@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPIT-455 | Prof. Adeeb Noor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">
+            <h2>CPIT-455</h2>
+            <p>Software Engineering II</p>
+        </div>
+        <nav>
+            <a href="#overview" class="active"><i class="fas fa-home"></i> Overview</a>
+            <a href="#modules"><i class="fas fa-layer-group"></i> Learning Modules</a>
+            <a href="#resources"><i class="fas fa-folder-open"></i> PDFs & Resources</a>
+        </nav>
+        <div class="instructor-info">
+            <div class="avatar-circle">AN</div>
+            <div>
+                <p><strong>Prof. Adeeb Noor</strong></p>
+                <small>FCIT | KAU</small>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        
+        <header id="overview">
+            <div class="header-content">
+                <h1>Advanced Software Engineering</h1>
+                <p>Fall 2025 | Bridging Theory to Professional Application</p>
+                <div class="badges">
+                    <span class="badge">CIMT Framework</span>
+                    <span class="badge">Vision 2030</span>
+                    <span class="badge">Reliability Engineering</span>
+                </div>
+            </div>
+        </header>
+
+        <section id="modules">
+            <h2 class="section-title">Interactive Lecture Slides</h2>
+            <p class="section-subtitle">Web-based presentations using EMAM & AMIR frameworks.</p>
+            
+            <div class="grid-container">
+                
+                <div class="card" onclick="window.open('slides/ch11.html', '_blank')">
+                    <div class="card-icon reliability"><i class="fas fa-shield-alt"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 11: Reliability</h3>
+                        <p>Fault tolerance, N-version programming, and AMIR framework.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch12.html', '_blank')">
+                    <div class="card-icon safety"><i class="fas fa-hard-hat"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 12: Safety Eng.</h3>
+                        <p>Hazard analysis, Safety cases, and CIMT weaponized.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch13.html', '_blank')">
+                    <div class="card-icon security"><i class="fas fa-lock"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 13: Security</h3>
+                        <p>CIA Triad, STRIDE model, and Islamic security frameworks.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch14.html', '_blank')">
+                    <div class="card-icon resilience"><i class="fas fa-heartbeat"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 14: Resilience</h3>
+                        <p>The 4 Rs framework and Sociotechnical resilience.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch15.html', '_blank')">
+                    <div class="card-icon reuse"><i class="fas fa-recycle"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 15: Reuse</h3>
+                        <p>Application frameworks, ERPs, and Product lines.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch16.html', '_blank')">
+                    <div class="card-icon component"><i class="fas fa-cubes"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 16: CBSE</h3>
+                        <p>Component-based engineering and composition patterns.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch17.html', '_blank')">
+                    <div class="card-icon distributed"><i class="fas fa-network-wired"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 17: Distributed</h3>
+                        <p>Client-server, Architectural patterns, and SaaS.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+                <div class="card" onclick="window.open('slides/ch20.html', '_blank')">
+                    <div class="card-icon sos"><i class="fas fa-city"></i></div>
+                    <div class="card-content">
+                        <h3>Ch 20: SoS</h3>
+                        <p>Systems of Systems: Complexity and Governance.</p>
+                        <span class="btn-link">Open Slides <i class="fas fa-external-link-alt"></i></span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="resources">
+            <h2 class="section-title">Course Documents & PDFs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Topic Focus</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="tag pdf">PDF</span></td>
+                            <td><strong>Lecture 0: Kickoff</strong></td>
+                            <td>Syllabus, Grading, CIMT Intro</td>
+                            <td><a href="materials/Class0.pdf" target="_blank" class="download-btn">Download</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag pdf">PDF</span></td>
+                            <td><strong>Lecture 1: Dependability</strong></td>
+                            <td>Availability, Reliability, Safety, Security</td>
+                            <td><a href="materials/Class1.pdf" target="_blank" class="download-btn">Download</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag html">WEB</span></td>
+                            <td><strong>Assignment Briefs</strong></td>
+                            <td>Project Requirements & Deadlines</td>
+                            <td><a href="#" class="download-btn secondary">View Portal</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Prof. Adeeb Noor | Faculty of Computing and Information Technology | King Abdulaziz University</p>
+        </footer>
+
+    </main>
+</body>
+</html>
