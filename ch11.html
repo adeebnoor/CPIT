@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 11: Reliability Engineering - AMIR Framework</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            overflow-y: auto;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #4a5568;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #2d3748;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #4a5568;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(90deg, #f0f7ff, #e6f3ff);
+            padding: 15px 25px;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+        }
+        
+        h4 {
+            color: #4a5568;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #718096;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+        
+        .mission-critical {
+            background: linear-gradient(135deg, #e53e3e, #c81e1e);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .visual-card {
+            background: linear-gradient(135deg, #f8faff, #e6f3ff);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .visual-card:hover {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .amir-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .badge-afhm {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .badge-mumarasa {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .badge-itqan {
+            background: linear-gradient(135deg, #d69e2e, #b7791f);
+            color: white;
+        }
+        
+        .badge-ruya {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .definition-box {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-style: italic;
+        }
+        
+        .islamic-box {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            border: 3px solid #065f46;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .islamic-box .arabic {
+            font-size: 1.3em;
+            color: #065f46;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .challenge-box {
+            background: linear-gradient(135deg, #fef4cd, #fed7d7);
+            border: 3px solid #e53e3e;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table th {
+            background: var(--gradient);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 1.05em;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8faff;
+        }
+        
+        .comparison-table tr:hover {
+            background: #e6f3ff;
+            transition: background 0.3s ease;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #4a5568;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #4a5568;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .quiz-container {
+            background: linear-gradient(135deg, #e6f3ff, #cce7ff);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quiz-option {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .code-editor {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .code-comment {
+            color: #a0aec0;
+        }
+        
+        .code-keyword {
+            color: #f093fb;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-item {
+            background: linear-gradient(135deg, #e6f3ff, #cce7ff);
+            border: 3px solid var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            min-width: 150px;
+            position: relative;
+            animation: slideInFlow 0.5s ease-out;
+        }
+        
+        @keyframes slideInFlow {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .soft-skill-box {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                height: 90vh;
+                padding: 30px 20px;
+            }
+            
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 2em; }
+            h3 { font-size: 1.4em; }
+            
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="slide-counter" id="slideCounter">1 / 20</div>
+        
+        <!-- Slide 1: Title and Introduction -->
+        <div class="slide active">
+            <h1>⚡ Reliability Engineering Excellence</h1>
+            <div class="subtitle">AMIR Framework - Chapter 11: Building Systems That Never Fail</div>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَأَعِدُّوا لَهُم مَّا اسْتَطَعْتُم مِّن قُوَّةٍ</div>
+                <p>"And prepare for them whatever you are able of power"</p>
+                <p><em>- Qur'an 8:60</em></p>
+            </div>
+            
+            <div class="mission-critical">
+                ⚡ Your Mission: Master reliability engineering to build Saudi's digital infrastructure
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <span class="amir-badge badge-afhm">افهم</span>
+                    <h5>Understand</h5>
+                    <p>Reliability vs Availability<br>Fault-Error-Failure model</p>
+                </div>
+                <div class="visual-card">
+                    <span class="amir-badge badge-mumarasa">مارس</span>
+                    <h5>Practice</h5>
+                    <p>Reliability metrics<br>Fault tolerance techniques</p>
+                </div>
+                <div class="visual-card">
+                    <span class="amir-badge badge-itqan">اتقن</span>
+                    <h5>Master</h5>
+                    <p>N-version programming<br>Statistical testing</p>
+                </div>
+                <div class="visual-card">
+                    <span class="amir-badge badge-ruya">ابصر</span>
+                    <h5>Envision</h5>
+                    <p>Vision 2030 reliability<br>Digital transformation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: The Fault-Error-Failure Model -->
+        <div class="slide">
+            <h2>🔄 The Fault-Error-Failure Chain</h2>
+            <span class="amir-badge badge-afhm">افهم</span>
+            
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <h4>Human Error</h4>
+                    <p>Programmer mistake</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <h4>System Fault</h4>
+                    <p>Bug in code</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <h4>System Error</h4>
+                    <p>Wrong state</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <h4>System Failure</h4>
+                    <p>Service lost</p>
+                </div>
+            </div>
+            
+            <h3>🇸🇦 Saudi Example: Absher System</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>Human Error</h4>
+                    <p>Developer forgets to check if national ID = 10 digits</p>
+                </div>
+                <div class="metric-card">
+                    <h4>System Fault</h4>
+                    <p>Missing validation code in registration module</p>
+                </div>
+                <div class="metric-card">
+                    <h4>System Error</h4>
+                    <p>System accepts 9-digit ID, creates invalid record</p>
+                </div>
+                <div class="metric-card">
+                    <h4>System Failure</h4>
+                    <p>Citizen cannot access government services</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Key Insight:</strong> Not all faults lead to failures! Many bugs never execute, errors may be transient, and protection mechanisms can prevent failures.
+            </div>
+        </div>
+
+        <!-- Slide 3: Reliability vs Availability -->
+        <div class="slide">
+            <h2>⚖️ Reliability vs Availability</h2>
+            <span class="amir-badge badge-afhm">افهم</span>
+            
+            <table class="comparison-table">
+                <tr>
+                    <th>Aspect</th>
+                    <th>Reliability</th>
+                    <th>Availability</th>
+                </tr>
+                <tr>
+                    <td><strong>Definition</strong></td>
+                    <td>Probability of failure-free operation</td>
+                    <td>Probability system is operational when needed</td>
+                </tr>
+                <tr>
+                    <td><strong>Focus</strong></td>
+                    <td>Correctness of service</td>
+                    <td>Uptime of service</td>
+                </tr>
+                <tr>
+                    <td><strong>Measurement</strong></td>
+                    <td>Failures per demand/time</td>
+                    <td>% of time operational</td>
+                </tr>
+                <tr>
+                    <td><strong>Saudi Example</strong></td>
+                    <td>Tawakkalna app health status accuracy</td>
+                    <td>Tawakkalna app 24/7 accessibility</td>
+                </tr>
+            </table>
+            
+            <h3>🏦 Banking ATM Case Study</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>System A</h4>
+                    <p><strong>Reliability:</strong> Fails once/year</p>
+                    <p><strong>Recovery:</strong> 6 hours</p>
+                    <p><strong>Annual Downtime:</strong> 360 minutes</p>
+                    <div style="color: var(--danger); margin-top: 10px;">❌ Lower Availability</div>
+                </div>
+                <div class="metric-card">
+                    <h4>System B</h4>
+                    <p><strong>Reliability:</strong> Fails once/month</p>
+                    <p><strong>Recovery:</strong> 5 minutes</p>
+                    <p><strong>Annual Downtime:</strong> 60 minutes</p>
+                    <div style="color: var(--success); margin-top: 10px;">✅ Higher Availability</div>
+                </div>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>💡 Key Lesson:</h4>
+                <p>A less reliable system can have better availability if it recovers quickly!</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Reliability Metrics -->
+        <div class="slide">
+            <h2>📊 Reliability Metrics Mastery</h2>
+            <span class="amir-badge badge-mumarasa">مارس</span>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h3 style="background: none; border: none; padding: 0;">POFOD</h3>
+                    <p><strong>Probability of Failure on Demand</strong></p>
+                    <p>Chance of failure when service requested</p>
+                    <div style="background: #e6f3ff; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>🇸🇦 Example:</strong> NEOM emergency brake system
+                        <br>Required: 0.001 (1 in 1000 chance of failure)
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h3 style="background: none; border: none; padding: 0;">ROCOF</h3>
+                    <p><strong>Rate of Occurrence of Failures</strong></p>
+                    <p>Number of failures per time unit</p>
+                    <div style="background: #fff8e1; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>🇸🇦 Example:</strong> Saudia airline booking
+                        <br>Acceptable: 2 failures/1000 transactions
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h3 style="background: none; border: none; padding: 0;">MTTF</h3>
+                    <p><strong>Mean Time To Failure</strong></p>
+                    <p>Average time between failures</p>
+                    <div style="background: #e8ffe8; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>🇸🇦 Example:</strong> KACST satellite systems
+                        <br>Target: 10,000 hours operation
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h3 style="background: none; border: none; padding: 0;">AVAIL</h3>
+                    <p><strong>Availability</strong></p>
+                    <p>Probability system is operational</p>
+                    <div style="background: #f3e6ff; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <strong>🇸🇦 Example:</strong> Saudi Central Bank
+                        <br>Required: 0.9999 (52 min downtime/year)
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Availability in Practice</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Availability</th>
+                    <th>Downtime per Year</th>
+                    <th>Saudi System Example</th>
+                </tr>
+                <tr>
+                    <td>0.9 (90%)</td>
+                    <td>36.5 days</td>
+                    <td>Development environments</td>
+                </tr>
+                <tr>
+                    <td>0.99 (99%)</td>
+                    <td>3.65 days</td>
+                    <td>Internal business systems</td>
+                </tr>
+                <tr>
+                    <td>0.999 (99.9%)</td>
+                    <td>8.76 hours</td>
+                    <td>Absher services</td>
+                </tr>
+                <tr>
+                    <td>0.9999 (99.99%)</td>
+                    <td>52.6 minutes</td>
+                    <td>Banking systems</td>
+                </tr>
+                <tr>
+                    <td>0.99999 (99.999%)</td>
+                    <td>5.26 minutes</td>
+                    <td>Hajj crowd management</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Slide 5: Fault Avoidance, Detection, and Tolerance -->
+        <div class="slide">
+            <h2>🛡️ Three Approaches to Reliability</h2>
+            <span class="amir-badge badge-mumarasa">مارس</span>
+            
+            <div class="flow-diagram">
+                <div class="flow-item" style="background: linear-gradient(135deg, #48bb78, #38a169);">
+                    <div style="font-size: 2em;">🚫</div>
+                    <strong>Fault Avoidance</strong>
+                    <p>Prevent faults from being introduced</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item" style="background: linear-gradient(135deg, #3182ce, #2c5282);">
+                    <div style="font-size: 2em;">🔍</div>
+                    <strong>Fault Detection</strong>
+                    <p>Find and remove faults before deployment</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item" style="background: linear-gradient(135deg, #805ad5, #6b46c1);">
+                    <div style="font-size: 2em;">🔄</div>
+                    <strong>Fault Tolerance</strong>
+                    <p>Continue operation despite faults</p>
+                </div>
+            </div>
+            
+            <h3>Implementation Techniques</h3>
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🚫 Avoidance</h5>
+                    <ul style="text-align: left;">
+                        <li>Strongly typed languages</li>
+                        <li>Code reviews</li>
+                        <li>Design patterns</li>
+                        <li>SOLID principles</li>
+                    </ul>
+                </div>
+                <div class="visual-card">
+                    <h5>🔍 Detection</h5>
+                    <ul style="text-align: left;">
+                        <li>Unit testing</li>
+                        <li>Integration testing</li>
+                        <li>Static analysis</li>
+                        <li>Code coverage</li>
+                    </ul>
+                </div>
+                <div class="visual-card">
+                    <h5>🔄 Tolerance</h5>
+                    <ul style="text-align: left;">
+                        <li>Exception handling</li>
+                        <li>Redundancy</li>
+                        <li>Checkpointing</li>
+                        <li>Graceful degradation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>⚠️ The Cost Reality</h4>
+                <p>Finding and removing faults becomes exponentially more expensive as reliability increases. At some point, even for critical systems, accepting some residual faults is more cost-effective than perfect reliability.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Fault-Tolerant Architectures -->
+        <div class="slide">
+            <h2>🏗️ Fault-Tolerant Architectures</h2>
+            <span class="amir-badge badge-itqan">اتقن</span>
+            
+            <h3>Protection Systems Architecture</h3>
+            <div style="text-align: center; margin: 30px 0;">
+                <svg width="500" height="300" viewBox="0 0 500 300">
+                    <!-- Environment -->
+                    <rect x="10" y="10" width="480" height="280" fill="#f0f7ff" stroke="#667eea" stroke-width="2" rx="10"/>
+                    <text x="250" y="30" text-anchor="middle" fill="#4a5568" font-weight="bold">System Environment</text>
+                    
+                    <!-- Control System -->
+                    <rect x="150" y="100" width="120" height="80" fill="#e6f3ff" stroke="#3182ce" stroke-width="2" rx="5"/>
+                    <text x="210" y="145" text-anchor="middle" fill="#2c5282">Control System</text>
+                    
+                    <!-- Protection System -->
+                    <rect x="300" y="100" width="120" height="80" fill="#fed7d7" stroke="#e53e3e" stroke-width="2" rx="5"/>
+                    <text x="360" y="145" text-anchor="middle" fill="#742a2a">Protection System</text>
+                    
+                    <!-- Sensors -->
+                    <circle cx="100" cy="80" r="20" fill="#48bb78" stroke="#22543d" stroke-width="2"/>
+                    <text x="100" y="85" text-anchor="middle" fill="white" font-size="12">S1</text>
+                    
+                    <circle cx="100" cy="220" r="20" fill="#48bb78" stroke="#22543d" stroke-width="2"/>
+                    <text x="100" y="225" text-anchor="middle" fill="white" font-size="12">S2</text>
+                    
+                    <!-- Arrows -->
+                    <path d="M120 80 L150 120" stroke="#4a5568" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M120 220 L150 160" stroke="#4a5568" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M120 80 L300 120" stroke="#e53e3e" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <path d="M120 220 L300 160" stroke="#e53e3e" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>Protection Systems</h4>
+                    <p>Independent monitoring system that takes over when primary fails</p>
+                    <div style="background: #e6f3ff; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>🇸🇦 Example:</strong> Haramain train emergency brake
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Self-Monitoring</h4>
+                    <p>Dual channels compare outputs, detect discrepancies</p>
+                    <div style="background: #fff8e1; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>🇸🇦 Example:</strong> ARAMCO refinery control
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>N-Version Programming</h4>
+                    <p>Multiple independent implementations, voting system</p>
+                    <div style="background: #e8ffe8; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>🇸🇦 Example:</strong> KACST satellite guidance
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: N-Version Programming -->
+        <div class="slide">
+            <h2>🔀 N-Version Programming Deep Dive</h2>
+            <span class="amir-badge badge-itqan">اتقن</span>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <svg width="600" height="350" viewBox="0 0 600 350">
+                    <!-- Input -->
+                    <rect x="20" y="150" width="80" height="50" fill="#667eea" stroke="#4a5568" stroke-width="2" rx="5"/>
+                    <text x="60" y="180" text-anchor="middle" fill="white">Input</text>
+                    
+                    <!-- Version 1 -->
+                    <rect x="200" y="50" width="120" height="60" fill="#48bb78" stroke="#22543d" stroke-width="2" rx="5"/>
+                    <text x="260" y="85" text-anchor="middle" fill="white">Version 1</text>
+                    <text x="260" y="100" text-anchor="middle" fill="white" font-size="12">Team A - Java</text>
+                    
+                    <!-- Version 2 -->
+                    <rect x="200" y="145" width="120" height="60" fill="#3182ce" stroke="#2c5282" stroke-width="2" rx="5"/>
+                    <text x="260" y="180" text-anchor="middle" fill="white">Version 2</text>
+                    <text x="260" y="195" text-anchor="middle" fill="white" font-size="12">Team B - C++</text>
+                    
+                    <!-- Version 3 -->
+                    <rect x="200" y="240" width="120" height="60" fill="#805ad5" stroke="#6b46c1" stroke-width="2" rx="5"/>
+                    <text x="260" y="275" text-anchor="middle" fill="white">Version 3</text>
+                    <text x="260" y="290" text-anchor="middle" fill="white" font-size="12">Team C - Ada</text>
+                    
+                    <!-- Voter -->
+                    <rect x="400" y="145" width="100" height="60" fill="#d69e2e" stroke="#b7791f" stroke-width="2" rx="5"/>
+                    <text x="450" y="180" text-anchor="middle" fill="white">Voter</text>
+                    
+                    <!-- Output -->
+                    <rect x="520" y="150" width="60" height="50" fill="#667eea" stroke="#4a5568" stroke-width="2" rx="5"/>
+                    <text x="550" y="180" text-anchor="middle" fill="white">Output</text>
+                    
+                    <!-- Arrows -->
+                    <path d="M100 175 L200 80" stroke="#4a5568" stroke-width="2"/>
+                    <path d="M100 175 L200 175" stroke="#4a5568" stroke-width="2"/>
+                    <path d="M100 175 L200 270" stroke="#4a5568" stroke-width="2"/>
+                    
+                    <path d="M320 80 L400 165" stroke="#4a5568" stroke-width="2"/>
+                    <path d="M320 175 L400 175" stroke="#4a5568" stroke-width="2"/>
+                    <path d="M320 270 L400 185" stroke="#4a5568" stroke-width="2"/>
+                    
+                    <path d="M500 175 L520 175" stroke="#4a5568" stroke-width="2"/>
+                </svg>
+            </div>
+            
+            <h3>Achieving Software Diversity</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Diversity Type</th>
+                    <th>Implementation</th>
+                    <th>Saudi Example</th>
+                </tr>
+                <tr>
+                    <td>Team Diversity</td>
+                    <td>Different development teams, no communication</td>
+                    <td>KFSH medical device teams</td>
+                </tr>
+                <tr>
+                    <td>Language Diversity</td>
+                    <td>Java, C++, Ada implementations</td>
+                    <td>SABIC control systems</td>
+                </tr>
+                <tr>
+                    <td>Algorithm Diversity</td>
+                    <td>Different computational approaches</td>
+                    <td>Weather prediction models</td>
+                </tr>
+                <tr>
+                    <td>Tool Diversity</td>
+                    <td>Different IDEs, compilers, libraries</td>
+                    <td>Banking fraud detection</td>
+                </tr>
+            </table>
+            
+            <div class="soft-skill-box">
+                <h4>⚠️ Reality Check:</h4>
+                <p>Studies show N-version systems are 5-9x more reliable than single versions, BUT common specification errors can still cause all versions to fail the same way!</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Dependable Programming Guidelines -->
+        <div class="slide">
+            <h2>💻 8 Golden Rules of Dependable Programming</h2>
+            <span class="amir-badge badge-mumarasa">مارس</span>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>1. 🔒 Control Visibility</h4>
+                    <p>Hide data, expose only through interfaces</p>
+                    <div class="code-editor" style="margin-top: 10px; font-size: 0.9em;">
+                        <span class="code-keyword">private</span> double balance;<br>
+                        <span class="code-keyword">public</span> getBalance() {...}
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>2. ✅ Check All Inputs</h4>
+                    <p>Validate ranges, types, formats</p>
+                    <div class="code-editor" style="margin-top: 10px; font-size: 0.9em;">
+                        <span class="code-keyword">if</span> (age < 0 || age > 150)<br>
+                        &nbsp;&nbsp;<span class="code-keyword">throw</span> InvalidInput();
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>3. 🚨 Handle Exceptions</h4>
+                    <p>Never let exceptions crash system</p>
+                    <div class="code-editor" style="margin-top: 10px; font-size: 0.9em;">
+                        <span class="code-keyword">try</span> { ... }<br>
+                        <span class="code-keyword">catch</span> (Exception e) { ... }
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>4. 🚫 Minimize Error-Prone</h4>
+                    <p>Avoid goto, pointers, dynamic allocation</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>5. 🔄 Provide Restart</h4>
+                    <p>Checkpointing for recovery</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>6. 📏 Check Array Bounds</h4>
+                    <p>Prevent buffer overflows</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>7. ⏱️ Include Timeouts</h4>
+                    <p>Don't wait forever for responses</p>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>8. 🏷️ Name Constants</h4>
+                    <p>TAX_RATE not 0.15</p>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>🇸🇦 Practice Exercise:</h4>
+                <p>Apply these rules to a Saudi National ID validator function. Which rules are most critical for this system?</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Statistical Testing -->
+        <div class="slide">
+            <h2>📈 Statistical Testing for Reliability</h2>
+            <span class="amir-badge badge-itqan">اتقن</span>
+            
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <div style="font-size: 2em;">📊</div>
+                    <strong>1. Operational Profile</strong>
+                    <p>Model real usage</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">🎲</div>
+                    <strong>2. Test Data</strong>
+                    <p>Generate realistic inputs</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">🧪</div>
+                    <strong>3. Execute Tests</strong>
+                    <p>Count failures</p>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">📉</div>
+                    <strong>4. Calculate Metrics</strong>
+                    <p>POFOD, ROCOF</p>
+                </div>
+            </div>
+            
+            <h3>Operational Profile Example: Hajj App</h3>
+            <div style="text-align: center; margin: 30px 0;">
+                <svg width="600" height="300" viewBox="0 0 600 300">
+                    <!-- Y-axis -->
+                    <line x1="50" y1="250" x2="50" y2="50" stroke="#4a5568" stroke-width="2"/>
+                    <text x="25" y="150" text-anchor="middle" fill="#4a5568" transform="rotate(-90 25 150)">Number of Inputs</text>
+                    
+                    <!-- X-axis -->
+                    <line x1="50" y1="250" x2="550" y2="250" stroke="#4a5568" stroke-width="2"/>
+                    <text x="300" y="280" text-anchor="middle" fill="#4a5568">Input Classes</text>
+                    
+                    <!-- Bars -->
+                    <rect x="80" y="100" width="40" height="150" fill="#667eea" opacity="0.8"/>
+                    <rect x="130" y="130" width="40" height="120" fill="#667eea" opacity="0.8"/>
+                    <rect x="180" y="160" width="40" height="90" fill="#667eea" opacity="0.8"/>
+                    <rect x="230" y="180" width="40" height="70" fill="#667eea" opacity="0.8"/>
+                    <rect x="280" y="200" width="40" height="50" fill="#667eea" opacity="0.8"/>
+                    <rect x="330" y="220" width="40" height="30" fill="#667eea" opacity="0.8"/>
+                    <rect x="380" y="235" width="40" height="15" fill="#667eea" opacity="0.8"/>
+                    <rect x="430" y="245" width="100" height="5" fill="#667eea" opacity="0.8"/>
+                    
+                    <!-- Labels -->
+                    <text x="100" y="95" text-anchor="middle" fill="#4a5568" font-size="12">Check Status</text>
+                    <text x="150" y="125" text-anchor="middle" fill="#4a5568" font-size="12">View Permit</text>
+                    <text x="200" y="155" text-anchor="middle" fill="#4a5568" font-size="12">Emergency</text>
+                </svg>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Challenge:</strong> Creating accurate operational profiles for new systems is difficult. Users may use the system in unexpected ways!
+            </div>
+        </div>
+
+        <!-- Slide 10: Vision 2030 Reliability Applications -->
+        <div class="slide">
+            <h2>🚀 Reliability for Vision 2030</h2>
+            <span class="amir-badge badge-ruya">ابصر</span>
+            
+            <div class="mission-critical">
+                Saudi Arabia's Digital Transformation Demands World-Class Reliability
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>🏙️ NEOM Smart City</h4>
+                    <p><strong>Reliability Requirements:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Autonomous transport: POFOD < 0.0001</li>
+                        <li>Power grid: 99.999% availability</li>
+                        <li>IoT sensors: MTTF > 10,000 hours</li>
+                    </ul>
+                    <div style="background: #e6f3ff; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Architecture:</strong> Triple modular redundancy
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>💳 Digital Banking</h4>
+                    <p><strong>Reliability Requirements:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Core banking: 99.99% availability</li>
+                        <li>Mobile apps: ROCOF < 1/10000</li>
+                        <li>Fraud detection: Zero false negatives</li>
+                    </ul>
+                    <div style="background: #fff8e1; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Architecture:</strong> Active-active clusters
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🏥 E-Health Platform</h4>
+                    <p><strong>Reliability Requirements:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Patient records: 99.999% availability</li>
+                        <li>Telemedicine: MTTF > 1000 hours</li>
+                        <li>Emergency systems: POFOD < 0.001</li>
+                    </ul>
+                    <div style="background: #e8ffe8; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Architecture:</strong> Protection systems
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🕌 Hajj Systems</h4>
+                    <p><strong>Reliability Requirements:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Crowd monitoring: Real-time, no failures</li>
+                        <li>Tawaf counter: 99.9% accuracy</li>
+                        <li>Emergency response: < 30 sec activation</li>
+                    </ul>
+                    <div style="background: #f3e6ff; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Architecture:</strong> Self-monitoring systems
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Career Opportunities -->
+        <div class="slide">
+            <h2>💼 Your Reliability Engineering Career</h2>
+            <span class="amir-badge badge-ruya">ابصر</span>
+            
+            <table class="comparison-table">
+                <tr>
+                    <th>Organization</th>
+                    <th>Role</th>
+                    <th>Salary (SAR)</th>
+                    <th>Skills Required</th>
+                </tr>
+                <tr>
+                    <td>NEOM</td>
+                    <td>Site Reliability Engineer</td>
+                    <td>420,000+</td>
+                    <td>Cloud, Kubernetes, Chaos Engineering</td>
+                </tr>
+                <tr>
+                    <td>Saudi Aramco</td>
+                    <td>Reliability Systems Architect</td>
+                    <td>380,000</td>
+                    <td>Fault tolerance, SCADA systems</td>
+                </tr>
+                <tr>
+                    <td>stc</td>
+                    <td>Network Reliability Lead</td>
+                    <td>350,000</td>
+                    <td>5G, Network redundancy, SDN</td>
+                </tr>
+                <tr>
+                    <td>SAMA (Central Bank)</td>
+                    <td>Banking Systems Reliability</td>
+                    <td>340,000</td>
+                    <td>Financial systems, DR planning</td>
+                </tr>
+                <tr>
+                    <td>Elm</td>
+                    <td>Government Systems SRE</td>
+                    <td>320,000</td>
+                    <td>High availability, Monitoring</td>
+                </tr>
+            </table>
+            
+            <h3>🎯 Skills to Master Now</h3>
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>Technical</h5>
+                    <ul style="text-align: left;">
+                        <li>Chaos engineering</li>
+                        <li>Load balancing</li>
+                        <li>Database replication</li>
+                        <li>Monitoring tools</li>
+                    </ul>
+                </div>
+                <div class="visual-card">
+                    <h5>Analytical</h5>
+                    <ul style="text-align: left;">
+                        <li>Statistical analysis</li>
+                        <li>Root cause analysis</li>
+                        <li>Performance tuning</li>
+                        <li>Capacity planning</li>
+                    </ul>
+                </div>
+                <div class="visual-card">
+                    <h5>Soft Skills</h5>
+                    <ul style="text-align: left;">
+                        <li>Incident management</li>
+                        <li>Documentation</li>
+                        <li>Communication</li>
+                        <li>Problem solving</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Practical Exercise -->
+        <div class="slide">
+            <h2>🛠️ Hands-On: ATM System Reliability</h2>
+            <span class="amir-badge badge-mumarasa">مارس</span>
+            
+            <div class="challenge-box">
+                <h4>Scenario: Design reliability for Al Rajhi Bank ATM Network</h4>
+                <p>You're the reliability engineer for 5,000 ATMs across Saudi Arabia</p>
+            </div>
+            
+            <h3>Step 1: Define Requirements</h3>
+            <div class="quiz-container">
+                <div class="quiz-question">Which metric is MOST important for ATM users?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'atmQuiz')">POFOD - Probability of failure</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'correct', 'atmQuiz')">AVAIL - System availability</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'atmQuiz')">MTTF - Mean time to failure</div>
+                </div>
+                <div class="quiz-feedback" id="atmQuiz"></div>
+            </div>
+            
+            <h3>Step 2: Calculate Availability</h3>
+            <div class="code-editor">
+                <span class="code-comment">// Given:</span><br>
+                <span class="code-comment">// - Each ATM fails once per month on average</span><br>
+                <span class="code-comment">// - Recovery time: 2 hours per failure</span><br>
+                <span class="code-comment">// - Month = 720 hours</span><br><br>
+                
+                downtime_per_month = 2 hours<br>
+                total_hours = 720 hours<br>
+                availability = (720 - 2) / 720 = 0.9972<br><br>
+                
+                <span class="code-comment">// Result: 99.72% availability</span><br>
+                <span class="code-comment">// Is this acceptable? Industry standard is 99.9%</span>
+            </div>
+            
+            <h3>Step 3: Design Improvements</h3>
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>Hardware Redundancy</h5>
+                    <p>Dual card readers</p>
+                    <p>Backup power supply</p>
+                </div>
+                <div class="visual-card">
+                    <h5>Software Techniques</h5>
+                    <p>Exception handling</p>
+                    <p>Transaction rollback</p>
+                </div>
+                <div class="visual-card">
+                    <h5>Operational</h5>
+                    <p>Predictive maintenance</p>
+                    <p>Remote diagnostics</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Assignment -->
+        <div class="slide">
+            <h2>📝 The Assignment - Reliability Case Study</h2>
+            <span class="amir-badge badge-ruya">ابصر</span>
+            
+            <div class="mission-critical">
+                Design a Complete Reliability Strategy for a Saudi Critical System
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Choose ONE System:</h4>
+                <ol>
+                    <li>🚁 Saudi Air Ambulance dispatch system</li>
+                    <li>💧 Saline Water Conversion Corporation control</li>
+                    <li>📱 Tawakkalna health status verification</li>
+                    <li>🏦 SADAD payment gateway</li>
+                    <li>🚇 Riyadh Metro signaling system</li>
+                </ol>
+            </div>
+            
+            <h3>Deliverables (AMIR Framework):</h3>
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <span class="amir-badge badge-afhm">افهم</span>
+                    <h5>Part 1: Analysis (25%)</h5>
+                    <p>• System description<br>• Fault-Error-Failure chains<br>• User impact analysis</p>
+                </div>
+                <div class="visual-card">
+                    <span class="amir-badge badge-mumarasa">مارس</span>
+                    <h5>Part 2: Metrics (25%)</h5>
+                    <p>• Define POFOD, ROCOF, AVAIL<br>• Justify target values<br>• Cost-benefit analysis</p>
+                </div>
+                <div class="visual-card">
+                    <span class="amir-badge badge-itqan">اتقن</span>
+                    <h5>Part 3: Architecture (35%)</h5>
+                    <p>• Fault-tolerant design<br>• Redundancy strategy<br>• Implementation code</p>
+                </div>
+                <div class="visual-card">
+                    <span class="amir-badge badge-ruya">ابصر</span>
+                    <h5>Part 4: Testing (15%)</h5>
+                    <p>• Operational profile<br>• Statistical test plan<br>• Reliability growth model</p>
+                </div>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>📅 Submission Requirements:</h4>
+                <ul>
+                    <li>Format: 8-10 page technical report</li>
+                    <li>Include: Architecture diagrams, calculations, code samples</li>
+                    <li>Bonus: Working simulation demonstrating fault tolerance</li>
+                    <li>Due: Next week</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 14: Key Takeaways -->
+        <div class="slide">
+            <h2>🎯 Key Takeaways - Chapter 11 Mastery</h2>
+            
+            <div class="definition-box">
+                <strong>Remember:</strong> "Reliability is about correctness, Availability is about uptime. Both matter, but differently for different systems."
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🧠 Core Concepts</h5>
+                    <p>• Fault→Error→Failure<br>• Reliability vs Availability<br>• Operational profiles<br>• Software diversity</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📊 Metrics</h5>
+                    <p>• POFOD<br>• ROCOF<br>• MTTF<br>• Availability %</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🏗️ Architectures</h5>
+                    <p>• Protection systems<br>• Self-monitoring<br>• N-version<br>• TMR</p>
+                </div>
+                <div class="visual-card">
+                    <h5>💻 Programming</h5>
+                    <p>• 8 golden rules<br>• Exception handling<br>• Input validation<br>• Checkpointing</p>
+                </div>
+            </div>
+            
+            <h3>Critical Reliability Principles:</h3>
+            <div class="metric-card">
+                <ol>
+                    <li><strong>Prevention:</strong> Better to avoid faults than fix them</li>
+                    <li><strong>Detection:</strong> Find faults before deployment</li>
+                    <li><strong>Tolerance:</strong> Systems must handle faults gracefully</li>
+                    <li><strong>Measurement:</strong> You can't improve what you don't measure</li>
+                    <li><strong>Economics:</strong> Perfect reliability is impossible and unaffordable</li>
+                </ol>
+            </div>
+            
+            <div class="islamic-box">
+                <p><strong>Final Thought:</strong> "إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا أَنْ يُتْقِنَهُ"</p>
+                <p>"Allah loves, when one of you does a job, that you do it with excellence (Itqan)"</p>
+                <p>Build reliable systems as an act of excellence and service to society.</p>
+            </div>
+        </div>
+
+        <!-- Slide 15: Quick Reference -->
+        <div class="slide">
+            <h2>📚 Quick Reference Guide</h2>
+            
+            <h3>Reliability Metrics Cheat Sheet</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Metric</th>
+                    <th>Formula</th>
+                    <th>When to Use</th>
+                    <th>Good Value</th>
+                </tr>
+                <tr>
+                    <td>POFOD</td>
+                    <td>Failures / Total Demands</td>
+                    <td>Safety-critical, infrequent use</td>
+                    <td>< 0.001</td>
+                </tr>
+                <tr>
+                    <td>ROCOF</td>
+                    <td>Failures / Time Unit</td>
+                    <td>Continuous operation systems</td>
+                    <td>< 1/month</td>
+                </tr>
+                <tr>
+                    <td>MTTF</td>
+                    <td>Total Time / # Failures</td>
+                    <td>Long-running processes</td>
+                    <td>> 1000 hours</td>
+                </tr>
+                <tr>
+                    <td>Availability</td>
+                    <td>Uptime / Total Time</td>
+                    <td>Service-oriented systems</td>
+                    <td>> 99.9%</td>
+                </tr>
+            </table>
+            
+            <h3>Common Fault Tolerance Patterns</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>Retry Pattern</h4>
+                    <div class="code-editor" style="font-size: 0.8em;">
+                        <span class="code-keyword">for</span> (i = 0; i < MAX_RETRIES; i++) {<br>
+                        &nbsp;&nbsp;<span class="code-keyword">try</span> { operation(); <span class="code-keyword">break</span>; }<br>
+                        &nbsp;&nbsp;<span class="code-keyword">catch</span> { wait(exponential_backoff); }<br>
+                        }
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Circuit Breaker</h4>
+                    <div class="code-editor" style="font-size: 0.8em;">
+                        <span class="code-keyword">if</span> (failures > threshold) {<br>
+                        &nbsp;&nbsp;state = OPEN;<br>
+                        &nbsp;&nbsp;<span class="code-keyword">return</span> cached_response;<br>
+                        }
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Bulkhead</h4>
+                    <div class="code-editor" style="font-size: 0.8em;">
+                        <span class="code-comment">// Isolate resources</span><br>
+                        thread_pool_A = critical_ops;<br>
+                        thread_pool_B = normal_ops;
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Timeout</h4>
+                    <div class="code-editor" style="font-size: 0.8em;">
+                        result = <span class="code-keyword">await</span> Promise.race([<br>
+                        &nbsp;&nbsp;operation(),<br>
+                        &nbsp;&nbsp;timeout(5000)<br>
+                        ]);
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Your Choice -->
+        <div class="slide">
+            <h2>⚔️ Your Choice - Excellence or Mediocrity</h2>
+            
+            <div class="mission-critical">
+                Become a Reliability Champion in Saudi's Tech Revolution
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <span class="amir-badge badge-afhm">افهم</span>
+                    <h4>Foundation</h4>
+                    <p>Master the fundamentals</p>
+                    <p>Understand failure modes</p>
+                    <p>Learn from disasters</p>
+                </div>
+                <div class="metric-card">
+                    <span class="amir-badge badge-mumarasa">مارس</span>
+                    <h4>Application</h4>
+                    <p>Apply metrics correctly</p>
+                    <p>Build fault-tolerant code</p>
+                    <p>Test statistically</p>
+                </div>
+                <div class="metric-card">
+                    <span class="amir-badge badge-itqan">اتقن</span>
+                    <h4>Excellence</h4>
+                    <p>Design robust architectures</p>
+                    <p>Achieve high availability</p>
+                    <p>Zero-defect mindset</p>
+                </div>
+                <div class="metric-card">
+                    <span class="amir-badge badge-ruya">ابصر</span>
+                    <h4>Vision</h4>
+                    <p>Shape Saudi's digital future</p>
+                    <p>Lead reliability culture</p>
+                    <p>Innovate solutions</p>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h3>⚠️ The Cost of Unreliability</h3>
+                <p>Every system failure means:</p>
+                <ul>
+                    <li>• Lost revenue (millions of riyals)</li>
+                    <li>• Damaged reputation</li>
+                    <li>• User frustration and abandonment</li>
+                    <li>• Potential safety risks</li>
+                </ul>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>✅ Your Commitment Today:</h4>
+                <p>"I will build systems that Saudi Arabia can depend on. Every line of code, every design decision, will contribute to our nation's reliable digital infrastructure."</p>
+            </div>
+        </div>
+
+        <!-- Slide 17: Resources -->
+        <div class="slide">
+            <h2>🛠️ Tools & Resources</h2>
+            <span class="amir-badge badge-ruya">ابصر</span>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>📊 Monitoring Tools</h4>
+                    <ul>
+                        <li>Prometheus + Grafana</li>
+                        <li>New Relic</li>
+                        <li>Datadog</li>
+                        <li>AppDynamics</li>
+                    </ul>
+                    <div style="background: #e6f3ff; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Start with:</strong> Prometheus (free & powerful)
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🧪 Testing Tools</h4>
+                    <ul>
+                        <li>Chaos Monkey (Netflix)</li>
+                        <li>Gremlin</li>
+                        <li>JMeter (load testing)</li>
+                        <li>Selenium (UI testing)</li>
+                    </ul>
+                    <div style="background: #fff8e1; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Start with:</strong> JMeter for load testing
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>📚 Essential Reading</h4>
+                    <ul>
+                        <li>Site Reliability Engineering (Google)</li>
+                        <li>Release It! (Nygard)</li>
+                        <li>Chaos Engineering (Netflix)</li>
+                        <li>The DevOps Handbook</li>
+                    </ul>
+                    <div style="background: #e8ffe8; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Start with:</strong> Google SRE book (free online)
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🌐 Communities</h4>
+                    <ul>
+                        <li>SRE Weekly newsletter</li>
+                        <li>r/sre on Reddit</li>
+                        <li>USENIX SREcon</li>
+                        <li>Saudi Tech Reliability Group</li>
+                    </ul>
+                    <div style="background: #f3e6ff; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>Start with:</strong> Join Saudi Tech Slack
+                    </div>
+                </div>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>📅 This Week's Action Items:</h4>
+                <ul>
+                    <li>✅ Install Prometheus on your local machine</li>
+                    <li>✅ Read one incident postmortem from a major tech company</li>
+                    <li>✅ Calculate the availability of a system you use daily</li>
+                    <li>✅ Write a simple retry mechanism in your preferred language</li>
+                    <li>✅ Start your assignment system analysis</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 18: Quiz Time -->
+        <div class="slide">
+            <h2>🎮 Test Your Knowledge</h2>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">1. A system fails once per year but takes 24 hours to recover. Another fails monthly but recovers in 10 minutes. Which has better availability?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'quiz1')">First system (fails yearly)</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'correct', 'quiz1')">Second system (fails monthly)</div>
+                </div>
+                <div class="quiz-feedback" id="quiz1"></div>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">2. Which metric is best for a protection system that rarely activates?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 'correct', 'quiz2')">POFOD</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'quiz2')">ROCOF</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'quiz2')">MTTF</div>
+                </div>
+                <div class="quiz-feedback" id="quiz2"></div>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">3. What's the main challenge with N-version programming?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'quiz3')">Hardware compatibility</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'correct', 'quiz3')">Common specification errors</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 'incorrect', 'quiz3')">Performance overhead</div>
+                </div>
+                <div class="quiz-feedback" id="quiz3"></div>
+            </div>
+        </div>
+
+        <!-- Slide 19: References -->
+        <div class="slide">
+            <h2>📚 Chapter 11 References & Next Steps</h2>
+            
+            <h3>Key Chapter References:</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>Foundational Works</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>Avizienis (1995) - N-Version Programming</li>
+                        <li>Randell (2000) - Fault-Error-Failure Model</li>
+                        <li>Leveson (1995) - Safeware</li>
+                        <li>Musa (1998) - Software Reliability Engineering</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>Modern Applications</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>Google (2016) - Site Reliability Engineering</li>
+                        <li>Netflix (2019) - Chaos Engineering</li>
+                        <li>Amazon (2020) - Cell-Based Architecture</li>
+                        <li>Microsoft (2021) - Azure Reliability</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Next Chapter Preview:</strong> Chapter 12 - Safety Engineering
+                <p>From reliability to safety - protecting lives through software</p>
+                <p>Prepare: Think about how safety differs from reliability</p>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>Before Next Class:</h4>
+                <ol>
+                    <li>Calculate the availability of your assignment system</li>
+                    <li>Read about one major system failure (postmortem)</li>
+                    <li>Think: How would you prevent the next big outage?</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 20: Thank You -->
+        <div class="slide">
+            <h2>🙏 Shukran - Build Reliability Into Everything</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ</div>
+                <p>"And cooperate in righteousness and piety"</p>
+                <p><em>- Qur'an 5:2</em></p>
+            </div>
+            
+            <div class="mission-critical">
+                Your reliability engineering skills will power Saudi's digital economy.<br>
+                This is not just a career - it's nation building.
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>📧 Contact</h5>
+                    <p>Office: Sun-Thu 2-4pm</p>
+                    <p>reliability@university.sa</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📅 Next Class</h5>
+                    <p>Chapter 12: Safety</p>
+                    <p>Tuesday, 10 AM</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📝 Due Soon</h5>
+                    <p>Reliability Case: Next Week</p>
+                    <p>Quiz: Thursday</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎯 Join Us</h5>
+                    <p>#saudi-sre-community</p>
+                    <p>github.com/saudi-reliability</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.5em; color: #666;">
+                    "Perfect reliability is impossible, but excellence in reliability is achievable."
+                </p>
+                <p style="font-size: 1.2em; color: #666; margin-top: 20px;">
+                    See you next class, إن شاء الله<br>
+                    <strong>Start calculating those metrics TODAY!</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        // Slide management
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressBar').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlideDisplay();
+            }
+        }
+        
+        // Quiz functionality
+        function checkAnswer(element, result, feedbackId) {
+            const feedback = document.getElementById(feedbackId);
+            if (!feedback) return;
+            
+            feedback.style.display = 'block';
+            
+            if (result === 'correct') {
+                switch(feedbackId) {
+                    case 'atmQuiz':
+                        feedback.textContent = '✅ Correct! Users care most about ATM availability - they want it working when they need it.';
+                        break;
+                    case 'quiz1':
+                        feedback.textContent = '✅ Correct! Second system: 12×10min = 120min/year vs First: 24×60 = 1440min/year';
+                        break;
+                    case 'quiz2':
+                        feedback.textContent = '✅ Correct! POFOD is perfect for systems with infrequent demands like protection systems.';
+                        break;
+                    case 'quiz3':
+                        feedback.textContent = '✅ Correct! All versions can fail the same way if the specification is wrong.';
+                        break;
+                    default:
+                        feedback.textContent = '✅ Correct!';
+                }
+                feedback.className = 'quiz-feedback correct';
+                element.style.background = '#c6f6d5';
+            } else {
+                switch(feedbackId) {
+                    case 'atmQuiz':
+                        feedback.textContent = '❌ Think again. What matters most when you need cash urgently?';
+                        break;
+                    case 'quiz1':
+                        feedback.textContent = '❌ Calculate the total downtime per year for each system.';
+                        break;
+                    case 'quiz2':
+                        feedback.textContent = '❌ Consider that protection systems activate rarely but must work when needed.';
+                        break;
+                    case 'quiz3':
+                        feedback.textContent = '❌ Think about what all versions have in common.';
+                        break;
+                    default:
+                        feedback.textContent = '❌ Try again!';
+                }
+                feedback.className = 'quiz-feedback incorrect';
+                element.style.background = '#fed7d7';
+            }
+            
+            // Disable all options after selection
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.onclick = null;
+                opt.style.cursor = 'default';
+            });
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlideDisplay();
+        });
+    </script>
+</body>
+</html>

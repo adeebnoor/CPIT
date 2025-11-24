@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)file:///C:/Users/USER/Downloads/chapter16-enhanced.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 16: Component-Based Software Engineering - Enhanced EMAM Framework</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #f59e0b;
+            --danger: #e53e3e;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --islamic-green: #065f46;
+            --islamic-light: #e6fffa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            overflow-y: auto;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            background: var(--gradient);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #2d3748;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(90deg, #f0f7ff, #e6f3ff);
+            padding: 15px 25px;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+        }
+        
+        h4 {
+            color: #2d3748;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #5a67d8;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+        
+        .mission-critical {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .visual-card {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .visual-card:hover {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .emam-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .badge-ifham {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .badge-maris {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .badge-atqan {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .badge-mayyiz {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .definition-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-style: italic;
+        }
+        
+        .islamic-box {
+            background: linear-gradient(135deg, #e6fffa, #99f6e4);
+            border: 3px solid #065f46;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .islamic-box .arabic {
+            font-size: 1.3em;
+            color: #065f46;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .challenge-box {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 3px solid #ef4444;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table th {
+            background: var(--gradient);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #cbd5e0;
+            font-size: 1.05em;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f0f7ff;
+        }
+        
+        .comparison-table tr:hover {
+            background: #e6f3ff;
+            transition: background 0.3s ease;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .timeline-content {
+            width: 45%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timeline-marker {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border: 4px solid white;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #2d3748;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #2d3748;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .quiz-container {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quiz-option {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .code-editor {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .code-comment {
+            color: #68d391;
+        }
+        
+        .code-keyword {
+            color: #f093fb;
+        }
+        
+        .reflection-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #d69e2e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .kpi-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kpi-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .kpi-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-item {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 3px solid var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            min-width: 150px;
+            position: relative;
+            animation: slideInFlow 0.5s ease-out;
+        }
+        
+        @keyframes slideInFlow {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .soft-skill-box {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .hazard-box {
+            background: linear-gradient(135deg, #fecaca, #f87171);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .ethics-box {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            border: 3px solid #8b5cf6;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+        }
+        
+        .checklist-item {
+            background: white;
+            border-left: 4px solid #8b5cf6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .maqasid-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .maqasid-card {
+            background: linear-gradient(135deg, #065f46, #047857);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .maqasid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(6, 95, 70, 0.3);
+        }
+        
+        .uni-market-label {
+            background: linear-gradient(135deg, #e9d5ff, #c084fc);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-display {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .market-reality {
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            border-left: 5px solid #dc2626;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .industry-tool {
+            background: linear-gradient(135deg, #dbeafe, #93c5fd);
+            border-left: 5px solid #2563eb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                height: 90vh;
+                padding: 30px 20px;
+            }
+            
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 2em; }
+            h3 { font-size: 1.4em; }
+            
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .maqasid-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-content {
+                width: 90%;
+                margin-bottom: 40px;
+            }
+            
+            .timeline-item {
+                flex-direction: column;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-marker {
+                left: 20px;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+        <div class="slide-counter" id="slideCounter">21 / 21</div>
+        
+        <!-- Slide 1: Title and Introduction -->
+        <div class="slide">
+            <h1>Chapter 16: Component-Based Software Engineering</h1>
+            <div class="subtitle">نموذج إِمام التعليمي: إنطلاقة راسخة على خطى الأولين
+</div>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَجَعَلْنَاكُمْ شُعُوبًا وَقَبَائِلَ لِتَعَارَفُوا</div>
+                <p>"We made you into nations and tribes that you may know one another" - Qur'an 49:13</p>
+                <p>(Transliteration: WajaʿalnÄkum shuʿÅ«ban waqabÄʾila litaʿÄrafÅ«)</p>
+                <p><strong>Foundation: التكامل (Integration) and التعاون (Cooperation)</strong></p>
+            </div>
+            
+            <div class="mission-critical">
+                ⚡ Your Mission: Master component engineering to build Saudi Arabia's software ecosystem
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h5>Understand</h5>
+                    <p>What are components?<br>Core characteristics<br><a href="file:///C:/Users/USER/Downloads/chapter16-enhanced.html#section-fundamentals" style="color: inherit;">Section: Fundamentals</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h5>Practice</h5>
+                    <p>CBSE processes<br>Hands-on building<br><a href="file:///C:/Users/USER/Downloads/chapter16-enhanced.html#section-processes" style="color: inherit;">Section: Processes</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h5>Master</h5>
+                    <p>Composition patterns<br>Production systems<br><a href="file:///C:/Users/USER/Downloads/chapter16-enhanced.html#section-composition" style="color: inherit;">Section: Composition</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h5>Excel</h5>
+                    <p>Innovation &amp; Scale<br>Vision 2030<br><a href="file:///C:/Users/USER/Downloads/chapter16-enhanced.html#section-innovation" style="color: inherit;">Section: Innovation</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Framework Evolution -->
+        <div class="slide">
+            <h2>🚀 Framework Evolution: Shaping Component Engineering</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <h3>Two Lenses for Mastering CBSE</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4 style="color: #3b82f6;">🏭 Industrial Revolution 6.0 (IR 6.0)</h4>
+                    <p><strong>Human-Centric Engineering (2020s)</strong></p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 16.1 - Components:</strong> Enhances reusability (e.g., Nafath auth for 30M users) and standardization (e.g., Saudi e-Gov standards).</li>
+                        <li><strong>Section 16.2 - CBSE Processes:</strong> Optimizes development cycles (e.g., SAMA banking components) for rapid deployment.</li>
+                        <li><strong>Section 16.3 - Composition:</strong> Drives modular architectures (e.g., Absher microservices).</li>
+                        <li><strong>Section 16.4 - Innovation:</strong> Enables cloud-native components (e.g., NEOM smart city modules).</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Market Impact:</strong> IR 6.0 reduces development time by 40% at STC through component reuse.
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #065f46;">
+                    <h4 style="color: #065f46;">📖 Islamization of Knowledge</h4>
+                    <p class="arabic" style="font-size: 1em;">إسلامية المعرفة (Proactive)</p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 16.1 - Components:</strong> Derives modularity from Islamic unity in diversity (Qur'an 49:13).</li>
+                        <li><strong>Section 16.2 - Processes:</strong> Models development from Islamic consultation (Shura).</li>
+                        <li><strong>Section 16.3 - Composition:</strong> Inspires integration from community building principles.</li>
+                        <li><strong>Section 16.4 - Innovation:</strong> Aligns innovation with serving humanity (khidmah).</li>
+                    </ul>
+                    <div style="background: #e6fffa; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        <strong>Principle:</strong> Components as صدقة جارية (continuous charity) - benefit persists.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Theoretical Foundation<br>
+                <strong>Market Test:</strong> Production Deployment
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Your Learning Approach (Mapped to Objectives)</h4>
+                <ul>
+                    <li>✅ Understand component characteristics and models (Objective 1, Section 16.1).</li>
+                    <li>✅ Master CBSE processes for/with reuse (Objective 2, Section 16.2).</li>
+                    <li>✅ Apply composition patterns to real systems (Objective 3, Section 16.3).</li>
+                    <li>✅ Design innovative component ecosystems (Objective 4, Section 16.4).</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Quick Quiz: Which IR 6.0 Benefit Applies to Components? (2 mins)</div>
+                <div class="timer-display">⏱️ Timer: 2:00</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz5&#39;)">A. Reusability - Build once, use many times</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz5&#39;)">B. Standardization - Common interfaces</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz5&#39;)">C. Modularity - Independent units</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz5&#39;, true)">D. All of the above</div>
+                </div>
+                <div class="quiz-feedback" id="quiz5"></div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Mission Context -->
+        <div class="slide">
+            <h2 id="section-fundamentals">🌐 Mission Context: Components in Your Life</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Abstraction<br>
+                <strong>Market Test:</strong> Real-World Assembly
+            </div>
+            
+            <div class="mission-critical">
+                Right now: You're using 100+ software components without knowing it
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Start With Your Experience (2 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 2:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person; use breakout rooms)</p>
+                <p><strong>Quick Activity:</strong> List components you've used today:</p>
+                <ul>
+                    <li>Login button on website (authentication component)</li>
+                    <li>Payment on app (payment processing component)</li>
+                    <li>Map in Uber (mapping component)</li>
+                    <li>Chat in Teams (messaging component)</li>
+                </ul>
+                <p><strong>Notice:</strong> Same components, different apps. How?!</p>
+            </div>
+            
+            <div class="hazard-box">
+                <h3>💥 The Component Revolution</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>• 90% of modern apps use third-party components</li>
+                    <li>• npm has 2.1 million packages</li>
+                    <li>• Average app uses 200+ components</li>
+                    <li>• Components save 60% development time</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Quick Poll: What makes something a component?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz1&#39;)">A. It's written in Java</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz1&#39;, true)">B. It's independent and reusable</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz1&#39;)">C. It's small code</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz1&#39;)">D. It's open source</div>
+                </div>
+                <div class="quiz-feedback" id="quiz1"></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Core Concept Definition -->
+        <div class="slide">
+            <h2>📚 What IS a Software Component?</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Formal Definition<br>
+                <strong>Market Test:</strong> Practical Recognition
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔍 Discover It Yourself (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>With your neighbor, classify these scenarios:</strong></p>
+                <table class="comparison-table">
+                    <tbody><tr>
+                        <th>Item</th>
+                        <th>Component? (Yes/No)</th>
+                        <th>Why?</th>
+                    </tr>
+                    <tr>
+                        <td>Google Maps API</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Print statement</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>React.js</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Authentication module</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                </tbody></table>
+                <button onclick="revealComponentClassification()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Check Answers</button>
+                <div id="componentAnswers" class="answer-box">
+                    <p>Google Maps API: Yes - Independent, documented, reusable<br>
+                    Print statement: No - Too simple, not independent<br>
+                    React.js: Yes - Framework component<br>
+                    Authentication: Yes - Self-contained service</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Szyperski (2002):</strong> "A software component is a unit of composition with contractually specified interfaces and explicit context dependencies only"
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Poorly documented components cost Saudi companies 15% more in integration time.
+            </div>
+        </div>
+
+        <!-- Slide 5: Component Characteristics -->
+        <div class="slide">
+            <h2>🚀 Essential Component Characteristics</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Analysis<br>
+                <strong>Market Test:</strong> Quality Assessment
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎮 Live Exercise: Rate Nafath Authentication (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>Score Nafath on each characteristic (1-5 stars):</strong></p>
+            </div>
+            
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Characteristic</th>
+                    <th>Description</th>
+                    <th>Nafath Score</th>
+                    <th>Why?</th>
+                </tr>
+                <tr>
+                    <td>📦 Composable</td>
+                    <td>Can be combined with others</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                    <td>Works with all Saudi apps</td>
+                </tr>
+                <tr>
+                    <td>🚀 Deployable</td>
+                    <td>Self-contained, ready to run</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                    <td>One SDK, instant integration</td>
+                </tr>
+                <tr>
+                    <td>📖 Documented</td>
+                    <td>Clear usage instructions</td>
+                    <td>⭐⭐⭐⭐</td>
+                    <td>Good docs, needs more examples</td>
+                </tr>
+                <tr>
+                    <td>🔐 Independent</td>
+                    <td>No hidden dependencies</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                    <td>Standalone service</td>
+                </tr>
+                <tr>
+                    <td>⚙️ Standardized</td>
+                    <td>Follows component model</td>
+                    <td>⭐⭐⭐⭐⭐</td>
+                    <td>OAuth 2.0 standard</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="challenge-box">
+                <h4>Real-World Challenge</h4>
+                <p><strong>Problem:</strong> 70% of components fail one characteristic</p>
+                <p><strong>Most common failure:</strong> Poor documentation</p>
+                <p><strong>Saudi solution:</strong> Mandatory Arabic + English docs</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Component Interfaces -->
+        <div class="slide">
+            <h2 id="section-processes">🔌 Component Interfaces</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Interface Design<br>
+                <strong>Market Test:</strong> API Contracts
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎭 Role Play: Restaurant Component (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p style="margin-top: 10px;">(Budget: Design payment component)</p>
+                <p><strong>Team Activity:</strong> Design interfaces for payment component</p>
+                <ul>
+                    <li><strong>What it provides:</strong> processPayment(), refund(), getStatus()</li>
+                    <li><strong>What it requires:</strong> Database, Network, Security</li>
+                </ul>
+            </div>
+            
+            <h3>Two Critical Interfaces</h3>
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <h4>Requires Interface</h4>
+                    <small>Dependencies</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <h4>Component</h4>
+                    <small>Implementation</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <h4>Provides Interface</h4>
+                    <small>Services</small>
+                </div>
+            </div>
+            
+            <div class="code-editor">
+                <span class="code-comment">// Saudi Payment Component Example</span><br>
+                <span class="code-keyword">interface</span> SAMAPaymentComponent {<br>
+                &nbsp;&nbsp;<span class="code-comment">// Provides interface</span><br>
+                &nbsp;&nbsp;processMADA(amount, merchant);<br>
+                &nbsp;&nbsp;validateIBAN(iban);<br>
+                &nbsp;&nbsp;sendSARIE(transaction);<br>
+                &nbsp;&nbsp;<span class="code-comment">// Requires interface</span><br>
+                &nbsp;&nbsp;encryptionService();<br>
+                &nbsp;&nbsp;auditLogger();<br>
+                &nbsp;&nbsp;fraudDetection();<br>
+                }
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> SAMA's payment interface standards process 100M+ transactions daily.
+            </div>
+        </div>
+
+        <!-- Slide 7: Component Models -->
+        <div class="slide">
+            <h2>🏗️ Component Models &amp; Standards</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Standardization<br>
+                <strong>Market Test:</strong> Interoperability
+            </div>
+            
+            <h3>Major Component Models</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Model</th>
+                    <th>Use Case</th>
+                    <th>Saudi Implementation</th>
+                    <th>Market Share</th>
+                </tr>
+                <tr>
+                    <td>EJB (Enterprise JavaBeans)</td>
+                    <td>Enterprise Java</td>
+                    <td>SAMA banking</td>
+                    <td>15%</td>
+                </tr>
+                <tr>
+                    <td>.NET Components</td>
+                    <td>Microsoft ecosystem</td>
+                    <td>Government portals</td>
+                    <td>25%</td>
+                </tr>
+                <tr>
+                    <td>Web Services</td>
+                    <td>Cross-platform</td>
+                    <td>Absher APIs</td>
+                    <td>30%</td>
+                </tr>
+                <tr>
+                    <td>Microservices</td>
+                    <td>Cloud-native</td>
+                    <td>NEOM services</td>
+                    <td>30%</td>
+                </tr>
+            </tbody></table>
+            
+            <h3>Middleware Services</h3>
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4>Platform Services</h4>
+                    <p>• Addressing<br>
+                    • Communication<br>
+                    • Interface definition<br>
+                    • Exception handling</p>
+                </div>
+                <div class="metric-card" style="border-left-color: #22c55e;">
+                    <h4>Support Services</h4>
+                    <p>• Security<br>
+                    • Transactions<br>
+                    • Persistence<br>
+                    • Concurrency</p>
+                </div>
+            </div>
+            
+            <div class="industry-tool">
+                <strong>Industry Tool:</strong> Use OpenAPI/Swagger for standardizing component interfaces.
+            </div>
+        </div>
+
+        <!-- Slide 8: CBSE Processes Overview -->
+        <div class="slide">
+            <h2>🔄 CBSE Development Processes</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <h3>Two Main Processes</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #667eea;">
+                    <h4 style="color: #667eea;">📤 CBSE for Reuse</h4>
+                    <p><strong>Creating Components</strong></p>
+                    <ul style="margin-top: 15px;">
+                        <li>Domain analysis</li>
+                        <li>Abstraction design</li>
+                        <li>Interface specification</li>
+                        <li>Documentation</li>
+                        <li>Testing &amp; certification</li>
+                    </ul>
+                    <div class="kpi-grid" style="margin-top: 20px;">
+                        <div class="kpi-item">
+                            <div class="kpi-value">3-5x</div>
+                            <div class="kpi-label">Initial cost</div>
+                        </div>
+                        <div class="kpi-item">
+                            <div class="kpi-value">10+</div>
+                            <div class="kpi-label">Uses to break even</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <h4 style="color: #f59e0b;">📥 CBSE with Reuse</h4>
+                    <p><strong>Using Components</strong></p>
+                    <ul style="margin-top: 15px;">
+                        <li>Requirements outline</li>
+                        <li>Component search</li>
+                        <li>Evaluation &amp; selection</li>
+                        <li>Adaptation</li>
+                        <li>Integration</li>
+                    </ul>
+                    <div class="kpi-grid" style="margin-top: 20px;">
+                        <div class="kpi-item">
+                            <div class="kpi-value">60%</div>
+                            <div class="kpi-label">Time saved</div>
+                        </div>
+                        <div class="kpi-item">
+                            <div class="kpi-value">40%</div>
+                            <div class="kpi-label">Cost reduction</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Market Reality Check</h4>
+                <p><strong>Vision (2000):</strong> Thriving component marketplaces</p>
+                <p><strong>Reality (2025):</strong> Internal reuse dominates (80%)</p>
+                <p><strong>Saudi approach:</strong> Build national component repository</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Creating Reusable Components -->
+        <div class="slide">
+            <h2>🏗️ Creating Reusable Components</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="soft-skill-box">
+                <h4>🛠️ Workshop: Make It Reusable (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p><strong>Transform this specific code into a reusable component:</strong></p>
+                <div class="code-editor">
+                    <span class="code-comment">// BEFORE: Specific to one bank</span><br>
+                    function validateAlRajhiAccount(account) {<br>
+                    &nbsp;&nbsp;if (account.startsWith("68")) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;return account.length === 24;<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;return false;<br>
+                    }<br><br>
+                    <span class="code-comment">// YOUR TASK: Make it work for any Saudi bank</span>
+                </div>
+                <button onclick="showReusableSolution()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Show Solution</button>
+                <div id="reusableSolution" class="answer-box">
+                    <div class="code-editor">
+                        <span class="code-comment">// AFTER: Reusable for all banks</span><br>
+                        class IBANValidator {<br>
+                        &nbsp;&nbsp;constructor(config) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.rules = config.rules || defaultSAMARules;<br>
+                        &nbsp;&nbsp;}<br><br>
+                        &nbsp;&nbsp;validate(iban, bankCode) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;const rule = this.rules[bankCode];<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;if (!rule) throw new Error('Unknown bank');<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return rule.validate(iban);<br>
+                        &nbsp;&nbsp;}<br><br>
+                        &nbsp;&nbsp;addBank(code, validationRule) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.rules[code] = validationRule;<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Reusability Checklist</h3>
+            <div class="visual-grid">
+                <div class="checklist-item">✅ Remove hardcoded values</div>
+                <div class="checklist-item">✅ Add configuration options</div>
+                <div class="checklist-item">✅ Handle multiple scenarios</div>
+                <div class="checklist-item">✅ Provide clear interfaces</div>
+                <div class="checklist-item">✅ Include error handling</div>
+                <div class="checklist-item">✅ Write documentation</div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Using Components -->
+        <div class="slide">
+            <h2>🔨 Using Components Effectively</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <h3>Component Selection Process</h3>
+            <div class="flow-diagram">
+                <div class="flow-item">Requirements</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">Search</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">Evaluate</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">Adapt</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">Integrate</div>
+            </div>
+            
+            <div class="hazard-box">
+                <h3>⚠️ Ariane 5 Disaster - Component Reuse Gone Wrong</h3>
+                <p><strong>What happened:</strong> Reused Ariane 4 navigation software</p>
+                <p><strong>Problem:</strong> Integer overflow in unused function</p>
+                <p><strong>Cost:</strong> $500 million rocket destroyed</p>
+                <p><strong>Lesson:</strong> ALWAYS validate assumptions when reusing!</p>
+                <p><strong>Saudi parallel:</strong> Hajj app crash due to untested component scaling</p>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>Component Evaluation Matrix</h4>
+                <table class="comparison-table">
+                    <tbody><tr>
+                        <th>Criteria</th>
+                        <th>Weight</th>
+                        <th>Component A</th>
+                        <th>Component B</th>
+                    </tr>
+                    <tr>
+                        <td>Functionality fit</td>
+                        <td>30%</td>
+                        <td>8/10</td>
+                        <td>9/10</td>
+                    </tr>
+                    <tr>
+                        <td>Performance</td>
+                        <td>25%</td>
+                        <td>9/10</td>
+                        <td>7/10</td>
+                    </tr>
+                    <tr>
+                        <td>Documentation</td>
+                        <td>20%</td>
+                        <td>6/10</td>
+                        <td>9/10</td>
+                    </tr>
+                    <tr>
+                        <td>Support</td>
+                        <td>15%</td>
+                        <td>7/10</td>
+                        <td>8/10</td>
+                    </tr>
+                    <tr>
+                        <td>Cost</td>
+                        <td>10%</td>
+                        <td>Free</td>
+                        <td>$5000</td>
+                    </tr>
+                </tbody></table>
+            </div>
+        </div>
+
+        <!-- Slide 11: Component Composition -->
+        <div class="slide">
+            <h2 id="section-composition">🔗 Component Composition Patterns</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <h3>Three Composition Types</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>1️⃣ Sequential</h4>
+                    <div style="font-size: 3em; text-align: center;">→→→</div>
+                    <p>Output feeds input<br>
+                    <strong>Example:</strong> Data pipeline<br>
+                    Validate → Transform → Store</p>
+                </div>
+                <div class="metric-card">
+                    <h4>2️⃣ Hierarchical</h4>
+                    <div style="font-size: 3em; text-align: center;">🌳</div>
+                    <p>Parent calls children<br>
+                    <strong>Example:</strong> Service layers<br>
+                    Controller → Service → DAO</p>
+                </div>
+                <div class="metric-card">
+                    <h4>3️⃣ Additive</h4>
+                    <div style="font-size: 3em; text-align: center;">➕</div>
+                    <p>Parallel functionality<br>
+                    <strong>Example:</strong> Plugin system<br>
+                    Core + Extensions</p>
+                </div>
+            </div>
+            
+            <div class="code-editor">
+                <span class="code-comment">// Sequential Composition Example</span><br>
+                const pipeline = [<br>
+                &nbsp;&nbsp;validateNationalID,<br>
+                &nbsp;&nbsp;enrichWithAbsherData,<br>
+                &nbsp;&nbsp;calculateCreditScore,<br>
+                &nbsp;&nbsp;generateReport<br>
+                ];<br><br>
+                const result = pipeline.reduce(<br>
+                &nbsp;&nbsp;(data, component) =&gt; component.process(data),<br>
+                &nbsp;&nbsp;initialData<br>
+                );
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Which pattern for Saudi e-commerce platform?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz3&#39;)">A. Sequential only</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz3&#39;)">B. Hierarchical only</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz3&#39;, true)">C. All three combined</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz3&#39;)">D. None needed</div>
+                </div>
+                <div class="quiz-feedback" id="quiz3"></div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Adaptors and Integration -->
+        <div class="slide">
+            <h2>🔧 Adaptors: Making Components Work Together</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="soft-skill-box">
+                <h4>🔄 Live Challenge: Fix the Mismatch (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p><strong>Problem:</strong> Payment component expects USD, Saudi system uses SAR</p>
+                <div class="code-editor">
+                    <span class="code-comment">// Component A: International payment</span><br>
+                    paymentAPI.charge({amount: 100, currency: "USD"});<br><br>
+                    <span class="code-comment">// Component B: Saudi system</span><br>
+                    localSystem.process({riyals: 375});<br><br>
+                    <span class="code-comment">// YOUR TASK: Write an adaptor</span>
+                </div>
+                <button onclick="showAdaptorSolution()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Show Solution</button>
+                <div id="adaptorSolution" class="answer-box">
+                    <div class="code-editor">
+                        class PaymentAdaptor {<br>
+                        &nbsp;&nbsp;constructor(exchangeRate = 3.75) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.rate = exchangeRate;<br>
+                        &nbsp;&nbsp;}<br><br>
+                        &nbsp;&nbsp;processSaudiPayment(sarAmount) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;const usdAmount = sarAmount / this.rate;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return paymentAPI.charge({<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amount: usdAmount,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currency: "USD"<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;});<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Common Adaptor Patterns</h3>
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🔄 Format Converter</h5>
+                    <p>XML ↔ JSON<br>Arabic ↔ English</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎭 Interface Wrapper</h5>
+                    <p>REST ↔ SOAP<br>Sync ↔ Async</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🌉 Protocol Bridge</h5>
+                    <p>HTTP ↔ WebSocket<br>MQTT ↔ AMQP</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📦 Legacy Wrapper</h5>
+                    <p>Old ↔ New API<br>Mainframe ↔ Cloud</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Saudi Component Ecosystem -->
+        <div class="slide">
+            <h2 id="section-innovation">🇸🇦 Saudi Arabia's Component Revolution</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Vision 2030: Building a National Component Repository serving MENA region
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>🏛️ Government Platform</h4>
+                    <div class="kpi-value">300+</div>
+                    <div class="kpi-label">Shared components</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Nafath authentication</li>
+                        <li>Absher services</li>
+                        <li>Yesser integration</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4>💰 Financial Services</h4>
+                    <div class="kpi-value">50+</div>
+                    <div class="kpi-label">Banking components</div>
+                    <ul style="margin-top: 15px;">
+                        <li>SAMA standards</li>
+                        <li>SARIE payments</li>
+                        <li>Open Banking APIs</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #22c55e;">
+                    <h4>🏥 Healthcare</h4>
+                    <div class="kpi-value">100+</div>
+                    <div class="kpi-label">Medical components</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Sehhaty modules</li>
+                        <li>NPHIES integration</li>
+                        <li>Wasfaty e-prescription</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <h4>🏗️ NEOM Tech</h4>
+                    <div class="kpi-value">500+</div>
+                    <div class="kpi-label">Smart city components</div>
+                    <ul style="margin-top: 15px;">
+                        <li>IoT frameworks</li>
+                        <li>AI services</li>
+                        <li>Digital twin platform</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="industry-tool">
+                <strong>Innovation Opportunities:</strong>
+                <ul>
+                    <li>Arabic NLP components (huge gap in market)</li>
+                    <li>Islamic finance modules (global demand)</li>
+                    <li>Hajj/Umrah management components (unique expertise)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 14: Component Security & Ethics -->
+        <div class="slide">
+            <h2>🔒 Component Security &amp; Islamic Ethics</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَلَا تَجَسَّسُوا</div>
+                <p>"And do not spy" - Qur'an 49:12</p>
+                <p><strong>Principle:</strong> Components must respect privacy and data sovereignty</p>
+            </div>
+            
+            <h3>Security Considerations</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Threat</th>
+                    <th>Risk</th>
+                    <th>Mitigation</th>
+                    <th>Saudi Example</th>
+                </tr>
+                <tr>
+                    <td>Supply Chain Attack</td>
+                    <td>Compromised components</td>
+                    <td>Code signing, auditing</td>
+                    <td>NCA certification required</td>
+                </tr>
+                <tr>
+                    <td>Data Leakage</td>
+                    <td>Unauthorized access</td>
+                    <td>Encryption, access control</td>
+                    <td>Nafath MFA mandatory</td>
+                </tr>
+                <tr>
+                    <td>Version Vulnerabilities</td>
+                    <td>Outdated components</td>
+                    <td>Regular updates</td>
+                    <td>Automated scanning</td>
+                </tr>
+                <tr>
+                    <td>License Violations</td>
+                    <td>Legal issues</td>
+                    <td>License management</td>
+                    <td>Compliance checks</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="ethics-box">
+                <h4>Ethical Component Development</h4>
+                <ul>
+                    <li>✅ Respect user privacy (no hidden tracking)</li>
+                    <li>✅ Transparent data usage</li>
+                    <li>✅ Accessible to all abilities</li>
+                    <li>✅ Cultural sensitivity (Arabic support)</li>
+                    <li>✅ Environmental efficiency</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 15: Career Roadmap -->
+        <div class="slide">
+            <h2>💼 Your Component Engineering Career Path</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <h3>12-Month Roadmap to Excellence</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <strong>Months 1-3: Foundation</strong>
+                        <ul>
+                            <li>Master component principles</li>
+                            <li>Learn design patterns</li>
+                            <li>Build first component</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content" style="margin-left: auto;">
+                        <strong>Months 4-6: Specialization</strong>
+                        <ul>
+                            <li>Choose domain (fintech/health/gov)</li>
+                            <li>Study domain standards</li>
+                            <li>Contribute to open source</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <strong>Months 7-9: Production</strong>
+                        <ul>
+                            <li>Internship at Saudi tech company</li>
+                            <li>Build production components</li>
+                            <li>Learn deployment pipelines</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content" style="margin-left: auto;">
+                        <strong>Months 10-12: Leadership</strong>
+                        <ul>
+                            <li>Lead component project</li>
+                            <li>Mentor juniors</li>
+                            <li>Publish components</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+            </div>
+            
+            <h3>Saudi Career Opportunities</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Salary (SAR)</th>
+                    <th>Growth</th>
+                </tr>
+                <tr>
+                    <td>SAMA</td>
+                    <td>Component Architect</td>
+                    <td>320,000+</td>
+                    <td>Very High</td>
+                </tr>
+                <tr>
+                    <td>Aramco</td>
+                    <td>Integration Engineer</td>
+                    <td>300,000</td>
+                    <td>High</td>
+                </tr>
+                <tr>
+                    <td>STC</td>
+                    <td>Platform Developer</td>
+                    <td>280,000</td>
+                    <td>High</td>
+                </tr>
+                <tr>
+                    <td>NEOM</td>
+                    <td>Smart City Developer</td>
+                    <td>350,000+</td>
+                    <td>Extreme</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 16: Bridging University to Market -->
+        <div class="slide">
+            <h2>🎓 Bridging University to Market</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #065f46;">
+                    <h4 style="color: #065f46;">الجامعة تعلمك (University Teaches You)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>التجريد (Abstraction)</li>
+                        <li>المعايير (Standards)</li>
+                        <li>الواجهات (Interfaces)</li>
+                        <li>التصميم (Design)</li>
+                        <li>النظرية (Theory)</li>
+                        <li>التوثيق (Documentation)</li>
+                        <li>الاختبار (Testing)</li>
+                        <li>الجودة (Quality)</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4 style="color: #dc2626;">السوق يعلمك (Market Teaches You)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>السرعة تهم (Speed matters)</li>
+                        <li>التكلفة حاسمة (Cost is critical)</li>
+                        <li>الصيانة مستمرة (Maintenance forever)</li>
+                        <li>الديون التقنية حقيقية (Tech debt is real)</li>
+                        <li>المستخدم لا يهتم بالكود (Users don't care about code)</li>
+                        <li>التكامل أصعب من البناء (Integration &gt; Building)</li>
+                        <li>القديم لا يموت (Legacy never dies)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <p><strong>University gives the foundation:</strong> How to think about components abstractly.</p>
+                <p><strong>Market tests the implementation:</strong> Can your components handle 10M users?</p>
+                <p><strong>Bridge:</strong> Start with solid principles, iterate based on real feedback.</p>
+            </div>
+        </div>
+
+        <!-- Slide 17: Assignment -->
+        <div class="slide">
+            <h2>📝 Assignment: Design National Component System</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Design a complete component ecosystem for Saudi Arabia's digital transformation
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Choose ONE National Challenge:</h4>
+                <ol>
+                    <li>🏥 Unified health records components (30M citizens)</li>
+                    <li>🎓 National education platform modules (6M students)</li>
+                    <li>🚗 Smart traffic management components (Riyadh)</li>
+                    <li>⚡ National energy monitoring modules</li>
+                    <li>🌾 Agricultural IoT component library</li>
+                </ol>
+            </div>
+            
+            <h3>Deliverables (EMAM Framework)</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Phase</th>
+                    <th>Weight</th>
+                    <th>Requirements</th>
+                    <th>Rubric</th>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-ifham">افهم</span></td>
+                    <td>20%</td>
+                    <td>Component analysis, characteristics</td>
+                    <td>Clear definitions – 10/20; Examples – 10/20</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-maris">مارس</span></td>
+                    <td>30%</td>
+                    <td>Interface design, CBSE process</td>
+                    <td>Complete interfaces – 15/30; Process flow – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-atqan">اتقن</span></td>
+                    <td>30%</td>
+                    <td>Composition patterns, adaptors</td>
+                    <td>Working integration – 15/30; Adaptors – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-mayyiz">ميز</span></td>
+                    <td>20%</td>
+                    <td>Innovation, Vision 2030 alignment</td>
+                    <td>Novel approach – 10/20; Saudi impact – 10/20</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="soft-skill-box">
+                <h4>Submission Requirements</h4>
+                <ul>
+                    <li><strong>Due:</strong> Next week</li>
+                    <li><strong>Format:</strong> PDF + GitHub repo</li>
+                    <li><strong>Must include:</strong> 5+ components, full documentation</li>
+                    <li><strong>Bonus:</strong> Working prototype, Arabic/English docs</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 18: Key Takeaways -->
+        <div class="slide">
+            <h2>🎯 Key Takeaways - Chapter 16 Mastery</h2>
+            
+            <div class="definition-box">
+                <strong>Summary:</strong> "Component-based software engineering enables systematic reuse through independent, standardized, and composable software units" (Sommerville, 2015)
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🧠 Core Concepts</h5>
+                    <p style="font-size: 0.9em;">
+                        • Characteristics<br>
+                        • Interfaces<br>
+                        • Standards<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>💼 Processes</h5>
+                    <p style="font-size: 0.9em;">
+                        • For reuse<br>
+                        • With reuse<br>
+                        • Management<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🔗 Composition</h5>
+                    <p style="font-size: 0.9em;">
+                        • Three patterns<br>
+                        • Adaptors<br>
+                        • Integration<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🚀 Innovation</h5>
+                    <p style="font-size: 0.9em;">
+                        • Saudi ecosystem<br>
+                        • Security &amp; ethics<br>
+                        • Future trends<br>
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: var(--gradient); color: white; padding: 25px; border-radius: 15px; margin-top: 30px; text-align: center;">
+                <h3 style="background: none; border: none; padding: 0; margin-bottom: 15px; color: white;">
+                    Success Formula
+                </h3>
+                <p style="font-size: 1.3em;">
+                    Technical Mastery + Islamic Values + Saudi Vision + Global Impact = <strong>Your Legacy</strong>
+                </p>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Self-Reflection Prompts</h4>
+                <ul>
+                    <li>Which component characteristic is most challenging for you?</li>
+                    <li>Rate your EMAM progress (1-5 each phase).</li>
+                    <li>How will you contribute to Saudi's component ecosystem?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 19: Your Commitment -->
+        <div class="slide">
+            <h2>🤝 Your Component Engineering Commitment</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا أَنْ يُتْقِنَهُ</div>
+                <p>"Allah loves when one of you does work, that they perfect it" - Hadith</p>
+                <p>(Transliteration: Inna AllÄha yuḥibbu idhÄ ʿamila aḥadukum ʿamalan an yutqinahu)</p>
+            </div>
+            
+            <div class="mission-critical">
+                Every component you build becomes a building block for humanity's progress.
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h4>Foundation</h4>
+                    <p>Master principles</p>
+                    <p>Understand standards</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h4>Application</h4>
+                    <p>Build components</p>
+                    <p>Create interfaces</p>
+                    <p>Test thoroughly</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h4>Excellence</h4>
+                    <p>Production quality</p>
+                    <p>Seamless integration</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h4>Innovation</h4>
+                    <p>Lead change</p>
+                    <p>Global impact</p>
+                    <p>Serve millions</p>
+                </div>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Commitment Questions:</h4>
+                <ul>
+                    <li>What component will you build first?</li>
+                    <li>How will it serve Saudi Arabia?</li>
+                    <li>Who will benefit from your work?</li>
+                    <li>What legacy will you create?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 20: Resources & Next Steps -->
+        <div class="slide">
+            <h2>📚 Resources &amp; Next Steps</h2>
+            
+            <h3>Essential Resources</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>📖 Reading</h4>
+                    <p>• Sommerville Ch.16<br>
+                    • Component Software (Szyperski)<br>
+                    • Saudi e-Gov standards</p>
+                </div>
+                <div class="metric-card">
+                    <h4>🛠️ Tools</h4>
+                    <p>• npm/Maven/NuGet<br>
+                    • Docker/Kubernetes<br>
+                    • OpenAPI/Swagger</p>
+                </div>
+                <div class="metric-card">
+                    <h4>🌐 Communities</h4>
+                    <p>• Saudi Developers<br>
+                    • Open Source Arabia<br>
+                    • Component Patterns</p>
+                </div>
+                <div class="metric-card">
+                    <h4>🎓 Certifications</h4>
+                    <p>• AWS Solutions Architect<br>
+                    • Azure Developer<br>
+                    • TOGAF Architecture</p>
+                </div>
+            </div>
+            
+            <h3>Industry Connections</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Organization</th>
+                    <th>Opportunity</th>
+                    <th>Contact</th>
+                </tr>
+                <tr>
+                    <td>SDAIA</td>
+                    <td>AI components internship</td>
+                    <td>careers.sdaia.gov.sa</td>
+                </tr>
+                <tr>
+                    <td>Elm</td>
+                    <td>Government components</td>
+                    <td>elm.sa/careers</td>
+                </tr>
+                <tr>
+                    <td>Lean Business</td>
+                    <td>Startup components</td>
+                    <td>lean.sa</td>
+                </tr>
+                <tr>
+                    <td>MCIT</td>
+                    <td>Digital transformation</td>
+                    <td>mcit.gov.sa</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 21: Thank You -->
+        <div class="slide active">
+            <h2>🙏 شكرًا - Your Journey Begins Now</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَقُل رَّبِّ زِدْنِي عِلْمًا</div>
+                <p>"My Lord, increase me in knowledge" - Qur'an 20:114</p>
+                <p>Component knowledge compounds - keep building!</p>
+            </div>
+            
+            <div class="mission-critical">
+                You now understand how to build software that scales globally<br>
+                From single functions to enterprise ecosystems - you're ready!
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>📧 Contact</h5>
+                    <p>Office Hours: By Email</p>
+                    <p>Email: arnoor@kau.edu.sa</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📅 Next Class</h5>
+                    <p>Chapter 17</p>
+                    <p>Distributed Systems</p>
+                    <p>Monday, 2:30 PM</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📝 Due Soon</h5>
+                    <p>Component design</p>
+                    <p>Next week</p>
+                    <p>Start TODAY!</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎯 Resources</h5>
+                    <p>Blackboard</p>
+                    <p>GitHub repo</p>
+                    <p>Component library</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.5em; color: #2d3748;">بروف: أديب بن رضا نور</p>
+                <p style="font-size: 1.2em; color: #2d3748; margin-top: 20px;">
+                    See you next class, إن شاء الله<br>
+                    <strong>Remember: Your components will power the future!</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" disabled="">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        // Slide management
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressBar').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlideDisplay();
+            }
+        }
+        
+        // Quiz functionality
+        function checkAnswer(element, option, feedbackId, isCorrect = false) {
+            const feedback = document.getElementById(feedbackId);
+            if (!feedback) return;
+            
+            feedback.style.display = 'block';
+            
+            const feedbackText = {
+                'quiz1': {
+                    correct: '✅ Correct! Components are independent and reusable units.',
+                    incorrect: '❌ Think about independence and reusability.'
+                },
+                'quiz3': {
+                    correct: '✅ Correct! Complex systems need all composition patterns.',
+                    incorrect: '❌ Consider the complexity of real systems.'
+                },
+                'quiz5': {
+                    correct: '✅ Correct! Components leverage all IR 6.0 benefits.',
+                    incorrect: '❌ Consider all aspects of component engineering.'
+                }
+            };
+            
+            if (isCorrect) {
+                feedback.textContent = feedbackText[feedbackId]?.correct || '✅ Correct!';
+                feedback.className = 'quiz-feedback correct';
+                element.style.background = '#c6f6d5';
+            } else {
+                feedback.textContent = feedbackText[feedbackId]?.incorrect || '❌ Try again!';
+                feedback.className = 'quiz-feedback incorrect';
+                element.style.background = '#fed7d7';
+            }
+            
+            // Disable all options
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.onclick = null;
+                opt.style.cursor = 'default';
+            });
+        }
+        
+        // Reveal functions
+        function revealComponentClassification() {
+            document.getElementById('componentAnswers').style.display = 'block';
+        }
+        
+        function showReusableSolution() {
+            document.getElementById('reusableSolution').style.display = 'block';
+        }
+        
+        function showAdaptorSolution() {
+            document.getElementById('adaptorSolution').style.display = 'block';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                updateSlideDisplay();
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides - 1;
+                updateSlideDisplay();
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlideDisplay();
+        });
+    </script>
+
+</body></html>
