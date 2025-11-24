@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<!-- saved from url=(0069)file:///C:/Users/USER/Downloads/chapter13-Security%20Engineering.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 13: Security Engineering - Enhanced EMAM Framework</title>
+    <style>
+        :root {
+            --primary: #dc2626;
+            --secondary: #991b1b;
+            --accent: #fca5a5;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #7f1d1d;
+            --light: #fef2f2;
+            --dark: #450a0a;
+            --gradient: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            --islamic-green: #065f46;
+            --islamic-light: #e6fffa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            overflow-y: auto;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            background: var(--gradient);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #450a0a;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #450a0a;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #450a0a;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(90deg, #fef2f2, #fecaca);
+            padding: 15px 25px;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+        }
+        
+        h4 {
+            color: #450a0a;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #991b1b;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+        
+        .mission-critical {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .visual-card {
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .visual-card:hover {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .emam-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .badge-ifham {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: white;
+        }
+        
+        .badge-maris {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+        }
+        
+        .badge-atqan {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .badge-mayyiz {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .definition-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-style: italic;
+        }
+        
+        .islamic-box {
+            background: linear-gradient(135deg, #e6fffa, #99f6e4);
+            border: 3px solid #065f46;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .islamic-box .arabic {
+            font-size: 1.3em;
+            color: #065f46;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .challenge-box {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 3px solid #dc2626;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table th {
+            background: var(--gradient);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #fecaca;
+            font-size: 1.05em;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #fef2f2;
+        }
+        
+        .comparison-table tr:hover {
+            background: #fecaca;
+            transition: background 0.3s ease;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .timeline-content {
+            width: 45%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timeline-marker {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border: 4px solid white;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #450a0a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #450a0a;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .quiz-container {
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quiz-option {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .code-editor {
+            background: #450a0a;
+            color: #fecaca;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .code-comment {
+            color: #fca5a5;
+        }
+        
+        .code-keyword {
+            color: #fbbf24;
+        }
+        
+        .reflection-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #d69e2e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, #e6fffa, #ccfbf1);
+            border: 2px solid var(--islamic-green);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .kpi-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kpi-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .kpi-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-item {
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            border: 3px solid var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            min-width: 150px;
+            position: relative;
+            animation: slideInFlow 0.5s ease-out;
+        }
+        
+        @keyframes slideInFlow {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .soft-skill-box {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .hazard-box {
+            background: linear-gradient(135deg, #fecaca, #f87171);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .ethics-box {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            border: 3px solid #8b5cf6;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+        }
+        
+        .checklist-item {
+            background: white;
+            border-left: 4px solid #8b5cf6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .maqasid-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .maqasid-card {
+            background: linear-gradient(135deg, #065f46, #047857);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .maqasid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(6, 95, 70, 0.3);
+        }
+        
+        .uni-market-label {
+            background: linear-gradient(135deg, #e9d5ff, #c084fc);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-display {
+            background: #dc2626;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .market-reality {
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            border-left: 5px solid #dc2626;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .industry-tool {
+            background: linear-gradient(135deg, #dbeafe, #93c5fd);
+            border-left: 5px solid #2563eb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                height: 90vh;
+                padding: 30px 20px;
+            }
+            
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 2em; }
+            h3 { font-size: 1.4em; }
+            
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .maqasid-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-content {
+                width: 90%;
+                margin-bottom: 40px;
+            }
+            
+            .timeline-item {
+                flex-direction: column;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-marker {
+                left: 20px;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+        <div class="slide-counter" id="slideCounter">21 / 21</div>
+        
+        <!-- Slide 1: Title and Introduction -->
+        <div class="slide">
+            <h1>Chapter 13: Security Engineering</h1>
+            <div class="subtitle">نموذج إِمام التعليمي: إنطلاقة راسخة على خطى الأولين
+</div>
+            
+            <div class="islamic-box">
+                <div class="arabic">إِنَّ اللَّهَ يَأْمُرُكُمْ أَن تُؤَدُّوا الْأَمَانَاتِ إِلَىٰ أَهْلِهَا</div>
+                <p>"Indeed, Allah commands you to render trusts to whom they are due" - Qur'an 4:58</p>
+                <p>(Transliteration: Inna Allaha ya'murukum an tu'addū l-amānāti ilā ahlihā)</p>
+                <p><strong>Foundation: أمانة (Trust) and حماية (Protection)</strong></p>
+            </div>
+            
+            <div class="mission-critical">
+                ⚡ Your Mission: Master security engineering to protect Saudi Arabia's digital sovereignty
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h5>Understand</h5>
+                    <p>Why security matters<br>Core principles<br><a href="file:///C:/Users/USER/Downloads/chapter13-Security%20Engineering.html#section-foundations" style="color: inherit;">Section: Foundations</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h5>Practice</h5>
+                    <p>Risk assessment<br>Security tools<br><a href="file:///C:/Users/USER/Downloads/chapter13-Security%20Engineering.html#section-requirements" style="color: inherit;">Section: Requirements</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h5>Master</h5>
+                    <p>Design patterns<br>Secure coding<br><a href="file:///C:/Users/USER/Downloads/chapter13-Security%20Engineering.html#section-design" style="color: inherit;">Section: Design</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h5>Excel</h5>
+                    <p>Testing &amp; Innovation<br>Vision 2030<br><a href="file:///C:/Users/USER/Downloads/chapter13-Security%20Engineering.html#section-innovation" style="color: inherit;">Section: Innovation</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Framework Evolution -->
+        <div class="slide">
+            <h2>🚀 Framework Evolution: Shaping Security Engineering</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <h3>Two Lenses for Mastering Security</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4 style="color: #3b82f6;">🏭 Industrial Revolution 6.0 (IR 6.0)</h4>
+                    <p><strong>Human-Centric Security (2020s)</strong></p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 13.1 - CIA Triad:</strong> Enhances confidentiality while respecting privacy (e.g., Absher's biometric auth).</li>
+                        <li><strong>Section 13.2 - Organizational Security:</strong> Designs policies that don't burn out security teams (e.g., automated SOC at STC).</li>
+                        <li><strong>Section 13.3 - Requirements Engineering:</strong> Balances security with user experience (e.g., Nafath's seamless auth).</li>
+                        <li><strong>Section 13.4 - Secure Design:</strong> Creates sustainable incident response (e.g., SAMA's 24/7 ops with rotation).</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Market Impact:</strong> IR 6.0 reduces security analyst burnout by 40%, increasing threat detection by 2x.
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #065f46;">
+                    <h4 style="color: #065f46;">📖 Islamization of Knowledge</h4>
+                    <p class="arabic" style="font-size: 1em;">أسلمة المعرفة (Proactive)</p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 13.1 - CIA Triad:</strong> Derives from أمانة (trustworthiness) not Western models.</li>
+                        <li><strong>Section 13.2 - Organizational Security:</strong> Models from Shura (consultation) for security governance.</li>
+                        <li><strong>Section 13.3 - Requirements Engineering:</strong> Misuse cases prevent خيانة (betrayal of trust).</li>
+                        <li><strong>Section 13.4 - Secure Design:</strong> Defense-in-depth from حصن (fortress) concept.</li>
+                    </ul>
+                    <div style="background: #e6fffa; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        <strong>Principle:</strong> Start with Islamic ethics, then evaluate global security standards.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Theoretical Security Models<br>
+                <strong>Market Test:</strong> Preventing Real Breaches
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Your Learning Approach (Mapped to Objectives)</h4>
+                <ul>
+                    <li>✅ Understand security dimensions &amp; terminology (Objective 1, Section 13.1).</li>
+                    <li>✅ Master risk assessment &amp; requirements (Objective 2, Section 13.3).</li>
+                    <li>✅ Apply secure design patterns (Objective 3, Section 13.4).</li>
+                    <li>✅ Execute security testing strategies (Objective 4, Section 13.5).</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Quick Quiz: Which IR 6.0 principle helps prevent SOC burnout? (2 mins)</div>
+                <div class="timer-display">⏱️ Timer: 2:00</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz5&#39;)">A. More monitoring tools</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz5&#39;, true)">B. Human-centric automation</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz5&#39;)">C. Stricter policies</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz5&#39;)">D. Longer shifts</div>
+                </div>
+                <div class="quiz-feedback" id="quiz5"></div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Mission Context - Real Impact -->
+        <div class="slide">
+            <h2 id="section-foundations">🌍 Mission Context: The Shamoon Reality</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Case Study Analysis<br>
+                <strong>Market Test:</strong> Understanding Attack Impact
+            </div>
+            
+            <div class="mission-critical">
+                August 15, 2012: 35,000 Aramco computers destroyed in hours
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Experience the Attack Timeline (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person; use simulation)</p>
+                <p><strong>Live Simulation:</strong> Watch the attack spread:</p>
+                <ul>
+                    <li>11:08 AM: First infection (1 computer)</li>
+                    <li>11:15 AM: 100 computers infected</li>
+                    <li>11:30 AM: 1,000 computers down</li>
+                    <li>12:00 PM: 10,000 computers destroyed</li>
+                    <li>2:00 PM: 35,000 computers - total destruction</li>
+                </ul>
+                <p><strong>Your Task:</strong> At what point would you pull the network cable?</p>
+            </div>
+            
+            <div class="hazard-box">
+                <h3>💔 The Human Cost</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>• 35,000 employees couldn't work for weeks</li>
+                    <li>• IT staff worked 24/7 for 2 weeks straight</li>
+                    <li>• $15 million in immediate damages</li>
+                    <li>• Global oil supply at risk</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 What made Shamoon so devastating?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz1&#39;)">A. It stole data</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz1&#39;, true)">B. It destroyed data permanently</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz1&#39;)">C. It was undetectable</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz1&#39;)">D. It spread slowly</div>
+                </div>
+                <div class="quiz-feedback" id="quiz1"></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Core Security Concepts -->
+        <div class="slide">
+            <h2>📚 CIA Triad: The Foundation</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Theoretical Models<br>
+                <strong>Market Test:</strong> Protecting Real Assets
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔍 Discover CIA Yourself (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>With your neighbor, identify CIA violations:</strong></p>
+                <table class="comparison-table">
+                    <tbody><tr>
+                        <th>Scenario</th>
+                        <th>C, I, or A?</th>
+                        <th>Why?</th>
+                    </tr>
+                    <tr>
+                        <td>WhatsApp message leaked</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Bank balance changed</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Absher down for hours</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Fake COVID certificate</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                </tbody></table>
+                <button onclick="revealCIA()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Check Answers</button>
+                <div id="ciaAnswers" class="answer-box">
+                    <p>WhatsApp: Confidentiality - Private info exposed<br>
+                    Bank: Integrity - Data corrupted<br>
+                    Absher: Availability - Service denied<br>
+                    COVID: Integrity - False data created</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Definition:</strong> "Security engineering is about building systems to remain dependable in the face of malice, error, or mischance" (Anderson, 2008)
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> One CIA violation in SAMA systems could cost billions and destroy public trust.
+            </div>
+        </div>
+
+        <!-- Slide 5: Security vs Safety -->
+        <div class="slide">
+            <h2>⚖️ Security ≠ Safety: Critical Differences</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Comparative Analysis<br>
+                <strong>Market Test:</strong> Choosing Right Approach
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎮 Role Play: Safety vs Security Engineer (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p style="margin-top: 10px;">(Split class into two teams)</p>
+                <p><strong>Scenario:</strong> System failure at Riyadh Metro</p>
+                <ul>
+                    <li><strong>Safety Team:</strong> Find root cause, fix, document</li>
+                    <li><strong>Security Team:</strong> Assume attack, contain, investigate</li>
+                </ul>
+                <p>Which approach if: (a) Train stops suddenly? (b) All screens show "HACKED"?</p>
+            </div>
+            
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Aspect</th>
+                    <th>Safety Focus</th>
+                    <th>Security Focus</th>
+                    <th>Saudi Example</th>
+                </tr>
+                <tr>
+                    <td>Threat Source</td>
+                    <td>Accidents, nature</td>
+                    <td>Malicious actors</td>
+                    <td>Hajj crowd vs cyber attack</td>
+                </tr>
+                <tr>
+                    <td>Response</td>
+                    <td>Can shutdown safely</td>
+                    <td>Must stay operational</td>
+                    <td>SAMA can't go offline</td>
+                </tr>
+                <tr>
+                    <td>Failure Analysis</td>
+                    <td>Open investigation</td>
+                    <td>Attacker hides traces</td>
+                    <td>Shamoon wiped logs</td>
+                </tr>
+                <tr>
+                    <td>Environment</td>
+                    <td>Predictable</td>
+                    <td>Adversarial, adaptive</td>
+                    <td>APT groups target Saudi</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Treating security as safety led to Shamoon's success - no adversarial thinking.
+            </div>
+        </div>
+
+        <!-- Slide 6: Risk Assessment Process -->
+        <div class="slide">
+            <h2 id="section-requirements">🎯 Risk Assessment: STRIDE Model</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> STRIDE Framework<br>
+                <strong>Market Test:</strong> Identifying Real Threats
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔍 Apply STRIDE to Tawakkalna (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p style="margin-top: 10px;">(Work in pairs; use worksheet)</p>
+                <p><strong>Your Task:</strong> Find one threat for each STRIDE category</p>
+            </div>
+            
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>STRIDE</th>
+                    <th>Threat Type</th>
+                    <th>Tawakkalna Example</th>
+                    <th>Islamic Violation</th>
+                    <th>Control</th>
+                </tr>
+                <tr>
+                    <td><strong>Spoofing</strong></td>
+                    <td>Fake identity</td>
+                    <td>Fake vaccine status</td>
+                    <td>انتحال الشخصية</td>
+                    <td>Biometric + Nafath</td>
+                </tr>
+                <tr>
+                    <td><strong>Tampering</strong></td>
+                    <td>Modify data</td>
+                    <td>Change health status</td>
+                    <td>تحريف البيانات</td>
+                    <td>Blockchain logs</td>
+                </tr>
+                <tr>
+                    <td><strong>Repudiation</strong></td>
+                    <td>Deny actions</td>
+                    <td>Deny permit request</td>
+                    <td>إنكار الفعل</td>
+                    <td>Digital signatures</td>
+                </tr>
+                <tr>
+                    <td><strong>Info Disclosure</strong></td>
+                    <td>Data leak</td>
+                    <td>Medical records exposed</td>
+                    <td>إفشاء السر</td>
+                    <td>End-to-end encryption</td>
+                </tr>
+                <tr>
+                    <td><strong>Denial of Service</strong></td>
+                    <td>Block access</td>
+                    <td>App crash during Hajj</td>
+                    <td>منع العبادة</td>
+                    <td>CDN + scaling</td>
+                </tr>
+                <tr>
+                    <td><strong>Elevation</strong></td>
+                    <td>Gain privileges</td>
+                    <td>Access admin panel</td>
+                    <td>تجاوز الصلاحيات</td>
+                    <td>Zero trust + RBAC</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="industry-tool">
+                <strong>Industry Tool:</strong> Microsoft Threat Modeling Tool for automated STRIDE analysis.
+            </div>
+        </div>
+
+        <!-- Slide 7: Misuse Cases -->
+        <div class="slide">
+            <h2>😈 Misuse Cases: Think Like an Attacker</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Misuse Case Diagrams<br>
+                <strong>Market Test:</strong> Preventing Real Attacks
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎭 Evil Twin Exercise (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p style="margin-top: 10px;">(Ethical hacking mindset)</p>
+                <p><strong>Your Mission:</strong> Break into Absher (theoretically!)</p>
+                <ol>
+                    <li>Partner A: Describe normal use case</li>
+                    <li>Partner B: Describe how to abuse it</li>
+                    <li>Together: Design a defense</li>
+                </ol>
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #16a34a;">
+                    <h4 style="color: #16a34a;">✅ Use Case</h4>
+                    <p><strong>Login to Absher</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Enter national ID</li>
+                        <li>Enter password</li>
+                        <li>Verify with Nafath</li>
+                        <li>Access services</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4 style="color: #dc2626;">😈 Misuse Case</h4>
+                    <p><strong>Hijack Account</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Phishing for credentials</li>
+                        <li>SIM swap for SMS</li>
+                        <li>Man-in-the-middle</li>
+                        <li>Session hijacking</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #2563eb;">
+                    <h4 style="color: #2563eb;">🛡️ Security Use Case</h4>
+                    <p><strong>Prevent Hijacking</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Anti-phishing training</li>
+                        <li>Device fingerprinting</li>
+                        <li>Certificate pinning</li>
+                        <li>Session timeout</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="code-editor">
+                <span class="code-comment"># Example: Detecting account hijacking attempt</span><br>
+                <span class="code-keyword">def</span> detect_suspicious_login(user_id, ip, device):<br>
+                &nbsp;&nbsp;<span class="code-comment"># Check for unusual patterns</span><br>
+                &nbsp;&nbsp;<span class="code-keyword">if</span> ip_location(ip) != user_usual_location(user_id):<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;send_alert("Login from unusual location")<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;require_additional_verification()<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;<span class="code-keyword">if</span> device not in trusted_devices(user_id):<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;send_notification_to_registered_phone()<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;require_nafath_verification()<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;<span class="code-comment"># Islamic principle: Trust but verify (الثقة مع التحقق)</span><br>
+                &nbsp;&nbsp;log_access_attempt(user_id, ip, device, timestamp())
+            </div>
+        </div>
+
+        <!-- Slide 8: 10 Security Requirements -->
+        <div class="slide">
+            <h2>📋 10 Essential Security Requirements</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Firesmith's Framework<br>
+                <strong>Market Test:</strong> Complete Coverage
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Requirement Mapping Game (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p><strong>Match each Saudi service to its PRIMARY requirement:</strong></p>
+            </div>
+            
+            <div class="visual-grid" style="grid-template-columns: repeat(5, 1fr);">
+                <div class="visual-card">
+                    <h5>1. Identification</h5>
+                    <p style="font-size: 0.8em;">Who are you?<br><strong>Absher ID</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>2. Authentication</h5>
+                    <p style="font-size: 0.8em;">Prove it!<br><strong>Nafath</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>3. Authorization</h5>
+                    <p style="font-size: 0.8em;">What can you do?<br><strong>SAMA roles</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>4. Immunity</h5>
+                    <p style="font-size: 0.8em;">Resist attacks<br><strong>Aramco post-Shamoon</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>5. Integrity</h5>
+                    <p style="font-size: 0.8em;">Accurate data<br><strong>Hajj permits</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>6. Intrusion Detection</h5>
+                    <p style="font-size: 0.8em;">Spot attacks<br><strong>NCA SOC</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>7. Non-repudiation</h5>
+                    <p style="font-size: 0.8em;">Can't deny<br><strong>Sarie payments</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>8. Privacy</h5>
+                    <p style="font-size: 0.8em;">Protect personal<br><strong>Sehhaty records</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>9. Auditing</h5>
+                    <p style="font-size: 0.8em;">Track actions<br><strong>Government ops</strong></p>
+                </div>
+                <div class="visual-card">
+                    <h5>10. Maintenance</h5>
+                    <p style="font-size: 0.8em;">Stay secure<br><strong>Regular updates</strong></p>
+                </div>
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Missing even one requirement led to 70% of Saudi breaches in 2023.
+            </div>
+        </div>
+
+        <!-- Slide 9: Secure Architecture Patterns -->
+        <div class="slide">
+            <h2 id="section-design">🏗️ Secure Architecture: Two Approaches</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Architecture Patterns<br>
+                <strong>Market Test:</strong> Building Resilient Systems
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #7c3aed;">
+                    <h4 style="color: #7c3aed;">🛡️ Protection Architecture</h4>
+                    <div style="font-size: 3em; text-align: center;">🏰</div>
+                    <p><strong>Fortress Model (حصن)</strong></p>
+                    <p>Layers of defense:</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Platform security (OS hardening)</li>
+                        <li>Application security (Input validation)</li>
+                        <li>Record security (Encryption)</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Saudi Example:</strong> SAMA's banking platform</p>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <h4 style="color: #f59e0b;">📊 Distribution Architecture</h4>
+                    <div style="font-size: 3em; text-align: center;">🌐</div>
+                    <p><strong>Spread Model (توزيع)</strong></p>
+                    <p>Minimize single points:</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Replicated databases</li>
+                        <li>Geographic distribution</li>
+                        <li>Load balancing</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Saudi Example:</strong> Hajj systems across regions</p>
+                </div>
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-item">User Request</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item" style="background: var(--gradient); color: white;">WAF Filter</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">Load Balancer</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">App Server</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">Database</div>
+            </div>
+        </div>
+
+        <!-- Slide 10: 10 Design Guidelines -->
+        <div class="slide">
+            <h2>📐 10 Security Design Guidelines</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="soft-skill-box">
+                <h4>🏗️ Design Challenge: Secure Madrasati (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p><strong>Apply 5 guidelines to fix Madrasati vulnerabilities:</strong></p>
+            </div>
+            
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>#</th>
+                    <th>Guideline</th>
+                    <th>Madrasati Application</th>
+                    <th>Fix</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Base on explicit policy</strong></td>
+                    <td>No clear data retention</td>
+                    <td>Define 5-year policy</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Defense in depth</strong></td>
+                    <td>Only password auth</td>
+                    <td>Add MFA + biometric</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Fail securely</strong></td>
+                    <td>Shows error details</td>
+                    <td>Generic error messages</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Balance security/usability</strong></td>
+                    <td>15-char passwords</td>
+                    <td>Passphrase option</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Log user actions</strong></td>
+                    <td>No audit trail</td>
+                    <td>Log all grade changes</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>Redundancy &amp; diversity</strong></td>
+                    <td>Single server</td>
+                    <td>Multi-region deployment</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><strong>Validate inputs</strong></td>
+                    <td>SQL injection possible</td>
+                    <td>Parameterized queries</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><strong>Compartmentalize</strong></td>
+                    <td>All data accessible</td>
+                    <td>School-level isolation</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td><strong>Design for deployment</strong></td>
+                    <td>Manual configuration</td>
+                    <td>Infrastructure as Code</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><strong>Design for recovery</strong></td>
+                    <td>No backup plan</td>
+                    <td>Automated daily backups</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 11: Secure Programming -->
+        <div class="slide">
+            <h2>💻 Secure Programming Practices</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="soft-skill-box">
+                <h4>🐛 Bug Hunt Challenge (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p><strong>Find 5 vulnerabilities in this code:</strong></p>
+            </div>
+            
+            <div class="code-editor">
+                <span class="code-comment"># Vulnerable Sarie payment system</span><br>
+                <span class="code-keyword">def</span> process_payment(amount, account_from, account_to):<br>
+                &nbsp;&nbsp;<span class="code-comment"># BUG 1: No input validation</span><br>
+                &nbsp;&nbsp;query = f"SELECT balance FROM accounts WHERE id = {account_from}"<br>
+                &nbsp;&nbsp;<span class="code-comment"># BUG 2: SQL injection vulnerability</span><br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;balance = execute_query(query)<br>
+                &nbsp;&nbsp;<span class="code-comment"># BUG 3: No error handling</span><br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;<span class="code-keyword">if</span> balance &gt; amount:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># BUG 4: Race condition - no locking</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;execute_query(f"UPDATE accounts SET balance = balance - {amount} WHERE id = {account_from}")<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;execute_query(f"UPDATE accounts SET balance = balance + {amount} WHERE id = {account_to}")<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># BUG 5: No logging of transaction</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> "Success"<br>
+                &nbsp;&nbsp;<span class="code-keyword">else</span>:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># BUG 6: Information disclosure</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> f"Insufficient funds. Current balance: {balance}"<br>
+            </div>
+            
+            <button onclick="showSecureCode()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Show Secure Version</button>
+            
+            <div id="secureCode" class="answer-box">
+                <div class="code-editor" style="background: #065f46;">
+                    <span class="code-comment"># Secure version with Islamic principles</span><br>
+                    <span class="code-keyword">def</span> process_payment_secure(amount, account_from, account_to):<br>
+                    &nbsp;&nbsp;<span class="code-comment"># حفظ الأمانة - Protect the trust</span><br>
+                    &nbsp;&nbsp;<span class="code-keyword">try</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Input validation</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if not</span> validate_amount(amount) or not validate_accounts(account_from, account_to):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> {"status": "error", "message": "Invalid request"}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Use parameterized queries</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">with</span> transaction_lock():<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;balance = db.query("SELECT balance FROM accounts WHERE id = ?", [account_from])<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> balance &gt;= amount:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;db.execute("UPDATE accounts SET balance = balance - ? WHERE id = ?", [amount, account_from])<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;db.execute("UPDATE accounts SET balance = balance + ? WHERE id = ?", [amount, account_to])<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># Complete audit trail</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_transaction(account_from, account_to, amount, "SUCCESS")<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> {"status": "success", "transaction_id": generate_id()}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">else</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_transaction(account_from, account_to, amount, "INSUFFICIENT_FUNDS")<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> {"status": "error", "message": "Transaction cannot be completed"}<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;<span class="code-keyword">except</span> Exception as e:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;log_error(e)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> {"status": "error", "message": "Service temporarily unavailable"}
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Security Testing -->
+        <div class="slide">
+            <h2>🧪 Security Testing Strategies</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Testing Methodologies<br>
+                <strong>Market Test:</strong> Finding Real Vulnerabilities
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔍 Testing Tournament (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p><strong>Each team picks a testing approach for Tawakkalna:</strong></p>
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #16a34a;">
+                    <h4>📋 Checklist Testing</h4>
+                    <p><strong>OWASP Top 10</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>✓ Injection flaws?</li>
+                        <li>✓ Broken authentication?</li>
+                        <li>✓ Sensitive data exposure?</li>
+                        <li>✓ XXE attacks?</li>
+                        <li>✓ Broken access control?</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Tool:</strong> OWASP ZAP</p>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4>🎯 Penetration Testing</h4>
+                    <p><strong>Ethical Hacking</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Reconnaissance</li>
+                        <li>Scanning</li>
+                        <li>Gaining access</li>
+                        <li>Maintaining access</li>
+                        <li>Covering tracks</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Tool:</strong> Metasploit</p>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #2563eb;">
+                    <h4>🔬 Static Analysis</h4>
+                    <p><strong>Code Review</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Buffer overflows</li>
+                        <li>SQL injection points</li>
+                        <li>Hardcoded secrets</li>
+                        <li>Unsafe functions</li>
+                        <li>Race conditions</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Tool:</strong> SonarQube</p>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #7c3aed;">
+                    <h4>🤖 Dynamic Testing</h4>
+                    <p><strong>Runtime Analysis</strong></p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Fuzzing inputs</li>
+                        <li>Memory analysis</li>
+                        <li>API testing</li>
+                        <li>Session management</li>
+                        <li>Error handling</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Tool:</strong> Burp Suite</p>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>⚠️ Why Security Testing is Hard</h4>
+                <ul>
+                    <li><strong>"Shall Not" Requirements:</strong> Can't prove absence of all vulnerabilities</li>
+                    <li><strong>Intelligent Adversaries:</strong> Attackers adapt and share techniques</li>
+                    <li><strong>Unknown Unknowns:</strong> Zero-day vulnerabilities</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 13: Saudi's Security Revolution -->
+        <div class="slide">
+            <h2 id="section-innovation">🇸🇦 Saudi's Security Revolution</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Vision 2030: Transform Saudi Arabia into a global cybersecurity hub<br>
+                Target: Top 20 globally by 2030
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4>🛡️ National Cybersecurity Authority</h4>
+                    <div class="kpi-value">500+</div>
+                    <div class="kpi-label">Security experts</div>
+                    <ul style="margin-top: 15px;">
+                        <li>24/7 SOC monitoring</li>
+                        <li>National threat intelligence</li>
+                        <li>Incident response teams</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4>🏆 Saudi CTF</h4>
+                    <div class="kpi-value">10,000+</div>
+                    <div class="kpi-label">Participants</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Annual competition</li>
+                        <li>$1M+ prizes</li>
+                        <li>International recognition</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #16a34a;">
+                    <h4>🎓 SAFCSP</h4>
+                    <div class="kpi-value">50,000</div>
+                    <div class="kpi-label">Certified professionals</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Security certifications</li>
+                        <li>Training programs</li>
+                        <li>Career development</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <h4>🏙️ NEOM Security</h4>
+                    <div class="kpi-value">100%</div>
+                    <div class="kpi-label">Smart city coverage</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Zero-trust architecture</li>
+                        <li>Quantum-safe crypto</li>
+                        <li>AI-powered defense</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🚀 Innovation Opportunities</h4>
+                <p>Saudi is investing $20B in cybersecurity by 2030 - your chance to lead!</p>
+            </div>
+        </div>
+
+        <!-- Slide 14: Islamic Security Framework -->
+        <div class="slide">
+            <h2>🕌 Islamic Security Framework: Leading Global Innovation</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَلَا تَجَسَّسُوا</div>
+                <p>"And do not spy" - Qur'an 49:12</p>
+                <p>Privacy-preserving security is an Islamic mandate, not Western import</p>
+            </div>
+            
+            <div class="maqasid-grid">
+                <div class="maqasid-card">
+                    <h4>حفظ الدين</h4>
+                    <p><strong>Protect Religion</strong></p>
+                    <p>Secure Hajj systems<br>Protect Islamic apps<br>Guard prayer times</p>
+                </div>
+                <div class="maqasid-card">
+                    <h4>حفظ النفس</h4>
+                    <p><strong>Protect Life</strong></p>
+                    <p>Healthcare security<br>Emergency systems<br>Critical infrastructure</p>
+                </div>
+                <div class="maqasid-card">
+                    <h4>حفظ العقل</h4>
+                    <p><strong>Protect Intellect</strong></p>
+                    <p>Educational platforms<br>Research data<br>Knowledge systems</p>
+                </div>
+                <div class="maqasid-card">
+                    <h4>حفظ النسل</h4>
+                    <p><strong>Protect Lineage</strong></p>
+                    <p>Family records<br>Marriage systems<br>Child protection</p>
+                </div>
+                <div class="maqasid-card">
+                    <h4>حفظ المال</h4>
+                    <p><strong>Protect Wealth</strong></p>
+                    <p>Banking security<br>Zakat systems<br>Trade platforms</p>
+                </div>
+                <div class="maqasid-card">
+                    <h4>حفظ العرض</h4>
+                    <p><strong>Protect Honor</strong></p>
+                    <p>Privacy rights<br>Reputation systems<br>Data protection</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <p><strong>Your Innovation:</strong> Create security frameworks that start from Maqasid, not patch Western models with Islamic justifications.</p>
+            </div>
+        </div>
+
+        <!-- Slide 15: Career Roadmap -->
+        <div class="slide">
+            <h2>💼 Your Security Engineering Career Path</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <h3>12-Month Roadmap to Excellence</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <strong>Months 1-3: Foundation</strong>
+                        <ul>
+                            <li>Master Chapter 13 concepts</li>
+                            <li>CompTIA Security+</li>
+                            <li>OWASP Top 10 mastery</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content" style="margin-left: auto;">
+                        <strong>Months 4-6: Specialization</strong>
+                        <ul>
+                            <li>Choose: AppSec/NetSec/CloudSec</li>
+                            <li>Bug bounty participation</li>
+                            <li>Saudi CTF preparation</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <strong>Months 7-9: Experience</strong>
+                        <ul>
+                            <li>NCA internship</li>
+                            <li>Contribute to OWASP</li>
+                            <li>Security research paper</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content" style="margin-left: auto;">
+                        <strong>Months 10-12: Leadership</strong>
+                        <ul>
+                            <li>Lead security project</li>
+                            <li>Mentor juniors</li>
+                            <li>Speak at conferences</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+            </div>
+            
+            <h3>Saudi Security Career Opportunities</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Salary (SAR)</th>
+                    <th>Growth</th>
+                </tr>
+                <tr>
+                    <td>NCA</td>
+                    <td>Security Analyst</td>
+                    <td>300,000+</td>
+                    <td>Extreme</td>
+                </tr>
+                <tr>
+                    <td>Aramco</td>
+                    <td>CISO Track</td>
+                    <td>400,000+</td>
+                    <td>Very High</td>
+                </tr>
+                <tr>
+                    <td>SAMA</td>
+                    <td>Security Architect</td>
+                    <td>350,000</td>
+                    <td>High</td>
+                </tr>
+                <tr>
+                    <td>NEOM</td>
+                    <td>Zero-Trust Engineer</td>
+                    <td>380,000</td>
+                    <td>Extreme</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 16: Bridging University to Market -->
+        <div class="slide">
+            <h2>🎓 Bridging University to Market</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #065f46;">
+                    <h4 style="color: #065f46;">الجامعة تعلمك (University Teaches You)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>نظريات الأمن (Security theories)</li>
+                        <li>التفكير النقدي (Critical thinking)</li>
+                        <li>البحث العلمي (Research methods)</li>
+                        <li>الأخلاقيات (Ethics)</li>
+                        <li>الأساسيات (Fundamentals)</li>
+                        <li>حل المشاكل (Problem solving)</li>
+                        <li>العمل الجماعي (Teamwork)</li>
+                        <li>التواصل (Communication)</li>
+                        <li>إدارة الوقت (Time management)</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4 style="color: #dc2626;">السوق يعلمك (Market Teaches You)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>منع الاختراقات الحقيقية (Stop real breaches)</li>
+                        <li>الاستجابة تحت الضغط (Respond under pressure)</li>
+                        <li>التكلفة مقابل الأمان (Cost vs security)</li>
+                        <li>السياسات والامتثال (Compliance)</li>
+                        <li>أحدث التهديدات (Latest threats)</li>
+                        <li>أدوات الصناعة (Industry tools)</li>
+                        <li>العملاء الصعبون (Difficult stakeholders)</li>
+                        <li>الحلول العملية (Practical solutions)</li>
+                        <li>التعلم المستمر (Continuous learning)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <p><strong>University gives the foundation:</strong> How to think about security systematically.</p>
+                <p><strong>Market tests execution:</strong> Can you stop a real attack at 3 AM?</p>
+                <p><strong>Bridge:</strong> University is your training ground; market is your battlefield.</p>
+            </div>
+        </div>
+
+        <!-- Slide 17: Assignment -->
+        <div class="slide">
+            <h2>📝 Assignment: Comprehensive Security Assessment</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Design a complete security framework for a Saudi national service
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Choose ONE National System:</h4>
+                <ol>
+                    <li>🕋 Nusuk (3M Hajj pilgrims)</li>
+                    <li>🏥 Sehhaty (30M health records)</li>
+                    <li>📱 Tawakkalna (25M users)</li>
+                    <li>🎓 Madrasati (6M students)</li>
+                    <li>💰 Sarie (National payments)</li>
+                </ol>
+            </div>
+            
+            <h3>Deliverables (EMAM Framework)</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Phase</th>
+                    <th>Weight</th>
+                    <th>Requirements</th>
+                    <th>Rubric</th>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-ifham">افهم</span></td>
+                    <td>20%</td>
+                    <td>CIA analysis, threat landscape</td>
+                    <td>Clear understanding – 10/20; Islamic integration – 10/20</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-maris">مارس</span></td>
+                    <td>30%</td>
+                    <td>STRIDE analysis, misuse cases</td>
+                    <td>Complete coverage – 15/30; Practical controls – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-atqan">اتقن</span></td>
+                    <td>30%</td>
+                    <td>Apply 10 guidelines, secure code</td>
+                    <td>Design excellence – 15/30; Code quality – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-mayyiz">ميز</span></td>
+                    <td>20%</td>
+                    <td>Testing plan, Vision 2030</td>
+                    <td>Innovation – 10/20; Saudi context – 10/20</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="soft-skill-box">
+                <h4>Submission Requirements</h4>
+                <ul>
+                    <li><strong>Due:</strong> Next week</li>
+                    <li><strong>Format:</strong> PDF + GitHub repo</li>
+                    <li><strong>Must include:</strong> Threat model, security architecture, test results</li>
+                    <li><strong>Bonus:</strong> Working POC, bug bounty findings</li>
+                </ul>
+            </div>
+            
+            <div class="industry-tool">
+                <h4>Required Tools</h4>
+                <ul>
+                    <li>OWASP ZAP for scanning</li>
+                    <li>draw.io for threat modeling</li>
+                    <li>GitHub for secure code</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 18: Key Takeaways -->
+        <div class="slide">
+            <h2>🎯 Key Takeaways - Chapter 13 Mastery</h2>
+            
+            <div class="definition-box">
+                <strong>Summary:</strong> "Security engineering builds systems to remain dependable in the face of malice, error, or mischance through systematic application of principles, practices, and processes."
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🧠 Foundations</h5>
+                    <p style="font-size: 0.9em;">
+                        • CIA Triad<br>
+                        • Security ≠ Safety<br>
+                        • Organizational policy<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>📋 Requirements</h5>
+                    <p style="font-size: 0.9em;">
+                        • STRIDE model<br>
+                        • Misuse cases<br>
+                        • 10 requirements<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🏗️ Design</h5>
+                    <p style="font-size: 0.9em;">
+                        • 10 guidelines<br>
+                        • Architecture patterns<br>
+                        • Secure coding<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🧪 Testing</h5>
+                    <p style="font-size: 0.9em;">
+                        • 4 approaches<br>
+                        • Tool selection<br>
+                        • Continuous testing<br>
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: var(--gradient); color: white; padding: 25px; border-radius: 15px; margin-top: 30px; text-align: center;">
+                <h3 style="background: none; border: none; padding: 0; margin-bottom: 15px; color: white;">
+                    Success Formula
+                </h3>
+                <p style="font-size: 1.3em;">
+                    Islamic Ethics + Technical Excellence + Saudi Context + Global Standards = <strong>Security Leadership</strong>
+                </p>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Self-Reflection Prompts</h4>
+                <ul>
+                    <li>Which security principle from Islam resonates most with you?</li>
+                    <li>Rate your confidence in each STRIDE category (1-5)</li>
+                    <li>What's your security specialization path?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 19: Quick Reference Guide -->
+        <div class="slide">
+            <h2>📖 Chapter 13 Quick Reference</h2>
+            
+            <h3>Essential Concepts at a Glance</h3>
+            
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Section</th>
+                    <th>Key Topics</th>
+                    <th>Pages</th>
+                    <th>Must Know</th>
+                </tr>
+                <tr>
+                    <td>13.1</td>
+                    <td>Security dimensions</td>
+                    <td>366-373</td>
+                    <td>CIA triad, terminology</td>
+                </tr>
+                <tr>
+                    <td>13.2</td>
+                    <td>Organizational security</td>
+                    <td>373-375</td>
+                    <td>Policy, risk stages</td>
+                </tr>
+                <tr>
+                    <td>13.3</td>
+                    <td>Requirements</td>
+                    <td>376-382</td>
+                    <td>STRIDE, misuse cases</td>
+                </tr>
+                <tr>
+                    <td>13.4</td>
+                    <td>Secure design</td>
+                    <td>383-399</td>
+                    <td>10 guidelines, architecture</td>
+                </tr>
+                <tr>
+                    <td>13.5</td>
+                    <td>Security testing</td>
+                    <td>400-402</td>
+                    <td>4 approaches, challenges</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="visual-grid" style="margin-top: 30px;">
+                <div class="metric-card">
+                    <h4>🚨 Common Attacks</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>SQL Injection</li>
+                        <li>XSS</li>
+                        <li>Buffer Overflow</li>
+                        <li>CSRF</li>
+                        <li>Session Hijacking</li>
+                    </ul>
+                </div>
+                <div class="metric-card">
+                    <h4>🛡️ Key Defenses</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>Input validation</li>
+                        <li>Parameterized queries</li>
+                        <li>Encryption</li>
+                        <li>MFA</li>
+                        <li>Least privilege</li>
+                    </ul>
+                </div>
+                <div class="metric-card">
+                    <h4>🔧 Essential Tools</h4>
+                    <ul style="font-size: 0.9em;">
+                        <li>OWASP ZAP</li>
+                        <li>Burp Suite</li>
+                        <li>Metasploit</li>
+                        <li>Nmap</li>
+                        <li>Wireshark</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 20: Your Commitment -->
+        <div class="slide">
+            <h2>🤝 Your Security Engineering Commitment</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا أَنْ يُتْقِنَهُ</div>
+                <p>"Allah loves when one of you does work, that they perfect it" - Hadith</p>
+                <p>(Transliteration: Inna Allāha yuḥibbu idhā ʿamila aḥadukum ʿamalan an yutqinahu)</p>
+            </div>
+            
+            <div class="mission-critical">
+                Every system you secure protects millions of Muslims' data, privacy, and trust.
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h4>Foundation</h4>
+                    <p>Understand threats</p>
+                    <p>Know the enemy</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h4>Application</h4>
+                    <p>Practice daily</p>
+                    <p>Break things ethically</p>
+                    <p>Learn from failures</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h4>Excellence</h4>
+                    <p>Master defense</p>
+                    <p>Write secure code</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h4>Innovation</h4>
+                    <p>Create new defenses</p>
+                    <p>Lead globally</p>
+                    <p>Protect the Ummah</p>
+                </div>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Your Security Pledge:</h4>
+                <ul>
+                    <li>What system will you protect first?</li>
+                    <li>How will you apply Islamic ethics?</li>
+                    <li>What vulnerability will you eliminate?</li>
+                    <li>Who will you teach security to?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 21: Thank You -->
+        <div class="slide active">
+            <h2>🙏 شكرًا - Your Journey as a Guardian Begins</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَقُل رَّبِّ زِدْنِي عِلْمًا</div>
+                <p>"My Lord, increase me in knowledge" - Qur'an 20:114</p>
+                <p>Security knowledge evolves daily - keep learning, keep protecting!</p>
+            </div>
+            
+            <div class="mission-critical">
+                You now understand how to build systems that protect digital trust<br>
+                From basic CIA to advanced testing - you're ready to defend!
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>📧 Contact</h5>
+                    <p>Office Hours: By Email</p>
+                    <p>Email: arnoor@kau.edu.sa</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📅 Next Class</h5>
+                    <p>Chapter 14</p>
+                    <p>Resilience Engineering</p>
+                    <p>Monday, 2:30 PM</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📝 Due Soon</h5>
+                    <p>Security Assessment</p>
+                    <p>Next week</p>
+                    <p>Start TODAY!</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎯 Resources</h5>
+                    <p>OWASP guides</p>
+                    <p>NCA resources</p>
+                    <p>Saudi CTF prep</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.5em; color: #450a0a;">بروف: أديب بن رضا نور</p>
+                <p style="font-size: 1.2em; color: #450a0a; margin-top: 20px;">
+                    See you next class, إن شاء الله<br>
+                    <strong>Remember: You are the firewall between attackers and millions!</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" disabled="">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        // Slide management
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressBar').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlideDisplay();
+            }
+        }
+        
+        // Quiz functionality
+        function checkAnswer(element, option, feedbackId, isCorrect = false) {
+            const feedback = document.getElementById(feedbackId);
+            if (!feedback) return;
+            
+            feedback.style.display = 'block';
+            
+            const feedbackText = {
+                'quiz1': {
+                    correct: '✅ Correct! Shamoon wiped data permanently, making recovery impossible.',
+                    incorrect: '❌ Think again. What made recovery impossible?'
+                },
+                'quiz5': {
+                    correct: '✅ Correct! Human-centric automation reduces burnout while maintaining security.',
+                    incorrect: '❌ Consider what helps humans work sustainably.'
+                }
+            };
+            
+            if (isCorrect) {
+                feedback.textContent = feedbackText[feedbackId]?.correct || '✅ Correct!';
+                feedback.className = 'quiz-feedback correct';
+                element.style.background = '#c6f6d5';
+            } else {
+                feedback.textContent = feedbackText[feedbackId]?.incorrect || '❌ Try again!';
+                feedback.className = 'quiz-feedback incorrect';
+                element.style.background = '#fed7d7';
+            }
+            
+            // Disable all options after selection
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.onclick = null;
+                opt.style.cursor = 'default';
+            });
+        }
+        
+        // Reveal functions
+        function revealCIA() {
+            document.getElementById('ciaAnswers').style.display = 'block';
+        }
+        
+        function showSecureCode() {
+            document.getElementById('secureCode').style.display = 'block';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                updateSlideDisplay();
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides - 1;
+                updateSlideDisplay();
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlideDisplay();
+        });
+    </script>
+
+</body></html>

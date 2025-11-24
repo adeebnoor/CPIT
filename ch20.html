@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)file:///C:/Users/USER/Downloads/chapter20-enhanced.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 20: Systems of Systems - Enhanced EMAM Framework</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #f59e0b;
+            --danger: #e53e3e;
+            --light: #f8faff;
+            --dark: #2d3748;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --islamic-purple: #5b21b6;
+            --islamic-light: #ede9fe;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            overflow-y: auto;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            background: var(--gradient);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #2d3748;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(90deg, #ede9fe, #ddd6fe);
+            padding: 15px 25px;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+        }
+        
+        h4 {
+            color: #2d3748;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #6b46c1;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+        
+        .mission-critical {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .visual-card {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .visual-card:hover {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .emam-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .badge-ifham {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .badge-maris {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .badge-atqan {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .badge-mayyiz {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .definition-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-style: italic;
+        }
+        
+        .islamic-box {
+            background: linear-gradient(135deg, #ede9fe, #c7d2fe);
+            border: 3px solid #5b21b6;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .islamic-box .arabic {
+            font-size: 1.3em;
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .challenge-box {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 3px solid #ef4444;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table th {
+            background: var(--gradient);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e9d5ff;
+            font-size: 1.05em;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8faff;
+        }
+        
+        .comparison-table tr:hover {
+            background: #ede9fe;
+            transition: background 0.3s ease;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .timeline-content {
+            width: 45%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timeline-marker {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border: 4px solid white;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #2d3748;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #2d3748;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .quiz-container {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quiz-option {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .code-editor {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .code-comment {
+            color: #a0aec0;
+        }
+        
+        .code-keyword {
+            color: #f093fb;
+        }
+        
+        .reflection-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #d69e2e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .kpi-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kpi-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .kpi-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-item {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 3px solid var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            min-width: 150px;
+            position: relative;
+            animation: slideInFlow 0.5s ease-out;
+        }
+        
+        @keyframes slideInFlow {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .soft-skill-box {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .hazard-box {
+            background: linear-gradient(135deg, #fecaca, #f87171);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .ethics-box {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            border: 3px solid #8b5cf6;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+        }
+        
+        .checklist-item {
+            background: white;
+            border-left: 4px solid #8b5cf6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .maqasid-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .maqasid-card {
+            background: linear-gradient(135deg, #5b21b6, #7c3aed);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .maqasid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(91, 33, 182, 0.3);
+        }
+        
+        .uni-market-label {
+            background: linear-gradient(135deg, #e9d5ff, #c084fc);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-display {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .market-reality {
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            border-left: 5px solid #dc2626;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .industry-tool {
+            background: linear-gradient(135deg, #dbeafe, #93c5fd);
+            border-left: 5px solid #2563eb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                height: 90vh;
+                padding: 30px 20px;
+            }
+            
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 2em; }
+            h3 { font-size: 1.4em; }
+            
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .maqasid-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-content {
+                width: 90%;
+                margin-bottom: 40px;
+            }
+            
+            .timeline-item {
+                flex-direction: column;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-marker {
+                left: 20px;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+        <div class="slide-counter" id="slideCounter">18 / 18</div>
+        
+        <!-- Slide 1: Title and Introduction -->
+        <div class="slide">
+            <h1>Chapter 20: Systems of Systems</h1>
+            <div class="subtitle">نموذج إِمام التعليمي: إنطلاقة راسخة على خطى الأولين</div>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَجَعَلْنَاكُمْ شُعُوبًا وَقَبَائِلَ لِتَعَارَفُوا</div>
+                <p>"We made you into nations and tribes that you may know one another" - Qur'an 49:13</p>
+                <p>(Transliteration: Wajaʿalnākum shuʿūban waqabāʾila litaʿārafū)</p>
+                <p><strong>Foundation: التكامل (Integration) and التنسيق (Coordination)</strong></p>
+            </div>
+            
+            <div class="mission-critical">
+                ⚡ Your Mission: Master systems of systems to build Saudi's mega-infrastructure
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h5>Understand</h5>
+                    <p>Complexity types<br>SoS characteristics<br><a href="file:///C:/Users/USER/Downloads/chapter20-enhanced.html#section-complexity" style="color: inherit;">Section: Complexity</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h5>Practice</h5>
+                    <p>Engineering process<br>Interface design<br><a href="file:///C:/Users/USER/Downloads/chapter20-enhanced.html#section-engineering" style="color: inherit;">Section: Engineering</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h5>Master</h5>
+                    <p>Architecture patterns<br>Integration strategies<br><a href="file:///C:/Users/USER/Downloads/chapter20-enhanced.html#section-architecture" style="color: inherit;">Section: Architecture</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h5>Excel</h5>
+                    <p>Saudi mega-systems<br>Vision 2030<br><a href="file:///C:/Users/USER/Downloads/chapter20-enhanced.html#section-excellence" style="color: inherit;">Section: Excellence</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Framework Evolution -->
+        <div class="slide">
+            <h2>🚀 Framework Evolution: Understanding SoS Engineering</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <h3>Two Lenses for Mastering Systems of Systems</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4 style="color: #3b82f6;">🏭 Industry 5.0 Perspective</h4>
+                    <p><strong>Human-Centric Mega-Systems (2020s)</strong></p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 20.1 - Complexity:</strong> Managing technical, managerial, and governance complexity in human-centered ways (e.g., Hajj management with 3M+ pilgrims).</li>
+                        <li><strong>Section 20.2 - Classification:</strong> Organizational, federated, coalition models for different governance needs (e.g., Saudi government platforms).</li>
+                        <li><strong>Section 20.4 - Engineering:</strong> Iterative development with stakeholder involvement (e.g., Absher evolution).</li>
+                        <li><strong>Section 20.5 - Architecture:</strong> Service-based patterns enabling flexibility (e.g., NEOM smart city).</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Market Impact:</strong> SoS failures cost billions globally (UK NHS: £12B). Saudi's structured approach saves 40% in integration costs.
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #5b21b6;">
+                    <h4 style="color: #5b21b6;">📖 Islamic Systems Thinking</h4>
+                    <p class="arabic" style="font-size: 1em;">التفكير النظمي الإسلامي</p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 20.1 - Complexity:</strong> Unity in diversity principle from Qur'an 49:13 guides multi-system integration.</li>
+                        <li><strong>Section 20.2 - Classification:</strong> Shura (consultation) models federated governance.</li>
+                        <li><strong>Section 20.4 - Engineering:</strong> Gradual revelation concept (تدرج) inspires staged deployment.</li>
+                        <li><strong>Section 20.5 - Architecture:</strong> Ummah structure models distributed yet unified systems.</li>
+                    </ul>
+                    <div style="background: #ede9fe; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        <strong>Principle:</strong> Start with Islamic wisdom, then apply modern engineering practices.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Systems Thinking Framework<br>
+                <strong>Market Test:</strong> Managing Real Complexity
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Your Learning Approach (Mapped to Objectives)</h4>
+                <ul>
+                    <li>✅ Understand complexity dimensions (Technical, Managerial, Governance - Section 20.1).</li>
+                    <li>✅ Master SoS classification (Organizational, Federated, Coalition - Section 20.2).</li>
+                    <li>✅ Apply engineering processes (5-stage development - Section 20.4).</li>
+                    <li>✅ Design resilient architectures (Patterns &amp; principles - Section 20.5).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 3: Mission Context -->
+        <div class="slide">
+            <h2 id="section-complexity">🌍 Mission Context: Living in SoS</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Systems Analysis<br>
+                <strong>Market Test:</strong> Recognizing SoS Everywhere
+            </div>
+            
+            <div class="mission-critical">
+                Right now: You're part of 100+ systems of systems daily
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Start With Your Experience (2 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 2:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>Quick Activity:</strong> Count your SoS interactions today:</p>
+                <ul>
+                    <li>Woke up (electricity grid + water + telecom)</li>
+                    <li>Drove to university (traffic + navigation + payment)</li>
+                    <li>Used Absher (ministries + databases + authentication)</li>
+                    <li>Prayed at mosque (timing + audio + climate control)</li>
+                </ul>
+                <p><strong>Notice:</strong> Each system works alone AND together!</p>
+            </div>
+            
+            <div class="hazard-box">
+                <h3>💥 The Hajj Phenomenon - Ultimate SoS</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>• 3 million pilgrims from 180+ countries</li>
+                    <li>• 20+ government systems coordinating</li>
+                    <li>• Transportation, health, security, accommodation</li>
+                    <li>• Real-time crowd management</li>
+                    <li>• Zero tolerance for failure</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Quick Poll: What makes Hajj a System of Systems?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz1&#39;)">A. It has many participants</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz1&#39;, true)">B. Independent systems collaborate for emergent behavior</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz1&#39;)">C. It uses technology</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz1&#39;)">D. It happens annually</div>
+                </div>
+                <div class="quiz-feedback" id="quiz1"></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Core Concept Definition -->
+        <div class="slide">
+            <h2>📚 What IS a System of Systems?</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Analytical Framework<br>
+                <strong>Market Test:</strong> Identifying SoS Properties
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔍 Discover It Yourself (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>With your neighbor, evaluate these systems:</strong></p>
+                <table class="comparison-table">
+                    <tbody><tr>
+                        <th>System</th>
+                        <th>Single System or SoS?</th>
+                        <th>Why?</th>
+                    </tr>
+                    <tr>
+                        <td>Your laptop</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Saudi banking network</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>WhatsApp</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>NEOM city</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                </tbody></table>
+                <button onclick="revealSoSClassification()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Check Answers</button>
+                <div id="sosClassificationAnswers" class="answer-box">
+                    <p>Laptop: Single system - One owner, one purpose<br>
+                    Saudi banking: SoS - Multiple banks cooperating<br>
+                    WhatsApp: Single system - One company controls all<br>
+                    NEOM: SoS - Many independent systems integrated</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Maier (1998):</strong> "A system of systems is an assemblage of components which individually may be regarded as systems, and which possesses two additional properties: operational independence and managerial independence"
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> 70% of mega-projects fail due to poor SoS understanding (Standish Group, 2023).
+            </div>
+        </div>
+
+        <!-- Slide 5: Maier's 5 Characteristics -->
+        <div class="slide">
+            <h2>🔑 Maier's 5 Essential Characteristics</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Classification Framework<br>
+                <strong>Market Test:</strong> Recognizing SoS Properties
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎮 Live Simulation: Build a Mini-SoS (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>Scenario:</strong> Design Saudi's unified education platform</p>
+                <p>Each team represents a system:</p>
+                <ul>
+                    <li>Team 1: K-12 schools system</li>
+                    <li>Team 2: Universities system</li>
+                    <li>Team 3: Technical training</li>
+                    <li>Team 4: Online learning platforms</li>
+                </ul>
+                <p><strong>Task:</strong> How do you maintain independence while cooperating?</p>
+            </div>
+            
+            <h3>The 5 Characteristics</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Characteristic</th>
+                    <th>Definition</th>
+                    <th>Saudi Example</th>
+                    <th>Check ✓</th>
+                </tr>
+                <tr>
+                    <td>1. Operational Independence</td>
+                    <td>Systems fulfill purpose alone</td>
+                    <td>Absher works without Tawakkalna</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>2. Managerial Independence</td>
+                    <td>Different management/ownership</td>
+                    <td>Different ministries manage</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>3. Evolutionary Development</td>
+                    <td>Develops and changes over time</td>
+                    <td>Saudi e-Gov evolution since 2005</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>4. Emergent Behavior</td>
+                    <td>New capabilities from integration</td>
+                    <td>Unified citizen services</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>5. Geographic Distribution</td>
+                    <td>Components in different locations</td>
+                    <td>Services across Saudi regions</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+            </tbody></table>
+            
+            <div class="islamic-box" style="margin-top: 30px;">
+                <div class="arabic">إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ</div>
+                <p>"The believers are but brothers" - Qur'an 49:10</p>
+                <p>(Transliteration: Innamā l-muʾminūna ikhwatun)</p>
+                <p><strong>Independent yet united in purpose</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Complexity Types -->
+        <div class="slide">
+            <h2>⚙️ Three Types of SoS Complexity</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="soft-skill-box">
+                <h4>🧩 Complexity Mapping Exercise (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p><strong>For Hajj Management System, identify:</strong></p>
+                <ol>
+                    <li>Technical complexity examples</li>
+                    <li>Managerial complexity examples</li>
+                    <li>Governance complexity examples</li>
+                </ol>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0;">
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4 style="text-align: center; color: #3b82f6;">🔧 Technical Complexity</h4>
+                    <p style="margin: 20px 0;">Component relationships:</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>System interfaces</li>
+                        <li>Data formats</li>
+                        <li>Protocols</li>
+                        <li>Performance requirements</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Hajj:</strong> 100+ APIs, 50+ databases
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <h4 style="text-align: center; color: #f59e0b;">👥 Managerial Complexity</h4>
+                    <p style="margin: 20px 0;">Control relationships:</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Who owns what</li>
+                        <li>Decision authority</li>
+                        <li>Resource allocation</li>
+                        <li>Conflicting goals</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Hajj:</strong> 20+ agencies coordinating
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4 style="text-align: center; color: #ef4444;">⚖️ Governance Complexity</h4>
+                    <p style="margin: 20px 0;">Policy relationships:</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>Laws and regulations</li>
+                        <li>Standards compliance</li>
+                        <li>International agreements</li>
+                        <li>Cultural considerations</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Hajj:</strong> 180+ country regulations
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Which complexity is hardest to manage?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz2&#39;)">A. Technical - can be automated</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz2&#39;)">B. Managerial - people conflicts</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz2&#39;, true)">C. Governance - political/legal constraints</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz2&#39;)">D. All equally difficult</div>
+                </div>
+                <div class="quiz-feedback" id="quiz2"></div>
+            </div>
+        </div>
+
+        <!-- Slide 7: SoS Classification -->
+        <div class="slide">
+            <h2 id="section-engineering">🏛️ Three Types of Systems of Systems</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Governance Models<br>
+                <strong>Market Test:</strong> Choosing Right Structure
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎭 Role Play: SoS Governance (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>Three scenarios - act them out:</strong></p>
+                <ol>
+                    <li><strong>Organizational:</strong> CEO controls all departments</li>
+                    <li><strong>Federated:</strong> Universities agreeing to share resources</li>
+                    <li><strong>Coalition:</strong> Social media platforms informal data sharing</li>
+                </ol>
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card" style="border-color: #3b82f6;">
+                    <h4>🏢 Organizational SoS</h4>
+                    <p><strong>Single owner</strong></p>
+                    <p>Central authority<br>
+                    Clear governance<br>
+                    Direct control</p>
+                    <small>Example: Aramco refineries</small>
+                </div>
+                <div class="visual-card" style="border-color: #f59e0b;">
+                    <h4>🤝 Federated SoS</h4>
+                    <p><strong>Voluntary cooperation</strong></p>
+                    <p>Shared governance<br>
+                    Agreed standards<br>
+                    Mutual benefit</p>
+                    <small>Example: GCC systems</small>
+                </div>
+                <div class="visual-card" style="border-color: #ef4444;">
+                    <h4>🌐 Coalition SoS</h4>
+                    <p><strong>No formal governance</strong></p>
+                    <p>Market driven<br>
+                    Minimal coordination<br>
+                    Self-organizing</p>
+                    <small>Example: Internet</small>
+                </div>
+            </div>
+            
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Factor</th>
+                    <th>Organizational</th>
+                    <th>Federated</th>
+                    <th>Coalition</th>
+                </tr>
+                <tr>
+                    <td>Control</td>
+                    <td>High</td>
+                    <td>Medium</td>
+                    <td>Low</td>
+                </tr>
+                <tr>
+                    <td>Flexibility</td>
+                    <td>Low</td>
+                    <td>Medium</td>
+                    <td>High</td>
+                </tr>
+                <tr>
+                    <td>Integration Speed</td>
+                    <td>Fast</td>
+                    <td>Medium</td>
+                    <td>Slow</td>
+                </tr>
+                <tr>
+                    <td>Saudi Example</td>
+                    <td>Absher</td>
+                    <td>Hajj systems</td>
+                    <td>App stores</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> 60% of federated SoS fail due to governance conflicts (IEEE SoS Study, 2023).
+            </div>
+        </div>
+
+        <!-- Slide 8: Engineering Process -->
+        <div class="slide">
+            <h2>🔧 5-Stage SoS Engineering Process</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Development Methodology<br>
+                <strong>Market Test:</strong> Building Real SoS
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🏗️ Build Your SoS (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p><strong>Design a Smart Campus SoS:</strong></p>
+                <p>Available systems: Access control, LMS, Library, Food services, Transport</p>
+                <p>Walk through each stage below!</p>
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-item" style="background: var(--gradient); color: white;">
+                    <div style="font-size: 2em;">🎨</div>
+                    <strong>1. Conceptual Design</strong><br>
+                    <small>Vision &amp; goals</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">🔍</div>
+                    <strong>2. System Selection</strong><br>
+                    <small>Choose components</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">🏛️</div>
+                    <strong>3. Architecture</strong><br>
+                    <small>Design structure</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">🔌</div>
+                    <strong>4. Interfaces</strong><br>
+                    <small>Enable interaction</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item" style="background: #48bb78; color: white;">
+                    <div style="font-size: 2em;">🚀</div>
+                    <strong>5. Integration</strong><br>
+                    <small>Deploy &amp; test</small>
+                </div>
+            </div>
+            
+            <div class="code-editor" style="margin-top: 30px;">
+                <span class="code-comment">// SoS Interface Pattern</span><br>
+                <span class="code-keyword">interface</span> SoSConnector {<br>
+                &nbsp;&nbsp;<span class="code-comment">// Standard methods all systems must implement</span><br>
+                &nbsp;&nbsp;authenticate(credentials);<br>
+                &nbsp;&nbsp;exchangeData(format);<br>
+                &nbsp;&nbsp;handleFailure(system);<br>
+                &nbsp;&nbsp;reportStatus();<br>
+                }<br><br>
+                <span class="code-comment">// Each system adapts to common interface</span><br>
+                <span class="code-keyword">class</span> UniversitySystem <span class="code-keyword">implements</span> SoSConnector {<br>
+                &nbsp;&nbsp;<span class="code-comment">// System-specific implementation</span><br>
+                }
+            </div>
+            
+            <div class="industry-tool">
+                <strong>Industry Tool:</strong> Use Apache Camel for enterprise integration patterns in SoS.
+            </div>
+        </div>
+
+        <!-- Slide 9: Architecture Principles -->
+        <div class="slide">
+            <h2 id="section-architecture">🏛️ SoS Architecture Principles</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Design Principles<br>
+                <strong>Market Test:</strong> Building Resilient SoS
+            </div>
+            
+            <h3>Maier's 4 Key Principles + Sillitto's Extensions</h3>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>1. Stable Intermediate Forms</h4>
+                    <p>Partial systems are useful</p>
+                    <div class="code-editor" style="margin-top: 10px;">
+                        // Deploy in stages<br>
+                        Stage1: Core auth + data<br>
+                        Stage2: + Analytics<br>
+                        Stage3: + AI services
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h4>2. Policy Triage</h4>
+                    <p>What to control vs. let emerge</p>
+                    <ul style="font-size: 0.9em; margin-top: 10px;">
+                        <li>Control: Security, data formats</li>
+                        <li>Emerge: User workflows, optimizations</li>
+                    </ul>
+                </div>
+                <div class="metric-card">
+                    <h4>3. Leverage at Interfaces</h4>
+                    <p>Influence through connections</p>
+                    <div style="margin-top: 10px; font-size: 0.9em;">
+                        Focus effort on APIs and protocols, not internal system changes
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h4>4. Ensuring Cooperation</h4>
+                    <p>Incentives for participation</p>
+                    <ul style="font-size: 0.9em; margin-top: 10px;">
+                        <li>Financial rewards</li>
+                        <li>Access to resources</li>
+                        <li>Regulatory compliance</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="challenge-box" style="margin-top: 30px;">
+                <h4>💡 Design Challenge</h4>
+                <p>You're architecting Saudi's healthcare SoS (30M citizens, 500+ hospitals):</p>
+                <ul>
+                    <li>Which principle is MOST critical? Why?</li>
+                    <li>How do you ensure private hospitals cooperate?</li>
+                    <li>What should you control vs. let emerge?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 10: Architecture Patterns -->
+        <div class="slide">
+            <h2>🔄 Three SoS Architecture Patterns</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Pattern Matching Game (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p><strong>Match Saudi systems to patterns:</strong></p>
+                <ul>
+                    <li>Traffic management pulling data from cameras</li>
+                    <li>Universities sharing common LMS platform</li>
+                    <li>Stock market with multiple brokers</li>
+                </ul>
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card" style="border-color: #3b82f6;">
+                    <h4>📊 Systems as Data Feeds</h4>
+                    <div style="font-size: 3em;">🔄</div>
+                    <p>Principal queries constituents</p>
+                    <p style="font-size: 0.85em;">One-way data flow<br>
+                    Central processing<br>
+                    Read-only access</p>
+                    <small>Example: DMV checking records</small>
+                </div>
+                <div class="visual-card" style="border-color: #f59e0b;">
+                    <h4>📦 Systems in Container</h4>
+                    <div style="font-size: 3em;">📦</div>
+                    <p>Common platform wrapper</p>
+                    <p style="font-size: 0.85em;">Shared services<br>
+                    Common UI<br>
+                    Central authentication</p>
+                    <small>Example: iLearn platform</small>
+                </div>
+                <div class="visual-card" style="border-color: #ef4444;">
+                    <h4>💱 Trading Systems</h4>
+                    <div style="font-size: 3em;">🤝</div>
+                    <p>Peer-to-peer exchange</p>
+                    <p style="font-size: 0.85em;">No central control<br>
+                    Market mechanisms<br>
+                    Self-organizing</p>
+                    <small>Example: Tadawul exchange</small>
+                </div>
+            </div>
+            
+            <table class="comparison-table" style="margin-top: 30px;">
+                <tbody><tr>
+                    <th>Pattern</th>
+                    <th>Best For</th>
+                    <th>Saudi Example</th>
+                    <th>Key Challenge</th>
+                </tr>
+                <tr>
+                    <td>Data Feeds</td>
+                    <td>Monitoring/Analytics</td>
+                    <td>Smart city sensors</td>
+                    <td>Data availability</td>
+                </tr>
+                <tr>
+                    <td>Container</td>
+                    <td>Shared services</td>
+                    <td>Government portal</td>
+                    <td>Interface complexity</td>
+                </tr>
+                <tr>
+                    <td>Trading</td>
+                    <td>Market scenarios</td>
+                    <td>Energy trading</td>
+                    <td>No control</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Most real SoS combine patterns. NEOM uses all three!
+            </div>
+        </div>
+
+        <!-- Slide 11: Saudi SoS Excellence -->
+        <div class="slide">
+            <h2 id="section-excellence">🇸🇦 Saudi's SoS Leadership</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Vision 2030: Building world's most advanced systems of systems
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🏆 Innovation Showcase</h4>
+                <p>Saudi manages the world's largest peaceful gathering (Hajj) using SoS</p>
+                <p>Key metrics: 3M+ pilgrims, 5 days, zero tolerance for failure</p>
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card" style="border-color: #ef4444;">
+                    <h4>🕋 Hajj Management</h4>
+                    <div class="kpi-value">3M+</div>
+                    <div class="kpi-label">Pilgrims coordinated</div>
+                    <p style="font-size: 0.85em; margin-top: 10px;">
+                    • 20+ systems integrated<br>
+                    • Real-time crowd AI<br>
+                    • Multi-language support</p>
+                </div>
+                <div class="visual-card" style="border-color: #8b5cf6;">
+                    <h4>🏙️ NEOM City</h4>
+                    <div class="kpi-value">$500B</div>
+                    <div class="kpi-label">Investment</div>
+                    <p style="font-size: 0.85em; margin-top: 10px;">
+                    • 100% renewable<br>
+                    • Autonomous transport<br>
+                    • AI-driven services</p>
+                </div>
+                <div class="visual-card" style="border-color: #f59e0b;">
+                    <h4>📱 Digital Government</h4>
+                    <div class="kpi-value">180+</div>
+                    <div class="kpi-label">Services unified</div>
+                    <p style="font-size: 0.85em; margin-top: 10px;">
+                    • Absher platform<br>
+                    • Tawakkalna integration<br>
+                    • 25M+ users</p>
+                </div>
+                <div class="visual-card" style="border-color: #22c55e;">
+                    <h4>⚡ Energy Systems</h4>
+                    <div class="kpi-value">50%</div>
+                    <div class="kpi-label">Renewable by 2030</div>
+                    <p style="font-size: 0.85em; margin-top: 10px;">
+                    • Smart grid<br>
+                    • Solar/wind farms<br>
+                    • Green hydrogen</p>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Case Study: Hajj SoS Architecture</h4>
+                <p><strong>Systems Integrated:</strong></p>
+                <ul>
+                    <li>Crowd management (cameras + AI)</li>
+                    <li>Transportation (buses, trains, pedestrian)</li>
+                    <li>Healthcare (hospitals, ambulances)</li>
+                    <li>Accommodation (hotels, camps)</li>
+                    <li>Security (police, civil defense)</li>
+                </ul>
+                <p><strong>Classification:</strong> Federated SoS (multiple ministries cooperate)</p>
+                <p><strong>Success Factor:</strong> Central command with distributed execution</p>
+            </div>
+        </div>
+
+        <!-- Slide 12: Career Roadmap -->
+        <div class="slide">
+            <h2>💼 Your SoS Career Path</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <h3>12-Month Roadmap to SoS Excellence</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <strong>Months 1-3: Foundation</strong>
+                        <ul>
+                            <li>Master Chapter 20 concepts</li>
+                            <li>Learn enterprise architecture</li>
+                            <li>Study Saudi mega-projects</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content" style="margin-left: auto;">
+                        <strong>Months 4-6: Skills Building</strong>
+                        <ul>
+                            <li>TOGAF certification</li>
+                            <li>Systems thinking course</li>
+                            <li>Integration patterns</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <strong>Months 7-9: Experience</strong>
+                        <ul>
+                            <li>Internship at NEOM/Aramco</li>
+                            <li>SoS project portfolio</li>
+                            <li>Government hackathons</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-content" style="margin-left: auto;">
+                        <strong>Months 10-12: Leadership</strong>
+                        <ul>
+                            <li>Lead integration project</li>
+                            <li>Present at conferences</li>
+                            <li>Mentor juniors</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-marker"></div>
+                </div>
+            </div>
+            
+            <h3>Saudi SoS Career Opportunities</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Organization</th>
+                    <th>Role</th>
+                    <th>Salary (SAR)</th>
+                    <th>Impact</th>
+                </tr>
+                <tr>
+                    <td>NEOM</td>
+                    <td>SoS Architect</td>
+                    <td>400,000+</td>
+                    <td>Build the future</td>
+                </tr>
+                <tr>
+                    <td>Aramco</td>
+                    <td>Integration Lead</td>
+                    <td>350,000</td>
+                    <td>Energy transition</td>
+                </tr>
+                <tr>
+                    <td>SDAIA</td>
+                    <td>AI-SoS Engineer</td>
+                    <td>320,000</td>
+                    <td>National AI strategy</td>
+                </tr>
+                <tr>
+                    <td>MOH</td>
+                    <td>Healthcare SoS</td>
+                    <td>280,000</td>
+                    <td>30M citizens health</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 13: Bridging University to Market -->
+        <div class="slide">
+            <h2>🎓 Bridging University to Market</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #5b21b6;">
+                    <h4 style="color: #5b21b6;">الجامعة تعلمك (University Teaches You)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>التفكير النظمي (Systems thinking)</li>
+                        <li>التحليل المعقد (Complex analysis)</li>
+                        <li>المنهجيات (Methodologies)</li>
+                        <li>النظريات (Theories)</li>
+                        <li>البحث العلمي (Research)</li>
+                        <li>التفكير النقدي (Critical thinking)</li>
+                        <li>حل المشاكل (Problem solving)</li>
+                        <li>العمل الجماعي (Teamwork)</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4 style="color: #dc2626;">السوق يعلمك (Market Teaches You)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>السياسة تغلب التقنية (Politics &gt; Tech)</li>
+                        <li>الميزانية محدودة (Budget constraints)</li>
+                        <li>الوقت حرج (Time is critical)</li>
+                        <li>التغيير صعب (Change is hard)</li>
+                        <li>الناس يقاومون (People resist)</li>
+                        <li>التكامل معقد (Integration is complex)</li>
+                        <li>الفشل مكلف (Failure is expensive)</li>
+                        <li>النجاح = الصبر (Success = Patience)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <p><strong>University gives you the map:</strong> Frameworks, principles, methodologies.</p>
+                <p><strong>Market is the territory:</strong> Real complexity, politics, constraints.</p>
+                <p><strong>Bridge:</strong> Apply theory wisely, adapt to reality, stay humble.</p>
+                <p><strong>Reality:</strong> SoS in textbooks ≠ SoS in production. Both perspectives needed!</p>
+            </div>
+        </div>
+
+        <!-- Slide 14: Assignment -->
+        <div class="slide">
+            <h2>📝 Assignment: Design a Saudi Mega-System</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Design a complete System of Systems for Saudi Arabia's future
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Choose ONE National SoS Challenge:</h4>
+                <ol>
+                    <li>🏥 Unified Healthcare (all hospitals, clinics, pharmacies)</li>
+                    <li>🚗 National Traffic Management (all cities integrated)</li>
+                    <li>🎓 Education Ecosystem (K-12 through PhD)</li>
+                    <li>🌊 Red Sea Tourism Platform (NEOM, resorts, services)</li>
+                    <li>🏭 Industrial Cities Integration (manufacturing, logistics)</li>
+                    <li>🌾 Smart Agriculture Network (farms, water, distribution)</li>
+                </ol>
+            </div>
+            
+            <h3>Deliverables (EMAM Framework)</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Phase</th>
+                    <th>Weight</th>
+                    <th>Requirements</th>
+                    <th>Rubric</th>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-ifham">افهم</span></td>
+                    <td>20%</td>
+                    <td>Complexity analysis, 5 characteristics check</td>
+                    <td>Clear analysis – 10/20; Saudi context – 10/20</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-maris">مارس</span></td>
+                    <td>30%</td>
+                    <td>Engineering process, interface design</td>
+                    <td>Complete process – 15/30; Workable interfaces – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-atqan">اتقن</span></td>
+                    <td>30%</td>
+                    <td>Architecture pattern, principles applied</td>
+                    <td>Pattern justification – 15/30; Resilience – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-mayyiz">ميز</span></td>
+                    <td>20%</td>
+                    <td>Innovation, Vision 2030 alignment</td>
+                    <td>Creativity – 10/20; National impact – 10/20</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="soft-skill-box">
+                <h4>Submission Requirements</h4>
+                <ul>
+                    <li><strong>Due:</strong> Next week</li>
+                    <li><strong>Format:</strong> Report + Presentation + Prototype</li>
+                    <li><strong>Must include:</strong> 5+ independent systems, governance model</li>
+                    <li><strong>Bonus (5%):</strong> Include Islamic principles integration</li>
+                    <li><strong>Bonus (5%):</strong> Working demo with 3+ systems</li>
+                </ul>
+            </div>
+            
+            <div class="industry-tool">
+                <h4>Tools to Use</h4>
+                <p>• ArchiMate for architecture modeling</p>
+                <p>• Apache Camel for integration patterns</p>
+                <p>• Docker for system simulation</p>
+            </div>
+        </div>
+
+        <!-- Slide 15: Real-World Challenges -->
+        <div class="slide">
+            <h2>⚠️ Learning from SoS Failures</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="hazard-box">
+                <h3>💥 Major Global SoS Failures</h3>
+                <ul>
+                    <li><strong>UK NHS IT System:</strong> £12 billion wasted</li>
+                    <li><strong>US Healthcare.gov:</strong> $2 billion crisis</li>
+                    <li><strong>German Airport (BER):</strong> 9 years late, €7 billion over</li>
+                </ul>
+            </div>
+            
+            <h3>Why They Failed</h3>
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <h4>❌ Underestimated Complexity</h4>
+                    <p>Thought it was just "big integration"</p>
+                </div>
+                <div class="metric-card">
+                    <h4>❌ Ignored Governance</h4>
+                    <p>Technical focus, political blindness</p>
+                </div>
+                <div class="metric-card">
+                    <h4>❌ Big Bang Approach</h4>
+                    <p>All at once vs. staged deployment</p>
+                </div>
+                <div class="metric-card">
+                    <h4>❌ No Incentives</h4>
+                    <p>Why should systems cooperate?</p>
+                </div>
+            </div>
+            
+            <h3>Saudi Success Factors</h3>
+            <div class="soft-skill-box">
+                <h4>Why Saudi Can Succeed Where Others Failed</h4>
+                <ul>
+                    <li>✅ <strong>Strong Leadership:</strong> Clear Vision 2030 alignment</li>
+                    <li>✅ <strong>Cultural Unity:</strong> Shared Islamic values facilitate cooperation</li>
+                    <li>✅ <strong>Resource Availability:</strong> Funding for long-term thinking</li>
+                    <li>✅ <strong>Hajj Experience:</strong> Proven SoS capability at massive scale</li>
+                    <li>✅ <strong>Young Population:</strong> Tech-savvy, adaptable workforce</li>
+                </ul>
+            </div>
+            
+            <div class="reflection-box">
+                <h4>Reflection Questions</h4>
+                <ul>
+                    <li>What makes SoS different from large systems?</li>
+                    <li>Why does reductionism fail for SoS?</li>
+                    <li>How can Islamic principles guide SoS design?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 16: Key Takeaways -->
+        <div class="slide">
+            <h2>🎯 Key Takeaways - Chapter 20 Mastery</h2>
+            
+            <div class="definition-box">
+                <strong>Core Insight:</strong> "Systems of Systems are not just big systems - they are fundamentally different beasts requiring new thinking"
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🧠 Complexity</h5>
+                    <p style="font-size: 0.9em;">
+                        • 3 types<br>
+                        • Emergence<br>
+                        • No reductionism<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🏛️ Classification</h5>
+                    <p style="font-size: 0.9em;">
+                        • Organizational<br>
+                        • Federated<br>
+                        • Coalition<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🔧 Engineering</h5>
+                    <p style="font-size: 0.9em;">
+                        • 5-stage process<br>
+                        • Interface focus<br>
+                        • Staged deployment<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🏗️ Architecture</h5>
+                    <p style="font-size: 0.9em;">
+                        • 3 patterns<br>
+                        • 4 principles<br>
+                        • Resilience design<br>
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: var(--gradient); color: white; padding: 25px; border-radius: 15px; margin-top: 30px; text-align: center;">
+                <h3 style="background: none; border: none; padding: 0; margin-bottom: 15px; color: white;">
+                    Your SoS Success Formula
+                </h3>
+                <p style="font-size: 1.3em;">
+                    Technical Mastery + Governance Wisdom + Islamic Values + Saudi Vision = <strong>Mega-System Excellence</strong>
+                </p>
+            </div>
+            
+            <div class="islamic-box" style="margin-top: 30px;">
+                <div class="arabic">وَأَنَّ هَٰذَا صِرَاطِي مُسْتَقِيمًا فَاتَّبِعُوهُ</div>
+                <p>"This is My straight path, so follow it" - Qur'an 6:153</p>
+                <p>(Transliteration: Wa-anna hādhā ṣirāṭī mustaqīman fa-ttabiʿūhu)</p>
+                <p><strong>Even in complexity, seek the clear path through principles</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 17: Your Commitment -->
+        <div class="slide">
+            <h2>🤝 Your Systems of Systems Commitment</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا أَنْ يُتْقِنَهُ</div>
+                <p>"Allah loves when one of you does work, that they perfect it" - Hadith</p>
+                <p>(Transliteration: Inna Allāha yuḥibbu idhā ʿamila aḥadukum ʿamalan an yutqinahu)</p>
+            </div>
+            
+            <div class="mission-critical">
+                Every SoS you build connects communities, enables progress, transforms nations.
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h4>Foundation</h4>
+                    <p>Master complexity</p>
+                    <p>Understand emergence</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h4>Application</h4>
+                    <p>Engineer wisely</p>
+                    <p>Build interfaces</p>
+                    <p>Test thoroughly</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h4>Excellence</h4>
+                    <p>Architect resilience</p>
+                    <p>Apply principles</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h4>Innovation</h4>
+                    <p>Lead transformation</p>
+                    <p>Build for billions</p>
+                    <p>Shape the future</p>
+                </div>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Personal Reflection:</h4>
+                <ul>
+                    <li>Which Saudi SoS will you help build?</li>
+                    <li>How will it serve Vision 2030?</li>
+                    <li>What complexity will you manage?</li>
+                    <li>How will you ensure cooperation?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 18: Thank You -->
+        <div class="slide active">
+            <h2>🙏 شكرًا - Your SoS Journey Begins</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَقُل رَّبِّ زِدْنِي عِلْمًا</div>
+                <p>"My Lord, increase me in knowledge" - Qur'an 20:114</p>
+                <p>Systems of Systems knowledge evolves daily - keep learning!</p>
+            </div>
+            
+            <div class="mission-critical">
+                You now understand how to build systems that transcend boundaries<br>
+                From single systems to mega-infrastructure - you're ready!
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>📧 Contact</h5>
+                    <p>Office Hours: By Email</p>
+                    <p>Email: arnoor@kau.edu.sa</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📅 Next</h5>
+                    <p>Final Exam</p>
+                    <p></p>
+                    <p>Tuesday, 2:00 PM</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📝 Due Soon</h5>
+                    <p>SoS Assignment</p>
+                    <p>Next week</p>
+                    <p>Start TODAY!</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎯 Resources</h5>
+                    <p>Blackboard</p>
+                    <p>ArchiMate tools</p>
+                    <p>Office hours</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.5em; color: #2d3748;">
+بروف: أديب بن رضا نور
+                </p>
+                <p style="font-size: 1.2em; color: #2d3748; margin-top: 20px;">
+                    See you next class, إن شاء الله<br>
+                    <strong>Remember: Your SoS will connect millions!</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" disabled="">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        // Slide management
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressBar').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlideDisplay();
+            }
+        }
+        
+        // Quiz functionality with improved feedback
+        function checkAnswer(element, option, feedbackId, isCorrect = false) {
+            const feedback = document.getElementById(feedbackId);
+            if (!feedback) return;
+            
+            feedback.style.display = 'block';
+            
+            // Specific feedback for each quiz
+            const feedbackText = {
+                'quiz1': {
+                    correct: '✅ Correct! SoS = independent systems working together with emergent behavior.',
+                    incorrect: '❌ Think about independence and emergence, not just scale.'
+                },
+                'quiz2': {
+                    correct: '✅ Correct! Governance complexity involves politics and laws - hardest to control.',
+                    incorrect: '❌ Consider which involves human factors beyond technical control.'
+                }
+            };
+            
+            if (isCorrect) {
+                feedback.textContent = feedbackText[feedbackId]?.correct || '✅ Correct!';
+                feedback.className = 'quiz-feedback correct';
+                element.style.background = '#c6f6d5';
+            } else {
+                feedback.textContent = feedbackText[feedbackId]?.incorrect || '❌ Try again!';
+                feedback.className = 'quiz-feedback incorrect';
+                element.style.background = '#fed7d7';
+            }
+            
+            // Disable all options after selection
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.onclick = null;
+                opt.style.cursor = 'default';
+            });
+        }
+        
+        // Reveal functions
+        function revealSoSClassification() {
+            document.getElementById('sosClassificationAnswers').style.display = 'block';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                updateSlideDisplay();
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides - 1;
+                updateSlideDisplay();
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlideDisplay();
+        });
+    </script>
+
+</body></html>

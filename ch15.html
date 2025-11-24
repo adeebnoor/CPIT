@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/USER/Downloads/chapter15-Software%20Reuse.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 15: Software Reuse - Enhanced EMAM Framework</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #f59e0b;
+            --danger: #e53e3e;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --islamic-green: #065f46;
+            --islamic-light: #e6fffa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient);
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            overflow-y: auto;
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            background: var(--gradient);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #2d3748;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(90deg, #f0f7ff, #e6f3ff);
+            padding: 15px 25px;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+        }
+        
+        h4 {
+            color: #2d3748;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #718096;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+        
+        .mission-critical {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .visual-card {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .visual-card:hover {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .emam-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .badge-ifham {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .badge-maris {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .badge-atqan {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .badge-mayyiz {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .definition-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-style: italic;
+        }
+        
+        .islamic-box {
+            background: linear-gradient(135deg, #e6fffa, #99f6e4);
+            border: 3px solid #065f46;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .islamic-box .arabic {
+            font-size: 1.3em;
+            color: #065f46;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .challenge-box {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 3px solid #ef4444;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table th {
+            background: var(--gradient);
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 1.05em;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8faff;
+        }
+        
+        .comparison-table tr:hover {
+            background: #e6f3ff;
+            transition: background 0.3s ease;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #2d3748;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            color: #2d3748;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .quiz-container {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quiz-option {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .code-editor {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .code-comment {
+            color: #a0aec0;
+        }
+        
+        .code-keyword {
+            color: #f093fb;
+        }
+        
+        .reflection-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #d69e2e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .answer-box {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 2px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .kpi-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kpi-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .kpi-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-item {
+            background: linear-gradient(135deg, #f0f7ff, #e6f3ff);
+            border: 3px solid var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            min-width: 150px;
+            position: relative;
+            animation: slideInFlow 0.5s ease-out;
+        }
+        
+        @keyframes slideInFlow {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .soft-skill-box {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #22c55e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .hazard-box {
+            background: linear-gradient(135deg, #fecaca, #f87171);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .ethics-box {
+            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            border: 3px solid #8b5cf6;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+        }
+        
+        .uni-market-label {
+            background: linear-gradient(135deg, #e9d5ff, #c084fc);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-display {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .market-reality {
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            border-left: 5px solid #dc2626;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .industry-tool {
+            background: linear-gradient(135deg, #dbeafe, #93c5fd);
+            border-left: 5px solid #2563eb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                height: 90vh;
+                padding: 30px 20px;
+            }
+            
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 2em; }
+            h3 { font-size: 1.4em; }
+            
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+        <div class="slide-counter" id="slideCounter">19 / 19</div>
+        
+        <!-- Slide 1: Title and Introduction -->
+        <div class="slide">
+            <h1>Chapter 15: Software Reuse</h1>
+            <div class="subtitle">نموذج إِمام التعليمي: إنطلاقة راسخة على خطى الأولين
+</div>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَىٰ</div>
+                <p>"And cooperate in righteousness and piety" - Qur'an 5:2</p>
+                <p>(Transliteration: Wata'āwanū 'alā l-birri wa-l-taqwā)</p>
+                <p><strong>Foundation: التعاون (Cooperation) and عدم الإسراف (Avoiding Waste)</strong></p>
+            </div>
+            
+            <div class="mission-critical">
+                ⚡ Your Mission: Master reuse to accelerate Saudi's digital transformation by 70%
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h5>Understand</h5>
+                    <p>Why reuse?<br>Benefits &amp; challenges<br><a href="file:///C:/Users/USER/Downloads/chapter15-Software%20Reuse.html#section-landscape" style="color: inherit;">Section: Landscape</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h5>Practice</h5>
+                    <p>Frameworks<br>MVC patterns<br><a href="file:///C:/Users/USER/Downloads/chapter15-Software%20Reuse.html#section-frameworks" style="color: inherit;">Section: Frameworks</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h5>Master</h5>
+                    <p>Product lines<br>ERP systems<br><a href="file:///C:/Users/USER/Downloads/chapter15-Software%20Reuse.html#section-enterprise" style="color: inherit;">Section: Enterprise</a></p>
+                </div>
+                <div class="visual-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h5>Excel</h5>
+                    <p>Integration<br>Vision 2030<br><a href="file:///C:/Users/USER/Downloads/chapter15-Software%20Reuse.html#section-innovation" style="color: inherit;">Section: Innovation</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Framework Evolution -->
+        <div class="slide">
+            <h2>🚀 Framework Evolution: Software Reuse Engineering</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <h3>Two Lenses for Mastering Software Reuse</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4 style="color: #3b82f6;">🏭 Industrial Revolution 6.0 (IR 6.0)</h4>
+                    <p><strong>Human-Centric Reuse (2020s)</strong></p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 15.1 - Reuse Landscape:</strong> Prioritizes rapid development (e.g., Tawakkalna's 3-month launch) through strategic component selection.</li>
+                        <li><strong>Section 15.2 - Frameworks:</strong> Enables MVC patterns (e.g., Absher's modular architecture) for scalable government services.</li>
+                        <li><strong>Section 15.3 - Product Lines:</strong> Creates configurable systems (e.g., Sehhaty variants) serving diverse healthcare needs.</li>
+                        <li><strong>Section 15.4 - ERP Systems:</strong> Adapts global solutions (e.g., SAP in Aramco) to local contexts efficiently.</li>
+                    </ul>
+                    <div class="market-reality">
+                        <strong>Market Impact:</strong> IR 6.0 reduces development time by 60% and costs by 40% through systematic reuse.
+                    </div>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #065f46;">
+                    <h4 style="color: #065f46;">📖 Islamization of Knowledge</h4>
+                    <p class="arabic" style="font-size: 1em;">إسلامية المعرفة (Proactive)</p>
+                    <ul style="margin-top: 15px; font-size: 0.9em;">
+                        <li><strong>Section 15.1 - Reuse Landscape:</strong> Derives efficiency from Islamic prohibition of waste (Israf), promoting shared knowledge.</li>
+                        <li><strong>Section 15.2 - Frameworks:</strong> Models collaborative development from Shura principles, ensuring collective benefit.</li>
+                        <li><strong>Section 15.3 - Product Lines:</strong> Inspires modularity from Islamic inheritance laws (precise sharing).</li>
+                        <li><strong>Section 15.4 - ERP Systems:</strong> Aligns enterprise systems with Amanah (trust) and transparency.</li>
+                    </ul>
+                    <div style="background: #e6fffa; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                        <strong>Principle:</strong> Reuse = Sadaqah Jariyah (continuing charity) through shared code.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Theoretical Foundation<br>
+                <strong>Market Test:</strong> ROI and Time-to-Market
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Your Learning Approach (Mapped to Objectives)</h4>
+                <ul>
+                    <li>✅ Analyze reuse landscape and trade-offs (Objective 1, Section 15.1).</li>
+                    <li>✅ Master framework architectures and MVC (Objective 2, Section 15.2).</li>
+                    <li>✅ Design product lines for domains (Objective 3, Section 15.3).</li>
+                    <li>✅ Integrate enterprise systems effectively (Objective 4, Section 15.4).</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Quick Quiz: Which Reuse Approach for Tawakkalna? (2 mins)</div>
+                <div class="timer-display">⏱️ Timer: 2:00</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz1&#39;)">A. Build everything from scratch</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz1&#39;, true)">B. Framework + existing components</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz1&#39;)">C. Copy another app's code</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz1&#39;)">D. Buy complete solution</div>
+                </div>
+                <div class="quiz-feedback" id="quiz1"></div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Mission Context -->
+        <div class="slide">
+            <h2 id="section-landscape">🌍 Mission Context: The Reuse Revolution</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Systems Thinking<br>
+                <strong>Market Test:</strong> Delivery Speed &amp; Quality
+            </div>
+            
+            <div class="mission-critical">
+                Reality Check: 70% of your future code should be reused components
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎯 Start With Your Experience (3 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 3:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person; use breakout rooms for discussion)</p>
+                <p><strong>Quick Activity:</strong> List software you use daily:</p>
+                <ul>
+                    <li>WhatsApp (uses React Native framework)</li>
+                    <li>Instagram (uses Django framework)</li>
+                    <li>Your banking app (likely uses Spring Boot)</li>
+                    <li>University LMS (uses Moodle/Canvas frameworks)</li>
+                </ul>
+                <p><strong>Discover:</strong> NONE built from scratch! All use extensive reuse!</p>
+                <p>Notice: Same login components, similar UI patterns. Why?!</p>
+            </div>
+            
+            <div class="hazard-box">
+                <h3>💥 The Spotify Phenomenon</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>• 500+ million users worldwide</li>
+                    <li>• Built on open-source components (95%)</li>
+                    <li>• Custom code only 5% of system</li>
+                    <li>• Development time: 6 months vs 5 years</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Quick Poll: What percentage of Absher is reused?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz2&#39;)">A. 10-20%</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz2&#39;)">B. 30-40%</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz2&#39;, true)">C. 60-70%</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz2&#39;)">D. 90%+</div>
+                </div>
+                <div class="quiz-feedback" id="quiz2"></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Core Concept Definition -->
+        <div class="slide">
+            <h2>📚 What IS Software Reuse?</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Systematic Analysis<br>
+                <strong>Market Test:</strong> Cost-Benefit Evaluation
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔍 Discover It Yourself (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person)</p>
+                <p><strong>With your neighbor, evaluate these scenarios:</strong></p>
+                <table class="comparison-table">
+                    <tbody><tr>
+                        <th>Scenario</th>
+                        <th>Reuse Level</th>
+                        <th>Why?</th>
+                    </tr>
+                    <tr>
+                        <td>Copy-paste code</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Import library</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Use framework</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                    <tr>
+                        <td>Configure ERP</td>
+                        <td>?</td>
+                        <td>Your answer...</td>
+                    </tr>
+                </tbody></table>
+                <button onclick="revealReuseLevels()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Check Answers</button>
+                <div id="reuseLevelsAnswers" class="answer-box">
+                    <p>Copy-paste: Low - Error-prone, no updates<br>
+                    Import library: Medium - Function reuse<br>
+                    Use framework: High - Architecture reuse<br>
+                    Configure ERP: Very High - Complete system reuse</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <strong>Sommerville Definition:</strong> "Using existing software artifacts to create new systems, ranging from functions to complete applications"
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Companies with &lt;50% reuse have 3x higher development costs and 5x more bugs.
+            </div>
+        </div>
+
+        <!-- Slide 5: Benefits of Reuse -->
+        <div class="slide">
+            <h2>🚀 Why Reuse? The Business Case</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Cost-Benefit Analysis<br>
+                <strong>Market Test:</strong> ROI Calculation
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎮 Live Simulation: The Saudi Startup Challenge (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person; use spreadsheet simulation)</p>
+                <p><strong>Scenario:</strong> Building e-commerce for Saudi market</p>
+                <ul>
+                    <li>Budget: 1M SAR</li>
+                    <li>Timeline: 6 months</li>
+                    <li>Team: 5 developers</li>
+                </ul>
+                <p><strong>Options (Calculate with neighbor):</strong></p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz3&#39;)">A) Build from scratch (18 months, 3M SAR)</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz3&#39;, true)">B) Use Shopify framework (3 months, 500K SAR)</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz3&#39;)">C) Copy competitor code (legal issues!)</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz3&#39;)">D) Wait for perfect solution</div>
+                </div>
+                <div class="quiz-feedback" id="quiz3"></div>
+                <div class="answer-box" style="display: block; margin-top: 20px;">
+                    <p><strong>Why Option B?</strong> Framework reuse provides 6x faster delivery, 60% cost reduction, proven reliability.</p>
+                    <p class="market-reality" style="margin: 10px 0;"><strong>Market Reality:</strong> Noon used existing e-commerce frameworks, launched in 12 months vs Amazon's original 5 years.</p>
+                </div>
+            </div>
+            
+            <h3>6 Critical Benefits (Figure 15.1)</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Benefit</th>
+                    <th>Description</th>
+                    <th>Saudi Example</th>
+                    <th>Metric</th>
+                </tr>
+                <tr>
+                    <td>🚀 Speed</td>
+                    <td>Faster time to market</td>
+                    <td>Tawakkalna: 3 months</td>
+                    <td>70% faster</td>
+                </tr>
+                <tr>
+                    <td>💰 Cost</td>
+                    <td>Lower development cost</td>
+                    <td>Absher saved 40M SAR</td>
+                    <td>40% cheaper</td>
+                </tr>
+                <tr>
+                    <td>✅ Quality</td>
+                    <td>Proven components</td>
+                    <td>Nafath: 99.9% uptime</td>
+                    <td>5x fewer bugs</td>
+                </tr>
+                <tr>
+                    <td>📉 Risk</td>
+                    <td>Known costs/timeline</td>
+                    <td>Government projects</td>
+                    <td>90% on-time</td>
+                </tr>
+                <tr>
+                    <td>👥 Efficiency</td>
+                    <td>Expert components</td>
+                    <td>NCA security</td>
+                    <td>3x productivity</td>
+                </tr>
+                <tr>
+                    <td>🎨 Standards</td>
+                    <td>Compliance built-in</td>
+                    <td>SAMA banking</td>
+                    <td>100% compliant</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 6: Reuse Problems -->
+        <div class="slide">
+            <h2>⚠️ The Dark Side of Reuse</h2>
+            <span class="emam-badge badge-ifham">افهم</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Risk Assessment<br>
+                <strong>Market Test:</strong> Mitigation Strategies
+            </div>
+            
+            <h3>6 Major Problems (Figure 15.2)</h3>
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>1. Maintenance Cost</h4>
+                    <p>Creating/maintaining library</p>
+                    <small>Solution: Dedicated team</small>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>2. Not-Invented-Here</h4>
+                    <p>Developer resistance</p>
+                    <small>Solution: Incentivize reuse</small>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>3. Finding Components</h4>
+                    <p>Discovery overhead</p>
+                    <small>Solution: Component catalog</small>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>4. Understanding</h4>
+                    <p>Learning curve</p>
+                    <small>Solution: Documentation</small>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>5. Adaptation</h4>
+                    <p>Customization effort</p>
+                    <small>Solution: Flexible design</small>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>6. Tool Support</h4>
+                    <p>Limited tooling</p>
+                    <small>Solution: Invest in tools</small>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Real Story: Saudi Bank Integration Failure</h4>
+                <p>2019: Major bank tried integrating 3 different systems</p>
+                <ul>
+                    <li>Problem: Incompatible data models</li>
+                    <li>Cost overrun: 500% (10M → 50M SAR)</li>
+                    <li>Delay: 2 years</li>
+                    <li>Lesson: Plan integration architecture first!</li>
+                </ul>
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> 30% of reuse projects fail due to poor planning, not technical issues.
+            </div>
+        </div>
+
+        <!-- Slide 7: The Reuse Landscape -->
+        <div class="slide">
+            <h2 id="section-frameworks">🗺️ The Reuse Landscape: 16 Approaches</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Classification Systems<br>
+                <strong>Market Test:</strong> Approach Selection
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🎭 Role Play: Choose Your Reuse Strategy (4 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 4:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person; use decision tree)</p>
+                <p><strong>Your scenarios (pick one):</strong></p>
+                <ul>
+                    <li>A) Ministry needs document management</li>
+                    <li>B) Startup needs mobile app</li>
+                    <li>C) Hospital needs patient system</li>
+                    <li>D) University needs LMS</li>
+                </ul>
+                <p>Navigate the decision tree to find best approach!</p>
+            </div>
+            
+            <h3>Figure 15.3 &amp; 15.4: Reuse Approaches</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card">
+                    <h4 style="text-align: center; color: #667eea;">🏗️ Architectural Patterns</h4>
+                    <ul style="margin: 20px 0;">
+                        <li>Application frameworks</li>
+                        <li>Design patterns</li>
+                        <li>Model-driven engineering</li>
+                        <li>Legacy system wrapping</li>
+                    </ul>
+                    <div class="market-reality">
+                        Best for: New systems with standard needs
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4 style="text-align: center; color: #f59e0b;">📦 Component-Based</h4>
+                    <ul style="margin: 20px 0;">
+                        <li>COTS integration</li>
+                        <li>Configurable products</li>
+                        <li>Program libraries</li>
+                        <li>Service-oriented systems</li>
+                    </ul>
+                    <div class="market-reality">
+                        Best for: Rapid assembly of proven parts
+                    </div>
+                </div>
+            </div>
+            
+            <div class="industry-tool">
+                <strong>Industry Tool:</strong> Use dependency managers (npm, Maven, pip) for component management.
+            </div>
+        </div>
+
+        <!-- Slide 8: Application Frameworks -->
+        <div class="slide">
+            <h2>🎨 Application Frameworks Deep Dive</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Architecture Patterns<br>
+                <strong>Market Test:</strong> Framework Selection
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🔧 Live Challenge: Build Absher Module (5 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 5:00</div>
+                <p style="margin-top: 10px;">(Adapt for online/in-person; use CodeSandbox)</p>
+                <p><strong>Task:</strong> Design MVC for passport renewal service</p>
+                <div class="code-editor">
+                    # Model Layer<br>
+                    class Citizen:<br>
+                    &nbsp;&nbsp;id: NationalID<br>
+                    &nbsp;&nbsp;passport: PassportData<br>
+                    &nbsp;&nbsp;# Your code: Add validation<br><br>
+                    
+                    # View Layer<br>
+                    class PassportRenewalView:<br>
+                    &nbsp;&nbsp;# Your code: Design form<br><br>
+                    
+                    # Controller Layer<br>
+                    class RenewalController:<br>
+                    &nbsp;&nbsp;# Your code: Handle workflow<br>
+                </div>
+                <button onclick="showMVCSolution()" style="margin-top: 10px; padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 8px; cursor: pointer;">Show Solution</button>
+                <div id="mvcSolution" class="answer-box">
+                    <div class="code-editor">
+                        class Citizen:<br>
+                        &nbsp;&nbsp;def validate_eligibility(self):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return self.passport.expires_in_days() &lt; 180<br><br>
+                        class PassportRenewalView:<br>
+                        &nbsp;&nbsp;def render_form(self, citizen):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return f"Renew passport for {citizen.id}"<br><br>
+                        class RenewalController:<br>
+                        &nbsp;&nbsp;def process_renewal(self, citizen_id):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;citizen = Citizen.find(citizen_id)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;if citizen.validate_eligibility():<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return self.view.render_form(citizen)
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Figure 15.5: MVC Pattern</h3>
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <div style="font-size: 2em;">💾</div>
+                    <strong>Model</strong><br>
+                    <small>Business Logic</small>
+                </div>
+                <span class="flow-arrow">↔</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">👁️</div>
+                    <strong>View</strong><br>
+                    <small>Presentation</small>
+                </div>
+                <span class="flow-arrow">↔</span>
+                <div class="flow-item">
+                    <div style="font-size: 2em;">🎮</div>
+                    <strong>Controller</strong><br>
+                    <small>User Input</small>
+                </div>
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> 90% of web applications use MVC or similar patterns (MVP, MVVM).
+            </div>
+        </div>
+
+        <!-- Slide 9: Web Application Frameworks -->
+        <div class="slide">
+            <h2>🌐 Modern Web Frameworks (WAFs)</h2>
+            <span class="emam-badge badge-maris">مارس</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Framework Comparison<br>
+                <strong>Market Test:</strong> Production Deployment
+            </div>
+            
+            <h3>5 Essential WAF Features</h3>
+            <div class="kpi-grid">
+                <div class="kpi-item">
+                    <div class="kpi-value">🔐</div>
+                    <div class="kpi-label">Security<br><small>Auth, encryption</small></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">📄</div>
+                    <div class="kpi-label">Dynamic Pages<br><small>Templates</small></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">💾</div>
+                    <div class="kpi-label">Database<br><small>ORM</small></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">🔄</div>
+                    <div class="kpi-label">Sessions<br><small>State mgmt</small></div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">⚡</div>
+                    <div class="kpi-label">AJAX<br><small>Reactive UI</small></div>
+                </div>
+            </div>
+            
+            <h3>Saudi Framework Usage</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>System</th>
+                    <th>Framework</th>
+                    <th>Why Chosen</th>
+                    <th>Users</th>
+                </tr>
+                <tr>
+                    <td>Absher</td>
+                    <td>Spring Boot</td>
+                    <td>Enterprise Java</td>
+                    <td>25M+</td>
+                </tr>
+                <tr>
+                    <td>Tawakkalna</td>
+                    <td>React Native</td>
+                    <td>Cross-platform</td>
+                    <td>20M+</td>
+                </tr>
+                <tr>
+                    <td>Sehhaty</td>
+                    <td>Django</td>
+                    <td>Rapid development</td>
+                    <td>15M+</td>
+                </tr>
+                <tr>
+                    <td>Maroof</td>
+                    <td>Laravel</td>
+                    <td>PHP ecosystem</td>
+                    <td>5M+</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="industry-tool">
+                <strong>Industry Tool:</strong> Use Next.js for modern React applications with SSR/SSG capabilities.
+            </div>
+        </div>
+
+        <!-- Slide 10: Software Product Lines -->
+        <div class="slide">
+            <h2 id="section-enterprise">🏭 Software Product Lines</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Domain Engineering<br>
+                <strong>Market Test:</strong> Product Variants
+            </div>
+            
+            <div class="definition-box">
+                <strong>Product Line:</strong> Set of software-intensive systems sharing a common, managed set of features that satisfy specific needs of a particular market segment
+            </div>
+            
+            <h3>Figure 15.7: Product Line Architecture</h3>
+            <div class="flow-diagram">
+                <div class="flow-item" style="background: var(--gradient); color: white;">
+                    Core Assets<br>
+                    <small>Shared by all</small>
+                </div>
+                <span class="flow-arrow">+</span>
+                <div class="flow-item" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                    Variable Features<br>
+                    <small>Configured</small>
+                </div>
+                <span class="flow-arrow">=</span>
+                <div class="flow-item" style="background: linear-gradient(135deg, #48bb78, #38a169); color: white;">
+                    Product Instance<br>
+                    <small>Customer-specific</small>
+                </div>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>🏗️ Design Activity: Sehhaty Product Line (6 mins)</h4>
+                <div class="timer-display">⏱️ Timer: 6:00</div>
+                <p style="margin-top: 10px;">(Work in pairs)</p>
+                <p><strong>Design variants for:</strong></p>
+                <ul>
+                    <li>Hospital version (full features)</li>
+                    <li>Clinic version (basic features)</li>
+                    <li>Pharmacy version (prescription only)</li>
+                    <li>Home care version (mobile-first)</li>
+                </ul>
+                <p>Identify: Core features vs Variable features</p>
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Sehhaty saves 200M SAR annually through product line approach vs custom development.
+            </div>
+        </div>
+
+        <!-- Slide 11: ERP Systems -->
+        <div class="slide">
+            <h2>💼 Enterprise Resource Planning (ERP)</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Systems Integration<br>
+                <strong>Market Test:</strong> ERP Implementation
+            </div>
+            
+            <h3>Figure 15.13: ERP Architecture</h3>
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>📦 Supply Chain</h5>
+                    <p>Inventory<br>Procurement<br>Logistics</p>
+                </div>
+                <div class="visual-card">
+                    <h5>💰 Finance</h5>
+                    <p>Accounting<br>Budgeting<br>Reporting</p>
+                </div>
+                <div class="visual-card">
+                    <h5>👥 HR</h5>
+                    <p>Payroll<br>Recruitment<br>Training</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🏭 Operations</h5>
+                    <p>Production<br>Quality<br>Maintenance</p>
+                </div>
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Case Study: Aramco SAP Implementation</h4>
+                <ul>
+                    <li>Scale: 70,000+ users globally</li>
+                    <li>Investment: 500M SAR</li>
+                    <li>Timeline: 3 years</li>
+                    <li>Result: 20% efficiency gain</li>
+                    <li>Lesson: Change processes to fit ERP, not vice versa</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question">🤔 Why do 60% of ERP implementations fail?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;A&#39;, &#39;quiz4&#39;)">A. Technical problems</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;B&#39;, &#39;quiz4&#39;, true)">B. Resistance to process change</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;C&#39;, &#39;quiz4&#39;)">C. High cost</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, &#39;D&#39;, &#39;quiz4&#39;)">D. Poor software quality</div>
+                </div>
+                <div class="quiz-feedback" id="quiz4"></div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Application Integration -->
+        <div class="slide">
+            <h2>🔗 System Integration Challenges</h2>
+            <span class="emam-badge badge-atqan">اتقن</span>
+            
+            <div class="uni-market-label">
+                <strong>University Tool:</strong> Integration Patterns<br>
+                <strong>Market Test:</strong> API Management
+            </div>
+            
+            <h3>Figure 15.14: Integration Architecture</h3>
+            <div class="code-editor">
+                // Integration Challenge: Connect 3 systems<br>
+                System A: Legacy Oracle DB (Arabic)<br>
+                System B: Modern REST API (English)<br>
+                System C: SAP ERP (German config)<br><br>
+                
+                // Your Solution:<br>
+                class IntegrationAdapter {<br>
+                &nbsp;&nbsp;translateData(source, target) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;// Map fields<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;// Convert formats<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;// Handle errors<br>
+                &nbsp;&nbsp;}<br>
+                }
+            </div>
+            
+            <h3>4 Integration Problems (Boehm &amp; Abts)</h3>
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>No Control</h4>
+                    <p>Can't modify vendor code</p>
+                    <p><strong>Solution:</strong> Wrapper patterns</p>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>Interoperability</h4>
+                    <p>Different data models</p>
+                    <p><strong>Solution:</strong> Common schema</p>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>Evolution</h4>
+                    <p>Version incompatibility</p>
+                    <p><strong>Solution:</strong> Version management</p>
+                </div>
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>Support</h4>
+                    <p>Vendor dependency</p>
+                    <p><strong>Solution:</strong> Exit strategy</p>
+                </div>
+            </div>
+            
+            <div class="market-reality">
+                <strong>Market Reality:</strong> Poor integration costs Saudi enterprises 2B SAR annually in inefficiencies.
+            </div>
+        </div>
+
+        <!-- Slide 13: Saudi's Reuse Revolution -->
+        <div class="slide">
+            <h2 id="section-innovation">🚀 Saudi's Software Reuse Leadership</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Vision 2030: Transform from technology consumer to global provider of reusable solutions
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <h4>🏛️ Government Platforms</h4>
+                    <div class="kpi-value">300+</div>
+                    <div class="kpi-label">Services unified</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Absher framework</li>
+                        <li>Tawakkalna modules</li>
+                        <li>Unified authentication</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #3b82f6;">
+                    <h4>🏙️ NEOM Components</h4>
+                    <div class="kpi-value">100%</div>
+                    <div class="kpi-label">Modular city</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Smart city modules</li>
+                        <li>Open-source contributions</li>
+                        <li>Global reuse</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #22c55e;">
+                    <h4>🏢 Enterprise Success</h4>
+                    <div class="kpi-value">60%</div>
+                    <div class="kpi-label">Cost reduction</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Aramco SAP</li>
+                        <li>STC frameworks</li>
+                        <li>Banking systems</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <h4>🕋 Hajj Systems</h4>
+                    <div class="kpi-value">3M+</div>
+                    <div class="kpi-label">Pilgrims managed</div>
+                    <ul style="margin-top: 15px;">
+                        <li>Reusable crowd mgmt</li>
+                        <li>Exported globally</li>
+                        <li>Olympic adoption</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="soft-skill-box">
+                <h4>Innovation Showcase: Saudi Open Source</h4>
+                <ul>
+                    <li>Tawakkalna SDK: 500+ apps using it</li>
+                    <li>Absher Components: Government standard</li>
+                    <li>Nafath Auth: Regional adoption</li>
+                    <li>Your contribution: Next global framework?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 14: Career Roadmap -->
+        <div class="slide">
+            <h2>💼 Your Software Reuse Career Path</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <h3>12-Month Roadmap to Reuse Excellence</h3>
+            <div class="flow-diagram">
+                <div class="flow-item">
+                    <strong>Months 1-3</strong><br>
+                    Master frameworks<br>
+                    <small>React, Spring, Django</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <strong>Months 4-6</strong><br>
+                    Component libraries<br>
+                    <small>npm, Maven, GitHub</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <strong>Months 7-9</strong><br>
+                    Product lines<br>
+                    <small>Domain engineering</small>
+                </div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-item">
+                    <strong>Months 10-12</strong><br>
+                    Enterprise systems<br>
+                    <small>ERP, integration</small>
+                </div>
+            </div>
+            
+            <h3>Saudi Career Opportunities</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Salary (SAR)</th>
+                    <th>Reuse Focus</th>
+                </tr>
+                <tr>
+                    <td>NEOM</td>
+                    <td>Framework Architect</td>
+                    <td>400,000+</td>
+                    <td>Smart city modules</td>
+                </tr>
+                <tr>
+                    <td>Aramco</td>
+                    <td>SAP Developer</td>
+                    <td>350,000</td>
+                    <td>ERP customization</td>
+                </tr>
+                <tr>
+                    <td>STC</td>
+                    <td>Component Engineer</td>
+                    <td>300,000</td>
+                    <td>Telecom frameworks</td>
+                </tr>
+                <tr>
+                    <td>Elm</td>
+                    <td>Integration Specialist</td>
+                    <td>280,000</td>
+                    <td>Government systems</td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <!-- Slide 15: Bridging University to Market -->
+        <div class="slide">
+            <h2>🎓 Bridging University to Market</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
+                <div class="metric-card" style="border-left-color: #065f46;">
+                    <h4 style="color: #065f46;">الجامعة تعلمك (University Teaches)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>نظريات إعادة الاستخدام (Reuse theories)</li>
+                        <li>أنماط التصميم (Design patterns)</li>
+                        <li>هندسة البرمجيات (Software engineering)</li>
+                        <li>التحليل والتصميم (Analysis &amp; design)</li>
+                        <li>أفضل الممارسات (Best practices)</li>
+                        <li>المعايير الدولية (Standards)</li>
+                        <li>البحث العلمي (Research)</li>
+                    </ul>
+                </div>
+                
+                <div class="metric-card" style="border-left-color: #dc2626;">
+                    <h4 style="color: #dc2626;">السوق يعلمك (Market Teaches)</h4>
+                    <ul style="margin-top: 15px; font-size: 0.95em;">
+                        <li>الوقت = مال (Time = money)</li>
+                        <li>إعادة الاستخدام = البقاء (Reuse = survival)</li>
+                        <li>السرعة تغلب الكمال (Speed &gt; perfection)</li>
+                        <li>العميل لا يهتم بالكود (Customer doesn't care)</li>
+                        <li>الصيانة تكلف أكثر (Maintenance costs more)</li>
+                        <li>الفشل = خسارة مالية (Failure = financial loss)</li>
+                        <li>المكتبات القديمة تعمل (Old libraries work)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <p><strong>University:</strong> Teaches you WHY and HOW to reuse properly</p>
+                <p><strong>Market:</strong> Shows you WHEN reuse saves money and time</p>
+                <p><strong>Balance:</strong> Use university knowledge to make smart market decisions</p>
+            </div>
+        </div>
+
+        <!-- Slide 16: Assignment -->
+        <div class="slide">
+            <h2>📝 Assignment: Design Reusable Saudi Solution</h2>
+            <span class="emam-badge badge-mayyiz">ميز</span>
+            
+            <div class="mission-critical">
+                Create a reusable solution that could serve 10+ Saudi organizations
+            </div>
+            
+            <div class="challenge-box">
+                <h4>Choose ONE Reuse Project:</h4>
+                <ol>
+                    <li>🏛️ Government service framework (like Absher 2.0)</li>
+                    <li>🏥 Healthcare product line (hospital variants)</li>
+                    <li>🎓 Educational platform components</li>
+                    <li>🏪 E-commerce framework (Saudi market)</li>
+                    <li>🏦 Banking integration middleware</li>
+                </ol>
+            </div>
+            
+            <h3>Deliverables (EMAM Framework)</h3>
+            <table class="comparison-table">
+                <tbody><tr>
+                    <th>Phase</th>
+                    <th>Weight</th>
+                    <th>Requirements</th>
+                    <th>Rubric</th>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-ifham">افهم</span></td>
+                    <td>20%</td>
+                    <td>Reuse analysis, cost-benefit</td>
+                    <td>Clear ROI calculation – 10/20; Risk analysis – 10/20</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-maris">مارس</span></td>
+                    <td>30%</td>
+                    <td>Framework selection, MVC design</td>
+                    <td>Working prototype – 15/30; Documentation – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-atqan">اتقن</span></td>
+                    <td>30%</td>
+                    <td>Product line architecture</td>
+                    <td>3+ variants – 15/30; Configuration strategy – 15/30</td>
+                </tr>
+                <tr>
+                    <td><span class="emam-badge badge-mayyiz">ميز</span></td>
+                    <td>20%</td>
+                    <td>Integration plan, Vision 2030</td>
+                    <td>Export potential – 10/20; Innovation – 10/20</td>
+                </tr>
+            </tbody></table>
+            
+            <div class="soft-skill-box">
+                <h4>Submission Requirements</h4>
+                <ul>
+                    <li><strong>Due:</strong> Next week</li>
+                    <li><strong>Format:</strong> Report + GitHub repo</li>
+                    <li><strong>Must include:</strong> 60%+ reuse metrics</li>
+                    <li><strong>Bonus:</strong> Open-source contribution, AI integration</li>
+                </ul>
+            </div>
+            
+            <div class="industry-tool">
+                <h4>AI Guidance for Bonus</h4>
+                <p>Use GitHub Copilot or ChatGPT for code generation, but document reuse percentage:</p>
+                <div class="code-editor">
+                    # Metrics Dashboard<br>
+                    Total LOC: 10,000<br>
+                    Reused components: 7,000 (70%)<br>
+                    Custom code: 2,500 (25%)<br>
+                    AI-generated: 500 (5%)<br>
+                    ROI: 400% (3-month vs 12-month)
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Key Takeaways -->
+        <div class="slide">
+            <h2>🎯 Key Takeaways - Chapter 15 Mastery</h2>
+            
+            <div class="definition-box">
+                <strong>Summary:</strong> "Software reuse ranges from functions to complete systems, offering faster delivery, lower costs, and higher quality through proven components"
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>🧠 Landscape</h5>
+                    <p style="font-size: 0.9em;">
+                        • 16 approaches<br>
+                        • Benefits vs problems<br>
+                        • Decision factors<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎨 Frameworks</h5>
+                    <p style="font-size: 0.9em;">
+                        • MVC pattern<br>
+                        • IoC principle<br>
+                        • WAF features<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>🏭 Product Lines</h5>
+                    <p style="font-size: 0.9em;">
+                        • Core + variable<br>
+                        • Configuration<br>
+                        • Domain focus<br>
+                    </p>
+                </div>
+                <div class="visual-card">
+                    <h5>💼 Enterprise</h5>
+                    <p style="font-size: 0.9em;">
+                        • ERP systems<br>
+                        • Integration<br>
+                        • COTS products<br>
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: var(--gradient); color: white; padding: 25px; border-radius: 15px; margin-top: 30px; text-align: center;">
+                <h3 style="background: none; border: none; padding: 0; margin-bottom: 15px; color: white;">
+                    Success Formula
+                </h3>
+                <p style="font-size: 1.3em;">
+                    Strategic Reuse + Islamic Efficiency + Saudi Innovation + Global Standards = <strong>Your Impact</strong>
+                </p>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Self-Reflection Prompts</h4>
+                <ul>
+                    <li>What percentage of your code is currently reused?</li>
+                    <li>Which framework will you master first?</li>
+                    <li>How can you contribute to Saudi's reuse ecosystem?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 18: Your Commitment -->
+        <div class="slide">
+            <h2>🤝 Your Software Reuse Commitment</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">إِنَّ اللَّهَ يُحِبُّ إِذَا عَمِلَ أَحَدُكُمْ عَمَلًا أَنْ يُتْقِنَهُ</div>
+                <p>"Allah loves when one of you does work, that they perfect it" - Hadith</p>
+                <p>(Transliteration: Inna Allāha yuḥibbu idhā 'amila aḥadukum 'amalan an yutqinahu)</p>
+            </div>
+            
+            <div class="mission-critical">
+                Every component you reuse saves time for innovation. Every framework you master enables faster delivery.
+            </div>
+            
+            <div class="visual-grid">
+                <div class="metric-card">
+                    <span class="emam-badge badge-ifham">افهم</span>
+                    <h4>Foundation</h4>
+                    <p>Know the landscape</p>
+                    <p>Evaluate trade-offs</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-maris">مارس</span>
+                    <h4>Application</h4>
+                    <p>Use frameworks</p>
+                    <p>Build components</p>
+                    <p>Share libraries</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-atqan">اتقن</span>
+                    <h4>Excellence</h4>
+                    <p>Design product lines</p>
+                    <p>Integrate systems</p>
+                </div>
+                <div class="metric-card">
+                    <span class="emam-badge badge-mayyiz">ميز</span>
+                    <h4>Innovation</h4>
+                    <p>Create frameworks</p>
+                    <p>Export solutions</p>
+                    <p>Lead industry</p>
+                </div>
+            </div>
+            
+            <div class="reflection-box" style="margin-top: 30px;">
+                <h4>Your Pledge:</h4>
+                <ul>
+                    <li>I will reuse before recreating</li>
+                    <li>I will document for others to reuse</li>
+                    <li>I will contribute to open source</li>
+                    <li>I will build Saudi's digital future efficiently</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 19: Thank You -->
+        <div class="slide active">
+            <h2>🙏 شكرًا - Your Journey in Reuse Begins</h2>
+            
+            <div class="islamic-box">
+                <div class="arabic">وَقُل رَّبِّ زِدْنِي عِلْمًا</div>
+                <p>"My Lord, increase me in knowledge" - Qur'an 20:114</p>
+                <p>Reuse knowledge compounds - share it to multiply impact!</p>
+            </div>
+            
+            <div class="mission-critical">
+                You now understand how to build faster, cheaper, and better through reuse<br>
+                From copy-paste to enterprise systems - you're ready!
+            </div>
+            
+            <div class="visual-grid">
+                <div class="visual-card">
+                    <h5>📧 Contact</h5>
+                    <p>Office Hours: By Email</p>
+                    <p>Email: arnoor@kau.edu.sa</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📅 Next Class</h5>
+                    <p>Chapter 16</p>
+                    <p>Component-based</p>
+                    <p>Monday, 2:30 PM</p>
+                </div>
+                <div class="visual-card">
+                    <h5>📝 Due Soon</h5>
+                    <p>Reuse project</p>
+                    <p>Next week</p>
+                    <p>Start TODAY!</p>
+                </div>
+                <div class="visual-card">
+                    <h5>🎯 Resources</h5>
+                    <p>Framework docs</p>
+                    <p>GitHub examples</p>
+                    <p>Office support</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.5em; color: #2d3748;">بروف: أديب بن رضا نور</p>
+                <p style="font-size: 1.2em; color: #2d3748; margin-top: 20px;">
+                    See you next class, إن شاء الله<br>
+                    <strong>Remember: Your reused code = Continuous charity!</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" disabled="">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        // Slide management
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressBar').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlideDisplay();
+            }
+        }
+        
+        // Quiz functionality
+        function checkAnswer(element, option, feedbackId, isCorrect = false) {
+            const feedback = document.getElementById(feedbackId);
+            if (!feedback) return;
+            
+            feedback.style.display = 'block';
+            
+            const feedbackText = {
+                'quiz1': {
+                    correct: '✅ Correct! Frameworks and components accelerate development.',
+                    incorrect: '❌ Think about speed and reliability benefits.'
+                },
+                'quiz2': {
+                    correct: '✅ Correct! Government systems heavily reuse components.',
+                    incorrect: '❌ Government systems reuse more than you think!'
+                },
+                'quiz3': {
+                    correct: '✅ Correct! Frameworks provide optimal balance.',
+                    incorrect: '❌ Consider time, cost, and legal factors.'
+                },
+                'quiz4': {
+                    correct: '✅ Correct! People resist changing their processes.',
+                    incorrect: '❌ The main issue is organizational, not technical.'
+                }
+            };
+            
+            if (isCorrect) {
+                feedback.textContent = feedbackText[feedbackId]?.correct || '✅ Correct!';
+                feedback.className = 'quiz-feedback correct';
+                element.style.background = '#c6f6d5';
+            } else {
+                feedback.textContent = feedbackText[feedbackId]?.incorrect || '❌ Try again!';
+                feedback.className = 'quiz-feedback incorrect';
+                element.style.background = '#fed7d7';
+            }
+            
+            // Disable all options after selection
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.onclick = null;
+                opt.style.cursor = 'default';
+            });
+        }
+        
+        // Reveal functions
+        function revealReuseLevels() {
+            document.getElementById('reuseLevelsAnswers').style.display = 'block';
+        }
+        
+        function showMVCSolution() {
+            document.getElementById('mvcSolution').style.display = 'block';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                updateSlideDisplay();
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides - 1;
+                updateSlideDisplay();
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlideDisplay();
+        });
+    </script>
+
+</body></html>
