@@ -1,204 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPIT-455 | King Abdulaziz University</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CPIT-455 Software Engineering II teaching archive: course modules, framework lineage, and instructional resources.">
+  <title>CPIT-455 | Software Engineering II</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="kau-logo">
-                <i class="fas fa-university"></i>
-            </div>
-            <h3>King Abdulaziz University</h3>
-            <p>Faculty of Computing & IT</p>
-        </div>
-
-        <nav class="nav-links">
-            <a href="#overview" class="nav-item active">
-                <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
-            </a>
-            <a href="#modules" class="nav-item">
-                <i class="fas fa-chalkboard-teacher"></i> <span>Lecture Slides</span>
-            </a>
-            <a href="#resources" class="nav-item">
-                <i class="fas fa-file-pdf"></i> <span>Course Materials</span>
-            </a>
-        </nav>
-
-        <div class="instructor-profile">
-            <div class="profile-img">AN</div>
-            <div class="profile-info">
-                <h4>Prof. Adeeb Noor</h4>
-                <span>Course Instructor</span>
-            </div>
-        </div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><i class="fas fa-university"></i></div>
+      <div><strong>King Abdulaziz University</strong><span>Faculty of Computing & IT</span></div>
     </div>
+    <nav>
+      <a href="#overview" class="active"><i class="fas fa-house"></i> Overview</a>
+      <a href="#lineage"><i class="fas fa-code-branch"></i> Framework Lineage</a>
+      <a href="#modules"><i class="fas fa-layer-group"></i> Learning Modules</a>
+      <a href="#resources"><i class="fas fa-folder-open"></i> Course Materials</a>
+    </nav>
+    <div class="instructor">
+      <div class="avatar">AN</div>
+      <div><strong>Prof. Adeeb Noor</strong><span>Course Instructor</span></div>
+    </div>
+  </aside>
 
-    <main class="main-content">
-        
-        <header id="overview" class="hero-section">
-            <div class="hero-text">
-                <span class="semester-badge">Fall 2025 • CPIT-455</span>
-                <h1>Software Engineering II</h1>
-                <p>Mastering Reliability, Safety, and Systems of Systems through the AMIR & CIMT Frameworks.</p>
-            </div>
-            <div class="hero-stats">
-                <div class="stat-box">
-                    <span class="count">8</span>
-                    <span class="label">Interactive Modules</span>
-                </div>
-                <div class="stat-box">
-                    <span class="count">2</span>
-                    <span class="label">Key Frameworks</span>
-                </div>
-            </div>
-        </header>
+  <main class="main-content">
+    <header id="overview" class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">CPIT-455 · FALL 2025 · TEACHING ARCHIVE</div>
+        <h1>Software Engineering II</h1>
+        <p>An instructional archive for dependable software engineering, documenting the evolution of course design from CIMT through culturally calibrated instructional frameworks.</p>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#modules">Explore modules <i class="fas fa-arrow-down"></i></a>
+          <a class="ghost-btn" href="#lineage">View framework lineage</a>
+        </div>
+      </div>
+      <div class="hero-metrics">
+        <div><strong>8</strong><span>Course modules</span></div>
+        <div><strong>2025</strong><span>Archived term</span></div>
+        <div><strong>CPIT-455</strong><span>Software Engineering II</span></div>
+      </div>
+    </header>
 
-        <section id="modules">
-            <div class="section-header">
-                <h2><i class="fas fa-layer-group"></i> Learning Modules</h2>
-                <div class="divider"></div>
-            </div>
-            
-            <div class="grid-container">
-                
-                <div class="card" onclick="window.open('slides/ch11.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 11</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box reliability"><i class="fas fa-shield-alt"></i></div>
-                    <h3>Reliability Eng.</h3>
-                    <p>Fault tolerance, N-version programming & AMIR framework.</p>
-                </div>
+    <section id="lineage" class="section lineage-section">
+      <div class="section-heading">
+        <div><span class="kicker">DESIGN PROVENANCE</span><h2>Framework lineage</h2></div>
+        <p>This archive documents an evolving instructional design program. Framework labels changed across course versions; the archived pages are preserved as historical instructional artifacts.</p>
+      </div>
+      <div class="lineage-grid">
+        <article class="lineage-card">
+          <span class="cycle">Cycle 1 · Spring 2025</span>
+          <h3>CIMT</h3>
+          <p>Curriculum–industry alignment provided the initial design engine and established the first cycle of the program.</p>
+        </article>
+        <div class="line-arrow"><i class="fas fa-arrow-right"></i></div>
+        <article class="lineage-card featured">
+          <span class="cycle">Cycle 2 · Fall 2025</span>
+          <h3>AMIR / EMAM–IMAM lineage</h3>
+          <p>The Fall 2025 archive contains AMIR and CIMT labels, while individual instructional artifacts also preserve EMAM/IMAM terminology from the evolving culturally calibrated design.</p>
+        </article>
+        <div class="line-arrow"><i class="fas fa-arrow-right"></i></div>
+        <article class="lineage-card">
+          <span class="cycle">Cycle 3 · Spring 2026</span>
+          <h3>HIMMA</h3>
+          <p>A template-governed lecture design cycle extending the earlier work into a more explicit instructional architecture.</p>
+        </article>
+      </div>
+      <div class="archive-note"><i class="fas fa-circle-info"></i><p><strong>Archive note.</strong> This site is a public record of instructional materials, not a claim that every historical framework label is terminologically identical. Individual archived pages may retain the label used when that version was produced.</p></div>
+    </section>
 
-                <div class="card" onclick="window.open('slides/ch12.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 12</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box safety"><i class="fas fa-hard-hat"></i></div>
-                    <h3>Safety Eng.</h3>
-                    <p>Hazard analysis, Safety cases, and CIMT weaponized.</p>
-                </div>
+    <section id="modules" class="section">
+      <div class="section-heading">
+        <div><span class="kicker">COURSE CONTENT</span><h2>Learning modules</h2></div>
+        <p>Eight topics spanning dependability, security, reuse, distributed systems, and large-scale systems engineering.</p>
+      </div>
+      <div class="grid-container">
+        <a class="card" href="slides/ch11.html" target="_blank"><div class="card-head"><span>Chapter 11</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box reliability"><i class="fas fa-shield-halved"></i></div><h3>Reliability Engineering</h3><p>Fault tolerance, N-version programming, and reliability-oriented design.</p></a>
+        <a class="card" href="slides/ch12.html" target="_blank"><div class="card-head"><span>Chapter 12</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box safety"><i class="fas fa-triangle-exclamation"></i></div><h3>Safety Engineering</h3><p>Hazard analysis, safety cases, and engineering for critical systems.</p></a>
+        <a class="card" href="slides/ch13.html" target="_blank"><div class="card-head"><span>Chapter 13</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box security"><i class="fas fa-lock"></i></div><h3>Security Engineering</h3><p>CIA triad, STRIDE, security reasoning, and culturally calibrated applications.</p></a>
+        <a class="card" href="slides/ch14.html" target="_blank"><div class="card-head"><span>Chapter 14</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box resilience"><i class="fas fa-heart-pulse"></i></div><h3>Resilience Engineering</h3><p>The 4Rs and sociotechnical approaches to resilient systems.</p></a>
+        <a class="card" href="slides/ch15.html" target="_blank"><div class="card-head"><span>Chapter 15</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box reuse"><i class="fas fa-recycle"></i></div><h3>Software Reuse</h3><p>Application frameworks, product lines, and systematic software reuse.</p></a>
+        <a class="card" href="slides/ch16.html" target="_blank"><div class="card-head"><span>Chapter 16</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box component"><i class="fas fa-cubes"></i></div><h3>Component-Based SE</h3><p>Components, interfaces, composition, and reusable system architecture.</p></a>
+        <a class="card" href="slides/ch17.html" target="_blank"><div class="card-head"><span>Chapter 17</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box distributed"><i class="fas fa-network-wired"></i></div><h3>Distributed Systems</h3><p>Client–server systems, architectural patterns, services, and SaaS.</p></a>
+        <a class="card" href="slides/ch20.html" target="_blank"><div class="card-head"><span>Chapter 20</span><i class="fas fa-arrow-up-right-from-square"></i></div><div class="icon-box sos"><i class="fas fa-city"></i></div><h3>Systems of Systems</h3><p>Complexity, governance, emergence, and engineering mega-systems.</p></a>
+      </div>
+    </section>
 
-                <div class="card" onclick="window.open('slides/ch13.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 13</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box security"><i class="fas fa-lock"></i></div>
-                    <h3>Security Eng.</h3>
-                    <p>CIA Triad, STRIDE model, and Islamic security frameworks.</p>
-                </div>
+    <section id="resources" class="section">
+      <div class="section-heading"><div><span class="kicker">SOURCE MATERIALS</span><h2>Course documents</h2></div><p>Selected source materials retained alongside the interactive archive.</p></div>
+      <div class="resource-grid">
+        <a class="resource" href="materials/Class0.pdf" target="_blank"><i class="fas fa-file-pdf"></i><div><span>Syllabus / kickoff</span><strong>Lecture 0: Course Introduction</strong><small>Course structure, grading, and orientation</small></div><b>PDF</b></a>
+        <a class="resource" href="materials/Class1.pdf" target="_blank"><i class="fas fa-file-pdf"></i><div><span>Lecture</span><strong>Lecture 1: Dependability</strong><small>Reliability, safety, and security overview</small></div><b>PDF</b></a>
+      </div>
+    </section>
 
-                <div class="card" onclick="window.open('slides/ch14.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 14</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box resilience"><i class="fas fa-heartbeat"></i></div>
-                    <h3>Resilience Eng.</h3>
-                    <p>The 4 Rs framework and Sociotechnical resilience.</p>
-                </div>
-
-                <div class="card" onclick="window.open('slides/ch15.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 15</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box reuse"><i class="fas fa-recycle"></i></div>
-                    <h3>Software Reuse</h3>
-                    <p>Application frameworks, ERPs, and Product lines.</p>
-                </div>
-
-                <div class="card" onclick="window.open('slides/ch16.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 16</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box component"><i class="fas fa-cubes"></i></div>
-                    <h3>CBSE</h3>
-                    <p>Component-based engineering and composition patterns.</p>
-                </div>
-
-                <div class="card" onclick="window.open('slides/ch17.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 17</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box distributed"><i class="fas fa-network-wired"></i></div>
-                    <h3>Distributed Sys.</h3>
-                    <p>Client-server, Architectural patterns, and SaaS.</p>
-                </div>
-
-                <div class="card" onclick="window.open('slides/ch20.html', '_blank')">
-                    <div class="card-top">
-                        <span class="chapter-tag">Chapter 20</span>
-                        <i class="fas fa-external-link-alt icon-link"></i>
-                    </div>
-                    <div class="icon-box sos"><i class="fas fa-city"></i></div>
-                    <h3>Systems of Systems</h3>
-                    <p>Managing complexity, governance, and mega-systems.</p>
-                </div>
-
-            </div>
-        </section>
-
-        <section id="resources">
-            <div class="section-header">
-                <h2><i class="fas fa-folder-open"></i> Course Documents</h2>
-                <div class="divider"></div>
-            </div>
-
-            <div class="table-wrapper">
-                <table class="kau-table">
-                    <thead>
-                        <tr>
-                            <th>Resource</th>
-                            <th>Description</th>
-                            <th>Type</th>
-                            <th>Access</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="file-info">
-                                    <i class="fas fa-file-pdf pdf-icon"></i>
-                                    <strong>Lecture 0: Kickoff</strong>
-                                </div>
-                            </td>
-                            <td>Syllabus, Grading, and Course Intro</td>
-                            <td><span class="badge-pill">Syllabus</span></td>
-                            <td><a href="materials/Class0.pdf" target="_blank" class="btn-download">Download</a></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="file-info">
-                                    <i class="fas fa-file-pdf pdf-icon"></i>
-                                    <strong>Lecture 1: Dependability</strong>
-                                </div>
-                            </td>
-                            <td>Reliability, Safety, Security Overview</td>
-                            <td><span class="badge-pill">Lecture</span></td>
-                            <td><a href="materials/Class1.pdf" target="_blank" class="btn-download">Download</a></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <footer>
-            <p>&copy; 2025 King Abdulaziz University | Faculty of Computing & Information Technology</p>
-        </footer>
-
-    </main>
+    <footer><div><strong>CPIT-455 · Software Engineering II</strong><span>King Abdulaziz University · Faculty of Computing & Information Technology</span></div><p>Public instructional archive · Historical labels are preserved for provenance.</p></footer>
+  </main>
 </body>
 </html>
