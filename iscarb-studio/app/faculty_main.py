@@ -21,9 +21,43 @@ for route in engine.app.router.routes:
     app.router.routes.append(route)
 
 
+def _output_v4_shell(html: str) -> str:
+    """Upgrade the stable v3.3 shell at response time without duplicating the page.
+
+    This keeps the original-identity homepage frozen while exposing Output v4:
+    Presenter, Detailed, Instructor, Student Activity Pack and Blueprint.
+    """
+    html = html.replace('<div class="version">v3.3</div>', '<div class="version">v3.4 · Output v4</div>')
+    html = html.replace(
+        'Render Presenter, Detailed, Instructor and Blueprint outputs.',
+        'Render Presenter, Detailed, Instructor, Student and Blueprint outputs.',
+    )
+    html = html.replace(
+        'One compilation. Four useful teaching assets.',
+        'One compilation. Five purposeful teaching assets.',
+    )
+    blueprint_card = '<div class="outcome"><div class="icon">⬡</div><b>Auditable Blueprint</b><p>Machine-readable 20-Unit structure, provenance split, ETEC mapping and release metadata.</p></div>'
+    student_card = '<div class="outcome"><div class="icon">✎</div><b>Student Activity Pack</b><p>Questions, decision spaces, evidence prompts, portfolio checklist and rubric — without instructor answers.</p></div>'
+    if blueprint_card in html and student_card not in html:
+        html = html.replace(blueprint_card, student_card + blueprint_card)
+    html = html.replace(
+        '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
+        '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Student</b><a href="/api/jobs/${id}/export/student">Activity Pack</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
+    )
+    html = html.replace(
+        'CIMT → IMAM → HIMMA → ISCARB · v3.3 Original Identity',
+        'CIMT → IMAM → HIMMA → ISCARB · v3.4 Output v4',
+    )
+    # Five output cards should breathe across common desktop widths.
+    html = html.replace('.outcomes{display:grid;grid-template-columns:repeat(4,1fr);', '.outcomes{display:grid;grid-template-columns:repeat(5,1fr);')
+    html = html.replace('.assets{display:grid;grid-template-columns:repeat(4,1fr);', '.assets{display:grid;grid-template-columns:repeat(5,1fr);')
+    return html
+
+
 @app.get("/")
 def faculty_studio():
     html = (engine.APP_ROOT / "static" / "studio_v33.html").read_text(encoding="utf-8")
+    html = _output_v4_shell(html)
     return HTMLResponse(
         html,
         headers={
@@ -55,7 +89,7 @@ def health():
             "presenter_theme": "deep green + technical purple + warm gold + visual-first text budget",
             "output_system": [
                 "Presenter Preview + PPTX — sparse visual teaching surface",
-                "Detailed Deck PDF — source/evidence/readiness reference",
+                "Detailed Deck PDF — designed source/evidence/readiness reference",
                 "Instructor Guide DOCX — 90-minute run of show",
                 "Student Activity Pack DOCX — activities without instructor answers",
                 "Blueprint JSON — auditable structured source of truth",
