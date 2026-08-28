@@ -4,18 +4,18 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 
 from . import main as engine
-from .heritage_pptx import export_cimt_heritage_pptx
+from .faculty_visual import export_faculty_presenter_pptx, render_faculty_presenter_preview
 
 FACULTY_VERSION = "3.2.0"
 PIPELINE_ID = "faculty-studio-v3.2-ztm-inspired-source-library"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
-# Reuse the proven engine routes and static mount, but replace its public landing,
-# health endpoint and presenter-PPTX export with the faculty-oriented shell.
+# Reuse the proven engine routes and static mount, but replace public landing,
+# health, presenter preview and presenter PPTX with the faculty-oriented shell/theme.
 for route in engine.app.router.routes:
     path = getattr(route, "path", None)
-    if path in {"/", "/api/health", "/api/jobs/{job_id}/export/{fmt}"}:
+    if path in {"/", "/api/health", "/api/jobs/{job_id}/presenter", "/api/jobs/{job_id}/export/{fmt}"}:
         continue
     app.router.routes.append(route)
 
@@ -51,10 +51,24 @@ def health():
             "public_experience": "verified-original-sources + upgrade-my-lecture + ISCARB-verified + starter-kit",
             "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
             "design_language": "ZTM-inspired high-contrast faculty UX; original ISCARB identity and assets",
-            "visual_heritage": "CIMT reasoning/diagram heritage + ISCARB visual grammar",
+            "presenter_theme": "white/ink + pink/purple/mint accents over ISCARB visual grammar",
         }
     )
     return data
+
+
+@app.get("/api/jobs/{job_id}/presenter")
+def faculty_presenter(job_id: str):
+    try:
+        job = engine.load_job(job_id)
+    except FileNotFoundError:
+        raise HTTPException(404, "Job not found")
+    if job.blueprint is None:
+        raise HTTPException(409, "No blueprint is available yet")
+    return HTMLResponse(
+        render_faculty_presenter_preview(job.blueprint, job.status.upper()),
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
 
 
 @app.get("/api/jobs/{job_id}/export/{fmt}")
@@ -73,7 +87,7 @@ def faculty_export(job_id: str, fmt: str):
         raise HTTPException(409, "Compilation is still in progress")
 
     path = engine.EXPORTS / f"ISCARB_{job_id}_Presenter.pptx"
-    path = export_cimt_heritage_pptx(job.blueprint, path)
+    path = export_faculty_presenter_pptx(job.blueprint, path)
     return FileResponse(
         path,
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
