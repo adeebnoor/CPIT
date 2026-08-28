@@ -55,6 +55,7 @@ class ReadinessAlignment(BaseModel):
     klo_refs: list[str] = Field(min_length=1)
     strength: AlignmentStrength
     rationale: str
+    atomicity_evidence: str
     clo_ids: list[Literal["CLO1", "CLO2", "CLO3", "CLO4", "CLO5"]] = Field(min_length=1)
     evidence_units: list[int] = Field(min_length=1)
     standard_source_pages: list[int] = Field(min_length=1)
@@ -93,10 +94,14 @@ class LectureUnit(BaseModel):
     title: str
     engineering_question: str
 
-    # Strict provenance split: core_content is ONLY weekly-source-derived technical content.
-    # Hard pedagogical caps are kept, but overlong AI output is trimmed BEFORE validation
-    # so a useful lecture never crashes simply because the model returned extra bullets.
-    core_content: list[str] = Field(min_length=1, max_length=8)
+    # TRIPLE PROVENANCE (v1.6)
+    # core_content: ONLY technical content demonstrably supported by the weekly source.
+    # pedagogy_content: ISCARB instructional/assessment scaffolding (CLOs, H-Stack,
+    # design review, falsification protocol, evidence policy, rubric logic, assurance, etc.).
+    # enrichment_content: external/current/cultural/contextual extensions not present in the source.
+    # Pure pedagogy units may legitimately have no core_content.
+    core_content: list[str] = Field(default_factory=list, max_length=8)
+    pedagogy_content: list[str] = Field(default_factory=list, max_length=8)
     enrichment_content: list[str] = Field(default_factory=list, max_length=6)
     enrichment_basis: list[str] = Field(default_factory=list, max_length=6)
     scenario_assumptions: list[str] = Field(default_factory=list, max_length=5)
@@ -106,16 +111,16 @@ class LectureUnit(BaseModel):
     takeaway: str
     cimtlens: list[CIMTLens] = Field(min_length=1, max_length=4)
     clo_ids: list[Literal["CLO1", "CLO2", "CLO3", "CLO4", "CLO5"]] = Field(min_length=1)
-    source_anchor: str
+    source_anchor: str = ""
     inherited_requirements: list[str] = Field(default_factory=list)
     elite_requirements: list[str] = Field(default_factory=list)
     evidence: str = ""
     contextual_enrichment: bool = False
     verify_before_release: bool = False
 
-    @field_validator("core_content", mode="before")
+    @field_validator("core_content", "pedagogy_content", mode="before")
     @classmethod
-    def cap_core_content(cls, value):
+    def cap_main_lists(cls, value):
         if isinstance(value, list):
             return [x for x in value if str(x).strip()][:8]
         return value
@@ -153,6 +158,7 @@ class Blueprint(BaseModel):
     lecture_title: str
     engineering_thesis: str
     central_engineering_crisis: str
+    named_ethical_purpose: str
     clOs: list[CLO] = Field(alias="clos", min_length=5, max_length=5)
     units: list[LectureUnit] = Field(min_length=20, max_length=20)
     source_topic_families: list[str] = Field(min_length=1)
