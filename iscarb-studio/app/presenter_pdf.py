@@ -5,7 +5,6 @@ from pathlib import Path
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import landscape
 
 from .models import Blueprint, LectureUnit
 
@@ -28,18 +27,25 @@ SOFT_RED = colors.HexColor('#FAEBEC')
 PHASE = {'IFHAM':PURPLE,'MARIS':GREEN2,'ATQAN':GOLD,'MAYYIZ':TEAL}
 
 
+def _ascii(text: str) -> str:
+    t=str(text or '')
+    reps={'→':'->','↔':'<->','←':'<-','—':'-','–':'-','…':'...','·':' / ','’':"'",'“':'"','”':'"','≥':'>=','≤':'<=','×':'x'}
+    for a,b in reps.items(): t=t.replace(a,b)
+    return t.encode('cp1252','replace').decode('cp1252')
+
+
 def _short(text: str, n: int = 72) -> str:
-    t = re.sub(r'\s+',' ',str(text or '')).strip()
+    t = re.sub(r'\s+',' ',_ascii(text)).strip()
     if len(t) <= n:
         return t
-    cut=t[:n-1].rsplit(' ',1)[0]
-    return cut+'…'
+    cut=t[:n-3].rsplit(' ',1)[0]
+    return cut+'...'
 
 
 def _wrap(c, text, x, y, width, size=12, color=INK, bold=False, leading=None, max_lines=4):
     font='Helvetica-Bold' if bold else 'Helvetica'
     c.setFont(font,size); c.setFillColor(color)
-    words=str(text or '').split(); lines=[]; line=''
+    words=_ascii(text).split(); lines=[]; line=''
     for word in words:
         trial=(line+' '+word).strip()
         if c.stringWidth(trial,font,size) <= width:
@@ -50,7 +56,7 @@ def _wrap(c, text, x, y, width, size=12, color=INK, bold=False, leading=None, ma
             if len(lines) >= max_lines-1: break
     if line and len(lines)<max_lines: lines.append(line)
     if words and len(' '.join(lines)) < len(' '.join(words)):
-        lines[-1]=lines[-1].rstrip(' .,:;-')+'…'
+        lines[-1]=lines[-1].rstrip(' .,:;-')+'...'
     leading=leading or size*1.25
     for i,ln in enumerate(lines): c.drawString(x,y-i*leading,ln)
     return len(lines)*leading
@@ -64,7 +70,7 @@ def _round(c,x,y,w,h,fill=WHITE,stroke=colors.HexColor('#DDE4DF'),radius=12,sw=1
 def _pill(c,x,y,w,text,fill):
     c.setFillColor(fill); c.roundRect(x,y,w,22,11,fill=1,stroke=0)
     c.setFillColor(WHITE if fill != GOLD else INK); c.setFont('Helvetica-Bold',8)
-    c.drawCentredString(x+w/2,y+7,text)
+    c.drawCentredString(x+w/2,y+7,_ascii(text))
 
 
 def _base(c,u:LectureUnit):
@@ -81,7 +87,7 @@ def _base(c,u:LectureUnit):
 
 def _node(c,x,y,w,h,title,body='',fill=WHITE,stroke=PURPLE):
     _round(c,x,y,w,h,fill,stroke,14,1.6)
-    c.setFillColor(stroke); c.setFont('Helvetica-Bold',10); c.drawCentredString(x+w/2,y+h-22,title)
+    c.setFillColor(stroke); c.setFont('Helvetica-Bold',10); c.drawCentredString(x+w/2,y+h-22,_ascii(title))
     if body: _wrap(c,_short(body,72),x+12,y+h-45,w-24,9,MUTED,False,max_lines=4)
 
 
@@ -96,7 +102,7 @@ def _arrow(c,x1,y1,x2,y2,color=MUTED):
 def _chain(c, labels):
     n=len(labels); gap=18; total=850; w=(total-gap*(n-1))/n; y=145; h=180
     for i,(t,b) in enumerate(labels):
-        x=55+i*(w+gap); _node(c,x,y,w,h,t,b,WHITE,PHASE.get('MAYYIZ',TEAL))
+        x=55+i*(w+gap); _node(c,x,y,w,h,t,b,WHITE,TEAL)
         if i<n-1: _arrow(c,x+w+3,y+h/2,x+w+gap-3,y+h/2,INK)
 
 
@@ -115,7 +121,7 @@ def _render(c,bp:Blueprint,u:LectureUnit):
         elif u.number==4:
             names=['ANALYTICAL','JUDGMENT','EVIDENCE','SOCIO-TECH','RISK-AWARE','ETHICAL']; items=[(n,ped[i] if i<len(ped) else '') for i,n in enumerate(names)]
         else: items=[('PROBLEM','Frame it'),('RISK','Analyze it'),('ARCHITECTURE','Design it'),('TRADE-OFF','Defend it'),('EVIDENCE','Prove it'),('ASSURANCE','Bound it')]
-        cols=3 if len(items)==6 else 5; rows=2 if cols==3 else 1; bw=260 if cols==3 else 160
+        cols=3 if len(items)==6 else 5; bw=260 if cols==3 else 160
         for i,(t,b) in enumerate(items):
             r=i//cols; cc=i%cols; _node(c,55+cc*(bw+25),180-r*135,bw,110,t,b,WHITE,PHASE[u.phase])
     elif u.number in {5,6,9,11,12,13,14,15,17,18}:
@@ -136,21 +142,20 @@ def _render(c,bp:Blueprint,u:LectureUnit):
         _round(c,95,110,770,250,SOFT_PURPLE,PURPLE,28,2); c.setFillColor(PURPLE); c.setFont('Helvetica-Bold',12); c.drawString(120,332,'PLATFORM PROTECTION')
         _round(c,190,145,580,170,SOFT_GREEN,GREEN2,24,2); c.setFillColor(GREEN2); c.drawString(215,288,'APPLICATION PROTECTION')
         _round(c,310,180,340,90,SOFT_TEAL,TEAL,20,2); c.setFillColor(TEAL); c.drawCentredString(480,222,'RECORD / ASSET')
-        c.setFillColor(MUTED); c.setFont('Helvetica-Bold',11); c.drawCentredString(480,80,'PROTECTION  ↔  DISTRIBUTION')
+        c.setFillColor(MUTED); c.setFont('Helvetica-Bold',11); c.drawCentredString(480,80,'PROTECTION  <->  DISTRIBUTION')
     elif u.number==8:
         _node(c,70,135,300,220,'ALTERNATIVE A',ped[0] if ped else 'Flexible COTS path',SOFT_PURPLE,PURPLE)
-        c.setFillColor(GOLD); c.setFont('Helvetica-Bold',30); c.drawCentredString(480,250,'↔'); c.setFont('Helvetica-Bold',10); c.setFillColor(MUTED); c.drawCentredString(480,220,'USABILITY · RISK · OVERHEAD')
+        c.setFillColor(GOLD); c.setFont('Helvetica-Bold',26); c.drawCentredString(480,250,'<->'); c.setFont('Helvetica-Bold',10); c.setFillColor(MUTED); c.drawCentredString(480,220,'USABILITY / RISK / OVERHEAD')
         _node(c,590,135,300,220,'ALTERNATIVE B',ped[1] if len(ped)>1 else 'Restricted client path',SOFT_GREEN,GREEN2)
     elif u.number==10:
         vals=[('KNOWN','Verified facts'),('UNKNOWN','Unresolved evidence'),('DECISION-SENSITIVE','Could change approval'),('MONITOR','Evidence to collect')]
         for i,(t,b) in enumerate(vals):
             rr=i//2; cc=i%2; _node(c,95+cc*395,235-rr*130,360,105,t,b,WHITE,GREEN2)
     elif u.number==19:
-        headers=['CAPABILITY','4 · DIST.','3 · READY','2 · DEV.','1 · NOT YET']; xs=[60,460,570,680,790];
+        headers=['CAPABILITY','4 / DIST.','3 / READY','2 / DEV.','1 / NOT YET']; xs=[60,460,570,680,790]
         c.setFont('Helvetica-Bold',8); c.setFillColor(MUTED)
         for x,h in zip(xs,headers): c.drawString(x,350,h)
-        crit=[x.criterion for x in bp.rubric_criteria[:6]]
-        cols=[GREEN2,PURPLE,GOLD,RED]
+        crit=[x.criterion for x in bp.rubric_criteria[:6]]; cols=[GREEN2,PURPLE,GOLD,RED]
         for r,t in enumerate(crit):
             y=320-r*42; _wrap(c,_short(t,44),60,y,360,8,INK,True,max_lines=1)
             for j,col in enumerate(cols): c.setFillColor(col); c.roundRect(460+j*110,y-8,82,20,5,fill=1,stroke=0)
@@ -166,7 +171,7 @@ def _render(c,bp:Blueprint,u:LectureUnit):
 
 def export_presenter_pdf(bp: Blueprint, out: Path) -> Path:
     out=Path(out); c=canvas.Canvas(str(out),pagesize=(W,H),pageCompression=1)
-    c.setTitle(bp.lecture_title); c.setAuthor('ISCARB Faculty Studio')
+    c.setTitle(_ascii(bp.lecture_title)); c.setAuthor('ISCARB Faculty Studio')
     for u in bp.units:
         _base(c,u); _render(c,bp,u); c.showPage()
     c.save(); return out
