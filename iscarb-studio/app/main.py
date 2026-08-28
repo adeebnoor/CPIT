@@ -23,7 +23,7 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.7.0")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.8.0")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
@@ -75,20 +75,20 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         source_text = bundle.combined_local_text()
 
         stage = "source-bundle analysis"
-        _update(job, "analyzing", 10, "1/4 · Reading the primary + supporting bundle and scoping ONE 90-minute lecture…")
+        _update(job, "analyzing", 10, "1/4 · Reading the primary + supporting bundle and identifying ALL major P1 topics for one fixed 90-minute lecture…")
         profile = service.profile_source(bundle)
         job.source_profile = profile
         save_job(job)
 
         stage = "20-unit generation + readiness alignment"
-        _update(job, "generating", 35, "2/4 · Building 20 Units only from the selected 90-minute scope; excess material is deferred, not silently dropped…")
+        _update(job, "generating", 35, "2/4 · Building 20 Units with complete P1 coverage. Dense material is compressed intelligently, never deferred…")
         blueprint = service.generate_blueprint(bundle, profile)
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint
         save_job(job)
 
-        stage = "Content Gate v5"
-        _update(job, "auditing", 70, "3/4 · Running Content Gate v5: 90-minute scope, source hierarchy, provenance, engineering rigor, and ETEC atomicity…")
+        stage = "Content Gate v6"
+        _update(job, "auditing", 70, "3/4 · Running Content Gate v6: 90-minute full coverage, source hierarchy, provenance, engineering rigor, and ETEC atomicity…")
         checks = deterministic_gate(blueprint, profile, source_text)
         checks.update(session_scope_gate(blueprint, profile, bundle))
         job.deterministic_checks = checks
@@ -101,12 +101,12 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         if all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
-            _update(job, "ready", 100, "RELEASE — one 90-minute lecture passed Content Gate v5, source hierarchy, triple provenance, and ETEC atomicity.")
+            _update(job, "ready", 100, "RELEASE — the full primary lecture is covered within 90 minutes and passed Content Gate v6, provenance, rigor, and ETEC atomicity.")
             return
 
         for round_no in range(repair_rounds):
             stage = f"repair round {round_no + 1}"
-            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing detected Content Gate v5 failures without expanding the 90-minute scope (round {round_no + 1})…")
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing Content Gate v6 failures while preserving ALL primary lecture topics (round {round_no + 1})…")
             blueprint = service.repair(bundle, blueprint, audit, det_fail)
             blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
             job.blueprint = blueprint
@@ -121,11 +121,11 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             job.audit = audit
             save_job(job)
             if all_required_pass(checks) and audit.overall_pass:
-                _update(job, "ready", 100, f"RELEASE — passed Content Gate v5 after repair round {round_no + 1}.")
+                _update(job, "ready", 100, f"RELEASE — passed Content Gate v6 after repair round {round_no + 1} with full P1 coverage.")
                 return
 
         job.blueprint = blueprint
-        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but the 90-minute scope/source/provenance/rigor/readiness gate found unresolved issues.")
+        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but the 90-minute full-coverage/source/provenance/rigor/readiness gate found unresolved issues.")
 
     except Exception as exc:
         try:
@@ -151,14 +151,16 @@ def root():
 def health():
     return {
         "ok": True,
-        "version": "1.7.0",
+        "version": "1.8.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "default_model": RELIABLE_DEFAULT_MODEL,
         "url_sources": True,
         "multi_source_bundle": True,
         "session_minutes": 90,
+        "full_primary_coverage": True,
+        "primary_topic_deferral_allowed": False,
         "max_sources": 8,
-        "pipeline": "content-gate-v5-90min-source-bundle",
+        "pipeline": "content-gate-v6-90min-full-primary-coverage",
         "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
         "visual_system": "content-first; lecture visual renderer follows release",
     }
@@ -232,7 +234,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v1.7 — one 90-minute lecture…",
+        message="Queued for ISCARB v1.8 — 90 minutes with full primary lecture coverage…",
         filename=display_name,
         model=chosen_model,
         source_manifest=bundle.manifest_lines(),
