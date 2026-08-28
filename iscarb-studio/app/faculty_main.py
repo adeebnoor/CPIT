@@ -9,14 +9,14 @@ from . import main as engine
 from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .faculty_visual import export_faculty_presenter_pptx, render_faculty_presenter_preview
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
+from .presenter_pdf import export_presenter_pdf
 
-FACULTY_VERSION = "3.4.1"
-PIPELINE_ID = "faculty-studio-v3.4.1-output-lab-prominent"
+FACULTY_VERSION = "3.6.0"
+PIPELINE_ID = "faculty-studio-v3.6-saudi-heritage-visual-provenance"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
-# Reuse the proven engine routes, but replace public landing, health, presenter
-# preview and export routes with the faculty-oriented experience/output system.
+# Reuse engine routes while replacing public experience and output routes.
 for route in engine.app.router.routes:
     path = getattr(route, "path", None)
     if path in {"/", "/api/health", "/api/jobs/{job_id}/presenter", "/api/jobs/{job_id}/export/{fmt}"}:
@@ -24,62 +24,9 @@ for route in engine.app.router.routes:
     app.router.routes.append(route)
 
 
-def _output_v4_shell(html: str) -> str:
-    """Upgrade the stable v3.3 shell at response time without duplicating the page."""
-    html = html.replace('<div class="version">v3.3</div>', '<div class="version">v3.4.1 · Output v4</div>')
-    html = html.replace(
-        'Render Presenter, Detailed, Instructor and Blueprint outputs.',
-        'Render Presenter, Detailed, Instructor, Student and Blueprint outputs.',
-    )
-    html = html.replace('One compilation. Four useful teaching assets.', 'One compilation. Five purposeful teaching assets.')
-
-    blueprint_card = '<div class="outcome"><div class="icon">⬡</div><b>Auditable Blueprint</b><p>Machine-readable 20-Unit structure, provenance split, ETEC mapping and release metadata.</p></div>'
-    student_card = '<div class="outcome"><div class="icon">✎</div><b>Student Activity Pack</b><p>Questions, decision spaces, evidence prompts, portfolio checklist and rubric — without instructor answers.</p></div>'
-    if blueprint_card in html and student_card not in html:
-        html = html.replace(blueprint_card, student_card + blueprint_card)
-
-    html = html.replace(
-        '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
-        '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Student</b><a href="/api/jobs/${id}/export/student">Activity Pack</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
-    )
-
-    # Make the two workflows unmistakable.
-    html = html.replace(
-        '<button class="compile" id="compileBtn" type="submit">Compile lecture studio →</button>',
-        '<button class="compile" id="compileBtn" type="submit">Generate new lecture · uses Gemini →</button><p class="hint" style="margin-top:8px"><b>Needs Gemini:</b> use this only when you want ISCARB to analyze a source and create a new 20-Unit Blueprint.</p>',
-    )
-
-    lab = '''<div id="output-lab" style="margin-top:16px;padding:16px;border:2px solid #563c7d;background:#f7f3fb;border-radius:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><span class="badge" style="background:#eee8f5;color:#563c7d">OUTPUT LAB · NO GEMINI</span><div style="font-size:1.05rem;font-weight:950;margin-top:4px">Already have an ISCARB Blueprint JSON?</div><p class="hint" style="max-width:620px">Rebuild Presenter, Detailed, Instructor and Student outputs locally. No Gemini quota is used. This is the correct path for visual-design iteration.</p></div><div style="font-size:.68rem;font-weight:900;color:#0c533d;background:#e7f4ec;padding:8px 10px;border-radius:9px">0 API CALLS</div></div>
-      <form id="blueprintForm" style="margin-top:12px"><div class="two"><div><div class="fieldLabel">ISCARB Blueprint JSON</div><input id="blueprintFile" name="blueprint_file" type="file" accept=".json"></div><div style="display:flex;align-items:end"><button class="compile" id="blueprintBtn" type="submit" style="width:100%;margin-top:0;background:#563c7d">Re-render outputs · NO GEMINI →</button></div></div></form>
-    </div>'''
-    # Put Output Lab directly after the full compiler form, where faculty naturally look after a failed run.
-    if 'id="output-lab"' not in html:
-        html = html.replace('</form></div><aside class="panel dark">', '</form>' + lab + '</div><aside class="panel dark">')
-
-    bp_js = r'''
-const blueprintForm=document.getElementById('blueprintForm');
-if(blueprintForm){blueprintForm.addEventListener('submit',async e=>{e.preventDefault();const f=document.getElementById('blueprintFile');if(!f||!f.files||!f.files.length){alert('Choose an ISCARB Blueprint JSON first.');return}const b=document.getElementById('blueprintBtn');b.disabled=true;b.textContent='Rendering locally…';const fd=new FormData(blueprintForm);try{const r=await fetch('/api/render-blueprint',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(data.detail||JSON.stringify(data));await poll(data.job_id)}catch(ex){showError(ex.message)}finally{b.disabled=false;b.textContent='Re-render outputs · NO GEMINI →'}})}
-'''
-    if 'const blueprintForm=' not in html:
-        html = html.replace("const form=document.getElementById('compileForm')", bp_js + "\nconst form=document.getElementById('compileForm')")
-
-    # Friendly quota message: preserve the technical detail but direct faculty to the local path.
-    html = html.replace(
-        "if(j.error){err.textContent=j.error;err.classList.remove('hidden')}",
-        "if(j.error){const q=String(j.error).toLowerCase().includes('quota')||String(j.error).includes('RESOURCE_EXHAUSTED');err.innerHTML=q?'<b>Gemini quota is unavailable for NEW content generation.</b><br><br>If you already have a Blueprint JSON, use <a href=\"#output-lab\" style=\"color:#563c7d;font-weight:900\">Output Lab · NO GEMINI</a> below. Your visual outputs can be redesigned without another API call.<br><br><span style=\"opacity:.72\">Technical detail: '+j.error.replace(/</g,'&lt;')+'</span>':j.error;err.classList.remove('hidden')}",
-    )
-
-    html = html.replace('CIMT → IMAM → HIMMA → ISCARB · v3.3 Original Identity', 'CIMT → IMAM → HIMMA → ISCARB · v3.4.1 Output v4')
-    html = html.replace('.outcomes{display:grid;grid-template-columns:repeat(4,1fr);', '.outcomes{display:grid;grid-template-columns:repeat(5,1fr);')
-    html = html.replace('.assets{display:grid;grid-template-columns:repeat(4,1fr);', '.assets{display:grid;grid-template-columns:repeat(5,1fr);')
-    return html
-
-
 @app.get("/")
 def faculty_studio():
-    html = (engine.APP_ROOT / "static" / "studio_v33.html").read_text(encoding="utf-8")
-    html = _output_v4_shell(html)
+    html = (engine.APP_ROOT / "static" / "studio_v36.html").read_text(encoding="utf-8")
     return HTMLResponse(
         html,
         headers={
@@ -105,19 +52,20 @@ def health():
             "version": FACULTY_VERSION,
             "engine_version": engine.SERVICE_VERSION,
             "pipeline": PIPELINE_ID,
-            "public_experience": "original-source-library + upgrade-my-lecture + ISCARB-verified + prominent-output-lab + starter-kit",
+            "public_experience": "Saudi heritage academic identity + original source library + output lab + visual provenance",
             "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
-            "design_language": "ISCARB Original Identity — Saudi academic engineering; no third-party logos or copied design assets",
-            "presenter_theme": "deep green + technical purple + warm gold + visual-first text budget",
+            "design_language": "Saudi educational heritage — dark academic canvas, sand, magenta, cyan, green and gold; no copied institutional logos",
+            "presenter_theme": "visual-first 20-unit presenter with source/visual provenance",
             "output_system": [
-                "Presenter Preview + PPTX — sparse visual teaching surface",
-                "Detailed Deck PDF — designed source/evidence/readiness reference",
-                "Instructor Guide DOCX — 90-minute run of show",
-                "Student Activity Pack DOCX — activities without instructor answers",
-                "Blueprint JSON — auditable structured source of truth",
+                "Visual Presenter Preview + PPTX + Presenter PDF",
+                "Faculty Reading Pack PDF",
+                "Instructor Guide DOCX",
+                "Student Activity Pack DOCX",
+                "Blueprint JSON",
             ],
             "local_output_lab": True,
-            "institutional_branding": "context links only; no claim of official KAU or Vision 2030 endorsement",
+            "visual_provenance": "source-anchored / adapted from P1 / ISCARB visualization",
+            "institutional_branding": "context only; no claim of official endorsement",
         }
     )
     return data
@@ -128,7 +76,7 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
     """Import a previously generated Blueprint and re-render outputs locally.
 
     This route intentionally does not call Gemini and can never issue RELEASE or
-    ISCARB Verified, because it does not repeat the source/semantic audit.
+    ISCARB Verified because source/semantic audits are not repeated.
     """
     if not (blueprint_file.filename or "").lower().endswith(".json"):
         raise HTTPException(400, "Choose an ISCARB Blueprint JSON file.")
@@ -153,13 +101,13 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
             problem="Outputs were rendered locally from an existing Blueprint. Source and semantic release audits were not re-run.",
             repair_instruction="Use the original compiled RELEASE job, or re-run the full compiler when audit authority is required.",
         )],
-        strengths=["No Gemini call is required to iterate on Presenter, Detailed, Instructor, Student, or Blueprint output design."],
+        strengths=["No Gemini call is required to iterate on Visual Presenter, Reading Pack, Instructor, Student, or Blueprint outputs."],
     )
     job = JobState(
         id=job_id,
         status="blocked",
         progress=100,
-        message="OUTPUT LAB — Blueprint imported locally. All output assets are available; ISCARB Verified is intentionally disabled because release audit was not repeated.",
+        message="OUTPUT LAB — Blueprint imported locally. All outputs are available; ISCARB Verified remains disabled because release audit was not repeated.",
         filename=blueprint_file.filename or "imported_blueprint.json",
         model="local-render-only",
         source_manifest=list(bp.source_manifest),
@@ -201,10 +149,13 @@ def faculty_export(job_id: str, fmt: str):
     base = engine.EXPORTS / f"ISCARB_{job_id}"
 
     if fmt == "pptx":
-        path = export_faculty_presenter_pptx(bp, base.with_name(base.name + "_Presenter.pptx"))
+        path = export_faculty_presenter_pptx(bp, base.with_name(base.name + "_Visual_Presenter.pptx"))
         media = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    elif fmt in {"presenter-pdf", "presenter_pdf", "visual-pdf"}:
+        path = export_presenter_pdf(bp, base.with_name(base.name + "_Visual_Presenter.pdf"))
+        media = "application/pdf"
     elif fmt == "pdf":
-        path = export_detailed_pdf(bp, base.with_name(base.name + "_Detailed_Deck.pdf"))
+        path = export_detailed_pdf(bp, base.with_name(base.name + "_Faculty_Reading_Pack.pdf"))
         media = "application/pdf"
     elif fmt == "docx":
         path = export_instructor_guide(bp, base.with_name(base.name + "_Instructor_Guide.docx"))
@@ -217,6 +168,6 @@ def faculty_export(job_id: str, fmt: str):
         path.write_text(bp.model_dump_json(by_alias=True, indent=2), encoding="utf-8")
         media = "application/json"
     else:
-        raise HTTPException(400, "Format must be pptx, pdf, docx, student, or json")
+        raise HTTPException(400, "Format must be pptx, presenter-pdf, pdf, docx, student, or json")
 
     return FileResponse(path, media_type=media, filename=path.name)
