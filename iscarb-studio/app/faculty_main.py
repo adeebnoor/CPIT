@@ -6,13 +6,13 @@ from fastapi.responses import HTMLResponse, FileResponse
 from . import main as engine
 from .heritage_pptx import export_cimt_heritage_pptx
 
-FACULTY_VERSION = "3.0.0"
-PIPELINE_ID = "faculty-studio-v3-cimt-heritage-iscarb-verified"
+FACULTY_VERSION = "3.1.0"
+PIPELINE_ID = "faculty-studio-v3.1-clean-source-first-cimt-heritage"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
 # Reuse the proven engine routes and static mount, but replace its public landing,
-# health endpoint and presenter-PPTX export with the adoption-oriented v3 shell.
+# health endpoint and presenter-PPTX export with the adoption-oriented Faculty Studio shell.
 for route in engine.app.router.routes:
     path = getattr(route, "path", None)
     if path in {"/", "/api/health", "/api/jobs/{job_id}/export/{fmt}"}:
@@ -22,7 +22,7 @@ for route in engine.app.router.routes:
 
 @app.get("/")
 def faculty_studio():
-    html = (engine.APP_ROOT / "static" / "studio_v3.html").read_text(encoding="utf-8")
+    html = (engine.APP_ROOT / "static" / "studio_v31.html").read_text(encoding="utf-8")
     return HTMLResponse(
         html,
         headers={
@@ -48,7 +48,8 @@ def health():
             "version": FACULTY_VERSION,
             "engine_version": engine.SERVICE_VERSION,
             "pipeline": PIPELINE_ID,
-            "public_experience": "ready-lectures + upgrade-my-lecture + ISCARB-verified + starter-kit + reuse",
+            "public_experience": "one-clear-cta + real-source-example + upgrade-my-lecture + verified-output + starter-kit",
+            "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
             "visual_heritage": "CIMT academic canvas + ISCARB visual grammar",
         }
     )
