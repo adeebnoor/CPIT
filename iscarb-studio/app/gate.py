@@ -60,6 +60,18 @@ def _source_has(source_text: str, term: str) -> bool:
     return term.lower() in source_text.lower()
 
 
+def _domain_clusters(text: str) -> set[str]:
+    low = " " + _norm(text) + " "
+    groups = {
+        "healthcare": [" patient ", " clinical ", " hospital ", " healthcare ", " medical record ", " health record "],
+        "finance": [" trading ", " equity ", " stock ", " financial ", " banking ", " transaction order "],
+        "aviation": [" aircraft ", " aviation ", " air traffic "],
+        "automotive": [" vehicle ", " automotive ", " car control "],
+        "energy": [" power grid ", " electricity ", " energy system "],
+    }
+    return {name for name, terms in groups.items() if any(term in low for term in terms)}
+
+
 def deterministic_gate(
     bp: Blueprint,
     profile: SourceProfile | None = None,
@@ -108,6 +120,15 @@ def deterministic_gate(
     ]
     checks["unit4_has_all_six_hstack_competencies"] = all(term in u4p for term in hstack_terms)
 
+    # One coherent central system: block obvious cross-domain composites.
+    central_text = " ".join([
+        bp.central_engineering_crisis,
+        bp.named_ethical_purpose,
+        _text(bp.units[0]), _text(bp.units[10]), _text(bp.units[15]),
+        _text(bp.units[16]), _text(bp.units[17]), _text(bp.units[19]),
+    ])
+    checks["one_non_composite_central_system"] = len(_domain_clusters(central_text)) <= 1
+
     # Named ethical purpose must be explicit from the opening.
     checks["named_ethical_purpose_present"] = bool(bp.named_ethical_purpose.strip())
     checks["unit1_states_named_ethical_purpose"] = _purpose_visible(bp.named_ethical_purpose, _text(bp.units[0]))
@@ -124,6 +145,25 @@ def deterministic_gate(
         for u in bp.units
     )
 
+    vague_basis_terms = [
+        "general industry", "standard literature", "regional standards", "industry experience",
+        "common practice", "general software engineering", "professional portfolio standards",
+    ]
+    valid_enrichment_basis = True
+    for u in bp.units:
+        if not u.enrichment_content:
+            continue
+        if not u.enrichment_basis:
+            valid_enrichment_basis = False
+            break
+        for basis in u.enrichment_basis:
+            low = basis.lower()
+            if any(term in low for term in vague_basis_terms):
+                valid_enrichment_basis = False
+            if "[s" not in low and "hypothetical" not in low:
+                valid_enrichment_basis = False
+    checks["enrichment_basis_is_traceable_or_hypothetical"] = valid_enrichment_basis
+
     risky_claim_terms = [" require", " requires", " mandate", " mandates", " regulation", " regulations", " national rule", " market rule"]
     hypothetical_language_ok = True
     for u in bp.units:
@@ -133,7 +173,7 @@ def deterministic_gate(
         for bullet in u.enrichment_content:
             low = " " + bullet.lower()
             if any(term in low for term in risky_claim_terms):
-                if not any(marker in low for marker in ["assume", "in this scenario", "in this hypothetical", "scenario requires"]):
+                if not any(marker in low for marker in ["assume", "in this scenario", "in this hypothetical", "scenario requires", "design exploration"]):
                     hypothetical_language_ok = False
     checks["hypothetical_enrichment_not_stated_as_fact"] = hypothetical_language_ok
 
@@ -261,6 +301,7 @@ def deterministic_gate(
 
     # ETEC readiness: official refs + exact KLO map + conservative atomicity against raw source.
     checks["readiness_alignment_present"] = len(bp.readiness_alignment) >= 1
+    checks["readiness_is_minimum_sufficient"] = len(bp.readiness_alignment) <= 2
     valid_skus = ETEC_IT_READINESS["skus"]
     valid_klos = ETEC_IT_READINESS["klo"]
     checks["readiness_no_eku_targets"] = all(
