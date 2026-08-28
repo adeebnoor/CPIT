@@ -23,7 +23,8 @@ class SourceProfile(BaseModel):
     technical_boundaries: list[str] = Field(default_factory=list)
     source_warnings: list[str] = Field(default_factory=list)
 
-    # v1.7: one live lecture is a 90-minute scope, even when the bundle is larger.
+    # One live lecture is always 90 minutes. In v1.8 all major PRIMARY topic
+    # families remain in scope; COMPRESS means smart compression, not deferral.
     session_minutes: int = 90
     scope_fit: ScopeFit = "FIT"
     in_scope_families: list[str] = Field(default_factory=list)
@@ -53,7 +54,11 @@ class CLO(BaseModel):
 class TopicCoverage(BaseModel):
     topic_family: str
     source_anchor: str
-    first_taught_unit: int = Field(ge=1, le=15)
+    # Structural parsing accepts any Unit 1-20 so a semantically bad draft can
+    # still reach Content Gate. The hard pedagogical rule remains in gate.py:
+    # every major topic MUST first be taught by Unit 15. If a model returns 16-20,
+    # the Gate fails it and the repair loop must move the actual teaching earlier.
+    first_taught_unit: int = Field(ge=1, le=20)
     reinforced_units: list[int] = Field(default_factory=list)
 
     @field_validator("reinforced_units", mode="before")
@@ -187,7 +192,6 @@ class Blueprint(BaseModel):
     rubric_criteria: list[RubricCriterion] = Field(min_length=6)
     release_notes: list[str] = Field(default_factory=list)
 
-    # v1.7 session contract.
     session_minutes: int = 90
     source_manifest: list[str] = Field(default_factory=list)
     deferred_topics: list[str] = Field(default_factory=list)
