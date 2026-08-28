@@ -111,6 +111,78 @@ jobs:
           assert 'layered protection architecture' in registry.assets[3].alt_text.lower()
           print(f'Local PDF visual registry OK: {len(registry.assets)} complete slide images rendered')
           PY
+      - name: Visual Lecture Engine v2 — end-to-end Presenter
+        env:
+          PYTHONPATH: iscarb-studio
+        run: |
+          python - <<'PY'
+          import shutil
+          from pathlib import Path
+          from pptx import Presentation
+          from pptx.enum.shapes import MSO_SHAPE_TYPE
+          from app.models import Blueprint
+          from app.source_visuals import _build_pdf_registry, plan_for_unit
+          from app.visual_output_v36 import export_presenter_pptx, export_presenter_pdf, render_presenter_preview
+
+          src=Path('/tmp/security-source-test.pdf')
+          upload_dir=Path('iscarb-studio/data/uploads/ci-security')
+          upload_dir.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(src, upload_dir/'P1__security-source-test.pdf')
+
+          phases = {**{i:'IFHAM' for i in range(1,6)}, **{i:'MARIS' for i in range(6,11)}, **{i:'ATQAN' for i in range(11,16)}, **{i:'MAYYIZ' for i in range(16,21)}}
+          titles = {
+              1:'Crisis',2:'Domain Spine',3:'Learning Outcomes',4:'H-Stack',5:'First Principles',
+              6:'Security Mechanism',7:'Layered Protection Architecture',8:'Architecture Trade-off',9:'Test and Falsify',10:'Uncertainty Ledger',
+              11:'Saudi Context',12:'Accountability',13:'Enduring Principles and Trends',14:'Practitioner Wellbeing',15:'AI Permissibility',
+              16:'Portfolio Mission',17:'Constraint Mutation',18:'Evidence Policy',19:'Capability Rubric',20:'Assurance Case'
+          }
+          units=[]
+          for i in range(1,21):
+              anchor = '[P1] SLIDE 4' if i in {6,7} else '[P1] SLIDE 5' if i==8 else '[P1] SLIDE 6' if i==9 else '[P1] SLIDE 7' if i in {12,13} else ''
+              units.append({
+                  'number':i,'phase':phases[i],'title':titles[i],
+                  'engineering_question':f'What engineering decision must be defended in unit {i}?',
+                  'core_content':['Layered protection architecture and source-supported mechanism','Evidence must remain traceable to the primary lecture'] if anchor else [],
+                  'pedagogy_content':['PREDICT: make a decision before explanation','KNOWN: source-supported facts','UNKNOWN: decision-sensitive evidence gap'],
+                  'enrichment_content':[],'enrichment_basis':[],'scenario_assumptions':[],
+                  'visual_suggestion':'diagram-first teaching visual','student_action':'Choose a design and state what evidence could reverse your decision.',
+                  'takeaway':'A defensible engineering decision is bounded by source evidence and uncertainty.',
+                  'cimtlens':['C'],'clo_ids':['CLO1'],'source_anchor':anchor,
+                  'inherited_requirements':[],'elite_requirements':[],'evidence':'Decision record','contextual_enrichment':False,
+                  'verify_before_release':False,'planned_minutes':4,
+              })
+          bp=Blueprint.model_validate({
+              'lecture_title':'Security Engineering Test','engineering_thesis':'Security is a design responsibility.',
+              'central_engineering_crisis':'A critical application shows conflicting signs of compromise.',
+              'named_ethical_purpose':'Amanah and professional responsibility',
+              'clos':[{'id':f'CLO{i}','statement':f'Demonstrate capability {i}','evidence_expected':f'Evidence {i}'} for i in range(1,6)],
+              'units':units,'source_topic_families':['Risk','Architecture','Guidelines','Deployment','Survivability'],
+              'topic_coverage':[{'topic_family':'Architecture','source_anchor':'[P1] SLIDE 4','first_taught_unit':7,'reinforced_units':[8,16]}],
+              'readiness_alignment':[{'gku':'GKU3','sku':'SKU3.1','slo_refs':['SLO3.1.2'],'klo_refs':['KLO2'],'strength':'direct','rationale':'Security analysis evidence','atomicity_evidence':'Unit 7 architecture evidence','clo_ids':['CLO1'],'evidence_units':[7],'standard_source_pages':[19]}],
+              'rubric_criteria':[{'criterion':f'Criterion {i}','distinguished':'Evidence-rich','ready':'Supported','developing':'Partial','not_yet_ready':'Unsupported','readiness_refs':['SKU3.1']} for i in range(1,7)],
+              'release_notes':[],'session_minutes':90,'source_manifest':['[P1] PRIMARY: security-source-test.pdf'],'deferred_topics':[]
+          })
+
+          registry=_build_pdf_registry(src,'Security Engineering Test Source')
+          plan=plan_for_unit(bp,bp.units[6],registry)
+          assert plan.reuse_mode == 'USE', plan
+          assert plan.source_slide == 4, plan
+
+          preview=render_presenter_preview(bp,'BLOCKED')
+          assert 'SOURCE VISUAL · P1 SLIDE 4' in preview
+          assert 'data:image/png;base64,' in preview
+
+          pptx=export_presenter_pptx(bp,Path('/tmp/iscarb-v2-security.pptx'))
+          assert pptx.exists() and pptx.stat().st_size > 20000
+          prs=Presentation(str(pptx))
+          assert len(prs.slides)==20
+          picture_count=sum(1 for sh in prs.slides[6].shapes if sh.shape_type == MSO_SHAPE_TYPE.PICTURE)
+          assert picture_count >= 1, 'Unit 7 did not receive the P1 source visual'
+
+          pdf=export_presenter_pdf(bp,Path('/tmp/iscarb-v2-security.pdf'))
+          assert pdf.exists() and pdf.stat().st_size > 10000
+          print(f'Visual Lecture Engine v2 E2E OK: 20 slides, Unit 7 source visual=P1 slide {plan.source_slide}, PPTX={pptx.stat().st_size}, PDF={pdf.stat().st_size}')
+          PY
       - name: SlideShare visual discovery — best effort, never a release dependency
         env:
           PYTHONPATH: iscarb-studio
