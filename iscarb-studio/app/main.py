@@ -16,12 +16,13 @@ from .gemini_service import GeminiService
 from .gate import deterministic_gate, all_required_pass, failed_check_names
 from .exporters import export_docx, export_pptx, export_pdf
 from .url_source import materialize_url_source
+from .source_text import extract_source_text
 
 APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.5.0")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.6.0")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
@@ -42,6 +43,7 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
     try:
         job = load_job(job_id)
         service = GeminiService(model=model)
+        source_text = extract_source_text(file_path)
 
         stage = "source analysis"
         _update(job, "analyzing", 10, "1/4 · Locking the weekly technical source and extracting all major topic families…")
@@ -50,14 +52,14 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
         save_job(job)
 
         stage = "20-unit generation + readiness alignment"
-        _update(job, "generating", 35, "2/4 · Building 20 units with exact ETEC SLO→KLO mapping and provenance separation…")
+        _update(job, "generating", 35, "2/4 · Building 20 units with triple provenance and minimum-sufficient ETEC readiness…")
         blueprint = service.generate_blueprint(file_path, profile)
         job.blueprint = blueprint
         save_job(job)
 
-        stage = "Content Gate v3"
-        _update(job, "auditing", 70, "3/4 · Running Content Gate v3: source provenance, elite engineering rigor, exact ETEC mapping, and cumulative fidelity…")
-        checks = deterministic_gate(blueprint, profile)
+        stage = "Content Gate v4"
+        _update(job, "auditing", 70, "3/4 · Running Content Gate v4: source / pedagogy / enrichment provenance, elite rigor, and ETEC atomicity…")
+        checks = deterministic_gate(blueprint, profile, source_text)
         job.deterministic_checks = checks
         det_fail = failed_check_names(checks)
 
@@ -68,17 +70,17 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
 
         if all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
-            _update(job, "ready", 100, "RELEASE — passed Content Gate v3, semantic source audit, and exact ETEC readiness alignment.")
+            _update(job, "ready", 100, "RELEASE — passed Content Gate v4, triple provenance, semantic source audit, and ETEC atomicity.")
             return
 
         for round_no in range(repair_rounds):
             stage = f"repair round {round_no + 1}"
-            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing only detected Content Gate v3 failures (round {round_no + 1})…")
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing detected Content Gate v4 failures (round {round_no + 1})…")
             blueprint = service.repair(file_path, blueprint, audit, det_fail)
             job.blueprint = blueprint
             save_job(job)
 
-            checks = deterministic_gate(blueprint, profile)
+            checks = deterministic_gate(blueprint, profile, source_text)
             job.deterministic_checks = checks
             det_fail = failed_check_names(checks)
             stage = f"post-repair audit {round_no + 1}"
@@ -86,11 +88,11 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
             job.audit = audit
             save_job(job)
             if all_required_pass(checks) and audit.overall_pass:
-                _update(job, "ready", 100, f"RELEASE — passed Content Gate v3 after repair round {round_no + 1}.")
+                _update(job, "ready", 100, f"RELEASE — passed Content Gate v4 after repair round {round_no + 1}.")
                 return
 
         job.blueprint = blueprint
-        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but Content Gate v3 found unresolved source, rigor, provenance, or readiness issues.")
+        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but Content Gate v4 found unresolved source, pedagogy, context, rigor, or readiness issues.")
 
     except Exception as exc:
         try:
@@ -116,11 +118,11 @@ def root():
 def health():
     return {
         "ok": True,
-        "version": "1.5.0",
+        "version": "1.6.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "default_model": RELIABLE_DEFAULT_MODEL,
         "url_sources": True,
-        "pipeline": "content-gate-v3-exact-etec-provenance",
+        "pipeline": "content-gate-v4-triple-provenance-etec-atomicity",
         "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
         "visual_system": "interface-v2; lecture visual rendering follows content release",
     }
@@ -165,7 +167,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v1.5 compilation…",
+        message="Queued for ISCARB v1.6 compilation…",
         filename=display_name,
         model=chosen_model,
     )
