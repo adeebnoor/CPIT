@@ -11,6 +11,8 @@ from pydantic import BaseModel, ValidationError
 from .models import SourceProfile, Blueprint, AuditReport
 from .prompts import SOURCE_PROFILE_PROMPT, MASTER_PROMPT, AUDIT_PROMPT, REPAIR_PROMPT
 from .readiness import READINESS_CONTEXT
+from .readiness_map import READINESS_KLO_MAP_CONTEXT
+from .quality_rules import QUALITY_ADDENDUM, AUDIT_ADDENDUM, REPAIR_ADDENDUM
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -23,7 +25,7 @@ class GeminiService:
     """Fast source-grounded Gemini client with local validation and one source upload per job."""
 
     def __init__(self, model: str | None = None):
-        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+        self.model = model or "gemini-3.6-flash"
         self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
         if not self.api_key:
             raise GeminiNotConfigured("GEMINI_API_KEY is not configured.")
@@ -182,10 +184,11 @@ class GeminiService:
         extra = (
             "\nSOURCE PROFILE (coverage checklist):\n" + profile.model_dump_json(indent=2)
             + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n" + READINESS_CONTEXT
+            + "\n\nOFFICIAL ETEC SLO-TO-KLO MAP (must be copied exactly; do not infer):\n" + READINESS_KLO_MAP_CONTEXT
         )
         return self._generate_structured(
             file_path=file_path,
-            prompt=MASTER_PROMPT,
+            prompt=MASTER_PROMPT + QUALITY_ADDENDUM,
             schema=Blueprint,
             extra_text=extra,
             preferred_model=self.model,
@@ -195,28 +198,31 @@ class GeminiService:
     def audit(self, file_path: Path, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
         extra = (
             "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
+            + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n" + READINESS_KLO_MAP_CONTEXT
             + "\nCANDIDATE BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
             + "\nDETERMINISTIC CHECK FAILURES:\n" + json.dumps(deterministic_failures or [], ensure_ascii=False)
         )
+        # The audit is the quality gate, so use the stable full Flash model rather than Lite.
         return self._generate_structured(
             file_path=file_path,
-            prompt=AUDIT_PROMPT,
+            prompt=AUDIT_PROMPT + AUDIT_ADDENDUM,
             schema=AuditReport,
             extra_text=extra,
-            preferred_model="gemini-3.5-flash-lite",
-            thinking_level="minimal",
+            preferred_model="gemini-3.6-flash",
+            thinking_level="low",
         )
 
     def repair(self, file_path: Path, blueprint: Blueprint, audit: AuditReport, deterministic_failures: list[str]) -> Blueprint:
         extra = (
             "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
+            + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n" + READINESS_KLO_MAP_CONTEXT
             + "\nCURRENT BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
             + "\nAUDIT REPORT:\n" + audit.model_dump_json(indent=2)
             + "\nDETERMINISTIC FAILURES:\n" + json.dumps(deterministic_failures, ensure_ascii=False)
         )
         return self._generate_structured(
             file_path=file_path,
-            prompt=REPAIR_PROMPT,
+            prompt=REPAIR_PROMPT + REPAIR_ADDENDUM,
             schema=Blueprint,
             extra_text=extra,
             preferred_model=self.model,
