@@ -49,12 +49,18 @@ class SourceBundle:
     def manifest_text(self) -> str:
         lines = [
             "ISCARB LECTURE SOURCE BUNDLE",
-            f"LIVE SESSION TIMEBOX: {self.session_minutes} minutes",
-            "SOURCE HIERARCHY: the PRIMARY source sets lecture scope, terminology, and conflict precedence; SUPPORTING sources may clarify, evidence, or enrich the SAME lecture focus but must not silently expand it into another lecture.",
-            "SOURCE ANCHORS in the blueprint must use these source IDs (for example: [P1] SLIDES 7-12, [S2] p.4).",
+            f"LIVE SESSION TIMEBOX: {self.session_minutes} minutes — FIXED.",
+            "PRIMARY FULL-COVERAGE CONTRACT: the PRIMARY lecture source defines the complete lecture scope. Every major technical topic family in P1 MUST appear in the 20-unit session. No P1 topic may be deferred, omitted, replaced, or moved to another lecture because the source is large.",
+            "COMPRESSION RULE: if P1 is dense, compress intelligently inside the same 90 minutes by grouping related concepts, reducing repetition, and varying depth. Preserve every major topic family and all decision-critical mechanisms. Use FIT for normal density and COMPRESS for high density; never solve overload by dropping primary content.",
+            "SUPPORTING-SOURCE RULE: SUPPORTING sources may clarify, evidence, exemplify, contextualize, or verify the SAME lecture, but they do not expand the mandatory technical scope. Material found only in supporting sources may be ignored when it does not help teach P1.",
+            "SOURCE HIERARCHY: P1 controls lecture scope, terminology, and conflict precedence. If a supporting source conflicts with P1, preserve P1 and record the conflict rather than silently reconciling them.",
+            "SOURCE ANCHORS in the blueprint must use source IDs (for example: [P1] SLIDES 7-12, [S2] p.4). Every primary topic-family coverage entry should include a [P1] anchor.",
         ]
         if self.lecture_focus.strip():
-            lines.append(f"FACULTY-SUPPLIED LECTURE FOCUS: {self.lecture_focus.strip()}")
+            lines.append(
+                "FACULTY-SUPPLIED LECTURE FOCUS: " + self.lecture_focus.strip()
+                + " — use this to emphasize and organize the lecture, NOT to remove other major P1 topics."
+            )
         lines.append("SOURCES:")
         lines.extend(self.manifest_lines())
         return "\n".join(lines)
