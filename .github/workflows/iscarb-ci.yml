@@ -30,13 +30,9 @@ jobs:
           from app.start import app
 
           client = TestClient(app)
-
           home = client.get('/')
           assert home.status_code == 200, home.text
           html = home.text
-
-          # Production-critical visual checks: the approved hero must be inline,
-          # not dependent on a /static stylesheet that can fail to mount.
           assert 'iscarb-approved-hero-inline' in html
           assert 'data:image/jpeg;base64,' in html
           assert 'v4.0.2 · Complete Hero + Link QA' in html
@@ -70,12 +66,24 @@ jobs:
           starter = client.get('/starter-kit')
           assert starter.status_code == 200
           assert 'ISCARB Faculty Starter Kit' in starter.text
-
-          # API contract checks that do not spend Gemini quota.
           assert client.post('/api/compile', data={}).status_code == 400
           bad_bp = client.post('/api/render-blueprint', files={'blueprint_file': ('bad.txt', b'{}', 'text/plain')})
           assert bad_bp.status_code == 400
           assert client.get('/api/jobs/not-a-real-job/presenter').status_code == 404
           assert client.get('/api/jobs/not-a-real-job/export/pptx').status_code == 404
-          print('ISCARB v4.0.2 smoke tests passed')
+          print('ISCARB application smoke tests passed')
+          PY
+      - name: Live source visual extraction test
+        env:
+          PYTHONPATH: iscarb-studio
+        run: |
+          python - <<'PY'
+          from app.source_visuals import _build_slideshare_registry, local_asset
+          url='https://www.slideshare.net/slideshow/ch14-5148075/5148075'
+          registry=_build_slideshare_registry(url)
+          assert registry is not None, 'SlideShare visual registry unavailable'
+          assert len(registry.assets) >= 10, f'Only {len(registry.assets)} slide visuals discovered'
+          path=local_asset(registry.assets[0])
+          assert path is not None and path.exists() and path.stat().st_size > 1000, 'Could not download source slide image'
+          print(f'Source visual registry OK: {len(registry.assets)} slides; sample={path.name}')
           PY
