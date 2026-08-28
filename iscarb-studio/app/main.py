@@ -21,7 +21,7 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.3.0")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.3.1")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
@@ -56,7 +56,7 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
 
         stage = "Content Gate v2"
         _update(job, "auditing", 70, "3/4 · Running source-provenance, engineering-rigor, ETEC-readiness, and cumulative-fidelity gates…")
-        checks = deterministic_gate(blueprint)
+        checks = deterministic_gate(blueprint, profile)
         job.deterministic_checks = checks
         det_fail = failed_check_names(checks)
 
@@ -77,7 +77,7 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
             job.blueprint = blueprint
             save_job(job)
 
-            checks = deterministic_gate(blueprint)
+            checks = deterministic_gate(blueprint, profile)
             job.deterministic_checks = checks
             det_fail = failed_check_names(checks)
             stage = f"post-repair audit {round_no + 1}"
@@ -115,7 +115,7 @@ def root():
 def health():
     return {
         "ok": True,
-        "version": "1.3.0",
+        "version": "1.3.1",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "default_model": os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
         "url_sources": True,
