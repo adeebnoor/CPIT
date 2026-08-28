@@ -16,15 +16,16 @@ from .gemini_service import GeminiService
 from .gate import deterministic_gate, all_required_pass, failed_check_names
 from .session_gate import apply_90_minute_timebox, session_scope_gate
 from .source_bundle import SourceBundle, SourceItem
-from .exporters import export_docx, export_pptx, export_pdf
+from .exporters import export_docx, export_pdf
+from .visual_engine import export_presenter_pptx, render_presenter_preview
 from .url_source import materialize_url_source
 
 APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-SERVICE_VERSION = "2.0.0"
-PIPELINE_ID = "visual-lecture-engine-v1-content-gate-v7"
+SERVICE_VERSION = "2.1.0"
+PIPELINE_ID = "visual-grammar-v1-presenter-preview-content-gate-v7"
 
 app = FastAPI(title="ISCARB Lecture Studio", version=SERVICE_VERSION)
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
@@ -136,20 +137,20 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         source_text = bundle.combined_local_text()
 
         stage = "source-bundle analysis"
-        _update(job, "analyzing", 10, "1/4 · Reading the primary + supporting bundle and identifying ALL major P1 topics for one fixed 90-minute lecture…")
+        _update(job, "analyzing", 10, "1/4 · Source Lock: identifying all major P1 topics and technical boundaries…")
         profile = service.profile_source(bundle)
         job.source_profile = profile
         save_job(job)
 
         stage = "20-unit generation + readiness alignment"
-        _update(job, "generating", 35, "2/4 · Building 20 Units with complete P1 coverage. Dense material is compressed intelligently, never deferred…")
+        _update(job, "generating", 35, "2/4 · Engineering Compiler: building 20 Units with complete P1 coverage and smart compression…")
         blueprint = service.generate_blueprint(bundle, profile)
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint
         save_job(job)
 
         stage = "Content Gate v7"
-        _update(job, "auditing", 70, "3/4 · Running Content Gate v7 before visual rendering: full coverage, prediction order, Unit roles, provenance, ISCARB capability rubric, bounded assurance, and ETEC atomicity…")
+        _update(job, "auditing", 70, "3/4 · Precision Gate: checking rigor, provenance, ETEC readiness, bounded assurance and Unit-role fidelity…")
         checks = deterministic_gate(blueprint, profile, source_text)
         checks.update(session_scope_gate(blueprint, profile, bundle))
         job.deterministic_checks = checks
@@ -170,7 +171,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         if semantic_available and all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
-            _update(job, "ready", 100, "RELEASE — content passed Precision Gate and is ready for Visual Lecture Engine export.")
+            _update(job, "ready", 100, "RELEASE — content passed Precision Gate. Presenter Preview and all Visual Lecture Engine assets are ready.")
             return
 
         for round_no in range(repair_rounds):
@@ -178,14 +179,14 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
                 break
 
             stage = f"repair round {round_no + 1}"
-            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing Content Gate failures while preserving all primary topics (round {round_no + 1})…")
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing gate failures while preserving all primary topics (round {round_no + 1})…")
             try:
                 blueprint = service.repair(bundle, blueprint, audit, det_fail)
             except Exception as exc:
                 if _is_quota_error(exc):
                     job.blueprint = blueprint
                     job.audit = audit
-                    _update(job, "blocked", 100, "BLOCKED — blueprint preserved. Repair could not run because Gemini quota is exhausted; visual/detailed exports remain available for review.")
+                    _update(job, "blocked", 100, "BLOCKED — blueprint preserved. Presenter Preview and exports remain available; repair waits for Gemini quota.")
                     return
                 raise
 
@@ -212,21 +213,21 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             save_job(job)
 
             if semantic_available and all_required_pass(checks) and audit.overall_pass:
-                _update(job, "ready", 100, f"RELEASE — passed Precision Gate after repair round {round_no + 1}; visual exports are ready.")
+                _update(job, "ready", 100, f"RELEASE — passed Precision Gate after repair round {round_no + 1}; Presenter Preview and assets are ready.")
                 return
 
         job.blueprint = blueprint
         if not semantic_available:
-            _update(job, "blocked", 100, "BLOCKED — blueprint preserved and local gates completed, but semantic release audit is unavailable because Gemini quota is exhausted. Visual and detailed exports remain available for review; no RELEASE is issued without semantic audit.")
+            _update(job, "blocked", 100, "BLOCKED — blueprint preserved and local gates completed; semantic audit is unavailable because Gemini quota is exhausted. Preview and exports remain available, but no RELEASE is issued.")
         else:
-            _update(job, "blocked", 100, "BLOCKED — blueprint generated, but Precision Content Gate found unresolved issues. Exports remain available for faculty review.")
+            _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
 
     except Exception as exc:
         try:
             job = load_job(job_id)
             if job.blueprint is not None and _is_quota_error(exc):
                 job.error = None
-                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; downstream Gemini quota became unavailable during {stage}. Exports remain available.")
+                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; downstream Gemini quota became unavailable during {stage}. Preview and exports remain available.")
             else:
                 job.status = "error"
                 job.progress = 100
@@ -242,9 +243,9 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
 @app.get("/")
 def root():
-    html = (APP_ROOT / "static" / "studio_v2.html").read_text(encoding="utf-8")
+    html_text = (APP_ROOT / "static" / "studio_v21.html").read_text(encoding="utf-8")
     return HTMLResponse(
-        html,
+        html_text,
         headers={
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
@@ -269,7 +270,7 @@ def health():
         "max_sources": 8,
         "pipeline": PIPELINE_ID,
         "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
-        "visual_system": "presenter-deck-v1 + detailed-deck + instructor-guide + blueprint",
+        "visual_system": "20-unit visual grammar + in-browser presenter preview + presenter PPTX + detailed PDF + instructor guide",
     }
 
 
@@ -341,7 +342,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v2.0 — source lock, Precision Content Gate, then Visual Lecture Engine assets…",
+        message="Queued for ISCARB v2.1 — source lock, Precision Gate, then local Visual Grammar + Presenter Preview…",
         filename=display_name,
         model=chosen_model,
         source_manifest=bundle.manifest_lines(),
@@ -358,6 +359,20 @@ def get_job(job_id: str):
         return load_job(job_id).model_dump(by_alias=True)
     except FileNotFoundError:
         raise HTTPException(404, "Job not found")
+
+
+@app.get("/api/jobs/{job_id}/presenter")
+def presenter_preview(job_id: str):
+    try:
+        job = load_job(job_id)
+    except FileNotFoundError:
+        raise HTTPException(404, "Job not found")
+    if job.blueprint is None:
+        raise HTTPException(409, "No blueprint is available yet")
+    return HTMLResponse(
+        render_presenter_preview(job.blueprint, job.status.upper()),
+        headers={"Cache-Control": "no-store", "X-ISCARB-Preview": "visual-grammar-v1"},
+    )
 
 
 @app.get("/api/jobs/{job_id}/export/{fmt}")
@@ -381,7 +396,7 @@ def export_job(job_id: str, fmt: str):
         path = export_docx(job.blueprint, base.with_suffix(".docx"))
         media = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     elif fmt == "pptx":
-        path = export_pptx(job.blueprint, base.with_suffix(".pptx"))
+        path = export_presenter_pptx(job.blueprint, base.with_suffix(".pptx"))
         media = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     elif fmt == "pdf":
         path = export_pdf(job.blueprint, base.with_suffix(".pdf"))
