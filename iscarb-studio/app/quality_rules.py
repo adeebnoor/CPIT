@@ -4,6 +4,14 @@ QUALITY_ADDENDUM = r"""
 
 ISCARB v1.5 QUALITY ADDENDUM — APPLY AS HARD GENERATION RULES
 
+0) EXACT UNIT FUNCTION CONTRACT
+The 20-unit architecture is semantic, not merely numeric. Do not repurpose reserved units.
+- Unit 1 = Engineering Crisis.
+- Unit 2 = DOMAIN SPINE / SYSTEM MAP. It must visibly map ALL major weekly source topic families and their relationships; it is not a normal content lecture.
+- Unit 3 = EXACTLY FIVE WEEKLY CLOs. Its five core bullets must be CLO1, CLO2, CLO3, CLO4, CLO5 and match the top-level CLO objects. Do not teach new technical content on Unit 3.
+- Unit 4 = H-STACK. It must explicitly name all six competencies: Analytical Reasoning, Engineering Judgment, Evidence-Based Reasoning, Socio-Technical Thinking, Risk-Aware Design, Ethical Responsibility.
+Units 5-20 must keep the reserved functions already specified in the master prompt.
+
 1) ONE COHERENT CENTRAL SYSTEM
 Do not fuse unrelated source examples into one fictional platform. Choose ONE coherent central system for the Unit-1-to-Unit-20 decision thread. Other examples present in the weekly source may appear as source examples or comparisons, but must not be merged into the central crisis unless the source itself integrates them.
 
@@ -42,6 +50,9 @@ An assurance case supports a bounded claim; it does not prove absolute security.
 AUDIT_ADDENDUM = r"""
 
 ISCARB v1.5 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
+- Unit 2 is not a true Domain Spine/System Map covering all major weekly source topic families;
+- Unit 3 is not exactly the five measurable CLOs or teaches ordinary technical content instead;
+- Unit 4 does not explicitly name all six H-Stack competencies;
 - the central crisis splices unrelated source examples/domains into one artificial platform;
 - a Unit's source_anchor does not actually support its core_content or a multi-slide synthesis is falsely attributed to one slide;
 - AI, wellbeing, accountability, design-review, falsification, evidence-policy, rubric, readiness, or trend methodology is presented as weekly-source technical content when absent from the source;
@@ -52,13 +63,15 @@ ISCARB v1.5 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
 - Unit 5 lacks a genuine prediction-before-explanation and a first-principles derivation;
 - Unit 10 lacks explicit known/unknown/decision-sensitive-unknown/monitoring reasoning;
 - Unit 20 uses absolute-proof language instead of bounded assurance.
-Do not award source_fidelity_pass or provenance_separation_pass merely because fields are labeled correctly; audit the semantic contents of those fields against the weekly source.
+Do not award source_fidelity_pass, cumulative_fidelity_pass, or provenance_separation_pass merely because fields/tags exist; audit the semantic contents against the weekly source and the exact unit contract.
 """
 
 REPAIR_ADDENDUM = r"""
 
 ISCARB v1.5 REPAIR ADDENDUM
 When repairing:
+- restore Unit 2 as the Domain Spine and Unit 3 as the five CLOs; do not solve this by adding extra units;
+- make Unit 4 explicitly contain all six H-Stack competencies;
 - choose one coherent central system and preserve other source examples only as comparisons;
 - move unsourced pedagogy/context from core_content to enrichment_content rather than deleting useful pedagogy;
 - correct source anchors to the exact supporting slide(s);
