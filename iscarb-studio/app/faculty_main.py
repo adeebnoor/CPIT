@@ -6,8 +6,8 @@ from fastapi.responses import HTMLResponse, FileResponse
 from . import main as engine
 from .faculty_visual import export_faculty_presenter_pptx, render_faculty_presenter_preview
 
-FACULTY_VERSION = "3.2.0"
-PIPELINE_ID = "faculty-studio-v3.2-ztm-inspired-source-library"
+FACULTY_VERSION = "3.3.0"
+PIPELINE_ID = "faculty-studio-v3.3-original-identity-source-library"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
@@ -22,7 +22,7 @@ for route in engine.app.router.routes:
 
 @app.get("/")
 def faculty_studio():
-    html = (engine.APP_ROOT / "static" / "studio_v32.html").read_text(encoding="utf-8")
+    html = (engine.APP_ROOT / "static" / "studio_v33.html").read_text(encoding="utf-8")
     return HTMLResponse(
         html,
         headers={
@@ -48,10 +48,11 @@ def health():
             "version": FACULTY_VERSION,
             "engine_version": engine.SERVICE_VERSION,
             "pipeline": PIPELINE_ID,
-            "public_experience": "verified-original-sources + upgrade-my-lecture + ISCARB-verified + starter-kit",
+            "public_experience": "original-source-library + upgrade-my-lecture + ISCARB-verified + starter-kit",
             "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
-            "design_language": "ZTM-inspired high-contrast faculty UX; original ISCARB identity and assets",
-            "presenter_theme": "white/ink + pink/purple/mint accents over ISCARB visual grammar",
+            "design_language": "ISCARB Original Identity — Saudi academic engineering; no third-party logos or copied design assets",
+            "presenter_theme": "deep green + technical purple + warm gold + hexagonal decision geometry",
+            "institutional_branding": "context links only; no claim of official KAU or Vision 2030 endorsement",
         }
     )
     return data
