@@ -10,8 +10,8 @@ from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .visual_output_v36 import export_presenter_pptx, render_presenter_preview, export_presenter_pdf
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
 
-FACULTY_VERSION = "3.7.0"
-PIPELINE_ID = "faculty-studio-v3.7-approved-heritage-audit-state"
+FACULTY_VERSION = "3.8.0"
+PIPELINE_ID = "faculty-studio-v3.8-approved-heritage-review-mode"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
@@ -24,7 +24,7 @@ for route in engine.app.router.routes:
 
 @app.get("/")
 def faculty_studio():
-    html = (engine.APP_ROOT / "static" / "studio_v36.html").read_text(encoding="utf-8")
+    html = (engine.APP_ROOT / "static" / "studio_v38.html").read_text(encoding="utf-8")
     return HTMLResponse(html, headers={
         "Cache-Control":"no-store, no-cache, must-revalidate, max-age=0",
         "Pragma":"no-cache",
@@ -46,9 +46,9 @@ def health():
         "version": FACULTY_VERSION,
         "engine_version": engine.SERVICE_VERSION,
         "pipeline": PIPELINE_ID,
-        "public_experience": "Approved Saudi educational heritage identity + source library + audit-safe Output Lab + visual provenance",
+        "public_experience": "Approved Saudi educational heritage identity + original source library + audit-safe Output Lab + visual provenance",
         "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
-        "design_language": "Premium Saudi educational heritage — dark academic canvas, Najdi geometry, sand, magenta, cyan, green and gold; no copied institutional logos",
+        "design_language": "Premium Saudi educational heritage — compact desktop composition, Najdi architecture, camel caravan, sand, magenta, cyan, green and gold; no copied institutional logos",
         "presenter_theme": "visual-first 20-unit presenter with explicit visual provenance",
         "output_system": [
             "Visual Presenter Preview + PPTX + Presenter PDF",
@@ -58,7 +58,7 @@ def health():
             "Blueprint JSON",
         ],
         "local_output_lab": True,
-        "output_lab_release_rule": "render/repair only; source-dependent gates are NOT RE-AUDITED without P1",
+        "output_lab_release_rule": "render/repair only; source-dependent gates are NOT RE-AUDITED without P1 and are never displayed as false FAIL",
         "visual_provenance": "source-anchored visual / adapted from P1 / ISCARB visualization",
         "institutional_branding": "context only; no claim of official endorsement",
     })
@@ -92,7 +92,7 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
                 "context are not present, so source fidelity and ETEC source-dependent checks are NOT RE-AUDITED."
             ),
             repair_instruction=(
-                "Use these outputs for faculty review. Re-run Generate New Lecture with the original lecture source "
+                "Use these outputs for faculty review. Re-run Analyze Source with the original lecture source "
                 "when ISCARB Verified release authority is required."
             ),
         )],
@@ -107,7 +107,7 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
             "ISCARB Verified remains disabled until a full source-backed compile is run."
         ),
         filename=blueprint_file.filename or "imported_blueprint.json",
-        model="local-render-only-v3.7",
+        model="local-render-only-v3.8",
         source_manifest=list(bp.source_manifest),
         blueprint=bp,
         audit=audit,
