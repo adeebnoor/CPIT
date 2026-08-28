@@ -26,7 +26,17 @@ def export_docx(bp: Blueprint, out: Path) -> Path:
     doc = Document()
     doc.add_heading(bp.lecture_title, 0)
     doc.add_paragraph(bp.engineering_thesis)
+    doc.add_paragraph(f"Live session: {bp.session_minutes} minutes | 20 Units")
     doc.add_paragraph(f"Named ethical purpose: {bp.named_ethical_purpose}")
+
+    doc.add_heading("Lecture Source Bundle", level=1)
+    for s in bp.source_manifest:
+        doc.add_paragraph(s, style="List Bullet")
+    if bp.deferred_topics:
+        doc.add_heading("Explicitly Deferred Beyond This 90-Minute Session", level=2)
+        for t in bp.deferred_topics:
+            doc.add_paragraph(t, style="List Bullet")
+
     doc.add_heading("Central Engineering Crisis", level=1)
     doc.add_paragraph(bp.central_engineering_crisis)
 
@@ -47,10 +57,10 @@ def export_docx(bp: Blueprint, out: Path) -> Path:
 
     for u in bp.units:
         doc.add_page_break()
-        doc.add_heading(f"UNIT {u.number:02d} — {u.phase} — {u.title}", level=1)
+        doc.add_heading(f"UNIT {u.number:02d} — {u.phase} — {u.title} — {u.planned_minutes} min", level=1)
         doc.add_paragraph(f"Engineering question: {u.engineering_question}")
         if u.core_content:
-            doc.add_heading("Weekly-source technical content", level=2)
+            doc.add_heading("Lecture-bundle technical content", level=2)
             for bullet in u.core_content:
                 doc.add_paragraph(bullet, style="List Bullet")
         if u.pedagogy_content:
@@ -76,7 +86,7 @@ def export_docx(bp: Blueprint, out: Path) -> Path:
         doc.add_paragraph(f"Student action: {u.student_action}")
         doc.add_paragraph(f"Takeaway: {u.takeaway}")
         doc.add_paragraph(f"CIMT: {', '.join(u.cimtlens)} | CLO: {', '.join(u.clo_ids)}")
-        doc.add_paragraph(f"Weekly source anchor: {u.source_anchor or 'N/A — ISCARB pedagogy'}")
+        doc.add_paragraph(f"Source anchor: {u.source_anchor or 'N/A — ISCARB pedagogy'}")
         doc.add_paragraph(f"Evidence: {u.evidence}")
 
     doc.add_page_break()
@@ -101,7 +111,7 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
     for u in bp.units:
         slide = prs.slides.add_slide(prs.slide_layouts[5])
         title = slide.shapes.title
-        title.text = f"{u.number:02d} · {u.phase} · {u.title}"
+        title.text = f"{u.number:02d} · {u.phase} · {u.title} · {u.planned_minutes} min"
         title.text_frame.paragraphs[0].font.size = Pt(24)
 
         tx = slide.shapes.add_textbox(Inches(0.7), Inches(1.15), Inches(7.5), Inches(5.55))
@@ -130,7 +140,7 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
             ("Visual", u.visual_suggestion),
             ("Takeaway", u.takeaway),
             ("Evidence", u.evidence),
-            ("Weekly source", u.source_anchor or "N/A — ISCARB pedagogy"),
+            ("Source", u.source_anchor or "N/A — ISCARB pedagogy"),
         ]
         refs = _readiness_for_unit(bp, u.number)
         if refs:
@@ -143,7 +153,7 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
 
         footer = slide.shapes.add_textbox(Inches(0.7), Inches(6.85), Inches(11.9), Inches(0.35))
         fp = footer.text_frame.paragraphs[0]
-        fp.text = f"CIMT: {', '.join(u.cimtlens)}  |  CLO: {', '.join(u.clo_ids)}  |  IDR: {', '.join(u.inherited_requirements)}"
+        fp.text = f"{u.planned_minutes} min  |  CIMT: {', '.join(u.cimtlens)}  |  CLO: {', '.join(u.clo_ids)}  |  IDR: {', '.join(u.inherited_requirements)}"
         fp.font.size = Pt(9)
 
     prs.save(out)
@@ -155,14 +165,24 @@ def export_pdf(bp: Blueprint, out: Path) -> Path:
     story = [
         Paragraph(bp.lecture_title, styles["Title"]),
         Paragraph(bp.engineering_thesis, styles["BodyText"]),
+        Paragraph(f"<b>Live session:</b> {bp.session_minutes} minutes | 20 Units", styles["BodyText"]),
         Paragraph(f"<b>Named ethical purpose:</b> {bp.named_ethical_purpose}", styles["BodyText"]),
         Spacer(1, 8),
+        Paragraph("<b>LECTURE SOURCE BUNDLE</b>", styles["BodyText"]),
     ]
+    for source in bp.source_manifest:
+        story.append(Paragraph("• " + source, styles["BodyText"]))
+    if bp.deferred_topics:
+        story.append(Paragraph("<b>DEFERRED BEYOND THIS 90-MINUTE SESSION</b>", styles["BodyText"]))
+        for topic in bp.deferred_topics:
+            story.append(Paragraph("• " + topic, styles["BodyText"]))
+    story.append(PageBreak())
+
     for u in bp.units:
-        story.append(Paragraph(f"UNIT {u.number:02d} — {u.phase} — {u.title}", styles["Heading1"]))
+        story.append(Paragraph(f"UNIT {u.number:02d} — {u.phase} — {u.title} — {u.planned_minutes} min", styles["Heading1"]))
         story.append(Paragraph(f"<b>Engineering question:</b> {u.engineering_question}", styles["BodyText"]))
         if u.core_content:
-            story.append(Paragraph("<b>WEEKLY-SOURCE TECHNICAL CONTENT</b>", styles["BodyText"]))
+            story.append(Paragraph("<b>LECTURE-BUNDLE TECHNICAL CONTENT</b>", styles["BodyText"]))
             for bullet in u.core_content:
                 story.append(Paragraph("• " + bullet, styles["BodyText"]))
         if u.pedagogy_content:
@@ -185,7 +205,7 @@ def export_pdf(bp: Blueprint, out: Path) -> Path:
                 story.append(Paragraph(f"<b>{r.criterion}</b> — 4: {r.distinguished} | 3: {r.ready} | 2: {r.developing} | 1: {r.not_yet_ready}", styles["BodyText"]))
         story.append(Paragraph(f"<b>Student action:</b> {u.student_action}", styles["BodyText"]))
         story.append(Paragraph(f"<b>Takeaway:</b> {u.takeaway}", styles["BodyText"]))
-        story.append(Paragraph(f"<b>Weekly source:</b> {u.source_anchor or 'N/A — ISCARB pedagogy'}", styles["BodyText"]))
+        story.append(Paragraph(f"<b>Source:</b> {u.source_anchor or 'N/A — ISCARB pedagogy'}", styles["BodyText"]))
         story.append(PageBreak())
     SimpleDocTemplate(str(out), pagesize=A4).build(story)
     return out
