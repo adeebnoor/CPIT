@@ -2,83 +2,97 @@ from __future__ import annotations
 
 QUALITY_ADDENDUM = r"""
 
-ISCARB v1.5 QUALITY ADDENDUM — APPLY AS HARD GENERATION RULES
+ISCARB v1.6 QUALITY ADDENDUM — HARD GENERATION RULES
 
-0) EXACT UNIT FUNCTION CONTRACT
-The 20-unit architecture is semantic, not merely numeric. Do not repurpose reserved units.
-- Unit 1 = Engineering Crisis.
-- Unit 2 = DOMAIN SPINE / SYSTEM MAP. It must visibly map ALL major weekly source topic families and their relationships; it is not a normal content lecture.
-- Unit 3 = EXACTLY FIVE WEEKLY CLOs. Its five core bullets must be CLO1, CLO2, CLO3, CLO4, CLO5 and match the top-level CLO objects. Do not teach new technical content on Unit 3.
-- Unit 4 = H-STACK. It must explicitly name all six competencies: Analytical Reasoning, Engineering Judgment, Evidence-Based Reasoning, Socio-Technical Thinking, Risk-Aware Design, Ethical Responsibility.
-Units 5-20 must keep the reserved functions already specified in the master prompt.
+A) TRIPLE PROVENANCE — DO NOT MIX THESE LAYERS
+Every Unit has three distinct content channels:
+1. core_content = ONLY weekly-source-derived technical content. No ISCARB pedagogy, no current trend claims, no Saudi facts, no AI guidance, no rubric/evidence/assurance method.
+2. pedagogy_content = ISCARB instructional scaffolding and learner reasoning: CLO wording, H-Stack, PREDICT/DERIVE prompts, Senior Design Review, known/unknown framework, falsification protocol, peer critique, portfolio instructions, evidence policy, rubric method, assurance-case method, ethical/accountability framing.
+3. enrichment_content = contextual/current/cultural/external extensions beyond the weekly source, such as contemporary trend examples or Saudi contextual facts. Every enrichment claim needs an enrichment_basis. If no verified source is supplied, state it as an explicit hypothetical scenario rather than a fact.
+Pure pedagogy Units (especially 3, 4, 16, 18, 19, 20) may have empty core_content. Do NOT invent a weekly-source claim simply to fill core_content or source_anchor.
 
-1) ONE COHERENT CENTRAL SYSTEM
-Do not fuse unrelated source examples into one fictional platform. Choose ONE coherent central system for the Unit-1-to-Unit-20 decision thread. Other examples present in the weekly source may appear as source examples or comparisons, but must not be merged into the central crisis unless the source itself integrates them.
+B) ONE COHERENT CENTRAL SYSTEM
+Do not fuse unrelated source examples into one fictional platform. Choose ONE coherent central system for the Unit-1-to-Unit-20 decision thread. Other source examples may be used as comparisons but not merged into the crisis.
 
-2) PROVENANCE BY CONTENT TYPE
-core_content is strictly weekly-source-derived technical content.
-The following are normally ISCARB enrichment unless explicitly present in the weekly source and must therefore be placed in enrichment_content, not core_content: AI guidance, practitioner wellbeing/cognitive-load claims, ethical/accountability interpretation, Senior Design Review method, falsification method, constraint-mutation method, evidence-policy method, rubric methodology, readiness interpretation, and contemporary trend claims.
-For these units, anchor the enrichment to a source-derived technical mechanism, but do not pretend the pedagogy itself came from the slide.
+C) SOURCE ANCHOR ACCURACY
+source_anchor must support only core_content. If core_content is empty, source_anchor may be "N/A — ISCARB PEDAGOGY" or a clearly labeled synthesis anchor. If several source slides support core_content, cite the correct range/list. Never cite a slide to legitimize pedagogy or enrichment.
 
-3) SOURCE ANCHOR ACCURACY
-source_anchor must support the technical bullets actually present in core_content. If a unit synthesizes several source slides, cite a range/list such as "SLIDES 28-32" or "SLIDES 20,23-24" rather than a single unrelated slide. Assessment-only synthesis may use "SYNTHESIS OF SLIDES ...". Never cite one slide merely because the unit needs a non-empty anchor.
+D) NAMED ETHICAL PURPOSE
+Set named_ethical_purpose to one explicit professional/ethical purpose appropriate to the week (for example entrusted professional responsibility/amanah, public safety, integrity of records, prevention of avoidable harm). Unit 1 pedagogy_content must state this purpose as the professional reason the decision matters. Do not force religious vocabulary if artificial.
 
-4) HYPOTHETICAL CONTEXT LANGUAGE
-If enrichment_basis says hypothetical, every claim that sounds like a rule, mandate, national requirement, regulation, infrastructure fact, or system capability must be phrased explicitly as a scenario assumption (for example: "Assume that..." or "In this hypothetical scenario..."). Do not write "national initiatives require" or "market rules mandate" without a verified external authority supplied to the system.
+E) HYPOTHETICAL CONTEXT LANGUAGE
+When a context is hypothetical, use explicit phrases such as "Assume that..." or "In this hypothetical Saudi scenario...". Never state invented national rules, mandates, data residency, infrastructure capabilities, SLAs, or regulations as facts.
 
-5) SYNTHETIC EXERCISE DATA
-Invented numbers are allowed only when clearly labeled as synthetic/normalized exercise data and only when the numbers are used in a learner calculation, sensitivity analysis, or decision threshold. Do not create decorative precision. Prefer normalized scores or ranges when real values are absent.
+F) SYNTHETIC EXERCISE DATA
+Invented numbers are permitted only as clearly labeled synthetic/normalized exercise data, and only if used by the learner in a calculation, sensitivity analysis, or decision threshold. Never present synthetic values as observed facts. Do not invent a technical formula and call it a standard risk formula. If the weekly source supplies no formula, use a qualitative/ordinal risk matrix or explicitly define a local exercise score.
 
-6) READINESS ATOMICITY
-ETEC SLOs are all-or-nothing readiness claims. Claim an SLO only when the weekly source plus the learner task can demonstrate every material component of that SLO. Partial topic overlap is NOT a readiness target.
-Examples: do not claim SLO9.1.2 merely because the lecture teaches input validation if it does not also teach/assess the other material elements stated in that SLO; do not claim SLO8.1.5 merely because the weekly source discusses deployment if version control/project hosting/deployment-services performance is not actually taught and assessed.
-Prefer the minimum sufficient alignment: one fully evidenced SLO is better than four partial alignments.
-Use the exact official SLO→KLO map supplied separately. Never infer KLO mappings.
+G) ETEC READINESS — MINIMUM SUFFICIENT ALIGNMENT
+ETEC SLOs are all-or-nothing claims. Select the smallest set of SLOs that the weekly source PLUS learner task can fully demonstrate. Partial overlap does not count.
+- Do not claim SLO9.1.2 for input validation alone; it materially also includes client/server-side development, cookies, and JavaScript.
+- Do not claim SLO7.1.3 for misuse-case discussion alone; it requires detailed use cases, event flows, and functional-requirement relationships.
+- Do not claim SLO8.1.5 for deployment discussion alone; it materially includes version control and project hosting.
+- Prefer one fully evidenced SLO over four partial SLOs.
+- Copy the official SLO→KLO map exactly; never infer it.
+For every readiness_alignment item, atomicity_evidence must explain how EVERY material component of each selected SLO is taught/assessed. If this cannot be stated truthfully, remove that SLO.
 
-7) ELITE ENGINEERING SEQUENCE
-Unit 5 must visibly include a prediction before explanation and a first-principles derivation. Use explicit labels in the content or student action: PREDICT, CONSTRAINT, DERIVATION, NAMED PRINCIPLE.
-Unit 8 must present two defensible alternatives and a decision criterion. A clear "A versus B" comparison is acceptable; do not force artificial Option A/Option B wording.
-By Unit 10, uncertainty must be operationalized explicitly as KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
+H) ELITE ENGINEERING SEQUENCE
+Unit 5 pedagogy_content must explicitly include PREDICT, CONSTRAINT, DERIVATION, and NAMED PRINCIPLE. Do not invent a formula absent from the source.
+Unit 8 must present at least two defensible designs using source-derived mechanisms; do not solve the trade-off with new external controls such as token gateways or cryptography unless taught in the source.
+Unit 10 MUST be MARIS and must include in pedagogy_content: KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR. Unknowns may not introduce unsupported technical mechanisms.
+Unit 15 pedagogy_content must contain explicit headings/phrases "AI MAY ASSIST" and "AI MUST NOT BE TRUSTED AUTONOMOUSLY". Avoid empirical claims about AI failure rates/capabilities unless a verified external source is supplied; use normative audit instructions instead.
+Unit 17 must mutate a constraint but must not pre-solve the redesign with new technologies absent from Units 1–15. Require the learner to adapt source-derived mechanisms.
 
-8) ASSESSMENT UNITS MUST NOT TEACH NEW WEEKLY CONTENT
-Units 16-20 synthesize, mutate, assess, prove, and assure. They may reuse source mechanisms, but must not introduce a major weekly technical concept for the first time.
+I) UNIT FUNCTION FIDELITY
+Unit 2 = Domain Spine of all major source topic families.
+Unit 3 = exactly five visible CLOs in pedagogy_content (CLO1...CLO5).
+Unit 4 = six visible H-Stack competencies in pedagogy_content.
+Units 6–10 are MARIS; Units 11–15 ATQAN; Units 16–20 MAYYIZ.
+Units 16–20 synthesize/assess; they do not introduce major weekly content for the first time.
 
-9) ASSURANCE LANGUAGE
-An assurance case supports a bounded claim; it does not prove absolute security. Avoid "undeniable", "proves security", "proven secure", "guarantees security", "proving critical service survivability", or equivalent certainty language. Prefer "supports a bounded claim" and make residual uncertainty explicit.
+J) TREND, WELLBEING, AI, ACCOUNTABILITY
+- Unit 13: source-derived enduring principles belong in core_content; contemporary practices such as cloud-native, microservices, Zero Trust or IaC belong in enrichment_content unless explicitly in the source.
+- Unit 14: source deployment/configuration mechanisms may be core_content; wellbeing/cognitive-load interpretation belongs in pedagogy_content unless externally verified.
+- Unit 12: source logging/permission mechanisms may be core_content; ethical/accountability chain and amanah belong in pedagogy_content. Do not invent immutable/non-repudiable controls unless source-supported.
+- Unit 15: source mechanisms being audited may be core_content; AI audit protocol belongs in pedagogy_content.
+
+K) EVIDENCE / RUBRIC / ASSURANCE
+Unit 18 pedagogy_content = CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY. Do not introduce formal verification/static analysis as source facts unless present in the weekly source.
+Unit 19 pedagogy_content explains the 4-level rubric; rubric_criteria contains >=6 complete criterion×level descriptors. Do not reward synthetic risk formulas or unsupported technical practices.
+Unit 20 pedagogy_content constructs a bounded assurance case. Never use absolute proof language. Prefer "supports a bounded claim". Source-derived technical subclaims must not be stronger than the source (for example distribution minimizes consequences; do not claim it guarantees/prevents cascading outage).
 """
 
 AUDIT_ADDENDUM = r"""
 
-ISCARB v1.5 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
-- Unit 2 is not a true Domain Spine/System Map covering all major weekly source topic families;
-- Unit 3 is not exactly the five measurable CLOs or teaches ordinary technical content instead;
-- Unit 4 does not explicitly name all six H-Stack competencies;
-- the central crisis splices unrelated source examples/domains into one artificial platform;
-- a Unit's source_anchor does not actually support its core_content or a multi-slide synthesis is falsely attributed to one slide;
-- AI, wellbeing, accountability, design-review, falsification, evidence-policy, rubric, readiness, or trend methodology is presented as weekly-source technical content when absent from the source;
-- hypothetical Saudi/contextual claims are phrased as factual mandates, regulations, national requirements, or verified system capabilities;
-- synthetic numbers create false precision or are not used by a learner decision/calculation;
-- any ETEC SLO is only partially supported by the weekly source/task;
-- any selected SLO→KLO mapping differs from the exact official mapping supplied in the ETEC map;
-- Unit 5 lacks a genuine prediction-before-explanation and a first-principles derivation;
-- Unit 10 lacks explicit known/unknown/decision-sensitive-unknown/monitoring reasoning;
-- Unit 20 uses absolute-proof language instead of bounded assurance.
-Do not award source_fidelity_pass, cumulative_fidelity_pass, or provenance_separation_pass merely because fields/tags exist; audit the semantic contents against the weekly source and the exact unit contract.
+ISCARB v1.6 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
+- source-derived technical claims, ISCARB pedagogy, and contextual enrichment are mixed into the wrong provenance channel;
+- a pedagogical Unit fabricates source bullets merely to satisfy core_content;
+- source_anchor is used to legitimize pedagogy/enrichment rather than core_content;
+- Unit 1 lacks a named ethical/professional purpose or reveals the diagnosis;
+- unrelated source examples are fused into one crisis;
+- a mathematical/technical formula is introduced without source support and not explicitly defined as a local synthetic exercise score;
+- a hypothetical contextual claim is written as a real Saudi mandate/regulation/capability;
+- Unit 10 is not MARIS or lacks KNOWN/UNKNOWN/DECISION-SENSITIVE UNKNOWN/WHAT WE MONITOR;
+- Unit 13 places contemporary trend claims in core_content when absent from the weekly source;
+- Unit 15 lacks explicit AI MAY ASSIST / AI MUST NOT BE TRUSTED AUTONOMOUSLY language, or makes unsupported empirical AI claims;
+- Unit 17 solves the mutation using technical controls not taught earlier/source-supported;
+- Unit 18/19/20 pedagogy masquerades as weekly-source technical content;
+- any ETEC SLO is only partially supported. Treat atomicity_evidence skeptically and compare it to the full official SLO wording and weekly source;
+- the selected SLO→KLO mapping differs from the exact official map;
+- assurance language overstates what evidence can establish.
+Do not award PASS because fields are labeled correctly; audit the semantic content.
 """
 
 REPAIR_ADDENDUM = r"""
 
-ISCARB v1.5 REPAIR ADDENDUM
+ISCARB v1.6 REPAIR ADDENDUM
 When repairing:
-- restore Unit 2 as the Domain Spine and Unit 3 as the five CLOs; do not solve this by adding extra units;
-- make Unit 4 explicitly contain all six H-Stack competencies;
-- choose one coherent central system and preserve other source examples only as comparisons;
-- move unsourced pedagogy/context from core_content to enrichment_content rather than deleting useful pedagogy;
-- correct source anchors to the exact supporting slide(s);
-- rewrite hypothetical claims as explicit assumptions;
-- remove readiness targets that only partially satisfy an ETEC SLO;
-- correct all SLO→KLO mappings to the supplied official map;
-- make Unit 5 prediction/derivation explicit;
-- make Unit 10 known/unknown/monitoring explicit;
-- preserve bounded assurance language in Unit 20.
+- preserve correct source-derived technical content;
+- MOVE ISCARB teaching/assessment scaffolding from core_content into pedagogy_content;
+- MOVE current/contextual claims into enrichment_content or rewrite as explicit scenario assumptions;
+- allow core_content to be empty in pure pedagogy units; never fabricate source content;
+- correct phases and fixed Unit functions;
+- remove unsupported formulas/technologies rather than rationalizing them;
+- reduce ETEC alignment to the minimum fully evidenced SLO set and provide truthful atomicity_evidence;
+- reuse source mechanisms for Unit 17 adaptation;
+- keep Unit 20 assurance bounded and evidence-proportionate.
 """
