@@ -35,7 +35,7 @@ jobs:
           html = home.text
           assert 'iscarb-approved-hero-inline' in html
           assert 'data:image/jpeg;base64,' in html
-          assert 'v4.0.2 · Complete Hero + Link QA' in html
+          assert 'v4.0.2 · Visual Lecture Engine v2' in html
           assert 'id="about"' in html
           assert "sources.id='sources'" in html
           assert "a.href='#sources'" in html
@@ -57,6 +57,9 @@ jobs:
           assert health.status_code == 200
           h = health.json()
           assert h['version'] == '4.0.2'
+          assert h['visual_lecture_engine'] == 'v2'
+          assert h['source_visual_primary'] == 'uploaded-p1-pdf'
+          assert h['source_visual_public_url'] == 'best-effort-only'
           assert h['hero_delivery'] == 'inline-data-uri'
           assert h['hero_static_dependency'] is False
           assert h['source_library_verified'] is True
@@ -120,6 +123,7 @@ jobs:
           from pathlib import Path
           from pptx import Presentation
           from pptx.enum.shapes import MSO_SHAPE_TYPE
+          from app import source_visual_patch_v2  # activates explicit-anchor-first policy
           from app.models import Blueprint
           from app.source_visuals import _build_pdf_registry, plan_for_unit
           from app.visual_output_v36 import export_presenter_pptx, export_presenter_pdf, render_presenter_preview
