@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from pptx.dml.color import RGBColor
@@ -8,9 +9,6 @@ from .models import Blueprint
 from . import visual_engine as ve
 
 # ISCARB Original Identity — Saudi academic engineering language.
-# The palette is intentionally original to ISCARB while drawing from the visual
-# vocabulary of Saudi higher education: deep green, technical purple, warm gold,
-# high-contrast neutral typography, and hexagonal geometry.
 INK = RGBColor(29, 41, 33)
 MUTED = RGBColor(101, 113, 105)
 PAPER = RGBColor(250, 249, 246)
@@ -28,6 +26,25 @@ SOFT_TEAL = RGBColor(231, 240, 241)
 SOFT_PURPLE = RGBColor(238, 232, 245)
 SOFT_GOLD = RGBColor(247, 241, 224)
 SOFT_RED = RGBColor(250, 235, 236)
+
+
+def _faculty_short(text: str, n: int = 145) -> str:
+    """Presenter-first text budget.
+
+    The Detailed Deck and Instructor Guide preserve full wording. Presenter assets
+    intentionally cap most visual text so a slide behaves like a teaching surface,
+    not a projected document. Existing renderer-specific limits are respected when
+    shorter; longer limits are capped near one short sentence.
+    """
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    cap = min(int(n), 96)
+    if len(text) <= cap:
+        return text
+    cut = text[: cap - 1].rstrip()
+    # Prefer a clean word boundary when possible.
+    if " " in cut:
+        cut = cut.rsplit(" ", 1)[0]
+    return cut.rstrip(" ,;:-") + "…"
 
 
 def _apply_theme() -> None:
@@ -58,6 +75,8 @@ def _apply_theme() -> None:
         "ATQAN": SOFT_GOLD,
         "MAYYIZ": SOFT_TEAL,
     }
+    # Visual-first presenter budget; full content stays intact in Blueprint/Detailed/Guide.
+    ve._short = _faculty_short
 
 
 def export_faculty_presenter_pptx(blueprint: Blueprint, path: Path) -> Path:
