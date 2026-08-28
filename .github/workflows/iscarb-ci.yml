@@ -34,8 +34,15 @@ jobs:
           home = client.get('/')
           assert home.status_code == 200, home.text
           html = home.text
-          assert 'hero_override_v401.css?v=4.0.1' in html
-          assert 'v4.0.1' in html
+
+          # Production-critical visual checks: the approved hero must be inline,
+          # not dependent on a /static stylesheet that can fail to mount.
+          assert 'iscarb-approved-hero-inline' in html
+          assert 'data:image/jpeg;base64,' in html
+          assert 'v4.0.2 · Complete Hero + Link QA' in html
+          assert 'id="about"' in html
+          assert "sources.id='sources'" in html
+          assert "a.href='#sources'" in html
 
           expected_sources = [
               'https://www.slideshare.net/slideshow/ch10-dependable-systems/43151515',
@@ -53,18 +60,22 @@ jobs:
           health = client.get('/api/health')
           assert health.status_code == 200
           h = health.json()
-          assert h['version'] == '4.0.1'
+          assert h['version'] == '4.0.2'
+          assert h['hero_delivery'] == 'inline-data-uri'
+          assert h['hero_static_dependency'] is False
           assert h['source_library_verified'] is True
           assert h['verified_source_count'] == 8
+          assert set(h['navigation_qa']) == {'home','sources','upgrade','outputs','guides','about'}
 
           starter = client.get('/starter-kit')
           assert starter.status_code == 200
           assert 'ISCARB Faculty Starter Kit' in starter.text
 
+          # API contract checks that do not spend Gemini quota.
           assert client.post('/api/compile', data={}).status_code == 400
           bad_bp = client.post('/api/render-blueprint', files={'blueprint_file': ('bad.txt', b'{}', 'text/plain')})
           assert bad_bp.status_code == 400
           assert client.get('/api/jobs/not-a-real-job/presenter').status_code == 404
           assert client.get('/api/jobs/not-a-real-job/export/pptx').status_code == 404
-          print('ISCARB smoke tests passed')
+          print('ISCARB v4.0.2 smoke tests passed')
           PY
