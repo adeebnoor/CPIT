@@ -1,20 +1,21 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse
 
 from . import main as engine
+from .heritage_pptx import export_cimt_heritage_pptx
 
 FACULTY_VERSION = "3.0.0"
 PIPELINE_ID = "faculty-studio-v3-cimt-heritage-iscarb-verified"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
-# Reuse the proven engine routes and static mount, but replace its public landing
-# page and health endpoint with the adoption-oriented Faculty Studio shell.
+# Reuse the proven engine routes and static mount, but replace its public landing,
+# health endpoint and presenter-PPTX export with the adoption-oriented v3 shell.
 for route in engine.app.router.routes:
     path = getattr(route, "path", None)
-    if path in {"/", "/api/health"}:
+    if path in {"/", "/api/health", "/api/jobs/{job_id}/export/{fmt}"}:
         continue
     app.router.routes.append(route)
 
@@ -52,3 +53,27 @@ def health():
         }
     )
     return data
+
+
+@app.get("/api/jobs/{job_id}/export/{fmt}")
+def faculty_export(job_id: str, fmt: str):
+    fmt = fmt.lower()
+    if fmt != "pptx":
+        return engine.export_job(job_id, fmt)
+
+    try:
+        job = engine.load_job(job_id)
+    except FileNotFoundError:
+        raise HTTPException(404, "Job not found")
+    if job.blueprint is None:
+        raise HTTPException(409, "No blueprint is available yet")
+    if job.status not in {"ready", "blocked", "error"}:
+        raise HTTPException(409, "Compilation is still in progress")
+
+    path = engine.EXPORTS / f"ISCARB_{job_id}_Presenter_CIMT_Heritage.pptx"
+    path = export_cimt_heritage_pptx(job.blueprint, path)
+    return FileResponse(
+        path,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        filename=path.name,
+    )
