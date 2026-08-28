@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 Phase = Literal["IFHAM", "MARIS", "ATQAN", "MAYYIZ"]
 CIMTLens = Literal["C", "I", "M", "T", "N/A"]
 AlignmentStrength = Literal["direct", "supporting"]
+ScopeFit = Literal["FIT", "COMPRESS", "MIXED"]
 
 
 class TopicFamily(BaseModel):
@@ -21,6 +22,26 @@ class SourceProfile(BaseModel):
     topic_families: list[TopicFamily] = Field(min_length=1)
     technical_boundaries: list[str] = Field(default_factory=list)
     source_warnings: list[str] = Field(default_factory=list)
+
+    # v1.7: one live lecture is a 90-minute scope, even when the bundle is larger.
+    session_minutes: int = 90
+    scope_fit: ScopeFit = "FIT"
+    in_scope_families: list[str] = Field(default_factory=list)
+    deferred_topics: list[str] = Field(default_factory=list)
+    source_conflicts: list[str] = Field(default_factory=list)
+    source_manifest: list[str] = Field(default_factory=list)
+
+    @field_validator("in_scope_families", "deferred_topics", "source_conflicts", "source_manifest", mode="before")
+    @classmethod
+    def clean_scope_lists(cls, value):
+        if isinstance(value, list):
+            result = []
+            for item in value:
+                text = str(item).strip()
+                if text and text not in result:
+                    result.append(text)
+            return result[:20]
+        return value
 
 
 class CLO(BaseModel):
@@ -94,12 +115,10 @@ class LectureUnit(BaseModel):
     title: str
     engineering_question: str
 
-    # TRIPLE PROVENANCE (v1.6)
-    # core_content: ONLY technical content demonstrably supported by the weekly source.
-    # pedagogy_content: ISCARB instructional/assessment scaffolding (CLOs, H-Stack,
-    # design review, falsification protocol, evidence policy, rubric logic, assurance, etc.).
-    # enrichment_content: external/current/cultural/contextual extensions not present in the source.
-    # Pure pedagogy units may legitimately have no core_content.
+    # TRIPLE PROVENANCE
+    # core_content: ONLY technical content demonstrably supported by the user-supplied lecture bundle.
+    # pedagogy_content: ISCARB instructional/assessment scaffolding.
+    # enrichment_content: external/current/cultural/contextual extensions not present in the lecture bundle.
     core_content: list[str] = Field(default_factory=list, max_length=8)
     pedagogy_content: list[str] = Field(default_factory=list, max_length=8)
     enrichment_content: list[str] = Field(default_factory=list, max_length=6)
@@ -117,6 +136,7 @@ class LectureUnit(BaseModel):
     evidence: str = ""
     contextual_enrichment: bool = False
     verify_before_release: bool = False
+    planned_minutes: int = Field(default=0, ge=0, le=15)
 
     @field_validator("core_content", "pedagogy_content", mode="before")
     @classmethod
@@ -167,13 +187,23 @@ class Blueprint(BaseModel):
     rubric_criteria: list[RubricCriterion] = Field(min_length=6)
     release_notes: list[str] = Field(default_factory=list)
 
+    # v1.7 session contract.
+    session_minutes: int = 90
+    source_manifest: list[str] = Field(default_factory=list)
+    deferred_topics: list[str] = Field(default_factory=list)
+
     model_config = {"populate_by_name": True}
 
-    @field_validator("release_notes", mode="before")
+    @field_validator("release_notes", "source_manifest", "deferred_topics", mode="before")
     @classmethod
-    def trim_release_notes(cls, value):
+    def trim_blueprint_lists(cls, value):
         if isinstance(value, list):
-            return [x for x in value if str(x).strip()][:12]
+            result = []
+            for item in value:
+                text = str(item).strip()
+                if text and text not in result:
+                    result.append(text)
+            return result[:20]
         return value
 
 
@@ -203,6 +233,8 @@ class JobState(BaseModel):
     message: str
     filename: str = ""
     model: str = ""
+    source_manifest: list[str] = Field(default_factory=list)
+    lecture_focus: str = ""
     source_profile: SourceProfile | None = None
     blueprint: Blueprint | None = None
     audit: AuditReport | None = None
