@@ -7,29 +7,27 @@ SOURCE_PROFILE_PROMPT = r"""
 Analyze ONLY the supplied LECTURE SOURCE BUNDLE. Do not redesign the lecture yet.
 
 SESSION CONTRACT
-- This compilation is for ONE live university lecture of exactly 90 minutes.
-- The bundle contains exactly one PRIMARY source [P1] plus zero or more SUPPORTING sources [S1], [S2], ... .
-- [P1] defines the COMPLETE mandatory lecture scope, terminology, and precedence when sources conflict.
-- SUPPORTING sources may clarify, evidence, exemplify, contextualize, or deepen P1. They must not replace or crowd out P1.
-- A faculty-supplied focus may change emphasis and depth, but it must NOT remove any major P1 topic family.
+- ONE live university lecture of exactly 90 minutes.
+- Exactly one PRIMARY [P1] plus optional SUPPORTING [S1], [S2], ... .
+- [P1] defines COMPLETE mandatory lecture scope, terminology, and precedence.
+- Supporting sources clarify/evidence/contextualize/deepen P1; they never replace/crowd out P1.
+- Faculty focus may change emphasis/depth but may not remove a major P1 family.
 
 FULL-COVERAGE RULE
-Identify ALL major technical topic families in P1. Every one of them must remain in the 90-minute lecture.
-- topic_families MUST contain ALL major P1 technical families.
-- in_scope_families MUST repeat ALL of those family names exactly.
-- deferred_topics MUST be empty for P1. Never defer a primary topic because the lecture is long.
-- scope_fit = FIT when P1 naturally fits 90 minutes.
-- scope_fit = COMPRESS when P1 is dense. COMPRESS means intelligent synthesis, grouping, unequal depth allocation, and removal of repetition — never omission.
-- Do NOT use MIXED merely because P1 contains many topic families. A real lecture may be broad and still must be covered.
-- Supporting-only material that does not help teach P1 may simply be ignored; it is not part of mandatory lecture coverage.
+Identify ALL major technical topic families in P1 and keep them in the 90-minute lecture.
+- topic_families = ALL major P1 technical families.
+- in_scope_families repeats those names exactly.
+- deferred_topics is empty for P1.
+- FIT = natural fit; COMPRESS = intelligent synthesis/grouping/unequal depth without omission.
+- Do not call P1 MIXED merely because it is broad.
 
 SOURCE CONTROL
-- Preserve P1 terminology, framing, mechanisms, examples, and level of detail.
+- Preserve P1 terminology, mechanisms, examples, and technical boundaries.
 - Do not add outside technical content.
-- Detect meaningful source conflicts and record them in source_conflicts. P1 wins when sources conflict.
-- Every source_anchor must identify the bundle source, e.g. "[P1] SLIDES 7-12" or "[S2] p.4".
-- Every primary topic-family anchor must include [P1].
-- source_manifest must copy the source labels from the bundle manifest.
+- Record meaningful source conflicts; P1 wins.
+- Every source_anchor identifies [P1]/[S#].
+- Every primary topic-family anchor includes [P1].
+- source_manifest copies bundle labels.
 """
 
 MASTER_PROMPT = r"""
@@ -39,49 +37,45 @@ ISCARB is cumulative:
 CIMT = Concept → Implementation → Measurement → Trend.
 IMAM = Ifham → Maris → Atqan → Mayyiz.
 HIMMA = five CLOs → H-Stack → decisions → portfolio → evidence → rubric → assurance.
-ISCARB adds problem framing, first-principles reasoning, uncertainty, falsification, critique, constraint mutation, AI auditing, accountability, readiness, and proof of capability.
+ISCARB adds ill-structured framing, first-principles reasoning, uncertainty, falsification, critique, constraint mutation, AI auditing, accountability, readiness, and proof of capability.
 
 PRIMARY OUTCOME
-Cover the complete PRIMARY lecture in 90 minutes while making the learner FRAME → DERIVE → DESIGN → MEASURE → BREAK → CRITIQUE → DEFEND → ADAPT → PROVE → OWN one engineering decision.
+Cover the complete P1 lecture in 90 minutes while making the learner FRAME → PREDICT → DERIVE → DESIGN → IMPLEMENT → MEASURE → BREAK → CRITIQUE → ADAPT → PROVE → DECIDE.
 
 1. 90-MINUTE FULL-COVERAGE CONTRACT
-- This is ONE lecture with a fixed 90-minute timebox.
-- ALL major P1 topic families selected by the Source Profile are mandatory.
-- Do NOT defer, omit, replace, or move a P1 topic to another session because the source is large.
-- deferred_topics must remain empty.
-- If the primary lecture is dense, compress by merging related material, eliminating repetition, tightening prose, and varying depth. Never compress by deleting a major P1 topic.
-- Every major P1 topic family must appear explicitly in source_topic_families and topic_coverage and be introduced by Unit 15.
-- A Unit may contain several closely related P1 subtopics when technically coherent.
-- Units 16-20 BRIEF/LAUNCH portfolio, mutation, evidence, rubric, and assurance work; the full take-home artifact is not completed live.
-- session_minutes must be 90. Copy source_manifest from the Source Profile.
+- ALL major P1 topic families are mandatory.
+- Never defer/delete a P1 family because the source is dense.
+- Compress by merging related content, removing repetition, tightening prose, and varying depth.
+- Every major P1 family appears in source_topic_families + topic_coverage and is first taught by Unit 15.
+- Units 16-20 synthesize/assess/launch evidence work only.
+- session_minutes = 90; deferred_topics = [].
 
 2. SOURCE-BUNDLE HIERARCHY
-- [P1] PRIMARY sets the complete mandatory scope, terminology, and conflict precedence.
-- [S#] SUPPORTING sources may clarify/deepen/evidence/contextualize P1 topics.
-- Supporting-only topics are not mandatory and must never displace P1 content.
-- If supporting material conflicts with P1, preserve P1 and flag the conflict.
-- Every technical source_anchor must identify [P1]/[S#]. Every primary topic-family coverage anchor must include [P1].
+- P1 sets mandatory scope/terminology/conflict precedence.
+- S# sources clarify/deepen/evidence/contextualize P1 only.
+- Supporting-only topics never displace P1.
+- Every technical source_anchor names [P1]/[S#]; every primary coverage anchor contains [P1].
 
 3. TRIPLE PROVENANCE
-For every Unit, separate three layers:
-- core_content: ONLY technical content supported by [P1] or a relevant [S#].
-- pedagogy_content: ISCARB teaching/assessment scaffolding, reasoning prompts, decision-review structure, CLO/H-Stack wording, evidence/rubric/assurance method.
-- enrichment_content: contextual/current/cultural/external material beyond the supplied lecture bundle. Supply enrichment_basis. If not verified, rewrite as explicit scenario assumptions rather than facts.
-Never move pedagogy into core_content merely to populate a source anchor. Pure pedagogy Units may have empty core_content.
+For every Unit:
+- core_content = ONLY technical content supported by P1/S#.
+- pedagogy_content = ONLY ISCARB instructional/reasoning/assessment scaffolding.
+- enrichment_content = external/current/cultural/contextual extension beyond the supplied bundle; provide enrichment_basis.
+Pure pedagogy Units may have empty core_content.
+
+CRITICAL: pedagogy_content/student_action/takeaway/evidence are NOT a hiding place for new technical mechanisms. Do not introduce unsupplied row-level encryption, immutable logging, penetration testing, IDS, Zero Trust, containers, infrastructure-as-code, proxy/token gateways, cryptography, or similar controls outside enrichment_content unless source-supported.
 
 4. SOURCE FIDELITY
-The user-supplied lecture bundle is the sole authority for technical definitions, mechanisms, formulas, architectures, metrics, processes, failure modes, design rules, and technical claims.
-Never invent cryptography, Zero Trust, token gateways, algorithms, formulas, numeric performance values, regulations, or technical capabilities unless they are in [P1]/[S#] or explicitly labeled as synthetic/hypothetical exercise data.
-source_anchor supports core_content only and must identify [P1]/[S#].
+User-supplied sources are the sole authority for technical definitions, mechanisms, formulas, architectures, metrics, processes, failure modes, and design rules.
+Synthetic values are allowed only when clearly labeled and used pedagogically; prefer normalized units to real-world currency when no real values exist.
 
 5. ETEC READINESS
-Use the supplied ETEC Academic Standards for Information Technology Programs 2025 v2.0 as readiness authority, not as the lecture technical source.
-- EKUs are excluded from standardized-test readiness targeting.
-- Select the MINIMUM SUFFICIENT GKU/SKU/SLO set fully demonstrated by the complete 90-minute P1 coverage + learner task.
-- Partial overlap is not readiness.
-- Copy official SLO→KLO mappings exactly.
-- Each readiness_alignment must include truthful atomicity_evidence explaining how every material component of every selected SLO is taught/assessed.
-- Gulf readiness webpage is orientation only.
+Use embedded ETEC IT 2025 only as readiness authority.
+- Exclude EKUs.
+- Select MINIMUM SUFFICIENT fully demonstrated GKU/SKU/SLO set.
+- Partial overlap does not count.
+- Copy official SLO→KLO exactly.
+- atomicity_evidence explains every material SLO component.
 
 6. CUMULATIVE REQUIREMENTS
 IDR-1 conceptual foundations.
@@ -90,7 +84,7 @@ IDR-3 assessed engineering task mapped to CLOs.
 IDR-4 trend anticipation.
 IDR-5 named ethical purpose.
 IDR-6 authentic Saudi context or explicitly hypothetical Saudi scenario that changes the decision.
-IDR-7 explicit IFHAM/MARIS/ATQAN/MAYYIZ progression.
+IDR-7 IFHAM/MARIS/ATQAN/MAYYIZ progression.
 IDR-8 accountability annotation.
 IDR-9 practitioner wellbeing tied to operations/design.
 IDR-10 topic-specific critical AI literacy.
@@ -101,98 +95,86 @@ IDR-14 demonstrable readiness through an authentic artifact.
 
 7. ELITE ENGINEERING REQUIREMENTS
 EER-1 ill-structured problem framing.
-EER-2 prediction before explanation.
+EER-2 prediction before explanation IN VISIBLE DELIVERY ORDER.
 EER-3 first-principles derivation before naming where feasible.
 EER-4 multiple defensible designs.
 EER-5 explicit trade-offs.
-EER-6 consequential uncertainty: KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
-EER-7 estimation before precision only with source values or clearly synthetic/normalized assumptions.
-EER-8 falsification: what would make us abandon the decision?
+EER-6 KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
+EER-7 estimation before precision only with source values or clearly synthetic normalized assumptions.
+EER-8 falsification: what evidence makes us abandon the decision?
 EER-9 constraint mutation.
-EER-10 critique of a competing design.
+EER-10 critique competing design.
 EER-11 Senior Design Review.
 EER-12 authentic professional artifact.
 
 8. ONE DECISION THREAD
-Use ONE coherent central system from Unit 1 through Unit 20. Do not create a separate case for each source file. All supplied sources serve one decision thread.
-Journey: OBSERVE → FRAME → PREDICT → DERIVE → DESIGN → IMPLEMENT → MEASURE → ATTACK → CRITIQUE → ADAPT → PROVE → DECIDE.
+Choose ONE coherent central system for Units 1-20. Do not merge unrelated P1 examples. Other P1 examples may be explicitly labeled comparisons only. named_ethical_purpose, Saudi scenario, portfolio, mutation, evidence, and assurance must stay on the same central system.
 
 9. PHASES
-Units 1–5 = IFHAM.
-Units 6–10 = MARIS.
-Units 11–15 = ATQAN.
-Units 16–20 = MAYYIZ.
+Units 1–5 IFHAM; 6–10 MARIS; 11–15 ATQAN; 16–20 MAYYIZ.
 
-10. EXACT UNIT FUNCTIONS
-UNIT 1 — Engineering Crisis. Incomplete evidence, conflict, missing information, human consequence. Do NOT reveal diagnosis. pedagogy_content must state the named_ethical_purpose.
-UNIT 2 — Domain Spine/System Map. Map ALL major P1 topic families and relationships.
-UNIT 3 — Exactly five measurable CLOs. Put exactly CLO1…CLO5 visibly in pedagogy_content, matching the top-level CLO objects. Do not teach ordinary content here.
-UNIT 4 — H-Stack. Put all six named competencies in pedagogy_content: Analytical Reasoning; Engineering Judgment; Evidence-Based Reasoning; Socio-Technical Thinking; Risk-Aware Design; Ethical Responsibility.
-UNIT 5 — Frame → PREDICT → CONSTRAINT → DERIVATION → NAMED PRINCIPLE. Do not invent a standard formula absent from supplied sources.
+10. EXACT UNIT FUNCTIONS — DOMINANT PURPOSE
+UNIT 1 — Engineering Crisis + professional/ethical responsibility. Start with incomplete evidence/conflict/human consequence. Do NOT front-load definitions or reveal diagnosis. If core_content exists, use only source-backed observations/evidence, not explanatory teaching. pedagogy_content states named_ethical_purpose tied only to the central system.
+UNIT 2 — Domain Spine/System Map of ALL P1 families.
+UNIT 3 — Exactly five measurable CLOs, visibly CLO1…CLO5 in pedagogy_content; no ordinary source teaching.
+UNIT 4 — H-Stack with exactly the six named competencies.
+UNIT 5 — FIRST-PRINCIPLES PREDICTION GATE. engineering_question itself MUST ask the learner to PREDICT BEFORE seeing/naming the model. Sequence must be PREDICT → CONSTRAINT → DERIVATION → NAMED PRINCIPLE. Do not title the Unit with the final principle if that gives away the answer. Core content should expose source facts/constraints without prematurely giving the derived conclusion.
 UNIT 6 — Mechanism Deep Dive: input → mechanism → output → assumption → failure mode.
-UNIT 7 — Implementation grounded in the supplied lecture bundle.
-UNIT 8 — At least two defensible alternatives + explicit trade-off using source-derived mechanisms. Synthetic values only if clearly labeled and used.
-UNIT 9 — Measurement + falsification; distinguish passing a test from supporting a claim.
-UNIT 10 — MARIS Senior Design Review. Put review protocol and KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR in pedagogy_content.
-UNIT 11 — Saudi Context. If no verified Saudi system facts are supplied, use an explicitly hypothetical Saudi professional scenario. The context must materially change the design decision.
-UNIT 12 — Accountability. Source mechanisms in core_content; ethical/accountability chain and amanah/professional purpose in pedagogy_content.
-UNIT 13 — Trend. Enduring source principles in core_content; contemporary trend claims in enrichment_content unless source-supported.
-UNIT 14 — Practitioner Wellbeing. Source deployment/operations mechanisms in core_content; wellbeing/cognitive-load interpretation in pedagogy_content.
-UNIT 15 — Critical AI Literacy. Source mechanisms being audited may be core_content. Put exact phrases AI MAY ASSIST and AI MUST NOT BE TRUSTED AUTONOMOUSLY plus Claim→Assumption→Source Check→Test→Failure Search→Human Sign-off in pedagogy_content.
-UNIT 16 — Portfolio Challenge. Authentic professional artifact; problem framing, first principles, alternatives, trade-offs, risk, context, evidence, accountability, readiness. Include selected ETEC targets. Orientation: https://gulf.edu.sa/standardized-exams-readiness
-UNIT 17 — Constraint Mutation + Peer Critique. Mutation/scaffolding in pedagogy_content; scenario in scenario_assumptions. Do not pre-solve with technologies absent from Units 1-15.
-UNIT 18 — Evidence Policy only. pedagogy_content must use CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY. No new major technical concept.
-UNIT 19 — Four-level rubric. pedagogy_content explains criteria; top-level rubric_criteria contains >=6 criteria with Distinguished / Ready / Developing / Not Yet Ready descriptors.
-UNIT 20 — Bounded Assurance Case. pedagogy_content: top claim → five CLO subclaims → evidence → warrant → counter-evidence → residual uncertainty → APPROVE / CONDITIONALLY APPROVE / REDESIGN / REJECT. Never imply absolute proof.
+UNIT 7 — Implementation grounded only in supplied mechanisms; student_action may not introduce a new unsupplied control.
+UNIT 8 — At least two defensible source-derived alternatives + explicit trade-off. Synthetic data clearly labeled; prefer normalized units.
+UNIT 9 — Measurement + falsification; state what evidence would force abandonment/revision.
+UNIT 10 — MARIS Senior Design Review + KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
+UNIT 11 — SAUDI CONTEXT is the dominant title/question/action. Integrate one or more P1 mechanisms into the same central system under a materially decision-changing Saudi constraint. If no verified Saudi facts supplied, explicitly say hypothetical/assume; never invent mandates.
+UNIT 12 — ACCOUNTABILITY is dominant. Source logging/permission mechanisms may be core; ethical/accountability chain belongs in pedagogy. Do not invent immutable logging or other new controls.
+UNIT 13 — TREND/FUTURE is dominant in title/question/action. Use source enduring principles in core. If no verified trend source exists, frame future technology as a design exploration/question, not a factual adoption claim. Vague "standard literature" is not an acceptable basis.
+UNIT 14 — PRACTITIONER WELLBEING is dominant in title/question/action. Integrate source operational/recovery mechanisms and explain how architecture changes alert burden, cognitive load, incident pressure, or recovery workload. Do not invent new technical tools.
+UNIT 15 — CRITICAL AI LITERACY is dominant in title/question/action while auditing a P1 mechanism. Include exact phrases AI MAY ASSIST and AI MUST NOT BE TRUSTED AUTONOMOUSLY plus Claim→Assumption→Source Check→Test→Failure Search→Human Sign-off.
+UNIT 16 — Portfolio Challenge on same central system. Require problem framing, first principles, alternatives, trade-offs, risk, context, evidence, accountability, readiness. Include Gulf orientation link only as orientation.
+UNIT 17 — Constraint Mutation + Peer Critique on same central system. Do not pre-solve with technology absent from Units 1-15/P1.
+UNIT 18 — Evidence Policy only: CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY. Evidence methods must come from P1 or learner-generated artifacts; do not introduce penetration testing or other methods unless source-supported.
+UNIT 19 — Four-level ISCARB Capability Rubric. At minimum use six explicit criteria: (1) Technical correctness + source fidelity; (2) First-principles/mechanism reasoning; (3) Alternatives + trade-off judgment; (4) Evidence + falsification/verification; (5) Constraint adaptation + risk-aware redesign; (6) ETEC readiness + professional accountability. Descriptors must be weekly-topic-specific. May add AI/provenance and socio-technical ethics.
+UNIT 20 — Bounded Assurance Case on same central system. Top claim → five CLO subclaims → evidence → warrant → counter-evidence → residual uncertainty → APPROVE / CONDITIONALLY APPROVE / REDESIGN / REJECT. Never use absolute verbs such as guarantee, eliminate, prevent, prove secure, zero risk, always. Prefer reduces/mitigates/addresses/supports/is designed to maintain/within stated bounds.
 
 11. FULL COVERAGE + DEPTH ALLOCATION
-All major P1 topic families must be introduced by Unit 15. Use unequal depth intentionally:
-- DEEP: concepts that drive mechanisms, architectural decisions, failure modes, trade-offs, or readiness evidence.
-- CONCISE: descriptive/details that are necessary for complete lecture coverage but do not require a separate derivation.
-- INTEGRATED: related source points that can be taught together without changing their technical meaning.
-Do not label any major P1 topic as optional or deferred.
+Every P1 family first appears by Unit 15. Use DEEP / CONCISE / INTEGRATED allocation without omission.
 
 12. INTERACTION MINIMUM
-At least: prediction before explanation; one valid estimate when appropriate; peer critique; Senior Design Review; falsification; constraint mutation.
+At least prediction before explanation, one appropriate estimate, peer critique, Senior Design Review, falsification, constraint mutation.
 
 13. OUTPUT DISCIPLINE
-- Exactly 20 Units and exactly five CLOs.
-- Every Unit has one dominant intellectual purpose even if it integrates several related P1 points.
-- source_topic_families and topic_coverage must account for ALL major P1 families.
-- deferred_topics must be empty.
-- source_manifest copies the Source Profile.
-- No fake precision, decorative Saudi label, decorative ETEC badge, or claim of learner attainment without learner evidence.
+- Exactly 20 Units and five CLOs.
+- Every reserved Unit has one DOMINANT function, reflected in title + engineering_question + student_action, not merely one matching bullet.
+- No fake precision, decorative Saudi label, decorative ETEC badge, vague enrichment basis, or learner-attainment claim without evidence.
 """
 
 AUDIT_PROMPT = r"""
-You are the ISCARB Content Gate Release Auditor. Be skeptical. Audit the candidate against:
-1) user-supplied lecture bundle = sole technical authority, with [P1] primary precedence;
-2) supplied ETEC IT 2025 profile and official SLO→KLO map = readiness authority only;
-3) ISCARB triple-provenance contract;
-4) ONE fixed 90-minute session with COMPLETE P1 topic-family coverage.
+You are the ISCARB Content Gate Release Auditor. Be skeptical. Audit against:
+1) P1 = sole mandatory technical authority with full coverage;
+2) ETEC IT 2025 = readiness authority only;
+3) triple provenance;
+4) fixed 90-minute session;
+5) actual learner-visible pedagogical order and reserved-Unit dominance.
 
-Fail SESSION/COVERAGE when any major P1 family is omitted, deferred, replaced, or missing from Domain Spine/topic_coverage; when compression deletes content instead of compressing depth/repetition; or when supporting sources crowd out P1.
-Fail source fidelity when technical claims are unsupported, source anchors do not identify [P1]/[S#], supporting sources silently override [P1], or synthetic/external claims masquerade as source.
-Fail provenance separation when ISCARB pedagogy is put in core_content, external/current/contextual claims are not in enrichment_content, or hypothetical claims are written as facts.
-Fail engineering rigor when framing, first principles, defensible alternatives, uncertainty, falsification, critique, mutation, or evidence are superficial.
-Fail cumulative fidelity when reserved Unit functions, phases, named ethical purpose, CIMT/IMAM/HIMMA inheritance, Saudi context, trend, wellbeing, AI literacy, assessment, assurance, or COMPLETE P1 coverage are missing/decorative.
-Fail readiness when any selected SLO is only partially supported, the SLO→KLO map is incorrect, atomicity_evidence is not truthful, an EKU is targeted, or Gulf orientation is treated as competency authority.
-Return precise issues and repair instructions. overall_pass is true only when ALL five pass flags are true and the 90-minute full-coverage contract is satisfied.
+Fail source fidelity for unsupported technical claims/anchors/synthetic claims masquerading as source.
+Fail provenance separation when pedagogy/student actions hide new technology, enrichment has vague basis, or external factual claims are outside enrichment.
+Fail engineering rigor when prediction occurs after explanation, first-principles reasoning is decorative, uncertainty/falsification/trade-offs are superficial, or assurance uses absolute claims.
+Fail cumulative fidelity when Units 11/13/14/15 do not have Saudi Context / Trend / Practitioner Wellbeing / AI Literacy as their dominant title/question/action, when Unit 19 lacks ISCARB capability criteria, or any inherited requirement is decorative.
+Fail one-decision-thread when ethics/context/portfolio/mutation/assurance drift to another system.
+Fail readiness for partial SLOs, wrong mappings, EKUs, or decorative readiness.
+Return precise issues and repair instructions. overall_pass only if all five pass flags are true.
 """
 
 REPAIR_PROMPT = r"""
-Repair the COMPLETE blueprint using the audit and deterministic failures.
-Maintain exactly 20 Units, exactly five CLOs, and exactly 90 minutes.
-Restore COMPLETE P1 topic-family coverage; never solve overload by deferring or deleting a primary topic.
-Compress by merging related source material, removing repetition, tightening explanations, and varying depth.
-Keep [P1] primary precedence; use [S#] only to clarify/support/contextualize P1.
-Preserve correct user-supplied technical content.
-Move content to the correct provenance channel rather than deleting valuable pedagogy.
-Allow core_content to be empty in pure-pedagogy Units.
-Remove unsupported formulas/technologies and false precision.
-Use one coherent crisis.
-Restore exact Unit functions/phases.
-Reduce ETEC alignment to the minimum fully evidenced SLO set with exact official KLO mappings and truthful atomicity_evidence.
-Every technical source_anchor must identify [P1]/[S#], and every primary topic-family coverage entry must retain [P1].
-Do not introduce new technical content merely to satisfy a gate.
+Repair the COMPLETE blueprint, not just metadata.
+- Preserve 90 minutes, 20 Units, five CLOs, and complete P1 family coverage.
+- Make learner-visible prediction actually occur before explanation; use Unit 5 engineering_question as the prediction gate.
+- Restore dominant reserved functions: Unit11 Saudi Context; Unit12 Accountability; Unit13 Trend; Unit14 Practitioner Wellbeing; Unit15 Critical AI Literacy.
+- Remove unsupplied technical mechanisms from pedagogy/student_action/evidence; use source-native mechanisms or move legitimate external ideas to clearly based enrichment.
+- Replace vague enrichment bases with supplied-source support or explicit hypothetical/future-exploration language.
+- Keep one central system across ethical purpose, Saudi context, portfolio, mutation, evidence, and assurance.
+- Rebuild Unit19 around explicit ISCARB capability dimensions with weekly-topic-specific descriptors.
+- Rewrite Unit20 guarantees/eliminates/prevents/absolute claims into bounded evidence-proportionate language.
+- Preserve correct P1 content/source anchors.
+- Keep ETEC mapping minimum, exact, and atomic.
+- Do not invent new technical content merely to satisfy a gate.
 """
