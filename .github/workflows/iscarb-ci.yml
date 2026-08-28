@@ -1,0 +1,70 @@
+name: ISCARB Faculty Studio CI
+
+on:
+  push:
+    paths:
+      - 'iscarb-studio/**'
+      - '.github/workflows/iscarb-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r iscarb-studio/requirements.txt
+      - name: Compile Python
+        run: python -m compileall -q iscarb-studio/app
+      - name: Application smoke tests
+        env:
+          PYTHONPATH: iscarb-studio
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+          from app.start import app
+
+          client = TestClient(app)
+
+          home = client.get('/')
+          assert home.status_code == 200, home.text
+          html = home.text
+          assert 'hero_override_v401.css?v=4.0.1' in html
+          assert 'v4.0.1' in html
+
+          expected_sources = [
+              'https://www.slideshare.net/slideshow/ch10-dependable-systems/43151515',
+              'https://www.slideshare.net/slideshow/ch11-reliability-engineering/43151516',
+              'https://www.slideshare.net/slideshow/ch12-safety-engineering/43151517',
+              'https://www.slideshare.net/slideshow/ch14-5148075/5148075',
+              'https://www.slideshare.net/slideshow/ch14-resilience-engineering/43151521',
+              'https://www.slideshare.net/slideshow/ch15-software-reuse/43151523',
+              'https://www.slideshare.net/slideshow/ch16-component-based-software-engineering/43151525',
+              'https://www.slideshare.net/slideshow/ch17-distributed-software-engineering/43151527',
+          ]
+          for url in expected_sources:
+              assert url in html, url
+
+          health = client.get('/api/health')
+          assert health.status_code == 200
+          h = health.json()
+          assert h['version'] == '4.0.1'
+          assert h['source_library_verified'] is True
+          assert h['verified_source_count'] == 8
+
+          starter = client.get('/starter-kit')
+          assert starter.status_code == 200
+          assert 'ISCARB Faculty Starter Kit' in starter.text
+
+          assert client.post('/api/compile', data={}).status_code == 400
+          bad_bp = client.post('/api/render-blueprint', files={'blueprint_file': ('bad.txt', b'{}', 'text/plain')})
+          assert bad_bp.status_code == 400
+          assert client.get('/api/jobs/not-a-real-job/presenter').status_code == 404
+          assert client.get('/api/jobs/not-a-real-job/export/pptx').status_code == 404
+          print('ISCARB smoke tests passed')
+          PY
