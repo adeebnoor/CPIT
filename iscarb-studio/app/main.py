@@ -21,7 +21,7 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.1.1")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.2.0")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
@@ -60,12 +60,12 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
 
             if all_required_pass(checks) and audit.overall_pass:
                 job.blueprint = blueprint
-                _update(job, "ready", 100, "RELEASE — lecture passed ISCARB source, fidelity, and engineering-rigor gates.")
+                _update(job, "ready", 100, f"RELEASE — lecture passed ISCARB gates using {service.active_model}.")
                 return
 
             if round_no >= repair_rounds:
                 job.blueprint = blueprint
-                _update(job, "blocked", 100, "BLOCKED — unresolved release-gate issues remain. Review the audit and re-run after correction.")
+                _update(job, "blocked", 100, f"BLOCKED — unresolved release-gate issues remain. Last model: {service.active_model}.")
                 return
 
             _update(job, "repairing", 72 + min(round_no * 10, 15), f"Repair round {round_no + 1}: regenerating only to resolve detected gate failures…")
@@ -78,7 +78,7 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
             job = load_job(job_id)
             job.status = "error"
             job.progress = 100
-            job.message = "Compilation failed."
+            job.message = "Compilation failed after automatic retry/failover attempts."
             job.error = f"{type(exc).__name__}: {exc}"
             save_job(job)
         except Exception:
@@ -92,11 +92,14 @@ def root():
 
 @app.get("/api/health")
 def health():
+    fallbacks = os.getenv("GEMINI_FALLBACK_MODELS", "gemini-3.6-flash,gemini-3.5-flash")
     return {
         "ok": True,
-        "version": "1.1.1",
+        "version": "1.2.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "default_model": os.getenv("GEMINI_MODEL", "gemini-3.7-flash"),
+        "fallback_models": [x.strip() for x in fallbacks.split(",") if x.strip()],
+        "automatic_retry": True,
         "url_sources": True,
     }
 
