@@ -23,14 +23,14 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-SERVICE_VERSION = "1.9.1"
-PIPELINE_ID = "content-gate-v7-quota-resilient-semantic-audit"
+SERVICE_VERSION = "2.0.0"
+PIPELINE_ID = "visual-lecture-engine-v1-content-gate-v7"
 
 app = FastAPI(title="ISCARB Lecture Studio", version=SERVICE_VERSION)
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
-RELIABLE_DEFAULT_MODEL = "gemini-3.6-flash"
+RELIABLE_DEFAULT_MODEL = "auto"
 MAX_SUPPORTING = 7
 
 
@@ -149,7 +149,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         save_job(job)
 
         stage = "Content Gate v7"
-        _update(job, "auditing", 70, "3/4 · Running Content Gate v7: full coverage, real prediction order, dominant Unit roles, provenance hygiene, ISCARB rubric capability, bounded assurance, and ETEC atomicity…")
+        _update(job, "auditing", 70, "3/4 · Running Content Gate v7 before visual rendering: full coverage, prediction order, Unit roles, provenance, ISCARB capability rubric, bounded assurance, and ETEC atomicity…")
         checks = deterministic_gate(blueprint, profile, source_text)
         checks.update(session_scope_gate(blueprint, profile, bundle))
         job.deterministic_checks = checks
@@ -170,24 +170,22 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         if semantic_available and all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
-            _update(job, "ready", 100, "RELEASE — the full primary lecture is covered within 90 minutes and passed Content Gate v7, pedagogy rigor, provenance, bounded assurance, and ETEC atomicity.")
+            _update(job, "ready", 100, "RELEASE — content passed Precision Gate and is ready for Visual Lecture Engine export.")
             return
 
         for round_no in range(repair_rounds):
-            # If the only missing element is the unavailable semantic audit, do not spend
-            # another generation request merely to rewrite a deterministically clean lecture.
             if not det_fail and not semantic_available:
                 break
 
             stage = f"repair round {round_no + 1}"
-            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing Content Gate v7 failures while preserving ALL primary lecture topics (round {round_no + 1})…")
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing Content Gate failures while preserving all primary topics (round {round_no + 1})…")
             try:
                 blueprint = service.repair(bundle, blueprint, audit, det_fail)
             except Exception as exc:
                 if _is_quota_error(exc):
                     job.blueprint = blueprint
                     job.audit = audit
-                    _update(job, "blocked", 100, "BLOCKED — the current blueprint was preserved. Repair could not run because Gemini quota is exhausted; retry repair when quota is available.")
+                    _update(job, "blocked", 100, "BLOCKED — blueprint preserved. Repair could not run because Gemini quota is exhausted; visual/detailed exports remain available for review.")
                     return
                 raise
 
@@ -214,23 +212,21 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             save_job(job)
 
             if semantic_available and all_required_pass(checks) and audit.overall_pass:
-                _update(job, "ready", 100, f"RELEASE — passed Content Gate v7 after repair round {round_no + 1} with full P1 coverage.")
+                _update(job, "ready", 100, f"RELEASE — passed Precision Gate after repair round {round_no + 1}; visual exports are ready.")
                 return
 
         job.blueprint = blueprint
         if not semantic_available:
-            _update(job, "blocked", 100, "BLOCKED — blueprint preserved and deterministic Content Gate completed, but the semantic release audit is unavailable because Gemini quota is exhausted. No RELEASE is issued without semantic audit.")
+            _update(job, "blocked", 100, "BLOCKED — blueprint preserved and local gates completed, but semantic release audit is unavailable because Gemini quota is exhausted. Visual and detailed exports remain available for review; no RELEASE is issued without semantic audit.")
         else:
-            _update(job, "blocked", 100, "BLOCKED — blueprint generated, but the 90-minute full-coverage/pedagogy/provenance/rigor/readiness gate found unresolved issues.")
+            _update(job, "blocked", 100, "BLOCKED — blueprint generated, but Precision Content Gate found unresolved issues. Exports remain available for faculty review.")
 
     except Exception as exc:
         try:
             job = load_job(job_id)
-            # Once a blueprint exists, preserve it as BLOCKED rather than destroying
-            # an otherwise useful run merely because a downstream service failed.
             if job.blueprint is not None and _is_quota_error(exc):
                 job.error = None
-                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; downstream Gemini quota became unavailable during {stage}. Retry the audit/repair later.")
+                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; downstream Gemini quota became unavailable during {stage}. Exports remain available.")
             else:
                 job.status = "error"
                 job.progress = 100
@@ -246,9 +242,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
 @app.get("/")
 def root():
-    html = (APP_ROOT / "static" / "index.html").read_text(encoding="utf-8")
-    html = html.replace("v1.8 · 90-Min Full Coverage", "v1.9.1 · Quota-Resilient Precision Gate")
-    html = html.replace("Content Gate v6", "Content Gate v7")
+    html = (APP_ROOT / "static" / "studio_v2.html").read_text(encoding="utf-8")
     return HTMLResponse(
         html,
         headers={
@@ -275,7 +269,7 @@ def health():
         "max_sources": 8,
         "pipeline": PIPELINE_ID,
         "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
-        "visual_system": "content-first; lecture visual renderer follows release",
+        "visual_system": "presenter-deck-v1 + detailed-deck + instructor-guide + blueprint",
     }
 
 
@@ -347,7 +341,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v1.9.1 — 90 minutes with full primary lecture coverage and quota-resilient Precision Content Gate…",
+        message="Queued for ISCARB v2.0 — source lock, Precision Content Gate, then Visual Lecture Engine assets…",
         filename=display_name,
         model=chosen_model,
         source_manifest=bundle.manifest_lines(),
