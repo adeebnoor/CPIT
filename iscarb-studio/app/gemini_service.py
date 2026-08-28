@@ -10,6 +10,7 @@ from pydantic import BaseModel, ValidationError
 
 from .models import SourceProfile, Blueprint, AuditReport
 from .prompts import SOURCE_PROFILE_PROMPT, MASTER_PROMPT, AUDIT_PROMPT, REPAIR_PROMPT
+from .readiness import READINESS_CONTEXT
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -19,13 +20,7 @@ class GeminiNotConfigured(RuntimeError):
 
 
 class GeminiService:
-    """Fast, source-grounded Gemini client with one source upload per job.
-
-    v1.2 deliberately performs schema validation locally. Large nested server-side
-    response schemas can trigger INVALID_ARGUMENT even when the JSON schema is
-    logically valid. We still request application/json and validate every result
-    with Pydantic before it can enter the ISCARB release pipeline.
-    """
+    """Fast source-grounded Gemini client with local validation and one source upload per job."""
 
     def __init__(self, model: str | None = None):
         self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
@@ -36,13 +31,12 @@ class GeminiService:
             from google import genai  # type: ignore
             from google.genai import types  # type: ignore
         except Exception as exc:
-            raise GeminiNotConfigured(
-                "google-genai is not installed. Run: pip install -r requirements.txt"
-            ) from exc
+            raise GeminiNotConfigured("google-genai is not installed. Run: pip install -r requirements.txt") from exc
         self._types = types
         self.client = genai.Client(api_key=self.api_key)
         self._uploaded = None
         self._uploaded_path: str | None = None
+        self.active_model = self.model
 
     @staticmethod
     def _is_retryable(exc: Exception) -> bool:
@@ -52,17 +46,14 @@ class GeminiService:
         text = str(exc).lower()
         return any(marker in text for marker in (
             "429", "500", "502", "503", "504", "unavailable", "high demand",
-            "temporarily overloaded", "resource exhausted", "rate limit",
-            "internal server error",
+            "temporarily overloaded", "resource exhausted", "rate limit", "internal server error",
         ))
 
     @staticmethod
     def _backoff(attempt: int) -> None:
-        # Keep the UI responsive. One short retry before moving to a fallback.
         time.sleep(1.5 * (attempt + 1))
 
     def _source_content(self, file_path: Path):
-        """Use text directly for extracted web sources; upload binary docs once."""
         suffix = file_path.suffix.lower()
         if suffix in {".txt", ".md"}:
             text = file_path.read_text(encoding="utf-8", errors="replace")
@@ -95,7 +86,6 @@ class GeminiService:
             self._uploaded_path = None
 
     def _models_for(self, preferred: str) -> list[str]:
-        # Reliability first. Do not spend minutes retrying one overloaded model.
         ordered = [preferred]
         if preferred == "gemini-3.7-flash":
             ordered += ["gemini-3.6-flash", "gemini-3.5-flash"]
@@ -113,7 +103,6 @@ class GeminiService:
 
     @staticmethod
     def _compact_schema(schema: Type[T]) -> str:
-        # The schema is guidance in the prompt; Pydantic remains the hard validator.
         raw = schema.model_json_schema(by_alias=True)
         return json.dumps(raw, ensure_ascii=False, separators=(",", ":"))
 
@@ -131,11 +120,9 @@ class GeminiService:
         model = preferred_model or self.model
         schema_text = self._compact_schema(schema)
         full_prompt = (
-            prompt
-            + extra_text
-            + "\n\nOUTPUT CONTRACT: Return ONLY one JSON object. It must validate against this JSON schema. "
-            + "Do not use markdown fences.\nJSON_SCHEMA:\n"
-            + schema_text
+            prompt + extra_text
+            + "\n\nOUTPUT CONTRACT: Return ONLY one JSON object validating against this schema. No markdown fences."
+            + "\nJSON_SCHEMA:\n" + schema_text
         )
 
         last_exc: Exception | None = None
@@ -152,16 +139,16 @@ class GeminiService:
                         contents=[source, full_prompt],
                         config=config,
                     )
+                    self.active_model = candidate
                     last_text = response.text or ""
                     try:
                         return schema.model_validate_json(last_text)
                     except ValidationError as validation_exc:
-                        # One concise format repair. No expensive semantic re-generation here.
                         if attempt == 0:
                             full_prompt += (
-                                "\n\nYour previous JSON failed local validation. Correct ONLY the JSON structure and return the complete object."
-                                "\nVALIDATION_ERROR:\n" + str(validation_exc)[:1800]
-                                + "\nPREVIOUS_JSON:\n" + last_text[:40_000]
+                                "\n\nFORMAT REPAIR ONLY: Previous JSON failed local validation. Return the complete corrected JSON object."
+                                "\nVALIDATION_ERROR:\n" + str(validation_exc)[:2200]
+                                + "\nPREVIOUS_JSON:\n" + last_text[:50_000]
                             )
                             continue
                         raise RuntimeError(
@@ -172,7 +159,6 @@ class GeminiService:
                     if isinstance(exc, RuntimeError) and "did not match" in str(exc):
                         raise
                     if not self._is_retryable(exc):
-                        # A non-transient request error will usually affect every model.
                         raise
                     if attempt == 0:
                         self._backoff(attempt)
@@ -193,7 +179,10 @@ class GeminiService:
         )
 
     def generate_blueprint(self, file_path: Path, profile: SourceProfile) -> Blueprint:
-        extra = "\nSOURCE PROFILE (coverage checklist):\n" + profile.model_dump_json(indent=2)
+        extra = (
+            "\nSOURCE PROFILE (coverage checklist):\n" + profile.model_dump_json(indent=2)
+            + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n" + READINESS_CONTEXT
+        )
         return self._generate_structured(
             file_path=file_path,
             prompt=MASTER_PROMPT,
@@ -205,10 +194,9 @@ class GeminiService:
 
     def audit(self, file_path: Path, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
         extra = (
-            "\nCANDIDATE BLUEPRINT:\n"
-            + blueprint.model_dump_json(by_alias=True, indent=2)
-            + "\nDETERMINISTIC CHECK FAILURES:\n"
-            + json.dumps(deterministic_failures or [], ensure_ascii=False)
+            "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
+            + "\nCANDIDATE BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
+            + "\nDETERMINISTIC CHECK FAILURES:\n" + json.dumps(deterministic_failures or [], ensure_ascii=False)
         )
         return self._generate_structured(
             file_path=file_path,
@@ -221,12 +209,10 @@ class GeminiService:
 
     def repair(self, file_path: Path, blueprint: Blueprint, audit: AuditReport, deterministic_failures: list[str]) -> Blueprint:
         extra = (
-            "\nCURRENT BLUEPRINT:\n"
-            + blueprint.model_dump_json(by_alias=True, indent=2)
-            + "\nAUDIT REPORT:\n"
-            + audit.model_dump_json(indent=2)
-            + "\nDETERMINISTIC FAILURES:\n"
-            + json.dumps(deterministic_failures, ensure_ascii=False)
+            "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
+            + "\nCURRENT BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
+            + "\nAUDIT REPORT:\n" + audit.model_dump_json(indent=2)
+            + "\nDETERMINISTIC FAILURES:\n" + json.dumps(deterministic_failures, ensure_ascii=False)
         )
         return self._generate_structured(
             file_path=file_path,
