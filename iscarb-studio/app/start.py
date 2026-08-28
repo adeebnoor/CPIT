@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-"""ISCARB process bootstrap for Faculty Studio v3.8.
+"""ISCARB process bootstrap for Faculty Studio v4.0 Final Candidate.
 
-Gate v9 remains the source-backed release gate. v3.8 adds source-safe structural
-normalization and keeps Output Lab in REVIEW MODE rather than manufacturing
-source-dependent PASS/FAIL results without the original P1 bundle.
+Gate v9 remains the source-backed release gate. v4.0 keeps Output Lab in
+REVIEW MODE and never manufactures source-dependent PASS/FAIL results without
+the original P1 bundle.
 """
 
 import uuid
@@ -21,7 +21,7 @@ _original_timebox = engine.apply_90_minute_timebox
 _original_health = engine.health
 
 
-def _timebox_v38(bp, profile, bundle):
+def _timebox_v40(bp, profile, bundle):
     bp = _original_timebox(bp, profile, bundle)
     try:
         source_text = bundle.combined_local_text()
@@ -30,14 +30,15 @@ def _timebox_v38(bp, profile, bundle):
     return normalize_source_backed_v38(bp, source_text=source_text, profile=profile)
 
 
-def _health_v38():
+def _health_v40():
     data = _original_health()
     data.update({
         "deterministic_gate": "v9-claim-level-fidelity",
-        "visual_output": "v8-approved-heritage-compact-ui",
+        "faculty_experience": "v4.0-final-candidate-reference-matched-heritage",
+        "visual_output": "visual-first-presenter-with-provenance",
         "local_pre_gate_normalizer": True,
         "local_gate_repair": True,
-        "output_lab_audit_mode": "review-mode-no-false-fails",
+        "output_lab_audit_mode": "review-mode-not-reaudited-no-false-fails",
         "local_normalizer_scope": [
             "Unit 3 exactly five CLOs in pedagogy channel",
             "hypothetical enrichment bounded as scenario assumptions",
@@ -56,8 +57,8 @@ def _health_v38():
 
 
 engine.deterministic_gate = gate_v9
-engine.apply_90_minute_timebox = _timebox_v38
-engine.health = _health_v38
+engine.apply_90_minute_timebox = _timebox_v40
+engine.health = _health_v40
 
 from . import faculty_main as faculty  # noqa: E402
 
@@ -114,11 +115,11 @@ def local_gate_repair(job_id: str):
         status="blocked",
         progress=100,
         message=(
-            "OUTPUT LAB REPAIR COMPLETE — presentation-safe v3.8 normalization applied with 0 Gemini calls. "
+            "OUTPUT LAB REPAIR COMPLETE — presentation-safe v4.0 normalization applied with 0 Gemini calls. "
             "Source-dependent gates are NOT RE-AUDITED; full source-backed compile is required for ISCARB Verified."
         ),
         filename=old.filename,
-        model="local-output-repair-v3.8",
+        model="local-output-repair-v4.0",
         source_manifest=list(old.source_manifest),
         lecture_focus=old.lecture_focus,
         source_profile=old.source_profile,
