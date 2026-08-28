@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 
 from .models import Blueprint, SourceProfile
@@ -56,6 +57,35 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     checks["all_units_have_action"] = all(bool(u.student_action.strip()) for u in bp.units)
     checks["all_units_have_question"] = all(bool(u.engineering_question.strip()) for u in bp.units)
 
+    # Exact semantic function contract for the first four reserved units.
+    u2 = _text(bp.units[1])
+    checks["unit2_is_domain_spine"] = any(k in u2 for k in ["domain spine", "system map", "topic map", "domain map"])
+    if profile is not None and profile.topic_families:
+        u2n = _norm(u2)
+        family_hits = sum(1 for fam in profile.topic_families if _norm(fam.name) in u2n)
+        required_hits = max(1, math.ceil(len(profile.topic_families) * 0.7))
+        checks["unit2_maps_major_source_families"] = family_hits >= required_hits
+    else:
+        checks["unit2_maps_major_source_families"] = True
+
+    u3 = bp.units[2]
+    u3_text = _text(u3)
+    checks["unit3_is_exactly_five_clos"] = (
+        len(u3.core_content) == 5
+        and all(f"clo{i}" in u3_text for i in range(1, 6))
+    )
+
+    u4 = _text(bp.units[3])
+    hstack_terms = [
+        "analytical reasoning",
+        "engineering judgment",
+        "evidence-based reasoning",
+        "socio-technical thinking",
+        "risk-aware design",
+        "ethical responsibility",
+    ]
+    checks["unit4_has_all_six_hstack_competencies"] = all(term in u4 for term in hstack_terms)
+
     # Provenance split.
     checks["no_unresolved_verify_flags"] = not any(u.verify_before_release for u in bp.units)
     checks["enrichment_flag_consistency"] = all(
@@ -68,7 +98,6 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         for u in bp.units
     )
 
-    # Hypothetical claims must sound hypothetical, not like verified national mandates.
     risky_claim_terms = [" require", " requires", " mandate", " mandates", " regulation", " regulations", " national rule", " market rule"]
     hypothetical_language_ok = True
     for u in bp.units:
@@ -92,7 +121,6 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     for tag in EER:
         checks[f"coverage_{tag}"] = tag in eer_tags
 
-    # Unit 1 must not solve the framing problem for the learner.
     u1 = _text(bp.units[0])
     diagnosis_leaks = [
         "the core issue is", "the root cause is", "the actual problem is",
@@ -101,7 +129,6 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     ]
     checks["unit1_does_not_reveal_diagnosis"] = not any(p in u1 for p in diagnosis_leaks)
 
-    # Major weekly-topic coverage: compare against source analysis, not model self-report alone.
     declared_topics = {_norm(x) for x in bp.source_topic_families}
     coverage_topics = {_norm(x.topic_family) for x in bp.topic_coverage}
     if profile is not None:
@@ -113,7 +140,6 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     checks["no_major_topic_first_taught_after_unit15"] = all(x.first_taught_unit <= 15 for x in bp.topic_coverage)
     checks["topic_coverage_has_source_anchors"] = all(bool(x.source_anchor.strip()) for x in bp.topic_coverage)
 
-    # Engineering reasoning hard checks.
     u5 = _text(bp.units[4])
     checks["unit5_prediction_before_explanation"] = "predict" in u5
     checks["unit5_visible_first_principles_derivation"] = (
@@ -153,7 +179,6 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     u18 = _text(bp.units[17])
     checks["unit18_full_evidence_protocol"] = all(k in u18 for k in ["claim", "evidence", "warrant", "counter-evidence", "residual uncertainty"])
 
-    # Pedagogical/contextual methods must not masquerade as weekly-source technical content.
     source_profile_text = _profile_text(profile)
     source_mentions_ai = bool(re.search(r"\bai\b|artificial intelligence", source_profile_text))
     checks["unit15_ai_not_misrepresented_as_source"] = source_mentions_ai or not bool(re.search(r"\bai\b|artificial intelligence", _core_text(bp.units[14])))
@@ -185,7 +210,6 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         for r in bp.rubric_criteria
     )
 
-    # ETEC readiness hard validation against embedded official profile + exact SLO->KLO tables.
     checks["readiness_alignment_present"] = len(bp.readiness_alignment) >= 1
     valid_skus = ETEC_IT_READINESS["skus"]
     valid_klos = ETEC_IT_READINESS["klo"]
