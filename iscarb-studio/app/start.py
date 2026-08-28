@@ -4,8 +4,8 @@ from __future__ import annotations
 
 Gate v9 remains the source-backed release gate. Output Lab stays in REVIEW MODE
 and never manufactures source-dependent PASS/FAIL results without the original
-P1 bundle. v4.0.2 also serves the approved heritage hero inline so the homepage
-cannot lose its main visual because of static-file routing or cache behavior.
+P1 bundle. Visual Lecture Engine v2 uses local P1 PDF pages when available and
+keeps explicit source-slide anchors authoritative.
 """
 
 import uuid
@@ -17,9 +17,10 @@ from . import main as engine
 from .gate_v9 import deterministic_gate as gate_v9
 from .normalizer_v38 import normalize_source_backed_v38, normalize_output_lab_v38
 from .models import AuditIssue, AuditReport, JobState
+from . import source_visual_patch_v2  # noqa: F401  # harden source-slide selection before output modules load
 
 PUBLIC_VERSION = "4.0.2"
-PIPELINE_ID = "faculty-studio-v4.0.2-inline-hero-navigation-complete"
+PIPELINE_ID = "faculty-studio-v4.0.2-visual-lecture-engine-v2"
 
 _original_timebox = engine.apply_90_minute_timebox
 _original_health = engine.health
@@ -39,7 +40,8 @@ def _health_v40():
     data.update({
         "deterministic_gate": "v9-claim-level-fidelity",
         "faculty_experience": "v4.0.2-approved-heritage-inline-hero",
-        "visual_output": "visual-first-presenter-with-provenance",
+        "visual_output": "visual-lecture-engine-v2-source-aware-pdf-first",
+        "source_visual_policy": "explicit-anchor-first-local-pdf-then-best-effort-public-then-redraw",
         "local_pre_gate_normalizer": True,
         "local_gate_repair": True,
         "output_lab_audit_mode": "review-mode-not-reaudited-no-false-fails",
@@ -68,8 +70,6 @@ from . import faculty_main as faculty  # noqa: E402
 
 app = faculty.app
 
-# Remove the public routes supplied by faculty_main so this bootstrap can serve
-# the fully self-contained final homepage and a version-consistent health route.
 app.router.routes[:] = [
     route for route in app.router.routes
     if getattr(route, "path", None) not in {"/", "/api/health"}
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     else if(text==='about') a.href='#about';
   });
   const version=document.querySelector('.version');
-  if(version) version.textContent='v4.0.2 · Complete Hero + Link QA';
+  if(version) version.textContent='v4.0.2 · Visual Lecture Engine v2';
 });
 </script>
 """
@@ -124,17 +124,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 def final_faculty_studio():
     html = (engine.APP_ROOT / "static" / "studio_v40.html").read_text(encoding="utf-8")
     hero_css = (engine.APP_ROOT / "static" / "hero_override_v401.css").read_text(encoding="utf-8")
-
-    # Deliver the hero CSS inline. This avoids the static-route failure that left
-    # the production hero visually blank in v4.0.1.
     html = html.replace("</head>", f"<style id=\"iscarb-approved-hero-inline\">{hero_css}</style>\n{FINAL_CSS}\n</head>")
-
-    # Keep the verified source-library behavior, then apply final navigation and
-    # About-section fixes after it so #sources remains the single canonical ID.
-    html = html.replace('href="#sources"', 'href="#sources"')
     html = html.replace('<div class="footer">', ABOUT_HTML + '\n<div class="footer">')
     html = html.replace("</body>", faculty.SOURCE_LIBRARY_PATCH + "\n" + FINAL_JS + "\n</body>")
-
     return HTMLResponse(html, headers={
         "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
         "Pragma": "no-cache",
@@ -154,18 +146,15 @@ def public_health():
         "navigation_qa": ["home", "sources", "upgrade", "outputs", "guides", "about"],
         "verified_source_count": 8,
         "source_library_verified": True,
+        "visual_lecture_engine": "v2",
+        "source_visual_primary": "uploaded-p1-pdf",
+        "source_visual_public_url": "best-effort-only",
     })
     return data
 
 
 @app.post("/api/jobs/{job_id}/local-repair")
 def local_gate_repair(job_id: str):
-    """Apply source-independent Blueprint repairs without Gemini.
-
-    This endpoint is deliberately NOT a release audit. Imported Blueprint JSON
-    does not contain the raw P1 source text required for source fidelity and
-    source-dependent ETEC validation. The UI therefore reports NOT RE-AUDITED.
-    """
     try:
         old = engine.load_job(job_id)
     except FileNotFoundError:
@@ -174,7 +163,6 @@ def local_gate_repair(job_id: str):
         raise HTTPException(409, "No Blueprint is available to repair")
 
     repaired = normalize_output_lab_v38(old.blueprint)
-
     new_id = uuid.uuid4().hex
     audit = AuditReport(
         overall_pass=False,
