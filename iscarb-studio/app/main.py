@@ -11,22 +11,24 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models import JobState
-from .storage import save_job, load_job, upload_path
+from .storage import save_job, load_job, UPLOADS
 from .gemini_service import GeminiService
 from .gate import deterministic_gate, all_required_pass, failed_check_names
+from .session_gate import apply_90_minute_timebox, session_scope_gate
+from .source_bundle import SourceBundle, SourceItem
 from .exporters import export_docx, export_pptx, export_pdf
 from .url_source import materialize_url_source
-from .source_text import extract_source_text
 
 APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.6.0")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.7.0")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
 RELIABLE_DEFAULT_MODEL = "gemini-3.6-flash"
+MAX_SUPPORTING = 7
 
 
 def _update(job: JobState, status: str, progress: int, message: str) -> JobState:
@@ -37,62 +39,93 @@ def _update(job: JobState, status: str, progress: int, message: str) -> JobState
     return job
 
 
-def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> None:
+def _safe_filename(name: str, fallback: str) -> str:
+    safe = "".join(c for c in Path(name or "").name if c.isalnum() or c in "._- ").strip()
+    return safe or fallback
+
+
+def _save_upload(job_id: str, upload: UploadFile, stem: str) -> Path:
+    name = _safe_filename(upload.filename or "", stem)
+    ext = Path(name).suffix.lower()
+    if ext not in ALLOWED_EXTS:
+        raise HTTPException(400, f"Unsupported file type {ext}. Allowed: {', '.join(sorted(ALLOWED_EXTS))}")
+    job_dir = UPLOADS / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+    path = job_dir / f"{stem}__{name}"
+    with path.open("wb") as f:
+        shutil.copyfileobj(upload.file, f)
+    return path
+
+
+def _parse_support_urls(raw: str) -> list[str]:
+    urls: list[str] = []
+    for line in (raw or "").replace(";", "\n").splitlines():
+        u = line.strip()
+        if u and u not in urls:
+            urls.append(u)
+    return urls
+
+
+def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) -> None:
     service: GeminiService | None = None
     stage = "startup"
     try:
         job = load_job(job_id)
         service = GeminiService(model=model)
-        source_text = extract_source_text(file_path)
+        source_text = bundle.combined_local_text()
 
-        stage = "source analysis"
-        _update(job, "analyzing", 10, "1/4 · Locking the weekly technical source and extracting all major topic families…")
-        profile = service.profile_source(file_path)
+        stage = "source-bundle analysis"
+        _update(job, "analyzing", 10, "1/4 · Reading the primary + supporting bundle and scoping ONE 90-minute lecture…")
+        profile = service.profile_source(bundle)
         job.source_profile = profile
         save_job(job)
 
         stage = "20-unit generation + readiness alignment"
-        _update(job, "generating", 35, "2/4 · Building 20 units with triple provenance and minimum-sufficient ETEC readiness…")
-        blueprint = service.generate_blueprint(file_path, profile)
+        _update(job, "generating", 35, "2/4 · Building 20 Units only from the selected 90-minute scope; excess material is deferred, not silently dropped…")
+        blueprint = service.generate_blueprint(bundle, profile)
+        blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint
         save_job(job)
 
-        stage = "Content Gate v4"
-        _update(job, "auditing", 70, "3/4 · Running Content Gate v4: source / pedagogy / enrichment provenance, elite rigor, and ETEC atomicity…")
+        stage = "Content Gate v5"
+        _update(job, "auditing", 70, "3/4 · Running Content Gate v5: 90-minute scope, source hierarchy, provenance, engineering rigor, and ETEC atomicity…")
         checks = deterministic_gate(blueprint, profile, source_text)
+        checks.update(session_scope_gate(blueprint, profile, bundle))
         job.deterministic_checks = checks
         det_fail = failed_check_names(checks)
 
         stage = "semantic content audit"
-        audit = service.audit(file_path, blueprint, det_fail)
+        audit = service.audit(bundle, blueprint, det_fail)
         job.audit = audit
         save_job(job)
 
         if all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
-            _update(job, "ready", 100, "RELEASE — passed Content Gate v4, triple provenance, semantic source audit, and ETEC atomicity.")
+            _update(job, "ready", 100, "RELEASE — one 90-minute lecture passed Content Gate v5, source hierarchy, triple provenance, and ETEC atomicity.")
             return
 
         for round_no in range(repair_rounds):
             stage = f"repair round {round_no + 1}"
-            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing detected Content Gate v4 failures (round {round_no + 1})…")
-            blueprint = service.repair(file_path, blueprint, audit, det_fail)
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing detected Content Gate v5 failures without expanding the 90-minute scope (round {round_no + 1})…")
+            blueprint = service.repair(bundle, blueprint, audit, det_fail)
+            blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
             job.blueprint = blueprint
             save_job(job)
 
             checks = deterministic_gate(blueprint, profile, source_text)
+            checks.update(session_scope_gate(blueprint, profile, bundle))
             job.deterministic_checks = checks
             det_fail = failed_check_names(checks)
             stage = f"post-repair audit {round_no + 1}"
-            audit = service.audit(file_path, blueprint, det_fail)
+            audit = service.audit(bundle, blueprint, det_fail)
             job.audit = audit
             save_job(job)
             if all_required_pass(checks) and audit.overall_pass:
-                _update(job, "ready", 100, f"RELEASE — passed Content Gate v4 after repair round {round_no + 1}.")
+                _update(job, "ready", 100, f"RELEASE — passed Content Gate v5 after repair round {round_no + 1}.")
                 return
 
         job.blueprint = blueprint
-        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but Content Gate v4 found unresolved source, pedagogy, context, rigor, or readiness issues.")
+        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but the 90-minute scope/source/provenance/rigor/readiness gate found unresolved issues.")
 
     except Exception as exc:
         try:
@@ -118,61 +151,95 @@ def root():
 def health():
     return {
         "ok": True,
-        "version": "1.6.0",
+        "version": "1.7.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "default_model": RELIABLE_DEFAULT_MODEL,
         "url_sources": True,
-        "pipeline": "content-gate-v4-triple-provenance-etec-atomicity",
+        "multi_source_bundle": True,
+        "session_minutes": 90,
+        "max_sources": 8,
+        "pipeline": "content-gate-v5-90min-source-bundle",
         "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
-        "visual_system": "interface-v2; lecture visual rendering follows content release",
+        "visual_system": "content-first; lecture visual renderer follows release",
     }
 
 
 @app.post("/api/compile")
 async def compile_lecture(
-    lecture: UploadFile | None = File(default=None),
-    source_url: str = Form(default=""),
+    primary_lecture: UploadFile | None = File(default=None),
+    primary_url: str = Form(default=""),
+    supporting_files: list[UploadFile] | None = File(default=None),
+    supporting_urls: str = Form(default=""),
+    lecture_focus: str = Form(default=""),
     model: str = Form(default=""),
     repair_rounds: int = Form(default=1),
 ):
-    source_url = source_url.strip()
-    has_file = lecture is not None and bool(lecture.filename)
-    if not has_file and not source_url:
-        raise HTTPException(400, "Upload one weekly lecture OR paste one public lecture URL.")
-    if has_file and source_url:
-        raise HTTPException(400, "Use one source at a time: either a file or a URL, not both.")
+    primary_url = primary_url.strip()
+    lecture_focus = lecture_focus.strip()
+    has_primary_file = primary_lecture is not None and bool(primary_lecture.filename)
+    if not has_primary_file and not primary_url:
+        raise HTTPException(400, "Choose exactly one PRIMARY lecture source: upload a file OR paste a primary URL.")
+    if has_primary_file and primary_url:
+        raise HTTPException(400, "For the PRIMARY source use either a file or a URL, not both.")
+
+    support_files = [f for f in (supporting_files or []) if f is not None and bool(f.filename)]
+    support_urls = _parse_support_urls(supporting_urls)
+    if len(support_files) + len(support_urls) > MAX_SUPPORTING:
+        raise HTTPException(400, f"Use at most {MAX_SUPPORTING} supporting sources for one 90-minute lecture.")
 
     repair_rounds = max(0, min(int(repair_rounds), 2))
     job_id = uuid.uuid4().hex
+    job_dir = UPLOADS / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+    items: list[SourceItem] = []
 
-    if source_url:
+    if primary_url:
         try:
-            target_dir = upload_path(job_id, "linked_source").parent / job_id
-            target = materialize_url_source(source_url, target_dir)
+            path = materialize_url_source(primary_url, job_dir / "P1")
         except ValueError as exc:
-            raise HTTPException(400, str(exc)) from exc
-        display_name = source_url
+            raise HTTPException(400, f"Primary URL: {exc}") from exc
+        items.append(SourceItem("primary", "P1", primary_url, path, primary_url))
+        display_name = primary_url
     else:
-        assert lecture is not None
-        ext = Path(lecture.filename or "").suffix.lower()
-        if ext not in ALLOWED_EXTS:
-            raise HTTPException(400, f"Unsupported file type {ext}. Allowed: {', '.join(sorted(ALLOWED_EXTS))}")
-        target = upload_path(job_id, lecture.filename or f"lecture{ext}")
-        with target.open("wb") as f:
-            shutil.copyfileobj(lecture.file, f)
-        display_name = lecture.filename or target.name
+        assert primary_lecture is not None
+        path = _save_upload(job_id, primary_lecture, "P1")
+        name = primary_lecture.filename or path.name
+        items.append(SourceItem("primary", "P1", name, path, name))
+        display_name = name
+
+    support_index = 1
+    for upload in support_files:
+        path = _save_upload(job_id, upload, f"S{support_index}")
+        name = upload.filename or path.name
+        items.append(SourceItem("supporting", f"S{support_index}", name, path, name))
+        support_index += 1
+
+    for url in support_urls:
+        try:
+            path = materialize_url_source(url, job_dir / f"S{support_index}")
+        except ValueError as exc:
+            raise HTTPException(400, f"Supporting URL {support_index}: {exc}") from exc
+        items.append(SourceItem("supporting", f"S{support_index}", url, path, url))
+        support_index += 1
+
+    try:
+        bundle = SourceBundle(items=items, lecture_focus=lecture_focus, session_minutes=90)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
     chosen_model = model.strip() or RELIABLE_DEFAULT_MODEL
     job = JobState(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v1.6 compilation…",
+        message="Queued for ISCARB v1.7 — one 90-minute lecture…",
         filename=display_name,
         model=chosen_model,
+        source_manifest=bundle.manifest_lines(),
+        lecture_focus=lecture_focus,
     )
     save_job(job)
-    executor.submit(_compile, job_id, target, chosen_model, repair_rounds)
+    executor.submit(_compile, job_id, bundle, chosen_model, repair_rounds)
     return {"job_id": job_id}
 
 
