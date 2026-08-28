@@ -23,7 +23,16 @@ class GeminiNotConfigured(RuntimeError):
 
 
 class GeminiService:
-    """Source-grounded Gemini client for one 90-minute multi-source lecture bundle."""
+    """Source-grounded Gemini client for one 90-minute multi-source lecture bundle.
+
+    Quota policy:
+    - source profiling uses Flash-Lite;
+    - semantic audit uses 3.5 Flash;
+    - the selected full model (normally 3.6 Flash) is reserved for blueprint generation
+      and, only when necessary, repair;
+    - free-tier quota exhaustion skips immediately to the next eligible model instead
+      of repeatedly burning requests on the exhausted model.
+    """
 
     def __init__(self, model: str | None = None):
         self.model = model or "gemini-3.6-flash"
@@ -41,19 +50,32 @@ class GeminiService:
         self.active_model = self.model
 
     @staticmethod
+    def _is_quota_exhausted(exc: Exception) -> bool:
+        text = str(exc).lower()
+        return any(marker in text for marker in (
+            "resource_exhausted",
+            "quota exceeded",
+            "free_tier_requests",
+            "generatecontentinputtokenspermodel",
+            "generaterequestsperdayperprojectpermodel",
+        ))
+
+    @staticmethod
     def _is_retryable(exc: Exception) -> bool:
+        if GeminiService._is_quota_exhausted(exc):
+            return False
         code = getattr(exc, "code", None)
         if code in {429, 500, 502, 503, 504}:
             return True
         text = str(exc).lower()
         return any(marker in text for marker in (
             "429", "500", "502", "503", "504", "unavailable", "high demand",
-            "temporarily overloaded", "resource exhausted", "rate limit", "internal server error",
+            "temporarily overloaded", "rate limit", "internal server error",
         ))
 
     @staticmethod
     def _backoff(attempt: int) -> None:
-        time.sleep(1.5 * (attempt + 1))
+        time.sleep(1.25 * (attempt + 1))
 
     def _upload(self, path: Path):
         key = str(path.resolve())
@@ -67,6 +89,8 @@ class GeminiService:
                 return uploaded
             except Exception as exc:
                 last_exc = exc
+                if self._is_quota_exhausted(exc):
+                    raise
                 if not self._is_retryable(exc) or attempt == 1:
                     raise
                 self._backoff(attempt)
@@ -94,15 +118,18 @@ class GeminiService:
         self._uploaded.clear()
 
     def _models_for(self, preferred: str) -> list[str]:
-        ordered = [preferred]
+        # Keep profiling/auditing away from the 3.6 pool whenever possible so the
+        # premium quota is spent on the actual lecture, not on orchestration.
         if preferred == "gemini-3.7-flash":
-            ordered += ["gemini-3.6-flash", "gemini-3.5-flash"]
+            ordered = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"]
         elif preferred == "gemini-3.6-flash":
-            ordered += ["gemini-3.5-flash", "gemini-3.5-flash-lite"]
+            ordered = ["gemini-3.6-flash", "gemini-3.5-flash"]
+        elif preferred == "gemini-3.5-flash":
+            ordered = ["gemini-3.5-flash", "gemini-3.5-flash-lite"]
         elif preferred == "gemini-3.5-flash-lite":
-            ordered += ["gemini-3.5-flash", "gemini-3.6-flash"]
+            ordered = ["gemini-3.5-flash-lite", "gemini-3.5-flash"]
         else:
-            ordered += ["gemini-3.6-flash", "gemini-3.5-flash"]
+            ordered = [preferred, "gemini-3.5-flash"]
         result: list[str] = []
         for m in ordered:
             if m not in result:
@@ -127,7 +154,7 @@ class GeminiService:
         source_contents = self._source_contents(bundle)
         model = preferred_model or self.model
         schema_text = self._compact_schema(schema)
-        full_prompt = (
+        base_prompt = (
             prompt + extra_text
             + "\n\nOUTPUT CONTRACT: Return ONLY one JSON object validating against this schema. No markdown fences."
             + "\nJSON_SCHEMA:\n" + schema_text
@@ -135,7 +162,10 @@ class GeminiService:
 
         last_exc: Exception | None = None
         last_text = ""
+        quota_exhausted_models: list[str] = []
+
         for candidate in self._models_for(model):
+            full_prompt = base_prompt
             for attempt in range(2):
                 try:
                     config = self._types.GenerateContentConfig(
@@ -166,6 +196,9 @@ class GeminiService:
                     last_exc = exc
                     if isinstance(exc, RuntimeError) and "did not match" in str(exc):
                         raise
+                    if self._is_quota_exhausted(exc):
+                        quota_exhausted_models.append(candidate)
+                        break  # immediately try the next model; no pointless sleep/retry
                     if not self._is_retryable(exc):
                         raise
                     if attempt == 0:
@@ -173,6 +206,13 @@ class GeminiService:
                         continue
                     break
 
+        if quota_exhausted_models and last_exc is not None:
+            names = ", ".join(dict.fromkeys(quota_exhausted_models))
+            raise RuntimeError(
+                "Gemini free-tier quota is currently exhausted for the available model pool "
+                f"({names}). ISCARB did not keep retrying and consuming quota. "
+                "Wait for the quota window to reset or enable billing / a higher Gemini quota, then run the lecture again."
+            ) from last_exc
         if last_exc is not None:
             raise last_exc
         raise RuntimeError(f"No Gemini model completed the request. Last output: {last_text[:500]}")
@@ -194,7 +234,7 @@ class GeminiService:
 
     def generate_blueprint(self, bundle: SourceBundle, profile: SourceProfile) -> Blueprint:
         extra = (
-            "\nSOURCE PROFILE (90-minute scope contract):\n" + profile.model_dump_json(indent=2)
+            "\nSOURCE PROFILE (90-minute full-coverage contract):\n" + profile.model_dump_json(indent=2)
             + "\n\nBUNDLE MANIFEST:\n" + bundle.manifest_text()
             + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n" + READINESS_CONTEXT
             + "\n\nOFFICIAL ETEC SLO-TO-KLO MAP (must be copied exactly; do not infer):\n" + READINESS_KLO_MAP_CONTEXT
@@ -216,12 +256,13 @@ class GeminiService:
             + "\nCANDIDATE BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
             + "\nDETERMINISTIC CHECK FAILURES:\n" + json.dumps(deterministic_failures or [], ensure_ascii=False)
         )
+        # Audit on a separate model pool so 3.6 quota is reserved for generation/repair.
         return self._generate_structured(
             bundle=bundle,
             prompt=AUDIT_PROMPT + AUDIT_ADDENDUM,
             schema=AuditReport,
             extra_text=extra,
-            preferred_model="gemini-3.6-flash",
+            preferred_model="gemini-3.5-flash",
             thinking_level="low",
         )
 
