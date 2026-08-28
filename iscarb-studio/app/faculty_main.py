@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
+import uuid
+
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse
 
 from . import main as engine
+from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .faculty_visual import export_faculty_presenter_pptx, render_faculty_presenter_preview
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
 
@@ -22,33 +25,40 @@ for route in engine.app.router.routes:
 
 
 def _output_v4_shell(html: str) -> str:
-    """Upgrade the stable v3.3 shell at response time without duplicating the page.
-
-    This keeps the original-identity homepage frozen while exposing Output v4:
-    Presenter, Detailed, Instructor, Student Activity Pack and Blueprint.
-    """
+    """Upgrade the stable v3.3 shell at response time without duplicating the page."""
     html = html.replace('<div class="version">v3.3</div>', '<div class="version">v3.4 · Output v4</div>')
     html = html.replace(
         'Render Presenter, Detailed, Instructor and Blueprint outputs.',
         'Render Presenter, Detailed, Instructor, Student and Blueprint outputs.',
     )
-    html = html.replace(
-        'One compilation. Four useful teaching assets.',
-        'One compilation. Five purposeful teaching assets.',
-    )
+    html = html.replace('One compilation. Four useful teaching assets.', 'One compilation. Five purposeful teaching assets.')
+
     blueprint_card = '<div class="outcome"><div class="icon">⬡</div><b>Auditable Blueprint</b><p>Machine-readable 20-Unit structure, provenance split, ETEC mapping and release metadata.</p></div>'
     student_card = '<div class="outcome"><div class="icon">✎</div><b>Student Activity Pack</b><p>Questions, decision spaces, evidence prompts, portfolio checklist and rubric — without instructor answers.</p></div>'
     if blueprint_card in html and student_card not in html:
         html = html.replace(blueprint_card, student_card + blueprint_card)
+
     html = html.replace(
         '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
         '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Student</b><a href="/api/jobs/${id}/export/student">Activity Pack</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
     )
-    html = html.replace(
-        'CIMT → IMAM → HIMMA → ISCARB · v3.3 Original Identity',
-        'CIMT → IMAM → HIMMA → ISCARB · v3.4 Output v4',
-    )
-    # Five output cards should breathe across common desktop widths.
+
+    # Local re-render path: iterate on output design without Gemini/API quota.
+    import_block = '''<form id="blueprintForm" class="support" style="margin-bottom:12px">
+      <span class="badge">OUTPUT LAB · NO GEMINI</span>
+      <div class="two"><div><div class="fieldLabel">Render an existing ISCARB Blueprint JSON</div><input id="blueprintFile" name="blueprint_file" type="file" accept=".json"><p class="hint">Use a JSON downloaded from any previous ISCARB run. This rebuilds all output assets locally and never grants ISCARB Verified.</p></div><div style="display:flex;align-items:end"><button class="compile" id="blueprintBtn" type="submit" style="width:100%;margin-top:0">Render outputs only →</button></div></div>
+    </form>'''
+    if 'id="blueprintForm"' not in html:
+        html = html.replace('<form id="compileForm">', import_block + '<form id="compileForm">')
+
+    bp_js = r'''
+const blueprintForm=document.getElementById('blueprintForm');
+if(blueprintForm){blueprintForm.addEventListener('submit',async e=>{e.preventDefault();const f=document.getElementById('blueprintFile');if(!f||!f.files||!f.files.length){alert('Choose an ISCARB Blueprint JSON first.');return}const b=document.getElementById('blueprintBtn');b.disabled=true;const fd=new FormData(blueprintForm);try{const r=await fetch('/api/render-blueprint',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(data.detail||JSON.stringify(data));await poll(data.job_id)}catch(ex){showError(ex.message)}finally{b.disabled=false}})}
+'''
+    if 'const blueprintForm=' not in html:
+        html = html.replace("const form=document.getElementById('compileForm')", bp_js + "\nconst form=document.getElementById('compileForm')")
+
+    html = html.replace('CIMT → IMAM → HIMMA → ISCARB · v3.3 Original Identity', 'CIMT → IMAM → HIMMA → ISCARB · v3.4 Output v4')
     html = html.replace('.outcomes{display:grid;grid-template-columns:repeat(4,1fr);', '.outcomes{display:grid;grid-template-columns:repeat(5,1fr);')
     html = html.replace('.assets{display:grid;grid-template-columns:repeat(4,1fr);', '.assets{display:grid;grid-template-columns:repeat(5,1fr);')
     return html
@@ -83,7 +93,7 @@ def health():
             "version": FACULTY_VERSION,
             "engine_version": engine.SERVICE_VERSION,
             "pipeline": PIPELINE_ID,
-            "public_experience": "original-source-library + upgrade-my-lecture + ISCARB-verified + starter-kit",
+            "public_experience": "original-source-library + upgrade-my-lecture + ISCARB-verified + output-lab + starter-kit",
             "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
             "design_language": "ISCARB Original Identity — Saudi academic engineering; no third-party logos or copied design assets",
             "presenter_theme": "deep green + technical purple + warm gold + visual-first text budget",
@@ -94,10 +104,59 @@ def health():
                 "Student Activity Pack DOCX — activities without instructor answers",
                 "Blueprint JSON — auditable structured source of truth",
             ],
+            "local_output_lab": True,
             "institutional_branding": "context links only; no claim of official KAU or Vision 2030 endorsement",
         }
     )
     return data
+
+
+@app.post("/api/render-blueprint")
+async def render_blueprint(blueprint_file: UploadFile = File(...)):
+    """Import a previously generated Blueprint and re-render outputs locally.
+
+    This route intentionally does not call Gemini and can never issue RELEASE or
+    ISCARB Verified, because it does not repeat the source/semantic audit.
+    """
+    if not (blueprint_file.filename or "").lower().endswith(".json"):
+        raise HTTPException(400, "Choose an ISCARB Blueprint JSON file.")
+    raw = await blueprint_file.read()
+    try:
+        bp = Blueprint.model_validate_json(raw)
+    except Exception as exc:
+        raise HTTPException(400, f"Invalid ISCARB Blueprint JSON: {exc}") from exc
+
+    job_id = uuid.uuid4().hex
+    audit = AuditReport(
+        overall_pass=False,
+        source_fidelity_pass=False,
+        engineering_rigor_pass=False,
+        cumulative_fidelity_pass=False,
+        readiness_alignment_pass=False,
+        provenance_separation_pass=False,
+        issues=[AuditIssue(
+            severity="major",
+            unit_numbers=[],
+            requirement="Imported Blueprint — audit not repeated",
+            problem="Outputs were rendered locally from an existing Blueprint. Source and semantic release audits were not re-run.",
+            repair_instruction="Use the original compiled RELEASE job, or re-run the full compiler when audit authority is required.",
+        )],
+        strengths=["No Gemini call is required to iterate on Presenter, Detailed, Instructor, Student, or Blueprint output design."],
+    )
+    job = JobState(
+        id=job_id,
+        status="blocked",
+        progress=100,
+        message="OUTPUT LAB — Blueprint imported locally. All output assets are available; ISCARB Verified is intentionally disabled because release audit was not repeated.",
+        filename=blueprint_file.filename or "imported_blueprint.json",
+        model="local-render-only",
+        source_manifest=list(bp.source_manifest),
+        blueprint=bp,
+        audit=audit,
+        deterministic_checks={},
+    )
+    engine.save_job(job)
+    return {"job_id": job_id}
 
 
 @app.get("/api/jobs/{job_id}/presenter")
