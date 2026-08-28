@@ -26,6 +26,7 @@ def export_docx(bp: Blueprint, out: Path) -> Path:
     doc = Document()
     doc.add_heading(bp.lecture_title, 0)
     doc.add_paragraph(bp.engineering_thesis)
+    doc.add_paragraph(f"Named ethical purpose: {bp.named_ethical_purpose}")
     doc.add_heading("Central Engineering Crisis", level=1)
     doc.add_paragraph(bp.central_engineering_crisis)
 
@@ -41,15 +42,21 @@ def export_docx(bp: Blueprint, out: Path) -> Path:
             style="List Bullet",
         )
         doc.add_paragraph(f"Rationale: {r.rationale}")
+        doc.add_paragraph(f"Atomicity evidence: {r.atomicity_evidence}")
         doc.add_paragraph(f"Evidence units: {', '.join(str(x) for x in r.evidence_units)} | ETEC pages: {', '.join(str(x) for x in r.standard_source_pages)}")
 
     for u in bp.units:
         doc.add_page_break()
         doc.add_heading(f"UNIT {u.number:02d} — {u.phase} — {u.title}", level=1)
         doc.add_paragraph(f"Engineering question: {u.engineering_question}")
-        doc.add_heading("Weekly-source technical content", level=2)
-        for bullet in u.core_content:
-            doc.add_paragraph(bullet, style="List Bullet")
+        if u.core_content:
+            doc.add_heading("Weekly-source technical content", level=2)
+            for bullet in u.core_content:
+                doc.add_paragraph(bullet, style="List Bullet")
+        if u.pedagogy_content:
+            doc.add_heading("ISCARB Pedagogy / Decision Work", level=2)
+            for bullet in u.pedagogy_content:
+                doc.add_paragraph(bullet, style="List Bullet")
         if u.enrichment_content:
             doc.add_heading("ISCARB Contextual Enrichment", level=2)
             for bullet in u.enrichment_content:
@@ -69,7 +76,7 @@ def export_docx(bp: Blueprint, out: Path) -> Path:
         doc.add_paragraph(f"Student action: {u.student_action}")
         doc.add_paragraph(f"Takeaway: {u.takeaway}")
         doc.add_paragraph(f"CIMT: {', '.join(u.cimtlens)} | CLO: {', '.join(u.clo_ids)}")
-        doc.add_paragraph(f"Weekly source anchor: {u.source_anchor}")
+        doc.add_paragraph(f"Weekly source anchor: {u.source_anchor or 'N/A — ISCARB pedagogy'}")
         doc.add_paragraph(f"Evidence: {u.evidence}")
 
     doc.add_page_break()
@@ -104,24 +111,17 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
         p.text = u.engineering_question
         p.font.bold = True
         p.font.size = Pt(17)
-        for bullet in u.core_content[:5]:
-            p = tf.add_paragraph()
-            p.text = bullet
-            p.level = 0
-            p.font.size = Pt(15)
+        for bullet in u.core_content[:4]:
+            p = tf.add_paragraph(); p.text = bullet; p.level = 0; p.font.size = Pt(14)
+        if u.pedagogy_content:
+            p = tf.add_paragraph(); p.text = "ISCARB PEDAGOGY / DECISION WORK"; p.font.bold = True; p.font.size = Pt(10)
+            for bullet in u.pedagogy_content[:3]:
+                p = tf.add_paragraph(); p.text = bullet; p.font.size = Pt(12)
         if u.enrichment_content:
-            p = tf.add_paragraph()
-            p.text = "ISCARB CONTEXTUAL ENRICHMENT"
-            p.font.bold = True
-            p.font.size = Pt(11)
+            p = tf.add_paragraph(); p.text = "ISCARB CONTEXTUAL ENRICHMENT"; p.font.bold = True; p.font.size = Pt(10)
             for bullet in u.enrichment_content[:2]:
-                p = tf.add_paragraph()
-                p.text = bullet
-                p.font.size = Pt(12)
-        p = tf.add_paragraph()
-        p.text = "STUDENT ACTION — " + u.student_action
-        p.font.bold = True
-        p.font.size = Pt(14)
+                p = tf.add_paragraph(); p.text = bullet; p.font.size = Pt(11)
+        p = tf.add_paragraph(); p.text = "STUDENT ACTION — " + u.student_action; p.font.bold = True; p.font.size = Pt(13)
 
         side = slide.shapes.add_textbox(Inches(8.45), Inches(1.25), Inches(4.15), Inches(5.1))
         sf = side.text_frame
@@ -130,7 +130,7 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
             ("Visual", u.visual_suggestion),
             ("Takeaway", u.takeaway),
             ("Evidence", u.evidence),
-            ("Weekly source", u.source_anchor),
+            ("Weekly source", u.source_anchor or "N/A — ISCARB pedagogy"),
         ]
         refs = _readiness_for_unit(bp, u.number)
         if refs:
@@ -139,8 +139,7 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
             side_items.append(("Enrichment basis", " | ".join(u.enrichment_basis[:2])))
         for label, value in side_items:
             p = sf.paragraphs[0] if len(sf.paragraphs) == 1 and not sf.paragraphs[0].text else sf.add_paragraph()
-            p.text = f"{label}: {value}"
-            p.font.size = Pt(11)
+            p.text = f"{label}: {value}"; p.font.size = Pt(10.5)
 
         footer = slide.shapes.add_textbox(Inches(0.7), Inches(6.85), Inches(11.9), Inches(0.35))
         fp = footer.text_frame.paragraphs[0]
@@ -153,12 +152,23 @@ def export_pptx(bp: Blueprint, out: Path) -> Path:
 
 def export_pdf(bp: Blueprint, out: Path) -> Path:
     styles = getSampleStyleSheet()
-    story = [Paragraph(bp.lecture_title, styles["Title"]), Paragraph(bp.engineering_thesis, styles["BodyText"]), Spacer(1, 8)]
+    story = [
+        Paragraph(bp.lecture_title, styles["Title"]),
+        Paragraph(bp.engineering_thesis, styles["BodyText"]),
+        Paragraph(f"<b>Named ethical purpose:</b> {bp.named_ethical_purpose}", styles["BodyText"]),
+        Spacer(1, 8),
+    ]
     for u in bp.units:
         story.append(Paragraph(f"UNIT {u.number:02d} — {u.phase} — {u.title}", styles["Heading1"]))
         story.append(Paragraph(f"<b>Engineering question:</b> {u.engineering_question}", styles["BodyText"]))
-        for bullet in u.core_content:
-            story.append(Paragraph("• " + bullet, styles["BodyText"]))
+        if u.core_content:
+            story.append(Paragraph("<b>WEEKLY-SOURCE TECHNICAL CONTENT</b>", styles["BodyText"]))
+            for bullet in u.core_content:
+                story.append(Paragraph("• " + bullet, styles["BodyText"]))
+        if u.pedagogy_content:
+            story.append(Paragraph("<b>ISCARB PEDAGOGY / DECISION WORK</b>", styles["BodyText"]))
+            for bullet in u.pedagogy_content:
+                story.append(Paragraph("• " + bullet, styles["BodyText"]))
         if u.enrichment_content:
             story.append(Paragraph("<b>ISCARB CONTEXTUAL ENRICHMENT</b>", styles["BodyText"]))
             for bullet in u.enrichment_content:
@@ -175,7 +185,7 @@ def export_pdf(bp: Blueprint, out: Path) -> Path:
                 story.append(Paragraph(f"<b>{r.criterion}</b> — 4: {r.distinguished} | 3: {r.ready} | 2: {r.developing} | 1: {r.not_yet_ready}", styles["BodyText"]))
         story.append(Paragraph(f"<b>Student action:</b> {u.student_action}", styles["BodyText"]))
         story.append(Paragraph(f"<b>Takeaway:</b> {u.takeaway}", styles["BodyText"]))
-        story.append(Paragraph(f"<b>Weekly source:</b> {u.source_anchor}", styles["BodyText"]))
+        story.append(Paragraph(f"<b>Weekly source:</b> {u.source_anchor or 'N/A — ISCARB pedagogy'}", styles["BodyText"]))
         story.append(PageBreak())
     SimpleDocTemplate(str(out), pagesize=A4).build(story)
     return out
