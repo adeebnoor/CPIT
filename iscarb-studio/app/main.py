@@ -10,7 +10,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from .models import JobState
+from .models import JobState, AuditReport, AuditIssue
 from .storage import save_job, load_job, UPLOADS
 from .gemini_service import GeminiService
 from .gate import deterministic_gate, all_required_pass, failed_check_names
@@ -23,8 +23,8 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-SERVICE_VERSION = "1.9.0"
-PIPELINE_ID = "content-gate-v7-pedagogy-provenance-assurance"
+SERVICE_VERSION = "1.9.1"
+PIPELINE_ID = "content-gate-v7-quota-resilient-semantic-audit"
 
 app = FastAPI(title="ISCARB Lecture Studio", version=SERVICE_VERSION)
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
@@ -69,6 +69,64 @@ def _parse_support_urls(raw: str) -> list[str]:
     return urls
 
 
+def _is_quota_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return any(marker in text for marker in (
+        "quota is exhausted",
+        "quota exhausted",
+        "resource_exhausted",
+        "quota exceeded",
+        "free_tier_requests",
+        "generaterequestsperdayperprojectpermodel",
+    ))
+
+
+def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> AuditReport:
+    failed = [name for name, ok in checks.items() if not ok]
+
+    def category_pass(markers: tuple[str, ...]) -> bool:
+        return not any(any(marker in name for marker in markers) for name in failed)
+
+    source_pass = category_pass((
+        "source_", "primary_", "topic_coverage", "topic_list", "p1_anchor",
+        "technical_anchors", "unsourced_terms_in_core", "weekly_source_anchor",
+    ))
+    rigor_pass = category_pass((
+        "unit1_", "unit5_", "unit8_", "unit9_", "unit10_", "unit17_",
+        "first_taught", "rubric_covers", "bounded_assurance", "prediction",
+    ))
+    cumulative_pass = category_pass((
+        "phase_", "unit2_", "unit3_", "unit4_", "cimt_", "coverage_idr",
+        "coverage_eer", "dominant", "named_ethical", "unit11_", "unit12_",
+        "unit13_", "unit14_", "unit15_", "unit16_", "unit18_", "unit19_", "unit20_",
+    ))
+    readiness_pass = category_pass(("readiness_", "etec"))
+    provenance_pass = category_pass((
+        "provenance", "enrichment", "pedagogy_channel", "hypothetical",
+        "unsourced", "source_anchor", "verify_flags",
+    ))
+
+    issue_text = ", ".join(failed[:24]) if failed else "No deterministic failures; semantic audit is still required before RELEASE."
+    return AuditReport(
+        overall_pass=False,
+        source_fidelity_pass=source_pass,
+        engineering_rigor_pass=rigor_pass,
+        cumulative_fidelity_pass=cumulative_pass,
+        readiness_alignment_pass=readiness_pass,
+        provenance_separation_pass=provenance_pass,
+        issues=[
+            AuditIssue(
+                severity="major",
+                unit_numbers=[],
+                requirement="Semantic release audit",
+                problem=f"Semantic audit unavailable because model quota is exhausted. Deterministic failures: {issue_text}",
+                repair_instruction="Preserve the generated blueprint. Re-run the semantic audit when Gemini quota is available; do not issue RELEASE without it.",
+            )
+        ],
+        strengths=["The 20-unit blueprint was preserved and deterministic Content Gate checks completed before quota interruption."],
+    )
+
+
 def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) -> None:
     service: GeminiService | None = None
     stage = "startup"
@@ -96,21 +154,43 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         checks.update(session_scope_gate(blueprint, profile, bundle))
         job.deterministic_checks = checks
         det_fail = failed_check_names(checks)
+        save_job(job)
 
+        semantic_available = True
         stage = "semantic content audit"
-        audit = service.audit(bundle, blueprint, det_fail)
+        try:
+            audit = service.audit(bundle, blueprint, det_fail)
+        except Exception as exc:
+            if not _is_quota_error(exc):
+                raise
+            semantic_available = False
+            audit = _deterministic_fallback_audit(checks, str(exc))
         job.audit = audit
         save_job(job)
 
-        if all_required_pass(checks) and audit.overall_pass:
+        if semantic_available and all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
             _update(job, "ready", 100, "RELEASE — the full primary lecture is covered within 90 minutes and passed Content Gate v7, pedagogy rigor, provenance, bounded assurance, and ETEC atomicity.")
             return
 
         for round_no in range(repair_rounds):
+            # If the only missing element is the unavailable semantic audit, do not spend
+            # another generation request merely to rewrite a deterministically clean lecture.
+            if not det_fail and not semantic_available:
+                break
+
             stage = f"repair round {round_no + 1}"
             _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing Content Gate v7 failures while preserving ALL primary lecture topics (round {round_no + 1})…")
-            blueprint = service.repair(bundle, blueprint, audit, det_fail)
+            try:
+                blueprint = service.repair(bundle, blueprint, audit, det_fail)
+            except Exception as exc:
+                if _is_quota_error(exc):
+                    job.blueprint = blueprint
+                    job.audit = audit
+                    _update(job, "blocked", 100, "BLOCKED — the current blueprint was preserved. Repair could not run because Gemini quota is exhausted; retry repair when quota is available.")
+                    return
+                raise
+
             blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
             job.blueprint = blueprint
             save_job(job)
@@ -119,25 +199,44 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             checks.update(session_scope_gate(blueprint, profile, bundle))
             job.deterministic_checks = checks
             det_fail = failed_check_names(checks)
+            save_job(job)
+
             stage = f"post-repair audit {round_no + 1}"
-            audit = service.audit(bundle, blueprint, det_fail)
+            try:
+                audit = service.audit(bundle, blueprint, det_fail)
+                semantic_available = True
+            except Exception as exc:
+                if not _is_quota_error(exc):
+                    raise
+                semantic_available = False
+                audit = _deterministic_fallback_audit(checks, str(exc))
             job.audit = audit
             save_job(job)
-            if all_required_pass(checks) and audit.overall_pass:
+
+            if semantic_available and all_required_pass(checks) and audit.overall_pass:
                 _update(job, "ready", 100, f"RELEASE — passed Content Gate v7 after repair round {round_no + 1} with full P1 coverage.")
                 return
 
         job.blueprint = blueprint
-        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but the 90-minute full-coverage/pedagogy/provenance/rigor/readiness gate found unresolved issues.")
+        if not semantic_available:
+            _update(job, "blocked", 100, "BLOCKED — blueprint preserved and deterministic Content Gate completed, but the semantic release audit is unavailable because Gemini quota is exhausted. No RELEASE is issued without semantic audit.")
+        else:
+            _update(job, "blocked", 100, "BLOCKED — blueprint generated, but the 90-minute full-coverage/pedagogy/provenance/rigor/readiness gate found unresolved issues.")
 
     except Exception as exc:
         try:
             job = load_job(job_id)
-            job.status = "error"
-            job.progress = 100
-            job.message = f"Compilation stopped during {stage}."
-            job.error = f"{type(exc).__name__}: {exc}"
-            save_job(job)
+            # Once a blueprint exists, preserve it as BLOCKED rather than destroying
+            # an otherwise useful run merely because a downstream service failed.
+            if job.blueprint is not None and _is_quota_error(exc):
+                job.error = None
+                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; downstream Gemini quota became unavailable during {stage}. Retry the audit/repair later.")
+            else:
+                job.status = "error"
+                job.progress = 100
+                job.message = f"Compilation stopped during {stage}."
+                job.error = f"{type(exc).__name__}: {exc}"
+                save_job(job)
         except Exception:
             pass
     finally:
@@ -147,11 +246,9 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
 @app.get("/")
 def root():
-    # Render/browser caches previously made the UI badge lag behind the deployed backend.
-    # Serve the HTML dynamically with the authoritative service version and no-store headers.
     html = (APP_ROOT / "static" / "index.html").read_text(encoding="utf-8")
-    html = html.replace("v1.8 · 90-Min Full Coverage", "v1.9 · Precision Content Gate")
-    html = html.replace("v1.8 · 90-Min", "v1.9 · Precision")
+    html = html.replace("v1.8 · 90-Min Full Coverage", "v1.9.1 · Quota-Resilient Precision Gate")
+    html = html.replace("Content Gate v6", "Content Gate v7")
     return HTMLResponse(
         html,
         headers={
@@ -250,7 +347,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v1.9 — 90 minutes with full primary lecture coverage and Precision Content Gate…",
+        message="Queued for ISCARB v1.9.1 — 90 minutes with full primary lecture coverage and quota-resilient Precision Content Gate…",
         filename=display_name,
         model=chosen_model,
         source_manifest=bundle.manifest_lines(),
@@ -277,7 +374,7 @@ def export_job(job_id: str, fmt: str):
         raise HTTPException(404, "Job not found")
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
-    if job.status not in {"ready", "blocked"}:
+    if job.status not in {"ready", "blocked", "error"}:
         raise HTTPException(409, "Compilation is still in progress")
 
     base = EXPORTS / f"ISCARB_{job_id}"
