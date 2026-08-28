@@ -7,6 +7,7 @@ from .models import Blueprint, SourceProfile
 from .prompts import IDR, EER
 from .readiness import ETEC_IT_READINESS
 from .readiness_map import SLO_KLO_MAP, expected_klos
+from .readiness_atomic import unsupported_atomic_slos
 
 
 def _text(unit) -> str:
@@ -14,6 +15,7 @@ def _text(unit) -> str:
         unit.title,
         unit.engineering_question,
         *unit.core_content,
+        *unit.pedagogy_content,
         *unit.enrichment_content,
         *unit.scenario_assumptions,
         unit.student_action,
@@ -24,6 +26,10 @@ def _text(unit) -> str:
 
 def _core_text(unit) -> str:
     return " ".join(unit.core_content).lower()
+
+
+def _pedagogy_text(unit) -> str:
+    return " ".join(unit.pedagogy_content).lower()
 
 
 def _norm(s: str) -> str:
@@ -42,9 +48,26 @@ def _profile_text(profile: SourceProfile | None) -> str:
     ]).lower()
 
 
-def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> dict[str, bool]:
+def _purpose_visible(purpose: str, unit_text: str) -> bool:
+    tokens = [t for t in _norm(purpose).split() if len(t) >= 5]
+    if not tokens:
+        return bool(purpose.strip())
+    hits = sum(1 for t in tokens if t in _norm(unit_text))
+    return hits >= min(2, len(tokens))
+
+
+def _source_has(source_text: str, term: str) -> bool:
+    return term.lower() in source_text.lower()
+
+
+def deterministic_gate(
+    bp: Blueprint,
+    profile: SourceProfile | None = None,
+    source_text: str = "",
+) -> dict[str, bool]:
     checks: dict[str, bool] = {}
 
+    # Structural contract.
     checks["exactly_20_units"] = len(bp.units) == 20
     checks["exactly_5_clos"] = len(bp.clOs) == 5
     checks["unit_numbers_1_to_20"] = [u.number for u in bp.units] == list(range(1, 21))
@@ -53,11 +76,13 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         for u in bp.units
     )
     checks["clo_ids_unique"] = sorted(c.id for c in bp.clOs) == ["CLO1", "CLO2", "CLO3", "CLO4", "CLO5"]
-    checks["all_units_have_source_anchor"] = all(bool(u.source_anchor.strip()) for u in bp.units)
     checks["all_units_have_action"] = all(bool(u.student_action.strip()) for u in bp.units)
     checks["all_units_have_question"] = all(bool(u.engineering_question.strip()) for u in bp.units)
+    checks["source_anchor_required_only_when_source_content_exists"] = all(
+        bool(u.source_anchor.strip()) if u.core_content else True for u in bp.units
+    )
 
-    # Exact semantic function contract for the first four reserved units.
+    # Reserved unit functions.
     u2 = _text(bp.units[1])
     checks["unit2_is_domain_spine"] = any(k in u2 for k in ["domain spine", "system map", "topic map", "domain map"])
     if profile is not None and profile.topic_families:
@@ -69,22 +94,23 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         checks["unit2_maps_major_source_families"] = True
 
     u3 = bp.units[2]
-    u3_text = _text(u3)
+    u3p = _pedagogy_text(u3)
     checks["unit3_is_exactly_five_clos"] = (
-        len(u3.core_content) == 5
-        and all(f"clo{i}" in u3_text for i in range(1, 6))
+        all(f"clo{i}" in u3p for i in range(1, 6))
+        and len([b for b in u3.pedagogy_content if re.search(r"\bclo[1-5]\b", b.lower())]) == 5
     )
+    checks["unit3_no_fake_source_content"] = len(u3.core_content) == 0
 
-    u4 = _text(bp.units[3])
+    u4p = _pedagogy_text(bp.units[3])
     hstack_terms = [
-        "analytical reasoning",
-        "engineering judgment",
-        "evidence-based reasoning",
-        "socio-technical thinking",
-        "risk-aware design",
-        "ethical responsibility",
+        "analytical reasoning", "engineering judgment", "evidence-based reasoning",
+        "socio-technical thinking", "risk-aware design", "ethical responsibility",
     ]
-    checks["unit4_has_all_six_hstack_competencies"] = all(term in u4 for term in hstack_terms)
+    checks["unit4_has_all_six_hstack_competencies"] = all(term in u4p for term in hstack_terms)
+
+    # Named ethical purpose must be explicit from the opening.
+    checks["named_ethical_purpose_present"] = bool(bp.named_ethical_purpose.strip())
+    checks["unit1_states_named_ethical_purpose"] = _purpose_visible(bp.named_ethical_purpose, _text(bp.units[0]))
 
     # Provenance split.
     checks["no_unresolved_verify_flags"] = not any(u.verify_before_release for u in bp.units)
@@ -110,6 +136,43 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
                 if not any(marker in low for marker in ["assume", "in this scenario", "in this hypothetical", "scenario requires"]):
                     hypothetical_language_ok = False
     checks["hypothetical_enrichment_not_stated_as_fact"] = hypothetical_language_ok
+
+    # Pedagogy must live in pedagogy_content, not core_content.
+    checks["unit3_clos_in_pedagogy_channel"] = all(f"clo{i}" in u3p for i in range(1, 6))
+    checks["unit4_hstack_in_pedagogy_channel"] = all(term in u4p for term in hstack_terms)
+    checks["unit10_design_review_in_pedagogy_channel"] = "senior design review" not in _core_text(bp.units[9])
+    checks["unit15_ai_in_pedagogy_channel"] = not bool(re.search(r"\bai\b|artificial intelligence", _core_text(bp.units[14])))
+    checks["unit18_evidence_method_in_pedagogy_channel"] = not any(
+        term in _core_text(bp.units[17]) for term in ["warrant", "counter-evidence", "residual uncertainty", "evidence policy framework"]
+    )
+    checks["unit19_rubric_method_in_pedagogy_channel"] = not any(
+        term in _core_text(bp.units[18]) for term in ["distinguished", "not yet ready", "rubric", "four-level"]
+    )
+    checks["unit20_assurance_method_in_pedagogy_channel"] = not any(
+        term in _core_text(bp.units[19]) for term in ["top-level bounded claim", "subclaim", "final authorization", "assurance case"]
+    )
+
+    # Obvious unsourced modern/pedagogical terms may not appear in weekly-source core.
+    watched_terms = [
+        "zero trust", "microservice", "container", "infrastructure-as-code", "token-based",
+        "proxy gateway", "encrypted payload", "decryption performance", "cognitive load",
+        "operator fatigue", "artificial intelligence", "ai may assist", "senior design review",
+        "counter-evidence", "residual uncertainty", "four-level rubric",
+    ]
+    unsupported_core_terms = []
+    for u in bp.units:
+        core = _core_text(u)
+        for term in watched_terms:
+            if term in core and (not source_text or not _source_has(source_text, term)):
+                unsupported_core_terms.append((u.number, term))
+    checks["no_obvious_unsourced_terms_in_core"] = not unsupported_core_terms
+
+    # Unit 13 contemporary trend claims belong outside core unless actually present in source.
+    trend_terms = ["microservice", "container", "zero trust", "infrastructure-as-code", "cloud-native"]
+    u13core = _core_text(bp.units[12])
+    checks["unit13_current_trends_not_misrepresented_as_source"] = all(
+        term not in u13core or (source_text and _source_has(source_text, term)) for term in trend_terms
+    )
 
     lenses = {lens for u in bp.units for lens in u.cimtlens}
     for lens in ["C", "I", "M", "T"]:
@@ -140,58 +203,44 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     checks["no_major_topic_first_taught_after_unit15"] = all(x.first_taught_unit <= 15 for x in bp.topic_coverage)
     checks["topic_coverage_has_source_anchors"] = all(bool(x.source_anchor.strip()) for x in bp.topic_coverage)
 
-    u5 = _text(bp.units[4])
-    checks["unit5_prediction_before_explanation"] = "predict" in u5
-    checks["unit5_visible_first_principles_derivation"] = (
-        "constraint" in u5 and "deriv" in u5 and "principle" in u5
-    )
-
-    combined_5_10 = " ".join(_text(u) for u in bp.units[4:10])
-    checks["uncertainty_is_operationalized"] = (
-        "unknown" in combined_5_10
-        and any(k in combined_5_10 for k in ["monitor", "telemetry", "observe", "measure after", "post-deployment"])
-    )
-    u10 = _text(bp.units[9])
-    checks["unit10_known_unknown_monitoring"] = (
-        "known" in u10 and "unknown" in u10 and any(k in u10 for k in ["monitor", "telemetry", "observe"])
-    )
+    # Elite engineering reasoning.
+    u5p = _pedagogy_text(bp.units[4])
+    checks["unit5_prediction_before_explanation"] = "predict" in u5p
+    checks["unit5_visible_first_principles_derivation"] = all(k in u5p for k in ["constraint", "deriv", "principle"])
 
     u8 = _text(bp.units[7])
     alternatives_present = (
         any(k in u8 for k in ["alternative", "option a", "design a", "approach a"])
-        or " versus " in u8
-        or " vs. " in u8
-        or " vs " in u8
+        or " versus " in u8 or " vs. " in u8 or " vs " in u8
     )
     tradeoff_present = any(k in u8 for k in ["trade-off", "tradeoff", "sacrifice", "cost", "versus", " vs "])
     checks["unit8_has_alternatives_and_tradeoff"] = alternatives_present and tradeoff_present
 
     u9 = _text(bp.units[8])
     checks["unit9_has_falsification"] = any(k in u9 for k in ["falsif", "prove us wrong", "abandon", "disconfirm", "counter-evidence"])
-    checks["unit17_constraint_mutation"] = any(k in _text(bp.units[16]) for k in ["constraint", "mutation", "keep", "change", "remove", "add", "redesign"])
 
-    u15 = _text(bp.units[14])
-    checks["unit15_ai_may_assist"] = "ai may assist" in u15
+    u10p = _pedagogy_text(bp.units[9])
+    checks["unit10_known_unknown_monitoring"] = all(k in u10p for k in ["known", "unknown", "decision-sensitive unknown"]) and any(
+        k in u10p for k in ["what we monitor", "monitor", "telemetry", "observe"]
+    )
+
+    u15p = _pedagogy_text(bp.units[14])
+    checks["unit15_ai_may_assist"] = "ai may assist" in u15p
     checks["unit15_ai_must_not_autonomously"] = (
-        "ai must not" in u15 and any(k in u15 for k in ["autonomous", "autonomously", "trusted"])
+        "ai must not" in u15p and any(k in u15p for k in ["autonomous", "autonomously", "trusted"])
     )
 
-    u18 = _text(bp.units[17])
-    checks["unit18_full_evidence_protocol"] = all(k in u18 for k in ["claim", "evidence", "warrant", "counter-evidence", "residual uncertainty"])
-
-    source_profile_text = _profile_text(profile)
-    source_mentions_ai = bool(re.search(r"\bai\b|artificial intelligence", source_profile_text))
-    checks["unit15_ai_not_misrepresented_as_source"] = source_mentions_ai or not bool(re.search(r"\bai\b|artificial intelligence", _core_text(bp.units[14])))
-    checks["unit14_wellbeing_not_misrepresented_as_source"] = not any(
-        term in _core_text(bp.units[13]) for term in ["cognitive load", "operator fatigue", "burnout", "alert fatigue", "wellbeing"]
-    )
-    checks["unit18_evidence_method_not_misrepresented_as_source"] = not any(
-        term in _core_text(bp.units[17]) for term in ["warrant", "counter-evidence", "residual uncertainty", "evidence policy framework"]
-    )
-    checks["unit19_rubric_method_not_misrepresented_as_source"] = not any(
-        term in _core_text(bp.units[18]) for term in ["distinguished", "not yet ready", "rubric calibration", "four-tier rubric"]
+    u17 = _text(bp.units[16])
+    checks["unit17_constraint_mutation"] = any(k in u17 for k in ["constraint", "mutation", "keep", "change", "remove", "add", "redesign"])
+    mutation_new_tech = ["zero trust", "proxy gateway", "token-based", "encrypted payload"]
+    checks["unit17_does_not_presolve_with_unsourced_technology"] = all(
+        term not in u17 or (source_text and _source_has(source_text, term)) for term in mutation_new_tech
     )
 
+    u18p = _pedagogy_text(bp.units[17])
+    checks["unit18_full_evidence_protocol"] = all(k in u18p for k in ["claim", "evidence", "warrant", "counter-evidence", "residual uncertainty"])
+
+    # Rubric.
     checks["rubric_has_at_least_6_criteria"] = len(bp.rubric_criteria) >= 6
     rubric_names = " ".join(_norm(r.criterion) for r in bp.rubric_criteria)
     checks["rubric_covers_core_engineering_dimensions"] = all(
@@ -210,6 +259,7 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         for r in bp.rubric_criteria
     )
 
+    # ETEC readiness: official refs + exact KLO map + conservative atomicity against raw source.
     checks["readiness_alignment_present"] = len(bp.readiness_alignment) >= 1
     valid_skus = ETEC_IT_READINESS["skus"]
     valid_klos = ETEC_IT_READINESS["klo"]
@@ -231,9 +281,12 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         and set(r.klo_refs) == set(expected_klos(r.sku, r.slo_refs))
         for r in bp.readiness_alignment
     )
+    checks["readiness_atomicity_evidence_present"] = all(bool(r.atomicity_evidence.strip()) for r in bp.readiness_alignment)
+    checks["readiness_source_atomicity"] = all(
+        not unsupported_atomic_slos(r.slo_refs, source_text) for r in bp.readiness_alignment
+    )
     checks["readiness_has_clo_and_evidence_trace"] = all(
-        bool(r.clo_ids)
-        and bool(r.evidence_units)
+        bool(r.clo_ids) and bool(r.evidence_units)
         and all(1 <= n <= 20 for n in r.evidence_units)
         and bool(r.standard_source_pages)
         for r in bp.readiness_alignment
@@ -247,6 +300,7 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         "gulf" in r.standard.lower() or "gulf.edu" in r.standard.lower() for r in bp.readiness_alignment
     )
 
+    # Assurance language.
     u20 = _text(bp.units[19])
     checks["unit20_assurance_language"] = all(k in u20 for k in ["claim", "evidence", "warrant", "residual uncertainty"])
     checks["unit20_avoids_false_certainty"] = not any(k in u20 for k in [
