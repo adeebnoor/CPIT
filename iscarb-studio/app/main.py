@@ -21,10 +21,11 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.3.1")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.4.0")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
+RELIABLE_DEFAULT_MODEL = "gemini-3.6-flash"
 
 
 def _update(job: JobState, status: str, progress: int, message: str) -> JobState:
@@ -115,12 +116,13 @@ def root():
 def health():
     return {
         "ok": True,
-        "version": "1.3.1",
+        "version": "1.4.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
-        "default_model": os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
+        "default_model": RELIABLE_DEFAULT_MODEL,
         "url_sources": True,
-        "pipeline": "content-gate-v2-etec-readiness",
+        "pipeline": "content-gate-v2-etec-readiness-tolerant-json",
         "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
+        "visual_system": "interface-v2; lecture visual rendering follows content release",
     }
 
 
@@ -158,12 +160,12 @@ async def compile_lecture(
             shutil.copyfileobj(lecture.file, f)
         display_name = lecture.filename or target.name
 
-    chosen_model = model.strip() or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+    chosen_model = model.strip() or RELIABLE_DEFAULT_MODEL
     job = JobState(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v1.3 compilation…",
+        message="Queued for ISCARB v1.4 compilation…",
         filename=display_name,
         model=chosen_model,
     )
