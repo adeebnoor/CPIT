@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-"""ISCARB process bootstrap for Faculty Studio v3.6.
+"""ISCARB process bootstrap for Faculty Studio v3.7.
 
-Gate v9 patches the compiler before the Faculty Studio app is imported. The v3.6
-public UI is native, so runtime HTML string-patching is no longer required.
+Gate v9 patches the compiler before the Faculty Studio app is imported. Output
+Lab repairs are intentionally presentation-safe and never pretend to re-run a
+source-dependent release audit without the original lecture bundle.
 """
 
 import uuid
@@ -11,8 +12,11 @@ import uuid
 from fastapi import HTTPException
 
 from . import main as engine
-from .gate import failed_check_names
-from .gate_v9 import deterministic_gate as gate_v9, normalize_blueprint_for_gate
+from .gate_v9 import (
+    deterministic_gate as gate_v9,
+    normalize_blueprint_for_gate,
+    normalize_blueprint_for_output_lab,
+)
 from .models import AuditIssue, AuditReport, JobState
 
 
@@ -33,10 +37,13 @@ def _health_v9():
     data = _original_health()
     data.update({
         "deterministic_gate": "v9-claim-level-fidelity",
-        "visual_output": "v6-saudi-heritage-visual-provenance",
+        "visual_output": "v7-approved-saudi-heritage",
         "local_pre_gate_normalizer": True,
         "local_gate_repair": True,
+        "output_lab_audit_mode": "render-and-presentation-repair-only",
         "local_normalizer_scope": [
+            "enrichment-state consistency",
+            "visible Unit 5 first-principles scaffold",
             "provenance channel cleanup",
             "Unit 10 information ledger",
             "Unit 20 bounded assurance",
@@ -44,6 +51,7 @@ def _health_v9():
             "unsupported authority claims bounded as hypothetical",
             "human-factors kept outside P1 core unless source-supported",
             "Units 16-17 readiness orientation reference",
+            "exact readiness mapping when original source is available",
         ],
     })
     return data
@@ -60,9 +68,12 @@ app = faculty.app
 
 @app.post("/api/jobs/{job_id}/local-repair")
 def local_gate_repair(job_id: str):
-    """Deterministically repair a generated Blueprint without Gemini.
+    """Apply source-independent Blueprint repairs without Gemini.
 
-    Local repair is review-only and never grants RELEASE/ISCARB Verified.
+    This endpoint is deliberately NOT a release audit. Imported Blueprint JSON
+    does not include the raw P1 source text needed for source fidelity, exact
+    ETEC atomicity, or semantic release authority. Those states are therefore
+    reported as NOT RE-AUDITED rather than false FAIL results.
     """
     try:
         old = engine.load_job(job_id)
@@ -71,41 +82,53 @@ def local_gate_repair(job_id: str):
     if old.blueprint is None:
         raise HTTPException(409, "No Blueprint is available to repair")
 
-    repaired = normalize_blueprint_for_gate(old.blueprint, source_text="", profile=old.source_profile)
-    checks = gate_v9(repaired, old.source_profile, "")
-    failures = failed_check_names(checks)
+    repaired = normalize_blueprint_for_output_lab(old.blueprint)
 
     new_id = uuid.uuid4().hex
     audit = AuditReport(
         overall_pass=False,
-        source_fidelity_pass=(checks.get("no_obvious_unsourced_terms_in_core", False) and checks.get("human_factors_not_misattributed_to_p1_core", False)),
-        engineering_rigor_pass=(checks.get("unit10_known_unknown_monitoring", False) and checks.get("unit20_assurance_language", checks.get("unit20_uses_bounded_assurance_language", False)) and checks.get("no_unsourced_precision_in_noncore", False)),
-        cumulative_fidelity_pass=not any(name.startswith(("unit2_","unit3_","unit4_","unit11_","unit12_","unit13_","unit14_","unit15_","unit16_","unit17_","unit18_","unit19_")) for name in failures),
-        readiness_alignment_pass=not any("readiness" in name or "etec" in name for name in failures),
-        provenance_separation_pass=not any(any(k in name for k in ["provenance","enrichment","unsourced","source_anchor","pedagogy_channel","external_authority","human_factors"]) for name in failures),
+        source_fidelity_pass=False,
+        engineering_rigor_pass=False,
+        cumulative_fidelity_pass=False,
+        readiness_alignment_pass=False,
+        provenance_separation_pass=False,
         issues=[AuditIssue(
             severity="major",
             unit_numbers=[],
-            requirement="Local deterministic repair — semantic audit not repeated",
-            problem=("Gate v9 local normalization was applied without Gemini. " + ("Remaining deterministic checks: " + ", ".join(failures[:24]) if failures else "No locally repairable Gate v9 failures remain.")),
-            repair_instruction="Use these outputs for faculty review. Re-run the full compiler/audit before assigning ISCARB Verified.",
+            requirement="Output Lab — release audit not repeated",
+            problem=(
+                "Presentation-safe deterministic repairs were applied with 0 Gemini calls. "
+                "Source fidelity, ETEC source atomicity, semantic engineering audit, and release authority "
+                "cannot be re-evaluated from Blueprint JSON alone."
+            ),
+            repair_instruction=(
+                "Use the repaired outputs for faculty review. Re-run Generate New Lecture with the original "
+                "lecture source when ISCARB Verified release authority is required."
+            ),
         )],
-        strengths=["Gate v9 claim-level provenance controls applied locally.","Visual outputs can be iterated with zero model calls."],
+        strengths=[
+            "Enrichment-state consistency repaired locally.",
+            "Unit 5 first-principles sequence made explicit locally.",
+            "Visual/document outputs can be iterated with zero model calls.",
+        ],
     )
     job = JobState(
         id=new_id,
         status="blocked",
         progress=100,
-        message="LOCAL REPAIR COMPLETE — Gate v9 normalization applied with 0 Gemini calls. v3.6 visual outputs are ready for faculty review; RELEASE audit was not repeated.",
+        message=(
+            "OUTPUT LAB REPAIR COMPLETE — presentation-safe local normalization applied with 0 Gemini calls. "
+            "Source-dependent gates are NOT RE-AUDITED; full compile is required for ISCARB Verified."
+        ),
         filename=old.filename,
-        model="local-gate-v9-repair",
+        model="local-output-repair-v3.7",
         source_manifest=list(old.source_manifest),
         lecture_focus=old.lecture_focus,
         source_profile=old.source_profile,
         blueprint=repaired,
         audit=audit,
-        deterministic_checks=checks,
+        deterministic_checks={},
         error=None,
     )
     engine.save_job(job)
-    return {"job_id": new_id, "remaining_failures": failures}
+    return {"job_id": new_id, "audit_state": "not_reaudited"}
