@@ -10,8 +10,8 @@ from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .faculty_visual import export_faculty_presenter_pptx, render_faculty_presenter_preview
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
 
-FACULTY_VERSION = "3.4.0"
-PIPELINE_ID = "faculty-studio-v3.4-output-v4-original-identity"
+FACULTY_VERSION = "3.4.1"
+PIPELINE_ID = "faculty-studio-v3.4.1-output-lab-prominent"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
@@ -26,7 +26,7 @@ for route in engine.app.router.routes:
 
 def _output_v4_shell(html: str) -> str:
     """Upgrade the stable v3.3 shell at response time without duplicating the page."""
-    html = html.replace('<div class="version">v3.3</div>', '<div class="version">v3.4 · Output v4</div>')
+    html = html.replace('<div class="version">v3.3</div>', '<div class="version">v3.4.1 · Output v4</div>')
     html = html.replace(
         'Render Presenter, Detailed, Instructor and Blueprint outputs.',
         'Render Presenter, Detailed, Instructor, Student and Blueprint outputs.',
@@ -43,22 +43,34 @@ def _output_v4_shell(html: str) -> str:
         '<div class="assets"><div class="asset"><b>Presenter</b><a target="_blank" href="/api/jobs/${id}/presenter">Preview ↗</a> · <a href="/api/jobs/${id}/export/pptx">PPTX</a></div><div class="asset"><b>Detailed</b><a href="/api/jobs/${id}/export/pdf">PDF</a></div><div class="asset"><b>Instructor</b><a href="/api/jobs/${id}/export/docx">DOCX</a></div><div class="asset"><b>Student</b><a href="/api/jobs/${id}/export/student">Activity Pack</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON</a></div></div>',
     )
 
-    # Local re-render path: iterate on output design without Gemini/API quota.
-    import_block = '''<form id="blueprintForm" class="support" style="margin-bottom:12px">
-      <span class="badge">OUTPUT LAB · NO GEMINI</span>
-      <div class="two"><div><div class="fieldLabel">Render an existing ISCARB Blueprint JSON</div><input id="blueprintFile" name="blueprint_file" type="file" accept=".json"><p class="hint">Use a JSON downloaded from any previous ISCARB run. This rebuilds all output assets locally and never grants ISCARB Verified.</p></div><div style="display:flex;align-items:end"><button class="compile" id="blueprintBtn" type="submit" style="width:100%;margin-top:0">Render outputs only →</button></div></div>
-    </form>'''
-    if 'id="blueprintForm"' not in html:
-        html = html.replace('<form id="compileForm">', import_block + '<form id="compileForm">')
+    # Make the two workflows unmistakable.
+    html = html.replace(
+        '<button class="compile" id="compileBtn" type="submit">Compile lecture studio →</button>',
+        '<button class="compile" id="compileBtn" type="submit">Generate new lecture · uses Gemini →</button><p class="hint" style="margin-top:8px"><b>Needs Gemini:</b> use this only when you want ISCARB to analyze a source and create a new 20-Unit Blueprint.</p>',
+    )
+
+    lab = '''<div id="output-lab" style="margin-top:16px;padding:16px;border:2px solid #563c7d;background:#f7f3fb;border-radius:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><span class="badge" style="background:#eee8f5;color:#563c7d">OUTPUT LAB · NO GEMINI</span><div style="font-size:1.05rem;font-weight:950;margin-top:4px">Already have an ISCARB Blueprint JSON?</div><p class="hint" style="max-width:620px">Rebuild Presenter, Detailed, Instructor and Student outputs locally. No Gemini quota is used. This is the correct path for visual-design iteration.</p></div><div style="font-size:.68rem;font-weight:900;color:#0c533d;background:#e7f4ec;padding:8px 10px;border-radius:9px">0 API CALLS</div></div>
+      <form id="blueprintForm" style="margin-top:12px"><div class="two"><div><div class="fieldLabel">ISCARB Blueprint JSON</div><input id="blueprintFile" name="blueprint_file" type="file" accept=".json"></div><div style="display:flex;align-items:end"><button class="compile" id="blueprintBtn" type="submit" style="width:100%;margin-top:0;background:#563c7d">Re-render outputs · NO GEMINI →</button></div></div></form>
+    </div>'''
+    # Put Output Lab directly after the full compiler form, where faculty naturally look after a failed run.
+    if 'id="output-lab"' not in html:
+        html = html.replace('</form></div><aside class="panel dark">', '</form>' + lab + '</div><aside class="panel dark">')
 
     bp_js = r'''
 const blueprintForm=document.getElementById('blueprintForm');
-if(blueprintForm){blueprintForm.addEventListener('submit',async e=>{e.preventDefault();const f=document.getElementById('blueprintFile');if(!f||!f.files||!f.files.length){alert('Choose an ISCARB Blueprint JSON first.');return}const b=document.getElementById('blueprintBtn');b.disabled=true;const fd=new FormData(blueprintForm);try{const r=await fetch('/api/render-blueprint',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(data.detail||JSON.stringify(data));await poll(data.job_id)}catch(ex){showError(ex.message)}finally{b.disabled=false}})}
+if(blueprintForm){blueprintForm.addEventListener('submit',async e=>{e.preventDefault();const f=document.getElementById('blueprintFile');if(!f||!f.files||!f.files.length){alert('Choose an ISCARB Blueprint JSON first.');return}const b=document.getElementById('blueprintBtn');b.disabled=true;b.textContent='Rendering locally…';const fd=new FormData(blueprintForm);try{const r=await fetch('/api/render-blueprint',{method:'POST',body:fd});const data=await r.json();if(!r.ok)throw new Error(data.detail||JSON.stringify(data));await poll(data.job_id)}catch(ex){showError(ex.message)}finally{b.disabled=false;b.textContent='Re-render outputs · NO GEMINI →'}})}
 '''
     if 'const blueprintForm=' not in html:
         html = html.replace("const form=document.getElementById('compileForm')", bp_js + "\nconst form=document.getElementById('compileForm')")
 
-    html = html.replace('CIMT → IMAM → HIMMA → ISCARB · v3.3 Original Identity', 'CIMT → IMAM → HIMMA → ISCARB · v3.4 Output v4')
+    # Friendly quota message: preserve the technical detail but direct faculty to the local path.
+    html = html.replace(
+        "if(j.error){err.textContent=j.error;err.classList.remove('hidden')}",
+        "if(j.error){const q=String(j.error).toLowerCase().includes('quota')||String(j.error).includes('RESOURCE_EXHAUSTED');err.innerHTML=q?'<b>Gemini quota is unavailable for NEW content generation.</b><br><br>If you already have a Blueprint JSON, use <a href=\"#output-lab\" style=\"color:#563c7d;font-weight:900\">Output Lab · NO GEMINI</a> below. Your visual outputs can be redesigned without another API call.<br><br><span style=\"opacity:.72\">Technical detail: '+j.error.replace(/</g,'&lt;')+'</span>':j.error;err.classList.remove('hidden')}",
+    )
+
+    html = html.replace('CIMT → IMAM → HIMMA → ISCARB · v3.3 Original Identity', 'CIMT → IMAM → HIMMA → ISCARB · v3.4.1 Output v4')
     html = html.replace('.outcomes{display:grid;grid-template-columns:repeat(4,1fr);', '.outcomes{display:grid;grid-template-columns:repeat(5,1fr);')
     html = html.replace('.assets{display:grid;grid-template-columns:repeat(4,1fr);', '.assets{display:grid;grid-template-columns:repeat(5,1fr);')
     return html
@@ -93,7 +105,7 @@ def health():
             "version": FACULTY_VERSION,
             "engine_version": engine.SERVICE_VERSION,
             "pipeline": PIPELINE_ID,
-            "public_experience": "original-source-library + upgrade-my-lecture + ISCARB-verified + output-lab + starter-kit",
+            "public_experience": "original-source-library + upgrade-my-lecture + ISCARB-verified + prominent-output-lab + starter-kit",
             "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
             "design_language": "ISCARB Original Identity — Saudi academic engineering; no third-party logos or copied design assets",
             "presenter_theme": "deep green + technical purple + warm gold + visual-first text budget",
