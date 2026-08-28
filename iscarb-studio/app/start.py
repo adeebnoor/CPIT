@@ -2,20 +2,22 @@ from __future__ import annotations
 
 """ISCARB process bootstrap.
 
-Applies Gate v9 at process start without destabilizing the proven compiler module.
-Gate v9 keeps the v8 provenance/ledger/assurance repairs and adds claim-level
-fidelity controls for invented precision, unsupported authority claims, human-
-factors source attribution, and mandatory readiness-orientation references.
+Gate v9 + Visual Output v5. Gate v9 keeps provenance/ledger/assurance repairs and
+claim-level fidelity controls. Visual Output v5 makes the Presenter genuinely
+visual in browser, PPTX and PDF while explicitly separating the text-rich Faculty
+Reading Pack from live teaching slides.
 """
 
 import uuid
 
 from fastapi import HTTPException
+from fastapi.responses import FileResponse
 
 from . import main as engine
 from .gate import failed_check_names
 from .gate_v9 import deterministic_gate as gate_v9, normalize_blueprint_for_gate
 from .models import AuditIssue, AuditReport, JobState
+from .presenter_pdf import export_presenter_pdf
 
 
 _original_timebox = engine.apply_90_minute_timebox
@@ -35,6 +37,7 @@ def _health_v9():
     data = _original_health()
     data.update({
         "deterministic_gate": "v9-claim-level-fidelity",
+        "visual_output": "v5-diagram-first-presenter",
         "local_pre_gate_normalizer": True,
         "local_gate_repair": True,
         "local_normalizer_scope": [
@@ -50,15 +53,15 @@ def _health_v9():
     return data
 
 
-# main._compile resolves these globals at runtime, so patching here upgrades both
-# initial generation and every post-repair pass while preserving the rest of the
-# compiler implementation.
 engine.deterministic_gate = gate_v9
 engine.apply_90_minute_timebox = _timebox_v9
 engine.health = _health_v9
 
-from . import faculty_main as faculty  # noqa: E402  (import only after engine patching)
+from . import faculty_main as faculty  # noqa: E402
 
+faculty.FACULTY_VERSION = "3.5.0"
+faculty.PIPELINE_ID = "faculty-studio-v3.5-visual-output-v5-gate-v9"
+faculty.app.version = faculty.FACULTY_VERSION
 app = faculty.app
 
 
@@ -116,7 +119,7 @@ def local_gate_repair(job_id: str):
         ]) for name in failures),
         issues=[issue],
         strengths=[
-            "Gate v9 retains v8 whole-phrase/source-profile provenance checks.",
+            "Gate v9 retains whole-phrase/source-profile provenance checks.",
             "Unit 10 contains a visible four-state information ledger.",
             "Unit 20 assurance language is bounded and retains residual uncertainty.",
             "Precise non-source exercise values are labeled synthetic instead of presented as evidence.",
@@ -128,9 +131,9 @@ def local_gate_repair(job_id: str):
         id=new_id,
         status="blocked",
         progress=100,
-        message="LOCAL REPAIR COMPLETE — Gate v9 claim-level normalization applied with 0 Gemini calls. Outputs are ready for faculty review; semantic RELEASE audit was not repeated.",
+        message="LOCAL REPAIR COMPLETE — Gate v9 normalization applied with 0 Gemini calls. Visual Output v5 assets are ready; semantic RELEASE audit was not repeated.",
         filename=old.filename,
-        model="local-gate-v9-repair",
+        model="local-gate-v9-visual-v5-repair",
         source_manifest=list(old.source_manifest),
         lecture_focus=old.lecture_focus,
         source_profile=old.source_profile,
@@ -143,25 +146,42 @@ def local_gate_repair(job_id: str):
     return {"job_id": new_id, "remaining_failures": failures}
 
 
-# Extend the existing v3.4.1 shell without copying the homepage. The result card
-# gets a prominent local-repair action whenever a Blueprint exists.
+@app.get("/api/jobs/{job_id}/presenter-pdf")
+def presenter_pdf(job_id: str):
+    """Twenty-page visual 16:9 Presenter PDF. No Gemini call."""
+    try:
+        job = engine.load_job(job_id)
+    except FileNotFoundError:
+        raise HTTPException(404, "Job not found")
+    if job.blueprint is None:
+        raise HTTPException(409, "No Blueprint is available yet")
+    path = engine.EXPORTS / f"ISCARB_{job_id}_Visual_Presenter.pdf"
+    export_presenter_pdf(job.blueprint, path)
+    return FileResponse(path, media_type="application/pdf", filename=path.name)
+
+
 _original_shell = faculty._output_v4_shell
 
 
-def _gate_v9_shell(html: str) -> str:
+def _visual_v5_shell(html: str) -> str:
     html = _original_shell(html)
-    html = html.replace("v3.4.1 · Output v4", "v3.4.3 · Gate v9 + Output v4")
-    html = html.replace("v3.4.1 Output v4", "v3.4.3 Gate v9 + Output v4")
-
+    html = html.replace("v3.4.1 · Output v4", "v3.5 · Visual Output v5")
+    html = html.replace("v3.4.1 Output v4", "v3.5 Visual Output v5")
+    html = html.replace("Detailed Deck", "Faculty Reading Pack")
+    html = html.replace("<b>Detailed</b>", "<b>Faculty Reading Pack</b>")
+    html = html.replace(
+        "<b>Presenter</b><a target=\"_blank\" href=\"/api/jobs/${id}/presenter\">Preview ↗</a> · <a href=\"/api/jobs/${id}/export/pptx\">PPTX</a>",
+        "<b>Visual Presenter</b><a target=\"_blank\" href=\"/api/jobs/${id}/presenter\">Preview ↗</a> · <a href=\"/api/jobs/${id}/export/pptx\">PPTX</a> · <a href=\"/api/jobs/${id}/presenter-pdf\">PDF</a>"
+    )
     marker = "${issues?`<div class=\"issues\">${issues}</div>`:''}<div class=\"assets\">"
-    repair = "${issues?`<div class=\"issues\">${issues}</div>`:''}<div style=\"margin:12px 0;padding:12px;border:1px solid #d8c9e8;background:#f7f3fb;border-radius:11px\"><b>Gate v9 local repair</b><div style=\"font-size:.66rem;color:#657169;margin:4px 0 9px\">Fix provenance leakage, synthetic precision, unsupported authority claims, Unit 10 information-ledger structure, readiness references and bounded Unit 20 assurance without Gemini. The repaired copy remains REVIEW REQUIRED until semantic audit is repeated.</div><button type=\"button\" onclick=\"localRepair('${id}')\" style=\"border:0;background:#563c7d;color:white;border-radius:8px;padding:9px 12px;font-weight:900;cursor:pointer\">Repair locally · NO GEMINI →</button></div><div class=\"assets\">"
+    repair = "${issues?`<div class=\"issues\">${issues}</div>`:''}<div style=\"margin:12px 0;padding:12px;border:1px solid #d8c9e8;background:#f7f3fb;border-radius:11px\"><b>Gate v9 local repair</b><div style=\"font-size:.66rem;color:#657169;margin:4px 0 9px\">Fix claim-level fidelity and regenerate Visual Output v5 with no Gemini call. The repaired copy remains REVIEW REQUIRED until semantic audit is repeated.</div><button type=\"button\" onclick=\"localRepair('${id}')\" style=\"border:0;background:#563c7d;color:white;border-radius:8px;padding:9px 12px;font-weight:900;cursor:pointer\">Repair + re-render · NO GEMINI →</button></div><div class=\"assets\">"
     if marker in html and "localRepair('${id}')" not in html:
         html = html.replace(marker, repair)
 
     js = r'''
 async function localRepair(id){
   const statusMsg=document.getElementById('statusMsg');
-  if(statusMsg)statusMsg.textContent='Applying Gate v9 claim-level repair — 0 Gemini calls…';
+  if(statusMsg)statusMsg.textContent='Applying Gate v9 + Visual Output v5 — 0 Gemini calls…';
   try{
     const r=await fetch('/api/jobs/'+id+'/local-repair',{method:'POST'});
     const data=await r.json();
@@ -175,4 +195,4 @@ async function localRepair(id){
     return html
 
 
-faculty._output_v4_shell = _gate_v9_shell
+faculty._output_v4_shell = _visual_v5_shell
