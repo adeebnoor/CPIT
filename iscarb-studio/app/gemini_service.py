@@ -13,6 +13,7 @@ from .prompts import SOURCE_PROFILE_PROMPT, MASTER_PROMPT, AUDIT_PROMPT, REPAIR_
 from .readiness import READINESS_CONTEXT
 from .readiness_map import READINESS_KLO_MAP_CONTEXT
 from .quality_rules import QUALITY_ADDENDUM, AUDIT_ADDENDUM, REPAIR_ADDENDUM
+from .source_bundle import SourceBundle
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -22,7 +23,7 @@ class GeminiNotConfigured(RuntimeError):
 
 
 class GeminiService:
-    """Fast source-grounded Gemini client with local validation and one source upload per job."""
+    """Source-grounded Gemini client for one 90-minute multi-source lecture bundle."""
 
     def __init__(self, model: str | None = None):
         self.model = model or "gemini-3.6-flash"
@@ -36,8 +37,7 @@ class GeminiService:
             raise GeminiNotConfigured("google-genai is not installed. Run: pip install -r requirements.txt") from exc
         self._types = types
         self.client = genai.Client(api_key=self.api_key)
-        self._uploaded = None
-        self._uploaded_path: str | None = None
+        self._uploaded: dict[str, object] = {}
         self.active_model = self.model
 
     @staticmethod
@@ -55,22 +55,16 @@ class GeminiService:
     def _backoff(attempt: int) -> None:
         time.sleep(1.5 * (attempt + 1))
 
-    def _source_content(self, file_path: Path):
-        suffix = file_path.suffix.lower()
-        if suffix in {".txt", ".md"}:
-            text = file_path.read_text(encoding="utf-8", errors="replace")
-            return "WEEKLY SOURCE (authoritative technical source):\n\n" + text[:350_000]
-
-        resolved = str(file_path.resolve())
-        if self._uploaded is not None and self._uploaded_path == resolved:
-            return self._uploaded
-
+    def _upload(self, path: Path):
+        key = str(path.resolve())
+        if key in self._uploaded:
+            return self._uploaded[key]
         last_exc: Exception | None = None
         for attempt in range(2):
             try:
-                self._uploaded = self.client.files.upload(file=str(file_path))
-                self._uploaded_path = resolved
-                return self._uploaded
+                uploaded = self.client.files.upload(file=str(path))
+                self._uploaded[key] = uploaded
+                return uploaded
             except Exception as exc:
                 last_exc = exc
                 if not self._is_retryable(exc) or attempt == 1:
@@ -78,14 +72,26 @@ class GeminiService:
                 self._backoff(attempt)
         raise last_exc or RuntimeError("Source upload failed")
 
+    def _source_contents(self, bundle: SourceBundle) -> list[object]:
+        contents: list[object] = [bundle.manifest_text()]
+        for item in bundle.items:
+            contents.append(f"\nBEGIN SOURCE {item.label}\n")
+            suffix = item.path.suffix.lower()
+            if suffix in {".txt", ".md"}:
+                text = item.path.read_text(encoding="utf-8", errors="replace")
+                contents.append(text[:300_000])
+            else:
+                contents.append(self._upload(item.path))
+            contents.append(f"\nEND SOURCE [{item.source_id}]\n")
+        return contents
+
     def close(self) -> None:
-        if self._uploaded is not None:
+        for uploaded in list(self._uploaded.values()):
             try:
-                self.client.files.delete(name=self._uploaded.name)
+                self.client.files.delete(name=uploaded.name)  # type: ignore[attr-defined]
             except Exception:
                 pass
-            self._uploaded = None
-            self._uploaded_path = None
+        self._uploaded.clear()
 
     def _models_for(self, preferred: str) -> list[str]:
         ordered = [preferred]
@@ -111,14 +117,14 @@ class GeminiService:
     def _generate_structured(
         self,
         *,
-        file_path: Path,
+        bundle: SourceBundle,
         prompt: str,
         schema: Type[T],
         extra_text: str = "",
         preferred_model: str | None = None,
         thinking_level: str = "low",
     ) -> T:
-        source = self._source_content(file_path)
+        source_contents = self._source_contents(bundle)
         model = preferred_model or self.model
         schema_text = self._compact_schema(schema)
         full_prompt = (
@@ -138,7 +144,7 @@ class GeminiService:
                     )
                     response = self.client.models.generate_content(
                         model=candidate,
-                        contents=[source, full_prompt],
+                        contents=[*source_contents, full_prompt],
                         config=config,
                     )
                     self.active_model = candidate
@@ -149,7 +155,7 @@ class GeminiService:
                         if attempt == 0:
                             full_prompt += (
                                 "\n\nFORMAT REPAIR ONLY: Previous JSON failed local validation. Return the complete corrected JSON object."
-                                "\nVALIDATION_ERROR:\n" + str(validation_exc)[:2200]
+                                "\nVALIDATION_ERROR:\n" + str(validation_exc)[:2400]
                                 + "\nPREVIOUS_JSON:\n" + last_text[:50_000]
                             )
                             continue
@@ -171,23 +177,30 @@ class GeminiService:
             raise last_exc
         raise RuntimeError(f"No Gemini model completed the request. Last output: {last_text[:500]}")
 
-    def profile_source(self, file_path: Path) -> SourceProfile:
-        return self._generate_structured(
-            file_path=file_path,
+    def profile_source(self, bundle: SourceBundle) -> SourceProfile:
+        result = self._generate_structured(
+            bundle=bundle,
             prompt=SOURCE_PROFILE_PROMPT,
             schema=SourceProfile,
+            extra_text="\n\nBUNDLE MANIFEST:\n" + bundle.manifest_text(),
             preferred_model="gemini-3.5-flash-lite",
             thinking_level="minimal",
         )
+        result.session_minutes = 90
+        result.source_manifest = bundle.manifest_lines()
+        if not result.in_scope_families:
+            result.in_scope_families = [x.name for x in result.topic_families]
+        return result
 
-    def generate_blueprint(self, file_path: Path, profile: SourceProfile) -> Blueprint:
+    def generate_blueprint(self, bundle: SourceBundle, profile: SourceProfile) -> Blueprint:
         extra = (
-            "\nSOURCE PROFILE (coverage checklist):\n" + profile.model_dump_json(indent=2)
+            "\nSOURCE PROFILE (90-minute scope contract):\n" + profile.model_dump_json(indent=2)
+            + "\n\nBUNDLE MANIFEST:\n" + bundle.manifest_text()
             + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n" + READINESS_CONTEXT
             + "\n\nOFFICIAL ETEC SLO-TO-KLO MAP (must be copied exactly; do not infer):\n" + READINESS_KLO_MAP_CONTEXT
         )
         return self._generate_structured(
-            file_path=file_path,
+            bundle=bundle,
             prompt=MASTER_PROMPT + QUALITY_ADDENDUM,
             schema=Blueprint,
             extra_text=extra,
@@ -195,16 +208,16 @@ class GeminiService:
             thinking_level="low",
         )
 
-    def audit(self, file_path: Path, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
+    def audit(self, bundle: SourceBundle, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
         extra = (
-            "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
+            "\nBUNDLE MANIFEST:\n" + bundle.manifest_text()
+            + "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
             + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n" + READINESS_KLO_MAP_CONTEXT
             + "\nCANDIDATE BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
             + "\nDETERMINISTIC CHECK FAILURES:\n" + json.dumps(deterministic_failures or [], ensure_ascii=False)
         )
-        # The audit is the quality gate, so use the stable full Flash model rather than Lite.
         return self._generate_structured(
-            file_path=file_path,
+            bundle=bundle,
             prompt=AUDIT_PROMPT + AUDIT_ADDENDUM,
             schema=AuditReport,
             extra_text=extra,
@@ -212,16 +225,17 @@ class GeminiService:
             thinking_level="low",
         )
 
-    def repair(self, file_path: Path, blueprint: Blueprint, audit: AuditReport, deterministic_failures: list[str]) -> Blueprint:
+    def repair(self, bundle: SourceBundle, blueprint: Blueprint, audit: AuditReport, deterministic_failures: list[str]) -> Blueprint:
         extra = (
-            "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
+            "\nBUNDLE MANIFEST:\n" + bundle.manifest_text()
+            + "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT
             + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n" + READINESS_KLO_MAP_CONTEXT
             + "\nCURRENT BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2)
             + "\nAUDIT REPORT:\n" + audit.model_dump_json(indent=2)
             + "\nDETERMINISTIC FAILURES:\n" + json.dumps(deterministic_failures, ensure_ascii=False)
         )
         return self._generate_structured(
-            file_path=file_path,
+            bundle=bundle,
             prompt=REPAIR_PROMPT + REPAIR_ADDENDUM,
             schema=Blueprint,
             extra_text=extra,
