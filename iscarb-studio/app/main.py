@@ -21,7 +21,7 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.2.1")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.3.0")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
@@ -43,36 +43,36 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
         service = GeminiService(model=model)
 
         stage = "source analysis"
-        _update(job, "analyzing", 10, "1/4 · Reading the weekly source and locking technical boundaries…")
+        _update(job, "analyzing", 10, "1/4 · Locking the weekly technical source and extracting all major topic families…")
         profile = service.profile_source(file_path)
         job.source_profile = profile
         save_job(job)
 
-        stage = "20-unit generation"
-        _update(job, "generating", 35, "2/4 · Building the exact 20-unit ISCARB lecture…")
+        stage = "20-unit generation + readiness alignment"
+        _update(job, "generating", 35, "2/4 · Building 20 ISCARB units and mapping only supported ETEC IT readiness targets…")
         blueprint = service.generate_blueprint(file_path, profile)
         job.blueprint = blueprint
         save_job(job)
 
-        stage = "structural gate"
-        _update(job, "auditing", 70, "3/4 · Running structural and semantic release gates…")
+        stage = "Content Gate v2"
+        _update(job, "auditing", 70, "3/4 · Running source-provenance, engineering-rigor, ETEC-readiness, and cumulative-fidelity gates…")
         checks = deterministic_gate(blueprint)
         job.deterministic_checks = checks
         det_fail = failed_check_names(checks)
 
-        stage = "semantic audit"
+        stage = "semantic content audit"
         audit = service.audit(file_path, blueprint, det_fail)
         job.audit = audit
         save_job(job)
 
         if all_required_pass(checks) and audit.overall_pass:
             job.blueprint = blueprint
-            _update(job, "ready", 100, "RELEASE — lecture passed source, fidelity, and engineering-rigor gates.")
+            _update(job, "ready", 100, "RELEASE — passed Content Gate v2, source provenance, and ETEC IT readiness alignment.")
             return
 
         for round_no in range(repair_rounds):
             stage = f"repair round {round_no + 1}"
-            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing detected gate failures (round {round_no + 1})…")
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing only detected gate failures (round {round_no + 1})…")
             blueprint = service.repair(file_path, blueprint, audit, det_fail)
             job.blueprint = blueprint
             save_job(job)
@@ -85,11 +85,11 @@ def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> No
             job.audit = audit
             save_job(job)
             if all_required_pass(checks) and audit.overall_pass:
-                _update(job, "ready", 100, f"RELEASE — passed after repair round {round_no + 1}.")
+                _update(job, "ready", 100, f"RELEASE — passed Content Gate v2 after repair round {round_no + 1}.")
                 return
 
         job.blueprint = blueprint
-        _update(job, "blocked", 100, "BLOCKED — a usable blueprint was generated, but unresolved release-gate issues remain. You can inspect/export it and re-run if needed.")
+        _update(job, "blocked", 100, "BLOCKED — blueprint generated, but Content Gate v2 found unresolved source, rigor, provenance, or readiness issues.")
 
     except Exception as exc:
         try:
@@ -115,11 +115,12 @@ def root():
 def health():
     return {
         "ok": True,
-        "version": "1.2.1",
+        "version": "1.3.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
         "default_model": os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
         "url_sources": True,
-        "pipeline": "fast-reliable",
+        "pipeline": "content-gate-v2-etec-readiness",
+        "readiness_standard": "ETEC Academic Standards for Information Technology Programs 2025 v2.0",
     }
 
 
@@ -162,7 +163,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB compilation…",
+        message="Queued for ISCARB v1.3 compilation…",
         filename=display_name,
         model=chosen_model,
     )
