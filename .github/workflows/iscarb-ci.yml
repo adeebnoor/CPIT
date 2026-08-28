@@ -123,7 +123,7 @@ jobs:
           from pathlib import Path
           from pptx import Presentation
           from pptx.enum.shapes import MSO_SHAPE_TYPE
-          from app import source_visual_patch_v2  # activates explicit-anchor-first policy
+          from app import source_visual_patch_v2
           from app.models import Blueprint
           from app.source_visuals import _build_pdf_registry, plan_for_unit
           from app.visual_output_v36 import export_presenter_pptx, export_presenter_pdf, render_presenter_preview
@@ -173,7 +173,8 @@ jobs:
           assert plan.source_slide == 4, plan
 
           preview=render_presenter_preview(bp,'BLOCKED')
-          assert 'SOURCE VISUAL · P1 SLIDE 4' in preview
+          assert '"slide": 4' in preview
+          assert 'SOURCE VISUAL · P1 SLIDE ${x.slide}' in preview
           assert 'data:image/png;base64,' in preview
 
           pptx=export_presenter_pptx(bp,Path('/tmp/iscarb-v2-security.pptx'))
