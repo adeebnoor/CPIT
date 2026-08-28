@@ -2,23 +2,36 @@ from __future__ import annotations
 
 QUALITY_ADDENDUM = r"""
 
-ISCARB v1.7 QUALITY ADDENDUM — HARD GENERATION RULES
+ISCARB v1.8 QUALITY ADDENDUM — 90-MINUTE FULL-COVERAGE CONTRACT
 
-A0) ONE 90-MINUTE LECTURE, NOT A CHAPTER DUMP
-The output is one live 90-minute lecture.
-- Teach only SourceProfile.topic_families / in_scope_families selected for this session.
-- Never reintroduce deferred_topics into Units 1-20.
-- If the bundle is broader than 90 minutes, scope_fit may be COMPRESS and important excess content must be listed in deferred_topics.
-- If the bundle represents multiple unrelated lectures/topics, scope_fit=MIXED and release must be blocked rather than fusing them.
-- Twenty Units are twenty pages/stops in one decision journey, not twenty equal mini-lectures.
-- Units 16-20 brief/launch assessment work; they do not imply the full portfolio is completed live in class.
+A0) EXACTLY ONE 90-MINUTE LECTURE — FULL PRIMARY COVERAGE
+The output is one live 90-minute lecture and it MUST cover the complete PRIMARY [P1] lecture source at the level of all major technical topic families.
+- Never defer, omit, replace, or move a major P1 topic to another lecture because P1 is long or dense.
+- If P1 is light/normal, scope_fit=FIT.
+- If P1 is dense, scope_fit=COMPRESS. Compression means tighter synthesis, grouping related concepts, removing repetition, and unequal depth allocation — NOT dropping primary topics.
+- deferred_topics must remain empty for the primary lecture.
+- A faculty-supplied focus may change emphasis/depth, but it may not narrow mandatory P1 coverage.
+- Twenty Units are twenty teaching stops in one decision journey; a Unit may cover multiple related P1 subtopics when necessary.
+- Units 16-20 launch/synthesize assessment and evidence work; they do not imply the full take-home artifact is completed live.
 
 A1) SOURCE-BUNDLE HIERARCHY
 There is exactly one PRIMARY [P1] source and optional SUPPORTING [S#] sources.
-- [P1] determines scope, terminology, and conflict precedence.
-- [S#] sources may clarify/deepen/evidence an in-scope idea but may not create a second lecture merely because they were supplied.
-- Every technical source_anchor must name the source ID, e.g. [P1] SLIDES 7-12 or [S2] p.4.
-- If a supporting source conflicts materially with [P1], preserve [P1] and report the conflict.
+- [P1] defines the complete mandatory lecture scope, terminology, ordering logic, and conflict precedence.
+- [S#] sources may clarify, deepen, verify, contextualize, or supply examples for P1 topics.
+- Material found only in [S#] is NOT mandatory merely because it was supplied; supporting sources must never crowd out P1 coverage.
+- If a supporting source conflicts materially with P1, preserve P1 and report the conflict.
+- Every technical source_anchor must name the relevant source ID, e.g. [P1] SLIDES 7-12 or [S2] p.4.
+- Every primary topic-family coverage entry must retain a [P1] anchor.
+
+A2) SMART COMPRESSION WITHOUT COVERAGE LOSS
+When P1 is too dense for equal-depth treatment in 90 minutes:
+1. Preserve every major topic family explicitly.
+2. Give deeper treatment to dependency-heavy, mechanism-heavy, decision-critical, high-risk, or assessment-critical topics.
+3. Give concise but explicit treatment to lower-dependency descriptive/detail topics.
+4. Merge related subtopics into one Unit when technically coherent.
+5. Eliminate repetition, not content.
+6. Never hide omitted content under "supporting", "optional", "later", or "deferred" labels.
+7. The Domain Spine and Topic Coverage ledger must prove that every major P1 family appears somewhere in Units 1-15, with reinforcement as needed later.
 
 A) TRIPLE PROVENANCE — DO NOT MIX THESE LAYERS
 Every Unit has three distinct content channels:
@@ -43,7 +56,7 @@ F) SYNTHETIC EXERCISE DATA
 Invented numbers are permitted only as clearly labeled synthetic/normalized exercise data and only if used by the learner in a calculation, sensitivity analysis, or decision threshold. Never present synthetic values as observed facts. Do not invent a technical formula and call it a standard formula. If supplied sources contain no formula, use a qualitative/ordinal matrix or explicitly define a local exercise score.
 
 G) ETEC READINESS — MINIMUM SUFFICIENT ALIGNMENT
-ETEC SLOs are all-or-nothing claims. Select the smallest set of SLOs that the 90-minute in-scope content PLUS learner task can fully demonstrate. Partial overlap does not count.
+ETEC SLOs are all-or-nothing claims. Select the smallest set of SLOs that the full 90-minute P1 coverage PLUS learner task can fully demonstrate. Partial overlap does not count.
 - Do not claim SLO9.1.2 for input validation alone; it materially also includes client/server-side development, cookies, and JavaScript.
 - Do not claim SLO7.1.3 for misuse-case discussion alone; it requires detailed use cases, event flows, and functional-requirement relationships.
 - Do not claim SLO8.1.5 for deployment discussion alone; it materially includes version control and project hosting.
@@ -59,11 +72,11 @@ Unit 15 pedagogy_content must contain explicit headings/phrases "AI MAY ASSIST" 
 Unit 17 must mutate a constraint but must not pre-solve the redesign with new technologies absent from Units 1-15. Require the learner to adapt source-derived mechanisms.
 
 I) UNIT FUNCTION FIDELITY
-Unit 2 = Domain Spine of all selected 90-minute topic families, not all material in a larger chapter bundle.
+Unit 2 = Domain Spine of ALL major P1 topic families.
 Unit 3 = exactly five visible CLOs in pedagogy_content (CLO1...CLO5).
 Unit 4 = six visible H-Stack competencies in pedagogy_content.
 Units 6–10 are MARIS; Units 11–15 ATQAN; Units 16–20 MAYYIZ.
-Units 16–20 synthesize/assess; they do not introduce selected weekly content for the first time.
+Every major P1 topic family must be introduced by Unit 15. Units 16–20 synthesize/assess; they do not introduce primary content for the first time.
 
 J) TREND, WELLBEING, AI, ACCOUNTABILITY
 - Unit 13: source-derived enduring principles belong in core_content; contemporary practices beyond the supplied bundle belong in enrichment_content.
@@ -79,10 +92,12 @@ Unit 20 pedagogy_content constructs a bounded assurance case. Never use absolute
 
 AUDIT_ADDENDUM = r"""
 
-ISCARB v1.7 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
-- the output behaves like exhaustive chapter coverage rather than one 90-minute lecture;
-- deferred_topics are taught in Units 1-20;
-- supporting [S#] sources silently expand or override the primary [P1] scope;
+ISCARB v1.8 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
+- any major PRIMARY [P1] topic family is omitted, deferred, replaced, or left outside the 90-minute lecture;
+- the Domain Spine or Topic Coverage ledger does not account for all major P1 families;
+- compression reduces primary coverage rather than reducing repetition or depth selectively;
+- faculty focus is used to delete other major P1 topics;
+- supporting [S#] material crowds out, overrides, or silently expands the mandatory P1 scope;
 - a technical source_anchor lacks [P1]/[S#] identification;
 - source-derived technical claims, ISCARB pedagogy, and contextual enrichment are mixed into the wrong provenance channel;
 - a pedagogical Unit fabricates source bullets merely to satisfy core_content;
@@ -96,7 +111,7 @@ ISCARB v1.7 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
 - Unit 15 lacks explicit AI MAY ASSIST / AI MUST NOT BE TRUSTED AUTONOMOUSLY language, or makes unsupported empirical AI claims;
 - Unit 17 solves the mutation using technical controls not taught earlier/source-supported;
 - Unit 18/19/20 pedagogy masquerades as source technical content;
-- any ETEC SLO is only partially supported by the IN-SCOPE 90-minute content/task;
+- any ETEC SLO is only partially supported by the 90-minute content/task;
 - the selected SLO→KLO mapping differs from the exact official map;
 - assurance language overstates what evidence can establish.
 Do not award PASS because fields are labeled correctly; audit the semantic content.
@@ -104,10 +119,12 @@ Do not award PASS because fields are labeled correctly; audit the semantic conte
 
 REPAIR_ADDENDUM = r"""
 
-ISCARB v1.7 REPAIR ADDENDUM
+ISCARB v1.8 REPAIR ADDENDUM
 When repairing:
-- preserve the one-lecture 90-minute scope and do not reintroduce deferred topics;
-- keep [P1] primary precedence; use [S#] only to support the same lecture focus;
+- keep the fixed 90-minute timebox AND restore full P1 topic-family coverage;
+- never solve overload by deferring or deleting a primary topic;
+- compress by merging related material, removing repetition, and varying depth;
+- keep [P1] primary precedence; use [S#] only to clarify/support/contextualize P1;
 - preserve correct supplied technical content;
 - MOVE ISCARB teaching/assessment scaffolding from core_content into pedagogy_content;
 - MOVE unsupplied current/contextual claims into enrichment_content or rewrite as explicit scenario assumptions;
@@ -117,5 +134,5 @@ When repairing:
 - reduce ETEC alignment to the minimum fully evidenced SLO set and provide truthful atomicity_evidence;
 - reuse source mechanisms for Unit 17 adaptation;
 - keep Unit 20 assurance bounded and evidence-proportionate;
-- ensure every technical source_anchor names [P1]/[S#].
+- ensure every technical source_anchor names [P1]/[S#] and every primary topic-family coverage entry retains [P1].
 """
