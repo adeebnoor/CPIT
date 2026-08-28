@@ -10,8 +10,8 @@ from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .visual_output_v36 import export_presenter_pptx, render_presenter_preview, export_presenter_pdf
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
 
-FACULTY_VERSION = "3.6.0"
-PIPELINE_ID = "faculty-studio-v3.6-saudi-heritage-visual-provenance"
+FACULTY_VERSION = "3.7.0"
+PIPELINE_ID = "faculty-studio-v3.7-approved-heritage-audit-state"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
@@ -25,7 +25,12 @@ for route in engine.app.router.routes:
 @app.get("/")
 def faculty_studio():
     html = (engine.APP_ROOT / "static" / "studio_v36.html").read_text(encoding="utf-8")
-    return HTMLResponse(html, headers={"Cache-Control":"no-store, no-cache, must-revalidate, max-age=0","Pragma":"no-cache","Expires":"0","X-ISCARB-Version":FACULTY_VERSION})
+    return HTMLResponse(html, headers={
+        "Cache-Control":"no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma":"no-cache",
+        "Expires":"0",
+        "X-ISCARB-Version":FACULTY_VERSION,
+    })
 
 
 @app.get("/starter-kit")
@@ -41,12 +46,19 @@ def health():
         "version": FACULTY_VERSION,
         "engine_version": engine.SERVICE_VERSION,
         "pipeline": PIPELINE_ID,
-        "public_experience": "Saudi heritage academic identity + original source library + output lab + visual provenance",
+        "public_experience": "Approved Saudi educational heritage identity + source library + audit-safe Output Lab + visual provenance",
         "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
-        "design_language": "Saudi educational heritage — dark academic canvas, sand, magenta, cyan, green and gold; no copied institutional logos",
+        "design_language": "Premium Saudi educational heritage — dark academic canvas, Najdi geometry, sand, magenta, cyan, green and gold; no copied institutional logos",
         "presenter_theme": "visual-first 20-unit presenter with explicit visual provenance",
-        "output_system": ["Visual Presenter Preview + PPTX + Presenter PDF","Faculty Reading Pack PDF","Instructor Guide DOCX","Student Activity Pack DOCX","Blueprint JSON"],
+        "output_system": [
+            "Visual Presenter Preview + PPTX + Presenter PDF",
+            "Faculty Reading Pack PDF",
+            "Instructor Guide DOCX",
+            "Student Activity Pack DOCX",
+            "Blueprint JSON",
+        ],
         "local_output_lab": True,
+        "output_lab_release_rule": "render/repair only; source-dependent gates are NOT RE-AUDITED without P1",
         "visual_provenance": "source-anchored visual / adapted from P1 / ISCARB visualization",
         "institutional_branding": "context only; no claim of official endorsement",
     })
@@ -71,12 +83,38 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
         cumulative_fidelity_pass=False,
         readiness_alignment_pass=False,
         provenance_separation_pass=False,
-        issues=[AuditIssue(severity="major",unit_numbers=[],requirement="Imported Blueprint — audit not repeated",problem="Outputs were rendered locally from an existing Blueprint. Source and semantic release audits were not re-run.",repair_instruction="Use the original compiled RELEASE job, or re-run the full compiler when audit authority is required.")],
+        issues=[AuditIssue(
+            severity="major",
+            unit_numbers=[],
+            requirement="Output Lab — release audit not repeated",
+            problem=(
+                "Outputs were rendered locally from an existing Blueprint. The raw primary source and release audit "
+                "context are not present, so source fidelity and ETEC source-dependent checks are NOT RE-AUDITED."
+            ),
+            repair_instruction=(
+                "Use these outputs for faculty review. Re-run Generate New Lecture with the original lecture source "
+                "when ISCARB Verified release authority is required."
+            ),
+        )],
         strengths=["No Gemini call is required to iterate on visual or document outputs."],
     )
-    job = JobState(id=job_id,status="blocked",progress=100,message="OUTPUT LAB — Blueprint imported locally. All outputs are available; ISCARB Verified remains disabled because release audit was not repeated.",filename=blueprint_file.filename or "imported_blueprint.json",model="local-render-only",source_manifest=list(bp.source_manifest),blueprint=bp,audit=audit,deterministic_checks={})
+    job = JobState(
+        id=job_id,
+        status="blocked",
+        progress=100,
+        message=(
+            "OUTPUT LAB — Blueprint imported locally. Outputs are available. Source-dependent gates are NOT RE-AUDITED; "
+            "ISCARB Verified remains disabled until a full source-backed compile is run."
+        ),
+        filename=blueprint_file.filename or "imported_blueprint.json",
+        model="local-render-only-v3.7",
+        source_manifest=list(bp.source_manifest),
+        blueprint=bp,
+        audit=audit,
+        deterministic_checks={},
+    )
     engine.save_job(job)
-    return {"job_id": job_id}
+    return {"job_id": job_id, "audit_state": "not_reaudited"}
 
 
 @app.get("/api/jobs/{job_id}/presenter")
@@ -87,7 +125,10 @@ def faculty_presenter(job_id: str):
         raise HTTPException(404, "Job not found")
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
-    return HTMLResponse(render_presenter_preview(job.blueprint, job.status.upper()), headers={"Cache-Control":"no-store, no-cache, must-revalidate, max-age=0"})
+    return HTMLResponse(
+        render_presenter_preview(job.blueprint, job.status.upper()),
+        headers={"Cache-Control":"no-store, no-cache, must-revalidate, max-age=0"},
+    )
 
 
 @app.get("/api/jobs/{job_id}/export/{fmt}")
