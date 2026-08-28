@@ -10,8 +10,8 @@ from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .visual_output_v36 import export_presenter_pptx, render_presenter_preview, export_presenter_pdf
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
 
-FACULTY_VERSION = "3.8.0"
-PIPELINE_ID = "faculty-studio-v3.8-approved-heritage-review-mode"
+FACULTY_VERSION = "4.0.0"
+PIPELINE_ID = "faculty-studio-v4.0-final-candidate"
 
 app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
 
@@ -24,19 +24,19 @@ for route in engine.app.router.routes:
 
 @app.get("/")
 def faculty_studio():
-    html = (engine.APP_ROOT / "static" / "studio_v38.html").read_text(encoding="utf-8")
+    html = (engine.APP_ROOT / "static" / "studio_v40.html").read_text(encoding="utf-8")
     return HTMLResponse(html, headers={
-        "Cache-Control":"no-store, no-cache, must-revalidate, max-age=0",
-        "Pragma":"no-cache",
-        "Expires":"0",
-        "X-ISCARB-Version":FACULTY_VERSION,
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+        "X-ISCARB-Version": FACULTY_VERSION,
     })
 
 
 @app.get("/starter-kit")
 def starter_kit():
     html = (engine.APP_ROOT / "static" / "faculty_starter_kit.html").read_text(encoding="utf-8")
-    return HTMLResponse(html, headers={"Cache-Control":"no-store"})
+    return HTMLResponse(html, headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/health")
@@ -46,9 +46,9 @@ def health():
         "version": FACULTY_VERSION,
         "engine_version": engine.SERVICE_VERSION,
         "pipeline": PIPELINE_ID,
-        "public_experience": "Approved Saudi educational heritage identity + original source library + audit-safe Output Lab + visual provenance",
+        "public_experience": "Final-candidate Saudi educational heritage Faculty Studio with original source library, source-backed compile, audit-safe Output Lab, five faculty outputs, and visual provenance",
         "ready_example_source": "https://www.slideshare.net/slideshow/ch14-5148075/5148075",
-        "design_language": "Premium Saudi educational heritage — compact desktop composition, Najdi architecture, camel caravan, sand, magenta, cyan, green and gold; no copied institutional logos",
+        "design_language": "Premium Saudi educational heritage — compact reference-matched composition, Najdi architecture, camel caravan, sand, magenta, cyan, green and gold; no copied institutional logos",
         "presenter_theme": "visual-first 20-unit presenter with explicit visual provenance",
         "output_system": [
             "Visual Presenter Preview + PPTX + Presenter PDF",
@@ -58,7 +58,7 @@ def health():
             "Blueprint JSON",
         ],
         "local_output_lab": True,
-        "output_lab_release_rule": "render/repair only; source-dependent gates are NOT RE-AUDITED without P1 and are never displayed as false FAIL",
+        "output_lab_release_rule": "render/repair only; source-dependent gates are NOT RE-AUDITED without P1 and are never represented as false FAIL in the Faculty Studio UI",
         "visual_provenance": "source-anchored visual / adapted from P1 / ISCARB visualization",
         "institutional_branding": "context only; no claim of official endorsement",
     })
@@ -88,7 +88,7 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
             unit_numbers=[],
             requirement="Output Lab — release audit not repeated",
             problem=(
-                "Outputs were rendered locally from an existing Blueprint. The raw primary source and release audit "
+                "Outputs were rendered locally from an existing Blueprint. The raw primary source and release-audit "
                 "context are not present, so source fidelity and ETEC source-dependent checks are NOT RE-AUDITED."
             ),
             repair_instruction=(
@@ -107,7 +107,7 @@ async def render_blueprint(blueprint_file: UploadFile = File(...)):
             "ISCARB Verified remains disabled until a full source-backed compile is run."
         ),
         filename=blueprint_file.filename or "imported_blueprint.json",
-        model="local-render-only-v3.8",
+        model="local-render-only-v4.0",
         source_manifest=list(bp.source_manifest),
         blueprint=bp,
         audit=audit,
@@ -127,7 +127,7 @@ def faculty_presenter(job_id: str):
         raise HTTPException(409, "No blueprint is available yet")
     return HTMLResponse(
         render_presenter_preview(job.blueprint, job.status.upper()),
-        headers={"Cache-Control":"no-store, no-cache, must-revalidate, max-age=0"},
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
     )
 
 
@@ -147,13 +147,13 @@ def faculty_export(job_id: str, fmt: str):
     base = engine.EXPORTS / f"ISCARB_{job_id}"
     if fmt == "pptx":
         path = export_presenter_pptx(bp, base.with_name(base.name + "_Visual_Presenter.pptx")); media = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-    elif fmt in {"presenter-pdf","presenter_pdf","visual-pdf"}:
+    elif fmt in {"presenter-pdf", "presenter_pdf", "visual-pdf"}:
         path = export_presenter_pdf(bp, base.with_name(base.name + "_Visual_Presenter.pdf")); media = "application/pdf"
     elif fmt == "pdf":
         path = export_detailed_pdf(bp, base.with_name(base.name + "_Faculty_Reading_Pack.pdf")); media = "application/pdf"
     elif fmt == "docx":
         path = export_instructor_guide(bp, base.with_name(base.name + "_Instructor_Guide.docx")); media = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    elif fmt in {"student","student-docx","activity"}:
+    elif fmt in {"student", "student-docx", "activity"}:
         path = export_student_pack(bp, base.with_name(base.name + "_Student_Activity_Pack.docx")); media = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     elif fmt == "json":
         path = base.with_name(base.name + "_Blueprint.json"); path.write_text(bp.model_dump_json(by_alias=True, indent=2), encoding="utf-8"); media = "application/json"
