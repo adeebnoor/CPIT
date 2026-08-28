@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""Source-aware visual planning for ISCARB Presenter v2.
+"""Source-aware visual planning for ISCARB Visual Lecture Engine v2.
 
-This layer is deliberately deterministic and optional. It never changes the
-technical content of a Blueprint. When a public SlideShare P1 exposes slide
-images, the planner can use a relevant source slide as the dominant teaching
-visual with explicit citation. If no safe/relevant source visual is available,
-Presenter rendering falls back to the existing ISCARB diagram grammar.
+The visual layer never changes technical claims in the Blueprint. It only
+chooses how source-supported ideas are shown. Local P1 PDFs are the preferred
+visual source because they preserve complete slide/page composition. Public
+SlideShare image discovery is opportunistic only; failure always falls back to
+ISCARB redraws without breaking Presenter generation.
 """
 
 import base64
@@ -19,6 +19,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+import fitz  # PyMuPDF
 from bs4 import BeautifulSoup
 
 from .models import Blueprint, LectureUnit
@@ -29,14 +30,17 @@ CACHE_ROOT = APP_ROOT.parent / "data" / "source_visual_cache"
 CACHE_ROOT.mkdir(parents=True, exist_ok=True)
 MAX_VISUAL_BYTES = 4 * 1024 * 1024
 MAX_SLIDES = 80
+PDF_RENDER_ZOOM = 1.45
 
 
 @dataclass(frozen=True)
 class VisualAsset:
     slide_number: int
-    image_url: str
-    alt_text: str
-    source_url: str
+    image_url: str = ""
+    alt_text: str = ""
+    source_url: str = ""
+    local_path: str = ""
+    source_kind: str = "public"  # public | local-pdf
 
 
 @dataclass(frozen=True)
@@ -44,6 +48,7 @@ class VisualRegistry:
     source_url: str
     source_title: str
     assets: tuple[VisualAsset, ...]
+    source_kind: str = "public"
 
 
 @dataclass(frozen=True)
@@ -59,33 +64,22 @@ class VisualPlan:
 
 
 VISUAL_TYPES = {
-    1: "incident-scene",
-    2: "domain-map",
-    3: "capability-evidence-path",
-    4: "six-lens-model",
-    5: "predict-derive-reveal",
-    6: "mechanism-diagram",
-    7: "architecture-diagram",
-    8: "tradeoff-decision-matrix",
-    9: "claim-test-falsification",
-    10: "uncertainty-map",
-    11: "context-system-map",
-    12: "accountability-map",
-    13: "trend-implication-map",
-    14: "workload-recovery-map",
-    15: "ai-permissibility-gate",
-    16: "mission-brief",
-    17: "constraint-mutation",
-    18: "claim-evidence-warrant",
-    19: "performance-ladder",
-    20: "assurance-case-tree",
+    1: "incident-scene", 2: "domain-map", 3: "capability-evidence-path",
+    4: "six-lens-model", 5: "predict-derive-reveal", 6: "mechanism-diagram",
+    7: "architecture-diagram", 8: "tradeoff-decision-matrix",
+    9: "claim-test-falsification", 10: "uncertainty-map",
+    11: "context-system-map", 12: "accountability-map",
+    13: "trend-implication-map", 14: "workload-recovery-map",
+    15: "ai-permissibility-gate", 16: "mission-brief",
+    17: "constraint-mutation", 18: "claim-evidence-warrant",
+    19: "performance-ladder", 20: "assurance-case-tree",
 }
 
 TEACHING_PURPOSE = {
     1: "Expose the failure before naming the mechanism.",
     2: "Show the complete technical territory of the primary lecture.",
     3: "Make capability promises traceable to evidence.",
-    4: "Force the learner to inspect the same decision through six human-engineering lenses.",
+    4: "Inspect the same decision through six human-engineering lenses.",
     5: "Make first-principles derivation visible before terminology is revealed.",
     6: "Show how the mechanism transforms inputs, assumptions and failure modes.",
     7: "Make architectural boundaries and protection layers spatially visible.",
@@ -104,7 +98,8 @@ TEACHING_PURPOSE = {
     20: "Close the original crisis with a bounded engineering verdict supported by evidence.",
 }
 
-# These units most often benefit from a source figure/architecture/process image.
+# Source figures are most valuable when the source itself owns a mechanism,
+# architecture, comparison, process or accountability structure.
 SOURCE_VISUAL_PRIORITY = {6, 7, 8, 9, 12, 13}
 
 _STOP = {
@@ -114,8 +109,8 @@ _STOP = {
 }
 
 
-def _cache_dir(url: str) -> Path:
-    key = hashlib.sha256(url.encode("utf-8")).hexdigest()[:20]
+def _cache_dir(key_text: str) -> Path:
+    key = hashlib.sha256(key_text.encode("utf-8")).hexdigest()[:20]
     path = CACHE_ROOT / key
     path.mkdir(parents=True, exist_ok=True)
     return path
@@ -131,11 +126,89 @@ def primary_url_from_manifest(source_manifest: list[str]) -> str | None:
     return None
 
 
+def _find_local_primary_pdf(source_root: Path | None) -> Path | None:
+    if not source_root or not source_root.exists():
+        return None
+    candidates: list[Path] = []
+    candidates.extend(source_root.glob("P1__*.pdf"))
+    candidates.extend(source_root.glob("P1/*.pdf"))
+    candidates.extend(source_root.glob("**/P1__*.pdf"))
+    candidates.extend(source_root.glob("**/linked_source.pdf"))
+    seen: set[Path] = set()
+    for path in candidates:
+        try:
+            p = path.resolve()
+        except Exception:
+            p = path
+        if p in seen:
+            continue
+        seen.add(p)
+        if path.is_file() and path.stat().st_size > 1000:
+            return path
+    return None
+
+
+def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRegistry | None:
+    try:
+        stat = path.stat()
+    except OSError:
+        return None
+    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}")
+    manifest_path = cache / "manifest.json"
+    if manifest_path.exists():
+        try:
+            data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            assets = tuple(VisualAsset(**x) for x in data.get("assets", []))
+            if assets and all(Path(a.local_path).exists() for a in assets if a.local_path):
+                return VisualRegistry(
+                    data.get("source_url", f"local:{path.name}"),
+                    data.get("source_title", source_title or path.stem),
+                    assets,
+                    "local-pdf",
+                )
+        except Exception:
+            pass
+
+    try:
+        doc = fitz.open(str(path))
+    except Exception:
+        return None
+    assets: list[VisualAsset] = []
+    try:
+        for idx, page in enumerate(doc):
+            if idx >= MAX_SLIDES:
+                break
+            slide_no = idx + 1
+            image_path = cache / f"slide-{slide_no:03d}.png"
+            if not image_path.exists() or image_path.stat().st_size < 1000:
+                pix = page.get_pixmap(matrix=fitz.Matrix(PDF_RENDER_ZOOM, PDF_RENDER_ZOOM), alpha=False)
+                pix.save(str(image_path))
+            page_text = " ".join(page.get_text("text").split())[:1600]
+            assets.append(VisualAsset(
+                slide_number=slide_no,
+                alt_text=page_text or f"Primary lecture page {slide_no}",
+                source_url=f"local:{path.name}",
+                local_path=str(image_path),
+                source_kind="local-pdf",
+            ))
+    finally:
+        doc.close()
+    if not assets:
+        return None
+    title = source_title or path.stem
+    registry = VisualRegistry(f"local:{path.name}", title, tuple(assets), "local-pdf")
+    manifest_path.write_text(json.dumps({
+        "source_url": registry.source_url,
+        "source_title": registry.source_title,
+        "source_kind": registry.source_kind,
+        "assets": [asdict(x) for x in assets],
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+    return registry
+
+
 def _candidate_image_url(img) -> str:
-    values = [
-        img.get("data-full"), img.get("data-normal"), img.get("data-src"),
-        img.get("data-lazy-src"), img.get("src"), img.get("srcset"),
-    ]
+    values = [img.get("data-full"), img.get("data-normal"), img.get("data-src"),
+              img.get("data-lazy-src"), img.get("src"), img.get("srcset")]
     for raw in values:
         if not raw:
             continue
@@ -148,6 +221,7 @@ def _candidate_image_url(img) -> str:
 
 
 def _build_slideshare_registry(url: str) -> VisualRegistry | None:
+    """Best-effort only. SlideShare may block server-side visual discovery."""
     cache = _cache_dir(url)
     manifest_path = cache / "manifest.json"
     if manifest_path.exists():
@@ -155,17 +229,15 @@ def _build_slideshare_registry(url: str) -> VisualRegistry | None:
             data = json.loads(manifest_path.read_text(encoding="utf-8"))
             assets = tuple(VisualAsset(**x) for x in data.get("assets", []))
             if assets:
-                return VisualRegistry(data.get("source_url", url), data.get("source_title", "SlideShare lecture"), assets)
+                return VisualRegistry(data.get("source_url", url), data.get("source_title", "SlideShare lecture"), assets, "public")
         except Exception:
             pass
-
     try:
         data, ctype, final_url = _download(url)
     except Exception:
         return None
     if "html" not in ctype and b"<html" not in data[:5000].lower():
         return None
-
     soup = BeautifulSoup(data, "html.parser")
     title_tag = soup.find("h1")
     title = " ".join(title_tag.get_text(" ", strip=True).split()) if title_tag else "SlideShare lecture"
@@ -179,35 +251,35 @@ def _build_slideshare_registry(url: str) -> VisualRegistry | None:
         if len(alt) < 12:
             continue
         seen.add(image_url)
-        assets.append(VisualAsset(len(assets) + 1, image_url, alt, final_url))
+        assets.append(VisualAsset(len(assets) + 1, image_url, alt, final_url, "", "public"))
         if len(assets) >= MAX_SLIDES:
             break
-
     if not assets:
         return None
-    registry = VisualRegistry(final_url, title, tuple(assets))
+    registry = VisualRegistry(final_url, title, tuple(assets), "public")
     manifest_path.write_text(json.dumps({
-        "source_url": final_url,
-        "source_title": title,
+        "source_url": final_url, "source_title": title, "source_kind": "public",
         "assets": [asdict(x) for x in assets],
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     return registry
 
 
-def load_registry(bp: Blueprint) -> VisualRegistry | None:
+def load_registry(bp: Blueprint, source_root: Path | None = None) -> VisualRegistry | None:
+    # Local P1 PDF is authoritative for visual reuse because it preserves the
+    # complete page/slide composition and is not dependent on third-party HTML.
+    local_pdf = _find_local_primary_pdf(source_root)
+    if local_pdf:
+        registry = _build_pdf_registry(local_pdf, local_pdf.stem.replace("P1__", ""))
+        if registry:
+            return registry
     url = primary_url_from_manifest(bp.source_manifest)
-    if not url:
-        return None
-    host = (urlparse(url).hostname or "").lower()
-    if "slideshare.net" not in host:
-        return None
-    return _build_slideshare_registry(url)
+    if url and "slideshare.net" in (urlparse(url).hostname or "").lower():
+        return _build_slideshare_registry(url)
+    return None
 
 
 def anchor_slides(anchor: str) -> list[int]:
     text = str(anchor or "")
-    nums: list[int] = []
-    # SLIDE 7, SLIDES 7-12, P1 7–12
     m = re.search(r"(?:slides?|pp?\.?|pages?)\s*(\d+)\s*[-–—]\s*(\d+)", text, flags=re.I)
     if m:
         a, b = int(m.group(1)), int(m.group(2))
@@ -216,7 +288,9 @@ def anchor_slides(anchor: str) -> list[int]:
     m = re.search(r"(?:slides?|pp?\.?|pages?)\s*(\d+)", text, flags=re.I)
     if m:
         return [int(m.group(1))]
-    return nums
+    # Some old Blueprints use '[P1] 22' without the literal word slide.
+    m = re.search(r"\[P1\][^0-9]{0,10}(\d+)", text, flags=re.I)
+    return [int(m.group(1))] if m else []
 
 
 def _keywords(unit: LectureUnit) -> set[str]:
@@ -227,69 +301,71 @@ def _keywords(unit: LectureUnit) -> set[str]:
 
 def _asset_score(asset: VisualAsset, unit: LectureUnit, anchors: set[int]) -> float:
     alt = asset.alt_text.lower()
-    kws = _keywords(unit)
-    overlap = sum(1 for w in kws if w in alt)
+    overlap = sum(1 for w in _keywords(unit) if w in alt)
     score = overlap * 4.0
     if asset.slide_number in anchors:
-        score += 14.0
-    # Favor likely diagram/process/architecture slides over long bullet slides.
-    cues = ("figure", "diagram", "architecture", "layer", "model", "process", "structure", "component", "protection", "system")
+        score += 18.0
+    cues = ("figure", "diagram", "architecture", "layer", "model", "process", "structure",
+            "component", "protection", "threat", "risk", "guideline", "survivability")
     score += sum(2.0 for cue in cues if cue in alt)
     n = len(asset.alt_text)
-    if 45 <= n <= 420:
+    if 35 <= n <= 650:
         score += 3.0
-    elif n > 900:
+    elif n > 1800:
         score -= 5.0
     return score
+
+
+def _looks_source_backed(anchor: str) -> bool:
+    a = (anchor or "").upper()
+    return bool(a.strip()) and ("P1" in a or "SLIDE" in a or "PAGE" in a)
 
 
 def plan_for_unit(bp: Blueprint, unit: LectureUnit, registry: VisualRegistry | None = None) -> VisualPlan:
     visual_type = VISUAL_TYPES.get(unit.number, "concept-visual")
     purpose = TEACHING_PURPOSE.get(unit.number, "Make the engineering decision visible.")
     anchor = (unit.source_anchor or "").strip()
-    has_p1 = "P1" in anchor.upper()
-    registry = registry if registry is not None else load_registry(bp)
+    source_backed = _looks_source_backed(anchor)
 
-    if registry and unit.number in SOURCE_VISUAL_PRIORITY and has_p1:
+    if registry and unit.number in SOURCE_VISUAL_PRIORITY and source_backed:
         anchors = set(anchor_slides(anchor))
         ranked = sorted(registry.assets, key=lambda a: _asset_score(a, unit, anchors), reverse=True)
-        if ranked and _asset_score(ranked[0], unit, anchors) >= (9.0 if anchors else 6.0):
-            asset = ranked[0]
-            return VisualPlan(
-                visual_type=visual_type,
-                teaching_purpose=purpose,
-                reuse_mode="USE",
-                citation=f"Source visual: [P1] Slide {asset.slide_number} · {registry.source_title}",
-                source_visual_available=True,
-                source_slide=asset.slide_number,
-                asset=asset,
-                focal_elements=(unit.takeaway, unit.student_action),
-            )
+        if ranked:
+            best = ranked[0]
+            score = _asset_score(best, unit, anchors)
+            # Exact source anchor is sufficient; otherwise require semantic evidence.
+            if best.slide_number in anchors or score >= 8.0:
+                return VisualPlan(
+                    visual_type=visual_type,
+                    teaching_purpose=purpose,
+                    reuse_mode="USE",
+                    citation=f"Source visual: [P1] Slide/Page {best.slide_number} · {registry.source_title}",
+                    source_visual_available=True,
+                    source_slide=best.slide_number,
+                    asset=best,
+                    focal_elements=(unit.takeaway, unit.student_action),
+                )
 
-    if has_p1:
-        return VisualPlan(
-            visual_type=visual_type,
-            teaching_purpose=purpose,
-            reuse_mode="REDRAW",
-            citation=anchor or "[P1] source-anchored redraw",
-            focal_elements=(unit.takeaway, unit.student_action),
-        )
-    return VisualPlan(
-        visual_type=visual_type,
-        teaching_purpose=purpose,
-        reuse_mode="NEW",
-        citation="ISCARB pedagogy — original teaching visualization",
-        focal_elements=(unit.takeaway, unit.student_action),
-    )
+    if source_backed:
+        return VisualPlan(visual_type, purpose, "REDRAW", anchor or "[P1] source-anchored redraw", False, None, None,
+                          (unit.takeaway, unit.student_action))
+    return VisualPlan(visual_type, purpose, "NEW", "ISCARB pedagogy — original teaching visualization", False, None, None,
+                      (unit.takeaway, unit.student_action))
 
 
-def plans_for_blueprint(bp: Blueprint) -> list[VisualPlan]:
-    registry = load_registry(bp)
+def plans_for_blueprint(bp: Blueprint, source_root: Path | None = None) -> list[VisualPlan]:
+    registry = load_registry(bp, source_root=source_root)
     return [plan_for_unit(bp, unit, registry) for unit in bp.units]
 
 
 def local_asset(asset: VisualAsset) -> Path | None:
-    cache = _cache_dir(asset.source_url)
+    if asset.local_path:
+        path = Path(asset.local_path)
+        if path.exists() and path.stat().st_size > 1000:
+            return path
+    if not asset.image_url:
+        return None
+    cache = _cache_dir(asset.source_url or asset.image_url)
     ext = Path(urlparse(asset.image_url).path).suffix.lower()
     if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
         ext = ".jpg"
@@ -326,5 +402,4 @@ def asset_data_uri(asset: VisualAsset) -> str | None:
         return None
     ext = path.suffix.lower()
     mime = "image/png" if ext == ".png" else "image/webp" if ext == ".webp" else "image/jpeg"
-    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-    return f"data:{mime};base64,{encoded}"
+    return f"data:{mime};base64,{base64.b64encode(path.read_bytes()).decode('ascii')}"
