@@ -21,7 +21,7 @@ APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
 EXPORTS.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="ISCARB Lecture Studio", version="1.2.0")
+app = FastAPI(title="ISCARB Lecture Studio", version="1.2.1")
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
@@ -36,53 +36,74 @@ def _update(job: JobState, status: str, progress: int, message: str) -> JobState
 
 
 def _compile(job_id: str, file_path: Path, model: str, repair_rounds: int) -> None:
+    service: GeminiService | None = None
+    stage = "startup"
     try:
         job = load_job(job_id)
         service = GeminiService(model=model)
-        _update(job, "analyzing", 12, "Analyzing the weekly source and locking technical boundaries…")
+
+        stage = "source analysis"
+        _update(job, "analyzing", 10, "1/4 · Reading the weekly source and locking technical boundaries…")
         profile = service.profile_source(file_path)
         job.source_profile = profile
         save_job(job)
 
-        _update(job, "generating", 35, "Building the exact 20-unit ISCARB lecture…")
+        stage = "20-unit generation"
+        _update(job, "generating", 35, "2/4 · Building the exact 20-unit ISCARB lecture…")
         blueprint = service.generate_blueprint(file_path, profile)
         job.blueprint = blueprint
         save_job(job)
 
-        for round_no in range(repair_rounds + 1):
-            _update(job, "auditing", 60 + min(round_no * 10, 20), "Running deterministic and semantic release gates…")
-            checks = deterministic_gate(blueprint)
-            job.deterministic_checks = checks
-            det_fail = failed_check_names(checks)
-            audit = service.audit(file_path, blueprint, det_fail)
-            job.audit = audit
-            save_job(job)
+        stage = "structural gate"
+        _update(job, "auditing", 70, "3/4 · Running structural and semantic release gates…")
+        checks = deterministic_gate(blueprint)
+        job.deterministic_checks = checks
+        det_fail = failed_check_names(checks)
 
-            if all_required_pass(checks) and audit.overall_pass:
-                job.blueprint = blueprint
-                _update(job, "ready", 100, f"RELEASE — lecture passed ISCARB gates using {service.active_model}.")
-                return
+        stage = "semantic audit"
+        audit = service.audit(file_path, blueprint, det_fail)
+        job.audit = audit
+        save_job(job)
 
-            if round_no >= repair_rounds:
-                job.blueprint = blueprint
-                _update(job, "blocked", 100, f"BLOCKED — unresolved release-gate issues remain. Last model: {service.active_model}.")
-                return
+        if all_required_pass(checks) and audit.overall_pass:
+            job.blueprint = blueprint
+            _update(job, "ready", 100, "RELEASE — lecture passed source, fidelity, and engineering-rigor gates.")
+            return
 
-            _update(job, "repairing", 72 + min(round_no * 10, 15), f"Repair round {round_no + 1}: regenerating only to resolve detected gate failures…")
+        for round_no in range(repair_rounds):
+            stage = f"repair round {round_no + 1}"
+            _update(job, "repairing", 84 + min(round_no * 5, 8), f"4/4 · Repairing detected gate failures (round {round_no + 1})…")
             blueprint = service.repair(file_path, blueprint, audit, det_fail)
             job.blueprint = blueprint
             save_job(job)
+
+            checks = deterministic_gate(blueprint)
+            job.deterministic_checks = checks
+            det_fail = failed_check_names(checks)
+            stage = f"post-repair audit {round_no + 1}"
+            audit = service.audit(file_path, blueprint, det_fail)
+            job.audit = audit
+            save_job(job)
+            if all_required_pass(checks) and audit.overall_pass:
+                _update(job, "ready", 100, f"RELEASE — passed after repair round {round_no + 1}.")
+                return
+
+        job.blueprint = blueprint
+        _update(job, "blocked", 100, "BLOCKED — a usable blueprint was generated, but unresolved release-gate issues remain. You can inspect/export it and re-run if needed.")
 
     except Exception as exc:
         try:
             job = load_job(job_id)
             job.status = "error"
             job.progress = 100
-            job.message = "Compilation failed after automatic retry/failover attempts."
+            job.message = f"Compilation stopped during {stage}."
             job.error = f"{type(exc).__name__}: {exc}"
             save_job(job)
         except Exception:
             pass
+    finally:
+        if service is not None:
+            service.close()
 
 
 @app.get("/")
@@ -92,15 +113,13 @@ def root():
 
 @app.get("/api/health")
 def health():
-    fallbacks = os.getenv("GEMINI_FALLBACK_MODELS", "gemini-3.6-flash,gemini-3.5-flash")
     return {
         "ok": True,
-        "version": "1.2.0",
+        "version": "1.2.1",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY", "").strip()),
-        "default_model": os.getenv("GEMINI_MODEL", "gemini-3.7-flash"),
-        "fallback_models": [x.strip() for x in fallbacks.split(",") if x.strip()],
-        "automatic_retry": True,
+        "default_model": os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
         "url_sources": True,
+        "pipeline": "fast-reliable",
     }
 
 
@@ -109,7 +128,7 @@ async def compile_lecture(
     lecture: UploadFile | None = File(default=None),
     source_url: str = Form(default=""),
     model: str = Form(default=""),
-    repair_rounds: int = Form(default=2),
+    repair_rounds: int = Form(default=1),
 ):
     source_url = source_url.strip()
     has_file = lecture is not None and bool(lecture.filename)
@@ -118,7 +137,7 @@ async def compile_lecture(
     if has_file and source_url:
         raise HTTPException(400, "Use one source at a time: either a file or a URL, not both.")
 
-    repair_rounds = max(0, min(int(repair_rounds), 3))
+    repair_rounds = max(0, min(int(repair_rounds), 2))
     job_id = uuid.uuid4().hex
 
     if source_url:
@@ -138,7 +157,7 @@ async def compile_lecture(
             shutil.copyfileobj(lecture.file, f)
         display_name = lecture.filename or target.name
 
-    chosen_model = model.strip() or os.getenv("GEMINI_MODEL", "gemini-3.7-flash")
+    chosen_model = model.strip() or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
     job = JobState(
         id=job_id,
         status="queued",
