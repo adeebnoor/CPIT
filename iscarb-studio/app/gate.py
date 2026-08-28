@@ -5,6 +5,7 @@ import re
 from .models import Blueprint, SourceProfile
 from .prompts import IDR, EER
 from .readiness import ETEC_IT_READINESS
+from .readiness_map import SLO_KLO_MAP, expected_klos
 
 
 def _text(unit) -> str:
@@ -20,8 +21,24 @@ def _text(unit) -> str:
     ]).lower()
 
 
+def _core_text(unit) -> str:
+    return " ".join(unit.core_content).lower()
+
+
 def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+
+
+def _profile_text(profile: SourceProfile | None) -> str:
+    if profile is None:
+        return ""
+    return " ".join([
+        profile.lecture_title,
+        profile.weekly_focus,
+        *[x.name + " " + x.why_important for x in profile.topic_families],
+        *profile.technical_boundaries,
+        *profile.source_warnings,
+    ]).lower()
 
 
 def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> dict[str, bool]:
@@ -50,6 +67,20 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         not any(marker in u.source_anchor.lower() for marker in ["http://", "https://", "etec", "gulf.edu", "nca.gov"])
         for u in bp.units
     )
+
+    # Hypothetical claims must sound hypothetical, not like verified national mandates.
+    risky_claim_terms = [" require", " requires", " mandate", " mandates", " regulation", " regulations", " national rule", " market rule"]
+    hypothetical_language_ok = True
+    for u in bp.units:
+        has_hyp_basis = any("hypothetical" in b.lower() for b in u.enrichment_basis)
+        if not has_hyp_basis:
+            continue
+        for bullet in u.enrichment_content:
+            low = " " + bullet.lower()
+            if any(term in low for term in risky_claim_terms):
+                if not any(marker in low for marker in ["assume", "in this scenario", "in this hypothetical", "scenario requires"]):
+                    hypothetical_language_ok = False
+    checks["hypothetical_enrichment_not_stated_as_fact"] = hypothetical_language_ok
 
     lenses = {lens for u in bp.units for lens in u.cimtlens}
     for lens in ["C", "I", "M", "T"]:
@@ -83,16 +114,32 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
     checks["topic_coverage_has_source_anchors"] = all(bool(x.source_anchor.strip()) for x in bp.topic_coverage)
 
     # Engineering reasoning hard checks.
+    u5 = _text(bp.units[4])
+    checks["unit5_prediction_before_explanation"] = "predict" in u5
+    checks["unit5_visible_first_principles_derivation"] = (
+        "constraint" in u5 and "deriv" in u5 and "principle" in u5
+    )
+
     combined_5_10 = " ".join(_text(u) for u in bp.units[4:10])
     checks["uncertainty_is_operationalized"] = (
         "unknown" in combined_5_10
         and any(k in combined_5_10 for k in ["monitor", "telemetry", "observe", "measure after", "post-deployment"])
     )
-    u8 = _text(bp.units[7])
-    checks["unit8_has_alternatives_and_tradeoff"] = (
-        any(k in u8 for k in ["alternative", "option a", "design a", "approach a"])
-        and any(k in u8 for k in ["trade-off", "tradeoff", "sacrifice", "cost", "versus", "vs."])
+    u10 = _text(bp.units[9])
+    checks["unit10_known_unknown_monitoring"] = (
+        "known" in u10 and "unknown" in u10 and any(k in u10 for k in ["monitor", "telemetry", "observe"])
     )
+
+    u8 = _text(bp.units[7])
+    alternatives_present = (
+        any(k in u8 for k in ["alternative", "option a", "design a", "approach a"])
+        or " versus " in u8
+        or " vs. " in u8
+        or " vs " in u8
+    )
+    tradeoff_present = any(k in u8 for k in ["trade-off", "tradeoff", "sacrifice", "cost", "versus", " vs "])
+    checks["unit8_has_alternatives_and_tradeoff"] = alternatives_present and tradeoff_present
+
     u9 = _text(bp.units[8])
     checks["unit9_has_falsification"] = any(k in u9 for k in ["falsif", "prove us wrong", "abandon", "disconfirm", "counter-evidence"])
     checks["unit17_constraint_mutation"] = any(k in _text(bp.units[16]) for k in ["constraint", "mutation", "keep", "change", "remove", "add", "redesign"])
@@ -105,6 +152,20 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
 
     u18 = _text(bp.units[17])
     checks["unit18_full_evidence_protocol"] = all(k in u18 for k in ["claim", "evidence", "warrant", "counter-evidence", "residual uncertainty"])
+
+    # Pedagogical/contextual methods must not masquerade as weekly-source technical content.
+    source_profile_text = _profile_text(profile)
+    source_mentions_ai = bool(re.search(r"\bai\b|artificial intelligence", source_profile_text))
+    checks["unit15_ai_not_misrepresented_as_source"] = source_mentions_ai or not bool(re.search(r"\bai\b|artificial intelligence", _core_text(bp.units[14])))
+    checks["unit14_wellbeing_not_misrepresented_as_source"] = not any(
+        term in _core_text(bp.units[13]) for term in ["cognitive load", "operator fatigue", "burnout", "alert fatigue", "wellbeing"]
+    )
+    checks["unit18_evidence_method_not_misrepresented_as_source"] = not any(
+        term in _core_text(bp.units[17]) for term in ["warrant", "counter-evidence", "residual uncertainty", "evidence policy framework"]
+    )
+    checks["unit19_rubric_method_not_misrepresented_as_source"] = not any(
+        term in _core_text(bp.units[18]) for term in ["distinguished", "not yet ready", "rubric calibration", "four-tier rubric"]
+    )
 
     checks["rubric_has_at_least_6_criteria"] = len(bp.rubric_criteria) >= 6
     rubric_names = " ".join(_norm(r.criterion) for r in bp.rubric_criteria)
@@ -124,7 +185,7 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         for r in bp.rubric_criteria
     )
 
-    # ETEC readiness hard validation against embedded official profile.
+    # ETEC readiness hard validation against embedded official profile + exact SLO->KLO tables.
     checks["readiness_alignment_present"] = len(bp.readiness_alignment) >= 1
     valid_skus = ETEC_IT_READINESS["skus"]
     valid_klos = ETEC_IT_READINESS["klo"]
@@ -138,6 +199,12 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
         and all(s in valid_skus[r.sku]["slos"] for s in r.slo_refs)
         and all(k in valid_klos for k in r.klo_refs)
         and set(r.standard_source_pages).issubset(set(valid_skus[r.sku]["source_pages"]))
+        for r in bp.readiness_alignment
+    )
+    checks["readiness_exact_official_slo_klo_map"] = all(
+        r.sku in SLO_KLO_MAP
+        and all(s in SLO_KLO_MAP[r.sku] for s in r.slo_refs)
+        and set(r.klo_refs) == set(expected_klos(r.sku, r.slo_refs))
         for r in bp.readiness_alignment
     )
     checks["readiness_has_clo_and_evidence_trace"] = all(
@@ -158,7 +225,10 @@ def deterministic_gate(bp: Blueprint, profile: SourceProfile | None = None) -> d
 
     u20 = _text(bp.units[19])
     checks["unit20_assurance_language"] = all(k in u20 for k in ["claim", "evidence", "warrant", "residual uncertainty"])
-    checks["unit20_avoids_false_certainty"] = not any(k in u20 for k in ["undeniable", "proves security", "proven secure", "guarantees security", "zero uncertainty"])
+    checks["unit20_avoids_false_certainty"] = not any(k in u20 for k in [
+        "undeniable", "proves security", "proven secure", "guarantees security", "zero uncertainty",
+        "proving security", "proving critical service", "prove the system is secure",
+    ])
 
     return checks
 
