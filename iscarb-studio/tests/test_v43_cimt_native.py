@@ -118,7 +118,7 @@ class TestCimtNativeV43(unittest.TestCase):
             self.assertEqual(out.status_code, 200, f'{fmt}: {out.text[:300]}')
             self.assertGreater(len(out.content), 500, fmt)
 
-    def test_health_advertises_v43_contract(self):
+    def test_health_and_home_advertise_v43_cimt_reference(self):
         client = TestClient(app)
         r = client.get('/api/health')
         self.assertEqual(r.status_code, 200)
@@ -127,6 +127,11 @@ class TestCimtNativeV43(unittest.TestCase):
         self.assertEqual(data['deterministic_gate'], 'v14-provenance-presenter-on-v13')
         self.assertEqual(data['presenter_exact_units'], 20)
         self.assertEqual(data['session_minutes'], 90)
+        self.assertEqual(data['cimt_reference_archive'], 'https://adeebnoor.github.io/CPIT/cimt.html')
+        home = client.get('/')
+        self.assertEqual(home.status_code, 200)
+        self.assertIn('CIMT archive', home.text)
+        self.assertIn('https://adeebnoor.github.io/CPIT/cimt.html', home.text)
 
 
 if __name__ == '__main__':
