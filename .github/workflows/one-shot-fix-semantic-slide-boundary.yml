@@ -79,15 +79,18 @@ jobs:
           anchor="\nif __name__=='__main__': unittest.main()\n"
           assert anchor in s
           if 'test_semantic_warning_blocks_flattened_host_slides_without_player_metadata' not in s:
-              method='''
+              fixture = (
+                  'SLIDE 3: Software process definition with specification design implementation validation evolution and process descriptions\n'
+                  'SLIDE 20: Process activities include specification development validation evolution and interleaved managerial activities\n'
+                  'SLIDE 71: Comprehensive Overview of Software Processes and Models for Effective Development with process model architecture and testing\n'
+                  'SLIDE 73: Comprehensive Overview of Software Processes and Models in Modern Development with process model design and validation\n'
+              )
+              method = """
     def test_semantic_warning_blocks_flattened_host_slides_without_player_metadata(self):
         td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup)
         p=Path(td.name)/'flattened-slideshare.txt'
-        p.write_text("""SLIDE 3: Software process definition with specification design implementation validation evolution and process descriptions
-SLIDE 20: Process activities include specification development validation evolution and interleaved managerial activities
-SLIDE 71: Comprehensive Overview of Software Processes and Models for Effective Development with process model architecture and testing
-SLIDE 73: Comprehensive Overview of Software Processes and Models in Modern Development with process model design and validation
-""",encoding='utf-8')
+        fixture = %r
+        p.write_text(fixture,encoding='utf-8')
         bundle=SourceBundle(items=[SourceItem('primary','P1','slideshare',p,'slideshare')],lecture_focus='',session_minutes=90)
         semantic=self._semantic()
         semantic.source_warnings=['Slides 59 through 92 contain external slide title artifacts and unrelated topic titles/file names which must be filtered out in favor of the core Chapter 2 content (Slides 1-58).']
@@ -96,7 +99,7 @@ SLIDE 73: Comprehensive Overview of Software Processes and Models in Modern Deve
         self.assertIn('[P1] SLIDE 20',anchors)
         self.assertNotIn('[P1] SLIDE 71',anchors)
         self.assertNotIn('[P1] SLIDE 73',anchors)
-'''
+""" % fixture
               s=s.replace(anchor,method+anchor,1)
               p.write_text(s,encoding='utf-8')
           PY
