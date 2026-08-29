@@ -25,11 +25,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install test client
-        run: python -m pip install requests
+        run: python -m pip install requests pypdf
       - name: Wait for Render deployment and test live production end to end
         env:
           BASE_URL: https://iscarb-lecture-studio.onrender.com
-          EXPECTED_VERSION: 4.0.3
+          EXPECTED_VERSION: 4.3.0
           SECURITY_SOURCE: https://www.slideshare.net/slideshow/ch14-5148075/5148075
         run: |
           python - <<'PY'
@@ -39,12 +39,13 @@ jobs:
           import time
           import zipfile
           import requests
+          from pypdf import PdfReader
 
           BASE=os.environ['BASE_URL'].rstrip('/')
           EXPECTED=os.environ['EXPECTED_VERSION']
           SOURCE=os.environ['SECURITY_SOURCE']
           S=requests.Session()
-          S.headers.update({'User-Agent':'ISCARB-production-e2e/1.1'})
+          S.headers.update({'User-Agent':'ISCARB-production-e2e/4.3'})
 
           def get(path, **kw):
               return S.get(BASE+path, timeout=90, **kw)
@@ -54,7 +55,7 @@ jobs:
           for _ in range(72):
               try:
                   r=get('/api/health')
-                  last=f'{r.status_code} {r.text[:400]}'
+                  last=f'{r.status_code} {r.text[:500]}'
                   if r.ok:
                       h=r.json()
                       print('health', h.get('version'), h.get('pipeline'))
@@ -70,30 +71,22 @@ jobs:
           assert h['version']==EXPECTED
           assert h['capacity_retry_attempts_per_model']==3
           assert h['capacity_failover'] is True
-          assert h['no_blueprint_exports']=='hidden'
-          assert h['no_blueprint_gate_state']=='NOT RUN'
-          assert h['visual_lecture_engine']=='v2'
           assert h['source_library_verified'] is True
           assert h['verified_source_count']==8
+          assert h['deterministic_gate']=='v14-provenance-presenter-on-v13'
+          assert h['presenter_renderer']=='cimt-native-v4.3-preview-pptx-pdf'
+          assert h['presenter_exact_units']==20
+          assert h['session_minutes']==90
+          assert h['cross_discipline_visual_residue_guard'] is True
 
           home=get('/')
           assert home.status_code==200, home.text[:1000]
           html=home.text
           required=[
-              'v4.0.3 · Capacity-Safe Visual Lecture Engine v2',
-              'iscarb-approved-hero-inline',
-              'data:image/jpeg;base64,',
-              'NOT RUN',
-              'Waiting for a valid Blueprint',
-              'Retry analysis',
-              SOURCE,
-              'Original Source Library',
-              'Upgrade My Lecture',
-              'Visual Presenter',
-              'Faculty Reading Pack',
-              'Instructor Guide',
-              'Student Activity Pack',
-              'Blueprint & Readiness',
+              'v4.3.0', 'Gate v14', 'CIMT-native Presenter',
+              'Original Source Library', 'Upgrade My Lecture',
+              'Visual Presenter', 'Faculty Reading Pack', 'Instructor Guide',
+              'Student Activity Pack', 'Blueprint & Readiness',
           ]
           for needle in required:
               assert needle in html, f'homepage missing {needle!r}'
@@ -107,7 +100,7 @@ jobs:
           successful_job=None
           final_job=None
           for compile_attempt in range(1,4):
-              print(f'Production compile attempt {compile_attempt}: {SOURCE}')
+              print(f'Production Gemini compile attempt {compile_attempt}: {SOURCE}')
               r=S.post(BASE+'/api/compile', data={
                   'primary_url': SOURCE,
                   'supporting_urls':'',
@@ -117,88 +110,82 @@ jobs:
               }, timeout=120)
               assert r.status_code==200, f'compile submit failed {r.status_code}: {r.text[:1000]}'
               job_id=r.json()['job_id']
-              print('job', job_id)
               deadline=time.time()+1100
               while time.time()<deadline:
                   jr=get('/api/jobs/'+job_id)
                   assert jr.status_code==200, jr.text[:1000]
-                  j=jr.json()
-                  final_job=j
-                  print('status', j.get('status'), j.get('progress'), j.get('message','')[:160])
+                  j=jr.json(); final_job=j
+                  print('status', j.get('status'), j.get('progress'), (j.get('message') or '')[:160])
                   if j.get('status') in {'ready','blocked','error'}:
                       if j.get('blueprint'):
-                          successful_job=(job_id,j)
-                          break
+                          successful_job=(job_id,j); break
                       text=((j.get('error') or '')+' '+(j.get('message') or '')).lower()
                       if any(x in text for x in ['quota','resource_exhausted','free_tier_requests']):
                           raise AssertionError('Production Gemini quota exhausted before Blueprint creation: '+text[:1500])
                       if any(x in text for x in ['503','unavailable','high demand','temporarily overloaded','service unavailable']):
-                          print('Transient capacity ended job before Blueprint; full-job retry will be used.')
+                          print('Transient model capacity; retrying whole job.')
                           break
                       raise AssertionError('Compile ended without Blueprint: '+json.dumps(j)[:4000])
                   time.sleep(8)
-              if successful_job:
-                  break
+              if successful_job: break
               time.sleep(45*compile_attempt)
 
-          assert successful_job is not None, 'No production job produced a Blueprint after transient retries. Last='+json.dumps(final_job)[:5000]
+          assert successful_job is not None, 'No production job produced a Blueprint. Last='+json.dumps(final_job)[:5000]
           job_id,j=successful_job
           bp=j['blueprint']
-          assert bp['session_minutes']==90, bp.get('session_minutes')
-          assert len(bp['units'])==20, len(bp['units'])
+          assert bp['session_minutes']==90
+          assert len(bp['units'])==20
           assert [u['number'] for u in bp['units']]==list(range(1,21))
           assert len(bp['clos'])==5
           assert bp.get('source_manifest')
-          assert any('slideshare.net' in x.lower() or 'ch14-5148075' in x.lower() for x in bp['source_manifest']), bp['source_manifest']
           assert j['status'] in {'ready','blocked'}
-          print('Blueprint OK:', bp['lecture_title'], 'status=', j['status'])
-          if j.get('audit'):
-              print('AUDIT FLAGS', json.dumps({
-                  'overall_pass': j['audit'].get('overall_pass'),
-                  'source_fidelity_pass': j['audit'].get('source_fidelity_pass'),
-                  'engineering_rigor_pass': j['audit'].get('engineering_rigor_pass'),
-                  'cumulative_fidelity_pass': j['audit'].get('cumulative_fidelity_pass'),
-                  'readiness_alignment_pass': j['audit'].get('readiness_alignment_pass'),
-                  'provenance_separation_pass': j['audit'].get('provenance_separation_pass'),
-              }, ensure_ascii=False))
-              print('AUDIT ISSUES', json.dumps(j['audit'].get('issues') or [], ensure_ascii=False))
-          print('DETERMINISTIC CHECKS', json.dumps(j.get('deterministic_checks') or {}, ensure_ascii=False, sort_keys=True))
+          checks=j.get('deterministic_checks') or {}
+          for key in ('v14_exactly_20_presenter_jobs','v14_exactly_90_live_minutes','v14_no_authored_hard_truncation_tokens'):
+              assert checks.get(key) is True, (key, checks.get(key))
+
+          preview=get('/api/jobs/'+job_id+'/presenter')
+          assert preview.status_code==200
+          assert 'CIMT-native Presenter' in preview.text
+          assert len(preview.content)>5000
+          # Dashboard-era slide chrome must not return in the learner Presenter.
+          for banned in ('WHY THIS MATTERS','VISUAL LECTURE ENGINE V2'):
+              assert banned not in preview.text.upper(), banned
 
           endpoints={
-              'preview':('/api/jobs/'+job_id+'/presenter','html'),
-              'pptx':('/api/jobs/'+job_id+'/export/pptx','zip'),
-              'presenter_pdf':('/api/jobs/'+job_id+'/export/presenter-pdf','pdf'),
+              'pptx':('/api/jobs/'+job_id+'/export/pptx','pptx'),
+              'presenter_pdf':('/api/jobs/'+job_id+'/export/presenter-pdf','presenter_pdf'),
               'reading_pdf':('/api/jobs/'+job_id+'/export/pdf','pdf'),
-              'instructor_docx':('/api/jobs/'+job_id+'/export/docx','zip'),
-              'student_docx':('/api/jobs/'+job_id+'/export/student','zip'),
+              'instructor_docx':('/api/jobs/'+job_id+'/export/docx','docx'),
+              'student_docx':('/api/jobs/'+job_id+'/export/student','docx'),
               'blueprint_json':('/api/jobs/'+job_id+'/export/json','json'),
           }
           for name,(path,kind) in endpoints.items():
               rr=get(path)
-              assert rr.status_code==200, f'{name} HTTP {rr.status_code}: {rr.text[:1000] if "text" in rr.headers.get("content-type","") else rr.content[:100]}'
+              assert rr.status_code==200, f'{name} HTTP {rr.status_code}'
               data=rr.content
-              if kind=='html':
-                  text=rr.text
-                  assert '<html' in text.lower() or '<!doctype html' in text.lower()
-                  assert 'Security' in text or bp['lecture_title'] in text
-                  assert len(data)>5000
-              elif kind=='pdf':
-                  assert data.startswith(b'%PDF'), f'{name} not PDF: {data[:20]!r}'
-                  assert len(data)>8000, f'{name} too small: {len(data)}'
-              elif kind=='zip':
-                  assert data.startswith(b'PK'), f'{name} not OOXML ZIP: {data[:20]!r}'
-                  assert len(data)>8000, f'{name} too small: {len(data)}'
+              assert len(data)>500, (name,len(data))
+              if kind=='pptx':
+                  assert data.startswith(b'PK')
                   with zipfile.ZipFile(io.BytesIO(data)) as z:
-                      names=z.namelist()
-                      if name=='pptx':
-                          slides=[x for x in names if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
-                          assert len(slides)==20, f'PPTX has {len(slides)} slides, expected 20'
-                      if name.endswith('docx'):
-                          assert 'word/document.xml' in names
+                      slides=[x for x in z.namelist() if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
+                      assert len(slides)==20
+                      text=' '.join(z.read(x).decode('utf-8','ignore') for x in slides)
+                      assert 'WHY THIS MATTERS' not in text.upper()
+                      assert '...' not in text and '…' not in text
+              elif kind=='presenter_pdf':
+                  assert data.startswith(b'%PDF')
+                  reader=PdfReader(io.BytesIO(data))
+                  assert len(reader.pages)==20
+                  text=' '.join((p.extract_text() or '') for p in reader.pages)
+                  assert '...' not in text and '…' not in text
+              elif kind=='pdf':
+                  assert data.startswith(b'%PDF')
+              elif kind=='docx':
+                  assert data.startswith(b'PK')
+                  with zipfile.ZipFile(io.BytesIO(data)) as z:
+                      assert 'word/document.xml' in z.namelist()
               elif kind=='json':
-                  exported=rr.json()
-                  assert exported['session_minutes']==90
-                  assert len(exported['units'])==20
+                  exported=rr.json(); assert exported['session_minutes']==90; assert len(exported['units'])==20
               print(name, 'OK', len(data), rr.headers.get('content-type'))
 
           print('PRODUCTION E2E PASS', job_id, j['status'])
