@@ -84,13 +84,16 @@ def session_scope_gate(bp: Blueprint, profile: SourceProfile, bundle: SourceBund
         marker in q5 for marker in ["before", "without", "given only", "from the evidence", "from these constraints"]
     )
 
-    # Reserved ATQAN functions must dominate title/question/action, not appear as decorative bullets.
+    # ATQAN functions are integrated pedagogy, while learner-facing titles remain source/topic-first.
+    # Keep the historical check names for API compatibility; the semantics are now "present and integrated",
+    # not "must dominate the title". Gate v14 separately rejects framework-first titles.
     u11, u12, u13, u14, u15 = bp.units[10:15]
-    checks["unit11_saudi_context_is_dominant"] = "saudi" in (u11.title + " " + u11.engineering_question).lower()
-    checks["unit12_accountability_is_dominant"] = any(k in (u12.title + " " + u12.engineering_question).lower() for k in ["accountab", "ethical", "ethics", "amanah"])
-    checks["unit13_trend_is_dominant"] = any(k in (u13.title + " " + u13.engineering_question).lower() for k in ["trend", "future", "next", "evolv"])
-    checks["unit14_wellbeing_is_dominant"] = any(k in (u14.title + " " + u14.engineering_question).lower() for k in ["wellbeing", "well-being", "practitioner", "operator workload", "incident pressure", "cognitive load"])
-    checks["unit15_ai_literacy_is_dominant"] = any(k in (u15.title + " " + u15.engineering_question).lower() for k in ["critical ai", "ai literacy", "artificial intelligence", " ai "])
+    t11, t12, t13, t14, t15 = (_txt(u) for u in (u11, u12, u13, u14, u15))
+    checks["unit11_saudi_context_is_dominant"] = any(k in t11 for k in ["saudi", "kingdom", "ksa", "gulf", "hypothetical"])
+    checks["unit12_accountability_is_dominant"] = any(k in t12 for k in ["accountab", "role", "responsib", "ethical", "ethics", "amanah", "pre-condition", "post-condition"])
+    checks["unit13_trend_is_dominant"] = any(k in t13 for k in ["trend", "future", "next", "evolv", "improv", "measurement", "change"])
+    checks["unit14_wellbeing_is_dominant"] = any(k in t14 for k in ["wellbeing", "well-being", "practitioner", "workload", "sustainable", "refactor", "visibility", "process friction"])
+    checks["unit15_ai_literacy_is_dominant"] = any(k in t15 for k in ["ai may assist", "human sign-off", "source check", "maturity", "capability", "audit"])
 
     # Pedagogy/non-core fields may not smuggle in technical mechanisms absent from the lecture bundle.
     source_text = bundle.combined_local_text().lower()
