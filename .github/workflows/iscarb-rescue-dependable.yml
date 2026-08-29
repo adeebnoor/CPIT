@@ -1,0 +1,124 @@
+name: ISCARB Rescue Dependable Systems v4.2
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-rescue-dependable.yml'
+
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          pip install -r iscarb-studio/requirements.txt
+          pip install requests pypdf pillow
+      - name: Fetch blocked Blueprint and rerender with v4.2
+        env:
+          PYTHONPATH: iscarb-studio
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+          OLD_JOB: e08209b5661c43b088706de84bc7170c
+        run: |
+          python - <<'PY'
+          import json, os, re, zipfile
+          from pathlib import Path
+          import requests
+          import fitz
+          from PIL import Image, ImageOps, ImageDraw
+          from pypdf import PdfReader
+
+          from app.start_v410 import app
+          from app.models import Blueprint
+          from app.cimt_sanity_v42 import normalize_cimt_sanity_v42, bounded_language_ok
+          from app.cimt_render_v42 import export_cimt_presenter_pptx_v42
+          from app import presenter_pdf
+          from app.faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
+          from app.faculty_visual import render_faculty_presenter_preview
+
+          base=os.environ['BASE_URL'].rstrip('/')
+          job=os.environ['OLD_JOB']
+          out=Path('/tmp/rescue'); out.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers['User-Agent']='ISCARB-rescue-v42/1.0'
+
+          # Capture exact old job diagnosis before repair.
+          old=s.get(f'{base}/api/jobs/{job}',timeout=60); old.raise_for_status(); oldj=old.json()
+          (out/'OLD_JOB_STATE.json').write_text(json.dumps(oldj,ensure_ascii=False,indent=2),encoding='utf-8')
+          failed=[k for k,v in (oldj.get('deterministic_checks') or {}).items() if not v]
+          print('OLD STATUS',oldj.get('status'))
+          print('OLD DETERMINISTIC FAILURES',failed)
+          print('OLD AUDIT',json.dumps(oldj.get('audit') or {},ensure_ascii=False)[:5000])
+
+          r=s.get(f'{base}/api/jobs/{job}/export/json',timeout=90); r.raise_for_status()
+          raw=r.json(); (out/'Dependable_Systems_Original_Blueprint.json').write_text(json.dumps(raw,ensure_ascii=False,indent=2),encoding='utf-8')
+          bp=Blueprint.model_validate(raw)
+          bp=normalize_cimt_sanity_v42(bp)
+          assert bp.session_minutes==90 and len(bp.units)==20 and len(bp.clOs)==5
+          assert bounded_language_ok(bp)
+
+          # Hard cross-discipline invariants from the reported failure.
+          preview=render_faculty_presenter_preview(bp,'FACULTY REVIEW · v4.2 RERENDER')
+          up=preview.upper()
+          for bad in ['SECURITY ENGINEERING','PLATFORM PROTECTION','APPLICATION PROTECTION']:
+              assert bad not in up, f'Preview retained legacy residue: {bad}'
+          assert 'DEPENDABLE' in up
+          assert 'HYPOTHETICAL SAUDI' in up
+          assert 'AI MAY ASSIST' in up and 'HUMAN SIGN-OFF' in up
+          (out/'Dependable_Systems_v4.2_Preview.html').write_text(preview,encoding='utf-8')
+
+          ppt=export_cimt_presenter_pptx_v42(bp,out/'Dependable_Systems_v4.2_CIMT_Presenter.pptx')
+          with zipfile.ZipFile(ppt) as z:
+              slides=[x for x in z.namelist() if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
+              assert len(slides)==20
+              ptxt=' '.join(z.read(x).decode('utf-8','ignore') for x in slides).upper()
+              for bad in ['SECURITY ENGINEERING','PLATFORM PROTECTION','APPLICATION PROTECTION']:
+                  assert bad not in ptxt, f'PPTX retained legacy residue: {bad}'
+              assert 'DEPENDABLE' in ptxt
+
+          pdf=presenter_pdf.export_presenter_pdf(bp,out/'Dependable_Systems_v4.2_CIMT_Presenter.pdf')
+          reader=PdfReader(str(pdf)); assert len(reader.pages)==20
+          pdftext=' '.join((p.extract_text() or '') for p in reader.pages).upper()
+          for bad in ['SECURITY ENGINEERING','PLATFORM PROTECTION','APPLICATION PROTECTION']:
+              assert bad not in pdftext, f'PDF retained legacy residue: {bad}'
+          assert 'DEPENDABLE' in pdftext
+
+          # Companion faculty outputs from the same source-grounded Blueprint.
+          export_detailed_pdf(bp,out/'Dependable_Systems_v4.2_Faculty_Reading_Pack.pdf')
+          export_instructor_guide(bp,out/'Dependable_Systems_v4.2_Instructor_Guide.docx')
+          export_student_pack(bp,out/'Dependable_Systems_v4.2_Student_Activity_Pack.docx')
+          (out/'Dependable_Systems_v4.2_Blueprint.json').write_text(bp.model_dump_json(by_alias=True,indent=2),encoding='utf-8')
+
+          # Render a 20-page contact sheet for visual QA.
+          doc=fitz.open(str(pdf)); thumbs=[]
+          for page in doc:
+              pix=page.get_pixmap(matrix=fitz.Matrix(0.9,0.9),alpha=False)
+              img=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
+              img.thumbnail((360,205))
+              canvas=Image.new('RGB',(380,225),'white')
+              canvas.paste(img,((380-img.width)//2,8))
+              thumbs.append(canvas)
+          sheet=Image.new('RGB',(380*4,225*5),(238,248,245))
+          for i,img in enumerate(thumbs): sheet.paste(img,((i%4)*380,(i//4)*225))
+          sheet.save(out/'Dependable_Systems_v4.2_Contact_Sheet.jpg',quality=88)
+
+          report={
+            'old_job':job,'old_status':oldj.get('status'),'old_failed_checks':failed,
+            'rerender_version':'4.2.0','pages':20,'slides':20,
+            'legacy_security_residue':False,'bounded_generated_language':True,
+            'hypothetical_saudi_context_visible':True,'ai_human_signoff_visible':True,
+            'files':sorted(p.name for p in out.iterdir())
+          }
+          (out/'RESCUE_REPORT.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('RESCUE PASS',json.dumps(report,ensure_ascii=False))
+          PY
+      - name: Upload rescue package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dependable-Systems-v4.2-Rescue
+          path: /tmp/rescue/*
+          if-no-files-found: error
+          retention-days: 7
