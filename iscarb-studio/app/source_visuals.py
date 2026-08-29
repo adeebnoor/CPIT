@@ -100,7 +100,7 @@ TEACHING_PURPOSE = {
     20: "Close the original crisis with a bounded engineering verdict supported by evidence.",
 }
 
-SOURCE_VISUAL_PRIORITY = {6, 7, 8, 9, 12, 13}
+SOURCE_VISUAL_PRIORITY = {2, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14}
 
 _STOP = {
     "the", "and", "for", "with", "from", "into", "that", "this", "what", "which",
