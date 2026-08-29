@@ -1,0 +1,36 @@
+name: Apply redesigned CIMT renderer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-cimt-renderer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct renderer payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .renderer_parts/cimt_v43.part00 .renderer_parts/cimt_v43.part01 .renderer_parts/cimt_v43.part02 .renderer_parts/cimt_v43.part03 > /tmp/cimt.b64
+          base64 -d /tmp/cimt.b64 | gzip -d > iscarb-studio/app/cimt_native_v43.py
+          echo 'c89ffd4fef55692368a7a4661410eb6528ee090c22507de666f034f917e64865  iscarb-studio/app/cimt_native_v43.py' | sha256sum -c -
+          python -m py_compile iscarb-studio/app/cimt_native_v43.py
+      - name: Commit renderer and remove staging files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .renderer_parts
+          rm -f .github/workflows/apply-cimt-renderer.yml
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          git add -A
+          git commit -m 'Redesign v4.3 Presenter to match archived CIMT visual grammar'
+          git push origin HEAD:main
