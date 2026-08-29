@@ -1,0 +1,22 @@
+name: Probe Current Render Health
+on:
+  push:
+    branches: ["fix/cimt-source-first-20260829"]
+    paths: ['.github/workflows/probe-current-render.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch production health
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 60 https://iscarb-lecture-studio.onrender.com/api/health | tee /tmp/health.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/health.json'))
+          print('VERSION='+str(d.get('version')))
+          print('PIPELINE='+str(d.get('pipeline')))
+          print('GATE='+str(d.get('deterministic_gate')))
+          PY
