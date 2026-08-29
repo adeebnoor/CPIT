@@ -92,17 +92,18 @@ I) UNIT FUNCTION FIDELITY — DOMINANT PURPOSE, NOT A DECORATIVE BULLET
 Unit 2 = Domain Spine of ALL major P1 families.
 Unit 3 = exactly five visible CLOs.
 Unit 4 = all six H-Stack competencies.
-Unit 11 = SAUDI CONTEXT must be the title/question/dominant reasoning purpose; integrate a P1 topic inside that context rather than hiding one Saudi bullet in a generic technical Unit.
-Unit 12 = ACCOUNTABILITY must be dominant.
-Unit 13 = TREND/FUTURE must be dominant. It may integrate a P1 topic, but title/question must explicitly ask what changes next.
-Unit 14 = PRACTITIONER WELLBEING must be dominant. Connect P1 operational/recovery mechanisms to workload, cognitive load, alert burden, or incident-response pressure.
-Unit 15 = CRITICAL AI LITERACY must be dominant while auditing a P1 mechanism.
-Unit 16 = Portfolio Challenge.
-Unit 17 = Constraint Mutation + Peer Critique.
-Unit 18 = Evidence Policy only.
-Unit 19 = Four-level Rubric.
-Unit 20 = Bounded Assurance Case.
-A reserved Unit does not pass because it contains one matching bullet; its title, engineering_question, learner action, and reasoning arc must reflect the reserved function.
+Units 11–15 = SOURCE-FIRST TECHNICAL TEACHING. Their titles/questions must name the P1 topic or mechanism being taught. Saudi context, accountability, future implications, practitioner workload, and critical AI literacy are integrated teaching moves in pedagogy/enrichment when relevant; they must not replace the technical spine.
+Unit 11 should include a Saudi/Gulf application only when it materially changes the decision, explicitly HYPOTHETICAL if unsourced.
+Unit 12 should integrate accountability/roles where relevant.
+Unit 13 may include a future/design exploration, but the P1 evolution/improvement mechanism remains dominant.
+Unit 14 may include practitioner workload/wellbeing only as a bounded consequence of the P1 mechanism; do not invent cognitive-load, alert-fatigue, or burnout facts.
+Unit 15 may include AI audit literacy in pedagogy; the learner-facing title remains the P1 maturity/audit mechanism.
+Unit 16 = Source-grounded Design Challenge.
+Unit 17 = Change the Constraint + Peer Critique.
+Unit 18 = Defend the Decision with evidence.
+Unit 19 = Take-home Capabilities; detailed four-level rubric stays in rubric metadata.
+Unit 20 = Take-home Decision / bounded assurance.
+No Unit may invent numeric precision (percentages, thresholds, multipliers, adoption rates) absent from an identified source.
 
 J) RUBRIC MUST ASSESS ISCARB CAPABILITY — NOT ONLY WEEKLY TOPICS
 Unit 19 must have at least these six explicit criterion dimensions (weekly descriptors may be topic-specific):
@@ -130,7 +131,7 @@ ISCARB v1.9 AUDITOR ADDENDUM — FAIL WHEN ANY OF THESE OCCUR
 - Domain Spine/topic_coverage does not account for all P1 families;
 - Unit 5 says PREDICT but the learner has already been given the explanatory principle before prediction;
 - Unit 1 front-loads definitions/diagnosis before the crisis;
-- Unit 11/13/14/15 reserved function is merely a side bullet rather than the dominant title/question/action;
+- Units 11–15 use framework labels as the dominant title/question instead of the P1 technical mechanism;
 - pedagogy/student_action/takeaway/evidence smuggles in unsupplied technical controls;
 - enrichment has only vague basis such as "standard literature" or "industry best practice" and is written as fact;
 - source-derived content, pedagogy, and enrichment are mixed;
@@ -148,7 +149,7 @@ ISCARB v1.9 REPAIR ADDENDUM
 When repairing:
 - preserve fixed 90 minutes and full P1 topic-family coverage;
 - repair PEDAGOGICAL ORDER, not just metadata: prediction must actually precede explanation;
-- make Units 11/13/14/15 visibly dominated by Saudi Context / Trend / Practitioner Wellbeing / Critical AI Literacy respectively while integrating P1 content;
+- make Units 11–15 visibly source-first and integrate Saudi context / accountability / future implication / practitioner consequence / AI audit only when relevant;
 - remove new technical controls from pedagogy/student actions unless source-supported; move legitimate external ideas to enrichment or rewrite as questions;
 - replace vague enrichment bases with supplied-source IDs or explicit hypothetical/future-exploration language;
 - keep one coherent central system across ethics, context, portfolio, mutation, and assurance;
@@ -157,4 +158,30 @@ When repairing:
 - preserve correct source content and exact source anchors;
 - reduce ETEC alignment to the minimum fully evidenced set;
 - never introduce new technical content merely to make a gate pass.
+"""
+
+QUALITY_ADDENDUM += r"""
+
+L) CHAPTER COMPLETENESS IS STRONGER THAN TOPIC-FAMILY COVERAGE
+A lecture can mention every broad topic family and still be incomplete. Release requires atomic coverage of every major P1 section/mechanism/metric/list/trade-off recorded in SourceProfile.coverage_items. Metadata-only coverage does not count: the idea must be visible in core_content or its source-native representation by Unit 15.
+
+M) CIMT × LEARN-BY-DOING DELIVERY
+The learner-facing sequence should feel like a taught engineering session rather than a generated dashboard: WHY → CONCEPT → MECHANISM/EXAMPLE → TRY → CHECK/MEASURE → CHALLENGE → TRANSFER/DECIDE. Units 6–15 need enough source-grounded substance to teach from, while keeping one dominant visual job and readable typography.
+
+N) READINESS EVIDENCE TRAIL
+A readiness claim must point to an evidence-producing Unit and artifact. Unit 19 may summarize proven readiness; it must not turn an unverified mapping into an attainment claim.
+"""
+
+AUDIT_ADDENDUM += r"""
+- any major P1 coverage item exists only in the ledger but is not actually taught in learner-visible content;
+- a named list, equation/metric, process stage, architecture element, or source-significant example is materially omitted;
+- Units 6–15 are systematically sparse or generic despite a content-rich P1;
+- readiness appears as a label without an evidence-producing learner action/artifact.
+"""
+
+REPAIR_ADDENDUM += r"""
+- restore atomic chapter coverage before visual polishing;
+- expand sparse technical Units using P1-only mechanisms, examples, lists, equations and relationships;
+- use a learn-by-doing rhythm with an explicit learner try/check rather than passive generic discussion;
+- attach readiness only to the exact artifact-producing Units that justify it.
 """

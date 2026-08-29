@@ -67,6 +67,66 @@ def _knowledge_type(text: str) -> str:
     return "CONCEPT"
 
 
+def _is_furniture_line(line: str) -> bool:
+    low = _clean(line, 180).lower()
+    if not low:
+        return True
+    exact = {
+        "cpit-455 software engineering (ii)", "advanced software engineering",
+        "advanced softwre engineering", "today lecture topic", "today lecture topic – part 2",
+        "today lecture topic - part 2", "the cimt compass", "where academic meets business reality",
+        "concept implementation measurement trend", "measurement implementation reality",
+    }
+    if low in exact:
+        return True
+    if any(low.startswith(x) for x in ("adeeb noor", "it department", "faculty of computing", "king abdulaziz university", "fall 2025")):
+        return True
+    return False
+
+
+def _choose_label(lines: list[str], page_no: int) -> str:
+    clean = [x for x in lines if not _is_furniture_line(x)]
+    # Numbered chapter sections are the strongest deterministic checkpoint.
+    for x in clean[:12]:
+        if re.match(r"^\d{1,2}\.\d+(?:\.\d+)?\b", x):
+            return _clean(x, 120)
+    # Prefer compact title-like lines over body sentences.
+    for x in clean[:12]:
+        if 3 <= len(x.split()) <= 11 and len(x) <= 100:
+            return _clean(x, 120)
+    return _clean(clean[0] if clean else f"Primary source page {page_no}", 120)
+
+
+def _page_importance(label: str, lines: list[str], page_no: int) -> str:
+    low = label.lower()
+    # Administrative / orientation / assignment pages remain traceable but do not
+    # become mandatory technical coverage claims.
+    support_markers = (
+        "class", "take-home", "to master", "your challenge", "assignment",
+        "today lecture topic", "the big picture", "big picture", "cimt compass",
+        "setting the stage", "our roadmap", "the core idea", "the big why",
+        "key clo", "availability: system is ready", "to master today's lesson",
+        "ai era", "ai revolution", "aligning with industry trends", "keeping up with trends",
+        "example", "ex;", "remember", "cautionary tale", "how to show this",
+    )
+    if page_no == 1 or any(m in low for m in support_markers):
+        return "supporting"
+    blob = " ".join(lines[:18]).lower()
+    major_markers = (
+        "definition", "requirements", "architecture", "process", "model", "metrics",
+        "measurement", "testing", "assurance", "design", "fault", "failure",
+        "security", "reliability", "dependability", "resilience", "safety",
+        "component", "composition", "reuse", "distributed", "client", "server",
+        "middleware", "saas", "service-oriented", "risk assessment", "formal methods",
+        "redundancy", "diversity", "sociotechnical", "programming for",
+    )
+    if re.match(r"^\d{1,2}\.\d+(?:\.\d+)?\b", label) or any(m in blob for m in major_markers):
+        return "major"
+    # Dense instructional pages with multiple distinct content lines are still major.
+    content_lines = [x for x in lines if not _is_furniture_line(x)]
+    return "major" if len(content_lines) >= 4 and len(" ".join(content_lines).split()) >= 28 else "supporting"
+
+
 def _pdf_chunks(path: Path) -> list[tuple[int, str, str]]:
     from pypdf import PdfReader
     reader = PdfReader(str(path))
@@ -76,8 +136,8 @@ def _pdf_chunks(path: Path) -> list[tuple[int, str, str]]:
         lines = _meaningful_lines(text)
         if not lines:
             continue
-        label = lines[0]
-        excerpt = _clean(" · ".join(lines[:5]), 520)
+        label = _choose_label(lines, i)
+        excerpt = _clean(" · ".join(x for x in lines[:8] if not _is_furniture_line(x)), 720)
         out.append((i, label, excerpt))
     return out
 
@@ -91,7 +151,7 @@ def _pptx_chunks(path: Path) -> list[tuple[int, str, str]]:
         lines = _meaningful_lines(raw)
         if not lines:
             continue
-        out.append((i, lines[0], _clean(" · ".join(lines[:5]), 520)))
+        out.append((i, _choose_label(lines, i), _clean(" · ".join(x for x in lines[:8] if not _is_furniture_line(x)), 720)))
     return out
 
 
@@ -146,8 +206,9 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
         clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
         anchor = f"[P1] {coordinate} {idx}"
         key = re.sub(r"[^a-z0-9]+", " ", clean_label.lower()).strip()
-        is_title_like = len(_meaningful_lines(excerpt)) <= 1 or len(excerpt.split()) < 8
-        importance = "supporting" if is_title_like else "major"
+        source_lines = _meaningful_lines(excerpt.replace(" · ", "\n"))
+        importance = _page_importance(clean_label, source_lines, idx)
+        is_title_like = importance == "supporting"
         coverage.append(CoverageItem(
             id=f"P1-{coordinate[0]}{idx:02d}",
             label=clean_label,
@@ -194,3 +255,30 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
         source_conflicts=[],
         source_manifest=bundle.manifest_lines(),
     )
+
+
+def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:
+    """Add deterministic chapter checkpoints that the semantic profiler may miss.
+
+    Gemini provides the semantic taxonomy. Deterministic extraction provides a second,
+    independent page/slide completeness floor. Only MAJOR source checkpoints are added
+    to the mandatory coverage ledger; orientation/assignment/trend-only pages remain
+    supporting. This makes omission detectable instead of trusting a single model pass.
+    """
+    deterministic = build_deterministic_source_profile(bundle, "chapter-completeness reconciliation")
+    existing = {re.sub(r"[^a-z0-9]+", " ", x.label.lower()).strip() for x in ai_profile.coverage_items}
+    merged = list(ai_profile.coverage_items)
+    for item in deterministic.coverage_items:
+        if item.importance != "major":
+            continue
+        key = re.sub(r"[^a-z0-9]+", " ", item.label.lower()).strip()
+        if key and key not in existing:
+            merged.append(item)
+            existing.add(key)
+    ai_profile.coverage_items = merged[:80]
+    ai_profile.deferred_topics = []
+    if deterministic.source_warnings:
+        ai_profile.source_warnings = list(dict.fromkeys([*ai_profile.source_warnings,
+            "Deterministic chapter checkpoints were reconciled with the semantic profile so major P1 pages/sections cannot disappear silently."
+        ]))[:20]
+    return ai_profile

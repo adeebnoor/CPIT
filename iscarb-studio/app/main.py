@@ -13,13 +13,14 @@ from fastapi.staticfiles import StaticFiles
 from .models import JobState, AuditReport, AuditIssue
 from .storage import save_job, load_job, UPLOADS
 from .gemini_service import GeminiService
-from .source_profile_fallback import build_deterministic_source_profile
+from .source_profile_fallback import build_deterministic_source_profile, reconcile_source_profile
 from .gate import deterministic_gate, all_required_pass, failed_check_names
 from .session_gate import apply_90_minute_timebox, session_scope_gate
 from .source_bundle import SourceBundle, SourceItem
 from .exporters import export_docx, export_pdf
 from .visual_engine import export_presenter_pptx, render_presenter_preview
 from .url_source import materialize_url_source
+from .deterministic_blueprint_fallback import build_deterministic_blueprint
 
 APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
@@ -141,6 +142,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         _update(job, "analyzing", 10, "1/4 · Source Lock: identifying all major P1 topics and technical boundaries…")
         try:
             profile = service.profile_source(bundle)
+            profile = reconcile_source_profile(profile, bundle)
         except Exception as exc:
             if not _is_quota_error(exc):
                 raise
@@ -150,7 +152,21 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         stage = "20-unit generation + readiness alignment"
         _update(job, "generating", 35, "2/4 · Engineering Compiler: building 20 Units with complete P1 coverage and smart compression…")
-        blueprint = service.generate_blueprint(bundle, profile)
+        try:
+            blueprint = service.generate_blueprint(bundle, profile)
+        except Exception as exc:
+            if not _is_quota_error(exc):
+                raise
+            blueprint = build_deterministic_blueprint(profile)
+            blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+            job.blueprint = blueprint
+            checks = deterministic_gate(blueprint, profile, source_text)
+            checks.update(session_scope_gate(blueprint, profile, bundle))
+            job.deterministic_checks = checks
+            job.audit = _deterministic_fallback_audit(checks, str(exc))
+            save_job(job)
+            _update(job, "blocked", 100, "BLOCKED — Gemini quota unavailable during generation. A complete source-checkpoint draft was preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds.")
+            return
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint
         save_job(job)
