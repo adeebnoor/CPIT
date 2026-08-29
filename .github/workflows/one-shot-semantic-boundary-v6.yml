@@ -1,0 +1,49 @@
+name: One-shot Semantic Boundary v6
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-semantic-boundary-v6.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply app and regression patch
+        run: |
+          echo 'CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApmcm9tIHRleHR3cmFwIGltcG9ydCBkZWRlbnQKCnAgPSBQYXRoKCJpc2NhcmItc3R1ZGlvL2FwcC9zb3VyY2VfcHJvZmlsZV9mYWxsYmFjay5weSIpCnMgPSBwLnJlYWRfdGV4dChlbmNvZGluZz0idXRmLTgiKQpmbiA9ICJkZWYgcmVjb25jaWxlX3NvdXJjZV9wcm9maWxlKGFpX3Byb2ZpbGU6IFNvdXJjZVByb2ZpbGUsIGJ1bmRsZTogU291cmNlQnVuZGxlKSAtPiBTb3VyY2VQcm9maWxlOlxuIgphc3NlcnQgZm4gaW4gcwoKaWYgImRlZiBfc2VtYW50aWNfc2xpZGVfY2VpbGluZyIgbm90IGluIHM6CiAgICBoZWxwZXIgPSBkZWRlbnQocicnJwpkZWYgX3NlbWFudGljX3NsaWRlX2NlaWxpbmcocHJvZmlsZTogU291cmNlUHJvZmlsZSkgLT4gaW50IHwgTm9uZToKICAgICMgSG9ub3IgZXhwbGljaXQgU291cmNlIExvY2sgYm91bmRzIHdoZW4gZmxhdHRlbmVkIGhvc3QgdGV4dCBjb250YWlucyBleHRyYSBzbGlkZXMuCiAgICBjYW5kaWRhdGVzOiBsaXN0W2ludF0gPSBbXQogICAgZm9yIHdhcm5pbmcgaW4gcHJvZmlsZS5zb3VyY2Vfd2FybmluZ3Mgb3IgW106CiAgICAgICAgdGV4dCA9IHN0cih3YXJuaW5nIG9yICIiKQogICAgICAgIGZvciBtIGluIHJlLmZpbmRpdGVyKHIoIj86Y29yZXxwcmltYXJ5fGFjdHVhbHxsZWN0dXJlfGNoYXB0ZXIpW14uXG5dezAsMTgwfT9zbGlkZXNcKlxzKjFcKlst4oCT4oCUXVxzKihcZHsxLDR9KSIsIHRleHQsIGZsYWdzPXJlLkkpOgogICAgICAgICAgICBjYW5kaWRhdGVzLmFwcGVuZChpbnQobS5ncm91cCgxKSkpCiAgICAgICAgZm9yIG0gaW4gcmUuZmluZGl0ZXIocidzbGlkZXM/XHMqMVxzKlst4oCT4oCUXVxzKihcZHsxLDR9KVteLlxuXXswLDE4MH0/KD86Y29yZXxwcmltYXJ5fGFjdHVhbHxsZWN0dXJlfGNoYXB0ZXIpIiwgdGV4dCwgZmxhZ3M9cmUuSSk6CiAgICAgICAgICAgIGNhbmRpZGF0ZXMuYXBwZW5kKGludChtLmdyb3VwKDEpKSkKICAgICAgICBmb3IgbSBpbiByZS5maW5kaXRlcihyInNsaWRlcz9ccyooXGR7MSw0fSlccyooPzp0aHJvdWdofHRvfFst4oCT4oCUXSlccyooXGR7MSw0fSlbXi5cbl17MCwyMjB9Pyg/OmV4dGVybmFsfHVucmVsYXRlZHxyZWNvbW1lbmRlZHxmaWx0ZXIoPzplZCk/XHMqb3V0fGhvc3RbLSBdcGFnZSkiLCB0ZXh0LCBmbGFncz1yZS5JKToKICAgICAgICAgICAgc3RhcnQgPSBpbnQobS5ncm91cCgxKSkKICAgICAgICAgICAgaWYgc3RhcnQgPiAxOgogICAgICAgICAgICAgICAgY2FuZGlkYXRlcy5hcHBlbmQoc3RhcnQgLSAxKQogICAgdmFsaWQgPSBbeCBmb3IgeCBpbiBjYW5kaWRhdGVzIGlmIDIgPD0geCA8PSA1MDBdCiAgICByZXR1cm4gbWluKHZhbGlkKSBpZiB2YWxpZCBlbHNlIE5vbmUKCgonJycpCiAgICBzID0gcy5yZXBsYWNlKGZuLCBoZWxwZXIgKyBmbiwgMSkKCnN0YXJ0ID0gcy5pbmRleChmbikKbWVyZ2VkID0gIiAgICBtZXJnZWQgPSBsaXN0KGFpX3Byb2ZpbGUuY292ZXJhZ2VfaXRlbXMpXG4iCm1pID0gcy5pbmRleChtZXJnZWQsIHN0YXJ0KQppZiAic2VtYW50aWNfY2VpbGluZyA9IF9zZW1hbnRpY19zbGlkZV9jZWlsaW5nKGFpX3Byb2ZpbGUpIiBub3QgaW4gc1tzdGFydDptaV06CiAgICBzID0gc1s6bWldICsgIiAgICBzZW1hbnRpY19jZWlsaW5nID0gX3NlbWFudGljX3NsaWRlX2NlaWxpbmcoYWlfcHJvZmlsZSlcblxuIiArIHNbbWk6XQoKc3RhcnQgPSBzLmluZGV4KGZuKQppdGVtID0gIiAgICAgICAgaXRlbV9zbGlkZXMgPSBfYW5jaG9yX3NsaWRlcyhpdGVtLnNvdXJjZV9hbmNob3IpXG4iCmlpID0gcy5pbmRleChpdGVtLCBzdGFydCkgKyBsZW4oaXRlbSkKZ3VhcmQgPSAiICAgICAgICBpZiBzZW1hbnRpY19jZWlsaW5nIGFuZCBpdGVtX3NsaWRlcyBhbmQgbWF4KGl0ZW1fc2xpZGVzKSA+IHNlbWFudGljX2NlaWxpbmc6XG4gICAgICAgICAgICBjb250aW51ZVxuIgppZiBndWFyZCBub3QgaW4gc1tzdGFydDpdOgogICAgcyA9IHNbOmlpXSArIGd1YXJkICsgc1tpaTpdCnAud3JpdGVfdGV4dChzLCBlbmNvZGluZz0idXRmLTgiKQoKdCA9IFBhdGgoImlzY2FyYi1zdHVkaW8vdGVzdHMvdGVzdF9zbGlkZXNoYXJlX3NvdXJjZV9sb2NrLnB5IikKdHMgPSB0LnJlYWRfdGV4dChlbmNvZGluZz0idXRmLTgiKQphbmNob3IgPSAiXG5pZiBfX25hbWVfXz09J19fbWFpbl9fJzogdW5pdHRlc3QubWFpbigpXG4iCmFzc2VydCBhbmNob3IgaW4gdHMKaWYgInRlc3Rfc2VtYW50aWNfd2FybmluZ19ibG9ja3NfZmxhdHRlbmVkX2hvc3Rfc2xpZGVzX3dpdGhvdXRfcGxheWVyX21ldGFkYXRhIiBub3QgaW4gdHM6CiAgICBmaXh0dXJlID0gKAogICAgICAgICJTTElERSAzOiBTb2Z0d2FyZSBwcm9jZXNzIGRlZmluaXRpb24gd2l0aCBzcGVjaWZpY2F0aW9uIGRlc2lnbiBpbXBsZW1lbnRhdGlvbiB2YWxpZGF0aW9uIGV2b2x1dGlvbiBhbmQgcHJvY2VzcyBkZXNjcmlwdGlvbnNcbgogICAgICAgICJTTElERSAyMDogUHJvY2VzcyBhY3Rpdml0aWVzIGluY2x1ZGUgc3BlY2lmaWNhdGlvbiBkZXZlbG9wbWVudCB2YWxpZGF0aW9uIGV2b2x1dGlvbiBhbmQgaW50ZXJsZWF2ZWQgbWFuYWdlcmlhbCBhY3Rpdml0aWVzXG4iCiAgICAgICAgIlNMSURFIDcxOiBDb21wcmVoZW5zaXZlIE92ZXJ2aWV3IG9mIFNvZnR3YXJlIFByb2Nlc3NlcyBhbmQgTW9kZWxzIGZvciBFZmZlY3RpdmUgRGV2ZWxvcG1lbnQgd2l0aCBwcm9jZXNzIG1vZGVsIGFyY2hpdGVjdHVyZSBhbmQgdGVzdGluZ1xuIgogICAgICAgICJTTElERSA3MzogQ29tcHJlaGVuc2l2ZSBPdmVydmlldyBvZiBTb2Z0d2FyZSBQcm9jZXNzZXMgYW5kIE1vZGVscyBpbiBNb2Rlcm4gRGV2ZWxvcG1lbnQgd2l0aCBwcm9jZXNzIG1vZGVsIGRlc2lnbiBhbmQgdmFsaWRhdGlvblxuIgogICAgKQogICAgbWV0aG9kID0gKAogICAgICAgICJcbiAgICBkZWYgdGVzdF9zZW1hbnRpY193YXJuaW5nX2Jsb2Nrc19mbGF0dGVuZWRfaG9zdF9zbGlkZXNfd2l0aG91dF9wbGF5ZXJfbWV0YWRhdGEoc2VsZik6XG4iCiAgICAgICAgIiAgICAgICAgdGQ9dGVtcGZpbGUuVGVtcG9yYXJ5RGlyZWN0b3J5KCk7IHNlbGYuYWRkQ2xlYW51cCh0ZC5jbGVhbnVwKVxuIgogICAgICAgICIgICAgICAgIHA9UGF0aCh0ZC5uYW1lKS8nZmxhdHRlbmVkLXNsaWRlc2hhcmUudHh0J1xuIgogICAgICAgIGY iICAgICAgICBmaXh0dXJlID0ge2ZpeHR1cmUhcn1cbiIKICAgICAgICAiICAgICAgICBwLndyaXRlX3RleHQoZml4dHVyZSxlbmNvZGluZz0ndXRmLTgnKVxuIgogICAgICAgICIgICAgICAgIGJ1bmRsZT1Tb3VyY2VCdW5kbGUoaXRlbXM9W1NvdXJjZUl0ZW0oJ3ByaW1hcnknLCdQMScsJ3NsaWRlc2hhcmUnLHAsJ3NsaWRlc2hhcmUnKV0sbGVjdHVyZV9mb2N1cz0nJyxzZXNzaW9uX21pbnV0ZXM9OTApXG4iCiAgICAgICAgIiAgICAgICAgc2VtYW50aWM9c2VsZi5fc2VtYW50aWMoKVxuIgogICAgICAgICIgICAgICAgIHNlbWFudGljLnNvdXJjZV93YXJuaW5ncz1bJ1NsaWRlcyA1OSB0aHJvdWdoIDkyIGNvbnRhaW4gZXh0ZXJuYWwgc2xpZGUgdGl0bGUgYXJ0aWZhY3RzIGFuZCB1bnJlbGF0ZWQgdG9waWMgdGl0bGVzL2ZpbGUgbmFtZXMgd2hpY2ggbXVzdCBiZSBmaWx0ZXJlZCBvdXQgaW4gZmF2b3Igb2YgdGhlIGNvcmUgQ2hhcHRlciAyIGNvbnRlbnQgKFNsaWRlcyAxLTU4KS4nXVxuIgogICAgICAgICIgICAgICAgIHByb2ZpbGU9cmVjb25jaWxlX3NvdXJjZV9wcm9maWxlKHNlbWFudGljLGJ1bmRsZSlcbiIKICAgICAgICAiICAgICAgICBhbmNob3JzPXt4LnNvdXJjZV9hbmNob3IgZm9yIHggaW4gcHJvZmlsZS5jb3ZlcmFnZV9pdGVtc31cbiIKICAgICAgICAiICAgICAgICBzZWxmLmFzc2VydEluKCdbUDFdIFNMSURFIDIwJyxhbmNob3JzKVxuIgogICAgICAgICIgICAgICAgIHNlbGYuYXNzZXJ0Tm90SW4oJ1tQMV0gU0xJREUgNzEnLGFuY2hvcnMpXG4iCiAgICAgICAgIiAgICAgICAgc2VsZi5hc3NlcnROb3RJbignW1AxXSBTTElERSA3MycsYW5jaG9ycylcbiIKICAgICApCiAgICB0cyA9IHRzLnJlcGxhY2UoYW5jaG9yLCBtZXRob2QgKyBhbmNob3IsIDEpCiAgICB0LndyaXRlX3RleHQodHMsIGVuY29kaW5nPSJ1dGYtOCIpCg==' | tr -d ' ' | base64 -d > /tmp/patch.py
+          python /tmp/patch.py
+      - name: Run full regression suite
+        working-directory: iscarb-studio
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m pip install -r requirements.txt
+          python -m compileall -q app tests
+          python -m unittest discover -s tests -v
+      - name: Hygiene and commit tested repair
+        run: |
+          set -euo pipefail
+          find iscarb-studio -type d -name __pycache__ -prune -exec rm -rf {} +
+          git diff --check
+          ! git status --short | grep -E '\.pyc$|__pycache__' || exit 1
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          rm -f .github/workflows/one-shot-sommerville-ch2-after-deploy.yml \
+                .github/workflows/one-shot-fetch-live-ch2-279f.yml \
+                .github/workflows/one-shot-fix-semantic-slide-boundary.yml \
+                .github/workflows/one-shot-semantic-boundary-v6.yml
+          git add -A
+          git commit -m 'Honor semantic source boundaries during SlideShare reconciliation'
+          git push origin HEAD:main
