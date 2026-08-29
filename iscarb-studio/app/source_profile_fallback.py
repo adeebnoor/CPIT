@@ -97,10 +97,9 @@ def _choose_label(lines: list[str], page_no: int) -> str:
     return _clean(clean[0] if clean else f"Primary source page {page_no}", 120)
 
 
+
 def _page_importance(label: str, lines: list[str], page_no: int) -> str:
     low = label.lower()
-    # Administrative / orientation / assignment pages remain traceable but do not
-    # become mandatory technical coverage claims.
     support_markers = (
         "class", "take-home", "to master", "your challenge", "assignment",
         "today lecture topic", "the big picture", "big picture", "cimt compass",
@@ -108,10 +107,14 @@ def _page_importance(label: str, lines: list[str], page_no: int) -> str:
         "key clo", "availability: system is ready", "to master today's lesson",
         "ai era", "ai revolution", "aligning with industry trends", "keeping up with trends",
         "example", "ex;", "remember", "cautionary tale", "how to show this",
+        "topics covered", "key points",
     )
-    if page_no == 1 or any(m in low for m in support_markers):
+    slide_no = _embedded_slide_number(label)
+    if page_no == 1 or slide_no == 1 or any(m in low for m in support_markers):
         return "supporting"
     blob = " ".join(lines[:18]).lower()
+    if slide_no and len(blob.split()) < 12:
+        return "supporting"
     major_markers = (
         "definition", "requirements", "architecture", "process", "model", "metrics",
         "measurement", "testing", "assurance", "design", "fault", "failure",
@@ -122,7 +125,6 @@ def _page_importance(label: str, lines: list[str], page_no: int) -> str:
     )
     if re.match(r"^\d{1,2}\.\d+(?:\.\d+)?\b", label) or any(m in blob for m in major_markers):
         return "major"
-    # Dense instructional pages with multiple distinct content lines are still major.
     content_lines = [x for x in lines if not _is_furniture_line(x)]
     return "major" if len(content_lines) >= 4 and len(" ".join(content_lines).split()) >= 28 else "supporting"
 
@@ -155,17 +157,54 @@ def _pptx_chunks(path: Path) -> list[tuple[int, str, str]]:
     return out
 
 
+
+def _embedded_slide_number(text: str) -> int | None:
+    m = re.match(r"^\s*SLIDE\s+(\d+)\s*:", str(text or ""), flags=re.I)
+    return int(m.group(1)) if m else None
+
+
+def _declared_slide_count(text: str) -> int | None:
+    """Return the player-declared deck size before host recommendation chrome."""
+    head = re.split(r"\bRecommended\b", str(text or ""), maxsplit=1, flags=re.I)[0]
+    for pattern in (r"\b1\s*/\s*(\d{1,4})\b", r"\b(\d{1,4})\s+slides\b"):
+        m = re.search(pattern, head, flags=re.I)
+        if m:
+            value = int(m.group(1))
+            if 2 <= value <= 500:
+                return value
+    return None
+
+
+def _anchor_slides(anchor: str) -> set[int]:
+    """Extract explicit P1 slide coordinates from source anchors."""
+    found: set[int] = set()
+    for m in re.finditer(r"\bSLIDES?\s+(\d+)(?:\s*[-–—]\s*(\d+))?", str(anchor or ""), flags=re.I):
+        start = int(m.group(1)); end = int(m.group(2) or start)
+        if end < start:
+            start, end = end, start
+        if end - start <= 200:
+            found.update(range(start, end + 1))
+    return found
+
+
+
 def _doc_chunks(path: Path) -> list[tuple[int, str, str]]:
-    # DOCX/TXT/MD have no reliable slide/page coordinate after extraction. Keep
-    # deterministic numbered sections so every extracted source segment remains traceable.
+    # Public presentation pages may expose `SLIDE n:` labels in extracted
+    # text. Respect the deck boundary and never ingest Recommended cards.
     text = extract_source_text(path, limit=500_000)
+    declared_slides = _declared_slide_count(text)
     paras = [_clean(x, 520) for x in re.split(r"\n{1,}", text) if _clean(x, 520)]
     out: list[tuple[int, str, str]] = []
-    for i, para in enumerate(paras[:80], 1):
+    for i, para in enumerate(paras[:200], 1):
+        if re.match(r"^recommended\b", para, flags=re.I):
+            break
         words = para.split()
         label = _clean(" ".join(words[:12]), 110)
+        slide_no = _embedded_slide_number(label) or _embedded_slide_number(para)
+        if declared_slides and slide_no and slide_no > declared_slides:
+            continue
         out.append((i, label, para))
-    return out
+    return out[:80]
 
 
 def _chunks(path: Path) -> tuple[str, list[tuple[int, str, str]]]:
@@ -204,7 +243,8 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
     coverage: list[CoverageItem] = []
     for idx, label, excerpt in chunks[:80]:
         clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
-        anchor = f"[P1] {coordinate} {idx}"
+        embedded_slide = _embedded_slide_number(clean_label)
+        anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else f"[P1] {coordinate} {idx}"
         key = re.sub(r"[^a-z0-9]+", " ", clean_label.lower()).strip()
         source_lines = _meaningful_lines(excerpt.replace(" · ", "\n"))
         importance = _page_importance(clean_label, source_lines, idx)
@@ -257,28 +297,32 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
     )
 
 
-def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:
-    """Add deterministic chapter checkpoints that the semantic profiler may miss.
 
-    Gemini provides the semantic taxonomy. Deterministic extraction provides a second,
-    independent page/slide completeness floor. Only MAJOR source checkpoints are added
-    to the mandatory coverage ledger; orientation/assignment/trend-only pages remain
-    supporting. This makes omission detectable instead of trusting a single model pass.
-    """
+def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:
+    """Add only uncovered real source slides to the semantic P1 contract."""
     deterministic = build_deterministic_source_profile(bundle, "chapter-completeness reconciliation")
     existing = {re.sub(r"[^a-z0-9]+", " ", x.label.lower()).strip() for x in ai_profile.coverage_items}
+    semantic_slides: set[int] = set()
+    for row in ai_profile.coverage_items:
+        semantic_slides.update(_anchor_slides(row.source_anchor))
+
     merged = list(ai_profile.coverage_items)
     for item in deterministic.coverage_items:
         if item.importance != "major":
+            continue
+        item_slides = _anchor_slides(item.source_anchor)
+        if item_slides and item_slides.issubset(semantic_slides):
             continue
         key = re.sub(r"[^a-z0-9]+", " ", item.label.lower()).strip()
         if key and key not in existing:
             merged.append(item)
             existing.add(key)
+            semantic_slides.update(item_slides)
+
     ai_profile.coverage_items = merged[:80]
     ai_profile.deferred_topics = []
-    if deterministic.source_warnings:
-        ai_profile.source_warnings = list(dict.fromkeys([*ai_profile.source_warnings,
-            "Deterministic chapter checkpoints were reconciled with the semantic profile so major P1 pages/sections cannot disappear silently."
-        ]))[:20]
+    ai_profile.source_warnings = list(dict.fromkeys([
+        *ai_profile.source_warnings,
+        "Deterministic source-coordinate reconciliation excludes duplicate semantic slides and host-page recommendation cards from mandatory P1 coverage.",
+    ]))[:20]
     return ai_profile
