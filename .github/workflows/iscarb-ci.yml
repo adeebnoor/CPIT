@@ -44,7 +44,6 @@ jobs:
           assert home.status_code == 200, home.text
           assert 'ISCARB Faculty Studio · CIMT+ Computing' in home.text
           assert 'v4.3.0' in home.text
-          assert 'data:image/jpeg;base64,' in home.text
 
           health = client.get('/api/health')
           assert health.status_code == 200
@@ -53,6 +52,9 @@ jobs:
           assert h['presenter_exact_units'] == 20
           assert h['session_minutes'] == 90
           assert h['deterministic_gate'].startswith('v14')
+          assert h['visual_lecture_engine'] == 'CIMT+ v4.3'
+          assert h['hero_delivery'] == 'css-native-no-asset'
+          assert h['hero_static_dependency'] is False
           assert h['capacity_retry_attempts_per_model'] == 3
           assert h['capacity_failover'] is True
           assert h['source_library_verified'] is True
