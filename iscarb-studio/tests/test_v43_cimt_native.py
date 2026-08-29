@@ -52,6 +52,13 @@ class TestCimtNativeV43(unittest.TestCase):
         self.assertNotIn('…', visible)
         self.assertIn('#005634', html.lower())
         self.assertIn('#c49a27', html.lower())
+        # Visual-regression sentinels: the presenter must preserve the varied
+        # lecture grammar seen in the archived CIMT decks, not collapse back
+        # into one repeated dashboard/card layout.
+        for visual_class in ('corner', 'quoteSlide', 'ladder', 'curve', 'tree', 'timeline', 'verdict'):
+            self.assertIn(f'class="{visual_class}"', html)
+        self.assertNotIn('WHY THIS MATTERS', visible.upper())
+        self.assertNotIn('VISUAL LECTURE ENGINE V2', visible.upper())
 
     def test_pptx_20_slides_and_large_cimt_title(self):
         with tempfile.TemporaryDirectory() as td:
@@ -66,7 +73,7 @@ class TestCimtNativeV43(unittest.TestCase):
                     txt = shape.text.strip()
                     if txt:
                         all_text.append(txt)
-                # The CIMT title is paragraph-formatted Georgia at 29pt.
+                # The CIMT title is paragraph-formatted Georgia at 28pt or larger.
                 large_georgia = False
                 for s in slide.shapes:
                     if not getattr(s, 'has_text_frame', False):
@@ -82,6 +89,7 @@ class TestCimtNativeV43(unittest.TestCase):
             self.assertNotIn('PLATFORM PROTECTION', joined)
             self.assertNotIn('...', joined)
             self.assertNotIn('…', joined)
+            self.assertNotIn('WHY THIS MATTERS', joined)
             self.assertGreater(path.stat().st_size, 10000)
 
     def test_pdf_has_20_pages_and_no_security_residue(self):
