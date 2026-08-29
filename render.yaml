@@ -3,6 +3,7 @@ services:
     name: iscarb-lecture-studio
     runtime: docker
     plan: free
+    branch: main
     rootDir: iscarb-studio
     healthCheckPath: /api/health
     autoDeployTrigger: commit
