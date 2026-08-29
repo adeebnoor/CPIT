@@ -130,6 +130,36 @@ def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> Audit
     )
 
 
+def _major_coverage_gaps(blueprint, profile) -> tuple[list[str], list[str]]:
+    """Return major P1 checkpoint ids that are missing or first taught after Unit 15."""
+    ledger = {entry.coverage_id: entry for entry in blueprint.coverage_ledger}
+    major = [row for row in profile.coverage_items if row.importance == "major"]
+    missing = [row.id for row in major if row.id not in ledger]
+    late = [
+        row.id for row in major
+        if row.id in ledger and ledger[row.id].first_taught_unit > 15
+    ]
+    return missing, late
+
+
+def _ensure_quota_safe_completeness(blueprint, profile, bundle, source_text: str, reason: str):
+    """Guarantee atomic P1 completeness when semantic repair/audit loses quota.
+
+    A complete semantic Blueprint is preserved.  An incomplete semantic Blueprint
+    is replaced by the tested deterministic source-bounded draft.  In both cases
+    the result remains non-releasable because semantic assurance is unavailable.
+    """
+    missing, late = _major_coverage_gaps(blueprint, profile)
+    replaced = bool(missing or late)
+    if replaced:
+        blueprint = build_deterministic_blueprint(profile)
+        blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+    checks = deterministic_gate(blueprint, profile, source_text)
+    checks.update(session_scope_gate(blueprint, profile, bundle))
+    audit = _deterministic_fallback_audit(checks, reason)
+    return blueprint, checks, audit, replaced, missing, late
+
+
 def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) -> None:
     service: GeminiService | None = None
     stage = "startup"
@@ -206,9 +236,19 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
                 blueprint = service.repair(bundle, blueprint, audit, det_fail)
             except Exception as exc:
                 if _is_quota_error(exc):
+                    blueprint, checks, audit, replaced, missing, late = _ensure_quota_safe_completeness(
+                        blueprint, profile, bundle, source_text, str(exc)
+                    )
                     job.blueprint = blueprint
+                    job.deterministic_checks = checks
                     job.audit = audit
-                    _update(job, "blocked", 100, "BLOCKED — blueprint preserved. Presenter Preview and exports remain available; repair waits for Gemini quota.")
+                    job.error = None
+                    save_job(job)
+                    if replaced:
+                        gap_text = ", ".join(missing + late)
+                        _update(job, "blocked", 100, f"BLOCKED — Gemini quota unavailable during repair. The incomplete semantic draft was replaced by a complete source-checkpoint draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED and RELEASE is forbidden until semantic audit succeeds. Recovered: {gap_text}")
+                    else:
+                        _update(job, "blocked", 100, "BLOCKED — Gemini quota unavailable during repair. The source-complete semantic draft was preserved; readiness remains UNVERIFIED and RELEASE is forbidden until semantic audit succeeds.")
                     return
                 raise
 
@@ -240,7 +280,18 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         job.blueprint = blueprint
         if not semantic_available:
-            _update(job, "blocked", 100, "BLOCKED — blueprint preserved and local gates completed; semantic audit is unavailable because Gemini quota is exhausted. Preview and exports remain available, but no RELEASE is issued.")
+            blueprint, checks, audit, replaced, missing, late = _ensure_quota_safe_completeness(
+                blueprint, profile, bundle, source_text, "Gemini quota exhausted before semantic release assurance completed."
+            )
+            job.blueprint = blueprint
+            job.deterministic_checks = checks
+            job.audit = audit
+            job.error = None
+            save_job(job)
+            if replaced:
+                _update(job, "blocked", 100, "BLOCKED — semantic assurance is unavailable because Gemini quota is exhausted. A complete source-checkpoint draft now covers every major P1 checkpoint by Unit 15; readiness is UNVERIFIED and no RELEASE is issued.")
+            else:
+                _update(job, "blocked", 100, "BLOCKED — source-complete blueprint preserved and local gates completed; semantic audit is unavailable because Gemini quota is exhausted. Preview and exports remain available, but no RELEASE is issued.")
         else:
             _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
 
