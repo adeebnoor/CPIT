@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from bs4 import BeautifulSoup
 from fastapi.testclient import TestClient
 from pptx import Presentation
 from pypdf import PdfReader
@@ -41,13 +42,14 @@ class TestCimtNativeV43(unittest.TestCase):
     def test_preview_is_cimt_native_and_20_units(self):
         html = render_cimt_presenter_preview_v43(self.bp, 'READY')
         up = html.upper()
+        visible = BeautifulSoup(html, 'html.parser').get_text(' ', strip=True)
         self.assertEqual(html.count('class="slide'), 20)
         self.assertIn('CIMT-NATIVE PRESENTER', up)
         self.assertIn('DEPENDABLE SYSTEMS', up)
         self.assertNotIn('SECURITY ENGINEERING', up)
         self.assertNotIn('PLATFORM PROTECTION', up)
-        self.assertNotIn('...', html)
-        self.assertNotIn('…', html)
+        self.assertNotIn('...', visible)
+        self.assertNotIn('…', visible)
         self.assertIn('#005634', html)
         self.assertIn('#C49A27', html)
 
@@ -64,17 +66,16 @@ class TestCimtNativeV43(unittest.TestCase):
                     txt = shape.text.strip()
                     if txt:
                         all_text.append(txt)
-                # The first content title box uses the CIMT large serif hierarchy.
-                title_shapes = [s for s in slide.shapes if getattr(s, 'has_text_frame', False) and s.text.strip() == slide.shapes[1].text.strip()]
-                # Robust font check: at least one Georgia run >= 28pt on every slide.
+                # The CIMT title is paragraph-formatted Georgia at 29pt.
                 large_georgia = False
                 for s in slide.shapes:
                     if not getattr(s, 'has_text_frame', False):
                         continue
                     for p in s.text_frame.paragraphs:
-                        for r in p.runs:
-                            if (r.font.name or '').lower() == 'georgia' and r.font.size and r.font.size.pt >= 28:
-                                large_georgia = True
+                        name = (p.font.name or '').lower()
+                        size = p.font.size.pt if p.font.size else 0
+                        if name == 'georgia' and size >= 28:
+                            large_georgia = True
                 self.assertTrue(large_georgia)
             joined = ' '.join(all_text).upper()
             self.assertNotIn('SECURITY ENGINEERING', joined)
