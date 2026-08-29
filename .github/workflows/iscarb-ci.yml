@@ -7,96 +7,69 @@ on:
       - '.github/workflows/iscarb-ci.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r iscarb-studio/requirements.txt
-      - name: Compile Python
-        run: python -m compileall -q iscarb-studio/app
-      - name: Application smoke tests
+      - name: Compile active application and tests
+        run: python -m compileall -q iscarb-studio/app iscarb-studio/tests
+      - name: Run active v4.3 regression suite
+        env:
+          PYTHONPATH: iscarb-studio
+        run: python -m unittest discover -s iscarb-studio/tests -v
+      - name: Smoke active v4.3 runtime and public services
         env:
           PYTHONPATH: iscarb-studio
         run: |
           python - <<'PY'
           from fastapi.testclient import TestClient
-          from app.start import app
-          from app.models import JobState
-          from app import main as engine
+          from app.start_v430 import app
 
           client = TestClient(app)
           home = client.get('/')
           assert home.status_code == 200, home.text
-          html = home.text
-          assert 'iscarb-approved-hero-inline' in html
-          assert 'data:image/jpeg;base64,' in html
-          assert 'v4.0.3 · Capacity-Safe Visual Lecture Engine v2' in html
-          assert 'NOT RUN' in html
-          assert 'Retry analysis' in html
-          assert 'Waiting for a valid Blueprint' in html
-          assert 'id="about"' in html
-          assert "sources.id='sources'" in html
-          assert "a.href='#sources'" in html
-
-          expected_sources = [
-              'https://www.slideshare.net/slideshow/ch10-dependable-systems/43151515',
-              'https://www.slideshare.net/slideshow/ch11-reliability-engineering/43151516',
-              'https://www.slideshare.net/slideshow/ch12-safety-engineering/43151517',
-              'https://www.slideshare.net/slideshow/ch14-5148075/5148075',
-              'https://www.slideshare.net/slideshow/ch14-resilience-engineering/43151521',
-              'https://www.slideshare.net/slideshow/ch15-software-reuse/43151523',
-              'https://www.slideshare.net/slideshow/ch16-component-based-software-engineering/43151525',
-              'https://www.slideshare.net/slideshow/ch17-distributed-software-engineering/43151527',
-          ]
-          for url in expected_sources:
-              assert url in html, url
+          assert 'ISCARB Faculty Studio · CIMT+ Computing' in home.text
+          assert 'v4.3.0' in home.text
+          assert 'data:image/jpeg;base64,' in home.text
 
           health = client.get('/api/health')
           assert health.status_code == 200
           h = health.json()
-          assert h['version'] == '4.0.3'
-          assert h['visual_lecture_engine'] == 'v2'
-          assert h['source_visual_primary'] == 'uploaded-p1-pdf'
-          assert h['source_visual_public_url'] == 'best-effort-only'
+          assert h['version'] == '4.3.0', h
+          assert h['presenter_exact_units'] == 20
+          assert h['session_minutes'] == 90
+          assert h['deterministic_gate'].startswith('v14')
           assert h['capacity_retry_attempts_per_model'] == 3
           assert h['capacity_failover'] is True
-          assert h['no_blueprint_exports'] == 'hidden'
-          assert h['no_blueprint_gate_state'] == 'NOT RUN'
-          assert h['hero_delivery'] == 'inline-data-uri'
-          assert h['hero_static_dependency'] is False
           assert h['source_library_verified'] is True
           assert h['verified_source_count'] == 8
+          assert h['source_visual_primary'] == 'uploaded-p1-pdf'
           assert set(h['navigation_qa']) == {'home','sources','upgrade','outputs','guides','about'}
 
-          starter = client.get('/starter-kit')
-          assert starter.status_code == 200
-          assert 'ISCARB Faculty Starter Kit' in starter.text
+          for path in ('/starter-kit', '/openapi.json', '/docs', '/redoc'):
+              r = client.get(path)
+              assert r.status_code == 200, (path, r.status_code)
           assert client.post('/api/compile', data={}).status_code == 400
-          bad_bp = client.post('/api/render-blueprint', files={'blueprint_file': ('bad.txt', b'{}', 'text/plain')})
-          assert bad_bp.status_code == 400
+          assert client.get('/api/jobs/not-a-real-job').status_code == 404
           assert client.get('/api/jobs/not-a-real-job/presenter').status_code == 404
           assert client.get('/api/jobs/not-a-real-job/export/pptx').status_code == 404
-
-          no_bp = JobState(
-              id='ci-no-blueprint', status='error', progress=100,
-              message='Compilation stopped before Blueprint creation.', filename='ci-source.pdf',
-              model='auto', source_manifest=['[P1] PRIMARY: ci-source.pdf'],
-              error="ServerError: 503 UNAVAILABLE high demand",
-          )
-          engine.save_job(no_bp)
-          assert client.get('/api/jobs/ci-no-blueprint/presenter').status_code == 409
-          assert client.get('/api/jobs/ci-no-blueprint/export/pptx').status_code == 409
-          assert client.get('/api/jobs/ci-no-blueprint/export/presenter-pdf').status_code == 409
-          print('ISCARB application smoke tests passed')
+          print('Active ISCARB v4.3 runtime smoke PASS')
           PY
-      - name: Capacity retry — reproduce 503 high demand then recover
+      - name: Capacity retry — recover after transient 503s
         env:
           PYTHONPATH: iscarb-studio
         run: |
@@ -108,172 +81,35 @@ jobs:
 
           class TinyResult(BaseModel):
               ok: bool
-
           class DummyConfig:
-              def __init__(self, **kwargs):
-                  self.kwargs = kwargs
-
+              def __init__(self, **kwargs): self.kwargs = kwargs
           class FakeTypes:
               GenerateContentConfig = DummyConfig
               ThinkingConfig = DummyConfig
-
           class FakeModels:
-              def __init__(self):
-                  self.calls = 0
+              def __init__(self): self.calls = 0
               def generate_content(self, **kwargs):
                   self.calls += 1
                   if self.calls < 3:
-                      raise RuntimeError("ServerError: 503 UNAVAILABLE high demand")
+                      raise RuntimeError('503 UNAVAILABLE high demand')
                   return SimpleNamespace(text='{"ok": true}')
 
-          fake_models = FakeModels()
+          fake = FakeModels()
           service = object.__new__(GeminiService)
           service.model = 'test-model'
           service.api_key = 'ci'
           service._types = FakeTypes
-          service.client = SimpleNamespace(models=fake_models)
+          service.client = SimpleNamespace(models=fake)
           service._uploaded = {}
           service.active_model = ''
           service._backoff = lambda attempt: None
-
           source = Path('/tmp/iscarb-capacity-source.txt')
-          source.write_text('Security engineering source text', encoding='utf-8')
+          source.write_text('Dependable systems source text', encoding='utf-8')
           item = SimpleNamespace(label='P1', source_id='P1', path=source)
           bundle = SimpleNamespace(items=[item], manifest_text=lambda: '[P1] PRIMARY: capacity-test')
-
-          result = service._generate_structured(
-              bundle=bundle, prompt='Return ok true.', schema=TinyResult,
-              preferred_model='test-model', thinking_level='minimal'
-          )
+          result = service._generate_structured(bundle=bundle, prompt='Return ok true.', schema=TinyResult, preferred_model='test-model', thinking_level='minimal')
           assert result.ok is True
-          assert fake_models.calls == 3, fake_models.calls
-          assert service.active_model == 'test-model'
+          assert fake.calls == 3
           assert MAX_TRANSIENT_ATTEMPTS == 3
-          assert GeminiService._is_retryable(RuntimeError('503 UNAVAILABLE high demand')) is True
-          print('Capacity retry OK: two 503 failures recovered on attempt 3')
-          PY
-      - name: Production source-visual path — local PDF pages
-        env:
-          PYTHONPATH: iscarb-studio
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          from reportlab.pdfgen import canvas
-          from app.source_visuals import _build_pdf_registry, local_asset
-
-          path=Path('/tmp/security-source-test.pdf')
-          c=canvas.Canvas(str(path), pagesize=(960,540))
-          pages=[
-              'Security Engineering Overview',
-              'Risk assessment: assets threats vulnerabilities controls',
-              'Preliminary risk analysis and misuse cases',
-              'Layered protection architecture: platform application record',
-              'Asset distribution and architectural security trade-offs',
-              'Security design guidelines and input validation',
-              'Deployment configuration and minimum privileges',
-              'Survivability: resistance recognition recovery',
-          ]
-          for i,title in enumerate(pages,1):
-              c.setFont('Helvetica-Bold',24); c.drawString(60,440,title)
-              c.setFont('Helvetica',13); c.drawString(60,400,f'Primary lecture slide {i}')
-              c.rect(130,160,700,180); c.drawString(170,240,'Source-owned engineering visual area')
-              c.showPage()
-          c.save()
-
-          registry=_build_pdf_registry(path,'Security Engineering Test Source')
-          assert registry is not None
-          assert registry.source_kind == 'local-pdf'
-          assert len(registry.assets) == len(pages)
-          for asset in registry.assets:
-              img=local_asset(asset)
-              assert img is not None and img.exists() and img.stat().st_size > 1000
-          assert 'layered protection architecture' in registry.assets[3].alt_text.lower()
-          print(f'Local PDF visual registry OK: {len(registry.assets)} complete slide images rendered')
-          PY
-      - name: Visual Lecture Engine v2 — end-to-end Presenter
-        env:
-          PYTHONPATH: iscarb-studio
-        run: |
-          python - <<'PY'
-          import shutil
-          from pathlib import Path
-          from pptx import Presentation
-          from pptx.enum.shapes import MSO_SHAPE_TYPE
-          from app import source_visual_patch_v2
-          from app.models import Blueprint
-          from app.source_visuals import _build_pdf_registry, plan_for_unit
-          from app.visual_output_v36 import export_presenter_pptx, export_presenter_pdf, render_presenter_preview
-
-          src=Path('/tmp/security-source-test.pdf')
-          upload_dir=Path('iscarb-studio/data/uploads/ci-security')
-          upload_dir.mkdir(parents=True, exist_ok=True)
-          shutil.copy2(src, upload_dir/'P1__security-source-test.pdf')
-
-          phases = {**{i:'IFHAM' for i in range(1,6)}, **{i:'MARIS' for i in range(6,11)}, **{i:'ATQAN' for i in range(11,16)}, **{i:'MAYYIZ' for i in range(16,21)}}
-          titles = {
-              1:'Crisis',2:'Domain Spine',3:'Learning Outcomes',4:'H-Stack',5:'First Principles',
-              6:'Security Mechanism',7:'Layered Protection Architecture',8:'Architecture Trade-off',9:'Test and Falsify',10:'Uncertainty Ledger',
-              11:'Saudi Context',12:'Accountability',13:'Enduring Principles and Trends',14:'Practitioner Wellbeing',15:'AI Permissibility',
-              16:'Portfolio Mission',17:'Constraint Mutation',18:'Evidence Policy',19:'Capability Rubric',20:'Assurance Case'
-          }
-          units=[]
-          for i in range(1,21):
-              anchor = '[P1] SLIDE 4' if i in {6,7} else '[P1] SLIDE 5' if i==8 else '[P1] SLIDE 6' if i==9 else '[P1] SLIDE 7' if i in {12,13} else ''
-              units.append({
-                  'number':i,'phase':phases[i],'title':titles[i],
-                  'engineering_question':f'What engineering decision must be defended in unit {i}?',
-                  'core_content':['Layered protection architecture and source-supported mechanism','Evidence must remain traceable to the primary lecture'] if anchor else [],
-                  'pedagogy_content':['PREDICT: make a decision before explanation','KNOWN: source-supported facts','UNKNOWN: decision-sensitive evidence gap'],
-                  'enrichment_content':[],'enrichment_basis':[],'scenario_assumptions':[],
-                  'visual_suggestion':'diagram-first teaching visual','student_action':'Choose a design and state what evidence could reverse your decision.',
-                  'takeaway':'A defensible engineering decision is bounded by source evidence and uncertainty.',
-                  'cimtlens':['C'],'clo_ids':['CLO1'],'source_anchor':anchor,
-                  'inherited_requirements':[],'elite_requirements':[],'evidence':'Decision record','contextual_enrichment':False,
-                  'verify_before_release':False,'planned_minutes':4,
-              })
-          bp=Blueprint.model_validate({
-              'lecture_title':'Security Engineering Test','engineering_thesis':'Security is a design responsibility.',
-              'central_engineering_crisis':'A critical application shows conflicting signs of compromise.',
-              'named_ethical_purpose':'Amanah and professional responsibility',
-              'clos':[{'id':f'CLO{i}','statement':f'Demonstrate capability {i}','evidence_expected':f'Evidence {i}'} for i in range(1,6)],
-              'units':units,'source_topic_families':['Risk','Architecture','Guidelines','Deployment','Survivability'],
-              'topic_coverage':[{'topic_family':'Architecture','source_anchor':'[P1] SLIDE 4','first_taught_unit':7,'reinforced_units':[8,16]}],
-              'readiness_alignment':[{'gku':'GKU3','sku':'SKU3.1','slo_refs':['SLO3.1.2'],'klo_refs':['KLO2'],'strength':'direct','rationale':'Security analysis evidence','atomicity_evidence':'Unit 7 architecture evidence','clo_ids':['CLO1'],'evidence_units':[7],'standard_source_pages':[19]}],
-              'rubric_criteria':[{'criterion':f'Criterion {i}','distinguished':'Evidence-rich','ready':'Supported','developing':'Partial','not_yet_ready':'Unsupported','readiness_refs':['SKU3.1']} for i in range(1,7)],
-              'release_notes':[],'session_minutes':90,'source_manifest':['[P1] PRIMARY: security-source-test.pdf'],'deferred_topics':[]
-          })
-
-          registry=_build_pdf_registry(src,'Security Engineering Test Source')
-          plan=plan_for_unit(bp,bp.units[6],registry)
-          assert plan.reuse_mode == 'USE', plan
-          assert plan.source_slide == 4, plan
-
-          preview=render_presenter_preview(bp,'BLOCKED')
-          assert '"slide": 4' in preview
-          assert 'SOURCE VISUAL · P1 SLIDE ${x.slide}' in preview
-          assert 'data:image/png;base64,' in preview
-
-          pptx=export_presenter_pptx(bp,Path('/tmp/iscarb-v2-security.pptx'))
-          assert pptx.exists() and pptx.stat().st_size > 20000
-          prs=Presentation(str(pptx))
-          assert len(prs.slides)==20
-          picture_count=sum(1 for sh in prs.slides[6].shapes if sh.shape_type == MSO_SHAPE_TYPE.PICTURE)
-          assert picture_count >= 1, 'Unit 7 did not receive the P1 source visual'
-
-          pdf=export_presenter_pdf(bp,Path('/tmp/iscarb-v2-security.pdf'))
-          assert pdf.exists() and pdf.stat().st_size > 10000
-          print(f'Visual Lecture Engine v2 E2E OK: 20 slides, Unit 7 source visual=P1 slide {plan.source_slide}, PPTX={pptx.stat().st_size}, PDF={pdf.stat().st_size}')
-          PY
-      - name: SlideShare visual discovery — best effort, never a release dependency
-        env:
-          PYTHONPATH: iscarb-studio
-        run: |
-          python - <<'PY'
-          from app.source_visuals import _build_slideshare_registry
-          url='https://www.slideshare.net/slideshow/ch14-5148075/5148075'
-          registry=_build_slideshare_registry(url)
-          if registry is None:
-              print('SlideShare blocked server-side image discovery as expected; ISCARB will use local PDF visuals or deterministic REDRAW.')
-          else:
-              print(f'SlideShare visual discovery available: {len(registry.assets)} candidates.')
+          print('Capacity retry PASS: recovered on attempt 3')
           PY
