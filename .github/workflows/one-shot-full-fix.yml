@@ -1,0 +1,38 @@
+name: One-shot full production fix
+
+on:
+  push:
+    branches: ["fix/full-production-green-20260829"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fix branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/full-production-green-20260829
+          fetch-depth: 0
+      - name: Apply deterministic repository fixes
+        run: python tools/apply_full_production_fix.py
+      - name: Syntax and static hygiene
+        run: |
+          python -m compileall -q iscarb-studio/app iscarb-studio/tests
+          grep -R "file:///C:/Users/\|index.html#frameworks\|?v=3.3" slides cimt.html imam.html iscarb.html && exit 1 || true
+      - name: Commit repaired source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes required."
+            exit 0
+          fi
+          git commit -m "Repair CPIT production source and mobile delivery"
+          git push origin HEAD:fix/full-production-green-20260829
