@@ -1,1 +1,0 @@
-Acceptance criteria: a quota interruption during repair must never result in a RELEASE; every major P1 checkpoint must remain represented by Unit 15 in the preserved draft; the lecture remains exactly 20 units / 90 minutes; standardized readiness remains unverified; and all existing regressions must continue to pass.
