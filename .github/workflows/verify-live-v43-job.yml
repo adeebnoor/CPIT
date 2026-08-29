@@ -1,0 +1,136 @@
+name: Verify Preserved Live v4.3 Job
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-live-v43-job.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live-job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://iscarb-lecture-studio.onrender.com
+      JOB_ID: 8d8fc43b158842adabcc6f6a9b72e15a
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install inspectors
+        run: python -m pip install requests pypdf python-pptx
+      - name: Validate preserved Blueprint, chapter completeness and every export
+        run: |
+          python - <<'PY'
+          import io, json, os, pathlib, zipfile, requests
+          from pypdf import PdfReader
+          from pptx import Presentation
+          from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+          base=os.environ['BASE_URL'].rstrip('/'); job_id=os.environ['JOB_ID']
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-preserved-job-QA/4.3'})
+          h=s.get(base+'/api/health',timeout=60); h.raise_for_status(); health=h.json()
+          assert health.get('version')=='4.3.0', health.get('version')
+          assert health.get('pipeline')=='faculty-studio-v4.3.0-cimt-native-presenter-gate-v14'
+
+          r=s.get(f'{base}/api/jobs/{job_id}',timeout=60); r.raise_for_status(); job=r.json()
+          print('JOB',job.get('status'),job.get('progress'),job.get('message'))
+          assert job.get('status') in {'ready','blocked'}
+          assert job.get('blueprint')
+          bp=job['blueprint']; profile=job.get('source_profile') or {}
+          assert len(bp.get('units') or [])==20
+          assert [u.get('number') for u in bp['units']]==list(range(1,21))
+          assert sum(int(u.get('planned_minutes') or 0) for u in bp['units'])==90
+          assert len(bp.get('clos') or [])==5
+
+          majors=[x for x in profile.get('coverage_items',[]) if str(x.get('importance','')).lower()=='major']
+          assert majors, 'Source profile contains no major checkpoints'
+          ledger={x.get('coverage_id'):x for x in (bp.get('coverage_ledger') or []) if x.get('coverage_id')}
+          missing=[x.get('id') for x in majors if x.get('id') not in ledger]
+          late=[x.get('id') for x in majors if x.get('id') in ledger and int(ledger[x.get('id')].get('first_taught_unit') or 99)>15]
+          print('MAJOR CHECKPOINTS',len(majors),'LEDGER',len(ledger),'MISSING',missing,'LATE',late)
+          assert not missing, ('missing major checkpoints',missing)
+          assert not late, ('major checkpoints taught after Unit 15',late)
+
+          checks=job.get('deterministic_checks') or {}
+          required=('v14_exactly_20_presenter_jobs','v14_exactly_90_live_minutes','v14_no_authored_hard_truncation_tokens')
+          for key in required:
+              assert checks.get(key) is True,(key,checks.get(key))
+          failed=[k for k,v in checks.items() if v is False]
+          print('DETERMINISTIC FAILED CHECKS',failed)
+
+          out=pathlib.Path('/tmp/live-v43-job'); out.mkdir(exist_ok=True)
+          endpoints={
+            'presenter.html':f'/api/jobs/{job_id}/presenter',
+            'presenter.pptx':f'/api/jobs/{job_id}/export/pptx',
+            'presenter.pdf':f'/api/jobs/{job_id}/export/presenter-pdf',
+            'reading-pack.pdf':f'/api/jobs/{job_id}/export/pdf',
+            'instructor-guide.docx':f'/api/jobs/{job_id}/export/docx',
+            'student-pack.docx':f'/api/jobs/{job_id}/export/student',
+            'blueprint.json':f'/api/jobs/{job_id}/export/json',
+          }
+          sizes={}
+          for name,path in endpoints.items():
+              rr=s.get(base+path,timeout=180)
+              print(name,rr.status_code,len(rr.content),rr.headers.get('content-type'))
+              rr.raise_for_status(); assert len(rr.content)>500
+              sizes[name]=len(rr.content); (out/name).write_bytes(rr.content)
+
+          preview=(out/'presenter.html').read_text(encoding='utf-8')
+          assert len(preview)>5000
+          assert 'CIMT-native Presenter' in preview
+          for banned in ('WHY THIS MATTERS','VISUAL LECTURE ENGINE V2'):
+              assert banned not in preview.upper(),banned
+
+          prs=Presentation(out/'presenter.pptx'); assert len(prs.slides)==20
+          text=' '.join(sh.text for sl in prs.slides for sh in sl.shapes if hasattr(sh,'text_frame'))
+          assert '...' not in text and '…' not in text
+          assert 'WHY THIS MATTERS' not in text.upper()
+          pictures=sum(1 for sl in prs.slides for sh in sl.shapes if sh.shape_type==MSO_SHAPE_TYPE.PICTURE)
+
+          ppdf=PdfReader(str(out/'presenter.pdf')); assert len(ppdf.pages)==20
+          ptxt=' '.join((p.extract_text() or '') for p in ppdf.pages)
+          assert '...' not in ptxt and '…' not in ptxt
+          reading=PdfReader(str(out/'reading-pack.pdf')); assert len(reading.pages)>=1
+          for name in ('instructor-guide.docx','student-pack.docx'):
+              with zipfile.ZipFile(out/name) as z: assert 'word/document.xml' in z.namelist()
+          exported=json.loads((out/'blueprint.json').read_text(encoding='utf-8'))
+          assert len(exported.get('units') or [])==20 and exported.get('session_minutes')==90
+
+          msg=((job.get('message') or '')+' '+(job.get('error') or '')).lower()
+          summary={
+            'production_version':health.get('version'),
+            'job_id':job_id,
+            'status':job.get('status'),
+            'message':job.get('message'),
+            'quota_or_capacity_signal':any(x in msg for x in ('quota','resource_exhausted','capacity','unavailable')),
+            'major_checkpoints':len(majors),
+            'major_missing':missing,
+            'major_late_after_unit15':late,
+            'units':20,
+            'minutes':90,
+            'clos':5,
+            'deterministic_failed_checks':failed,
+            'presenter_slides':20,
+            'presenter_pdf_pages':20,
+            'reading_pack_pages':len(reading.pages),
+            'picture_shapes':pictures,
+            'export_sizes':sizes,
+            'all_seven_output_surfaces_valid':True,
+            'hard_ellipsis':False,
+            'dashboard_residue':False,
+          }
+          (out/'health.json').write_text(json.dumps(health,ensure_ascii=False,indent=2),encoding='utf-8')
+          (out/'job.json').write_text(json.dumps(job,ensure_ascii=False,indent=2),encoding='utf-8')
+          (out/'verification-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('PRESERVED LIVE V4.3 JOB PASS',json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preserved-live-v43-job-evidence
+          path: /tmp/live-v43-job/*
+          if-no-files-found: error
