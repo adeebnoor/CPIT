@@ -293,7 +293,27 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             else:
                 _update(job, "blocked", 100, "BLOCKED — source-complete blueprint preserved and local gates completed; semantic audit is unavailable because Gemini quota is exhausted. Preview and exports remain available, but no RELEASE is issued.")
         else:
-            _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
+            # Major P1 completeness is non-negotiable even when Gemini remained
+            # available through every repair round.
+            missing, late = _major_coverage_gaps(blueprint, profile)
+            if missing or late:
+                recovered = ", ".join(missing + late)
+                blueprint = build_deterministic_blueprint(profile)
+                blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+                checks = deterministic_gate(blueprint, profile, source_text)
+                checks.update(session_scope_gate(blueprint, profile, bundle))
+                audit = _deterministic_fallback_audit(
+                    checks,
+                    "Semantic repair ended with unresolved major P1 coverage gaps; a source-complete review draft was substituted.",
+                )
+                job.blueprint = blueprint
+                job.deterministic_checks = checks
+                job.audit = audit
+                job.error = None
+                save_job(job)
+                _update(job, "blocked", 100, "BLOCKED — semantic repair exhausted with unresolved major P1 coverage gaps. The incomplete draft was replaced by a source-complete review draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED; no RELEASE is issued. Recovered: " + recovered)
+            else:
+                _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
 
     except Exception as exc:
         try:
