@@ -30,13 +30,16 @@ jobs:
         run: |
           set -euo pipefail
           expected=$(python - <<'PY'
-          import re
           from pathlib import Path
           text=Path('iscarb-studio/app/start.py').read_text(encoding='utf-8')
-          m=re.search(r'PUBLIC_VERSION\s*=\s*["\'']([^"\'']+)["\'']', text)
-          if not m:
+          value=''
+          for line in text.splitlines():
+              if line.strip().startswith('PUBLIC_VERSION') and '=' in line:
+                  value=line.split('=',1)[1].strip().strip('"').strip("'")
+                  break
+          if not value:
               raise SystemExit('Could not resolve PUBLIC_VERSION from app/start.py')
-          print(m.group(1))
+          print(value)
           PY
           )
           echo "expected=$expected" >> "$GITHUB_OUTPUT"
