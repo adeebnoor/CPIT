@@ -1,0 +1,117 @@
+ure" or "industry best practice" and is written as fact;
+ - source-derived content, pedagogy, and enrichment are mixed;
+@@ -148,7 +149,7 @@
+ When repairing:
+ - preserve fixed 90 minutes and full P1 topic-family coverage;
+ - repair PEDAGOGICAL ORDER, not just metadata: prediction must actually precede explanation;
+-- make Units 11/13/14/15 visibly dominated by Saudi Context / Trend / Practitioner Wellbeing / Critical AI Literacy respectively while integrating P1 content;
++- make Units 11–15 visibly source-first and integrate Saudi context / accountability / future implication / practitioner consequence / AI audit only when relevant;
+ - remove new technical controls from pedagogy/student actions unless source-supported; move legitimate external ideas to enrichment or rewrite as questions;
+ - replace vague enrichment bases with supplied-source IDs or explicit hypothetical/future-exploration language;
+ - keep one coherent central system across ethics, context, portfolio, mutation, and assurance;
+--- a/iscarb-studio/app/session_gate.py
++++ b/iscarb-studio/app/session_gate.py
+@@ -84,13 +84,16 @@
+         marker in q5 for marker in ["before", "without", "given only", "from the evidence", "from these constraints"]
+     )
+ 
+-    # Reserved ATQAN functions must dominate title/question/action, not appear as decorative bullets.
++    # ATQAN functions are integrated pedagogy, while learner-facing titles remain source/topic-first.
++    # Keep the historical check names for API compatibility; the semantics are now "present and integrated",
++    # not "must dominate the title". Gate v14 separately rejects framework-first titles.
+     u11, u12, u13, u14, u15 = bp.units[10:15]
+-    checks["unit11_saudi_context_is_dominant"] = "saudi" in (u11.title + " " + u11.engineering_question).lower()
+-    checks["unit12_accountability_is_dominant"] = any(k in (u12.title + " " + u12.engineering_question).lower() for k in ["accountab", "ethical", "ethics", "amanah"])
+-    checks["unit13_trend_is_dominant"] = any(k in (u13.title + " " + u13.engineering_question).lower() for k in ["trend", "future", "next", "evolv"])
+-    checks["unit14_wellbeing_is_dominant"] = any(k in (u14.title + " " + u14.engineering_question).lower() for k in ["wellbeing", "well-being", "practitioner", "operator workload", "incident pressure", "cognitive load"])
+-    checks["unit15_ai_literacy_is_dominant"] = any(k in (u15.title + " " + u15.engineering_question).lower() for k in ["critical ai", "ai literacy", "artificial intelligence", " ai "])
++    t11, t12, t13, t14, t15 = (_txt(u) for u in (u11, u12, u13, u14, u15))
++    checks["unit11_saudi_context_is_dominant"] = any(k in t11 for k in ["saudi", "kingdom", "ksa", "gulf", "hypothetical"])
++    checks["unit12_accountability_is_dominant"] = any(k in t12 for k in ["accountab", "role", "responsib", "ethical", "ethics", "amanah", "pre-condition", "post-condition"])
++    checks["unit13_trend_is_dominant"] = any(k in t13 for k in ["trend", "future", "next", "evolv", "improv", "measurement", "change"])
++    checks["unit14_wellbeing_is_dominant"] = any(k in t14 for k in ["wellbeing", "well-being", "practitioner", "workload", "sustainable", "refactor", "visibility", "process friction"])
++    checks["unit15_ai_literacy_is_dominant"] = any(k in t15 for k in ["ai may assist", "human sign-off", "source check", "maturity", "capability", "audit"])
+ 
+     # Pedagogy/non-core fields may not smuggle in technical mechanisms absent from the lecture bundle.
+     source_text = bundle.combined_local_text().lower()
+--- a/iscarb-studio/app/gate_v14.py
++++ b/iscarb-studio/app/gate_v14.py
+@@ -22,6 +22,35 @@
+     "capability rubric",
+ )
+ 
++_FRAMEWORK_FIRST_TITLE_TERMS = (
++    "saudi context:",
++    "trend & future:",
++    "trend and future:",
++    "practitioner wellbeing:",
++    "practitioner well-being:",
++    "critical ai literacy",
++    "iscarb capability rubric",
++    "bounded assurance case",
++)
++
++
++def _unsourced_numeric_precision(bp: Blueprint, source_text: str) -> list[str]:
++    """Return learner-authored numeric claims that are not traceable to source text.
++
++    Years and unit/page numbers are ignored; the dangerous failure mode here is invented
++    percentages/thresholds/multipliers presented as engineering facts.
++    """
++    source = (source_text or "").lower()
++    authored = []
++    for u in bp.units:
++        blob = " ".join([u.engineering_question, *u.pedagogy_content, *u.enrichment_content, *u.scenario_assumptions, u.student_action, u.takeaway])
++        for token in re.findall(r"(?<!\w)(\d+(?:\.\d+)?)\s*(%|percent|x\b)", blob, flags=re.I):
++            value, suffix = token
++            forms = {f"{value}%", f"{value} %", f"{value} percent", f"{value}x"}
++            if not any(form.lower() in source for form in forms):
++                authored.append(f"{value}{suffix}")
++    return authored
++
+ 
+ def _core_blob(bp: Blueprint, unit_numbers: tuple[int, ...]) -> str:
+     return " ".join(
+@@ -77,6 +106,17 @@
+         )
+         checks["v14_no_legacy_security_template_residue"] = not any(x in learner for x in legacy)
+ 
++    # Learner-facing titles should teach the source topic, not expose internal ISCARB
++    # scaffold labels as the dominant classroom headline.
++    titles = [u.title.strip().lower() for u in bp.units]
++    checks["v14_source_first_learner_titles"] = not any(
++        any(term in title for term in _FRAMEWORK_FIRST_TITLE_TERMS) for title in titles
++    )
++
++    # Synthetic activities may use qualitative assumptions, but invented quantitative
++    # thresholds must never look like source facts.
++    checks["v14_no_unsourced_numeric_precision"] = not _unsourced_numeric_precision(bp, source_text)
++
+     checks["v14_exactly_20_presenter_jobs"] = len(bp.units) == 20
+     checks["v14_exactly_90_live_minutes"] = sum(u.planned_minutes for u in bp.units) == 90
+ 
+--- a/iscarb-studio/tests/test_v43_cimt_source_first.py
++++ b/iscarb-studio/tests/test_v43_cimt_source_first.py
+@@ -0,0 +1,61 @@
++from __future__ import annotations
++
++import unittest
++
++from app.cimt_native_v43 import _display_question, _display_title, _spec
++from app.gate_v14 import deterministic_gate
++from tests.v43_fixture import make_blueprint
++
++
++class CimtSourceFirstRegressionTests(unittest.TestCase):
++    def test_visual_plan_drives_real_technical_unit_not_unit_number(self):
++        bp = make_blueprint()
++        u = bp.units[5]  # Unit 6 used to be hard-wired to a dependability cost curve.
++        u.title = 'Mechanism Deep Dive: Integration and Configuration'
++        u.core_content = [
++            'Integration and configuration: systems are assembled from reusable components.',
++            'Types of reusable software: COTS applications, component frameworks, and web services.',
++            'Key process stages: discovery, configuration, and adaptation.',
++        ]
++        u.visual_plan.visual_type = 'process'
++        u.visual_plan.focal_elements = ['Discovery', 'Configuration', 'Adaptation']
++     
