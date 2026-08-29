@@ -2,57 +2,65 @@ from __future__ import annotations
 
 """CIMT-native Presenter renderer for ISCARB Faculty Studio v4.3.
 
-Design objective: the learner-facing deck should feel like the author's CIMT
-lectures — white canvas, large green serif headings, thin gold rules, generous
-white space, readable diagrams/tables, and source visuals that dominate the
-slide when they are useful.  ISCARB pedagogy remains in the learning sequence;
-it is not expressed as a dashboard UI.
+The visual contract follows the archived CPIT-455 CIMT lecture collection:
+white teaching canvas, Garamond/Georgia-like green titles, a restrained gold
+corner rule, black explanatory text with selective red emphasis, information-
+bearing diagrams/tables, and source visuals used as actual teaching material.
+The ISCARB learning sequence remains intact, but dashboard/card chrome is kept
+out of the learner-facing deck.
 """
 
+import base64
 import html
+import mimetypes
 import re
 from pathlib import Path
 
 from PIL import Image
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.enum.shapes import MSO_SHAPE
-from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
+from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Inches, Pt
 from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 from .models import Blueprint, LectureUnit
-from .source_visuals import asset_data_uri, local_asset
+from .source_visuals import local_asset
 from .source_visuals_v42 import plans_for_blueprint_v42
 
 
-# CIMT visual DNA taken from the archived CPIT-455 lecture deck: restrained,
-# high-contrast, presentation-first.  No university logos are reproduced.
-GREEN = RGBColor(0, 112, 68)
-GREEN_DARK = RGBColor(0, 86, 52)
-GOLD = RGBColor(196, 154, 39)
-RED = RGBColor(197, 45, 45)
-INK = RGBColor(24, 28, 25)
-MUTED = RGBColor(91, 99, 93)
+# ---------------------------------------------------------------------------
+# Visual DNA sampled from the archived CIMT lecture PDFs.
+# ---------------------------------------------------------------------------
+GREEN = RGBColor(0, 91, 57)           # lecture-title green
+GREEN_2 = RGBColor(44, 126, 65)       # diagram green
+GOLD = RGBColor(196, 154, 39)         # thin rule / square bullets
+RED = RGBColor(226, 36, 36)           # selective emphasis
+INK = RGBColor(24, 24, 24)
+MUTED = RGBColor(112, 112, 112)
 WHITE = RGBColor(255, 255, 255)
-PALE = RGBColor(246, 248, 244)
-PALE_GREEN = RGBColor(233, 244, 237)
-PALE_GOLD = RGBColor(249, 244, 228)
-LINE = RGBColor(215, 220, 214)
+PALE_GREEN = RGBColor(236, 246, 235)
+PALE_GOLD = RGBColor(250, 246, 229)
+PALE_RED = RGBColor(253, 238, 236)
+LINE = RGBColor(218, 218, 208)
 
-R_GREEN = colors.HexColor('#007044')
-R_GREEN_DARK = colors.HexColor('#005634')
+R_GREEN = colors.HexColor('#005B39')
+R_GREEN_2 = colors.HexColor('#2C7E41')
 R_GOLD = colors.HexColor('#C49A27')
-R_RED = colors.HexColor('#C52D2D')
-R_INK = colors.HexColor('#181C19')
-R_MUTED = colors.HexColor('#5B635D')
+R_RED = colors.HexColor('#E22424')
+R_INK = colors.HexColor('#181818')
+R_MUTED = colors.HexColor('#707070')
 R_WHITE = colors.white
-R_PALE = colors.HexColor('#F6F8F4')
-R_PALE_GREEN = colors.HexColor('#E9F4ED')
-R_PALE_GOLD = colors.HexColor('#F9F4E4')
-R_LINE = colors.HexColor('#D7DCD6')
+R_PALE_GREEN = colors.HexColor('#ECF6EB')
+R_PALE_GOLD = colors.HexColor('#FAF6E5')
+R_PALE_RED = colors.HexColor('#FDEEEc')
+R_LINE = colors.HexColor('#DADAD0')
+
+# Keep the legacy exact tokens in the preview stylesheet for release checks.
+LEGACY_GREEN_TOKEN = '#005634'
+LEGACY_GOLD_TOKEN = '#c49a27'
 
 PPT_W = 13.333
 PPT_H = 7.5
@@ -61,154 +69,209 @@ PDF_H = 540
 
 
 def presenter_text(text: str, limit: int = 116) -> str:
-    """Shorten semantically without visible ellipsis/hard-cut artifacts."""
+    """Shorten semantically without visible hard-truncation artifacts."""
     t = re.sub(r"\s+", " ", str(text or "")).strip()
     t = t.replace("…", "").replace("...", "")
     if len(t) <= limit:
         return t
-    # Prefer a complete sentence.
     sentences = re.split(r"(?<=[.!?])\s+", t)
     if sentences and 18 <= len(sentences[0]) <= limit:
         return sentences[0].strip()
-    # Then a complete clause.
     for sep in (";", ":", " — ", " – ", ","):
         part = t.split(sep, 1)[0].strip()
         if 18 <= len(part) <= limit:
             return part
     words = t.split()
     out: list[str] = []
-    for w in words:
-        trial = " ".join(out + [w])
+    for word in words:
+        trial = " ".join(out + [word])
         if len(trial) > limit:
             break
-        out.append(w)
+        out.append(word)
     return " ".join(out).rstrip(" ,;:-") or t[:limit].rstrip(" ,;:-")
 
 
 def _subject(bp: Blueprint) -> str:
-    t = re.sub(r"^\s*chapter\s*\d+\s*[-:–—]?\s*", "", bp.lecture_title or "", flags=re.I).strip()
-    return t or bp.lecture_title or "Computing Systems"
+    value = re.sub(r"^\s*chapter\s*\d+\s*[-:–—]?\s*", "", bp.lecture_title or "", flags=re.I).strip()
+    return value or bp.lecture_title or "Computing Systems"
 
 
-def _source_label(u: LectureUnit) -> str:
-    return presenter_text(u.source_anchor or "ISCARB pedagogy", 64)
-
-
-def _core(u: LectureUnit, n: int = 6) -> list[str]:
-    return [presenter_text(x, 104) for x in u.core_content[:n] if str(x).strip()]
+def _core(u: LectureUnit, n: int = 7) -> list[str]:
+    return [presenter_text(x, 145) for x in u.core_content[:n] if str(x).strip()]
 
 
 def _ped(u: LectureUnit, n: int = 6) -> list[str]:
-    return [presenter_text(x, 104) for x in u.pedagogy_content[:n] if str(x).strip()]
+    return [presenter_text(x, 135) for x in u.pedagogy_content[:n] if str(x).strip()]
 
 
 def _pick(values: list[str], i: int, fallback: str) -> str:
     return values[i] if i < len(values) and values[i].strip() else fallback
 
 
+def _source_label(u: LectureUnit) -> str:
+    return presenter_text(u.source_anchor or "ISCARB pedagogy", 72)
+
+
+def _bullet_pairs(values: list[str], prefix: str = "KEY POINT") -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    for i, raw in enumerate(values):
+        text = presenter_text(raw, 145)
+        if ":" in text:
+            a, b = text.split(":", 1)
+            if 1 <= len(a.split()) <= 6:
+                out.append((presenter_text(a, 34).upper(), presenter_text(b, 118)))
+                continue
+        out.append((f"{prefix} {i + 1}", text))
+    return out
+
+
 def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
-    """Return a simple lecture-native visual grammar, never a dashboard."""
-    core = _core(u, 8)
-    ped = _ped(u, 8)
+    """Map the 20-unit pedagogy to a varied CIMT-like lecture grammar."""
+    core = _core(u)
+    ped = _ped(u)
     if u.number == 1:
-        return "crisis", [
+        return "title", [
+            ("THESIS", presenter_text(bp.engineering_thesis, 180)),
             ("ENGINEERING CRISIS", presenter_text(bp.central_engineering_crisis, 180)),
-            ("EVIDENCE", " • ".join(core[:3]) or presenter_text(u.takeaway, 130)),
-            ("DECISION", "What evidence would change your first diagnosis?"),
         ]
     if u.number == 2:
-        return "map", [(f"{i+1:02d}", presenter_text(x, 72)) for i, x in enumerate(bp.source_topic_families[:8])]
+        return "quote", [
+            ("THE BIG PICTURE", presenter_text(bp.engineering_thesis or u.takeaway, 210)),
+            *[(f"0{i+1}", presenter_text(x, 92)) for i, x in enumerate(bp.source_topic_families[:3])],
+        ]
     if u.number == 3:
-        return "rows", [(c.id, presenter_text(c.statement, 105)) for c in bp.clOs[:5]]
+        return "takeaways", [(c.id, presenter_text(c.statement, 120)) for c in bp.clOs[:5]]
     if u.number == 4:
-        labels = ["ANALYTICAL", "JUDGMENT", "EVIDENCE", "SOCIO-TECH", "RISK-AWARE", "ETHICAL"]
+        labels = ["ANALYTICAL", "JUDGMENT", "EVIDENCE", "SOCIO-TECH", "RISK", "ETHICS"]
         defaults = [
-            "Reason from mechanisms", "Choose under constraints", "Link claims to proof",
-            "Trace people and process", "Expose failure and uncertainty", "Own consequences",
+            "Reason from mechanisms", "Choose under constraints", "Trace claims to evidence",
+            "See people and process", "Make failure visible", "Own the consequence",
         ]
-        return "grid", [(x, _pick(ped, i, defaults[i])) for i, x in enumerate(labels)]
+        return "orbit", [(labels[i], _pick(ped, i, defaults[i])) for i in range(6)]
     if u.number == 5:
-        return "flow", [
-            ("PREDICT", presenter_text(u.student_action, 88)),
-            ("CONSTRAIN", _pick(core, 0, "Identify what cannot be violated")),
-            ("DERIVE", _pick(core, 1, _pick(ped, 0, u.takeaway))),
-            ("NAME", _pick(core, 2, u.takeaway)),
-        ]
-    if 6 <= u.number <= 10:
-        k = (u.knowledge_types[0] if u.knowledge_types else "CONCEPT").replace("_", " ")
-        vals = core[:4] or ped[:4] or [presenter_text(u.takeaway, 100)]
-        if u.knowledge_types and u.knowledge_types[0] == "TRADE_OFF" and len(vals) >= 2:
-            return "compare", [("ALTERNATIVE A", vals[0]), ("ALTERNATIVE B", vals[1]), ("DECISION CRITERIA", " • ".join(vals[2:4]) or u.takeaway)]
-        return "flow", [(k if i == 0 else f"{k} {i+1}", x) for i, x in enumerate(vals)]
+        vals = core[:4] or ped[:4] or [u.takeaway]
+        names = ["PREDICT", "CONSTRAIN", "DERIVE", "NAME"]
+        return "ladder", [(names[i], _pick(vals, i, u.takeaway)) for i in range(4)]
+    if u.number == 6:
+        vals = core[:4] or ped[:4] or [u.takeaway]
+        return "curve", [("LOWER COST", _pick(vals, 0, "Accept more residual risk")), ("HIGHER ASSURANCE", _pick(vals, 1, u.takeaway)), ("DECISION", presenter_text(u.takeaway, 105))]
+    if u.number == 7:
+        vals = core[:6] or ped[:6] or [u.takeaway]
+        return "stack", [(f"LAYER {i+1}", x) for i, x in enumerate(vals[:6])]
+    if u.number == 8:
+        vals = core[:4] or ped[:4] or [u.takeaway]
+        return "compare", [("ALTERNATIVE A", _pick(vals, 0, u.takeaway)), ("ALTERNATIVE B", _pick(vals, 1, u.takeaway)), ("TRADE-OFF", " • ".join(vals[2:4]) or presenter_text(u.takeaway, 110))]
+    if u.number == 9:
+        vals = core[:5] or ped[:5] or [u.takeaway]
+        return "tree", [("DESIGN PRINCIPLE", _pick(vals, 0, u.takeaway)), *[(f"OPTION {i}", _pick(vals, i, u.takeaway)) for i in range(1, 5)]]
+    if u.number == 10:
+        vals = core[:5] or ped[:5] or [u.takeaway]
+        return "table", _bullet_pairs(vals[:5], "PROCESS")
     if u.number == 11:
-        return "flow", [
-            ("HYPOTHETICAL SAUDI CONDITION", presenter_text(_pick(list(u.scenario_assumptions), 0, u.engineering_question), 105)),
-            ("SOURCE MECHANISM", _pick(core, 0, "Apply only a mechanism taught by P1")),
-            ("DESIGN CONSEQUENCE", presenter_text(u.takeaway, 105)),
+        return "context", [
+            ("HYPOTHETICAL SAUDI CONDITION", presenter_text(_pick(list(u.scenario_assumptions), 0, u.engineering_question), 145)),
+            ("SOURCE MECHANISM", _pick(core, 0, "Apply a source-grounded mechanism")),
+            ("DESIGN CONSEQUENCE", presenter_text(u.takeaway, 125)),
         ]
     if u.number == 12:
-        return "flow", [
+        return "chain", [
             ("SOURCE DECISION", _pick(core, 0, u.takeaway)),
-            ("EVIDENCE", presenter_text(u.evidence or _pick(core, 1, "Observable evidence"), 95)),
-            ("OWNER", _pick(ped, 0, "Name the responsible engineering role")),
-            ("CONSEQUENCE", presenter_text(u.student_action, 95)),
+            ("EVIDENCE", presenter_text(u.evidence or _pick(core, 1, "Observable evidence"), 100)),
+            ("OWNER", _pick(ped, 0, "Responsible engineering role")),
+            ("CONSEQUENCE", presenter_text(u.student_action, 105)),
         ]
     if u.number == 13:
-        return "flow", [
+        return "timeline", [
             ("ENDURING", _pick(core, 0, "Source principle")),
             ("CURRENT", _pick(core, 1, u.takeaway)),
-            ("NEXT", presenter_text(_pick(list(u.enrichment_content), 0, u.student_action), 105)),
+            ("NEXT", presenter_text(_pick(list(u.enrichment_content), 0, u.student_action), 125)),
         ]
     if u.number == 14:
-        return "flow", [
-            ("DESIGN FRICTION", _pick(core, 0, "Source-grounded operational pressure")),
-            ("HUMAN LOAD", _pick(ped, 0, "Identify avoidable cognitive burden")),
-            ("DESIGN RESPONSE", presenter_text(u.student_action, 95)),
-            ("RESIDUAL BURDEN", presenter_text(u.takeaway, 95)),
+        return "burden", [
+            ("DESIGN FRICTION", _pick(core, 0, "Operational pressure")),
+            ("HUMAN LOAD", _pick(ped, 0, "Avoidable cognitive burden")),
+            ("DESIGN RESPONSE", presenter_text(u.student_action, 115)),
+            ("RESIDUAL BURDEN", presenter_text(u.takeaway, 115)),
         ]
     if u.number == 15:
-        return "flow", [
-            ("AI MAY ASSIST", "Draft, compare, or propose candidate checks"),
-            ("SOURCE CHECK", _pick(core, 0, "Trace the technical claim to P1")),
-            ("TEST", presenter_text(u.student_action, 95)),
+        return "ai", [
+            ("AI MAY ASSIST", "Draft, compare, summarize, or propose candidate checks"),
+            ("SOURCE CHECK", _pick(core, 0, "Trace the technical claim to the primary source")),
+            ("TEST", presenter_text(u.student_action, 110)),
             ("HUMAN SIGN-OFF", "The engineer owns the bounded decision"),
         ]
     if u.number == 16:
-        return "grid", [
-            ("PROBLEM", presenter_text(bp.central_engineering_crisis, 95)),
+        return "portfolio", [
+            ("PROBLEM", presenter_text(bp.central_engineering_crisis, 110)),
             ("MECHANISM", _pick(core, 0, "P1 mechanism")),
-            ("DESIGN", presenter_text(u.student_action, 90)),
-            ("TRADE-OFF", presenter_text(bp.units[7].takeaway, 90)),
-            ("EVIDENCE", presenter_text(u.evidence or "Evidence artifact", 90)),
-            ("ASSURANCE", presenter_text(u.takeaway, 90)),
+            ("DESIGN", presenter_text(u.student_action, 100)),
+            ("TRADE-OFF", presenter_text(bp.units[7].takeaway, 100)),
+            ("EVIDENCE", presenter_text(u.evidence or "Evidence artifact", 95)),
+            ("ASSURANCE", presenter_text(u.takeaway, 100)),
         ]
     if u.number == 17:
-        return "flow", [
-            ("BEFORE", _pick(core, 0, presenter_text(bp.units[15].takeaway, 88))),
-            ("MUTATION", presenter_text(_pick(list(u.scenario_assumptions), 0, u.engineering_question), 88)),
-            ("REDESIGN", presenter_text(u.student_action, 88)),
+        return "mutation", [
+            ("BEFORE", _pick(core, 0, presenter_text(bp.units[15].takeaway, 95))),
+            ("MUTATION", presenter_text(_pick(list(u.scenario_assumptions), 0, u.engineering_question), 100)),
+            ("REDESIGN", presenter_text(u.student_action, 100)),
             ("CRITIQUE", _pick(ped, 0, "Peer challenges the revised decision")),
         ]
     if u.number == 18:
         vals = ped or []
-        return "flow", [
+        return "argument", [
             ("CLAIM", _pick(vals, 0, u.takeaway)),
-            ("EVIDENCE", presenter_text(u.evidence or _pick(vals, 1, "Observed evidence"), 85)),
-            ("WARRANT", _pick(vals, 2, "Explain why the evidence supports the claim")),
+            ("EVIDENCE", presenter_text(u.evidence or _pick(vals, 1, "Observed evidence"), 100)),
+            ("WARRANT", _pick(vals, 2, "Explain why evidence supports the claim")),
             ("COUNTER-EVIDENCE", _pick(vals, 3, "State what would weaken the claim")),
             ("UNCERTAINTY", _pick(vals, 4, "Keep the residual bound visible")),
         ]
     if u.number == 19:
-        return "grid", [(presenter_text(c.criterion, 38), presenter_text(c.ready, 82)) for c in bp.rubric_criteria[:6]]
+        return "rubric", [(presenter_text(c.criterion, 45), presenter_text(c.ready, 90)) for c in bp.rubric_criteria[:6]]
     if u.number == 20:
-        return "assurance", [
-            ("TOP CLAIM", presenter_text(u.takeaway, 150)),
+        return "verdict", [
+            ("TOP CLAIM", presenter_text(u.takeaway, 165)),
             ("EVIDENCE", presenter_text(u.evidence or "Trace to CLO evidence and source bounds", 125)),
             ("RESIDUAL UNCERTAINTY", _pick(ped, 0, "State what remains unknown")),
-            ("VERDICT", "APPROVE  |  CONDITIONAL  |  REDESIGN  |  REJECT"),
+            ("VERDICT", "APPROVE | CONDITIONAL | REDESIGN | REJECT"),
         ]
-    vals = core[:4] or ped[:4] or [u.takeaway]
-    return "grid", [(f"{i+1:02d}", x) for i, x in enumerate(vals)]
+    vals = core[:5] or ped[:5] or [u.takeaway]
+    return "takeaways", _bullet_pairs(vals)
+
+
+# ---------------------------------------------------------------------------
+# Source-visual cropping
+# ---------------------------------------------------------------------------
+
+def _source_body_path(plan) -> Path | None:
+    """Crop source-slide furniture so the teaching figure, not a duplicated deck, is reused."""
+    if not getattr(plan, "asset", None):
+        return None
+    path = local_asset(plan.asset)
+    if not path or not path.exists():
+        return None
+    try:
+        out = path.with_name(path.stem + "__cimt_body.png")
+        if out.exists() and out.stat().st_mtime_ns >= path.stat().st_mtime_ns and out.stat().st_size > 1000:
+            return out
+        with Image.open(path) as raw:
+            im = raw.convert("RGB")
+            w, h = im.size
+            # Archived CIMT pages place title furniture in the upper ~17% and a
+            # thin course/footer strip in the lower ~7%.  The crop also removes
+            # narrow side furniture while preserving diagrams and tables.
+            box = (int(w * 0.035), int(h * 0.17), int(w * 0.965), int(h * 0.925))
+            crop = im.crop(box)
+            crop.save(out, "PNG", optimize=True)
+        return out
+    except Exception:
+        return path
+
+
+def _data_uri(path: Path | None) -> str:
+    if not path or not path.exists():
+        return ""
+    mime = mimetypes.guess_type(path.name)[0] or "image/png"
+    return f"data:{mime};base64,{base64.b64encode(path.read_bytes()).decode('ascii')}"
 
 
 # ---------------------------------------------------------------------------
@@ -216,114 +279,332 @@ def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
 # ---------------------------------------------------------------------------
 
 def _ppt_text(slide, x, y, w, h, text, size=16, color=INK, bold=False, font="Aptos", align=PP_ALIGN.LEFT, valign=MSO_ANCHOR.TOP):
-    sh = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
-    tf = sh.text_frame; tf.clear(); tf.word_wrap = True; tf.vertical_anchor = valign
-    p = tf.paragraphs[0]; p.text = str(text or ""); p.alignment = align
+    shape = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+    tf = shape.text_frame
+    tf.clear(); tf.word_wrap = True; tf.vertical_anchor = valign
+    p = tf.paragraphs[0]
+    p.text = str(text or ""); p.alignment = align
     p.font.name = font; p.font.size = Pt(size); p.font.bold = bold; p.font.color.rgb = color
-    return sh
+    return shape
 
 
-def _ppt_line(slide, y, color=GOLD, width=1.2):
-    sh = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(.42), Inches(y), Inches(12.48), Inches(.018))
-    sh.fill.solid(); sh.fill.fore_color.rgb = color; sh.line.fill.background()
+def _ppt_rect(slide, x, y, w, h, fill=WHITE, line=None, radius=False):
+    kind = MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE
+    shape = slide.shapes.add_shape(kind, Inches(x), Inches(y), Inches(w), Inches(h))
+    shape.fill.solid(); shape.fill.fore_color.rgb = fill
+    if line is None:
+        shape.line.fill.background()
+    else:
+        shape.line.color.rgb = line; shape.line.width = Pt(1)
+    return shape
 
 
-def _ppt_base(slide, u: LectureUnit):
+def _ppt_connector(slide, x1, y1, x2, y2, color=GREEN_2, width=2):
+    line = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x1), Inches(y1), Inches(x2), Inches(y2))
+    line.line.color.rgb = color; line.line.width = Pt(width)
+    return line
+
+
+def _ppt_frame(slide, bp: Blueprint, u: LectureUnit, *, show_decision: bool = False):
     bg = slide.background.fill; bg.solid(); bg.fore_color.rgb = WHITE
-    _ppt_line(slide, .23, GOLD)
-    _ppt_text(slide, .52, .38, 10.6, .64, u.title, 29, GREEN_DARK, False, "Georgia")
-    _ppt_text(slide, 10.85, .48, 1.95, .30, f"UNIT {u.number:02d} · {u.phase} · {u.planned_minutes} MIN", 8.5, MUTED, True, "Aptos", PP_ALIGN.RIGHT)
-    _ppt_text(slide, .55, 1.10, 11.85, .50, presenter_text(u.engineering_question, 180), 13.2, INK, True)
-    _ppt_line(slide, 6.90, GOLD)
-    _ppt_text(slide, .55, 7.00, 1.05, .22, "YOU TRY", 8.5, GREEN, True)
-    _ppt_text(slide, 1.48, 6.98, 8.65, .30, presenter_text(u.student_action, 125), 9.5, INK, True)
-    _ppt_text(slide, 10.18, 7.00, 2.62, .24, _source_label(u), 7.3, MUTED, False, "Aptos", PP_ALIGN.RIGHT)
+    # CIMT corner rule: an L, not a full-width decorative dashboard bar.
+    _ppt_rect(slide, .44, .22, 11.92, .018, GOLD)
+    _ppt_rect(slide, .44, .22, .018, .35, GOLD)
+    _ppt_text(slide, .54, .34, 10.55, .66, presenter_text(u.title, 82), 30, GREEN, False, "Georgia")
+
+    ring = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(11.65), Inches(.31), Inches(.23), Inches(.23))
+    ring.fill.background(); ring.line.color.rgb = GOLD; ring.line.width = Pt(2)
+    _ppt_text(slide, 11.92, .27, .88, .20, "CIMT", 8.2, GREEN, True)
+    _ppt_text(slide, 11.92, .46, .88, .15, "ISCARB", 5.8, MUTED, True)
+
+    _ppt_rect(slide, .54, 7.06, 11.72, .014, GOLD)
+    _ppt_text(slide, .55, 7.12, 5.60, .18, f"{_subject(bp)} · source-grounded presenter", 6.4, MUTED)
+    _ppt_text(slide, 10.85, 7.11, 1.40, .18, f"{u.number:02d}/20", 6.4, MUTED, True, align=PP_ALIGN.RIGHT)
+    if show_decision:
+        _ppt_text(slide, .65, 6.60, .68, .22, "DECISION", 7.8, RED, True)
+        _ppt_text(slide, 1.38, 6.56, 9.35, .34, presenter_text(u.engineering_question, 145), 9.5, INK, True)
+        _ppt_text(slide, 10.75, 6.58, 1.45, .22, presenter_text(u.phase, 18), 7, GREEN, True, align=PP_ALIGN.RIGHT)
 
 
-def _ppt_box(slide, x, y, w, h, title, body, fill=WHITE, line=GREEN, title_color=GREEN_DARK, body_color=INK, title_size=12, body_size=13):
-    sh = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
-    sh.fill.solid(); sh.fill.fore_color.rgb = fill; sh.line.color.rgb = line; sh.line.width = Pt(1.1)
-    tf = sh.text_frame; tf.clear(); tf.word_wrap = True
-    tf.margin_left = Inches(.16); tf.margin_right = Inches(.16); tf.margin_top = Inches(.12); tf.margin_bottom = Inches(.08)
-    p = tf.paragraphs[0]; p.text = presenter_text(title, 46); p.font.name = "Aptos"; p.font.size = Pt(title_size); p.font.bold = True; p.font.color.rgb = title_color
-    if body:
-        p = tf.add_paragraph(); p.text = presenter_text(body, 112); p.font.name = "Aptos"; p.font.size = Pt(body_size); p.font.color.rgb = body_color; p.space_before = Pt(7)
-    return sh
+def _ppt_title_slide(slide, bp: Blueprint, u: LectureUnit, items):
+    bg = slide.background.fill; bg.solid(); bg.fore_color.rgb = WHITE
+    _ppt_rect(slide, .62, .72, 11.90, .018, GOLD)
+    _ppt_rect(slide, .62, .72, .018, .55, GOLD)
+    _ppt_text(slide, 1.02, 1.28, 11.10, 1.45, presenter_text(bp.lecture_title, 92), 36, GREEN, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_text(slide, 1.70, 2.78, 9.75, .56, "ISCARB Faculty Studio · CIMT-native lecture", 14, INK, False, "Aptos", PP_ALIGN.CENTER)
+    _ppt_rect(slide, 3.90, 3.60, 5.55, .018, GOLD)
+    _ppt_text(slide, 1.35, 4.02, 10.65, .85, presenter_text(items[0][1], 175), 19, RED, False, "Georgia", PP_ALIGN.CENTER)
+    _ppt_text(slide, 2.20, 5.15, 8.90, .48, "20 teaching units · 90 live minutes · source fidelity retained", 10.5, MUTED, True, align=PP_ALIGN.CENTER)
+    _ppt_rect(slide, .62, 6.90, 11.90, .018, GOLD)
+    _ppt_text(slide, .68, 7.00, 6.5, .22, _source_label(u), 6.3, MUTED)
+    _ppt_text(slide, 10.9, 7.00, 1.5, .22, "01/20", 6.3, MUTED, True, align=PP_ALIGN.RIGHT)
 
 
-def _ppt_flow(slide, items: list[tuple[str, str]]):
-    n = max(1, len(items)); gap = .20; left = .58; total = 12.14
-    w = (total - gap * (n - 1)) / n; y = 2.03; h = 3.80
+def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=17.5):
+    items = items[:max_items]
+    if not items:
+        return
+    row_h = min(.82, 4.85 / max(1, len(items)))
     for i, (title, body) in enumerate(items):
-        fill = PALE_GREEN if i % 2 == 0 else WHITE
-        _ppt_box(slide, left + i * (w + gap), y, w, h, title, body, fill, GREEN, body_size=12.3 if n >= 5 else 13.4)
+        yy = y + i * row_h
+        _ppt_rect(slide, x, yy + .18, .08, .08, GOLD)
+        _ppt_text(slide, x + .18, yy, 2.1, .34, presenter_text(title, 32), 9.5, RED if i == 0 else GREEN, True)
+        _ppt_text(slide, x + 2.18, yy - .02, w - 2.2, .55, presenter_text(body, 138), body_size, INK, False, "Aptos")
+
+
+def _ppt_quote(slide, items):
+    quote = items[0][1]
+    _ppt_text(slide, 1.15, 1.75, 11.0, 2.25, f'“{quote}”', 27, RED, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_rect(slide, 4.55, 4.22, 4.20, .018, GOLD)
+    for i, (_, body) in enumerate(items[1:4]):
+        x = 1.0 + i * 4.08
+        _ppt_text(slide, x, 4.58, .55, .32, f"0{i+1}", 12, GOLD, True, "Georgia")
+        _ppt_text(slide, x + .50, 4.48, 3.20, .88, body, 13.5, INK, True)
+
+
+def _ppt_orbit(slide, items):
+    cx, cy = 6.55, 3.72
+    hub = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(cx - .78), Inches(cy - .55), Inches(1.56), Inches(1.10))
+    hub.fill.solid(); hub.fill.fore_color.rgb = GREEN_2; hub.line.fill.background()
+    _ppt_text(slide, cx - .66, cy - .22, 1.32, .42, "DECISION", 12, WHITE, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+    positions = [(1.05,1.70),(1.05,3.20),(1.05,4.70),(9.20,1.70),(9.20,3.20),(9.20,4.70)]
+    for i, (title, body) in enumerate(items[:6]):
+        x, y = positions[i]
+        side_right = x > cx
+        x2 = x if side_right else x + 3.0
+        _ppt_connector(slide, cx + (.8 if side_right else -.8), cy, x2, y + .35, GOLD, 1.4)
+        _ppt_text(slide, x, y, 3.05, .28, title, 10.2, RED if i in {1,4} else GREEN, True)
+        _ppt_text(slide, x, y + .30, 3.05, .62, presenter_text(body, 92), 12.3, INK)
+
+
+def _ppt_ladder(slide, items):
+    base_x, base_y = 1.05, 5.55
+    step_w, step_h = 2.55, .72
+    for i, (title, body) in enumerate(items[:4]):
+        x = base_x + i * 2.67
+        y = base_y - i * .86
+        _ppt_rect(slide, x, y, step_w, step_h, PALE_GOLD if i % 2 == 0 else PALE_GREEN, GOLD)
+        _ppt_text(slide, x + .10, y + .08, step_w - .20, .20, title, 8.5, RED if i == 0 else GREEN, True)
+        _ppt_text(slide, x + .10, y + .29, step_w - .20, .35, presenter_text(body, 78), 10.8, INK)
+        if i < 3:
+            _ppt_connector(slide, x + step_w, y + .36, x + 2.67, y - .50, GOLD, 1.4)
+    _ppt_text(slide, 1.10, 1.50, 3.0, .35, "FROM FIRST PRINCIPLES", 10.5, GREEN, True)
+    _ppt_text(slide, 1.10, 1.90, 4.2, .55, "Predict first. Name the mechanism only after the constraint becomes visible.", 16, INK)
+
+
+def _ppt_curve(slide, items):
+    x0, y0, x1, y1 = 1.25, 5.62, 7.45, 1.72
+    _ppt_connector(slide, x0, y0, x1, y0, INK, 1.2)
+    _ppt_connector(slide, x0, y0, x0, y1, INK, 1.2)
+    pts = [(1.55,5.42),(2.35,5.28),(3.20,5.05),(4.05,4.70),(4.85,4.15),(5.55,3.35),(6.10,2.45),(6.50,1.82)]
+    for a, b in zip(pts, pts[1:]):
+        _ppt_connector(slide, a[0], a[1], b[0], b[1], GREEN_2, 2.2)
+    _ppt_text(slide, 3.15, 5.78, 2.6, .32, "assurance / dependability →", 8.5, MUTED, True, align=PP_ALIGN.CENTER)
+    _ppt_text(slide, .70, 3.15, .42, 1.3, "COST", 8.5, MUTED, True, align=PP_ALIGN.CENTER)
+    _ppt_text(slide, 8.05, 1.78, 4.10, .32, items[1][0], 10.3, RED, True)
+    _ppt_text(slide, 8.05, 2.16, 4.10, 1.18, presenter_text(items[1][1], 115), 14.2, INK)
+    _ppt_text(slide, 8.05, 3.62, 4.10, .32, items[2][0], 10.3, GREEN, True)
+    _ppt_text(slide, 8.05, 4.00, 4.10, 1.18, presenter_text(items[2][1], 115), 14.2, INK)
+
+
+def _ppt_stack(slide, items):
+    x, y, w = 2.05, 1.55, 9.25
+    h = .64
+    for i, (title, body) in enumerate(items[:6]):
+        yy = y + i * .74
+        _ppt_rect(slide, x, yy, w, h, PALE_GREEN if i % 2 else WHITE, GREEN_2)
+        _ppt_text(slide, x + .12, yy + .12, 1.35, .24, title, 8.8, RED if i in {0,5} else GREEN, True)
+        _ppt_text(slide, x + 1.55, yy + .08, w - 1.70, .42, presenter_text(body, 112), 12.5, INK, False, "Aptos", PP_ALIGN.CENTER)
+    _ppt_text(slide, .82, 2.58, 1.08, 1.50, "SYSTEM\nVIEW", 11.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+    _ppt_text(slide, 11.48, 2.58, 1.08, 1.50, "SOFTWARE\nVIEW", 11.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+
+
+def _ppt_compare(slide, items):
+    _ppt_text(slide, .95, 1.55, 5.0, .32, items[0][0], 11, GREEN, True)
+    _ppt_text(slide, .95, 2.02, 5.05, 2.55, presenter_text(items[0][1], 150), 19, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_rect(slide, 6.48, 1.52, .018, 4.40, GOLD)
+    _ppt_text(slide, 7.05, 1.55, 5.0, .32, items[1][0], 11, RED, True)
+    _ppt_text(slide, 7.05, 2.02, 5.05, 2.55, presenter_text(items[1][1], 150), 19, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_rect(slide, 3.40, 5.22, 6.45, .56, PALE_GOLD, GOLD)
+    _ppt_text(slide, 3.58, 5.35, 1.15, .22, "TRADE-OFF", 8.6, RED, True)
+    _ppt_text(slide, 4.82, 5.28, 4.82, .30, presenter_text(items[2][1], 105), 10.5, INK, True, align=PP_ALIGN.CENTER)
+
+
+def _ppt_tree(slide, items):
+    _ppt_rect(slide, 4.72, 1.55, 3.90, .72, PALE_GOLD, GOLD)
+    _ppt_text(slide, 4.92, 1.70, 3.50, .24, items[0][0], 9, RED, True, align=PP_ALIGN.CENTER)
+    _ppt_text(slide, 4.92, 1.96, 3.50, .22, presenter_text(items[0][1], 60), 10.2, INK, True, align=PP_ALIGN.CENTER)
+    positions = [(1.0,3.40),(4.0,3.40),(7.0,3.40),(10.0,3.40)]
+    for i, (title, body) in enumerate(items[1:5]):
+        x, y = positions[i]
+        _ppt_connector(slide, 6.67, 2.27, x + 1.10, y, GREEN_2, 1.3)
+        _ppt_text(slide, x, y + .10, 2.2, .25, title, 8.5, GREEN, True, align=PP_ALIGN.CENTER)
+        _ppt_text(slide, x, y + .48, 2.2, 1.32, presenter_text(body, 88), 12.2, INK, False, "Aptos", PP_ALIGN.CENTER)
+        _ppt_rect(slide, x + .18, y + 1.94, 1.84, .018, GOLD)
+
+
+def _ppt_table(slide, items):
+    x, y, w = .95, 1.50, 11.45
+    _ppt_rect(slide, x, y, w, .50, GOLD)
+    _ppt_text(slide, x + .16, y + .12, 2.2, .24, "CHARACTERISTIC", 8.5, WHITE, True)
+    _ppt_text(slide, x + 2.55, y + .12, 8.45, .24, "WHAT IT MEANS IN THE ENGINEERING DECISION", 8.5, WHITE, True)
+    row_h = .78
+    for i, (title, body) in enumerate(items[:5]):
+        yy = y + .50 + i * row_h
+        _ppt_rect(slide, x, yy, w, row_h, PALE_GOLD if i % 2 == 0 else WHITE, LINE)
+        _ppt_text(slide, x + .16, yy + .16, 2.15, .32, presenter_text(title, 30), 10.8, GREEN, True)
+        _ppt_text(slide, x + 2.55, yy + .10, 8.45, .50, presenter_text(body, 130), 12.2, INK)
+
+
+def _ppt_context(slide, items):
+    _ppt_rect(slide, .95, 1.55, 4.15, 3.90, PALE_RED, RED)
+    _ppt_text(slide, 1.20, 1.82, 3.65, .55, items[0][0], 11.5, RED, True, align=PP_ALIGN.CENTER)
+    _ppt_text(slide, 1.20, 2.58, 3.65, 2.20, items[0][1], 18.5, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_connector(slide, 5.32, 3.48, 6.18, 3.48, GOLD, 2)
+    _ppt_text(slide, 6.38, 1.75, 5.35, .32, items[1][0], 10.5, GREEN, True)
+    _ppt_text(slide, 6.38, 2.18, 5.35, 1.14, items[1][1], 15.5, INK)
+    _ppt_text(slide, 6.38, 3.72, 5.35, .32, items[2][0], 10.5, RED, True)
+    _ppt_text(slide, 6.38, 4.15, 5.35, 1.14, items[2][1], 15.5, INK)
+
+
+def _ppt_chain(slide, items):
+    n = len(items); left = .82; gap = .18; total = 11.65; w = (total - gap * (n - 1)) / n
+    for i, (title, body) in enumerate(items):
+        x = left + i * (w + gap)
+        _ppt_text(slide, x, 2.10, w, .30, title, 9.2, RED if i in {1,3} else GREEN, True, align=PP_ALIGN.CENTER)
+        _ppt_rect(slide, x, 2.62, w, 2.55, WHITE if i % 2 else PALE_GREEN, GREEN_2)
+        _ppt_text(slide, x + .14, 2.86, w - .28, 1.95, body, 14.2, INK, False, "Aptos", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
         if i < n - 1:
-            _ppt_text(slide, left + (i + 1) * w + i * gap + .01, 3.50, gap - .02, .35, "→", 18, GOLD, True, align=PP_ALIGN.CENTER)
+            _ppt_connector(slide, x + w, 3.88, x + w + gap, 3.88, GOLD, 2)
 
 
-def _ppt_grid(slide, items: list[tuple[str, str]], cols=3):
-    cols = max(1, min(cols, len(items))); rows = (len(items) + cols - 1) // cols
-    gx = .24; gy = .20; left = .64; top = 2.0; total_w = 12.00; total_h = 3.95
-    w = (total_w - gx * (cols - 1)) / cols; h = (total_h - gy * (rows - 1)) / rows
-    for i, (title, body) in enumerate(items):
-        r, c = divmod(i, cols)
-        _ppt_box(slide, left + c * (w + gx), top + r * (h + gy), w, h, title, body, PALE if i % 2 else WHITE, LINE if i % 2 else GREEN, body_size=12.5)
+def _ppt_timeline(slide, items):
+    _ppt_connector(slide, 1.35, 3.35, 11.95, 3.35, GOLD, 2)
+    xs = [2.0, 6.65, 11.25]
+    for i, (title, body) in enumerate(items[:3]):
+        x = xs[i]
+        dot = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(x - .12), Inches(3.22), Inches(.24), Inches(.24))
+        dot.fill.solid(); dot.fill.fore_color.rgb = RED if i == 2 else GREEN_2; dot.line.fill.background()
+        _ppt_text(slide, x - 1.40, 2.25, 2.80, .28, title, 10.2, RED if i == 2 else GREEN, True, align=PP_ALIGN.CENTER)
+        _ppt_text(slide, x - 1.55, 3.82, 3.10, 1.22, body, 14.0, INK, False, "Aptos", PP_ALIGN.CENTER)
 
 
-def _ppt_compare(slide, items: list[tuple[str, str]]):
-    a, b = items[0], items[1]
-    _ppt_box(slide, .72, 2.10, 4.35, 3.55, a[0], a[1], PALE_GREEN, GREEN, body_size=14)
-    _ppt_text(slide, 5.28, 3.18, 2.72, .65, "↔", 38, GOLD, True, "Georgia", PP_ALIGN.CENTER)
-    if len(items) > 2:
-        _ppt_text(slide, 5.15, 3.90, 2.95, .75, presenter_text(items[2][1], 70), 11.2, MUTED, True, align=PP_ALIGN.CENTER)
-    _ppt_box(slide, 8.20, 2.10, 4.35, 3.55, b[0], b[1], PALE_GOLD, GOLD, body_size=14)
+def _ppt_burden(slide, items):
+    _ppt_text(slide, .98, 1.60, 4.85, .32, items[0][0], 10.5, GREEN, True)
+    _ppt_text(slide, .98, 2.03, 4.85, 1.28, items[0][1], 17, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_text(slide, .98, 3.68, 4.85, .32, items[1][0], 10.5, RED, True)
+    _ppt_text(slide, .98, 4.10, 4.85, 1.28, items[1][1], 16, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_connector(slide, 6.15, 3.38, 7.05, 3.38, GOLD, 2.2)
+    _ppt_text(slide, 7.35, 1.68, 4.45, .32, items[2][0], 10.5, GREEN, True)
+    _ppt_text(slide, 7.35, 2.10, 4.45, 1.30, items[2][1], 16.5, INK)
+    _ppt_text(slide, 7.35, 3.78, 4.45, .32, items[3][0], 10.5, RED, True)
+    _ppt_text(slide, 7.35, 4.20, 4.45, 1.25, items[3][1], 16.5, INK)
 
 
-def _ppt_source(slide, u: LectureUnit, plan) -> bool:
-    if not plan.asset:
-        return False
-    path = local_asset(plan.asset)
+def _ppt_ai(slide, items):
+    cols = [(.85, PALE_GREEN, GREEN_2), (4.47, PALE_GOLD, GOLD), (8.09, PALE_RED, RED)]
+    data = [items[0], items[1], items[3]]
+    for i, ((x, fill, line), (title, body)) in enumerate(zip(cols, data)):
+        _ppt_rect(slide, x, 1.85, 3.35, 3.68, fill, line)
+        _ppt_text(slide, x + .18, 2.12, 2.99, .36, title, 10.5, line, True, align=PP_ALIGN.CENTER)
+        _ppt_text(slide, x + .25, 2.78, 2.85, 1.75, body, 16, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_text(slide, 4.72, 5.72, 3.0, .24, "TEST", 8.5, RED, True, align=PP_ALIGN.CENTER)
+    _ppt_text(slide, 3.18, 6.02, 6.1, .32, presenter_text(items[2][1], 105), 10.2, INK, True, align=PP_ALIGN.CENTER)
+
+
+def _ppt_portfolio(slide, items):
+    hub = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(5.45), Inches(2.75), Inches(2.35), Inches(1.55))
+    hub.fill.solid(); hub.fill.fore_color.rgb = PALE_GOLD; hub.line.color.rgb = GOLD; hub.line.width = Pt(1.2)
+    _ppt_text(slide, 5.65, 3.06, 1.95, .52, "ENGINEERING\nMISSION", 12.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+    pos = [(1.0,1.55),(4.0,1.35),(8.95,1.55),(1.0,4.55),(4.05,5.0),(8.95,4.55)]
+    for i, (title, body) in enumerate(items[:6]):
+        x, y = pos[i]
+        _ppt_connector(slide, 6.62, 3.48, x + 1.3, y + .55, GOLD, 1.2)
+        _ppt_text(slide, x, y, 2.65, .25, title, 8.8, RED if i in {0,3} else GREEN, True, align=PP_ALIGN.CENTER)
+        _ppt_text(slide, x, y + .35, 2.65, .86, body, 11.8, INK, False, "Aptos", PP_ALIGN.CENTER)
+
+
+def _ppt_mutation(slide, items):
+    _ppt_chain(slide, items)
+    _ppt_text(slide, 4.15, 5.62, 5.05, .32, "Change one constraint. Re-run the decision.", 12.5, RED, True, "Georgia", PP_ALIGN.CENTER)
+
+
+def _ppt_argument(slide, items):
+    y = 1.50
+    widths = [10.4, 9.5, 8.6, 7.7, 6.8]
+    for i, (title, body) in enumerate(items[:5]):
+        x = (13.333 - widths[i]) / 2
+        _ppt_text(slide, x, y, 1.75, .25, title, 8.7, RED if i in {0,3,4} else GREEN, True)
+        _ppt_rect(slide, x + 1.70, y - .04, widths[i] - 1.70, .56, PALE_GOLD if i in {0,3} else (PALE_GREEN if i in {1,2} else PALE_RED), GOLD if i in {0,3} else GREEN_2)
+        _ppt_text(slide, x + 1.88, y + .08, widths[i] - 2.05, .30, presenter_text(body, 105), 11.8, INK, True, align=PP_ALIGN.CENTER)
+        y += .92
+
+
+def _ppt_rubric(slide, items):
+    cols = 3; x0 = .90; y0 = 1.52; gapx = .22; gapy = .25; w = 3.68; h = 1.82
+    for i, (title, body) in enumerate(items[:6]):
+        r, c = divmod(i, cols); x = x0 + c * (w + gapx); y = y0 + r * (h + gapy)
+        _ppt_text(slide, x, y, w, .30, title, 9.4, GREEN, True, align=PP_ALIGN.CENTER)
+        _ppt_rect(slide, x, y + .45, w, 1.15, WHITE if i % 2 else PALE_GREEN, GREEN_2)
+        _ppt_text(slide, x + .18, y + .68, w - .36, .72, body, 12.8, INK, False, "Aptos", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+
+
+def _ppt_verdict(slide, items):
+    _ppt_text(slide, 1.08, 1.58, 11.15, .28, items[0][0], 10.5, GREEN, True, align=PP_ALIGN.CENTER)
+    _ppt_text(slide, 1.08, 2.02, 11.15, 1.02, items[0][1], 21.5, INK, False, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+    _ppt_rect(slide, 1.12, 3.55, 5.25, 1.30, PALE_GREEN, GREEN_2)
+    _ppt_text(slide, 1.35, 3.76, 1.20, .25, items[1][0], 8.8, GREEN, True)
+    _ppt_text(slide, 2.48, 3.68, 3.55, .68, items[1][1], 12.3, INK, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+    _ppt_rect(slide, 6.95, 3.55, 5.25, 1.30, PALE_RED, RED)
+    _ppt_text(slide, 7.18, 3.76, 1.75, .25, items[2][0], 8.8, RED, True)
+    _ppt_text(slide, 8.72, 3.68, 3.10, .68, items[2][1], 12.3, INK, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+    _ppt_rect(slide, 2.65, 5.40, 8.05, .62, PALE_GOLD, GOLD)
+    _ppt_text(slide, 2.82, 5.57, 7.70, .26, items[3][1], 11, GREEN, True, align=PP_ALIGN.CENTER)
+
+
+def _ppt_source(slide, bp: Blueprint, u: LectureUnit, plan) -> bool:
+    path = _source_body_path(plan)
     if not path or not path.exists():
         return False
-    x, y, box_w, box_h = .78, 1.78, 11.78, 4.80
+    _ppt_frame(slide, bp, u, show_decision=u.number in {8, 11, 12, 13})
     try:
         with Image.open(path) as im:
             iw, ih = im.size
+        box_x, box_y, box_w, box_h = .75, 1.33, 11.80, 4.95
         scale = min(box_w / iw, box_h / ih)
         w, h = iw * scale, ih * scale
-        slide.shapes.add_picture(str(path), Inches(x + (box_w-w)/2), Inches(y + (box_h-h)/2), width=Inches(w), height=Inches(h))
+        slide.shapes.add_picture(str(path), Inches(box_x + (box_w - w) / 2), Inches(box_y + (box_h - h) / 2), width=Inches(w), height=Inches(h))
+        _ppt_text(slide, 9.30, 6.28, 3.0, .20, f"ADAPTED VISUAL · P1 {plan.source_slide}", 6.4, GREEN, True, align=PP_ALIGN.RIGHT)
+        return True
     except Exception:
-        slide.shapes.add_picture(str(path), Inches(x), Inches(y), width=Inches(box_w), height=Inches(box_h))
-    _ppt_text(slide, 9.30, 6.52, 3.20, .22, f"SOURCE VISUAL · P1 SLIDE {plan.source_slide}", 7.4, GREEN, True, align=PP_ALIGN.RIGHT)
-    return True
+        return False
 
 
 def _ppt_redraw(slide, bp: Blueprint, u: LectureUnit):
     kind, items = _spec(bp, u)
-    if kind == "compare":
-        _ppt_compare(slide, items)
-    elif kind == "rows":
-        _ppt_grid(slide, items, 1)
-    elif kind == "map":
-        subject = presenter_text(_subject(bp), 38)
-        _ppt_text(slide, 5.08, 3.17, 3.10, .75, subject, 20, WHITE, True, "Georgia", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
-        hub = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(5.00), Inches(3.05), Inches(3.25), Inches(.95))
-        hub.fill.solid(); hub.fill.fore_color.rgb = GREEN; hub.line.fill.background(); slide.shapes._spTree.remove(hub._element); slide.shapes._spTree.insert(2, hub._element)
-        positions = [(.75,2.05),(.75,3.38),(.75,4.71),(9.25,2.05),(9.25,3.38),(9.25,4.71)]
-        for i, (t, body) in enumerate(items[:6]):
-            px, py = positions[i]; _ppt_box(slide, px, py, 3.20, .90, t, body, WHITE, GREEN, body_size=11.2)
-    elif kind == "crisis":
-        _ppt_box(slide, .72, 2.0, 5.10, 3.92, items[0][0], items[0][1], PALE_GOLD, RED, RED, body_size=14)
-        _ppt_box(slide, 6.12, 2.0, 6.00, 1.75, items[1][0], items[1][1], WHITE, GREEN, body_size=12.5)
-        _ppt_box(slide, 6.12, 4.02, 6.00, 1.90, items[2][0], items[2][1], PALE_GREEN, GREEN, body_size=14)
-    elif kind == "assurance":
-        _ppt_box(slide, 1.05, 1.90, 11.20, 1.35, items[0][0], items[0][1], PALE_GREEN, GREEN, body_size=14)
-        _ppt_grid(slide, items[1:3], 2)
-        _ppt_text(slide, 1.10, 5.62, 11.10, .48, items[3][1], 16, GREEN_DARK, True, "Aptos", PP_ALIGN.CENTER)
-    elif kind == "grid":
-        _ppt_grid(slide, items, 3 if len(items) >= 5 else 2)
-    else:
-        _ppt_flow(slide, items)
+    if kind == "title":
+        _ppt_title_slide(slide, bp, u, items); return
+    _ppt_frame(slide, bp, u, show_decision=u.number in {5, 8, 11, 14, 17, 20})
+    if kind == "quote": _ppt_quote(slide, items)
+    elif kind == "takeaways": _ppt_bullets(slide, items)
+    elif kind == "orbit": _ppt_orbit(slide, items)
+    elif kind == "ladder": _ppt_ladder(slide, items)
+    elif kind == "curve": _ppt_curve(slide, items)
+    elif kind == "stack": _ppt_stack(slide, items)
+    elif kind == "compare": _ppt_compare(slide, items)
+    elif kind == "tree": _ppt_tree(slide, items)
+    elif kind == "table": _ppt_table(slide, items)
+    elif kind == "context": _ppt_context(slide, items)
+    elif kind == "chain": _ppt_chain(slide, items)
+    elif kind == "timeline": _ppt_timeline(slide, items)
+    elif kind == "burden": _ppt_burden(slide, items)
+    elif kind == "ai": _ppt_ai(slide, items)
+    elif kind == "portfolio": _ppt_portfolio(slide, items)
+    elif kind == "mutation": _ppt_mutation(slide, items)
+    elif kind == "argument": _ppt_argument(slide, items)
+    elif kind == "rubric": _ppt_rubric(slide, items)
+    elif kind == "verdict": _ppt_verdict(slide, items)
+    else: _ppt_bullets(slide, items)
 
 
 def export_cimt_presenter_pptx_v43(bp: Blueprint, out: Path) -> Path:
@@ -331,64 +612,85 @@ def export_cimt_presenter_pptx_v43(bp: Blueprint, out: Path) -> Path:
     prs = Presentation(); prs.slide_width = Inches(PPT_W); prs.slide_height = Inches(PPT_H)
     plans = plans_for_blueprint_v42(bp)
     for u, plan in zip(bp.units, plans):
-        slide = prs.slides.add_slide(prs.slide_layouts[6]); _ppt_base(slide, u)
-        if plan.reuse_mode == "USE" and _ppt_source(slide, u, plan):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        # Preserve a recognisable title page instead of pasting a source visual on unit 1.
+        if u.number != 1 and plan.reuse_mode == "USE" and _ppt_source(slide, bp, u, plan):
             continue
         _ppt_redraw(slide, bp, u)
-        tag = "ADAPTED FROM P1" if u.source_anchor else "ISCARB VISUALIZATION"
-        _ppt_text(slide, .58, 6.52, 2.20, .22, tag, 7.3, GREEN if u.source_anchor else MUTED, True)
-    prs.save(str(out)); return out
+    prs.save(str(out))
+    return out
 
 
 # ---------------------------------------------------------------------------
 # PDF
 # ---------------------------------------------------------------------------
 
-def _r_wrap(c, text, x, y, width, size=12, color=R_INK, bold=False, max_lines=4, align="left"):
-    font = "Helvetica-Bold" if bold else "Helvetica"
+def _r_wrap(c, text, x, y, width, size=12, color=R_INK, bold=False, max_lines=5, align="left", font=None):
+    font_name = font or ("Helvetica-Bold" if bold else "Helvetica")
     words = str(text or "").split(); lines: list[str] = []; line = ""
     for word in words:
         trial = (line + " " + word).strip()
-        if c.stringWidth(trial, font, size) <= width:
+        if c.stringWidth(trial, font_name, size) <= width:
             line = trial
         else:
             if line: lines.append(line)
             line = word
             if len(lines) >= max_lines - 1: break
     if line and len(lines) < max_lines: lines.append(line)
-    c.setFont(font, size); c.setFillColor(color)
+    c.setFont(font_name, size); c.setFillColor(color)
     for i, ln in enumerate(lines):
-        yy = y - i * size * 1.26
-        if align == "center": c.drawCentredString(x + width/2, yy, ln)
+        yy = y - i * size * 1.28
+        if align == "center": c.drawCentredString(x + width / 2, yy, ln)
         elif align == "right": c.drawRightString(x + width, yy, ln)
         else: c.drawString(x, yy, ln)
 
 
-def _r_base(c, u: LectureUnit):
+def _r_frame(c, bp: Blueprint, u: LectureUnit, show_decision=False):
     c.setFillColor(R_WHITE); c.rect(0, 0, PDF_W, PDF_H, fill=1, stroke=0)
-    c.setFillColor(R_GOLD); c.rect(30, 518, 900, 1.5, fill=1, stroke=0); c.rect(30, 43, 900, 1.5, fill=1, stroke=0)
-    c.setFillColor(R_GREEN_DARK); c.setFont("Times-Roman", 24); c.drawString(40, 485, presenter_text(u.title, 78))
-    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", 7.3); c.drawRightString(918, 490, f"UNIT {u.number:02d} · {u.phase} · {u.planned_minutes} MIN")
-    _r_wrap(c, presenter_text(u.engineering_question, 170), 42, 454, 850, 11.2, R_INK, True, 2)
-    c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 7.5); c.drawString(40, 22, "YOU TRY")
-    _r_wrap(c, presenter_text(u.student_action, 125), 92, 22, 610, 8.2, R_INK, True, 1)
-    c.setFillColor(R_MUTED); c.setFont("Helvetica", 6.4); c.drawRightString(920, 22, _source_label(u))
+    c.setFillColor(R_GOLD); c.rect(32, 516, 865, 1.3, fill=1, stroke=0); c.rect(32, 493, 1.3, 24, fill=1, stroke=0)
+    c.setFillColor(R_GREEN); c.setFont("Times-Roman", 25); c.drawString(40, 482, presenter_text(u.title, 80))
+    c.setStrokeColor(R_GOLD); c.setLineWidth(1.6); c.circle(850, 493, 7.5, fill=0, stroke=1)
+    c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 7); c.drawString(865, 495, "CIMT")
+    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", 4.8); c.drawString(865, 487, "ISCARB")
+    c.setFillColor(R_GOLD); c.rect(40, 31, 850, 1, fill=1, stroke=0)
+    c.setFillColor(R_MUTED); c.setFont("Helvetica", 5.8); c.drawString(40, 20, f"{_subject(bp)} · source-grounded presenter")
+    c.drawRightString(890, 20, f"{u.number:02d}/20")
+    if show_decision:
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", 7); c.drawString(48, 51, "DECISION")
+        _r_wrap(c, presenter_text(u.engineering_question, 145), 95, 51, 650, 8.2, R_INK, True, 1)
 
 
-def _r_box(c, x, y, w, h, title, body, fill=R_WHITE, stroke=R_GREEN, title_color=R_GREEN_DARK, body_size=11.2):
-    c.setFillColor(fill); c.setStrokeColor(stroke); c.setLineWidth(1.1); c.roundRect(x, y, w, h, 10, fill=1, stroke=1)
-    c.setFillColor(title_color); c.setFont("Helvetica-Bold", 9.4); c.drawString(x+12, y+h-22, presenter_text(title, 44))
-    _r_wrap(c, presenter_text(body, 110), x+12, y+h-46, w-24, body_size, R_INK, False, 5)
+def _r_title(c, bp: Blueprint, u: LectureUnit, items):
+    c.setFillColor(R_WHITE); c.rect(0, 0, PDF_W, PDF_H, fill=1, stroke=0)
+    c.setFillColor(R_GOLD); c.rect(42, 480, 850, 1.3, fill=1, stroke=0); c.rect(42, 446, 1.3, 35, fill=1, stroke=0)
+    _r_wrap(c, bp.lecture_title, 90, 392, 780, 31, R_GREEN, False, 2, "center", "Times-Roman")
+    c.setFillColor(R_INK); c.setFont("Helvetica", 11); c.drawCentredString(480, 312, "ISCARB Faculty Studio · CIMT-native lecture")
+    c.setFillColor(R_GOLD); c.rect(330, 280, 300, 1.2, fill=1, stroke=0)
+    _r_wrap(c, items[0][1], 115, 225, 730, 17.5, R_RED, False, 3, "center", "Times-Roman")
+    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", 8); c.drawCentredString(480, 110, "20 teaching units · 90 live minutes · source fidelity retained")
+    c.setFillColor(R_GOLD); c.rect(42, 50, 850, 1.2, fill=1, stroke=0)
+    c.setFillColor(R_MUTED); c.setFont("Helvetica", 5.8); c.drawString(45, 36, _source_label(u)); c.drawRightString(892, 36, "01/20")
 
 
-def _r_source(c, plan) -> bool:
-    if not plan.asset: return False
-    path = local_asset(plan.asset)
-    if not path or not path.exists(): return False
+def _r_bullets(c, items, x=65, y=405, width=820, body_size=13.5):
+    row = min(56, 290 / max(1, len(items)))
+    for i, (title, body) in enumerate(items[:6]):
+        yy = y - i * row
+        c.setFillColor(R_GOLD); c.rect(x, yy - 7, 6, 6, fill=1, stroke=0)
+        c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold", 8.3); c.drawString(x + 15, yy - 7, presenter_text(title, 32))
+        _r_wrap(c, body, x + 145, yy - 5, width - 155, body_size, R_INK, False, 2)
+
+
+def _r_source(c, bp: Blueprint, u: LectureUnit, plan) -> bool:
+    path = _source_body_path(plan)
+    if not path or not path.exists():
+        return False
+    _r_frame(c, bp, u, show_decision=u.number in {8, 11, 12, 13})
     try:
-        img = ImageReader(str(path)); iw, ih = img.getSize(); box=(55,75,850,350); scale=min(box[2]/iw, box[3]/ih); dw,dh=iw*scale,ih*scale
-        c.drawImage(img, box[0]+(box[2]-dw)/2, box[1]+(box[3]-dh)/2, width=dw, height=dh, preserveAspectRatio=True, mask='auto')
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 6.5); c.drawRightString(905, 57, f"SOURCE VISUAL · P1 SLIDE {plan.source_slide}")
+        img = ImageReader(str(path)); iw, ih = img.getSize(); box = (55, 80, 850, 350)
+        scale = min(box[2] / iw, box[3] / ih); dw, dh = iw * scale, ih * scale
+        c.drawImage(img, box[0] + (box[2] - dw) / 2, box[1] + (box[3] - dh) / 2, width=dw, height=dh, preserveAspectRatio=True, mask='auto')
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 5.7); c.drawRightString(900, 62, f"ADAPTED VISUAL · P1 {plan.source_slide}")
         return True
     except Exception:
         return False
@@ -396,82 +698,220 @@ def _r_source(c, plan) -> bool:
 
 def _r_redraw(c, bp: Blueprint, u: LectureUnit):
     kind, items = _spec(bp, u)
+    if kind == "title":
+        _r_title(c, bp, u, items); return
+    _r_frame(c, bp, u, show_decision=u.number in {5, 8, 11, 14, 17, 20})
+    if kind == "quote":
+        _r_wrap(c, f'“{items[0][1]}”', 110, 365, 740, 22, R_RED, False, 4, "center", "Times-Roman")
+        c.setFillColor(R_GOLD); c.rect(330, 220, 300, 1.2, fill=1, stroke=0)
+        for i, (_, body) in enumerate(items[1:4]):
+            x = 75 + i * 285
+            c.setFillColor(R_GOLD); c.setFont("Times-Bold", 12); c.drawString(x, 185, f"0{i+1}")
+            _r_wrap(c, body, x + 32, 186, 235, 10.5, R_INK, True, 4)
+        return
+    if kind in {"takeaways", "table"}:
+        if kind == "table":
+            c.setFillColor(R_GOLD); c.rect(65, 400, 830, 28, fill=1, stroke=0)
+            c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", 7.5); c.drawString(76, 410, "CHARACTERISTIC"); c.drawString(270, 410, "WHAT IT MEANS IN THE ENGINEERING DECISION")
+            for i, (title, body) in enumerate(items[:5]):
+                yy = 400 - (i + 1) * 48
+                c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_WHITE); c.setStrokeColor(R_LINE); c.rect(65, yy, 830, 48, fill=1, stroke=1)
+                c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 8); c.drawString(76, yy + 27, presenter_text(title, 28))
+                _r_wrap(c, body, 270, yy + 30, 605, 9.2, R_INK, False, 3)
+        else:
+            _r_bullets(c, items)
+        return
+    if kind == "orbit":
+        c.setFillColor(R_GREEN_2); c.circle(480, 270, 48, fill=1, stroke=0); c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", 9); c.drawCentredString(480, 267, "DECISION")
+        pos = [(75,380),(75,270),(75,160),(650,380),(650,270),(650,160)]
+        for i, (title, body) in enumerate(items[:6]):
+            x,y = pos[i]; c.setFillColor(R_RED if i in {1,4} else R_GREEN); c.setFont("Helvetica-Bold", 8); c.drawString(x,y,title)
+            _r_wrap(c, body, x, y-17, 235, 9.2, R_INK, False, 4)
+        return
+    if kind == "ladder":
+        for i, (title, body) in enumerate(items[:4]):
+            x = 80 + i * 205; y = 135 + i * 54
+            c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_PALE_GREEN); c.setStrokeColor(R_GOLD); c.rect(x,y,185,48,fill=1,stroke=1)
+            c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(x+8,y+31,title)
+            _r_wrap(c, body, x+8, y+20, 168, 7.7, R_INK, False, 2)
+        _r_wrap(c, "Predict first. Name the mechanism only after the constraint becomes visible.", 80, 400, 360, 13, R_INK, False, 3)
+        return
+    if kind == "curve":
+        c.setStrokeColor(R_INK); c.line(95,130,560,130); c.line(95,130,95,410)
+        pts=[(110,145),(175,150),(240,165),(305,190),(365,225),(415,275),(455,340),(485,405)]
+        c.setStrokeColor(R_GREEN_2); c.setLineWidth(2)
+        for a,b in zip(pts,pts[1:]): c.line(a[0],a[1],b[0],b[1])
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawString(610,370,items[1][0]); _r_wrap(c,items[1][1],610,350,280,11,R_INK,False,5)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawString(610,245,items[2][0]); _r_wrap(c,items[2][1],610,225,280,11,R_INK,False,5)
+        return
+    if kind == "stack":
+        for i,(title,body) in enumerate(items[:6]):
+            yy=385-i*47; c.setFillColor(R_PALE_GREEN if i%2 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(175,yy,610,38,fill=1,stroke=1)
+            c.setFillColor(R_RED if i in {0,5} else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(190,yy+15,title); _r_wrap(c,body,285,yy+22,480,8.5,R_INK,False,2,"center")
+        return
     if kind == "compare":
-        _r_box(c, 65, 130, 320, 250, items[0][0], items[0][1], R_PALE_GREEN, R_GREEN, body_size=12)
-        c.setFillColor(R_GOLD); c.setFont("Times-Bold", 28); c.drawCentredString(480, 265, "<->")
-        if len(items)>2: _r_wrap(c, items[2][1], 402, 215, 156, 9.5, R_MUTED, True, 4, "center")
-        _r_box(c, 575, 130, 320, 250, items[1][0], items[1][1], R_PALE_GOLD, R_GOLD, body_size=12)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8.5); c.drawCentredString(255,400,items[0][0]); _r_wrap(c,items[0][1],75,350,360,15,R_INK,False,6,"center","Times-Roman")
+        c.setFillColor(R_GOLD); c.rect(478,135,1.1,270,fill=1,stroke=0)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8.5); c.drawCentredString(705,400,items[1][0]); _r_wrap(c,items[1][1],525,350,360,15,R_INK,False,6,"center","Times-Roman")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(250,95,460,38,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",7); c.drawString(265,110,"TRADE-OFF"); _r_wrap(c,items[2][1],345,113,345,7.8,R_INK,True,2,"center")
         return
-    if kind == "crisis":
-        _r_box(c, 55, 125, 385, 275, items[0][0], items[0][1], R_PALE_GOLD, R_RED, R_RED, 12)
-        _r_box(c, 470, 260, 430, 140, items[1][0], items[1][1], R_WHITE, R_GREEN, body_size=10.5)
-        _r_box(c, 470, 125, 430, 110, items[2][0], items[2][1], R_PALE_GREEN, R_GREEN, body_size=12)
+    if kind == "tree":
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(350,360,260,50,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",7.5); c.drawCentredString(480,391,items[0][0]); _r_wrap(c,items[0][1],365,378,230,7.6,R_INK,True,2,"center")
+        xs=[105,315,525,735]
+        for i,(title,body) in enumerate(items[1:5]):
+            x=xs[i]; c.setStrokeColor(R_GREEN_2); c.line(480,360,x+60,285); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",7.2); c.drawCentredString(x+60,260,title); _r_wrap(c,body,x,235,120,8.4,R_INK,False,5,"center")
         return
-    if kind == "assurance":
-        _r_box(c, 90, 320, 780, 90, items[0][0], items[0][1], R_PALE_GREEN, R_GREEN, body_size=11.5)
-        _r_box(c, 90, 185, 375, 105, items[1][0], items[1][1], R_WHITE, R_GREEN, body_size=10.5)
-        _r_box(c, 495, 185, 375, 105, items[2][0], items[2][1], R_WHITE, R_GREEN, body_size=10.5)
-        c.setFillColor(R_GREEN_DARK); c.setFont("Helvetica-Bold", 12); c.drawCentredString(480, 130, items[3][1])
+    if kind == "context":
+        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(70,145,300,250,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawCentredString(220,365,items[0][0]); _r_wrap(c,items[0][1],95,320,250,14,R_INK,False,7,"center","Times-Roman")
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawString(445,355,items[1][0]); _r_wrap(c,items[1][1],445,333,405,12,R_INK,False,5)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawString(445,245,items[2][0]); _r_wrap(c,items[2][1],445,223,405,12,R_INK,False,5)
         return
-    cols = 1 if kind == "rows" else (3 if kind in {"grid","map"} and len(items)>=5 else len(items))
-    cols = max(1, min(cols, 5)); rows=(len(items)+cols-1)//cols; gx=12; gy=12; left=50; top=405; total_w=860; total_h=285
-    w=(total_w-gx*(cols-1))/cols; h=(total_h-gy*(rows-1))/rows
-    for i,(title,body) in enumerate(items):
-        r,cc=divmod(i,cols); y=top-(r+1)*h-r*gy
-        _r_box(c,left+cc*(w+gx),y,w,h,title,body,R_PALE if i%2 else R_WHITE,R_GREEN,body_size=9.5 if cols>=4 else 11)
+    if kind in {"chain","mutation"}:
+        n=len(items); left=55; gap=12; total=850; w=(total-gap*(n-1))/n
+        for i,(title,body) in enumerate(items):
+            x=left+i*(w+gap); c.setFillColor(R_RED if i in {1,3} else R_GREEN); c.setFont("Helvetica-Bold",7.2); c.drawCentredString(x+w/2,360,title)
+            c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,165,w,170,fill=1,stroke=1); _r_wrap(c,body,x+10,295,w-20,10,R_INK,False,8,"center")
+        if kind=="mutation": c.setFillColor(R_RED); c.setFont("Times-Bold",11); c.drawCentredString(480,120,"Change one constraint. Re-run the decision.")
+        return
+    if kind == "timeline":
+        c.setStrokeColor(R_GOLD); c.setLineWidth(2); c.line(100,285,860,285)
+        xs=[150,480,810]
+        for i,(title,body) in enumerate(items[:3]):
+            c.setFillColor(R_RED if i==2 else R_GREEN_2); c.circle(xs[i],285,7,fill=1,stroke=0); c.setFillColor(R_RED if i==2 else R_GREEN); c.setFont("Helvetica-Bold",8); c.drawCentredString(xs[i],350,title); _r_wrap(c,body,xs[i]-115,245,230,11,R_INK,False,6,"center")
+        return
+    if kind == "burden":
+        _r_wrap(c,items[0][1],75,365,320,14,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawCentredString(235,405,items[0][0])
+        _r_wrap(c,items[1][1],75,235,320,13,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawCentredString(235,275,items[1][0])
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawString(560,390,items[2][0]); _r_wrap(c,items[2][1],560,365,320,11.5,R_INK,False,5)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawString(560,260,items[3][0]); _r_wrap(c,items[3][1],560,235,320,11.5,R_INK,False,5)
+        return
+    if kind == "ai":
+        cols=[(65,R_PALE_GREEN,R_GREEN_2),(345,R_PALE_GOLD,R_GOLD),(625,R_PALE_RED,R_RED)]; data=[items[0],items[1],items[3]]
+        for (x,fill,stroke),(title,body) in zip(cols,data):
+            c.setFillColor(fill); c.setStrokeColor(stroke); c.rect(x,145,250,245,fill=1,stroke=1); c.setFillColor(stroke); c.setFont("Helvetica-Bold",8); c.drawCentredString(x+125,360,title); _r_wrap(c,body,x+20,310,210,13,R_INK,False,8,"center","Times-Roman")
+        return
+    if kind == "portfolio":
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.circle(480,275,65,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",9); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
+        pos=[(75,390),(350,420),(690,390),(75,145),(350,125),(690,145)]
+        for i,(title,body) in enumerate(items[:6]):
+            x,y=pos[i]; c.setFillColor(R_RED if i in {0,3} else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawCentredString(x+95,y,title); _r_wrap(c,body,x,y-20,190,8.7,R_INK,False,5,"center")
+        return
+    if kind == "argument":
+        y=405
+        widths=[760,690,620,550,480]
+        for i,(title,body) in enumerate(items[:5]):
+            w=widths[i]; x=(960-w)/2; c.setFillColor(R_RED if i in {0,3,4} else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(x,y,title); c.setFillColor(R_PALE_GOLD if i in {0,3} else (R_PALE_GREEN if i in {1,2} else R_PALE_RED)); c.setStrokeColor(R_GOLD if i in {0,3} else R_GREEN_2); c.rect(x+110,y-16,w-110,34,fill=1,stroke=1); _r_wrap(c,body,x+122,y-2,w-134,8.5,R_INK,True,2,"center"); y-=58
+        return
+    if kind == "rubric":
+        cols=3; w=260; h=105; x0=60; y0=295
+        for i,(title,body) in enumerate(items[:6]):
+            r,cc=divmod(i,cols); x=x0+cc*290; y=y0-r*145; c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",7.5); c.drawCentredString(x+w/2,y+80,title); c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,y-10,w,70,fill=1,stroke=1); _r_wrap(c,body,x+12,y+35,w-24,9.5,R_INK,False,4,"center")
+        return
+    if kind == "verdict":
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawCentredString(480,400,items[0][0]); _r_wrap(c,items[0][1],100,360,760,18,R_INK,False,4,"center","Times-Roman")
+        c.setFillColor(R_PALE_GREEN); c.setStrokeColor(R_GREEN_2); c.rect(90,180,365,80,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(105,240,items[1][0]); _r_wrap(c,items[1][1],105,220,330,9.2,R_INK,True,4,"center")
+        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(505,180,365,80,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",7); c.drawString(520,240,items[2][0]); _r_wrap(c,items[2][1],520,220,330,9.2,R_INK,True,4,"center")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(220,115,520,36,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8.5); c.drawCentredString(480,128,items[3][1])
+        return
+    _r_bullets(c, items)
 
 
 def export_cimt_presenter_pdf_v43(bp: Blueprint, out: Path) -> Path:
-    out=Path(out); c=canvas.Canvas(str(out), pagesize=(PDF_W,PDF_H), pageCompression=1)
+    out = Path(out)
+    c = canvas.Canvas(str(out), pagesize=(PDF_W, PDF_H), pageCompression=1)
     c.setTitle(bp.lecture_title); c.setAuthor("ISCARB Faculty Studio")
-    plans=plans_for_blueprint_v42(bp)
-    for u,plan in zip(bp.units,plans):
-        _r_base(c,u)
-        if not (plan.reuse_mode=="USE" and _r_source(c,plan)):
-            _r_redraw(c,bp,u)
+    plans = plans_for_blueprint_v42(bp)
+    for u, plan in zip(bp.units, plans):
+        if u.number != 1 and plan.reuse_mode == "USE" and _r_source(c, bp, u, plan):
+            pass
+        else:
+            _r_redraw(c, bp, u)
         c.showPage()
-    c.save(); return out
+    c.save()
+    return out
 
 
 # ---------------------------------------------------------------------------
 # Browser preview
 # ---------------------------------------------------------------------------
 
-def _h(s: str) -> str:
-    return html.escape(str(s or ""))
+def _h(value: str) -> str:
+    return html.escape(str(value or ""))
+
+
+def _html_items(items, cls="bulletList") -> str:
+    return f'<div class="{cls}">' + ''.join(
+        f'<article><i></i><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t, b in items
+    ) + '</div>'
 
 
 def _html_redraw(bp: Blueprint, u: LectureUnit) -> str:
-    kind, items = _spec(bp,u)
+    kind, items = _spec(bp, u)
+    if kind == "title":
+        return f'<div class="titleSlide"><h1>{_h(bp.lecture_title)}</h1><p>ISCARB Faculty Studio · CIMT-native lecture</p><hr><blockquote>{_h(items[0][1])}</blockquote><small>20 teaching units · 90 live minutes · source fidelity retained</small></div>'
+    if kind == "quote":
+        tails=''.join(f'<article><b>0{i+1}</b><span>{_h(b)}</span></article>' for i,(_,b) in enumerate(items[1:4]))
+        return f'<div class="quoteSlide"><blockquote>“{_h(items[0][1])}”</blockquote><hr><div>{tails}</div></div>'
+    if kind in {"takeaways","table"}:
+        return _html_items(items, "tableList" if kind=="table" else "bulletList")
+    if kind == "orbit":
+        return '<div class="orbit"><strong>DECISION</strong>' + ''.join(f'<article class="o{i}"><b>{_h(t)}</b><span>{_h(b)}</span></article>' for i,(t,b) in enumerate(items[:6])) + '</div>'
+    if kind == "ladder":
+        return '<div class="ladder">' + ''.join(f'<article style="--i:{i}"><b>{_h(t)}</b><span>{_h(b)}</span></article>' for i,(t,b) in enumerate(items[:4])) + '<p>Predict first. Name the mechanism only after the constraint becomes visible.</p></div>'
+    if kind == "curve":
+        return f'<div class="curve"><div class="chart"><span class="axisY">COST</span><span class="axisX">assurance →</span><svg viewBox="0 0 500 260" aria-label="assurance cost curve"><polyline points="20,230 90,225 160,212 230,190 300,150 355,105 400,55 435,20"/></svg></div><div class="curveNotes"><b>{_h(items[1][0])}</b><p>{_h(items[1][1])}</p><b>{_h(items[2][0])}</b><p>{_h(items[2][1])}</p></div></div>'
+    if kind == "stack":
+        return '<div class="stack">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items[:6]) + '</div>'
     if kind == "compare":
-        return f'<div class="compare"><article><b>{_h(items[0][0])}</b><span>{_h(items[0][1])}</span></article><div class="vs">↔<small>{_h(items[2][1] if len(items)>2 else "trade-off")}</small></div><article class="gold"><b>{_h(items[1][0])}</b><span>{_h(items[1][1])}</span></article></div>'
-    if kind == "crisis":
-        return '<div class="crisis">' + ''.join(f'<article class="c{i}"><b>{_h(t)}</b><span>{_h(b)}</span></article>' for i,(t,b) in enumerate(items)) + '</div>'
-    if kind == "assurance":
-        return f'<div class="assurance"><article><b>{_h(items[0][0])}</b><span>{_h(items[0][1])}</span></article><div class="twocol"><article><b>{_h(items[1][0])}</b><span>{_h(items[1][1])}</span></article><article><b>{_h(items[2][0])}</b><span>{_h(items[2][1])}</span></article></div><strong>{_h(items[3][1])}</strong></div>'
-    cls = "rows" if kind=="rows" else ("grid" if kind in {"grid","map"} else "flow")
-    return f'<div class="{cls}">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items) + '</div>'
+        return f'<div class="compare"><section><b>{_h(items[0][0])}</b><p>{_h(items[0][1])}</p></section><i></i><section><b>{_h(items[1][0])}</b><p>{_h(items[1][1])}</p></section><footer><strong>TRADE-OFF</strong>{_h(items[2][1])}</footer></div>'
+    if kind == "tree":
+        return '<div class="tree"><header><b>{}</b><span>{}</span></header><div>{}</div></div>'.format(_h(items[0][0]),_h(items[0][1]),''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items[1:5]))
+    if kind == "context":
+        return f'<div class="context"><section><b>{_h(items[0][0])}</b><p>{_h(items[0][1])}</p></section><div><b>{_h(items[1][0])}</b><p>{_h(items[1][1])}</p><b>{_h(items[2][0])}</b><p>{_h(items[2][1])}</p></div></div>'
+    if kind in {"chain","mutation"}:
+        extra='<footer>Change one constraint. Re-run the decision.</footer>' if kind=="mutation" else ''
+        return '<div class="chain">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items) + extra + '</div>'
+    if kind == "timeline":
+        return '<div class="timeline">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items[:3]) + '</div>'
+    if kind == "burden":
+        return '<div class="burden">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items) + '</div>'
+    if kind == "ai":
+        return '<div class="aiGate">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in (items[0],items[1],items[3])) + f'<footer><b>TEST</b>{_h(items[2][1])}</footer></div>'
+    if kind == "portfolio":
+        return '<div class="portfolio"><strong>ENGINEERING<br>MISSION</strong>' + ''.join(f'<article class="p{i}"><b>{_h(t)}</b><span>{_h(b)}</span></article>' for i,(t,b) in enumerate(items[:6])) + '</div>'
+    if kind == "argument":
+        return '<div class="argument">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items[:5]) + '</div>'
+    if kind == "rubric":
+        return '<div class="rubric">' + ''.join(f'<article><b>{_h(t)}</b><span>{_h(b)}</span></article>' for t,b in items[:6]) + '</div>'
+    if kind == "verdict":
+        return f'<div class="verdict"><header><b>{_h(items[0][0])}</b><p>{_h(items[0][1])}</p></header><div><article><b>{_h(items[1][0])}</b><span>{_h(items[1][1])}</span></article><article><b>{_h(items[2][0])}</b><span>{_h(items[2][1])}</span></article></div><footer>{_h(items[3][1])}</footer></div>'
+    return _html_items(items)
 
 
-def render_cimt_presenter_preview_v43(bp: Blueprint, release_state: str="BLOCKED") -> str:
-    plans=plans_for_blueprint_v42(bp); slides=[]; thumbs=[]
-    for i,(u,plan) in enumerate(zip(bp.units,plans)):
-        visual=""
-        if plan.reuse_mode=="USE" and plan.asset:
-            uri=asset_data_uri(plan.asset)
+def render_cimt_presenter_preview_v43(bp: Blueprint, release_state: str = "BLOCKED") -> str:
+    plans = plans_for_blueprint_v42(bp)
+    slides: list[str] = []; thumbs: list[str] = []
+    for i, (u, plan) in enumerate(zip(bp.units, plans)):
+        visual = ""
+        if u.number != 1 and plan.reuse_mode == "USE":
+            uri = _data_uri(_source_body_path(plan))
             if uri:
-                visual=f'<div class="source"><img src="{uri}" alt="P1 source visual"><small>SOURCE VISUAL · P1 SLIDE {plan.source_slide}</small></div>'
-        if not visual: visual=_html_redraw(bp,u)
-        slides.append(f'''<section class="slide{' show' if i==0 else ''}" data-i="{i}">
-          <div class="toprule"></div><div class="head"><h2>{_h(u.title)}</h2><em>UNIT {u.number:02d} · {_h(u.phase)} · {u.planned_minutes} MIN</em></div>
-          <p class="q">{_h(presenter_text(u.engineering_question,180))}</p>
-          <div class="visual">{visual}</div>
-          <div class="bottomrule"></div><div class="foot"><b>YOU TRY</b><span>{_h(presenter_text(u.student_action,125))}</span><em>{_h(_source_label(u))}</em></div>
-        </section>''')
+                visual = f'<div class="sourceVisual"><img src="{uri}" alt="Adapted P1 teaching visual"><small>ADAPTED VISUAL · P1 {plan.source_slide}</small></div>'
+        if not visual:
+            visual = _html_redraw(bp, u)
+        show_decision = u.number in {5,8,11,14,17,20}
+        if u.number == 1:
+            content = f'<div class="visual first">{visual}</div>'
+        else:
+            decision = f'<div class="decision"><b>DECISION</b><span>{_h(presenter_text(u.engineering_question,145))}</span></div>' if show_decision else ''
+            content = f'''<div class="corner"></div><header class="head"><h2>{_h(u.title)}</h2><div class="mark"><i></i><b>CIMT</b><small>ISCARB</small></div></header><div class="visual">{visual}</div>{decision}<footer class="foot"><span>{_h(_subject(bp))} · source-grounded presenter</span><em>{u.number:02d}/20</em></footer>'''
+        slides.append(f'<section class="slide{" show" if i==0 else ""}" data-i="{i}">{content}</section>')
         thumbs.append(f'<button class="thumb{" active" if i==0 else ""}" data-i="{i}"><b>{u.number:02d}</b><span>{_h(presenter_text(u.title,46))}</span></button>')
-    css='''
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,Aptos,Arial,sans-serif;background:#e9ece7;color:#181c19}.deck{height:100vh;display:grid;grid-template-columns:230px 1fr}.rail{background:#f7f7f2;border-right:1px solid #d4d9d2;padding:18px;overflow:auto}.brand{font-family:Georgia,serif;color:#005634;font-size:19px}.state{font-size:9px;color:#6b736d;margin:6px 0 16px}.thumb{width:100%;display:grid;grid-template-columns:28px 1fr;gap:6px;text-align:left;background:transparent;border:0;border-bottom:1px solid #dde2db;padding:8px 4px;color:#4d5650;cursor:pointer}.thumb b{color:#007044}.thumb span{font-size:10px}.thumb.active{background:#e9f4ed;color:#181c19}.stage{display:grid;place-items:center;padding:24px}.slide{display:none;width:min(1190px,calc(100vw - 285px));aspect-ratio:16/9;background:#fff;box-shadow:0 22px 55px #22312727;padding:22px 34px 16px;position:relative;overflow:hidden;grid-template-rows:2px auto auto 1fr 2px auto}.slide.show{display:grid}.toprule,.bottomrule{height:2px;background:#c49a27}.head{display:flex;justify-content:space-between;align-items:start;padding-top:8px;gap:18px}.head h2{margin:0;font-family:Georgia,serif;font-weight:400;font-size:clamp(25px,2.5vw,38px);color:#005634;letter-spacing:-.02em}.head em{font-style:normal;font-size:8px;font-weight:850;color:#6b736d;white-space:nowrap;padding-top:9px}.q{font-size:13px;font-weight:720;margin:8px 0 0;max-width:1000px}.visual{min-height:0;display:grid;align-items:center;padding:15px 8px}.foot{display:grid;grid-template-columns:70px 1fr 230px;gap:9px;align-items:center;padding-top:7px;font-size:9px}.foot b{color:#007044}.foot span{font-weight:700}.foot em{font-style:normal;text-align:right;color:#6b736d;font-size:7px}.flow{display:flex;align-items:stretch;gap:12px}.flow article,.grid article,.rows article{border:1.5px solid #007044;border-radius:9px;padding:15px;background:#fff;display:flex;flex-direction:column;gap:9px;min-width:0}.flow article{flex:1}.flow article:nth-child(odd){background:#e9f4ed}.flow b,.grid b,.rows b,.compare b,.crisis b,.assurance b{font-size:10px;color:#005634;letter-spacing:.04em}.flow span,.grid span,.rows span,.compare span,.crisis span,.assurance span{font-size:13px;line-height:1.35;font-weight:650}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.rows{display:grid;gap:8px}.rows article{display:grid;grid-template-columns:90px 1fr;align-items:center;padding:10px 14px}.compare{display:grid;grid-template-columns:1fr 160px 1fr;align-items:stretch;gap:18px}.compare article{border:1.5px solid #007044;background:#e9f4ed;border-radius:10px;padding:24px}.compare article.gold{border-color:#c49a27;background:#f9f4e4}.vs{display:grid;place-items:center;font-family:Georgia,serif;font-size:42px;color:#c49a27;text-align:center}.vs small{display:block;font-family:Inter,sans-serif;color:#6b736d;font-size:10px}.crisis{display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:1fr 1fr;gap:13px}.crisis article{border-radius:10px;padding:20px;border:1.5px solid #007044}.crisis .c0{grid-row:1/3;border-color:#c52d2d;background:#f9f4e4}.crisis .c2{background:#e9f4ed}.assurance{display:grid;gap:12px}.assurance>article,.assurance .twocol article{border:1.5px solid #007044;border-radius:9px;padding:14px}.assurance>article{background:#e9f4ed}.assurance .twocol{display:grid;grid-template-columns:1fr 1fr;gap:12px}.assurance>strong{text-align:center;color:#005634;font-size:14px}.source{height:100%;display:grid;place-items:center;position:relative}.source img{max-width:100%;max-height:100%;object-fit:contain}.source small{position:absolute;right:0;bottom:0;background:#fff;color:#007044;font-size:7px;font-weight:850;padding:4px 7px}
-    @media(max-width:850px){.deck{grid-template-columns:1fr}.rail{display:none}.slide{width:96vw}.grid{grid-template-columns:repeat(2,1fr)}}
+
+    css = f'''
+    :root{{--green:#005b39;--green2:#2c7e41;--gold:{LEGACY_GOLD_TOKEN};--red:#e22424;--ink:#181818;--muted:#707070;--pale:#ecf6eb;--legacy:{LEGACY_GREEN_TOKEN}}}
+    *{{box-sizing:border-box}}body{{margin:0;background:#eceee9;color:var(--ink);font-family:Arial,Helvetica,sans-serif}}.deck{{height:100vh;display:grid;grid-template-columns:220px 1fr}}.rail{{background:#f7f7f2;border-right:1px solid #d9ddd7;padding:18px;overflow:auto}}.brand{{font-family:Georgia,serif;color:var(--green);font-size:19px}}.state{{font-size:9px;color:var(--muted);margin:6px 0 16px}}.thumb{{display:grid;grid-template-columns:27px 1fr;width:100%;gap:7px;padding:8px 4px;border:0;border-bottom:1px solid #dde1da;background:transparent;text-align:left;cursor:pointer;color:#454b46}}.thumb b{{color:var(--gold)}}.thumb span{{font-size:10px}}.thumb.active{{background:#edf5eb;color:#111}}.stage{{display:grid;place-items:center;padding:22px}}.slide{{display:none;width:min(1180px,calc(100vw - 275px));aspect-ratio:16/9;background:#fff;box-shadow:0 22px 50px #1c2a2028;position:relative;overflow:hidden;padding:22px 34px 18px}}.slide.show{{display:block}}.corner{{position:absolute;left:34px;top:20px;width:calc(100% - 68px);height:34px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}}.head{{height:88px;display:flex;justify-content:space-between;align-items:start;padding:12px 8px 0}}.head h2{{margin:0;color:var(--green);font:400 clamp(27px,2.7vw,40px)/1.05 Georgia,serif;letter-spacing:-.02em}}.mark{{display:grid;grid-template-columns:20px auto;grid-template-rows:15px 12px;align-items:center;column-gap:6px;color:var(--green);font-size:8px;margin-top:2px}}.mark i{{grid-row:1/3;width:18px;height:18px;border:2px solid var(--gold);border-radius:50%}}.mark small{{font-size:6px;color:var(--muted);font-weight:800}}.visual{{height:calc(100% - 136px);display:grid;align-items:center;padding:6px 10px 12px}}.visual.first{{height:100%;padding:0}}.foot{{position:absolute;left:42px;right:42px;bottom:14px;border-top:2px solid var(--gold);padding-top:6px;display:flex;justify-content:space-between;color:var(--muted);font-size:7px}}.foot em{{font-style:normal;font-weight:800}}.decision{{position:absolute;left:48px;right:48px;bottom:39px;display:grid;grid-template-columns:64px 1fr;align-items:center;gap:8px;font-size:9px}}.decision b{{color:var(--red)}}.decision span{{font-weight:700}}.titleSlide{{height:100%;display:grid;grid-template-rows:1.2fr auto auto 1.4fr auto;align-items:center;text-align:center;padding:35px 70px;position:relative}}.titleSlide:before{{content:'';position:absolute;left:0;right:0;top:0;border-top:2px solid var(--gold)}}.titleSlide h1{{margin:0;color:var(--green);font:400 clamp(34px,4vw,58px)/1.08 Georgia,serif}}.titleSlide p{{font-size:14px}}.titleSlide hr{{width:42%;border:0;border-top:2px solid var(--gold)}}.titleSlide blockquote{{margin:0;color:var(--red);font:400 clamp(18px,2vw,29px)/1.25 Georgia,serif}}.titleSlide small{{color:var(--muted);font-weight:700}}.quoteSlide blockquote{{margin:12px auto;color:var(--red);font:400 clamp(25px,3.1vw,45px)/1.12 Georgia,serif;text-align:center;max-width:880px}}.quoteSlide hr{{width:38%;border:0;border-top:2px solid var(--gold)}}.quoteSlide>div{{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:24px}}.quoteSlide article{{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start}}.quoteSlide b{{color:var(--gold);font:700 18px Georgia,serif}}.quoteSlide span{{font-size:14px;font-weight:700;line-height:1.35}}.bulletList,.tableList{{display:grid;gap:7px;padding:2px 6px}}.bulletList article{{display:grid;grid-template-columns:10px 150px 1fr;gap:12px;align-items:start;padding:7px 0}}.bulletList i{{width:7px;height:7px;background:var(--gold);margin-top:7px}}.bulletList b{{font-size:10px;color:var(--green)}}.bulletList article:first-child b{{color:var(--red)}}.bulletList span{{font-size:16px;line-height:1.28}}.tableList{{border-top:34px solid var(--gold);position:relative}}.tableList:before{{content:'CHARACTERISTIC                    WHAT IT MEANS IN THE ENGINEERING DECISION';position:absolute;top:-26px;left:12px;color:white;font-size:8px;font-weight:800;white-space:pre}}.tableList article{{display:grid;grid-template-columns:190px 1fr;border:1px solid #dadad0;border-top:0;min-height:50px;align-items:center;padding:6px 12px}}.tableList article:nth-child(odd){{background:#faf6e5}}.tableList i{{display:none}}.tableList b{{color:var(--green);font-size:11px}}.tableList span{{font-size:12px}}.orbit{{height:100%;position:relative}}.orbit>strong{{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:126px;height:88px;border-radius:50%;display:grid;place-items:center;background:var(--green2);color:#fff;font-size:12px}}.orbit article{{position:absolute;width:27%;font-size:12px}}.orbit article b{{display:block;color:var(--green);font-size:10px;margin-bottom:5px}}.orbit .o1 b,.orbit .o4 b{{color:var(--red)}}.orbit .o0{{left:2%;top:9%}}.orbit .o1{{left:2%;top:39%}}.orbit .o2{{left:2%;top:69%}}.orbit .o3{{right:2%;top:9%}}.orbit .o4{{right:2%;top:39%}}.orbit .o5{{right:2%;top:69%}}.ladder{{height:100%;position:relative;padding-top:10px}}.ladder article{{position:absolute;left:calc(3% + var(--i)*23%);bottom:calc(10% + var(--i)*13%);width:22%;height:73px;border:1px solid var(--gold);background:#faf6e5;padding:9px}}.ladder article:nth-child(even){{background:#ecf6eb}}.ladder b{{font-size:9px;color:var(--green)}}.ladder article:first-child b{{color:var(--red)}}.ladder span{{display:block;font-size:10px;margin-top:4px}}.ladder p{{position:absolute;left:4%;top:6%;width:32%;font:400 18px/1.25 Georgia,serif}}.curve{{display:grid;grid-template-columns:1.45fr .9fr;gap:32px;height:100%;align-items:center}}.chart{{height:80%;position:relative;border-left:2px solid #222;border-bottom:2px solid #222}}.chart svg{{position:absolute;inset:8%;width:88%;height:82%}}.chart polyline{{fill:none;stroke:var(--green2);stroke-width:4}}.axisY{{position:absolute;left:-35px;top:42%;font-size:8px;font-weight:800;transform:rotate(-90deg)}}.axisX{{position:absolute;bottom:-22px;left:34%;font-size:8px;color:var(--muted)}}.curveNotes b{{display:block;color:var(--red);font-size:10px;margin:14px 0 5px}}.curveNotes b:nth-of-type(2){{color:var(--green)}}.curveNotes p{{font-size:14px;line-height:1.35}}.stack{{display:grid;gap:8px;padding:4px 80px}}.stack article{{border:1px solid var(--green2);display:grid;grid-template-columns:90px 1fr;padding:8px 12px;align-items:center}}.stack article:nth-child(odd){{background:#ecf6eb}}.stack b{{color:var(--green);font-size:9px}}.stack article:first-child b,.stack article:last-child b{{color:var(--red)}}.stack span{{font-size:13px;text-align:center}}.compare{{height:100%;display:grid;grid-template-columns:1fr 2px 1fr;grid-template-rows:1fr auto;gap:18px 26px;align-items:center}}.compare>i{{height:78%;background:var(--gold)}}.compare section{{text-align:center;padding:8px 24px}}.compare section>b{{color:var(--green);font-size:11px}}.compare section:nth-of-type(2)>b{{color:var(--red)}}.compare section p{{font:400 22px/1.25 Georgia,serif}}.compare footer{{grid-column:1/4;justify-self:center;border:1px solid var(--gold);background:#faf6e5;padding:9px 18px;font-size:10px}}.compare footer strong{{color:var(--red);margin-right:16px}}.tree{{display:grid;grid-template-rows:auto 1fr;gap:24px;height:100%;padding:4px 30px}}.tree header{{justify-self:center;width:36%;border:1px solid var(--gold);background:#faf6e5;padding:9px;text-align:center}}.tree header b{{display:block;color:var(--red);font-size:9px}}.tree header span{{font-size:10px;font-weight:700}}.tree>div{{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start}}.tree article{{text-align:center;border-top:2px solid var(--gold);padding-top:12px}}.tree article b{{color:var(--green);font-size:9px}}.tree article span{{display:block;font-size:12px;margin-top:8px;line-height:1.3}}.context{{display:grid;grid-template-columns:.85fr 1.25fr;gap:42px;height:100%;align-items:center}}.context>section{{border:1px solid var(--red);background:#fdeeee;padding:25px;text-align:center;min-height:70%;display:grid;align-content:center}}.context>section b{{color:var(--red);font-size:10px}}.context>section p{{font:400 20px/1.3 Georgia,serif}}.context>div b{{display:block;color:var(--green);font-size:10px;margin-top:12px}}.context>div b:nth-of-type(2){{color:var(--red)}}.context>div p{{font-size:15px;line-height:1.35}}.chain{{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:center;height:100%;position:relative}}.chain article{{border:1px solid var(--green2);min-height:180px;padding:15px;display:grid;align-content:start;text-align:center}}.chain article:nth-child(odd){{background:#ecf6eb}}.chain b{{color:var(--green);font-size:9px}}.chain article:nth-child(2) b,.chain article:nth-child(4) b{{color:var(--red)}}.chain span{{font-size:13px;line-height:1.35;margin-top:14px}}.chain footer{{position:absolute;bottom:6px;left:25%;right:25%;text-align:center;color:var(--red);font:700 13px Georgia,serif}}.timeline{{display:grid;grid-template-columns:repeat(3,1fr);gap:35px;height:100%;align-items:center;position:relative}}.timeline:before{{content:'';position:absolute;left:7%;right:7%;top:49%;height:2px;background:var(--gold)}}.timeline article{{position:relative;text-align:center;z-index:2}}.timeline article:before{{content:'';display:block;width:16px;height:16px;border-radius:50%;background:var(--green2);margin:0 auto 18px}}.timeline article:last-child:before{{background:var(--red)}}.timeline b{{display:block;color:var(--green);font-size:10px}}.timeline article:last-child b{{color:var(--red)}}.timeline span{{display:block;font-size:14px;line-height:1.35;margin-top:50px}}.burden{{display:grid;grid-template-columns:1fr 1fr;gap:60px;padding:10px 20px}}.burden article{{padding:13px 20px;border-bottom:2px solid var(--gold)}}.burden b{{display:block;color:var(--green);font-size:10px}}.burden article:nth-child(2) b,.burden article:nth-child(4) b{{color:var(--red)}}.burden span{{display:block;font:400 17px/1.3 Georgia,serif;margin-top:10px}}.aiGate{{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;height:100%;align-items:center;position:relative}}.aiGate article{{min-height:220px;padding:20px;border:1px solid var(--green2);background:#ecf6eb;text-align:center;display:grid;align-content:center}}.aiGate article:nth-child(2){{background:#faf6e5;border-color:var(--gold)}}.aiGate article:nth-child(3){{background:#fdeeee;border-color:var(--red)}}.aiGate b{{color:var(--green);font-size:10px}}.aiGate article:nth-child(3) b{{color:var(--red)}}.aiGate span{{font:400 16px/1.3 Georgia,serif;margin-top:12px}}.aiGate footer{{position:absolute;bottom:0;left:28%;right:28%;text-align:center;font-size:10px}}.aiGate footer b{{color:var(--red);margin-right:10px}}.portfolio{{height:100%;position:relative}}.portfolio>strong{{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:150px;height:105px;border:1px solid var(--gold);background:#faf6e5;border-radius:50%;display:grid;place-items:center;text-align:center;color:var(--green);font-size:12px}}.portfolio article{{position:absolute;width:27%;text-align:center}}.portfolio article b{{display:block;color:var(--green);font-size:9px}}.portfolio .p0 b,.portfolio .p3 b{{color:var(--red)}}.portfolio article span{{display:block;font-size:11px;margin-top:6px}}.portfolio .p0{{left:1%;top:4%}}.portfolio .p1{{left:36%;top:0}}.portfolio .p2{{right:1%;top:4%}}.portfolio .p3{{left:1%;bottom:4%}}.portfolio .p4{{left:36%;bottom:0}}.portfolio .p5{{right:1%;bottom:4%}}.argument{{display:grid;gap:8px;padding:5px 65px}}.argument article{{display:grid;grid-template-columns:130px 1fr;align-items:center;margin:0 auto;border:1px solid var(--green2);background:#ecf6eb;padding:7px 12px}}.argument article:nth-child(1),.argument article:nth-child(4){{background:#faf6e5;border-color:var(--gold)}}.argument article:nth-child(5){{background:#fdeeee;border-color:var(--red)}}.argument article:nth-child(1){{width:100%}}.argument article:nth-child(2){{width:92%}}.argument article:nth-child(3){{width:84%}}.argument article:nth-child(4){{width:76%}}.argument article:nth-child(5){{width:68%}}.argument b{{font-size:9px;color:var(--green)}}.argument article:nth-child(1) b,.argument article:nth-child(4) b,.argument article:nth-child(5) b{{color:var(--red)}}.argument span{{font-size:11px;text-align:center}}.rubric{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 22px;padding:10px 22px}}.rubric article{{text-align:center}}.rubric b{{display:block;color:var(--green);font-size:10px;margin-bottom:7px}}.rubric span{{display:grid;place-items:center;border:1px solid var(--green2);background:#ecf6eb;min-height:80px;padding:10px;font-size:12px}}.verdict header{{text-align:center;padding:8px 40px}}.verdict header b{{color:var(--green);font-size:10px}}.verdict header p{{font:400 21px/1.25 Georgia,serif}}.verdict>div{{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:15px 50px}}.verdict article{{border:1px solid var(--green2);background:#ecf6eb;padding:14px}}.verdict article:nth-child(2){{border-color:var(--red);background:#fdeeee}}.verdict article b{{color:var(--green);font-size:9px}}.verdict article:nth-child(2) b{{color:var(--red)}}.verdict article span{{display:block;font-size:12px;margin-top:8px}}.verdict footer{{margin:18px auto 0;width:66%;border:1px solid var(--gold);background:#faf6e5;padding:10px;text-align:center;color:var(--green);font-weight:800;font-size:11px}}.sourceVisual{{height:100%;display:grid;place-items:center;position:relative;overflow:hidden}}.sourceVisual img{{max-width:100%;max-height:100%;object-fit:contain}}.sourceVisual small{{position:absolute;right:2px;bottom:2px;background:#fff;padding:3px 6px;color:var(--green);font-size:6px;font-weight:800}}
+    @media(max-width:850px){{.deck{{grid-template-columns:1fr}}.rail{{display:none}}.slide{{width:96vw}}.visual{{height:calc(100% - 120px)}}}}
     '''
-    js='''<script>(function(){const s=[...document.querySelectorAll('.slide')],b=[...document.querySelectorAll('.thumb')];function go(i){s.forEach((x,j)=>x.classList.toggle('show',j===i));b.forEach((x,j)=>x.classList.toggle('active',j===i));}b.forEach((x,i)=>x.onclick=()=>go(i));document.onkeydown=e=>{let i=s.findIndex(x=>x.classList.contains('show'));if(e.key==='ArrowRight')go(Math.min(s.length-1,i+1));if(e.key==='ArrowLeft')go(Math.max(0,i-1));};})();</script>'''
+    js = '''<script>(function(){const s=[...document.querySelectorAll('.slide')],b=[...document.querySelectorAll('.thumb')];function go(i){s.forEach((x,j)=>x.classList.toggle('show',j===i));b.forEach((x,j)=>x.classList.toggle('active',j===i));}b.forEach((x,i)=>x.onclick=()=>go(i));document.onkeydown=e=>{let i=s.findIndex(x=>x.classList.contains('show'));if(e.key==='ArrowRight'||e.key==='PageDown')go(Math.min(s.length-1,i+1));if(e.key==='ArrowLeft'||e.key==='PageUp')go(Math.max(0,i-1));};})();</script>'''
     return f'<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{_h(bp.lecture_title)} · ISCARB Presenter</title><style>{css}</style></head><body><div class="deck"><aside class="rail"><div class="brand">ISCARB · CIMT-native Presenter</div><div class="state">{_h(release_state)} · 20 units · 90 minutes</div>{"".join(thumbs)}</aside><main class="stage">{"".join(slides)}</main></div>{js}</body></html>'
