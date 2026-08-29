@@ -24,21 +24,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Resolve expected production version
+      - name: Resolve expected production version from active uvicorn module
         id: version
         shell: bash
         run: |
           set -euo pipefail
           expected=$(python - <<'PY'
+          import re
           from pathlib import Path
-          text=Path('iscarb-studio/app/start.py').read_text(encoding='utf-8')
+
+          run_text=Path('iscarb-studio/run.py').read_text(encoding='utf-8')
+          m=re.search(r'uvicorn\.run\(["\']app\.([A-Za-z0-9_]+):app["\']', run_text)
+          if not m:
+              raise SystemExit('Could not resolve active uvicorn module from iscarb-studio/run.py')
+          module=m.group(1)
+          path=Path('iscarb-studio/app')/(module+'.py')
+          text=path.read_text(encoding='utf-8')
           value=''
           for line in text.splitlines():
               if line.strip().startswith('PUBLIC_VERSION') and '=' in line:
                   value=line.split('=',1)[1].strip().strip('"').strip("'")
                   break
           if not value:
-              raise SystemExit('Could not resolve PUBLIC_VERSION from app/start.py')
+              raise SystemExit(f'Could not resolve PUBLIC_VERSION from {path}')
           print(value)
           PY
           )
@@ -97,7 +105,7 @@ jobs:
             fi
             echo "Render API deployment accepted."
           else
-            echo "::warning::Production is behind the repository, but no Render deploy credential is configured in GitHub. Render Blueprint auto-deploy or a manual Render deploy must advance the service. This workflow will not mark the repository failed solely for missing external credentials."
+            echo "::warning::Production is behind the active application version, but no Render deploy credential is configured in GitHub. Render Blueprint auto-deploy is expected to advance the service; the strict release acceptance workflow independently verifies that it does."
           fi
 
       - name: Verify production version when possible
@@ -110,9 +118,9 @@ jobs:
           expected=os.environ['EXPECTED_VERSION']
           url='https://iscarb-lecture-studio.onrender.com/api/health'
           last=''
-          for _ in range(30):
+          for _ in range(36):
               try:
-                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/2.0'})
+                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/3.0'})
                   with urllib.request.urlopen(req,timeout=30) as r:
                       data=json.loads(r.read().decode())
                   last=str(data)
