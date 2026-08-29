@@ -36,7 +36,6 @@ jobs:
           import io
           import json
           import os
-          import sys
           import time
           import zipfile
           import requests
@@ -45,14 +44,14 @@ jobs:
           EXPECTED=os.environ['EXPECTED_VERSION']
           SOURCE=os.environ['SECURITY_SOURCE']
           S=requests.Session()
-          S.headers.update({'User-Agent':'ISCARB-production-e2e/1.0'})
+          S.headers.update({'User-Agent':'ISCARB-production-e2e/1.1'})
 
           def get(path, **kw):
               return S.get(BASE+path, timeout=90, **kw)
 
           print('Waiting for Render to serve expected version', EXPECTED)
           last=''
-          for i in range(72):
+          for _ in range(72):
               try:
                   r=get('/api/health')
                   last=f'{r.status_code} {r.text[:400]}'
@@ -105,8 +104,6 @@ jobs:
           assert get('/api/jobs/not-a-real-job/presenter').status_code==404
           assert get('/api/jobs/not-a-real-job/export/pptx').status_code==404
 
-          # Compile the exact Security Engineering source used by the Faculty Studio.
-          # Retry a whole job only for transient upstream model capacity, never for quota exhaustion.
           successful_job=None
           final_job=None
           for compile_attempt in range(1,4):
@@ -155,8 +152,18 @@ jobs:
           assert any('slideshare.net' in x.lower() or 'ch14-5148075' in x.lower() for x in bp['source_manifest']), bp['source_manifest']
           assert j['status'] in {'ready','blocked'}
           print('Blueprint OK:', bp['lecture_title'], 'status=', j['status'])
+          if j.get('audit'):
+              print('AUDIT FLAGS', json.dumps({
+                  'overall_pass': j['audit'].get('overall_pass'),
+                  'source_fidelity_pass': j['audit'].get('source_fidelity_pass'),
+                  'engineering_rigor_pass': j['audit'].get('engineering_rigor_pass'),
+                  'cumulative_fidelity_pass': j['audit'].get('cumulative_fidelity_pass'),
+                  'readiness_alignment_pass': j['audit'].get('readiness_alignment_pass'),
+                  'provenance_separation_pass': j['audit'].get('provenance_separation_pass'),
+              }, ensure_ascii=False))
+              print('AUDIT ISSUES', json.dumps(j['audit'].get('issues') or [], ensure_ascii=False))
+          print('DETERMINISTIC CHECKS', json.dumps(j.get('deterministic_checks') or {}, ensure_ascii=False, sort_keys=True))
 
-          # Every faculty output must be real, downloadable and structurally recognizable.
           endpoints={
               'preview':('/api/jobs/'+job_id+'/presenter','html'),
               'pptx':('/api/jobs/'+job_id+'/export/pptx','zip'),
