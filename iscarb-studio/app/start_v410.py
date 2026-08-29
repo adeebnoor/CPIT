@@ -8,6 +8,7 @@ Release goals:
 - Add source-native computing knowledge typing and adaptive visual grammar.
 - Drive the actual browser Presenter and PPTX with that adaptive grammar.
 - Keep exactly 20 Units / 90 minutes / five CLOs.
+- Apply the KAU visual-identity guide to the public Faculty Studio interface.
 """
 
 from pathlib import Path
@@ -70,6 +71,7 @@ def _health_v410():
         "visual_lecture_engine": "CIMT+",
         "presenter_renderer": "source-native-v4.1-preview-and-pptx",
         "release_contract": "semantic audit PASS AND every v12 deterministic gate PASS",
+        "interface_identity": "KAU visual identity guide palette + Alexandria hierarchy + line-wave motif; ISCARB project mark retained; no institutional-endorsement claim",
     })
     return data
 
@@ -87,6 +89,14 @@ app.router.routes[:] = [
 def faculty_studio_v410():
     path = Path(__file__).with_name("static") / "index_v410.html"
     body = path.read_text(encoding="utf-8")
+    identity_css = '<link rel="stylesheet" href="/static/kau_identity_v410.css?v=4.1.0-kau">'
+    identity_note = (
+        '<div class="kauIdentityNote"><b>Visual identity:</b> Interface styling follows the '
+        'King Abdulaziz University visual-identity guide for palette, typography hierarchy and line-wave motifs. '
+        'ISCARB remains the project identity; this interface does not by itself constitute an official institutional endorsement.</div>'
+    )
+    body = body.replace("</head>", identity_css + "\n</head>")
+    body = body.replace("</body>", identity_note + "\n</body>")
     return HTMLResponse(body, headers={
         "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
         "Pragma": "no-cache",
