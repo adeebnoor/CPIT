@@ -6,6 +6,7 @@ Release goals:
 - Preserve v4.0.4 release consistency, provenance and ETEC discipline.
 - Add atomic chapter/source coverage across computing disciplines.
 - Add source-native computing knowledge typing and adaptive visual grammar.
+- Drive the actual browser Presenter and PPTX with that adaptive grammar.
 - Keep exactly 20 Units / 90 minutes / five CLOs.
 """
 
@@ -15,6 +16,8 @@ from fastapi.responses import HTMLResponse
 from . import start_v404 as prev
 from .gate_v12 import deterministic_gate as gate_v12
 from .cimt_plus import normalize_cimt_plus
+from . import faculty_visual as faculty_visual
+from .cimt_render import cimt_visual_html, export_cimt_presenter_pptx
 
 engine = prev.engine
 app = prev.app
@@ -32,6 +35,11 @@ def _timebox_v410(bp, profile, bundle):
 engine.deterministic_gate = gate_v12
 engine.apply_90_minute_timebox = _timebox_v410
 
+# The Presenter must embody the plan, not merely store it in JSON.
+_original_visual_html = faculty_visual._visual_html
+faculty_visual._visual_html = lambda bp, unit: cimt_visual_html(bp, unit, _original_visual_html)
+faculty_visual.ve.export_presenter_pptx = export_cimt_presenter_pptx
+
 
 def _health_v410():
     data = prev._health_v404()
@@ -40,7 +48,7 @@ def _health_v410():
         "pipeline": PIPELINE_ID,
         "deterministic_gate": "v12-cimt-plus-computing-coverage-on-v11",
         "faculty_experience": "cimt-plus-computing-studio",
-        "visual_output": "cimt-plus-source-native-visual-grammar",
+        "visual_output": "cimt-plus-source-native-visual-grammar-live-preview-and-pptx",
         "computing_scope": [
             "computer science", "information technology", "software engineering",
             "information systems", "cybersecurity", "AI/ML", "data science",
@@ -60,6 +68,7 @@ def _health_v410():
         "full_primary_coverage": True,
         "primary_topic_deferral_allowed": False,
         "visual_lecture_engine": "CIMT+",
+        "presenter_renderer": "source-native-v4.1-preview-and-pptx",
         "release_contract": "semantic audit PASS AND every v12 deterministic gate PASS",
     })
     return data
