@@ -19,7 +19,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -105,7 +105,7 @@ jobs:
             fi
             echo "Render API deployment accepted."
           else
-            echo "::warning::Production is behind the active application version and no Render deploy credential is configured in GitHub."
+            echo "No explicit Render trigger credential is configured. Relying on Render Blueprint autoDeployTrigger=commit for pushes to main, then verifying production below."
           fi
 
       - name: Verify production version
@@ -118,7 +118,7 @@ jobs:
           expected=os.environ['EXPECTED_VERSION']
           url='https://iscarb-lecture-studio.onrender.com/api/health'
           last=''
-          for _ in range(36):
+          for _ in range(60):
               try:
                   req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/4.3'})
                   with urllib.request.urlopen(req,timeout=30) as r:
@@ -134,5 +134,5 @@ jobs:
               except Exception as e:
                   last=repr(e)
               time.sleep(10)
-          raise SystemExit('Production did not advance to expected version during this verification window. Last='+last[:1000])
+          raise SystemExit('Production did not advance to expected version during the verification window. Confirm the Render service is linked to main with autoDeploy enabled, or configure RENDER_DEPLOY_HOOK_URL / RENDER_API_KEY + RENDER_SERVICE_ID. Last='+last[:1000])
           PY
