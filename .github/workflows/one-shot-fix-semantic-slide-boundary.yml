@@ -1,0 +1,170 @@
+name: One-shot Fix Semantic Slide Boundary
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-fix-semantic-slide-boundary.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Make semantic source boundary authoritative during reconciliation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('iscarb-studio/app/source_profile_fallback.py')
+          s=p.read_text(encoding='utf-8')
+
+          marker='def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:\n'
+          assert marker in s
+          helper=r'''def _semantic_slide_ceiling(profile: SourceProfile) -> int | None:
+              """Return an explicit upper bound when Source Lock identified host-page material outside P1.
+
+              Semantic Source Lock can see page context that flattened URL text loses. When it
+              explicitly says later slides are external/recommended and names the core lecture
+              range, reconciliation must not re-introduce those host artifacts as deterministic
+              P1 checkpoints.
+              """
+              candidates: list[int] = []
+              for warning in profile.source_warnings or []:
+                  text = str(warning or "")
+                  # Strongest form: "core ... (Slides 1-58)" / "primary ... Slides 1-58".
+                  for m in re.finditer(
+                      r"(?:core|primary|actual|lecture|chapter)[^.\n]{0,180}?slides?\s*1\s*[-–—]\s*(\d{1,4})",
+                      text,
+                      flags=re.I,
+                  ):
+                      candidates.append(int(m.group(1)))
+                  # Also accept the range before the qualifier.
+                  for m in re.finditer(
+                      r"slides?\s*1\s*[-–—]\s*(\d{1,4})[^.\n]{0,180}?(?:core|primary|actual|lecture|chapter)",
+                      text,
+                      flags=re.I,
+                  ):
+                      candidates.append(int(m.group(1)))
+                  # If Source Lock explicitly marks a later range as external/unrelated/
+                  # recommended, the slide immediately before that range is the ceiling.
+                  for m in re.finditer(
+                      r"slides?\s*(\d{1,4})\s*(?:through|to|[-–—])\s*(\d{1,4})[^.\n]{0,220}?(?:external|unrelated|recommended|filter(?:ed)?\s*out|host[- ]page)",
+                      text,
+                      flags=re.I,
+                  ):
+                      start = int(m.group(1))
+                      if start > 1:
+                          candidates.append(start - 1)
+              valid = [x for x in candidates if 2 <= x <= 500]
+              return min(valid) if valid else None
+
+
+          '''
+          helper='\n'.join(line[10:] if line.startswith('          ') else line for line in helper.splitlines())+'\n'
+          if 'def _semantic_slide_ceiling' not in s:
+              s=s.replace(marker,helper+marker,1)
+
+          old='''    semantic_slides: set[int] = set()
+              for row in ai_profile.coverage_items:
+                  semantic_slides.update(_anchor_slides(row.source_anchor))
+
+              merged = list(ai_profile.coverage_items)
+          '''
+          old='\n'.join(line[10:] if line.startswith('          ') else line for line in old.splitlines())+'\n'
+          new='''    semantic_slides: set[int] = set()
+              for row in ai_profile.coverage_items:
+                  semantic_slides.update(_anchor_slides(row.source_anchor))
+              semantic_ceiling = _semantic_slide_ceiling(ai_profile)
+
+              merged = list(ai_profile.coverage_items)
+          '''
+          new='\n'.join(line[10:] if line.startswith('          ') else line for line in new.splitlines())+'\n'
+          assert old in s
+          s=s.replace(old,new,1)
+
+          old='''        item_slides = _anchor_slides(item.source_anchor)
+                  if item_slides and item_slides.issubset(semantic_slides):
+                      continue
+          '''
+          old='\n'.join(line[10:] if line.startswith('          ') else line for line in old.splitlines())+'\n'
+          new='''        item_slides = _anchor_slides(item.source_anchor)
+                  if semantic_ceiling and item_slides and max(item_slides) > semantic_ceiling:
+                      continue
+                  if item_slides and item_slides.issubset(semantic_slides):
+                      continue
+          '''
+          new='\n'.join(line[10:] if line.startswith('          ') else line for line in new.splitlines())+'\n'
+          assert old in s
+          s=s.replace(old,new,1)
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Add production-shape regression
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('iscarb-studio/tests/test_slideshare_source_lock.py')
+          s=p.read_text(encoding='utf-8')
+          anchor="\nif __name__=='__main__': unittest.main()\n"
+          assert anchor in s
+          test=r'''
+              def test_semantic_warning_blocks_flattened_host_slides_without_player_metadata(self):
+                  td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup)
+                  p=Path(td.name)/'flattened-slideshare.txt'
+                  # Production shape: no `1 / 58` player metadata and no literal
+                  # `Recommended` separator survive materialization.
+                  p.write_text('''SLIDE 3: Software process definition with specification design implementation validation evolution and process descriptions
+          SLIDE 20: Process activities include specification development validation evolution and interleaved managerial activities
+          SLIDE 71: Comprehensive Overview of Software Processes and Models for Effective Development with process model architecture and testing
+          SLIDE 73: Comprehensive Overview of Software Processes and Models in Modern Development with process model design and validation
+          ''',encoding='utf-8')
+                  bundle=SourceBundle(items=[SourceItem('primary','P1','slideshare',p,'slideshare')],lecture_focus='',session_minutes=90)
+                  semantic=self._semantic()
+                  semantic.source_warnings=[
+                      'Slides 59 through 92 contain external slide title artifacts and unrelated topic titles/file names which must be filtered out in favor of the core Chapter 2 content (Slides 1-58).'
+                  ]
+                  profile=reconcile_source_profile(semantic,bundle)
+                  anchors={x.source_anchor for x in profile.coverage_items}
+                  self.assertIn('[P1] SLIDE 20',anchors)
+                  self.assertNotIn('[P1] SLIDE 71',anchors)
+                  self.assertNotIn('[P1] SLIDE 73',anchors)
+          '''
+          test='\n'.join(line[10:] if line.startswith('          ') else line for line in test.splitlines())+'\n'
+          s=s.replace(anchor,test+anchor,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Run full regression suite
+        working-directory: iscarb-studio
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m pip install -r requirements.txt
+          python -m compileall -q app tests
+          python -m unittest discover -s tests -v
+
+      - name: Hygiene and commit tested repair
+        run: |
+          set -euo pipefail
+          find iscarb-studio -type d -name __pycache__ -prune -exec rm -rf {} +
+          git diff --check
+          ! git status --short | grep -E '\.pyc$|__pycache__' || exit 1
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          rm -f .github/workflows/one-shot-sommerville-ch2-after-deploy.yml \
+                .github/workflows/one-shot-fetch-live-ch2-279f.yml \
+                .github/workflows/one-shot-fix-semantic-slide-boundary.yml
+          git add -A
+          git commit -m 'Honor semantic source boundaries during SlideShare reconciliation'
+          git push origin HEAD:main
