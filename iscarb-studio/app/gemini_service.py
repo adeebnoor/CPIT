@@ -16,6 +16,7 @@ from .quality_rules import QUALITY_ADDENDUM, AUDIT_ADDENDUM, REPAIR_ADDENDUM
 from .source_bundle import SourceBundle
 
 T = TypeVar("T", bound=BaseModel)
+MAX_TRANSIENT_ATTEMPTS = 3
 
 
 class GeminiNotConfigured(RuntimeError):
@@ -23,7 +24,7 @@ class GeminiNotConfigured(RuntimeError):
 
 
 class GeminiService:
-    """Source-grounded Gemini client with quota-aware automatic model failover."""
+    """Source-grounded Gemini client with capacity-aware retry and model failover."""
 
     def __init__(self, model: str | None = None):
         self.model = model or "auto"
@@ -58,19 +59,21 @@ class GeminiService:
         text = str(exc).lower()
         return any(marker in text for marker in (
             "429", "500", "502", "503", "504", "unavailable", "high demand",
-            "temporarily overloaded", "rate limit", "internal server error",
+            "temporarily overloaded", "temporarily unavailable", "rate limit",
+            "internal server error", "service unavailable",
         ))
 
     @staticmethod
     def _backoff(attempt: int) -> None:
-        time.sleep(1.25 * (attempt + 1))
+        # Short exponential backoff: 2s, 4s, then fail over to the next model.
+        time.sleep(min(2.0 * (2 ** max(0, attempt)), 8.0))
 
     def _upload(self, path: Path):
         key = str(path.resolve())
         if key in self._uploaded:
             return self._uploaded[key]
         last_exc: Exception | None = None
-        for attempt in range(2):
+        for attempt in range(MAX_TRANSIENT_ATTEMPTS):
             try:
                 uploaded = self.client.files.upload(file=str(path))
                 self._uploaded[key] = uploaded
@@ -79,7 +82,7 @@ class GeminiService:
                 last_exc = exc
                 if self._is_quota_exhausted(exc):
                     raise
-                if not self._is_retryable(exc) or attempt == 1:
+                if not self._is_retryable(exc) or attempt >= MAX_TRANSIENT_ATTEMPTS - 1:
                     raise
                 self._backoff(attempt)
         raise last_exc or RuntimeError("Source upload failed")
@@ -140,19 +143,38 @@ class GeminiService:
 
         for candidate in self._models_for(model):
             full_prompt = base_prompt
-            for attempt in range(2):
+            format_repair_used = False
+            transport_attempt = 0
+
+            while transport_attempt < MAX_TRANSIENT_ATTEMPTS:
                 try:
-                    config = self._types.GenerateContentConfig(response_mime_type="application/json", thinking_config=self._types.ThinkingConfig(thinking_level=thinking_level))
-                    response = self.client.models.generate_content(model=candidate, contents=[*source_contents, full_prompt], config=config)
+                    config = self._types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        thinking_config=self._types.ThinkingConfig(thinking_level=thinking_level),
+                    )
+                    response = self.client.models.generate_content(
+                        model=candidate,
+                        contents=[*source_contents, full_prompt],
+                        config=config,
+                    )
                     self.active_model = candidate
                     last_text = response.text or ""
                     try:
                         return schema.model_validate_json(last_text)
                     except ValidationError as validation_exc:
-                        if attempt == 0:
-                            full_prompt += "\n\nFORMAT REPAIR ONLY: Previous JSON failed local validation. Return the complete corrected JSON object.\nVALIDATION_ERROR:\n" + str(validation_exc)[:2400] + "\nPREVIOUS_JSON:\n" + last_text[:50_000]
+                        if not format_repair_used:
+                            format_repair_used = True
+                            full_prompt += (
+                                "\n\nFORMAT REPAIR ONLY: Previous JSON failed local validation. "
+                                "Return the complete corrected JSON object.\nVALIDATION_ERROR:\n"
+                                + str(validation_exc)[:2400]
+                                + "\nPREVIOUS_JSON:\n"
+                                + last_text[:50_000]
+                            )
                             continue
-                        raise RuntimeError(f"Gemini returned JSON that did not match the required ISCARB structure: {validation_exc}") from validation_exc
+                        raise RuntimeError(
+                            f"Gemini returned JSON that did not match the required ISCARB structure: {validation_exc}"
+                        ) from validation_exc
                 except Exception as exc:
                     last_exc = exc
                     if isinstance(exc, RuntimeError) and "did not match" in str(exc):
@@ -162,10 +184,11 @@ class GeminiService:
                         break
                     if not self._is_retryable(exc):
                         raise
-                    if attempt == 0:
-                        self._backoff(attempt)
-                        continue
-                    break
+
+                    transport_attempt += 1
+                    if transport_attempt >= MAX_TRANSIENT_ATTEMPTS:
+                        break
+                    self._backoff(transport_attempt - 1)
 
         if quota_exhausted_models and last_exc is not None:
             names = ", ".join(dict.fromkeys(quota_exhausted_models))
@@ -179,7 +202,14 @@ class GeminiService:
         raise RuntimeError(f"No Gemini model completed the request. Last output: {last_text[:500]}")
 
     def profile_source(self, bundle: SourceBundle) -> SourceProfile:
-        result = self._generate_structured(bundle=bundle, prompt=SOURCE_PROFILE_PROMPT, schema=SourceProfile, extra_text="\n\nBUNDLE MANIFEST:\n" + bundle.manifest_text(), preferred_model="gemini-3.5-flash-lite", thinking_level="minimal")
+        result = self._generate_structured(
+            bundle=bundle,
+            prompt=SOURCE_PROFILE_PROMPT,
+            schema=SourceProfile,
+            extra_text="\n\nBUNDLE MANIFEST:\n" + bundle.manifest_text(),
+            preferred_model="gemini-3.5-flash-lite",
+            thinking_level="minimal",
+        )
         result.session_minutes = 90
         result.source_manifest = bundle.manifest_lines()
         if not result.in_scope_families:
@@ -187,13 +217,67 @@ class GeminiService:
         return result
 
     def generate_blueprint(self, bundle: SourceBundle, profile: SourceProfile) -> Blueprint:
-        extra = "\nSOURCE PROFILE (90-minute full-coverage contract):\n" + profile.model_dump_json(indent=2) + "\n\nBUNDLE MANIFEST:\n" + bundle.manifest_text() + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n" + READINESS_CONTEXT + "\n\nOFFICIAL ETEC SLO-TO-KLO MAP (must be copied exactly; do not infer):\n" + READINESS_KLO_MAP_CONTEXT
-        return self._generate_structured(bundle=bundle, prompt=MASTER_PROMPT + QUALITY_ADDENDUM, schema=Blueprint, extra_text=extra, preferred_model=self.model, thinking_level="low")
+        extra = (
+            "\nSOURCE PROFILE (90-minute full-coverage contract):\n"
+            + profile.model_dump_json(indent=2)
+            + "\n\nBUNDLE MANIFEST:\n"
+            + bundle.manifest_text()
+            + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n"
+            + READINESS_CONTEXT
+            + "\n\nOFFICIAL ETEC SLO-TO-KLO MAP (must be copied exactly; do not infer):\n"
+            + READINESS_KLO_MAP_CONTEXT
+        )
+        return self._generate_structured(
+            bundle=bundle,
+            prompt=MASTER_PROMPT + QUALITY_ADDENDUM,
+            schema=Blueprint,
+            extra_text=extra,
+            preferred_model=self.model,
+            thinking_level="low",
+        )
 
     def audit(self, bundle: SourceBundle, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
-        extra = "\nBUNDLE MANIFEST:\n" + bundle.manifest_text() + "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n" + READINESS_KLO_MAP_CONTEXT + "\nCANDIDATE BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2) + "\nDETERMINISTIC CHECK FAILURES:\n" + json.dumps(deterministic_failures or [], ensure_ascii=False)
-        return self._generate_structured(bundle=bundle, prompt=AUDIT_PROMPT + AUDIT_ADDENDUM, schema=AuditReport, extra_text=extra, preferred_model="gemini-3.5-flash", thinking_level="low")
+        extra = (
+            "\nBUNDLE MANIFEST:\n"
+            + bundle.manifest_text()
+            + "\nETEC IT 2025 READINESS PROFILE:\n"
+            + READINESS_CONTEXT
+            + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n"
+            + READINESS_KLO_MAP_CONTEXT
+            + "\nCANDIDATE BLUEPRINT:\n"
+            + blueprint.model_dump_json(by_alias=True, indent=2)
+            + "\nDETERMINISTIC CHECK FAILURES:\n"
+            + json.dumps(deterministic_failures or [], ensure_ascii=False)
+        )
+        return self._generate_structured(
+            bundle=bundle,
+            prompt=AUDIT_PROMPT + AUDIT_ADDENDUM,
+            schema=AuditReport,
+            extra_text=extra,
+            preferred_model="gemini-3.5-flash",
+            thinking_level="low",
+        )
 
     def repair(self, bundle: SourceBundle, blueprint: Blueprint, audit: AuditReport, deterministic_failures: list[str]) -> Blueprint:
-        extra = "\nBUNDLE MANIFEST:\n" + bundle.manifest_text() + "\nETEC IT 2025 READINESS PROFILE:\n" + READINESS_CONTEXT + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n" + READINESS_KLO_MAP_CONTEXT + "\nCURRENT BLUEPRINT:\n" + blueprint.model_dump_json(by_alias=True, indent=2) + "\nAUDIT REPORT:\n" + audit.model_dump_json(indent=2) + "\nDETERMINISTIC FAILURES:\n" + json.dumps(deterministic_failures, ensure_ascii=False)
-        return self._generate_structured(bundle=bundle, prompt=REPAIR_PROMPT + REPAIR_ADDENDUM, schema=Blueprint, extra_text=extra, preferred_model=self.model, thinking_level="low")
+        extra = (
+            "\nBUNDLE MANIFEST:\n"
+            + bundle.manifest_text()
+            + "\nETEC IT 2025 READINESS PROFILE:\n"
+            + READINESS_CONTEXT
+            + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n"
+            + READINESS_KLO_MAP_CONTEXT
+            + "\nCURRENT BLUEPRINT:\n"
+            + blueprint.model_dump_json(by_alias=True, indent=2)
+            + "\nAUDIT REPORT:\n"
+            + audit.model_dump_json(indent=2)
+            + "\nDETERMINISTIC FAILURES:\n"
+            + json.dumps(deterministic_failures, ensure_ascii=False)
+        )
+        return self._generate_structured(
+            bundle=bundle,
+            prompt=REPAIR_PROMPT + REPAIR_ADDENDUM,
+            schema=Blueprint,
+            extra_text=extra,
+            preferred_model=self.model,
+            thinking_level="low",
+        )
