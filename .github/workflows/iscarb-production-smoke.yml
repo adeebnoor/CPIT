@@ -1,0 +1,198 @@
+name: ISCARB Production End-to-End
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'iscarb-studio/**'
+      - 'render.yaml'
+      - '.github/workflows/iscarb-production-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iscarb-production-smoke
+  cancel-in-progress: true
+
+jobs:
+  production-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test client
+        run: python -m pip install requests
+      - name: Wait for Render deployment and test live production end to end
+        env:
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+          EXPECTED_VERSION: 4.0.3
+          SECURITY_SOURCE: https://www.slideshare.net/slideshow/ch14-5148075/5148075
+        run: |
+          python - <<'PY'
+          import io
+          import json
+          import os
+          import sys
+          import time
+          import zipfile
+          import requests
+
+          BASE=os.environ['BASE_URL'].rstrip('/')
+          EXPECTED=os.environ['EXPECTED_VERSION']
+          SOURCE=os.environ['SECURITY_SOURCE']
+          S=requests.Session()
+          S.headers.update({'User-Agent':'ISCARB-production-e2e/1.0'})
+
+          def get(path, **kw):
+              return S.get(BASE+path, timeout=90, **kw)
+
+          print('Waiting for Render to serve expected version', EXPECTED)
+          last=''
+          for i in range(72):
+              try:
+                  r=get('/api/health')
+                  last=f'{r.status_code} {r.text[:400]}'
+                  if r.ok:
+                      h=r.json()
+                      print('health', h.get('version'), h.get('pipeline'))
+                      if h.get('version') == EXPECTED:
+                          break
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(15)
+          else:
+              raise AssertionError('Render never served expected version. Last response: '+last)
+
+          h=get('/api/health').json()
+          assert h['version']==EXPECTED
+          assert h['capacity_retry_attempts_per_model']==3
+          assert h['capacity_failover'] is True
+          assert h['no_blueprint_exports']=='hidden'
+          assert h['no_blueprint_gate_state']=='NOT RUN'
+          assert h['visual_lecture_engine']=='v2'
+          assert h['source_library_verified'] is True
+          assert h['verified_source_count']==8
+
+          home=get('/')
+          assert home.status_code==200, home.text[:1000]
+          html=home.text
+          required=[
+              'v4.0.3 · Capacity-Safe Visual Lecture Engine v2',
+              'iscarb-approved-hero-inline',
+              'data:image/jpeg;base64,',
+              'NOT RUN',
+              'Waiting for a valid Blueprint',
+              'Retry analysis',
+              SOURCE,
+              'Original Source Library',
+              'Upgrade My Lecture',
+              'Visual Presenter',
+              'Faculty Reading Pack',
+              'Instructor Guide',
+              'Student Activity Pack',
+              'Blueprint & Readiness',
+          ]
+          for needle in required:
+              assert needle in html, f'homepage missing {needle!r}'
+
+          starter=get('/starter-kit')
+          assert starter.status_code==200
+          assert 'ISCARB Faculty Starter Kit' in starter.text
+          assert get('/api/jobs/not-a-real-job/presenter').status_code==404
+          assert get('/api/jobs/not-a-real-job/export/pptx').status_code==404
+
+          # Compile the exact Security Engineering source used by the Faculty Studio.
+          # Retry a whole job only for transient upstream model capacity, never for quota exhaustion.
+          successful_job=None
+          final_job=None
+          for compile_attempt in range(1,4):
+              print(f'Production compile attempt {compile_attempt}: {SOURCE}')
+              r=S.post(BASE+'/api/compile', data={
+                  'primary_url': SOURCE,
+                  'supporting_urls':'',
+                  'lecture_focus':'',
+                  'model':'auto',
+                  'repair_rounds':'0',
+              }, timeout=120)
+              assert r.status_code==200, f'compile submit failed {r.status_code}: {r.text[:1000]}'
+              job_id=r.json()['job_id']
+              print('job', job_id)
+              deadline=time.time()+1100
+              while time.time()<deadline:
+                  jr=get('/api/jobs/'+job_id)
+                  assert jr.status_code==200, jr.text[:1000]
+                  j=jr.json()
+                  final_job=j
+                  print('status', j.get('status'), j.get('progress'), j.get('message','')[:160])
+                  if j.get('status') in {'ready','blocked','error'}:
+                      if j.get('blueprint'):
+                          successful_job=(job_id,j)
+                          break
+                      text=((j.get('error') or '')+' '+(j.get('message') or '')).lower()
+                      if any(x in text for x in ['quota','resource_exhausted','free_tier_requests']):
+                          raise AssertionError('Production Gemini quota exhausted before Blueprint creation: '+text[:1500])
+                      if any(x in text for x in ['503','unavailable','high demand','temporarily overloaded','service unavailable']):
+                          print('Transient capacity ended job before Blueprint; full-job retry will be used.')
+                          break
+                      raise AssertionError('Compile ended without Blueprint: '+json.dumps(j)[:4000])
+                  time.sleep(8)
+              if successful_job:
+                  break
+              time.sleep(45*compile_attempt)
+
+          assert successful_job is not None, 'No production job produced a Blueprint after transient retries. Last='+json.dumps(final_job)[:5000]
+          job_id,j=successful_job
+          bp=j['blueprint']
+          assert bp['session_minutes']==90, bp.get('session_minutes')
+          assert len(bp['units'])==20, len(bp['units'])
+          assert [u['number'] for u in bp['units']]==list(range(1,21))
+          assert len(bp['clos'])==5
+          assert bp.get('source_manifest')
+          assert any('slideshare.net' in x.lower() or 'ch14-5148075' in x.lower() for x in bp['source_manifest']), bp['source_manifest']
+          assert j['status'] in {'ready','blocked'}
+          print('Blueprint OK:', bp['lecture_title'], 'status=', j['status'])
+
+          # Every faculty output must be real, downloadable and structurally recognizable.
+          endpoints={
+              'preview':('/api/jobs/'+job_id+'/presenter','html'),
+              'pptx':('/api/jobs/'+job_id+'/export/pptx','zip'),
+              'presenter_pdf':('/api/jobs/'+job_id+'/export/presenter-pdf','pdf'),
+              'reading_pdf':('/api/jobs/'+job_id+'/export/pdf','pdf'),
+              'instructor_docx':('/api/jobs/'+job_id+'/export/docx','zip'),
+              'student_docx':('/api/jobs/'+job_id+'/export/student','zip'),
+              'blueprint_json':('/api/jobs/'+job_id+'/export/json','json'),
+          }
+          for name,(path,kind) in endpoints.items():
+              rr=get(path)
+              assert rr.status_code==200, f'{name} HTTP {rr.status_code}: {rr.text[:1000] if "text" in rr.headers.get("content-type","") else rr.content[:100]}'
+              data=rr.content
+              if kind=='html':
+                  text=rr.text
+                  assert '<html' in text.lower() or '<!doctype html' in text.lower()
+                  assert 'Security' in text or bp['lecture_title'] in text
+                  assert len(data)>5000
+              elif kind=='pdf':
+                  assert data.startswith(b'%PDF'), f'{name} not PDF: {data[:20]!r}'
+                  assert len(data)>8000, f'{name} too small: {len(data)}'
+              elif kind=='zip':
+                  assert data.startswith(b'PK'), f'{name} not OOXML ZIP: {data[:20]!r}'
+                  assert len(data)>8000, f'{name} too small: {len(data)}'
+                  with zipfile.ZipFile(io.BytesIO(data)) as z:
+                      names=z.namelist()
+                      if name=='pptx':
+                          slides=[x for x in names if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
+                          assert len(slides)==20, f'PPTX has {len(slides)} slides, expected 20'
+                      if name.endswith('docx'):
+                          assert 'word/document.xml' in names
+              elif kind=='json':
+                  exported=rr.json()
+                  assert exported['session_minutes']==90
+                  assert len(exported['units'])==20
+              print(name, 'OK', len(data), rr.headers.get('content-type'))
+
+          print('PRODUCTION E2E PASS', job_id, j['status'])
+          PY
