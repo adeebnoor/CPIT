@@ -125,7 +125,7 @@ EER-12 authentic professional artifact.
 
 8. ONE DECISION THREAD — HARD NON-COMPOSITE RULE
 Choose ONE coherent central system for Units 1-20.
-- If P1 contains several examples from different domains (for example patient records AND equity trading), choose EXACTLY ONE as the central system.
+- If P1 contains several examples from different domains, choose EXACTLY ONE as the central system.
 - NEVER fuse two source examples into a hybrid/composite scenario.
 - Other P1 examples may appear only as explicitly labeled comparisons and may not enter the central crisis, named ethical purpose, Saudi context, portfolio, mutation, evidence, or assurance.
 - named_ethical_purpose, Saudi scenario, portfolio, mutation, evidence, and assurance must all refer to the same single central system and domain.
@@ -134,26 +134,26 @@ Choose ONE coherent central system for Units 1-20.
 Units 1–5 IFHAM; 6–10 MARIS; 11–15 ATQAN; 16–20 MAYYIZ.
 
 10. EXACT UNIT FUNCTIONS — DOMINANT PURPOSE
-UNIT 1 — Engineering Crisis + professional/ethical responsibility. Start with incomplete evidence/conflict/human consequence. Do NOT front-load definitions or reveal diagnosis. If core_content exists, use only source-backed observations/evidence, not explanatory teaching. pedagogy_content states named_ethical_purpose tied only to the central system.
+UNIT 1 — Engineering Crisis + professional/ethical responsibility. Start with incomplete evidence/conflict/human consequence. Do NOT front-load definitions or reveal diagnosis.
 UNIT 2 — Domain Spine/System Map of ALL P1 families.
-UNIT 3 — Exactly five measurable CLOs, visibly CLO1…CLO5 in pedagogy_content; core_content MUST be empty because CLOs are ISCARB pedagogy, not source teaching.
-UNIT 4 — H-Stack with EXACTLY these six competencies and these exact names in pedagogy_content: analytical reasoning; engineering judgment; evidence-based reasoning; socio-technical thinking; risk-aware design; ethical responsibility. Do not substitute Foundations/Architecture/Requirements/Testing/Operations/Governance or any other six-part taxonomy.
-UNIT 5 — FIRST-PRINCIPLES PREDICTION GATE. engineering_question itself MUST ask the learner to PREDICT BEFORE seeing/naming the model. Sequence must be PREDICT → CONSTRAINT → DERIVATION → NAMED PRINCIPLE. Do not title the Unit with the final principle if that gives away the answer. Core content should expose source facts/constraints without prematurely giving the derived conclusion.
+UNIT 3 — Exactly five measurable CLOs, visibly CLO1…CLO5 in pedagogy_content; core_content MUST be empty.
+UNIT 4 — H-Stack with EXACTLY these six competencies in pedagogy_content: analytical reasoning; engineering judgment; evidence-based reasoning; socio-technical thinking; risk-aware design; ethical responsibility.
+UNIT 5 — FIRST-PRINCIPLES PREDICTION GATE. engineering_question MUST ask the learner to PREDICT BEFORE seeing/naming the model. Sequence: PREDICT → CONSTRAINT → DERIVATION → NAMED PRINCIPLE.
 UNIT 6 — Mechanism Deep Dive: input → mechanism → output → assumption → failure mode.
-UNIT 7 — Implementation grounded only in supplied mechanisms; student_action may not introduce a new unsupplied control.
-UNIT 8 — At least two defensible source-derived alternatives + explicit trade-off. Synthetic data clearly labeled; prefer normalized units.
-UNIT 9 — Measurement + falsification; state what evidence would force abandonment/revision.
+UNIT 7 — Implementation grounded only in supplied mechanisms.
+UNIT 8 — At least two defensible source-derived alternatives + explicit trade-off.
+UNIT 9 — Measurement + falsification.
 UNIT 10 — MARIS Senior Design Review + KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
-UNIT 11 — SAUDI CONTEXT is the dominant title/question/action. Integrate one or more P1 mechanisms into the same central system under a materially decision-changing Saudi constraint. If no supplied [S#] verifies a Saudi fact, use an explicitly hypothetical Saudi scenario only; never invent national mandates, localization rules, initiatives, regulations, or requirements.
-UNIT 12 — ACCOUNTABILITY is dominant. Source logging/permission mechanisms may be core; ethical/accountability chain belongs in pedagogy. Do not invent immutable logging or other new controls.
-UNIT 13 — TREND/FUTURE is dominant in title/question/action. Use source enduring principles in core. If no supplied [S#] verifies a current trend, frame future technology as a DESIGN EXPLORATION / QUESTION, not a factual adoption claim. No vague external basis.
-UNIT 14 — PRACTITIONER WELLBEING is dominant in title/question/action. Integrate source operational/recovery mechanisms and reason about workload as an ISCARB design consequence. If no supplied [S#] supports a factual claim about burnout/alert fatigue, do not present one as an external fact.
-UNIT 15 — CRITICAL AI LITERACY is dominant in title/question/action while auditing a P1 mechanism. Include exact phrases AI MAY ASSIST and AI MUST NOT BE TRUSTED AUTONOMOUSLY plus Claim→Assumption→Source Check→Test→Failure Search→Human Sign-off. Do not invent claims about specific AI scanner capabilities without [S#] evidence; use a hypothetical AI proposal if needed.
-UNIT 16 — Portfolio Challenge on same central system. Require problem framing, first principles, alternatives, trade-offs, risk, context, evidence, accountability, readiness. Include Gulf orientation link only as orientation.
-UNIT 17 — Constraint Mutation + Peer Critique on same central system. Do not pre-solve with technology absent from Units 1-15/P1.
-UNIT 18 — Evidence Policy only: CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY. Evidence methods must come from P1 or learner-generated artifacts; do not introduce penetration testing or other methods unless source-supported.
-UNIT 19 — Four-level ISCARB Capability Rubric. At minimum use six explicit criteria: (1) Technical correctness + source fidelity; (2) First-principles/mechanism reasoning; (3) Alternatives + trade-off judgment; (4) Evidence + falsification/verification; (5) Constraint adaptation + risk-aware redesign; (6) ETEC readiness + professional accountability. Descriptors must be weekly-topic-specific. May add AI/provenance and socio-technical ethics.
-UNIT 20 — Bounded Assurance Case on same central system. Top claim → five CLO subclaims → evidence → warrant → counter-evidence → residual uncertainty → APPROVE / CONDITIONALLY APPROVE / REDESIGN / REJECT. Never use absolute verbs such as guarantee, eliminate, prevent, prove secure, zero risk, always. Prefer reduces/mitigates/addresses/supports/is designed to maintain/within stated bounds.
+UNIT 11 — SAUDI CONTEXT is dominant. Use a materially decision-changing Saudi constraint; if unsupported, make it explicitly hypothetical.
+UNIT 12 — ACCOUNTABILITY is dominant. Source mechanisms may be core; accountability chain belongs in pedagogy.
+UNIT 13 — TREND/FUTURE is dominant. Unsupported future technology must be a DESIGN EXPLORATION / QUESTION.
+UNIT 14 — PRACTITIONER WELLBEING is dominant. Reason about workload as an ISCARB design consequence without inventing factual claims.
+UNIT 15 — CRITICAL AI LITERACY is dominant. Include exact phrases AI MAY ASSIST and AI MUST NOT BE TRUSTED AUTONOMOUSLY plus Claim→Assumption→Source Check→Test→Failure Search→Human Sign-off.
+UNIT 16 — Portfolio Challenge on same central system. Include Gulf orientation link only as orientation.
+UNIT 17 — Constraint Mutation + Peer Critique on same central system.
+UNIT 18 — Evidence Policy only: CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY.
+UNIT 19 — Four-level ISCARB Capability Rubric with at least six explicit capability criteria.
+UNIT 20 — Bounded Assurance Case on same central system. Never use absolute assurance language.
 
 11. FULL COVERAGE + DEPTH ALLOCATION
 Every P1 family first appears by Unit 15. Use DEEP / CONCISE / INTEGRATED allocation without omission.
@@ -163,7 +163,7 @@ At least prediction before explanation, one appropriate estimate, peer critique,
 
 13. OUTPUT DISCIPLINE
 - Exactly 20 Units and five CLOs.
-- Every reserved Unit has one DOMINANT function, reflected in title + engineering_question + student_action, not merely one matching bullet.
+- Every reserved Unit has one DOMINANT function.
 - No fake precision, decorative Saudi label, decorative ETEC badge, vague enrichment basis, composite central system, or learner-attainment claim without evidence.
 """
 
@@ -195,10 +195,89 @@ Repair the COMPLETE blueprint, not just metadata.
 - Restore dominant reserved functions: Unit11 Saudi Context; Unit12 Accountability; Unit13 Trend; Unit14 Practitioner Wellbeing; Unit15 Critical AI Literacy.
 - Remove unsupplied technical mechanisms from pedagogy/student_action/evidence; use source-native mechanisms or move legitimate external ideas to clearly based enrichment.
 - Replace vague enrichment bases with [S#] support or explicit "HYPOTHETICAL — no external factual claim" language.
-- Reduce readiness to the minimum fully demonstrated SLO set; do not attach broad readiness lists to Units that do not generate matching evidence.
+- Reduce readiness to the minimum fully demonstrated SLO set.
 - Keep one central system across ethical purpose, Saudi context, portfolio, mutation, evidence, and assurance.
 - Rebuild Unit19 around explicit ISCARB capability dimensions with weekly-topic-specific descriptors.
-- Rewrite Unit20 guarantees/eliminates/prevents/absolute claims into bounded evidence-proportionate language.
+- Rewrite Unit20 absolute claims into bounded evidence-proportionate language.
 - Preserve correct P1 content/source anchors.
 - Do not invent new technical content merely to satisfy a gate.
+"""
+
+# -----------------------------------------------------------------------------
+# CIMT+ COMPUTING-WIDE ADDENDUM
+# Fixed ISCARB pedagogy; adaptive computing representation.
+# -----------------------------------------------------------------------------
+SOURCE_PROFILE_PROMPT += r"""
+
+CIMT+ COMPUTING COVERAGE LEDGER — HARD
+This compiler must work across computing disciplines, not only Security Engineering.
+For P1, identify every MAJOR chapter/source element needed to claim complete coverage.
+Populate coverage_items with stable IDs COV-01, COV-02, ... and classify each item as exactly one knowledge_type:
+CONCEPT, ALGORITHM, CODE, ARCHITECTURE, EQUATION, PROTOCOL, PROCESS, DATA_MODEL, SYSTEM_BEHAVIOR, DESIGN_PRINCIPLE, TRADE_OFF, EMPIRICAL_RESULT, EXAMPLE, OTHER.
+
+Granularity rule:
+- Topic families are broad sections.
+- coverage_items are the auditable elements inside those sections: major concepts, algorithms, code patterns, equations, protocols, processes, data models, system behaviours, design principles, trade-offs, empirical results, and source-significant examples.
+- Mark importance=major for anything whose omission would materially misrepresent P1; supporting otherwise.
+- Every major item MUST carry a [P1] source_anchor.
+- Do not invent items absent from P1.
+- Do not force a Security taxonomy onto programming, algorithms, databases, networks, operating systems, AI/ML, software engineering, distributed systems, HCI, or other computing material.
+"""
+
+MASTER_PROMPT += r"""
+
+CIMT+ COMPUTING REPRESENTATION — HARD
+ISCARB structure is fixed; computing representation is adaptive.
+
+A. COVERAGE LEDGER
+- coverage_ledger MUST contain every major SourceProfile.coverage_items entry, using the exact coverage_id and label.
+- Every major coverage item is first taught by Unit 15.
+- A coverage item may be DEEP, CONCISE, or INTEGRATED, but never omitted.
+- representation states how the learner sees it.
+
+B. KNOWLEDGE TYPES
+For each Unit, populate knowledge_types with the source-native kinds actually taught.
+Do NOT default everything to CONCEPT or ARCHITECTURE.
+
+C. ADAPTIVE VISUAL GRAMMAR
+For every Unit populate visual_plan. Prefer one dominant visual/cognitive job.
+Map source-native knowledge to representation:
+- ALGORITHM: problem → invariant/intuition → pseudocode/steps → trace → complexity/trade-off.
+- CODE: code fragment → execution/state/memory trace → output/bug/mutation.
+- ARCHITECTURE: components → interfaces/flows → constraint/failure → design decision.
+- EQUATION: quantities → derivation → equation → worked interpretation/sensitivity.
+- PROTOCOL: actors/layers → message/packet sequence → state/timing → failure case.
+- PROCESS: stages → handoffs/decision points → feedback/failure loop.
+- DATA_MODEL: entities/relations/schema → constraints/query/use.
+- SYSTEM_BEHAVIOR: state machine/timeline/event sequence → observable consequence.
+- DESIGN_PRINCIPLE: problem pressure → principle → application → boundary/trade-off.
+- TRADE_OFF: alternatives → explicit criteria → evidence → decision.
+- EMPIRICAL_RESULT: setup → measure → result → uncertainty → engineering implication.
+- CONCEPT: causal/concept map, not a paragraph.
+
+D. SOURCE VISUAL FIRST
+visual_plan.reuse_mode is USE, ADAPT, REDRAW, or NEW.
+Only set source_visual_available=true when P1 actually contains a relevant source visual and identify source_page_or_slide/source_anchor. Otherwise use REDRAW/NEW without pretending a source image exists.
+Every visual_plan must include teaching_purpose, focal_elements, annotation_plan, citation, and visual_evidence_role.
+
+E. PRESENTER TEXT BUDGET
+Design the presenter for approximately 15–35 visible words on most Units and at most about 50 when technical labels are necessary. Put detail in Reading Pack / Instructor Guide, not on the visual surface.
+"""
+
+AUDIT_PROMPT += r"""
+
+CIMT+ COMPUTING AUDIT
+Fail source fidelity/cumulative fidelity if any major SourceProfile coverage item is absent from coverage_ledger, mislabeled, first taught after Unit 15, or unsupported by its source anchor.
+Fail engineering rigor if the representation collapses source-native computing knowledge into generic boxes/text instead of a suitable algorithm/code/equation/protocol/data-model/process/architecture/behaviour/trade-off/result representation.
+Fail cumulative fidelity if visual_plan is missing for a Unit, if source_visual_available is claimed without an identifiable source anchor/page/slide, or if the lecture visually behaves as one repeated template regardless of knowledge type.
+"""
+
+REPAIR_PROMPT += r"""
+
+CIMT+ COMPUTING REPAIR
+- Restore every missing major coverage item from SourceProfile.coverage_items into coverage_ledger and teach it by Unit 15.
+- Preserve exact source terminology and anchors.
+- Populate knowledge_types and visual_plan for all Units.
+- Choose visual grammar from the knowledge type; do not turn algorithms, code, equations, protocols, data models, or empirical results into generic architecture boxes.
+- Never fabricate a source visual. If none is verifiable, use REDRAW or NEW with an ISCARB visualization citation.
 """
