@@ -1,0 +1,301 @@
+name: One-shot Fix SlideShare Source Lock v3
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/one-shot-fix-slideshare-source-lock-v3.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Patch source lock with deterministic string slicing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          def replace_block(text, start, end, replacement):
+              i=text.index(start)
+              j=text.index(end,i)
+              return text[:i]+replacement+text[j:]
+
+          p=Path('iscarb-studio/app/source_profile_fallback.py')
+          s=p.read_text(encoding='utf-8')
+
+          helpers=dedent(r'''
+          def _embedded_slide_number(text: str) -> int | None:
+              m = re.match(r"^\s*SLIDE\s+(\d+)\s*:", str(text or ""), flags=re.I)
+              return int(m.group(1)) if m else None
+
+
+          def _declared_slide_count(text: str) -> int | None:
+              """Return the player-declared deck size before host recommendation chrome."""
+              head = re.split(r"\bRecommended\b", str(text or ""), maxsplit=1, flags=re.I)[0]
+              for pattern in (r"\b1\s*/\s*(\d{1,4})\b", r"\b(\d{1,4})\s+slides\b"):
+                  m = re.search(pattern, head, flags=re.I)
+                  if m:
+                      value = int(m.group(1))
+                      if 2 <= value <= 500:
+                          return value
+              return None
+
+
+          def _anchor_slides(anchor: str) -> set[int]:
+              """Extract explicit P1 slide coordinates from source anchors."""
+              found: set[int] = set()
+              for m in re.finditer(r"\bSLIDES?\s+(\d+)(?:\s*[-–—]\s*(\d+))?", str(anchor or ""), flags=re.I):
+                  start = int(m.group(1)); end = int(m.group(2) or start)
+                  if end < start:
+                      start, end = end, start
+                  if end - start <= 200:
+                      found.update(range(start, end + 1))
+              return found
+
+
+          ''')
+          if 'def _embedded_slide_number' not in s:
+              marker='def _doc_chunks(path: Path) -> list[tuple[int, str, str]]:\n'
+              assert marker in s
+              s=s.replace(marker,helpers+marker,1)
+
+          page_importance=dedent(r'''
+          def _page_importance(label: str, lines: list[str], page_no: int) -> str:
+              low = label.lower()
+              support_markers = (
+                  "class", "take-home", "to master", "your challenge", "assignment",
+                  "today lecture topic", "the big picture", "big picture", "cimt compass",
+                  "setting the stage", "our roadmap", "the core idea", "the big why",
+                  "key clo", "availability: system is ready", "to master today's lesson",
+                  "ai era", "ai revolution", "aligning with industry trends", "keeping up with trends",
+                  "example", "ex;", "remember", "cautionary tale", "how to show this",
+                  "topics covered", "key points",
+              )
+              slide_no = _embedded_slide_number(label)
+              if page_no == 1 or slide_no == 1 or any(m in low for m in support_markers):
+                  return "supporting"
+              blob = " ".join(lines[:18]).lower()
+              if slide_no and len(blob.split()) < 24:
+                  return "supporting"
+              major_markers = (
+                  "definition", "requirements", "architecture", "process", "model", "metrics",
+                  "measurement", "testing", "assurance", "design", "fault", "failure",
+                  "security", "reliability", "dependability", "resilience", "safety",
+                  "component", "composition", "reuse", "distributed", "client", "server",
+                  "middleware", "saas", "service-oriented", "risk assessment", "formal methods",
+                  "redundancy", "diversity", "sociotechnical", "programming for",
+              )
+              if re.match(r"^\d{1,2}\.\d+(?:\.\d+)?\b", label) or any(m in blob for m in major_markers):
+                  return "major"
+              content_lines = [x for x in lines if not _is_furniture_line(x)]
+              return "major" if len(content_lines) >= 4 and len(" ".join(content_lines).split()) >= 28 else "supporting"
+
+
+          ''')
+          s=replace_block(s,'def _page_importance(label: str, lines: list[str], page_no: int) -> str:\n','def _pdf_chunks(path: Path) -> list[tuple[int, str, str]]:\n',page_importance)
+
+          doc_chunks=dedent(r'''
+          def _doc_chunks(path: Path) -> list[tuple[int, str, str]]:
+              # Public presentation pages may expose `SLIDE n:` labels in extracted
+              # text. Respect the deck boundary and never ingest Recommended cards.
+              text = extract_source_text(path, limit=500_000)
+              declared_slides = _declared_slide_count(text)
+              paras = [_clean(x, 520) for x in re.split(r"\n{1,}", text) if _clean(x, 520)]
+              out: list[tuple[int, str, str]] = []
+              for i, para in enumerate(paras[:200], 1):
+                  if re.match(r"^recommended\b", para, flags=re.I):
+                      break
+                  words = para.split()
+                  label = _clean(" ".join(words[:12]), 110)
+                  slide_no = _embedded_slide_number(label) or _embedded_slide_number(para)
+                  if declared_slides and slide_no and slide_no > declared_slides:
+                      continue
+                  out.append((i, label, para))
+              return out[:80]
+
+
+          ''')
+          s=replace_block(s,'def _doc_chunks(path: Path) -> list[tuple[int, str, str]]:\n','def _chunks(path: Path) -> tuple[str, list[tuple[int, str, str]]]:\n',doc_chunks)
+
+          old='        anchor = f"[P1] {coordinate} {idx}"'
+          assert old in s
+          s=s.replace(old,'        embedded_slide = _embedded_slide_number(clean_label)\n        anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else f"[P1] {coordinate} {idx}"',1)
+
+          reconcile=dedent(r'''
+          def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:
+              """Add only uncovered real source slides to the semantic P1 contract."""
+              deterministic = build_deterministic_source_profile(bundle, "chapter-completeness reconciliation")
+              existing = {re.sub(r"[^a-z0-9]+", " ", x.label.lower()).strip() for x in ai_profile.coverage_items}
+              semantic_slides: set[int] = set()
+              for row in ai_profile.coverage_items:
+                  semantic_slides.update(_anchor_slides(row.source_anchor))
+
+              merged = list(ai_profile.coverage_items)
+              for item in deterministic.coverage_items:
+                  if item.importance != "major":
+                      continue
+                  item_slides = _anchor_slides(item.source_anchor)
+                  if item_slides and item_slides.issubset(semantic_slides):
+                      continue
+                  key = re.sub(r"[^a-z0-9]+", " ", item.label.lower()).strip()
+                  if key and key not in existing:
+                      merged.append(item)
+                      existing.add(key)
+                      semantic_slides.update(item_slides)
+
+              ai_profile.coverage_items = merged[:80]
+              ai_profile.deferred_topics = []
+              ai_profile.source_warnings = list(dict.fromkeys([
+                  *ai_profile.source_warnings,
+                  "Deterministic source-coordinate reconciliation excludes duplicate semantic slides and host-page recommendation cards from mandatory P1 coverage.",
+              ]))[:20]
+              return ai_profile
+          ''')
+          i=s.index('def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:\n')
+          s=s[:i]+reconcile.rstrip()+'\n'
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Enforce P1 completeness after normal semantic repair
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+          p=Path('iscarb-studio/app/main.py'); s=p.read_text(encoding='utf-8')
+          old='''        else:
+              _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
+          '''
+          old=dedent(old).replace('else:\n','        else:\n',1).replace('    _update','            _update',1)
+          # Use the exact current tail if the compact construction above ever drifts.
+          exact='        else:\n            _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")\n'
+          assert exact in s
+          new=dedent('''
+                  else:
+                      # Major P1 completeness is non-negotiable even when Gemini remained
+                      # available through every repair round.
+                      missing, late = _major_coverage_gaps(blueprint, profile)
+                      if missing or late:
+                          recovered = ", ".join(missing + late)
+                          blueprint = build_deterministic_blueprint(profile)
+                          blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+                          checks = deterministic_gate(blueprint, profile, source_text)
+                          checks.update(session_scope_gate(blueprint, profile, bundle))
+                          audit = _deterministic_fallback_audit(
+                              checks,
+                              "Semantic repair ended with unresolved major P1 coverage gaps; a source-complete review draft was substituted.",
+                          )
+                          job.blueprint = blueprint
+                          job.deterministic_checks = checks
+                          job.audit = audit
+                          job.error = None
+                          save_job(job)
+                          _update(job, "blocked", 100, "BLOCKED — semantic repair exhausted with unresolved major P1 coverage gaps. The incomplete draft was replaced by a source-complete review draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED; no RELEASE is issued. Recovered: " + recovered)
+                      else:
+                          _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
+          ''')
+          # dedent gives 8-space else block above by construction in source literal below.
+          lines=new.splitlines()
+          while lines and not lines[0].strip(): lines.pop(0)
+          new='\n'.join(lines)+'\n'
+          # Ensure function-level indentation matches the exact block being replaced.
+          if not new.startswith('        else:'):
+              delta=8-len(new.splitlines()[0])+len(new.splitlines()[0].lstrip())
+              new='\n'.join((' '*max(0,delta))+x if x.strip() else x for x in new.splitlines())+'\n'
+          assert new.startswith('        else:'),repr(new[:40])
+          s=s.replace(exact,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Add permanent SlideShare source-lock tests
+        run: |
+          cat > iscarb-studio/tests/test_slideshare_source_lock.py <<'PY'
+          import tempfile
+          import unittest
+          from pathlib import Path
+
+          from app.models import CoverageItem, SourceProfile, TopicFamily
+          from app.source_bundle import SourceBundle, SourceItem
+          from app.source_profile_fallback import build_deterministic_source_profile, reconcile_source_profile
+
+          class SlideShareSourceLockTests(unittest.TestCase):
+              def _bundle(self):
+                  td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup)
+                  p=Path(td.name)/'slideshare.txt'
+                  p.write_text('''1 / 58
+          SLIDE 1: Chapter 2 Software Processes
+          SLIDE 3: The software process A structured set of activities required to develop a software system specification design implementation validation evolution process model abstract representation perspective and workflow evidence
+          SLIDE 7: Software process models waterfall incremental development integration and configuration plan-driven agile large systems combine elements from all models with context and tradeoffs
+          SLIDE 20: Process activities Real software processes are inter-leaved sequences of technical collaborative and managerial activities specification development validation evolution waterfall sequence incremental interleaving and iteration
+          SLIDE 56: Key points Software processes are activities involved in producing a software system and general models include waterfall incremental and reuse-oriented development with change
+          Recommended
+          SLIDE 59: Ch2 SW Processes.pdf unrelated recommendation card software process models
+          SLIDE 60: Another recommended presentation software process models
+          ''',encoding='utf-8')
+                  return SourceBundle(items=[SourceItem('primary','P1','slideshare',p,'slideshare')],lecture_focus='',session_minutes=90)
+
+              def _semantic(self):
+                  return SourceProfile(
+                      lecture_title='Chapter 2 Software Processes',course_or_level='SE',weekly_focus='Software Processes',
+                      topic_families=[TopicFamily(name='Software process',source_anchor='[P1] SLIDE 3',why_important='core')],
+                      coverage_items=[CoverageItem(id='COV-01',label='Software process definition and activities',knowledge_type='PROCESS',importance='major',source_anchor='[P1] SLIDE 3',why_important='core')],
+                      technical_boundaries=[],source_warnings=[],session_minutes=90,scope_fit='FIT',in_scope_families=['Software process'],deferred_topics=[],source_conflicts=[],source_manifest=[])
+
+              def test_recommendations_after_real_deck_never_become_p1(self):
+                  profile=build_deterministic_source_profile(self._bundle())
+                  text=' '.join(x.label+' '+x.source_anchor for x in profile.coverage_items).lower()
+                  self.assertNotIn('slide 59',text)
+                  self.assertNotIn('recommended presentation',text)
+
+              def test_semantic_slide_coordinate_suppresses_raw_duplicate(self):
+                  profile=reconcile_source_profile(self._semantic(),self._bundle())
+                  self.assertEqual(len([x for x in profile.coverage_items if x.source_anchor=='[P1] SLIDE 3']),1)
+
+              def test_uncovered_real_major_slide_is_retained_but_key_points_are_supporting(self):
+                  profile=reconcile_source_profile(self._semantic(),self._bundle())
+                  majors={x.source_anchor for x in profile.coverage_items if x.importance=='major'}
+                  self.assertIn('[P1] SLIDE 20',majors)
+                  self.assertNotIn('[P1] SLIDE 56',majors)
+                  self.assertFalse(any('SLIDE 59' in x for x in majors))
+
+          if __name__=='__main__': unittest.main()
+          PY
+
+      - name: Install and run all tests
+        working-directory: iscarb-studio
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -m pip install -r requirements.txt
+          python -m compileall -q app tests
+          python -m unittest discover -s tests -v
+
+      - name: Hygiene
+        run: |
+          set -euo pipefail
+          find iscarb-studio -type d -name __pycache__ -prune -exec rm -rf {} +
+          git diff --check
+          ! git status --short | grep -E '\.pyc$|__pycache__' || exit 1
+
+      - name: Commit only after green suite
+        run: |
+          set -euo pipefail
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          rm -f .github/workflows/one-shot-slideshare-ch2-qa.yml \
+                .github/workflows/one-shot-fetch-ch2-job.yml \
+                .github/workflows/one-shot-fix-slideshare-source-lock.yml \
+                .github/workflows/one-shot-fix-slideshare-source-lock-v3.yml
+          git add -A
+          git commit -m 'Fix SlideShare source lock and enforce P1 completeness'
+          git push origin HEAD:main
