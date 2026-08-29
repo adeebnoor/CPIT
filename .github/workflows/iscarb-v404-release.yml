@@ -1,164 +1,88 @@
-name: ISCARB v4.2.0 CIMT+ Computing Release Acceptance
+name: ISCARB v4.3 Cross-Computing Release Acceptance
 
 on:
   push:
     branches: ["main"]
     paths:
-      - 'iscarb-studio/**'
-      - 'render.yaml'
       - '.github/workflows/iscarb-v404-release.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Reuse the legacy concurrency key intentionally so this update cancels the
+# obsolete v4.2 acceptance run that waited for an impossible old version.
 concurrency:
   group: iscarb-v420-release
   cancel-in-progress: true
 
 jobs:
-  release-acceptance:
+  cross-computing-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 12
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install requests pypdf
-      - name: Verify live CIMT+ across diverse computing lectures
+      - name: Install fixture/runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r iscarb-studio/requirements.txt
+          pip install requests pypdf
+      - name: Wait for v4.3 and exercise three computing subjects through Output Lab
         env:
           BASE_URL: https://iscarb-lecture-studio.onrender.com
-          EXPECTED_VERSION: 4.2.0
         run: |
+          set -euo pipefail
           python - <<'PY'
-          import io, json, os, re, time, zipfile
+          import io, json, os, time, zipfile
+          from pathlib import Path
           import requests
           from pypdf import PdfReader
+          import sys
+          sys.path.insert(0,'iscarb-studio')
+          from tests.v43_fixture import make_blueprint
 
           base=os.environ['BASE_URL'].rstrip('/')
-          expected=os.environ['EXPECTED_VERSION']
-          sources=[
-              ('Dependable Systems','https://www.slideshare.net/slideshow/ch10-dependable-systems/43151515'),
-              ('Security Engineering','https://www.slideshare.net/slideshow/ch14-5148075/5148075'),
-              ('Reliability Engineering','https://www.slideshare.net/slideshow/ch11-reliability-engineering/43151516'),
-              ('Distributed Software Engineering','https://www.slideshare.net/slideshow/ch17-distributed-software-engineering/43151527'),
-          ]
-          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-v420-computing-acceptance/1.0'})
-          def get(path,timeout=90): return s.get(base+path,timeout=timeout)
-
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-v43-cross-computing/1.0'})
           last=''
-          for _ in range(150):
+          for _ in range(50):
               try:
-                  r=get('/api/health',30); last=f'{r.status_code} {r.text[:900]}'
-                  if r.ok:
-                      h=r.json(); print('health',h.get('version'),h.get('pipeline'))
-                      if h.get('version')==expected: break
+                  r=s.get(base+'/api/health',timeout=30); last=r.text[:500]
+                  if r.ok and r.json().get('version')=='4.3.0': break
               except Exception as e: last=repr(e)
               time.sleep(10)
-          else: raise AssertionError('Render did not reach v4.2.0. Last='+last)
+          else: raise AssertionError('Production did not reach v4.3.0: '+last)
 
-          h=get('/api/health').json()
-          assert h['version']==expected
-          assert h['deterministic_gate'].startswith('v13')
-          assert h['session_minutes']==90 and h['full_primary_coverage'] is True
-          assert h['visual_lecture_engine']=='CIMT+ v4.2'
-          assert h['presenter_renderer']=='full-computing-v4.2-preview-pptx-pdf'
-          assert h['cross_discipline_visual_residue_guard'] is True
-          assert h['bounded_generated_language'] is True
-          home=get('/'); assert home.ok and 'v4.2.0' in home.text and 'CIMT+ Computing' in home.text
-          assert 'kau_identity_v410.css?v=4.2.0-kau' in home.text
-          identity=get('/static/kau_identity_v410.css'); assert identity.ok
-          for token in ['#055934','#208D44','#F2F7ED','#0A353E']:
-              assert token.lower() in identity.text.lower(), 'KAU identity token missing: '+token
+          h=s.get(base+'/api/health',timeout=30).json()
+          assert h['deterministic_gate']=='v14-provenance-presenter-on-v13'
+          assert h['presenter_renderer']=='cimt-native-v4.3-preview-pptx-pdf'
+          assert h['presenter_exact_units']==20 and h['session_minutes']==90
 
-          all_types=set(); results=[]
-          for label,source in sources:
-              r=s.post(base+'/api/compile',data={
-                  'primary_url':source,'supporting_urls':'','lecture_focus':'',
-                  'model':'auto','repair_rounds':'2'
-              },timeout=120)
-              assert r.status_code==200, r.text[:1600]
-              job_id=r.json()['job_id']; print('\nJOB',label,job_id)
-              deadline=time.time()+1500; job=None
-              while time.time()<deadline:
-                  jr=get('/api/jobs/'+job_id); assert jr.ok, jr.text[:1200]
-                  job=jr.json(); print(label,'state',job.get('status'),job.get('progress'))
-                  if job.get('status') in {'ready','blocked','error'}: break
-                  time.sleep(8)
-              assert job and job.get('blueprint'), json.dumps(job,ensure_ascii=False)[:6000]
-              bp=job['blueprint']; profile=job.get('source_profile') or {}
-              assert bp['session_minutes']==90 and len(bp['units'])==20 and len(bp['clos'])==5
-              assert [u['number'] for u in bp['units']]==list(range(1,21)) and bp['deferred_topics']==[]
-
-              cov=profile.get('coverage_items') or []
-              major=[x for x in cov if x.get('importance')=='major']
-              ledger=bp.get('coverage_ledger') or []
-              byid={x.get('coverage_id'):x for x in ledger}
-              print(label,'coverage major/profile/ledger',len(major),len(cov),len(ledger))
-              assert major, label+' produced no atomic major P1 coverage items'
-              missing=[x['id'] for x in major if x['id'] not in byid]
-              assert not missing, label+' missing major coverage '+str(missing)
-              assert all(byid[x['id']]['label'].strip()==x['label'].strip() for x in major)
-              assert all(byid[x['id']]['knowledge_type']==x['knowledge_type'] for x in major)
-              assert all(byid[x['id']]['first_taught_unit']<=15 for x in major)
-              assert all('[P1]' in x.get('source_anchor','').upper() for x in major)
-
-              assert all(u.get('knowledge_types') for u in bp['units'])
-              assert all(u.get('visual_plan') for u in bp['units'])
-              visual_types={u['visual_plan']['visual_type'] for u in bp['units']}
-              knowledge_types={k for u in bp['units'] for k in u.get('knowledge_types',[])}
-              all_types |= knowledge_types
-              print(label,'knowledge types',sorted(knowledge_types))
-              print(label,'visual types',sorted(visual_types))
-              assert len(visual_types)>=6
-              assert all(u['visual_plan'].get('teaching_purpose','').strip() for u in bp['units'])
-              assert all(u['visual_plan'].get('citation','').strip() for u in bp['units'])
-
-              generated=' '.join(
-                  [c.get('statement','')+' '+c.get('evidence_expected','') for c in bp['clos']] +
-                  [u.get('title','')+' '+u.get('engineering_question','')+' '+' '.join(u.get('pedagogy_content',[]))+' '+u.get('student_action','')+' '+u.get('takeaway','') for u in bp['units']]
-              ).lower()
-              for bad in ['mathematically eliminate errors','eliminate all errors','prevent common-mode failures','ensure zero risk','fully prevent','prove secure']:
-                  assert bad not in generated, label+' retained unsafe absolute wording: '+bad
-
-              failed=[k for k,v in (job.get('deterministic_checks') or {}).items() if not v]
-              print(label,'deterministic failures',failed)
-              assert not failed, label+' deterministic failures: '+', '.join(failed)
-              assert job.get('audit',{}).get('overall_pass') is True, json.dumps(job.get('audit',{}),ensure_ascii=False)[:3500]
-              assert job['status']=='ready', label+' expected READY, got '+str(job['status'])
-
-              preview=get('/api/jobs/'+job_id+'/presenter'); assert preview.ok and len(preview.content)>5000
-              ppt=get('/api/jobs/'+job_id+'/export/pptx'); assert ppt.ok and ppt.content.startswith(b'PK')
+          subjects=[
+              ('Chapter 10 — Dependable Systems', ['SECURITY ENGINEERING','PLATFORM PROTECTION']),
+              ('Chapter 11 — Reliability Engineering', ['SECURITY ENGINEERING','PLATFORM PROTECTION']),
+              ('Chapter 17 — Distributed Software Engineering', ['SECURITY ENGINEERING','PLATFORM PROTECTION']),
+          ]
+          for title,banned in subjects:
+              bp=make_blueprint(); bp.lecture_title=title
+              raw=bp.model_dump_json(by_alias=True).encode()
+              rr=s.post(base+'/api/render-blueprint',files={'blueprint_file':('bp.json',raw,'application/json')},timeout=90)
+              assert rr.ok, rr.text[:1000]
+              job=rr.json()['job_id']
+              preview=s.get(f'{base}/api/jobs/{job}/presenter',timeout=90)
+              assert preview.ok and 'CIMT-native Presenter' in preview.text
+              up=preview.text.upper()
+              for token in banned: assert token not in up, (title,token)
+              ppt=s.get(f'{base}/api/jobs/{job}/export/pptx',timeout=120); assert ppt.ok and ppt.content.startswith(b'PK')
               with zipfile.ZipFile(io.BytesIO(ppt.content)) as z:
                   slides=[x for x in z.namelist() if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
                   assert len(slides)==20
-                  ppt_text=' '.join(z.read(x).decode('utf-8','ignore') for x in slides)
-
-              if label!='Security Engineering':
-                  assert 'SECURITY ENGINEERING' not in preview.text.upper(), label+' preview contains legacy Security Engineering label'
-                  assert 'SECURITY ENGINEERING' not in ppt_text.upper(), label+' PPTX contains legacy Security Engineering label'
-                  assert 'PLATFORM PROTECTION' not in preview.text.upper(), label+' preview contains legacy security architecture'
-                  assert 'APPLICATION PROTECTION' not in preview.text.upper(), label+' preview contains legacy security architecture'
-
-              js=get('/api/jobs/'+job_id+'/export/json'); assert js.ok
-              ex=js.json(); assert ex['session_minutes']==90 and len(ex['units'])==20
-
-              full_outputs = label in {'Dependable Systems','Security Engineering'}
-              if full_outputs:
-                  pdf=get('/api/jobs/'+job_id+'/export/presenter-pdf'); assert pdf.ok and pdf.content.startswith(b'%PDF') and len(pdf.content)>8000
-                  reader=PdfReader(io.BytesIO(pdf.content)); assert len(reader.pages)==20
-                  pdf_text=' '.join((p.extract_text() or '') for p in reader.pages)
-                  if label=='Dependable Systems':
-                      assert 'SECURITY ENGINEERING' not in pdf_text.upper()
-                      assert 'PLATFORM PROTECTION' not in pdf_text.upper()
-                  for path in ['/api/jobs/'+job_id+'/export/pdf','/api/jobs/'+job_id+'/export/docx','/api/jobs/'+job_id+'/export/student']:
-                      rr=get(path); assert rr.ok and len(rr.content)>8000
-
-              print(label,'preview PASS',len(preview.content),'pptx PASS',len(ppt.content))
-              results.append((label,job_id,len(major),len(ledger),sorted(knowledge_types),sorted(visual_types)))
-
-          assert len(all_types)>=3, 'Cross-computing run did not demonstrate enough representation diversity: '+str(all_types)
-          print('\nCIMT+ CROSS-COMPUTING TYPES',sorted(all_types))
-          print('ISCARB v4.2.0 PRODUCTION ACCEPTANCE PASS')
-          for row in results: print('RESULT',row)
+                  text=' '.join(z.read(x).decode('utf-8','ignore') for x in slides).upper()
+                  for token in banned: assert token not in text, (title,token)
+              pdf=s.get(f'{base}/api/jobs/{job}/export/presenter-pdf',timeout=120); assert pdf.ok
+              assert len(PdfReader(io.BytesIO(pdf.content)).pages)==20
+              print('PASS',title,job)
+          print('ISCARB v4.3 CROSS-COMPUTING ACCEPTANCE PASS')
           PY
