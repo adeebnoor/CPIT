@@ -29,9 +29,15 @@ def _norm(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip()
 
 
-def _source_has(source_text: str, phrase: str) -> bool:
+def _has_phrase(text: str, phrase: str) -> bool:
     needle = _norm(phrase)
-    return bool(needle) and needle in _norm(source_text)
+    if not needle:
+        return False
+    return f" {needle} " in f" {_norm(text)} "
+
+
+def _source_has(source_text: str, phrase: str) -> bool:
+    return _has_phrase(source_text, phrase)
 
 
 def _append_bounded(items: list[str], text: str, limit: int) -> None:
@@ -40,7 +46,6 @@ def _append_bounded(items: list[str], text: str, limit: int) -> None:
     if len(items) < limit:
         items.append(text)
     elif items:
-        # Preserve the bounded schema without silently discarding the repair.
         if text not in items[-1]:
             items[-1] = items[-1] + " | " + text
 
@@ -58,25 +63,19 @@ def _move_to_pedagogy(unit, predicate) -> None:
 
 
 def _fix_reserved_channel_purity(out: Blueprint, source_text: str) -> None:
-    # Unit 15 is Critical AI Literacy. AI instructions are pedagogy unless P1
-    # itself explicitly teaches AI as weekly technical content.
     u15 = out.units[14]
     _move_to_pedagogy(
         u15,
         lambda b: bool(re.search(r"\bai\b|artificial intelligence", b, flags=re.I))
-        and not (_source_has(source_text, "artificial intelligence") or _source_has(source_text, " ai ")),
+        and not (_source_has(source_text, "artificial intelligence") or _source_has(source_text, "ai")),
     )
 
-    # Unit 19 is the assessment rubric; rubric mechanics must never masquerade
-    # as weekly-source technical content.
     u19 = out.units[18]
     _move_to_pedagogy(
         u19,
         lambda b: any(x in b.lower() for x in ["distinguished", "not yet ready", "rubric", "four-level"]),
     )
 
-    # Unit 20 is the assurance method. Source-supported technical facts may stay
-    # in core, but the assurance scaffolding belongs in pedagogy.
     u20 = out.units[19]
     _move_to_pedagogy(
         u20,
@@ -91,16 +90,13 @@ def _fix_domain_spine(out: Blueprint, profile: SourceProfile | None) -> None:
     if not names:
         return
     u2 = out.units[1]
-    blob = _norm(" ".join([u2.title, u2.engineering_question, *u2.core_content, *u2.pedagogy_content]))
-    missing = [name for name in names if _norm(name) not in blob]
+    blob = " ".join([u2.title, u2.engineering_question, *u2.core_content, *u2.pedagogy_content])
+    missing = [name for name in names if not _has_phrase(blob, name)]
     if missing:
-        # These names come from the authoritative P1 source profile, not outside knowledge.
         _append_bounded(u2.pedagogy_content, "DOMAIN SPINE — " + " | ".join(names), 8)
 
 
 def _fix_bundle_anchors(out: Blueprint) -> None:
-    # In this architecture P1 defines mandatory technical scope. A technical
-    # unit with core content therefore needs an explicit bundle identifier.
     for unit in out.units:
         if not unit.core_content:
             continue
@@ -122,11 +118,13 @@ def _replace_phrase(text: str, phrase: str) -> str:
 def _neutralize_sentence(unit, sentence: str, source_text: str) -> str:
     if not sentence:
         return sentence
-    unsupported = [term for term in SESSION_WATCHED if _norm(term) in _norm(sentence) and not _source_has(source_text, term)]
+    unsupported = [
+        term for term in SESSION_WATCHED
+        if _has_phrase(sentence, term) and not _source_has(source_text, term)
+    ]
     if not unsupported:
         return sentence
 
-    # Keep the original specificity only as explicitly hypothetical enrichment.
     if len(unit.enrichment_content) < 6:
         candidate = "HYPOTHETICAL DESIGN EXPLORATION — Evaluate rather than assume: " + sentence
         _append_bounded(unit.enrichment_content, candidate, 6)
@@ -141,12 +139,8 @@ def _neutralize_sentence(unit, sentence: str, source_text: str) -> str:
 
 def _fix_noncore_technology_leakage(out: Blueprint, source_text: str) -> None:
     for unit in out.units:
-        unit.pedagogy_content = [
-            _neutralize_sentence(unit, x, source_text) for x in unit.pedagogy_content
-        ]
-        unit.scenario_assumptions = [
-            _neutralize_sentence(unit, x, source_text) for x in unit.scenario_assumptions
-        ]
+        unit.pedagogy_content = [_neutralize_sentence(unit, x, source_text) for x in unit.pedagogy_content]
+        unit.scenario_assumptions = [_neutralize_sentence(unit, x, source_text) for x in unit.scenario_assumptions]
         unit.student_action = _neutralize_sentence(unit, unit.student_action, source_text)
         unit.takeaway = _neutralize_sentence(unit, unit.takeaway, source_text)
         unit.evidence = _neutralize_sentence(unit, unit.evidence, source_text)
@@ -199,7 +193,6 @@ def normalize_source_backed_v404(
 
 
 def normalize_output_lab_v404(bp: Blueprint) -> Blueprint:
-    # Output Lab still cannot re-audit P1; retain the presentation-safe v9 path.
     out = normalize_blueprint_for_output_lab(bp)
     _fix_reserved_channel_purity(out, "")
     _fix_bundle_anchors(out)
