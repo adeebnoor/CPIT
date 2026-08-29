@@ -1,0 +1,278 @@
+/* KAU visual-identity adaptation for ISCARB Faculty Studio.
+   Based on the user's King Abdulaziz University Visual Identity Guide.
+   This stylesheet uses official palette values, typography hierarchy, line-wave motifs,
+   and high-contrast digital composition without reproducing the university logo. */
+
+:root{
+  --kau-deep-green:#055934;
+  --kau-green:#208D44;
+  --kau-lime:#86C242;
+  --kau-pale:#F2F7ED;
+  --kau-soft-green:#D3E6BE;
+  --kau-teal:#0A353E;
+  --kau-mint:#A7E0C5;
+  --kau-bright:#2BB673;
+  --kau-neutral-1:#1D2921;
+  --kau-neutral-2:#5C6660;
+  --kau-neutral-3:#8D9991;
+  --kau-neutral-4:#C2CCC6;
+  --kau-white:#ffffff;
+  --kau-line:rgba(32,141,68,.18);
+  --kau-shadow:0 22px 60px rgba(10,53,62,.11);
+
+  --bg:var(--kau-pale)!important;
+  --panel:var(--kau-white)!important;
+  --panel2:#f8fbf6!important;
+  --sand:var(--kau-soft-green)!important;
+  --muted:var(--kau-neutral-2)!important;
+  --line:var(--kau-line)!important;
+  --cyan:var(--kau-bright)!important;
+  --mag:var(--kau-lime)!important;
+  --gold:var(--kau-green)!important;
+  --green:var(--kau-green)!important;
+  --red:#9b3b43!important;
+  --ink:var(--kau-neutral-1)!important;
+  --shadow:var(--kau-shadow)!important;
+
+  font-family:"Alexandria","Segoe UI",Arial,sans-serif!important;
+}
+
+html{background:var(--kau-pale)}
+body{
+  position:relative;
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 88% 6%,rgba(167,224,197,.33),transparent 24%),
+    linear-gradient(180deg,#ffffff 0%,var(--kau-pale) 46%,#ffffff 100%)!important;
+  color:var(--kau-neutral-1)!important;
+  font-family:"Alexandria","Segoe UI",Arial,sans-serif!important;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.42;
+  background:
+    repeating-radial-gradient(ellipse at 100% 8%,transparent 0 18px,rgba(32,141,68,.07) 19px 20px,transparent 21px 31px),
+    repeating-radial-gradient(ellipse at -8% 92%,transparent 0 24px,rgba(134,194,66,.055) 25px 26px,transparent 27px 39px);
+  mask-image:linear-gradient(180deg,#000 0%,transparent 38%,transparent 64%,#000 100%);
+}
+
+.wrap{max-width:1280px!important}
+
+.nav{
+  height:84px!important;
+  border-bottom:1px solid rgba(5,89,52,.16)!important;
+  background:rgba(255,255,255,.86)!important;
+  backdrop-filter:blur(14px);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.brand{gap:14px!important}
+.mark{
+  width:40px!important;
+  height:40px!important;
+  border:1.5px solid var(--kau-green)!important;
+  border-radius:10px!important;
+  background:linear-gradient(145deg,var(--kau-deep-green),var(--kau-green))!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(5,89,52,.16);
+}
+.brand b{
+  color:var(--kau-teal)!important;
+  letter-spacing:.105em!important;
+  font-weight:800!important;
+}
+.brand span{color:var(--kau-neutral-2)!important}
+.links{color:var(--kau-neutral-2)!important}
+.links a{position:relative}
+.links a:after{
+  content:"";position:absolute;left:0;right:100%;bottom:-7px;height:2px;background:var(--kau-green);transition:.2s ease
+}
+.links a:hover{color:var(--kau-deep-green)!important}
+.links a:hover:after{right:0}
+.version{
+  color:var(--kau-deep-green)!important;
+  border-color:rgba(32,141,68,.26)!important;
+  background:rgba(242,247,237,.9)!important;
+}
+
+.hero{
+  min-height:610px;
+  align-items:center!important;
+  padding:76px 0 58px!important;
+  position:relative;
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  right:-7vw;
+  bottom:12px;
+  width:52vw;
+  height:150px;
+  opacity:.5;
+  pointer-events:none;
+  background:repeating-radial-gradient(ellipse at 100% 100%,transparent 0 15px,rgba(43,182,115,.16) 16px 17px,transparent 18px 25px);
+  mask-image:linear-gradient(90deg,transparent,#000 45%);
+}
+.kicker{
+  color:var(--kau-green)!important;
+  letter-spacing:.18em!important;
+  font-weight:800!important;
+}
+.hero h1,
+.sectionHead h2,
+.box h3{
+  color:var(--kau-teal)!important;
+}
+.hero h1{
+  font-family:"The Year Of The Camel","Alexandria","Segoe UI",Arial,sans-serif!important;
+  font-weight:800!important;
+  letter-spacing:-.055em!important;
+  line-height:.91!important;
+}
+.hero h1 em{color:var(--kau-green)!important}
+.lead{color:var(--kau-neutral-2)!important;max-width:780px!important}
+.cta{
+  border-color:rgba(5,89,52,.24)!important;
+  color:var(--kau-deep-green)!important;
+  background:rgba(255,255,255,.82)!important;
+  border-radius:10px!important;
+}
+.cta:hover{border-color:var(--kau-green)!important;transform:translateY(-1px)}
+.cta.primary{
+  background:linear-gradient(135deg,var(--kau-deep-green),var(--kau-green))!important;
+  color:#fff!important;
+  border-color:var(--kau-deep-green)!important;
+  box-shadow:0 14px 28px rgba(5,89,52,.18);
+}
+
+.heroCard{
+  color:#fff!important;
+  border-color:rgba(167,224,197,.26)!important;
+  background:linear-gradient(150deg,var(--kau-teal) 0%,var(--kau-deep-green) 72%,#034b30 100%)!important;
+  border-radius:18px!important;
+  box-shadow:0 28px 70px rgba(10,53,62,.21)!important;
+}
+.heroCard:before{
+  border-color:rgba(167,224,197,.18)!important;
+  width:330px!important;height:330px!important;
+}
+.heroCard:after{
+  content:"";position:absolute;left:-30px;right:-30px;bottom:-85px;height:180px;
+  background:repeating-radial-gradient(ellipse at 20% 100%,transparent 0 14px,rgba(167,224,197,.12) 15px 16px,transparent 17px 23px);
+  pointer-events:none;
+}
+.heroCard h3{color:var(--kau-mint)!important}
+.metric{
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.13)!important;
+}
+.metric b{color:#fff!important}
+.metric span{color:#d7ebe1!important}
+.contract{
+  border-left-color:var(--kau-lime)!important;
+  background:rgba(242,247,237,.09)!important;
+  color:#eff9f3!important;
+  position:relative;z-index:1
+}
+.tax{border-color:rgba(255,255,255,.18)!important;color:#dceee5!important;position:relative;z-index:1}
+
+.trust div{border-top-color:rgba(32,141,68,.22)!important}
+.trust b{color:var(--kau-teal)!important}
+.trust span{color:var(--kau-neutral-2)!important}
+
+.section{position:relative}
+.sectionHead h2{
+  font-family:"The Year Of The Camel","Alexandria","Segoe UI",Arial,sans-serif!important;
+  font-weight:800!important;
+}
+.sectionHead p{color:var(--kau-neutral-2)!important}
+
+.source,
+.box,
+.status,
+.asset,
+.gate,
+.principle{
+  background:rgba(255,255,255,.93)!important;
+  border-color:rgba(5,89,52,.15)!important;
+  box-shadow:0 10px 34px rgba(10,53,62,.045);
+}
+.source{
+  position:relative;overflow:hidden;border-radius:12px!important;
+}
+.source:before{
+  content:"";position:absolute;left:0;top:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--kau-deep-green),var(--kau-green),var(--kau-lime));
+}
+.source small{color:var(--kau-green)!important}
+.source b{color:var(--kau-teal)!important}
+.source p,.principle span,.hint,.statusTop span{color:var(--kau-neutral-2)!important}
+.source button{
+  color:var(--kau-deep-green)!important;
+  border-color:rgba(32,141,68,.26)!important;
+  background:var(--kau-pale)!important;
+}
+.source button:hover{background:var(--kau-green)!important;color:#fff!important}
+
+.box{border-radius:14px!important}
+.box:first-child{border-top:4px solid var(--kau-green)!important}
+.principle b{color:var(--kau-deep-green)!important}
+.field label{color:var(--kau-deep-green)!important}
+input,textarea,select{
+  background:#fbfdf9!important;
+  color:var(--kau-neutral-1)!important;
+  border-color:rgba(92,102,96,.27)!important;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--kau-green)!important;
+  box-shadow:0 0 0 3px rgba(32,141,68,.10)!important;
+}
+.compileBtn{
+  background:linear-gradient(110deg,var(--kau-deep-green),var(--kau-green))!important;
+  color:#fff!important;
+  border-radius:9px!important;
+  box-shadow:0 12px 28px rgba(5,89,52,.16);
+}
+.compileBtn:hover{filter:brightness(1.04)}
+.barTrack{background:#dce7df!important}
+.bar{background:linear-gradient(90deg,var(--kau-deep-green),var(--kau-bright),var(--kau-lime))!important}
+.badge{border-color:rgba(5,89,52,.2)!important;background:var(--kau-pale)!important}
+.badge.ready{color:var(--kau-deep-green)!important;border-color:rgba(32,141,68,.45)!important}
+.badge.blocked{color:#7b651c!important}
+.asset a{color:var(--kau-green)!important;font-weight:700}
+.gate .pass{color:var(--kau-green)!important}.gate .fail{color:#9b3b43!important}
+
+.footer{
+  color:var(--kau-neutral-2)!important;
+  border-top-color:rgba(5,89,52,.15)!important;
+  margin-top:64px!important;
+}
+.kauIdentityNote{
+  width:min(1280px,calc(100% - 48px));
+  margin:0 auto 28px;
+  padding:12px 16px;
+  border:1px solid rgba(5,89,52,.14);
+  background:rgba(242,247,237,.8);
+  color:var(--kau-neutral-2);
+  font:500 .64rem/1.6 "Alexandria","Segoe UI",Arial,sans-serif;
+  border-radius:10px;
+}
+.kauIdentityNote b{color:var(--kau-deep-green)}
+
+/* National Design System-inspired outline icon treatment. */
+.source button,.cta,.compileBtn,.badge{transition:all .18s ease}
+
+@media(max-width:980px){
+  .nav{position:relative}
+  .hero{min-height:auto!important}
+  .hero:after{width:90vw;opacity:.3}
+}
+@media(max-width:620px){
+  .kauIdentityNote{width:calc(100% - 32px)}
+  .hero h1{font-size:3.4rem!important}
+}
