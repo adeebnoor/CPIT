@@ -101,7 +101,7 @@ def _core(u: LectureUnit, n: int = 7) -> list[str]:
 
 
 def _ped(u: LectureUnit, n: int = 6) -> list[str]:
-    return [presenter_text(x, 135) for x in u.pedagogy_content[:n] if str(x).strip()]
+    return [presenter_text(_sanitize_noncore(x), 135) for x in u.pedagogy_content[:n] if str(x).strip()]
 
 
 def _pick(values: list[str], i: int, fallback: str) -> str:
@@ -125,8 +125,8 @@ def _bullet_pairs(values: list[str], prefix: str = "KEY POINT") -> list[tuple[st
     return out
 
 
-def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
-    """Map the 20-unit pedagogy to a varied CIMT-like lecture grammar."""
+def _legacy_spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
+    """Legacy unit-number grammar retained only for old fixtures/unknown visual types."""
     core = _core(u)
     ped = _ped(u)
     if u.number == 1:
@@ -238,6 +238,176 @@ def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
     return "takeaways", _bullet_pairs(vals)
 
 
+def _sanitize_noncore(text: str) -> str:
+    """Keep learner-facing synthetic activities qualitative unless a source owns the number."""
+    t = re.sub(r"\b\d+(?:\.\d+)?\s*%", "a bounded amount", str(text or ""), flags=re.I)
+    t = re.sub(r"\b\d+(?:\.\d+)?\s*percent\b", "a bounded amount", t, flags=re.I)
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+
+def _display_title(bp: Blueprint, u: LectureUnit) -> str:
+    """Project internal ISCARB scaffolds into a source-first classroom headline."""
+    core = " ".join(u.core_content).lower()
+    if u.number == 13 and "process improvement" in core:
+        return "Process Improvement: Measure, Analyze, Change"
+    if u.number == 14 and "incremental development" in core:
+        return "Incremental Development: Visibility, Structure, and Refactoring"
+    if u.number == 15 and ("maturity" in core or "capability maturity" in core):
+        return "Process Maturity: From Initial to Optimising"
+    if u.number == 19:
+        return "What You Should Now Be Able to Do"
+    if u.number == 20:
+        return "Take-home Decision"
+    title = str(u.title or "").strip()
+    substitutions = (
+        (r"^Saudi Context:\s*", ""),
+        (r"^Accountability:\s*", ""),
+        (r"^Trend\s*&\s*Future:\s*", ""),
+        (r"^Practitioner Well(?:being|-being):\s*", ""),
+        (r"^Critical AI Literacy\s*&\s*", ""),
+        (r"^Portfolio Challenge:\s*", ""),
+        (r"^Constraint Mutation\s*&\s*Peer Critique:\s*", ""),
+        (r"^Evidence Policy:\s*", "Defending a Process Decision: "),
+        (r"^Mechanism Deep Dive:\s*", ""),
+        (r"^Authentic Implementation:\s*", ""),
+        (r"^First-Principles Prediction Gate:\s*", "Prediction: "),
+        (r"^Measurement\s*&\s*Falsification:\s*", ""),
+    )
+    for pattern, repl in substitutions:
+        title = re.sub(pattern, repl, title, flags=re.I)
+    if u.number == 8 and "trade" in title.lower():
+        title = "Choosing a Process Model: Alternatives and Trade-offs"
+    if u.number == 10:
+        title = "Senior Design Review: Known, Unknown, What We Monitor"
+    if u.number == 16:
+        title = re.sub(r"^Complete\s+", "", title, flags=re.I)
+    if u.number == 17 and title.lower().startswith("adapting"):
+        title = "Adapting the Process When Constraints Change"
+    return presenter_text(title or u.title, 76)
+
+
+def _display_question(u: LectureUnit) -> str:
+    core = " ".join(u.core_content).lower()
+    if u.number == 13 and "process improvement" in core:
+        return "How do measurement, analysis, and change work together to improve a software process?"
+    if u.number == 14 and "incremental development" in core:
+        return "What does incremental development trade for adaptability, and when does refactoring become necessary?"
+    if u.number == 15 and "maturity" in core:
+        return "What do the SEI maturity levels reveal about process control and continuous improvement?"
+    if u.number == 19:
+        return "Which engineering capabilities should your final artifact demonstrate?"
+    if u.number == 20:
+        return "What evidence supports approval, redesign, or rejection of the process decision?"
+    return presenter_text(_sanitize_noncore(u.engineering_question), 132)
+
+
+def _compact(text: str, limit: int = 178) -> str:
+    """Word-boundary compaction that preserves comma-separated technical lists."""
+    t = re.sub(r"\s+", " ", str(text or "")).replace("…", "").replace("...", "").strip()
+    if len(t) <= limit:
+        return t
+    words, out = t.split(), []
+    for word in words:
+        trial = " ".join(out + [word])
+        if len(trial) > limit:
+            break
+        out.append(word)
+    return " ".join(out).rstrip(" ,;:-")
+
+
+def _source_first_items(u: LectureUnit, limit: int = 6) -> list[tuple[str, str]]:
+    raw_core = [str(x).strip() for x in u.core_content[:limit] if str(x).strip()]
+    focal = [presenter_text(x, 32).upper() for x in (u.visual_plan.focal_elements or []) if str(x).strip()]
+    if not raw_core:
+        raw_core = [_sanitize_noncore(x) for x in u.pedagogy_content[:limit] if str(x).strip()]
+    items: list[tuple[str, str]] = []
+    for i, raw in enumerate(raw_core[:limit]):
+        label = focal[i] if i < len(focal) else f"KEY POINT {i+1}"
+        body = raw
+        if ":" in raw:
+            a, b = raw.split(":", 1)
+            if 1 <= len(a.split()) <= 7 and b.strip():
+                label = presenter_text(a, 36).upper()
+                body = b.strip()
+        items.append((label, _compact(body, 178)))
+    return items or [("TAKE-HOME", _compact(u.takeaway, 160))]
+
+
+def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
+    """CIMT grammar driven by the source visual/content job, never by Unit number alone."""
+    # Stable pedagogical bookends.
+    if u.number in {1, 3, 4, 5, 18, 20}:
+        return _legacy_spec(bp, u)
+    if u.number == 10:
+        known = _pick(_core(u), 0, u.takeaway)
+        ped = _ped(u, 6)
+        labels = ["KNOWN", "UNKNOWN", "DECISION-SENSITIVE", "WHAT WE MONITOR"]
+        bodies = [
+            known,
+            next((x.split(":",1)[1].strip() for x in ped if x.upper().startswith("UNKNOWN:")), "State the bounded unknown"),
+            next((x.split(":",1)[1].strip() for x in ped if x.upper().startswith("DECISION-SENSITIVE UNKNOWN:")), "Identify the unknown that could change the decision"),
+            next((x.split(":",1)[1].strip() for x in ped if x.upper().startswith("WHAT WE MONITOR:")), presenter_text(u.student_action, 120)),
+        ]
+        return "chain", list(zip(labels, map(lambda x: presenter_text(_sanitize_noncore(x), 112), bodies)))
+    if u.number == 15 and "maturity" in " ".join(u.core_content).lower():
+        return "stack", [
+            ("INITIAL", "Work is largely uncontrolled and depends on individual practice."),
+            ("REPEATABLE", "Basic procedures are defined so successful practice can be repeated."),
+            ("DEFINED", "An organization-wide process strategy is defined and used."),
+            ("MANAGED", "Quality and process performance are measured and managed."),
+            ("OPTIMISING", "Continuous process improvement is an explicit organizational practice."),
+        ]
+    if u.number == 19:
+        items = [(presenter_text(r.criterion, 46), presenter_text(r.ready, 105)) for r in bp.rubric_criteria[:6]]
+        return "takeaways", items
+
+    raw_type = str(getattr(u.visual_plan, "visual_type", "") or "").strip().lower()
+    if raw_type in {"process", "workflow", "flow", "sequence"}:
+        items = _source_first_items(u, 4)
+        # Process slides should visibly read left-to-right like the archived CIMT mechanism diagrams.
+        return "chain", items[:4]
+    if raw_type in {"trade-off", "tradeoff", "comparison", "compare"}:
+        vals = _core(u, 3)
+        if len(vals) < 2:
+            vals += [_sanitize_noncore(x) for x in _ped(u, 3) if x not in vals]
+        a = _pick(vals, 0, u.takeaway)
+        b = _pick(vals, 1, u.takeaway)
+        focal = [x for x in (u.visual_plan.focal_elements or []) if str(x).strip()]
+        if u.number == 14 and "incremental development" in " ".join(u.core_content).lower():
+            la, lb = "VISIBILITY & CONTROL", "MEASUREMENT & REFACTORING"
+            trade = "Adaptability improves; visibility and structure still require deliberate management and refactoring."
+        else:
+            la = presenter_text(focal[0] if focal else "ALTERNATIVE A", 28).upper()
+            lb = presenter_text(focal[1] if len(focal) > 1 else "ALTERNATIVE B", 28).upper()
+            trade = _sanitize_noncore(u.takeaway)
+        return "compare", [(la, _compact(a, 165)), (lb, _compact(b, 165)), ("ENGINEERING TRADE-OFF", _compact(trade, 135))]
+    if raw_type in {"concept-map", "concept map", "concept", "map"}:
+        return "takeaways", _source_first_items(u, 6)
+
+    # Archived/synthetic fixtures use historical visual-type tokens; preserve their
+    # layout diversity without leaking that unit-number mapping into real lectures.
+    return _legacy_spec(bp, u)
+
+
+
+def _readiness_for_unit(bp: Blueprint, u: LectureUnit) -> str:
+    refs: list[str] = []
+    for row in bp.readiness_alignment:
+        if u.number in row.evidence_units:
+            refs.extend(row.slo_refs[:2])
+    refs = list(dict.fromkeys(refs))
+    return "READINESS EVIDENCE · " + " / ".join(refs) if refs else ""
+
+
+def _try_text(u: LectureUnit) -> str:
+    return presenter_text(_sanitize_noncore(u.student_action or u.engineering_question), 96)
+
+
+def _check_text(u: LectureUnit) -> str:
+    return presenter_text(_sanitize_noncore(u.takeaway), 86)
+
+
 # ---------------------------------------------------------------------------
 # Source-visual cropping
 # ---------------------------------------------------------------------------
@@ -311,7 +481,8 @@ def _ppt_frame(slide, bp: Blueprint, u: LectureUnit, *, show_decision: bool = Fa
     # CIMT corner rule: an L, not a full-width decorative dashboard bar.
     _ppt_rect(slide, .44, .22, 11.92, .018, GOLD)
     _ppt_rect(slide, .44, .22, .018, .35, GOLD)
-    _ppt_text(slide, .54, .34, 10.55, .66, presenter_text(u.title, 82), 30, GREEN, False, "Georgia")
+    _ppt_text(slide, .54, .34, 10.55, .66, _display_title(bp, u), 30, GREEN, False, "Georgia")
+    _ppt_text(slide, .62, 1.02, 10.90, .46, _display_question(u), 12.8, INK, False, "Aptos")
 
     ring = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(11.65), Inches(.31), Inches(.23), Inches(.23))
     ring.fill.background(); ring.line.color.rgb = GOLD; ring.line.width = Pt(2)
@@ -322,9 +493,14 @@ def _ppt_frame(slide, bp: Blueprint, u: LectureUnit, *, show_decision: bool = Fa
     _ppt_text(slide, .55, 7.12, 5.60, .18, f"{_subject(bp)} · source-grounded presenter", 6.4, MUTED)
     _ppt_text(slide, 10.85, 7.11, 1.40, .18, f"{u.number:02d}/20", 6.4, MUTED, True, align=PP_ALIGN.RIGHT)
     if show_decision:
-        _ppt_text(slide, .65, 6.60, .68, .22, "DECISION", 7.8, RED, True)
-        _ppt_text(slide, 1.38, 6.56, 9.35, .34, presenter_text(u.engineering_question, 145), 9.5, INK, True)
-        _ppt_text(slide, 10.75, 6.58, 1.45, .22, presenter_text(u.phase, 18), 7, GREEN, True, align=PP_ALIGN.RIGHT)
+        _ppt_rect(slide, .62, 6.43, 11.58, .02, GOLD)
+        _ppt_text(slide, .65, 6.52, .62, .22, "TRY", 8.8, RED, True)
+        _ppt_text(slide, 1.18, 6.48, 5.12, .36, _try_text(u), 9.5, INK, True)
+        _ppt_text(slide, 6.48, 6.52, .72, .22, "CHECK", 8.3, GREEN, True)
+        _ppt_text(slide, 7.18, 6.48, 4.20, .36, _check_text(u), 9.1, INK, False)
+        ready = _readiness_for_unit(bp, u)
+        if ready:
+            _ppt_text(slide, 9.25, 6.88, 2.95, .18, ready, 6.2, GREEN, True, align=PP_ALIGN.RIGHT)
 
 
 def _ppt_title_slide(slide, bp: Blueprint, u: LectureUnit, items):
@@ -341,7 +517,7 @@ def _ppt_title_slide(slide, bp: Blueprint, u: LectureUnit, items):
     _ppt_text(slide, 10.9, 7.00, 1.5, .22, "01/20", 6.3, MUTED, True, align=PP_ALIGN.RIGHT)
 
 
-def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=17.5):
+def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=19.0):
     items = items[:max_items]
     if not items:
         return
@@ -349,7 +525,7 @@ def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=
     for i, (title, body) in enumerate(items):
         yy = y + i * row_h
         _ppt_rect(slide, x, yy + .18, .08, .08, GOLD)
-        _ppt_text(slide, x + .18, yy, 2.1, .34, presenter_text(title, 32), 9.5, RED if i == 0 else GREEN, True)
+        _ppt_text(slide, x + .18, yy, 2.1, .34, presenter_text(title, 32), 11.0, RED if i == 0 else GREEN, True)
         _ppt_text(slide, x + 2.18, yy - .02, w - 2.2, .55, presenter_text(body, 138), body_size, INK, False, "Aptos")
 
 
@@ -567,7 +743,7 @@ def _ppt_source(slide, bp: Blueprint, u: LectureUnit, plan) -> bool:
     path = _source_body_path(plan)
     if not path or not path.exists():
         return False
-    _ppt_frame(slide, bp, u, show_decision=u.number in {8, 11, 12, 13})
+    _ppt_frame(slide, bp, u, show_decision=u.number in set(range(5, 19)))
     try:
         with Image.open(path) as im:
             iw, ih = im.size
@@ -585,7 +761,7 @@ def _ppt_redraw(slide, bp: Blueprint, u: LectureUnit):
     kind, items = _spec(bp, u)
     if kind == "title":
         _ppt_title_slide(slide, bp, u, items); return
-    _ppt_frame(slide, bp, u, show_decision=u.number in {5, 8, 11, 14, 17, 20})
+    _ppt_frame(slide, bp, u, show_decision=u.number in set(range(5, 19)))
     if kind == "quote": _ppt_quote(slide, items)
     elif kind == "takeaways": _ppt_bullets(slide, items)
     elif kind == "orbit": _ppt_orbit(slide, items)
@@ -649,7 +825,8 @@ def _r_wrap(c, text, x, y, width, size=12, color=R_INK, bold=False, max_lines=5,
 def _r_frame(c, bp: Blueprint, u: LectureUnit, show_decision=False):
     c.setFillColor(R_WHITE); c.rect(0, 0, PDF_W, PDF_H, fill=1, stroke=0)
     c.setFillColor(R_GOLD); c.rect(32, 516, 865, 1.3, fill=1, stroke=0); c.rect(32, 493, 1.3, 24, fill=1, stroke=0)
-    c.setFillColor(R_GREEN); c.setFont("Times-Roman", 25); c.drawString(40, 482, presenter_text(u.title, 80))
+    c.setFillColor(R_GREEN); c.setFont("Times-Roman", 25); c.drawString(40, 482, _display_title(bp, u))
+    _r_wrap(c, _display_question(u), 45, 452, 780, 9.6, R_INK, False, 2)
     c.setStrokeColor(R_GOLD); c.setLineWidth(1.6); c.circle(850, 493, 7.5, fill=0, stroke=1)
     c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 7); c.drawString(865, 495, "CIMT")
     c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", 4.8); c.drawString(865, 487, "ISCARB")
@@ -657,8 +834,14 @@ def _r_frame(c, bp: Blueprint, u: LectureUnit, show_decision=False):
     c.setFillColor(R_MUTED); c.setFont("Helvetica", 5.8); c.drawString(40, 20, f"{_subject(bp)} · source-grounded presenter")
     c.drawRightString(890, 20, f"{u.number:02d}/20")
     if show_decision:
-        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", 7); c.drawString(48, 51, "DECISION")
-        _r_wrap(c, presenter_text(u.engineering_question, 145), 95, 51, 650, 8.2, R_INK, True, 1)
+        c.setStrokeColor(R_GOLD); c.setLineWidth(.8); c.line(48, 64, 875, 64)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", 7); c.drawString(48, 50, "TRY")
+        _r_wrap(c, _try_text(u), 78, 51, 360, 7.5, R_INK, True, 2)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 6.8); c.drawString(470, 50, "CHECK")
+        _r_wrap(c, _check_text(u), 515, 51, 300, 7.2, R_INK, False, 2)
+        ready = _readiness_for_unit(bp, u)
+        if ready:
+            c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 4.8); c.drawRightString(875, 36, ready)
 
 
 def _r_title(c, bp: Blueprint, u: LectureUnit, items):
@@ -686,7 +869,7 @@ def _r_source(c, bp: Blueprint, u: LectureUnit, plan) -> bool:
     path = _source_body_path(plan)
     if not path or not path.exists():
         return False
-    _r_frame(c, bp, u, show_decision=u.number in {8, 11, 12, 13})
+    _r_frame(c, bp, u, show_decision=u.number in set(range(5, 19)))
     try:
         img = ImageReader(str(path)); iw, ih = img.getSize(); box = (55, 80, 850, 350)
         scale = min(box[2] / iw, box[3] / ih); dw, dh = iw * scale, ih * scale
@@ -701,7 +884,7 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
     kind, items = _spec(bp, u)
     if kind == "title":
         _r_title(c, bp, u, items); return
-    _r_frame(c, bp, u, show_decision=u.number in {5, 8, 11, 14, 17, 20})
+    _r_frame(c, bp, u, show_decision=u.number in set(range(5, 19)))
     if kind == "quote":
         _r_wrap(c, f'“{items[0][1]}”', 110, 365, 740, 22, R_RED, False, 4, "center", "Times-Roman")
         c.setFillColor(R_GOLD); c.rect(330, 220, 300, 1.2, fill=1, stroke=0)
@@ -900,19 +1083,22 @@ def render_cimt_presenter_preview_v43(bp: Blueprint, release_state: str = "BLOCK
                 visual = f'<div class="sourceVisual"><img src="{uri}" alt="Adapted P1 teaching visual"><small>ADAPTED VISUAL · P1 {plan.source_slide}</small></div>'
         if not visual:
             visual = _html_redraw(bp, u)
-        show_decision = u.number in {5,8,11,14,17,20}
+        show_decision = u.number in set(range(5,19))
         if u.number == 1:
             content = f'<div class="visual first">{visual}</div>'
         else:
-            decision = f'<div class="decision"><b>DECISION</b><span>{_h(presenter_text(u.engineering_question,145))}</span></div>' if show_decision else ''
-            content = f'''<div class="corner"></div><header class="head"><h2>{_h(u.title)}</h2><div class="mark"><i></i><b>CIMT</b><small>ISCARB</small></div></header><div class="visual">{visual}</div>{decision}<footer class="foot"><span>{_h(_subject(bp))} · source-grounded presenter</span><em>{u.number:02d}/20</em></footer>'''
+            ready = _readiness_for_unit(bp, u)
+            lesson = (f'<div class="learningStrip"><section><b>TRY</b><span>{_h(_try_text(u))}</span></section>'
+                      f'<section><b>CHECK</b><span>{_h(_check_text(u))}</span></section>'
+                      + (f'<small>{_h(ready)}</small>' if ready else '') + '</div>') if show_decision else ''
+            content = f'''<div class="corner"></div><header class="head"><div><h2>{_h(_display_title(bp, u))}</h2><p class="question">{_h(_display_question(u))}</p></div><div class="mark"><i></i><b>CIMT</b><small>ISCARB</small></div></header><div class="visual">{visual}</div>{lesson}<footer class="foot"><span>{_h(_subject(bp))} · source-grounded presenter</span><em>{u.number:02d}/20</em></footer>'''
         slides.append(f'<section class="slide{" show" if i==0 else ""}" data-i="{i}">{content}</section>')
-        thumbs.append(f'<button class="thumb{" active" if i==0 else ""}" data-i="{i}"><b>{u.number:02d}</b><span>{_h(presenter_text(u.title,46))}</span></button>')
+        thumbs.append(f'<button class="thumb{" active" if i==0 else ""}" data-i="{i}"><b>{u.number:02d}</b><span>{_h(presenter_text(_display_title(bp, u),46))}</span></button>')
 
     css = f'''
     :root{{--green:#005b39;--green2:#2c7e41;--gold:{LEGACY_GOLD_TOKEN};--red:#e22424;--ink:#181818;--muted:#707070;--pale:#ecf6eb;--legacy:{LEGACY_GREEN_TOKEN}}}
-    *{{box-sizing:border-box}}body{{margin:0;background:#eceee9;color:var(--ink);font-family:Arial,Helvetica,sans-serif}}.deck{{height:100vh;display:grid;grid-template-columns:220px 1fr}}.rail{{background:#f7f7f2;border-right:1px solid #d9ddd7;padding:18px;overflow:auto}}.brand{{font-family:Georgia,serif;color:var(--green);font-size:19px}}.state{{font-size:9px;color:var(--muted);margin:6px 0 16px}}.thumb{{display:grid;grid-template-columns:27px 1fr;width:100%;gap:7px;padding:8px 4px;border:0;border-bottom:1px solid #dde1da;background:transparent;text-align:left;cursor:pointer;color:#454b46}}.thumb b{{color:var(--gold)}}.thumb span{{font-size:10px}}.thumb.active{{background:#edf5eb;color:#111}}.stage{{display:grid;place-items:center;padding:22px}}.slide{{display:none;width:min(1180px,calc(100vw - 275px));aspect-ratio:16/9;background:#fff;box-shadow:0 22px 50px #1c2a2028;position:relative;overflow:hidden;padding:22px 34px 18px}}.slide.show{{display:block}}.corner{{position:absolute;left:34px;top:20px;width:calc(100% - 68px);height:34px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}}.head{{height:88px;display:flex;justify-content:space-between;align-items:start;padding:12px 8px 0}}.head h2{{margin:0;color:var(--green);font:400 clamp(27px,2.7vw,40px)/1.05 Georgia,serif;letter-spacing:-.02em}}.mark{{display:grid;grid-template-columns:20px auto;grid-template-rows:15px 12px;align-items:center;column-gap:6px;color:var(--green);font-size:8px;margin-top:2px}}.mark i{{grid-row:1/3;width:18px;height:18px;border:2px solid var(--gold);border-radius:50%}}.mark small{{font-size:6px;color:var(--muted);font-weight:800}}.visual{{height:calc(100% - 136px);display:grid;align-items:center;padding:6px 10px 12px}}.visual.first{{height:100%;padding:0}}.foot{{position:absolute;left:42px;right:42px;bottom:14px;border-top:2px solid var(--gold);padding-top:6px;display:flex;justify-content:space-between;color:var(--muted);font-size:7px}}.foot em{{font-style:normal;font-weight:800}}.decision{{position:absolute;left:48px;right:48px;bottom:39px;display:grid;grid-template-columns:64px 1fr;align-items:center;gap:8px;font-size:9px}}.decision b{{color:var(--red)}}.decision span{{font-weight:700}}.titleSlide{{height:100%;display:grid;grid-template-rows:1.2fr auto auto 1.4fr auto;align-items:center;text-align:center;padding:35px 70px;position:relative}}.titleSlide:before{{content:'';position:absolute;left:0;right:0;top:0;border-top:2px solid var(--gold)}}.titleSlide h1{{margin:0;color:var(--green);font:400 clamp(34px,4vw,58px)/1.08 Georgia,serif}}.titleSlide p{{font-size:14px}}.titleSlide hr{{width:42%;border:0;border-top:2px solid var(--gold)}}.titleSlide blockquote{{margin:0;color:var(--red);font:400 clamp(18px,2vw,29px)/1.25 Georgia,serif}}.titleSlide small{{color:var(--muted);font-weight:700}}.quoteSlide blockquote{{margin:12px auto;color:var(--red);font:400 clamp(25px,3.1vw,45px)/1.12 Georgia,serif;text-align:center;max-width:880px}}.quoteSlide hr{{width:38%;border:0;border-top:2px solid var(--gold)}}.quoteSlide>div{{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:24px}}.quoteSlide article{{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start}}.quoteSlide b{{color:var(--gold);font:700 18px Georgia,serif}}.quoteSlide span{{font-size:14px;font-weight:700;line-height:1.35}}.bulletList,.tableList{{display:grid;gap:7px;padding:2px 6px}}.bulletList article{{display:grid;grid-template-columns:10px 150px 1fr;gap:12px;align-items:start;padding:7px 0}}.bulletList i{{width:7px;height:7px;background:var(--gold);margin-top:7px}}.bulletList b{{font-size:10px;color:var(--green)}}.bulletList article:first-child b{{color:var(--red)}}.bulletList span{{font-size:16px;line-height:1.28}}.tableList{{border-top:34px solid var(--gold);position:relative}}.tableList:before{{content:'CHARACTERISTIC                    WHAT IT MEANS IN THE ENGINEERING DECISION';position:absolute;top:-26px;left:12px;color:white;font-size:8px;font-weight:800;white-space:pre}}.tableList article{{display:grid;grid-template-columns:190px 1fr;border:1px solid #dadad0;border-top:0;min-height:50px;align-items:center;padding:6px 12px}}.tableList article:nth-child(odd){{background:#faf6e5}}.tableList i{{display:none}}.tableList b{{color:var(--green);font-size:11px}}.tableList span{{font-size:12px}}.orbit{{height:100%;position:relative}}.orbit>strong{{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:126px;height:88px;border-radius:50%;display:grid;place-items:center;background:var(--green2);color:#fff;font-size:12px}}.orbit article{{position:absolute;width:27%;font-size:12px}}.orbit article b{{display:block;color:var(--green);font-size:10px;margin-bottom:5px}}.orbit .o1 b,.orbit .o4 b{{color:var(--red)}}.orbit .o0{{left:2%;top:9%}}.orbit .o1{{left:2%;top:39%}}.orbit .o2{{left:2%;top:69%}}.orbit .o3{{right:2%;top:9%}}.orbit .o4{{right:2%;top:39%}}.orbit .o5{{right:2%;top:69%}}.ladder{{height:100%;position:relative;padding-top:10px}}.ladder article{{position:absolute;left:calc(3% + var(--i)*23%);bottom:calc(10% + var(--i)*13%);width:22%;height:73px;border:1px solid var(--gold);background:#faf6e5;padding:9px}}.ladder article:nth-child(even){{background:#ecf6eb}}.ladder b{{font-size:9px;color:var(--green)}}.ladder article:first-child b{{color:var(--red)}}.ladder span{{display:block;font-size:10px;margin-top:4px}}.ladder p{{position:absolute;left:4%;top:6%;width:32%;font:400 18px/1.25 Georgia,serif}}.curve{{display:grid;grid-template-columns:1.45fr .9fr;gap:32px;height:100%;align-items:center}}.chart{{height:80%;position:relative;border-left:2px solid #222;border-bottom:2px solid #222}}.chart svg{{position:absolute;inset:8%;width:88%;height:82%}}.chart polyline{{fill:none;stroke:var(--green2);stroke-width:4}}.axisY{{position:absolute;left:-35px;top:42%;font-size:8px;font-weight:800;transform:rotate(-90deg)}}.axisX{{position:absolute;bottom:-22px;left:34%;font-size:8px;color:var(--muted)}}.curveNotes b{{display:block;color:var(--red);font-size:10px;margin:14px 0 5px}}.curveNotes b:nth-of-type(2){{color:var(--green)}}.curveNotes p{{font-size:14px;line-height:1.35}}.stack{{display:grid;gap:8px;padding:4px 80px}}.stack article{{border:1px solid var(--green2);display:grid;grid-template-columns:90px 1fr;padding:8px 12px;align-items:center}}.stack article:nth-child(odd){{background:#ecf6eb}}.stack b{{color:var(--green);font-size:9px}}.stack article:first-child b,.stack article:last-child b{{color:var(--red)}}.stack span{{font-size:13px;text-align:center}}.compare{{height:100%;display:grid;grid-template-columns:1fr 2px 1fr;grid-template-rows:1fr auto;gap:18px 26px;align-items:center}}.compare>i{{height:78%;background:var(--gold)}}.compare section{{text-align:center;padding:8px 24px}}.compare section>b{{color:var(--green);font-size:11px}}.compare section:nth-of-type(2)>b{{color:var(--red)}}.compare section p{{font:400 22px/1.25 Georgia,serif}}.compare footer{{grid-column:1/4;justify-self:center;border:1px solid var(--gold);background:#faf6e5;padding:9px 18px;font-size:10px}}.compare footer strong{{color:var(--red);margin-right:16px}}.tree{{display:grid;grid-template-rows:auto 1fr;gap:24px;height:100%;padding:4px 30px}}.tree header{{justify-self:center;width:36%;border:1px solid var(--gold);background:#faf6e5;padding:9px;text-align:center}}.tree header b{{display:block;color:var(--red);font-size:9px}}.tree header span{{font-size:10px;font-weight:700}}.tree>div{{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start}}.tree article{{text-align:center;border-top:2px solid var(--gold);padding-top:12px}}.tree article b{{color:var(--green);font-size:9px}}.tree article span{{display:block;font-size:12px;margin-top:8px;line-height:1.3}}.context{{display:grid;grid-template-columns:.85fr 1.25fr;gap:42px;height:100%;align-items:center}}.context>section{{border:1px solid var(--red);background:#fdeeee;padding:25px;text-align:center;min-height:70%;display:grid;align-content:center}}.context>section b{{color:var(--red);font-size:10px}}.context>section p{{font:400 20px/1.3 Georgia,serif}}.context>div b{{display:block;color:var(--green);font-size:10px;margin-top:12px}}.context>div b:nth-of-type(2){{color:var(--red)}}.context>div p{{font-size:15px;line-height:1.35}}.chain{{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:center;height:100%;position:relative}}.chain article{{border:1px solid var(--green2);min-height:180px;padding:15px;display:grid;align-content:start;text-align:center}}.chain article:nth-child(odd){{background:#ecf6eb}}.chain b{{color:var(--green);font-size:9px}}.chain article:nth-child(2) b,.chain article:nth-child(4) b{{color:var(--red)}}.chain span{{font-size:13px;line-height:1.35;margin-top:14px}}.chain footer{{position:absolute;bottom:6px;left:25%;right:25%;text-align:center;color:var(--red);font:700 13px Georgia,serif}}.timeline{{display:grid;grid-template-columns:repeat(3,1fr);gap:35px;height:100%;align-items:center;position:relative}}.timeline:before{{content:'';position:absolute;left:7%;right:7%;top:49%;height:2px;background:var(--gold)}}.timeline article{{position:relative;text-align:center;z-index:2}}.timeline article:before{{content:'';display:block;width:16px;height:16px;border-radius:50%;background:var(--green2);margin:0 auto 18px}}.timeline article:last-child:before{{background:var(--red)}}.timeline b{{display:block;color:var(--green);font-size:10px}}.timeline article:last-child b{{color:var(--red)}}.timeline span{{display:block;font-size:14px;line-height:1.35;margin-top:50px}}.burden{{display:grid;grid-template-columns:1fr 1fr;gap:60px;padding:10px 20px}}.burden article{{padding:13px 20px;border-bottom:2px solid var(--gold)}}.burden b{{display:block;color:var(--green);font-size:10px}}.burden article:nth-child(2) b,.burden article:nth-child(4) b{{color:var(--red)}}.burden span{{display:block;font:400 17px/1.3 Georgia,serif;margin-top:10px}}.aiGate{{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;height:100%;align-items:center;position:relative}}.aiGate article{{min-height:220px;padding:20px;border:1px solid var(--green2);background:#ecf6eb;text-align:center;display:grid;align-content:center}}.aiGate article:nth-child(2){{background:#faf6e5;border-color:var(--gold)}}.aiGate article:nth-child(3){{background:#fdeeee;border-color:var(--red)}}.aiGate b{{color:var(--green);font-size:10px}}.aiGate article:nth-child(3) b{{color:var(--red)}}.aiGate span{{font:400 16px/1.3 Georgia,serif;margin-top:12px}}.aiGate footer{{position:absolute;bottom:0;left:28%;right:28%;text-align:center;font-size:10px}}.aiGate footer b{{color:var(--red);margin-right:10px}}.portfolio{{height:100%;position:relative}}.portfolio>strong{{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:150px;height:105px;border:1px solid var(--gold);background:#faf6e5;border-radius:50%;display:grid;place-items:center;text-align:center;color:var(--green);font-size:12px}}.portfolio article{{position:absolute;width:27%;text-align:center}}.portfolio article b{{display:block;color:var(--green);font-size:9px}}.portfolio .p0 b,.portfolio .p3 b{{color:var(--red)}}.portfolio article span{{display:block;font-size:11px;margin-top:6px}}.portfolio .p0{{left:1%;top:4%}}.portfolio .p1{{left:36%;top:0}}.portfolio .p2{{right:1%;top:4%}}.portfolio .p3{{left:1%;bottom:4%}}.portfolio .p4{{left:36%;bottom:0}}.portfolio .p5{{right:1%;bottom:4%}}.argument{{display:grid;gap:8px;padding:5px 65px}}.argument article{{display:grid;grid-template-columns:130px 1fr;align-items:center;margin:0 auto;border:1px solid var(--green2);background:#ecf6eb;padding:7px 12px}}.argument article:nth-child(1),.argument article:nth-child(4){{background:#faf6e5;border-color:var(--gold)}}.argument article:nth-child(5){{background:#fdeeee;border-color:var(--red)}}.argument article:nth-child(1){{width:100%}}.argument article:nth-child(2){{width:92%}}.argument article:nth-child(3){{width:84%}}.argument article:nth-child(4){{width:76%}}.argument article:nth-child(5){{width:68%}}.argument b{{font-size:9px;color:var(--green)}}.argument article:nth-child(1) b,.argument article:nth-child(4) b,.argument article:nth-child(5) b{{color:var(--red)}}.argument span{{font-size:11px;text-align:center}}.rubric{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 22px;padding:10px 22px}}.rubric article{{text-align:center}}.rubric b{{display:block;color:var(--green);font-size:10px;margin-bottom:7px}}.rubric span{{display:grid;place-items:center;border:1px solid var(--green2);background:#ecf6eb;min-height:80px;padding:10px;font-size:12px}}.verdict header{{text-align:center;padding:8px 40px}}.verdict header b{{color:var(--green);font-size:10px}}.verdict header p{{font:400 21px/1.25 Georgia,serif}}.verdict>div{{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:15px 50px}}.verdict article{{border:1px solid var(--green2);background:#ecf6eb;padding:14px}}.verdict article:nth-child(2){{border-color:var(--red);background:#fdeeee}}.verdict article b{{color:var(--green);font-size:9px}}.verdict article:nth-child(2) b{{color:var(--red)}}.verdict article span{{display:block;font-size:12px;margin-top:8px}}.verdict footer{{margin:18px auto 0;width:66%;border:1px solid var(--gold);background:#faf6e5;padding:10px;text-align:center;color:var(--green);font-weight:800;font-size:11px}}.sourceVisual{{height:100%;display:grid;place-items:center;position:relative;overflow:hidden}}.sourceVisual img{{max-width:100%;max-height:100%;object-fit:contain}}.sourceVisual small{{position:absolute;right:2px;bottom:2px;background:#fff;padding:3px 6px;color:var(--green);font-size:6px;font-weight:800}}
-    @media(max-width:850px){{html,body,.deck,.stage{{max-width:100%;overflow-x:hidden}}.deck{{grid-template-columns:minmax(0,1fr)}}.rail{{display:none}}.stage{{padding:8px;min-width:0}}.slide{{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0;padding-left:18px;padding-right:18px}}.head,.visual,.slide>*{{min-width:0}}.corner{{left:18px;width:calc(100% - 36px)}}.foot{{left:22px;right:22px}}.decision{{left:24px;right:24px}}.visual{{height:calc(100% - 120px)}}.bulletList article{{grid-template-columns:8px minmax(72px,28%) minmax(0,1fr)}}.tableList article{{grid-template-columns:minmax(88px,34%) minmax(0,1fr)}}.stack{{padding-left:12px;padding-right:12px}}.argument{{padding-left:8px;padding-right:8px}}.compare section{{padding-left:8px;padding-right:8px}}.tree{{padding-left:8px;padding-right:8px}}.context{{gap:14px}}.chain{{gap:6px}}.timeline{{gap:10px}}.burden{{gap:12px;padding-left:4px;padding-right:4px}}.verdict>div{{margin-left:8px;margin-right:8px;gap:10px}}}}
+    *{{box-sizing:border-box}}body{{margin:0;background:#eceee9;color:var(--ink);font-family:Arial,Helvetica,sans-serif}}.deck{{height:100vh;display:grid;grid-template-columns:220px 1fr}}.rail{{background:#f7f7f2;border-right:1px solid #d9ddd7;padding:18px;overflow:auto}}.brand{{font-family:Georgia,serif;color:var(--green);font-size:19px}}.state{{font-size:9px;color:var(--muted);margin:6px 0 16px}}.thumb{{display:grid;grid-template-columns:27px 1fr;width:100%;gap:7px;padding:8px 4px;border:0;border-bottom:1px solid #dde1da;background:transparent;text-align:left;cursor:pointer;color:#454b46}}.thumb b{{color:var(--gold)}}.thumb span{{font-size:10px}}.thumb.active{{background:#edf5eb;color:#111}}.stage{{display:grid;place-items:center;padding:22px}}.slide{{display:none;width:min(1180px,calc(100vw - 275px));aspect-ratio:16/9;background:#fff;box-shadow:0 22px 50px #1c2a2028;position:relative;overflow:hidden;padding:22px 34px 18px}}.slide.show{{display:block}}.corner{{position:absolute;left:34px;top:20px;width:calc(100% - 68px);height:34px;border-top:2px solid var(--gold);border-left:2px solid var(--gold)}}.head{{height:112px;display:flex;justify-content:space-between;align-items:start;padding:12px 8px 0}}.head h2{{margin:0;color:var(--green);font:400 clamp(27px,2.7vw,40px)/1.05 Georgia,serif;letter-spacing:-.02em}}.question{{margin:8px 0 0;max-width:900px;font-size:13px;line-height:1.32;color:#333}}.mark{{display:grid;grid-template-columns:20px auto;grid-template-rows:15px 12px;align-items:center;column-gap:6px;color:var(--green);font-size:8px;margin-top:2px}}.mark i{{grid-row:1/3;width:18px;height:18px;border:2px solid var(--gold);border-radius:50%}}.mark small{{font-size:6px;color:var(--muted);font-weight:800}}.visual{{height:calc(100% - 196px);display:grid;align-items:center;padding:4px 10px 8px}}.visual.first{{height:100%;padding:0}}.foot{{position:absolute;left:42px;right:42px;bottom:14px;border-top:2px solid var(--gold);padding-top:6px;display:flex;justify-content:space-between;color:var(--muted);font-size:7px}}.foot em{{font-style:normal;font-weight:800}}.decision{{position:absolute;left:48px;right:48px;bottom:39px;display:grid;grid-template-columns:64px 1fr;align-items:center;gap:8px;font-size:9px}}.decision b{{color:var(--red)}}.decision span{{font-weight:700}}.learningStrip{{position:absolute;left:48px;right:48px;bottom:39px;border-top:1px solid var(--gold);padding-top:7px;display:grid;grid-template-columns:1fr 1fr;gap:18px;font-size:9px}}.learningStrip section{{display:grid;grid-template-columns:42px 1fr;gap:7px;align-items:start}}.learningStrip section:first-child b{{color:var(--red)}}.learningStrip section:last-child b{{color:var(--green)}}.learningStrip span{{font-weight:650;line-height:1.25}}.learningStrip small{{position:absolute;right:0;bottom:-14px;color:var(--green);font-size:6px;font-weight:800}}.titleSlide{{height:100%;display:grid;grid-template-rows:1.2fr auto auto 1.4fr auto;align-items:center;text-align:center;padding:35px 70px;position:relative}}.titleSlide:before{{content:'';position:absolute;left:0;right:0;top:0;border-top:2px solid var(--gold)}}.titleSlide h1{{margin:0;color:var(--green);font:400 clamp(34px,4vw,58px)/1.08 Georgia,serif}}.titleSlide p{{font-size:14px}}.titleSlide hr{{width:42%;border:0;border-top:2px solid var(--gold)}}.titleSlide blockquote{{margin:0;color:var(--red);font:400 clamp(18px,2vw,29px)/1.25 Georgia,serif}}.titleSlide small{{color:var(--muted);font-weight:700}}.quoteSlide blockquote{{margin:12px auto;color:var(--red);font:400 clamp(25px,3.1vw,45px)/1.12 Georgia,serif;text-align:center;max-width:880px}}.quoteSlide hr{{width:38%;border:0;border-top:2px solid var(--gold)}}.quoteSlide>div{{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:24px}}.quoteSlide article{{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start}}.quoteSlide b{{color:var(--gold);font:700 18px Georgia,serif}}.quoteSlide span{{font-size:14px;font-weight:700;line-height:1.35}}.bulletList,.tableList{{display:grid;gap:7px;padding:2px 6px}}.bulletList article{{display:grid;grid-template-columns:10px 150px 1fr;gap:12px;align-items:start;padding:7px 0}}.bulletList i{{width:7px;height:7px;background:var(--gold);margin-top:7px}}.bulletList b{{font-size:11px;color:var(--green)}}.bulletList article:first-child b{{color:var(--red)}}.bulletList span{{font-size:18px;line-height:1.28}}.tableList{{border-top:34px solid var(--gold);position:relative}}.tableList:before{{content:'CHARACTERISTIC                    WHAT IT MEANS IN THE ENGINEERING DECISION';position:absolute;top:-26px;left:12px;color:white;font-size:8px;font-weight:800;white-space:pre}}.tableList article{{display:grid;grid-template-columns:190px 1fr;border:1px solid #dadad0;border-top:0;min-height:50px;align-items:center;padding:6px 12px}}.tableList article:nth-child(odd){{background:#faf6e5}}.tableList i{{display:none}}.tableList b{{color:var(--green);font-size:11px}}.tableList span{{font-size:12px}}.orbit{{height:100%;position:relative}}.orbit>strong{{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:126px;height:88px;border-radius:50%;display:grid;place-items:center;background:var(--green2);color:#fff;font-size:12px}}.orbit article{{position:absolute;width:27%;font-size:12px}}.orbit article b{{display:block;color:var(--green);font-size:10px;margin-bottom:5px}}.orbit .o1 b,.orbit .o4 b{{color:var(--red)}}.orbit .o0{{left:2%;top:9%}}.orbit .o1{{left:2%;top:39%}}.orbit .o2{{left:2%;top:69%}}.orbit .o3{{right:2%;top:9%}}.orbit .o4{{right:2%;top:39%}}.orbit .o5{{right:2%;top:69%}}.ladder{{height:100%;position:relative;padding-top:10px}}.ladder article{{position:absolute;left:calc(3% + var(--i)*23%);bottom:calc(10% + var(--i)*13%);width:22%;height:73px;border:1px solid var(--gold);background:#faf6e5;padding:9px}}.ladder article:nth-child(even){{background:#ecf6eb}}.ladder b{{font-size:9px;color:var(--green)}}.ladder article:first-child b{{color:var(--red)}}.ladder span{{display:block;font-size:10px;margin-top:4px}}.ladder p{{position:absolute;left:4%;top:6%;width:32%;font:400 18px/1.25 Georgia,serif}}.curve{{display:grid;grid-template-columns:1.45fr .9fr;gap:32px;height:100%;align-items:center}}.chart{{height:80%;position:relative;border-left:2px solid #222;border-bottom:2px solid #222}}.chart svg{{position:absolute;inset:8%;width:88%;height:82%}}.chart polyline{{fill:none;stroke:var(--green2);stroke-width:4}}.axisY{{position:absolute;left:-35px;top:42%;font-size:8px;font-weight:800;transform:rotate(-90deg)}}.axisX{{position:absolute;bottom:-22px;left:34%;font-size:8px;color:var(--muted)}}.curveNotes b{{display:block;color:var(--red);font-size:10px;margin:14px 0 5px}}.curveNotes b:nth-of-type(2){{color:var(--green)}}.curveNotes p{{font-size:14px;line-height:1.35}}.stack{{display:grid;gap:8px;padding:4px 80px}}.stack article{{border:1px solid var(--green2);display:grid;grid-template-columns:90px 1fr;padding:8px 12px;align-items:center}}.stack article:nth-child(odd){{background:#ecf6eb}}.stack b{{color:var(--green);font-size:9px}}.stack article:first-child b,.stack article:last-child b{{color:var(--red)}}.stack span{{font-size:13px;text-align:center}}.compare{{height:100%;display:grid;grid-template-columns:1fr 2px 1fr;grid-template-rows:1fr auto;gap:18px 26px;align-items:center}}.compare>i{{height:78%;background:var(--gold)}}.compare section{{text-align:center;padding:8px 24px}}.compare section>b{{color:var(--green);font-size:11px}}.compare section:nth-of-type(2)>b{{color:var(--red)}}.compare section p{{font:400 22px/1.25 Georgia,serif}}.compare footer{{grid-column:1/4;justify-self:center;border:1px solid var(--gold);background:#faf6e5;padding:9px 18px;font-size:10px}}.compare footer strong{{color:var(--red);margin-right:16px}}.tree{{display:grid;grid-template-rows:auto 1fr;gap:24px;height:100%;padding:4px 30px}}.tree header{{justify-self:center;width:36%;border:1px solid var(--gold);background:#faf6e5;padding:9px;text-align:center}}.tree header b{{display:block;color:var(--red);font-size:9px}}.tree header span{{font-size:10px;font-weight:700}}.tree>div{{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start}}.tree article{{text-align:center;border-top:2px solid var(--gold);padding-top:12px}}.tree article b{{color:var(--green);font-size:9px}}.tree article span{{display:block;font-size:12px;margin-top:8px;line-height:1.3}}.context{{display:grid;grid-template-columns:.85fr 1.25fr;gap:42px;height:100%;align-items:center}}.context>section{{border:1px solid var(--red);background:#fdeeee;padding:25px;text-align:center;min-height:70%;display:grid;align-content:center}}.context>section b{{color:var(--red);font-size:10px}}.context>section p{{font:400 20px/1.3 Georgia,serif}}.context>div b{{display:block;color:var(--green);font-size:10px;margin-top:12px}}.context>div b:nth-of-type(2){{color:var(--red)}}.context>div p{{font-size:15px;line-height:1.35}}.chain{{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:center;height:100%;position:relative}}.chain article{{border:1px solid var(--green2);min-height:180px;padding:15px;display:grid;align-content:start;text-align:center}}.chain article:nth-child(odd){{background:#ecf6eb}}.chain b{{color:var(--green);font-size:9px}}.chain article:nth-child(2) b,.chain article:nth-child(4) b{{color:var(--red)}}.chain span{{font-size:14px;line-height:1.35;margin-top:14px}}.chain footer{{position:absolute;bottom:6px;left:25%;right:25%;text-align:center;color:var(--red);font:700 13px Georgia,serif}}.timeline{{display:grid;grid-template-columns:repeat(3,1fr);gap:35px;height:100%;align-items:center;position:relative}}.timeline:before{{content:'';position:absolute;left:7%;right:7%;top:49%;height:2px;background:var(--gold)}}.timeline article{{position:relative;text-align:center;z-index:2}}.timeline article:before{{content:'';display:block;width:16px;height:16px;border-radius:50%;background:var(--green2);margin:0 auto 18px}}.timeline article:last-child:before{{background:var(--red)}}.timeline b{{display:block;color:var(--green);font-size:10px}}.timeline article:last-child b{{color:var(--red)}}.timeline span{{display:block;font-size:14px;line-height:1.35;margin-top:50px}}.burden{{display:grid;grid-template-columns:1fr 1fr;gap:60px;padding:10px 20px}}.burden article{{padding:13px 20px;border-bottom:2px solid var(--gold)}}.burden b{{display:block;color:var(--green);font-size:10px}}.burden article:nth-child(2) b,.burden article:nth-child(4) b{{color:var(--red)}}.burden span{{display:block;font:400 17px/1.3 Georgia,serif;margin-top:10px}}.aiGate{{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;height:100%;align-items:center;position:relative}}.aiGate article{{min-height:220px;padding:20px;border:1px solid var(--green2);background:#ecf6eb;text-align:center;display:grid;align-content:center}}.aiGate article:nth-child(2){{background:#faf6e5;border-color:var(--gold)}}.aiGate article:nth-child(3){{background:#fdeeee;border-color:var(--red)}}.aiGate b{{color:var(--green);font-size:10px}}.aiGate article:nth-child(3) b{{color:var(--red)}}.aiGate span{{font:400 16px/1.3 Georgia,serif;margin-top:12px}}.aiGate footer{{position:absolute;bottom:0;left:28%;right:28%;text-align:center;font-size:10px}}.aiGate footer b{{color:var(--red);margin-right:10px}}.portfolio{{height:100%;position:relative}}.portfolio>strong{{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:150px;height:105px;border:1px solid var(--gold);background:#faf6e5;border-radius:50%;display:grid;place-items:center;text-align:center;color:var(--green);font-size:12px}}.portfolio article{{position:absolute;width:27%;text-align:center}}.portfolio article b{{display:block;color:var(--green);font-size:9px}}.portfolio .p0 b,.portfolio .p3 b{{color:var(--red)}}.portfolio article span{{display:block;font-size:11px;margin-top:6px}}.portfolio .p0{{left:1%;top:4%}}.portfolio .p1{{left:36%;top:0}}.portfolio .p2{{right:1%;top:4%}}.portfolio .p3{{left:1%;bottom:4%}}.portfolio .p4{{left:36%;bottom:0}}.portfolio .p5{{right:1%;bottom:4%}}.argument{{display:grid;gap:8px;padding:5px 65px}}.argument article{{display:grid;grid-template-columns:130px 1fr;align-items:center;margin:0 auto;border:1px solid var(--green2);background:#ecf6eb;padding:7px 12px}}.argument article:nth-child(1),.argument article:nth-child(4){{background:#faf6e5;border-color:var(--gold)}}.argument article:nth-child(5){{background:#fdeeee;border-color:var(--red)}}.argument article:nth-child(1){{width:100%}}.argument article:nth-child(2){{width:92%}}.argument article:nth-child(3){{width:84%}}.argument article:nth-child(4){{width:76%}}.argument article:nth-child(5){{width:68%}}.argument b{{font-size:9px;color:var(--green)}}.argument article:nth-child(1) b,.argument article:nth-child(4) b,.argument article:nth-child(5) b{{color:var(--red)}}.argument span{{font-size:11px;text-align:center}}.rubric{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 22px;padding:10px 22px}}.rubric article{{text-align:center}}.rubric b{{display:block;color:var(--green);font-size:10px;margin-bottom:7px}}.rubric span{{display:grid;place-items:center;border:1px solid var(--green2);background:#ecf6eb;min-height:80px;padding:10px;font-size:12px}}.verdict header{{text-align:center;padding:8px 40px}}.verdict header b{{color:var(--green);font-size:10px}}.verdict header p{{font:400 21px/1.25 Georgia,serif}}.verdict>div{{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:15px 50px}}.verdict article{{border:1px solid var(--green2);background:#ecf6eb;padding:14px}}.verdict article:nth-child(2){{border-color:var(--red);background:#fdeeee}}.verdict article b{{color:var(--green);font-size:9px}}.verdict article:nth-child(2) b{{color:var(--red)}}.verdict article span{{display:block;font-size:12px;margin-top:8px}}.verdict footer{{margin:18px auto 0;width:66%;border:1px solid var(--gold);background:#faf6e5;padding:10px;text-align:center;color:var(--green);font-weight:800;font-size:11px}}.sourceVisual{{height:100%;display:grid;place-items:center;position:relative;overflow:hidden}}.sourceVisual img{{max-width:100%;max-height:100%;object-fit:contain}}.sourceVisual small{{position:absolute;right:2px;bottom:2px;background:#fff;padding:3px 6px;color:var(--green);font-size:6px;font-weight:800}}
+    @media(max-width:850px){{html,body,.deck,.stage{{max-width:100%;overflow-x:hidden}}.deck{{grid-template-columns:minmax(0,1fr)}}.rail{{display:none}}.stage{{padding:8px;min-width:0}}.slide{{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0;padding-left:18px;padding-right:18px}}.head,.visual,.slide>*{{min-width:0}}.corner{{left:18px;width:calc(100% - 36px)}}.foot{{left:22px;right:22px}}.decision{{left:24px;right:24px}}.visual{{height:calc(100% - 168px)}}.learningStrip{{left:24px;right:24px;gap:8px;grid-template-columns:1fr}}.learningStrip section{{grid-template-columns:36px 1fr}}.bulletList article{{grid-template-columns:8px minmax(72px,28%) minmax(0,1fr)}}.tableList article{{grid-template-columns:minmax(88px,34%) minmax(0,1fr)}}.stack{{padding-left:12px;padding-right:12px}}.argument{{padding-left:8px;padding-right:8px}}.argument article{{grid-template-columns:minmax(68px,30%) minmax(0,1fr)}}.compare section{{padding-left:8px;padding-right:8px}}.tree{{padding-left:8px;padding-right:8px}}.context{{gap:14px}}.chain{{gap:6px}}.timeline{{gap:10px}}.burden{{gap:12px;padding-left:4px;padding-right:4px}}.verdict>div{{margin-left:8px;margin-right:8px;gap:10px}}}}
     '''
     js = '''<script>(function(){const s=[...document.querySelectorAll('.slide')],b=[...document.querySelectorAll('.thumb')];function go(i){s.forEach((x,j)=>x.classList.toggle('show',j===i));b.forEach((x,j)=>x.classList.toggle('active',j===i));}b.forEach((x,i)=>x.onclick=()=>go(i));document.onkeydown=e=>{let i=s.findIndex(x=>x.classList.contains('show'));if(e.key==='ArrowRight'||e.key==='PageDown')go(Math.min(s.length-1,i+1));if(e.key==='ArrowLeft'||e.key==='PageUp')go(Math.max(0,i-1));};})();</script>'''
     return f'<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{_h(bp.lecture_title)} · ISCARB Presenter</title><style>{css}</style></head><body><div class="deck"><aside class="rail"><div class="brand">ISCARB · CIMT-native Presenter</div><div class="state">{_h(release_state)} · 20 units · 90 minutes</div>{"".join(thumbs)}</aside><main class="stage">{"".join(slides)}</main></div>{js}</body></html>'

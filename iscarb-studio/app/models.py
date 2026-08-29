@@ -265,7 +265,7 @@ class Blueprint(BaseModel):
     source_topic_families: list[str] = Field(min_length=1)
     topic_coverage: list[TopicCoverage] = Field(min_length=1)
     coverage_ledger: list[CoverageLedgerEntry] = Field(default_factory=list)
-    readiness_alignment: list[ReadinessAlignment] = Field(min_length=1)
+    readiness_alignment: list[ReadinessAlignment] = Field(default_factory=list)
     rubric_criteria: list[RubricCriterion] = Field(min_length=6)
     release_notes: list[str] = Field(default_factory=list)
 
