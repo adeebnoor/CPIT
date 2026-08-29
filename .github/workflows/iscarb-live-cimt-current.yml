@@ -1,0 +1,93 @@
+name: ISCARB Live CIMT Current Production QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/iscarb-live-cimt-current.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iscarb-live-cimt-current
+  cancel-in-progress: true
+
+jobs:
+  live-cimt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BASE_URL: https://iscarb-lecture-studio.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install inspection dependencies
+        run: python -m pip install requests pypdf python-pptx
+      - name: Compile the archived CIMT Dependable Systems lecture on live production
+        run: |
+          python - <<'PY'
+          import json, pathlib, time, requests
+          base='https://iscarb-lecture-studio.onrender.com'
+          src=pathlib.Path('lectures/cimt/CPIT455-class2-NooR.pdf')
+          assert src.exists() and src.stat().st_size>100000
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/1.0'})
+          h=s.get(base+'/api/health',timeout=45); h.raise_for_status(); health=h.json()
+          print('LIVE HEALTH',json.dumps(health,indent=2)[:8000])
+          pathlib.Path('/tmp/health.json').write_text(json.dumps(health,indent=2),encoding='utf-8')
+          with src.open('rb') as f:
+              r=s.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/pdf')},data={
+                  'primary_url':'','supporting_urls':'','lecture_focus':'Preserve the original CIMT technical depth and source-native figures while compiling the full 20-unit ISCARB experience.','model':'auto','repair_rounds':'2'
+              },timeout=120)
+          print('COMPILE',r.status_code,r.text[:2000]); r.raise_for_status()
+          job_id=r.json()['job_id']; pathlib.Path('/tmp/job_id.txt').write_text(job_id)
+          deadline=time.time()+1800; job=None
+          while time.time()<deadline:
+              jr=s.get(base+'/api/jobs/'+job_id,timeout=60); jr.raise_for_status(); job=jr.json()
+              print('STATE',job.get('status'),job.get('progress'),job.get('message'))
+              if job.get('status') in {'ready','blocked','error'}: break
+              time.sleep(8)
+          assert job is not None
+          pathlib.Path('/tmp/job.json').write_text(json.dumps(job,ensure_ascii=False,indent=2),encoding='utf-8')
+          assert job.get('blueprint'), json.dumps(job,ensure_ascii=False)[:6000]
+          bp=job['blueprint']; assert len(bp.get('units',[]))==20 and len(bp.get('clos',[]))==5 and bp.get('session_minutes')==90
+          print('FINAL',job.get('status'),'units',len(bp['units']),'clos',len(bp['clos']))
+          PY
+      - name: Download every live output and validate file structure
+        run: |
+          python - <<'PY'
+          import io,json,pathlib,requests,zipfile
+          from pypdf import PdfReader
+          from pptx import Presentation
+          base='https://iscarb-lecture-studio.onrender.com'; job_id=pathlib.Path('/tmp/job_id.txt').read_text().strip()
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/1.0'})
+          out=pathlib.Path('/tmp/iscarb-live-cimt'); out.mkdir(exist_ok=True)
+          endpoints={
+            'presenter.html':f'/api/jobs/{job_id}/presenter',
+            'presenter.pptx':f'/api/jobs/{job_id}/export/pptx',
+            'presenter.pdf':f'/api/jobs/{job_id}/export/presenter-pdf',
+            'reading-pack.pdf':f'/api/jobs/{job_id}/export/pdf',
+            'instructor-guide.docx':f'/api/jobs/{job_id}/export/docx',
+            'student-pack.docx':f'/api/jobs/{job_id}/export/student',
+            'blueprint.json':f'/api/jobs/{job_id}/export/json',
+          }
+          for name,path in endpoints.items():
+              r=s.get(base+path,timeout=180); print(name,r.status_code,len(r.content)); r.raise_for_status(); (out/name).write_bytes(r.content)
+          prs=Presentation(out/'presenter.pptx'); assert len(prs.slides)==20
+          assert len(PdfReader(str(out/'presenter.pdf')).pages)==20
+          assert len(PdfReader(str(out/'reading-pack.pdf')).pages)>=1
+          text=' '.join(shape.text for sl in prs.slides for shape in sl.shapes if hasattr(shape,'text_frame')).upper()
+          assert 'SECURITY ENGINEERING' not in text, 'Dependable Systems presenter contains Security Engineering residue'
+          bp=json.loads((out/'blueprint.json').read_text(encoding='utf-8')); assert len(bp['units'])==20
+          (out/'health.json').write_bytes(pathlib.Path('/tmp/health.json').read_bytes())
+          (out/'job.json').write_bytes(pathlib.Path('/tmp/job.json').read_bytes())
+          print('LIVE CURRENT PRODUCTION OUTPUTS PASS STRUCTURAL QA')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-live-cimt-current-production
+          path: /tmp/iscarb-live-cimt/*
+          if-no-files-found: error
