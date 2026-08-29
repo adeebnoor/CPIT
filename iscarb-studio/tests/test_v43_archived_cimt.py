@@ -38,21 +38,15 @@ class ArchivedCIMTRegressionTests(unittest.TestCase):
         # These mappings are deliberately grounded in the preserved CIMT deck,
         # not invented by the fixture: overview/take-home, properties, cost curve,
         # sociotechnical stack, redundancy/diversity, and dependable-process table.
-        anchors = {
-            2: "[P1] SLIDE 3",
-            5: "[P1] SLIDE 5",
-            6: "[P1] SLIDE 6",
-            7: "[P1] SLIDE 8",
-            9: "[P1] SLIDE 9",
-            10: "[P1] SLIDE 10",
-        }
+        source_slides = {2: 3, 5: 5, 6: 6, 7: 8, 9: 9, 10: 10}
         for unit in bp.units:
-            unit.source_anchor = anchors.get(unit.number, "")
+            slide_no = source_slides.get(unit.number)
+            unit.source_anchor = f"[P1] SLIDE {slide_no}" if slide_no else ""
 
         try:
             plans = plans_for_blueprint_v42(bp)
             selected = {u.number: p.source_slide for u, p in zip(bp.units, plans) if p.reuse_mode == "USE"}
-            for unit_no, slide_no in anchors.items():
+            for unit_no, slide_no in source_slides.items():
                 self.assertEqual(selected.get(unit_no), slide_no, (unit_no, selected))
 
             out = Path("/tmp/iscarb-v43-qa")
