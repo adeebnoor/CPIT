@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: iscarb-studio
     healthCheckPath: /api/health
-    autoDeploy: true
+    autoDeployTrigger: commit
     envVars:
       - key: GEMINI_API_KEY
         sync: false
