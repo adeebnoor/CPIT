@@ -1,0 +1,116 @@
+name: Try Sommerville Chapter 2 on Live ISCARB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/try-sommerville-ch2-live.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-ch2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BASE_URL: https://iscarb-lecture-studio.onrender.com
+      SOURCE_URL: https://www.slideshare.net/slideshow/ian-sommerville-software-engineering-tenth-edition-pearson-education-limited-2016/287925972
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests pypdf python-pptx
+      - name: Compile exact Chapter 2 source and validate coverage
+        run: |
+          python - <<'PY'
+          import io, json, os, pathlib, time, zipfile, requests
+          from pypdf import PdfReader
+          from pptx import Presentation
+
+          base=os.environ['BASE_URL'].rstrip('/')
+          src=os.environ['SOURCE_URL']
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Sommerville-Ch2-QA/1.0'})
+
+          h=s.get(base+'/api/health',timeout=60); h.raise_for_status(); health=h.json()
+          assert health.get('version')=='4.3.0', health
+          print('HEALTH',health.get('version'),health.get('pipeline'))
+
+          r=s.post(base+'/api/compile',data={
+            'primary_url':src,
+            'supporting_urls':'',
+            'lecture_focus':'Preserve the complete Chapter 2 Software Processes scope. Cover software process models, process activities, coping with change, and process improvement; retain source diagrams/tables where information-bearing; use CIMT learn-by-doing choreography without replacing source technical content.',
+            'model':'auto',
+            'repair_rounds':'2'
+          },timeout=120)
+          print('SUBMIT',r.status_code,r.text[:800]); r.raise_for_status()
+          job_id=r.json()['job_id']
+          deadline=time.time()+1800; job=None
+          while time.time()<deadline:
+            rr=s.get(f'{base}/api/jobs/{job_id}',timeout=60); rr.raise_for_status(); job=rr.json()
+            print('STATE',job.get('status'),job.get('progress'),(job.get('message') or '')[:180],flush=True)
+            if job.get('status') in {'ready','blocked','error'}: break
+            time.sleep(8)
+          assert job and job.get('blueprint'), json.dumps(job)[:5000]
+          assert job.get('status') in {'ready','blocked'}
+          bp=job['blueprint']; profile=job.get('source_profile') or {}
+          assert len(bp.get('units') or [])==20
+          assert bp.get('session_minutes')==90
+          assert len(bp.get('clos') or [])==5
+
+          expected_families=['software process models','process activities','coping with change','process improvement']
+          family_text=' '.join(str(x.get('name') or '') for x in (profile.get('topic_families') or [])).lower()
+          for fam in expected_families:
+            assert fam in family_text, (fam,family_text)
+
+          majors=[x for x in profile.get('coverage_items',[]) if str(x.get('importance','')).lower()=='major']
+          ledger={x.get('coverage_id'):x for x in (bp.get('coverage_ledger') or []) if x.get('coverage_id')}
+          missing=[x.get('id') for x in majors if x.get('id') not in ledger]
+          late=[x.get('id') for x in majors if x.get('id') in ledger and int(ledger[x.get('id')].get('first_taught_unit') or 99)>15]
+          print('MAJORS',len(majors),'LEDGER',len(ledger),'MISSING',missing,'LATE',late)
+          assert majors
+          assert not missing, missing
+          assert not late, late
+
+          # Source-specific chapter concepts that must be visible in learner-facing teaching.
+          unit_text=' '.join(' '.join(map(str,u.get('core_content') or []))+' '+str(u.get('title') or '') for u in bp['units']).lower()
+          required=['waterfall','incremental development','integration and configuration','requirements engineering','validation','software evolution','prototyp','incremental delivery','process improvement','capability maturity']
+          absent=[x for x in required if x not in unit_text]
+          print('SOURCE-CONCEPT ABSENT',absent)
+          assert not absent, absent
+
+          out=pathlib.Path('/tmp/sommerville-ch2-live'); out.mkdir(exist_ok=True)
+          endpoints={
+            'presenter.html':f'/api/jobs/{job_id}/presenter',
+            'presenter.pptx':f'/api/jobs/{job_id}/export/pptx',
+            'presenter.pdf':f'/api/jobs/{job_id}/export/presenter-pdf',
+            'reading.pdf':f'/api/jobs/{job_id}/export/pdf',
+            'instructor.docx':f'/api/jobs/{job_id}/export/docx',
+            'student.docx':f'/api/jobs/{job_id}/export/student',
+            'blueprint.json':f'/api/jobs/{job_id}/export/json',
+          }
+          sizes={}
+          for name,path in endpoints.items():
+            x=s.get(base+path,timeout=180); print(name,x.status_code,len(x.content)); x.raise_for_status(); assert len(x.content)>500
+            (out/name).write_bytes(x.content); sizes[name]=len(x.content)
+
+          prs=Presentation(out/'presenter.pptx'); assert len(prs.slides)==20
+          pdf=PdfReader(str(out/'presenter.pdf')); assert len(pdf.pages)==20
+          reading=PdfReader(str(out/'reading.pdf')); assert len(reading.pages)>=1
+          summary={
+            'job_id':job_id,'status':job.get('status'),'version':health.get('version'),
+            'major_checkpoints':len(majors),'missing_major':missing,'late_major':late,
+            'source_specific_absent':absent,'units':20,'minutes':90,'clos':5,
+            'presenter_slides':20,'presenter_pdf_pages':20,'reading_pages':len(reading.pages),
+            'sizes':sizes
+          }
+          (out/'summary.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
+          (out/'job.json').write_text(json.dumps(job,indent=2),encoding='utf-8')
+          print('SOMMERVILLE CH2 LIVE PASS',json.dumps(summary,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sommerville-ch2-live-evidence
+          path: /tmp/sommerville-ch2-live/*
+          if-no-files-found: error
