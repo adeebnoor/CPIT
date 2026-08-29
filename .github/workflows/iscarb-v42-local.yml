@@ -1,0 +1,112 @@
+name: ISCARB v4.2 Local Dependable Regression
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-v42-local.yml'
+      - 'iscarb-studio/app/cimt_render_v42.py'
+      - 'iscarb-studio/app/cimt_sanity_v42.py'
+      - 'iscarb-studio/app/source_visuals_v42.py'
+      - 'iscarb-studio/app/gate_v13.py'
+      - 'iscarb-studio/app/start_v410.py'
+
+jobs:
+  dependable-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r iscarb-studio/requirements.txt
+          pip install pypdf
+      - name: Import v4.2 runtime and render Dependable Systems
+        env:
+          PYTHONPATH: iscarb-studio
+        run: |
+          python - <<'PY'
+          import io, zipfile
+          from pathlib import Path
+          from pypdf import PdfReader
+          from app.start_v410 import app
+          from app.models import Blueprint
+          from app import faculty_visual
+          from app.visual_output_v36 import export_presenter_pptx, export_presenter_pdf
+          from app.cimt_sanity_v42 import normalize_cimt_sanity_v42, bounded_language_ok
+
+          phases={**{i:'IFHAM' for i in range(1,6)},**{i:'MARIS' for i in range(6,11)},**{i:'ATQAN' for i in range(11,16)},**{i:'MAYYIZ' for i in range(16,21)}}
+          knowledge={1:'SYSTEM_BEHAVIOR',2:'CONCEPT',3:'CONCEPT',4:'CONCEPT',5:'CONCEPT',6:'TRADE_OFF',7:'ARCHITECTURE',8:'TRADE_OFF',9:'DESIGN_PRINCIPLE',10:'PROCESS',11:'CONCEPT',12:'PROCESS',13:'TRADE_OFF',14:'SYSTEM_BEHAVIOR',15:'PROCESS',16:'ARCHITECTURE',17:'TRADE_OFF',18:'PROCESS',19:'CONCEPT',20:'CONCEPT'}
+          titles={
+            1:'Dependability Failure Crisis',2:'Dependability Domain Spine',3:'Learning Outcomes',4:'H-Stack Competencies',5:'First-Principles Dependability',
+            6:'Economics of Dependability',7:'Sociotechnical Systems',8:'Regulation and Compliance Trade-offs',9:'Redundancy and Diversity',10:'Dependable Process Review',
+            11:'Saudi Context',12:'Accountability and Traceability',13:'Agility and Dependable Processes',14:'Practitioner Load',15:'Critical AI Literacy',
+            16:'Dependability Portfolio',17:'Constraint Mutation',18:'Evidence Policy',19:'Capability Rubric',20:'Assurance Verdict'
+          }
+          units=[]
+          for i in range(1,21):
+              core=[f'[P1] Dependable Systems source mechanism for unit {i}', f'[P1] Evidence boundary for unit {i}'] if i not in {3,4,11,14,19,20} else []
+              ped=[f'Engineering decision scaffold for unit {i}']
+              if i==15:
+                  ped=['AI MAY ASSIST — draft or compare candidate reasoning.','AI MUST NOT BE TRUSTED AUTONOMOUSLY — human engineer owns source checking, testing, and final sign-off.']
+              assumptions=['HYPOTHETICAL SAUDI SCENARIO — no national mandate is asserted as fact.'] if i==11 else []
+              units.append({
+                'number':i,'phase':phases[i],'title':titles[i],
+                'engineering_question':f'What dependable-systems decision is required in unit {i}?',
+                'core_content':core,'pedagogy_content':ped,'enrichment_content':[],'enrichment_basis':[],
+                'scenario_assumptions':assumptions,'knowledge_types':[knowledge[i]],
+                'visual_suggestion':'source-native computing visualization',
+                'visual_plan':{'visual_type':f'dependable-{i}','teaching_purpose':'Make the dependable-systems decision visible.','source_visual_available':False,'source_page_or_slide':'','source_url':'','reuse_mode':'REDRAW' if core else 'NEW','citation':'[P1] source-anchored redraw' if core else 'ISCARB visualization','focal_elements':['dependability'],'annotation_plan':[],'visual_evidence_role':'decision support'},
+                'student_action':f'Defend the dependable-systems decision for unit {i}.',
+                'takeaway':f'Dependability decision {i} is bounded by evidence and uncertainty.',
+                'cimtlens':['C'],'clo_ids':['CLO1'],'source_anchor':'[P1] SLIDE 10' if core else '',
+                'inherited_requirements':[],'elite_requirements':[],'evidence':f'Decision evidence {i}',
+                'contextual_enrichment':False,'verify_before_release':False,'planned_minutes':4
+              })
+          bp=Blueprint.model_validate({
+            'lecture_title':'Chapter 10 — Dependable Systems',
+            'engineering_thesis':'Dependability is achieved through bounded engineering mechanisms and evidence.',
+            'central_engineering_crisis':'A critical sociotechnical system shows interacting hardware, software and operational failures.',
+            'named_ethical_purpose':'Professional responsibility for dependable operation.',
+            'clos':[{'id':f'CLO{i}','statement':f'Analyze dependable-systems capability {i}','evidence_expected':f'Dependability evidence {i}'} for i in range(1,6)],
+            'units':units,
+            'source_topic_families':['Dependability properties','Sociotechnical systems','Redundancy and diversity','Dependable processes','Formal methods and dependability'],
+            'topic_coverage':[{'topic_family':'Dependability properties','source_anchor':'[P1] SLIDES 8-11','first_taught_unit':2,'reinforced_units':[5,16]}],
+            'coverage_ledger':[{'coverage_id':'P1-C1','label':'Dependability properties','knowledge_type':'CONCEPT','source_anchor':'[P1] SLIDES 8-11','first_taught_unit':2,'reinforced_units':[5,16],'depth':'DEEP','representation':'domain spine'}],
+            'readiness_alignment':[{'gku':'GKU3','sku':'SKU3.1','slo_refs':['SLO3.1.2'],'klo_refs':['KLO2'],'strength':'supporting','rationale':'Dependability analysis evidence','atomicity_evidence':'Unit 16 portfolio evidence','clo_ids':['CLO1'],'evidence_units':[16],'standard_source_pages':[19]}],
+            'rubric_criteria':[{'criterion':f'Criterion {i}','distinguished':'Evidence-rich and bounded','ready':'Supported','developing':'Partial','not_yet_ready':'Unsupported','readiness_refs':['SKU3.1']} for i in range(1,7)],
+            'release_notes':[],'session_minutes':90,'source_manifest':['[P1] PRIMARY: Dependable Systems'],'deferred_topics':[]
+          })
+          bp=normalize_cimt_sanity_v42(bp)
+          assert bounded_language_ok(bp)
+
+          preview=faculty_visual.render_presenter_preview(bp,'READY')
+          up=preview.upper()
+          assert 'DEPENDABLE SYSTEMS' in up
+          assert 'SECURITY ENGINEERING' not in up
+          assert 'PLATFORM PROTECTION' not in up
+          assert 'APPLICATION PROTECTION' not in up
+          assert 'AI MUST NOT BE TRUSTED AUTONOMOUSLY' in up
+          assert 'HYPOTHETICAL SAUDI' in up
+
+          ppt=export_presenter_pptx(bp,Path('/tmp/dependable-v42.pptx'))
+          with zipfile.ZipFile(ppt) as z:
+              slides=[x for x in z.namelist() if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
+              assert len(slides)==20
+              txt=' '.join(z.read(x).decode('utf-8','ignore') for x in slides).upper()
+              assert 'SECURITY ENGINEERING' not in txt
+              assert 'PLATFORM PROTECTION' not in txt
+              assert 'APPLICATION PROTECTION' not in txt
+              assert 'DEPENDABLE' in txt
+
+          pdf=export_presenter_pdf(bp,Path('/tmp/dependable-v42.pdf'))
+          reader=PdfReader(str(pdf)); assert len(reader.pages)==20
+          txt=' '.join((p.extract_text() or '') for p in reader.pages).upper()
+          assert 'SECURITY ENGINEERING' not in txt
+          assert 'PLATFORM PROTECTION' not in txt
+          assert 'APPLICATION PROTECTION' not in txt
+          assert 'DEPENDABLE' in txt
+          print('V4.2 DEPENDABLE REGRESSION PASS',ppt.stat().st_size,pdf.stat().st_size)
+          PY
