@@ -26,7 +26,26 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install inspection dependencies
-        run: python -m pip install requests pypdf python-pptx
+        run: python -m pip install requests pypdf python-pptx pymupdf Pillow
+
+      - name: Verify live public routes before compilation
+        run: |
+          python - <<'PY'
+          import json, pathlib, requests
+          base='https://iscarb-lecture-studio.onrender.com'
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/2.0'})
+          health=s.get(base+'/api/health',timeout=45); health.raise_for_status(); h=health.json()
+          home=s.get(base+'/',timeout=45); home.raise_for_status()
+          starter=s.get(base+'/starter-kit',timeout=45); starter.raise_for_status()
+          html=home.text
+          for needle in ('Source Library','Upgrade My Lecture','Outputs','Guides'):
+              assert needle in html, needle
+          assert len(starter.content)>1000
+          assert h.get('ok') is True
+          print('LIVE ROUTES PASS', h.get('version'), h.get('pipeline'))
+          pathlib.Path('/tmp/health.json').write_text(json.dumps(h,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+
       - name: Compile the archived CIMT Dependable Systems lecture on live production
         run: |
           python - <<'PY'
@@ -34,36 +53,43 @@ jobs:
           base='https://iscarb-lecture-studio.onrender.com'
           src=pathlib.Path('lectures/cimt/CPIT455-class2-NooR.pdf')
           assert src.exists() and src.stat().st_size>100000
-          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/1.0'})
-          h=s.get(base+'/api/health',timeout=45); h.raise_for_status(); health=h.json()
-          print('LIVE HEALTH',json.dumps(health,indent=2)[:8000])
-          pathlib.Path('/tmp/health.json').write_text(json.dumps(health,indent=2),encoding='utf-8')
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/2.0'})
           with src.open('rb') as f:
               r=s.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/pdf')},data={
-                  'primary_url':'','supporting_urls':'','lecture_focus':'Preserve the original CIMT technical depth and source-native figures while compiling the full 20-unit ISCARB experience.','model':'auto','repair_rounds':'2'
+                  'primary_url':'',
+                  'supporting_urls':'',
+                  'lecture_focus':'Preserve the original CIMT technical depth, diagrams, tables, red emphasis and source-native visual teaching style while compiling the full 20-unit ISCARB experience. Do not turn the presenter into a dashboard or generic cards.',
+                  'model':'auto',
+                  'repair_rounds':'2'
               },timeout=120)
           print('COMPILE',r.status_code,r.text[:2000]); r.raise_for_status()
           job_id=r.json()['job_id']; pathlib.Path('/tmp/job_id.txt').write_text(job_id)
           deadline=time.time()+1800; job=None
           while time.time()<deadline:
               jr=s.get(base+'/api/jobs/'+job_id,timeout=60); jr.raise_for_status(); job=jr.json()
-              print('STATE',job.get('status'),job.get('progress'),job.get('message'))
+              print('STATE',job.get('status'),job.get('progress'),(job.get('message') or '')[:240])
               if job.get('status') in {'ready','blocked','error'}: break
               time.sleep(8)
           assert job is not None
           pathlib.Path('/tmp/job.json').write_text(json.dumps(job,ensure_ascii=False,indent=2),encoding='utf-8')
           assert job.get('blueprint'), json.dumps(job,ensure_ascii=False)[:6000]
-          bp=job['blueprint']; assert len(bp.get('units',[]))==20 and len(bp.get('clos',[]))==5 and bp.get('session_minutes')==90
+          bp=job['blueprint']
+          assert len(bp.get('units',[]))==20
+          assert len(bp.get('clos',[]))==5
+          assert bp.get('session_minutes')==90
+          assert job.get('status') in {'ready','blocked'}
           print('FINAL',job.get('status'),'units',len(bp['units']),'clos',len(bp['clos']))
           PY
-      - name: Download every live output and validate file structure
+
+      - name: Download every live output and validate file structure and visual residue
         run: |
           python - <<'PY'
-          import io,json,pathlib,requests,zipfile
+          import json, pathlib, requests, re
           from pypdf import PdfReader
           from pptx import Presentation
+          from pptx.enum.shapes import MSO_SHAPE_TYPE
           base='https://iscarb-lecture-studio.onrender.com'; job_id=pathlib.Path('/tmp/job_id.txt').read_text().strip()
-          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/1.0'})
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-live-CIMT-QA/2.0'})
           out=pathlib.Path('/tmp/iscarb-live-cimt'); out.mkdir(exist_ok=True)
           endpoints={
             'presenter.html':f'/api/jobs/{job_id}/presenter',
@@ -76,16 +102,72 @@ jobs:
           }
           for name,path in endpoints.items():
               r=s.get(base+path,timeout=180); print(name,r.status_code,len(r.content)); r.raise_for_status(); (out/name).write_bytes(r.content)
-          prs=Presentation(out/'presenter.pptx'); assert len(prs.slides)==20
+
+          prs=Presentation(out/'presenter.pptx')
+          assert len(prs.slides)==20
           assert len(PdfReader(str(out/'presenter.pdf')).pages)==20
           assert len(PdfReader(str(out/'reading-pack.pdf')).pages)>=1
-          text=' '.join(shape.text for sl in prs.slides for shape in sl.shapes if hasattr(shape,'text_frame')).upper()
-          assert 'SECURITY ENGINEERING' not in text, 'Dependable Systems presenter contains Security Engineering residue'
-          bp=json.loads((out/'blueprint.json').read_text(encoding='utf-8')); assert len(bp['units'])==20
+
+          ppt_text=' '.join(shape.text for sl in prs.slides for shape in sl.shapes if hasattr(shape,'text_frame'))
+          upper=ppt_text.upper()
+          assert 'DEPENDABLE SYSTEMS' in upper
+          assert 'SECURITY ENGINEERING' not in upper, 'Dependable Systems presenter contains Security Engineering residue'
+          assert '...' not in ppt_text and '…' not in ppt_text, 'Presenter contains visible hard truncation'
+
+          picture_count=sum(1 for sl in prs.slides for sh in sl.shapes if sh.shape_type == MSO_SHAPE_TYPE.PICTURE)
+          assert picture_count >= 4, f'Only {picture_count} picture shapes; source-native visual reuse is too weak'
+
+          bp=json.loads((out/'blueprint.json').read_text(encoding='utf-8'))
+          assert len(bp['units'])==20
+          source_anchored=sum(1 for u in bp['units'] if '[P1]' in str(u.get('source_anchor','')).upper())
+          assert source_anchored >= 10, source_anchored
+
+          job=json.loads(pathlib.Path('/tmp/job.json').read_text(encoding='utf-8'))
+          checks=job.get('deterministic_checks') or {}
+          failed=[k for k,v in checks.items() if v is False]
+          summary={
+              'job_id':job_id,
+              'status':job.get('status'),
+              'picture_shapes':picture_count,
+              'source_anchored_units':source_anchored,
+              'deterministic_failed_checks':failed,
+              'presenter_slides':20,
+              'presenter_pdf_pages':20,
+              'all_exports_downloaded':True,
+              'cross_discipline_residue':False,
+              'visible_hard_ellipsis':False,
+          }
+          (out/'qa-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
           (out/'health.json').write_bytes(pathlib.Path('/tmp/health.json').read_bytes())
           (out/'job.json').write_bytes(pathlib.Path('/tmp/job.json').read_bytes())
-          print('LIVE CURRENT PRODUCTION OUTPUTS PASS STRUCTURAL QA')
+          print('LIVE CURRENT PRODUCTION STRUCTURAL QA PASS',json.dumps(summary,indent=2))
           PY
+
+      - name: Render live presenter to a 20-slide contact sheet
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import fitz
+          from PIL import Image, ImageDraw
+          src=Path('/tmp/iscarb-live-cimt/presenter.pdf')
+          out=Path('/tmp/iscarb-live-cimt')
+          doc=fitz.open(src)
+          thumbs=[]
+          for i,page in enumerate(doc):
+              pix=page.get_pixmap(matrix=fitz.Matrix(1.2,1.2),alpha=False)
+              im=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
+              im.thumbnail((480,270))
+              c=Image.new('RGB',(500,305),'white'); c.paste(im,((500-im.width)//2,5))
+              ImageDraw.Draw(c).text((10,283),f'Live slide {i+1:02d}',fill='black')
+              thumbs.append(c)
+          assert len(thumbs)==20
+          cols=4; rows=5
+          sheet=Image.new('RGB',(cols*500,rows*305),(238,238,238))
+          for i,im in enumerate(thumbs): sheet.paste(im,((i%cols)*500,(i//cols)*305))
+          sheet.save(out/'presenter-contact.png')
+          print('CONTACT SHEET',out/'presenter-contact.png',sheet.size)
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: iscarb-live-cimt-current-production
