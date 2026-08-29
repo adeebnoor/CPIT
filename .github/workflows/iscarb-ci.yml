@@ -28,6 +28,8 @@ jobs:
           python - <<'PY'
           from fastapi.testclient import TestClient
           from app.start import app
+          from app.models import JobState
+          from app import main as engine
 
           client = TestClient(app)
           home = client.get('/')
@@ -35,7 +37,10 @@ jobs:
           html = home.text
           assert 'iscarb-approved-hero-inline' in html
           assert 'data:image/jpeg;base64,' in html
-          assert 'v4.0.2 · Visual Lecture Engine v2' in html
+          assert 'v4.0.3 · Capacity-Safe Visual Lecture Engine v2' in html
+          assert 'NOT RUN' in html
+          assert 'Retry analysis' in html
+          assert 'Waiting for a valid Blueprint' in html
           assert 'id="about"' in html
           assert "sources.id='sources'" in html
           assert "a.href='#sources'" in html
@@ -56,10 +61,14 @@ jobs:
           health = client.get('/api/health')
           assert health.status_code == 200
           h = health.json()
-          assert h['version'] == '4.0.2'
+          assert h['version'] == '4.0.3'
           assert h['visual_lecture_engine'] == 'v2'
           assert h['source_visual_primary'] == 'uploaded-p1-pdf'
           assert h['source_visual_public_url'] == 'best-effort-only'
+          assert h['capacity_retry_attempts_per_model'] == 3
+          assert h['capacity_failover'] is True
+          assert h['no_blueprint_exports'] == 'hidden'
+          assert h['no_blueprint_gate_state'] == 'NOT RUN'
           assert h['hero_delivery'] == 'inline-data-uri'
           assert h['hero_static_dependency'] is False
           assert h['source_library_verified'] is True
@@ -74,7 +83,74 @@ jobs:
           assert bad_bp.status_code == 400
           assert client.get('/api/jobs/not-a-real-job/presenter').status_code == 404
           assert client.get('/api/jobs/not-a-real-job/export/pptx').status_code == 404
+
+          no_bp = JobState(
+              id='ci-no-blueprint', status='error', progress=100,
+              message='Compilation stopped before Blueprint creation.', filename='ci-source.pdf',
+              model='auto', source_manifest=['[P1] PRIMARY: ci-source.pdf'],
+              error="ServerError: 503 UNAVAILABLE high demand",
+          )
+          engine.save_job(no_bp)
+          assert client.get('/api/jobs/ci-no-blueprint/presenter').status_code == 409
+          assert client.get('/api/jobs/ci-no-blueprint/export/pptx').status_code == 409
+          assert client.get('/api/jobs/ci-no-blueprint/export/presenter-pdf').status_code == 409
           print('ISCARB application smoke tests passed')
+          PY
+      - name: Capacity retry — reproduce 503 high demand then recover
+        env:
+          PYTHONPATH: iscarb-studio
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from types import SimpleNamespace
+          from pydantic import BaseModel
+          from app.gemini_service import GeminiService, MAX_TRANSIENT_ATTEMPTS
+
+          class TinyResult(BaseModel):
+              ok: bool
+
+          class DummyConfig:
+              def __init__(self, **kwargs):
+                  self.kwargs = kwargs
+
+          class FakeTypes:
+              GenerateContentConfig = DummyConfig
+              ThinkingConfig = DummyConfig
+
+          class FakeModels:
+              def __init__(self):
+                  self.calls = 0
+              def generate_content(self, **kwargs):
+                  self.calls += 1
+                  if self.calls < 3:
+                      raise RuntimeError("ServerError: 503 UNAVAILABLE high demand")
+                  return SimpleNamespace(text='{"ok": true}')
+
+          fake_models = FakeModels()
+          service = object.__new__(GeminiService)
+          service.model = 'test-model'
+          service.api_key = 'ci'
+          service._types = FakeTypes
+          service.client = SimpleNamespace(models=fake_models)
+          service._uploaded = {}
+          service.active_model = ''
+          service._backoff = lambda attempt: None
+
+          source = Path('/tmp/iscarb-capacity-source.txt')
+          source.write_text('Security engineering source text', encoding='utf-8')
+          item = SimpleNamespace(label='P1', source_id='P1', path=source)
+          bundle = SimpleNamespace(items=[item], manifest_text=lambda: '[P1] PRIMARY: capacity-test')
+
+          result = service._generate_structured(
+              bundle=bundle, prompt='Return ok true.', schema=TinyResult,
+              preferred_model='test-model', thinking_level='minimal'
+          )
+          assert result.ok is True
+          assert fake_models.calls == 3, fake_models.calls
+          assert service.active_model == 'test-model'
+          assert MAX_TRANSIENT_ATTEMPTS == 3
+          assert GeminiService._is_retryable(RuntimeError('503 UNAVAILABLE high demand')) is True
+          print('Capacity retry OK: two 503 failures recovered on attempt 3')
           PY
       - name: Production source-visual path — local PDF pages
         env:
