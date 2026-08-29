@@ -1,0 +1,1 @@
+Release note: when semantic repair loses Gemini quota, ISCARB now preserves a complete source-bounded faculty draft rather than an incomplete chapter representation. A source-complete semantic draft is retained; an incomplete one is replaced by the tested deterministic P1 draft. Both outcomes remain BLOCKED until semantic assurance is available.
