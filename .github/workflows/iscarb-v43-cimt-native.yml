@@ -45,6 +45,40 @@ jobs:
           export_cimt_presenter_pdf_v43(bp,out/'Dependable_Systems_CIMT_Native_v43.pdf')
           print('QA outputs',[(p.name,p.stat().st_size) for p in out.iterdir()])
           PY
+      - name: Render archived CIMT reference sheets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import fitz
+          from PIL import Image, ImageOps, ImageDraw
+
+          out=Path('/tmp/iscarb-v43-qa'); out.mkdir(exist_ok=True)
+          refs=[
+              ('Dependable_Systems_CIMT_original', Path('lectures/cimt/CPIT455-class2-NooR.pdf')),
+              ('Reliability_CIMT_original', Path('lectures/cimt/CPIT455-class3-NooR.pdf')),
+              ('Security_CIMT_original', Path('lectures/cimt/CPIT455-class5-NooR.pdf')),
+          ]
+          for label,pdf_path in refs:
+              doc=fitz.open(pdf_path)
+              thumbs=[]
+              for i in range(min(12, len(doc))):
+                  page=doc[i]
+                  pix=page.get_pixmap(matrix=fitz.Matrix(1.25,1.25), alpha=False)
+                  img=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
+                  img.thumbnail((480,360))
+                  canvas=Image.new('RGB',(500,390),'white')
+                  canvas.paste(img,((500-img.width)//2,8))
+                  d=ImageDraw.Draw(canvas)
+                  d.text((12,366),f'{label} · page {i+1:02d}',fill='black')
+                  thumbs.append(canvas)
+              cols=3
+              rows=(len(thumbs)+cols-1)//cols
+              sheet=Image.new('RGB',(cols*500,rows*390),(238,238,238))
+              for i,img in enumerate(thumbs):
+                  sheet.paste(img,((i%cols)*500,(i//cols)*390))
+              sheet.save(out/f'{label}_contact.png')
+              print(label,'pages',len(doc),'contact',sheet.size)
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: iscarb-v43-cimt-native-qa
