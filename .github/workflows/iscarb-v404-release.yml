@@ -1,0 +1,151 @@
+name: ISCARB v4.0.4 Release Acceptance
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'iscarb-studio/**'
+      - 'render.yaml'
+      - '.github/workflows/iscarb-v404-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iscarb-v404-release
+  cancel-in-progress: true
+
+jobs:
+  release-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests
+      - name: Verify live v4.0.4 can RELEASE the canonical lecture
+        env:
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+          EXPECTED_VERSION: 4.0.4
+          SECURITY_SOURCE: https://www.slideshare.net/slideshow/ch14-5148075/5148075
+        run: |
+          python - <<'PY'
+          import io, json, os, time, zipfile
+          import requests
+
+          base=os.environ['BASE_URL'].rstrip('/')
+          expected=os.environ['EXPECTED_VERSION']
+          source=os.environ['SECURITY_SOURCE']
+          s=requests.Session()
+          s.headers.update({'User-Agent':'ISCARB-v404-release-acceptance/1.0'})
+
+          def get(path, timeout=90):
+              return s.get(base+path, timeout=timeout)
+
+          # Render may still be building the commit that triggered this run.
+          last=''
+          for _ in range(90):
+              try:
+                  r=get('/api/health',30)
+                  last=f'{r.status_code} {r.text[:500]}'
+                  if r.ok:
+                      h=r.json()
+                      print('health',h.get('version'),h.get('pipeline'))
+                      if h.get('version')==expected:
+                          break
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(10)
+          else:
+              raise AssertionError('Render did not reach v4.0.4. Last='+last)
+
+          h=get('/api/health').json()
+          assert h['version']==expected
+          assert h['deterministic_gate'].startswith('v11')
+          assert h['audit_deterministic_consistency'] is True
+          assert h['session_minutes']==90
+          assert h['full_primary_coverage'] is True
+          assert h['visual_lecture_engine']=='v2'
+
+          home=get('/')
+          assert home.status_code==200
+          assert 'v4.0.4' in home.text
+          assert 'Gate v11' in home.text
+          assert source in home.text
+
+          # Compile from the exact public source used in the Source Library.
+          r=s.post(base+'/api/compile',data={
+              'primary_url':source,
+              'supporting_urls':'',
+              'lecture_focus':'',
+              'model':'auto',
+              'repair_rounds':'1',
+          },timeout=120)
+          assert r.status_code==200, r.text[:1200]
+          job_id=r.json()['job_id']
+          print('job',job_id)
+
+          deadline=time.time()+1200
+          job=None
+          while time.time()<deadline:
+              jr=get('/api/jobs/'+job_id)
+              assert jr.status_code==200, jr.text[:1200]
+              job=jr.json()
+              print('state',job.get('status'),job.get('progress'),job.get('message','')[:180])
+              if job.get('status') in {'ready','blocked','error'}:
+                  break
+              time.sleep(8)
+          assert job is not None
+          assert job.get('blueprint'), json.dumps(job)[:4000]
+
+          bp=job['blueprint']
+          assert bp['session_minutes']==90
+          assert len(bp['units'])==20
+          assert [u['number'] for u in bp['units']]==list(range(1,21))
+          assert len(bp['clos'])==5
+          assert bp['deferred_topics']==[]
+          assert any('ch14-5148075' in x or 'slideshare.net' in x for x in bp['source_manifest'])
+
+          failed=[k for k,v in (job.get('deterministic_checks') or {}).items() if not v]
+          print('deterministic failures',failed)
+          if job.get('audit'):
+              print('audit',json.dumps(job['audit'],ensure_ascii=False)[:6000])
+          assert not failed, 'Deterministic release failures remain: '+', '.join(failed)
+          assert job.get('audit',{}).get('overall_pass') is True, 'Semantic audit did not pass'
+          assert job['status']=='ready', 'Expected READY/RELEASE, got '+str(job['status'])
+
+          endpoints={
+              'preview':('/api/jobs/'+job_id+'/presenter','html'),
+              'pptx':('/api/jobs/'+job_id+'/export/pptx','zip'),
+              'presenter_pdf':('/api/jobs/'+job_id+'/export/presenter-pdf','pdf'),
+              'reading_pdf':('/api/jobs/'+job_id+'/export/pdf','pdf'),
+              'instructor_docx':('/api/jobs/'+job_id+'/export/docx','zip'),
+              'student_docx':('/api/jobs/'+job_id+'/export/student','zip'),
+              'blueprint_json':('/api/jobs/'+job_id+'/export/json','json'),
+          }
+          for name,(path,kind) in endpoints.items():
+              rr=get(path)
+              assert rr.status_code==200, f'{name}: {rr.status_code}'
+              data=rr.content
+              if kind=='html':
+                  assert len(data)>5000 and ('Security' in rr.text or bp['lecture_title'] in rr.text)
+              elif kind=='pdf':
+                  assert data.startswith(b'%PDF') and len(data)>8000
+              elif kind=='zip':
+                  assert data.startswith(b'PK') and len(data)>8000
+                  with zipfile.ZipFile(io.BytesIO(data)) as z:
+                      names=z.namelist()
+                      if name=='pptx':
+                          slides=[x for x in names if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
+                          assert len(slides)==20
+                      else:
+                          assert 'word/document.xml' in names
+              else:
+                  exported=rr.json()
+                  assert exported['session_minutes']==90 and len(exported['units'])==20
+              print(name,'PASS',len(data))
+
+          print('ISCARB v4.0.4 PRODUCTION RELEASE ACCEPTANCE PASS',job_id)
+          PY
