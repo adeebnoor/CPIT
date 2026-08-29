@@ -1,0 +1,71 @@
+name: CIMT Multi-Lecture Blueprint Probe
+
+on:
+  push:
+    branches: ["fix/cimt-source-first-20260829"]
+    paths:
+      - '.github/workflows/cimt-multi-lecture-blueprint-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-real-lectures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: dependable
+            file: lectures/cimt/CPIT455-class2-NooR.pdf
+          - key: reliability
+            file: lectures/cimt/CPIT455-class3-NooR.pdf
+          - key: security
+            file: lectures/cimt/CPIT455-class5-NooR.pdf
+          - key: reuse
+            file: lectures/cimt/CPIT455-class7-NooR.pdf
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile real lecture through production Gemini service
+        env:
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+          SOURCE_FILE: ${{ matrix.file }}
+          KEY: ${{ matrix.key }}
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          from pathlib import Path
+          base=os.environ['BASE_URL'].rstrip('/')
+          src=Path(os.environ['SOURCE_FILE'])
+          key=os.environ['KEY']
+          with src.open('rb') as f:
+              r=requests.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/pdf')},data={'repair_rounds':'1'},timeout=180)
+          print('compile',r.status_code,r.text[:500]); r.raise_for_status()
+          job=r.json()['job_id']
+          final=None
+          for attempt in range(90):
+              q=requests.get(f'{base}/api/jobs/{job}',timeout=120)
+              print(key,attempt,q.status_code)
+              q.raise_for_status(); data=q.json(); final=data
+              print('status=',data.get('status'),'progress=',data.get('progress'),'message=',str(data.get('message'))[:180])
+              if data.get('status') in {'ready','blocked','error'}:
+                  break
+              time.sleep(10)
+          if not final or final.get('status') not in {'ready','blocked'} or not final.get('blueprint'):
+              Path(f'/tmp/{key}-failure.json').write_text(json.dumps(final or {},indent=2),encoding='utf-8')
+              raise SystemExit(f'{key}: compile did not yield a Blueprint')
+          out={'job_id':job,'status':final.get('status'),'gate':final.get('gate'),'blueprint':final['blueprint']}
+          Path(f'/tmp/{key}.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('saved',key,'job',job,'units',len(final['blueprint'].get('units') or []))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-blueprint-${{ matrix.key }}
+          path: /tmp/${{ matrix.key }}*.json
+          if-no-files-found: warn
