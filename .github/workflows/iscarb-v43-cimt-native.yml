@@ -1,0 +1,134 @@
+name: ISCARB v4.3 CIMT-native Release Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, iscarb-v43-cimt-native]
+    paths:
+      - 'iscarb-studio/**'
+      - 'render.yaml'
+      - '.github/workflows/iscarb-v43-cimt-native.yml'
+
+jobs:
+  local-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime + test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r iscarb-studio/requirements.txt
+          pip install httpx
+      - name: Compile all Python modules
+        run: python -m compileall -q iscarb-studio/app iscarb-studio/tests
+      - name: Run v4.3 regression suite
+        working-directory: iscarb-studio
+        env:
+          PYTHONPATH: .
+        run: python -m unittest tests.test_v43_cimt_native -v
+      - name: Generate inspectable QA outputs
+        working-directory: iscarb-studio
+        env:
+          PYTHONPATH: .
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from tests.v43_fixture import make_blueprint
+          from app.cimt_native_v43 import export_cimt_presenter_pptx_v43, export_cimt_presenter_pdf_v43
+          out=Path('/tmp/iscarb-v43-qa'); out.mkdir(exist_ok=True)
+          bp=make_blueprint()
+          export_cimt_presenter_pptx_v43(bp,out/'Dependable_Systems_CIMT_Native_v43.pptx')
+          export_cimt_presenter_pdf_v43(bp,out/'Dependable_Systems_CIMT_Native_v43.pdf')
+          print('QA outputs',[(p.name,p.stat().st_size) for p in out.iterdir()])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-v43-cimt-native-qa
+          path: /tmp/iscarb-v43-qa/*
+          if-no-files-found: error
+
+  production-smoke:
+    if: github.ref == 'refs/heads/main'
+    needs: local-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      BASE_URL: https://iscarb-lecture-studio.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install fixture dependency
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r iscarb-studio/requirements.txt
+      - name: Wait for Render auto-deploy and verify v4.3 health
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 36); do
+            echo "health attempt $i"
+            if curl -fsS --max-time 30 "$BASE_URL/api/health" -o /tmp/health.json; then
+              cat /tmp/health.json
+              if python - <<'PY'
+          import json
+          d=json.load(open('/tmp/health.json'))
+          assert d.get('ok') is True
+          assert d.get('version') == '4.3.0', d.get('version')
+          assert d.get('deterministic_gate') == 'v14-provenance-presenter-on-v13'
+          assert d.get('presenter_exact_units') == 20
+          assert d.get('session_minutes') == 90
+          PY
+              then ok=1; break; fi
+            fi
+            sleep 20
+          done
+          test "$ok" = 1
+      - name: Verify public home and starter kit
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 40 "$BASE_URL/" -o /tmp/home.html
+          grep -q 'v4.3.0' /tmp/home.html
+          grep -q 'CIMT-native Presenter' /tmp/home.html
+          curl -fsS --max-time 40 "$BASE_URL/starter-kit" -o /tmp/starter.html
+          test $(wc -c < /tmp/starter.html) -gt 1000
+      - name: Exercise live Output Lab and every export without Gemini
+        env:
+          PYTHONPATH: iscarb-studio
+        run: |
+          set -euo pipefail
+          python iscarb-studio/tests/v43_fixture.py /tmp/bp.json
+          curl -fsS --max-time 60 -F 'blueprint_file=@/tmp/bp.json;type=application/json' "$BASE_URL/api/render-blueprint" -o /tmp/job.json
+          cat /tmp/job.json
+          JOB_ID=$(python - <<'PY'
+          import json
+          print(json.load(open('/tmp/job.json'))['job_id'])
+          PY
+          )
+          echo "live output job: $JOB_ID"
+          curl -fsS --max-time 60 "$BASE_URL/api/jobs/$JOB_ID/presenter" -o /tmp/presenter.html
+          grep -q 'CIMT-native Presenter' /tmp/presenter.html
+          ! grep -q 'SECURITY ENGINEERING' /tmp/presenter.html
+          for fmt in pptx presenter-pdf pdf docx student json; do
+            echo "export $fmt"
+            curl -fsS --max-time 120 "$BASE_URL/api/jobs/$JOB_ID/export/$fmt" -o "/tmp/out-$fmt"
+            test $(wc -c < "/tmp/out-$fmt") -gt 500
+          done
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          from pypdf import PdfReader
+          ppt=Path('/tmp/out-pptx'); pdf=Path('/tmp/out-presenter-pdf')
+          with ZipFile(ppt) as z:
+              slides=[x for x in z.namelist() if x.startswith('ppt/slides/slide') and x.endswith('.xml')]
+              assert len(slides)==20, len(slides)
+              text=' '.join(z.read(x).decode('utf-8','ignore') for x in slides).upper()
+              assert 'SECURITY ENGINEERING' not in text
+          assert len(PdfReader(str(pdf)).pages)==20
+          print('LIVE OUTPUT LAB: presenter + all six exports PASS')
+          PY
