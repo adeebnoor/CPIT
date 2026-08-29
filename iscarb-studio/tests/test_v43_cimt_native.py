@@ -50,8 +50,8 @@ class TestCimtNativeV43(unittest.TestCase):
         self.assertNotIn('PLATFORM PROTECTION', up)
         self.assertNotIn('...', visible)
         self.assertNotIn('…', visible)
-        self.assertIn('#005634', html)
-        self.assertIn('#C49A27', html)
+        self.assertIn('#005634', html.lower())
+        self.assertIn('#c49a27', html.lower())
 
     def test_pptx_20_slides_and_large_cimt_title(self):
         with tempfile.TemporaryDirectory() as td:
