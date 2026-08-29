@@ -1,1 +1,0 @@
-Scope: this change affects only degraded-mode behavior after Gemini semantic generation has started. Normal source profiling, semantic generation, Gate v14, successful semantic release, public API shape, Presenter rendering, and export formats are unchanged.
