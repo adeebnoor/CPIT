@@ -1,0 +1,40 @@
+6eb;min-height:80px;padding:10px;font-size:12px}}.verdict header{{text-align:center;padding:8px 40px}}.verdict header b{{color:var(--green);font-size:10px}}.verdict header p{{font:400 21px/1.25 Georgia,serif}}.verdict>div{{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:15px 50px}}.verdict article{{border:1px solid var(--green2);background:#ecf6eb;padding:14px}}.verdict article:nth-child(2){{border-color:var(--red);background:#fdeeee}}.verdict article b{{color:var(--green);font-size:9px}}.verdict article:nth-child(2) b{{color:var(--red)}}.verdict article span{{display:block;font-size:12px;margin-top:8px}}.verdict footer{{margin:18px auto 0;width:66%;border:1px solid var(--gold);background:#faf6e5;padding:10px;text-align:center;color:var(--green);font-weight:800;font-size:11px}}.sourceVisual{{height:100%;display:grid;place-items:center;position:relative;overflow:hidden}}.sourceVisual img{{max-width:100%;max-height:100%;object-fit:contain}}.sourceVisual small{{position:absolute;right:2px;bottom:2px;background:#fff;padding:3px 6px;color:var(--green);font-size:6px;font-weight:800}}
++    @media(max-width:850px){{html,body,.deck,.stage{{max-width:100%;overflow-x:hidden}}.deck{{grid-template-columns:minmax(0,1fr)}}.rail{{display:none}}.stage{{padding:8px;min-width:0}}.slide{{width:calc(100vw - 16px);max-width:calc(100vw - 16px);min-width:0;padding-left:18px;padding-right:18px}}.head,.visual,.slide>*{{min-width:0}}.corner{{left:18px;width:calc(100% - 36px)}}.foot{{left:22px;right:22px}}.decision{{left:24px;right:24px}}.visual{{height:calc(100% - 120px)}}.bulletList article{{grid-template-columns:8px minmax(72px,28%) minmax(0,1fr)}}.tableList article{{grid-template-columns:minmax(88px,34%) minmax(0,1fr)}}.stack{{padding-left:12px;padding-right:12px}}.argument{{padding-left:8px;padding-right:8px}}.argument article{{grid-template-columns:minmax(68px,30%) minmax(0,1fr)}}.compare section{{padding-left:8px;padding-right:8px}}.tree{{padding-left:8px;padding-right:8px}}.context{{gap:14px}}.chain{{gap:6px}}.timeline{{gap:10px}}.burden{{gap:12px;padding-left:4px;padding-right:4px}}.verdict>div{{margin-left:8px;margin-right:8px;gap:10px}}}}
+     '''
+     js = '''<script>(function(){const s=[...document.querySelectorAll('.slide')],b=[...document.querySelectorAll('.thumb')];function go(i){s.forEach((x,j)=>x.classList.toggle('show',j===i));b.forEach((x,j)=>x.classList.toggle('active',j===i));}b.forEach((x,i)=>x.onclick=()=>go(i));document.onkeydown=e=>{let i=s.findIndex(x=>x.classList.contains('show'));if(e.key==='ArrowRight'||e.key==='PageDown')go(Math.min(s.length-1,i+1));if(e.key==='ArrowLeft'||e.key==='PageUp')go(Math.max(0,i-1));};})();</script>'''
+     return f'<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{_h(bp.lecture_title)} · ISCARB Presenter</title><style>{css}</style></head><body><div class="deck"><aside class="rail"><div class="brand">ISCARB · CIMT-native Presenter</div><div class="state">{_h(release_state)} · 20 units · 90 minutes</div>{"".join(thumbs)}</aside><main class="stage">{"".join(slides)}</main></div>{js}</body></html>'
+--- a/iscarb-studio/app/prompts.py
++++ b/iscarb-studio/app/prompts.py
+@@ -144,16 +144,16 @@
+ UNIT 8 — At least two defensible source-derived alternatives + explicit trade-off.
+ UNIT 9 — Measurement + falsification.
+ UNIT 10 — MARIS Senior Design Review + KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
+-UNIT 11 — SAUDI CONTEXT is dominant. Use a materially decision-changing Saudi constraint; if unsupported, make it explicitly hypothetical.
+-UNIT 12 — ACCOUNTABILITY is dominant. Source mechanisms may be core; accountability chain belongs in pedagogy.
+-UNIT 13 — TREND/FUTURE is dominant. Unsupported future technology must be a DESIGN EXPLORATION / QUESTION.
+-UNIT 14 — PRACTITIONER WELLBEING is dominant. Reason about workload as an ISCARB design consequence without inventing factual claims.
+-UNIT 15 — CRITICAL AI LITERACY is dominant. Include exact phrases AI MAY ASSIST and AI MUST NOT BE TRUSTED AUTONOMOUSLY plus Claim→Assumption→Source Check→Test→Failure Search→Human Sign-off.
+-UNIT 16 — Portfolio Challenge on same central system. Include Gulf orientation link only as orientation.
+-UNIT 17 — Constraint Mutation + Peer Critique on same central system.
+-UNIT 18 — Evidence Policy only: CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY.
+-UNIT 19 — Four-level ISCARB Capability Rubric with at least six explicit capability criteria.
+-UNIT 20 — Bounded Assurance Case on same central system. Never use absolute assurance language.
++UNIT 11 — SOURCE-FIRST APPLICATION. Teach the next major P1 mechanism in a concrete application. Integrate a materially decision-changing Saudi constraint only in pedagogy/scenario if it genuinely changes the decision; if unsupported, label it HYPOTHETICAL. Do not prefix the learner-facing title with “Saudi Context”.
++UNIT 12 — SOURCE-FIRST ACCOUNTABILITY. Keep the P1 mechanism dominant in title/question/core; integrate roles, responsibility, pre/post-conditions, ethics, or accountability in pedagogy when relevant.
++UNIT 13 — SOURCE-FIRST EVOLUTION/IMPROVEMENT. Teach the P1 mechanism first. A future-facing question may appear in pedagogy/enrichment only when it follows from the source; unsupported future technology is a DESIGN EXPLORATION, never the title’s factual premise.
++UNIT 14 — SOURCE-FIRST OPERATING CONSEQUENCES. Continue the P1 technical spine. Practitioner workload/wellbeing may be a bounded pedagogical consequence when supported by the mechanism, but must never replace the weekly technical topic or introduce invented psychology/alert-burden claims.
++UNIT 15 — SOURCE-FIRST MATURITY/AUDIT. Teach the P1 mechanism first. Critical AI literacy is an optional audit move in pedagogy (AI MAY ASSIST; human sign-off remains required) and must not replace a source-derived technical title.
++UNIT 16 — Source-grounded Design Challenge on the same central system. Include Gulf orientation only as orientation.
++UNIT 17 — Change the Constraint + Peer Critique on the same central system.
++UNIT 18 — Defend the Decision with CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY; keep all factual claims source-bounded.
++UNIT 19 — Take-home Capabilities: translate the rubric into six concise learner-visible abilities; detailed four-level descriptors stay in rubric metadata, not six dashboard cards.
++UNIT 20 — Take-home Decision / bounded assurance on the same central system. Never use absolute assurance language.
+ 
+ 11. FULL COVERAGE + DEPTH ALLOCATION
+ Every P1 family first appears by Unit 15. Use DEEP / CONCISE / INTEGRATED allocation without omission.
+@@ -163,8 +163,9 @@
+ 
+ 13. OUTPUT DISCIPLINE
+ - Exactly 20 Units and five CLOs.
+-- Every reserved Unit has one DOMINANT function.
+-- No fake precision, decorative Saudi label, deco
