@@ -298,6 +298,24 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
 
 
 
+
+def _semantic_slide_ceiling(profile: SourceProfile) -> int | None:
+    # Honor explicit Source Lock bounds when flattened host text contains extra slides.
+    candidates: list[int] = []
+    for warning in profile.source_warnings or []:
+        text = str(warning or "")
+        for m in re.finditer(r"(?:core|primary|actual|lecture|chapter)[^.\n]{0,180}?slides?\s*1\s*[-–—]\s*(\d{1,4})", text, flags=re.I):
+            candidates.append(int(m.group(1)))
+        for m in re.finditer(r"slides?\s*1\s*[-–—]\s*(\d{1,4})[^.\n]{0,180}?(?:core|primary|actual|lecture|chapter)", text, flags=re.I):
+            candidates.append(int(m.group(1)))
+        for m in re.finditer(r"slides?\s*(\d{1,4})\s*(?:through|to|[-–—])\s*(\d{1,4})[^.\n]{0,220}?(?:external|unrelated|recommended|filter(?:ed)?\s*out|host[- ]page)", text, flags=re.I):
+            start = int(m.group(1))
+            if start > 1:
+                candidates.append(start - 1)
+    valid = [x for x in candidates if 2 <= x <= 500]
+    return min(valid) if valid else None
+
+
 def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:
     """Add only uncovered real source slides to the semantic P1 contract."""
     deterministic = build_deterministic_source_profile(bundle, "chapter-completeness reconciliation")
@@ -306,11 +324,15 @@ def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) ->
     for row in ai_profile.coverage_items:
         semantic_slides.update(_anchor_slides(row.source_anchor))
 
+    semantic_ceiling = _semantic_slide_ceiling(ai_profile)
+
     merged = list(ai_profile.coverage_items)
     for item in deterministic.coverage_items:
         if item.importance != "major":
             continue
         item_slides = _anchor_slides(item.source_anchor)
+        if semantic_ceiling and item_slides and max(item_slides) > semantic_ceiling:
+            continue
         if item_slides and item_slides.issubset(semantic_slides):
             continue
         key = re.sub(r"[^a-z0-9]+", " ", item.label.lower()).strip()
