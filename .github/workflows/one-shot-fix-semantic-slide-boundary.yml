@@ -26,32 +26,21 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           from textwrap import dedent
-
           p=Path('iscarb-studio/app/source_profile_fallback.py')
           s=p.read_text(encoding='utf-8')
           marker='def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:\n'
           assert marker in s
-
           helper=dedent(r'''
           def _semantic_slide_ceiling(profile: SourceProfile) -> int | None:
               """Honor explicit Source Lock bounds when flattened host text contains extra slides."""
               candidates: list[int] = []
               for warning in profile.source_warnings or []:
                   text = str(warning or "")
-                  for m in re.finditer(
-                      r"(?:core|primary|actual|lecture|chapter)[^.\n]{0,180}?slides?\s*1\s*[-–—]\s*(\d{1,4})",
-                      text, flags=re.I,
-                  ):
+                  for m in re.finditer(r"(?:core|primary|actual|lecture|chapter)[^.\n]{0,180}?slides?\s*1\s*[-–—]\s*(\d{1,4})", text, flags=re.I):
                       candidates.append(int(m.group(1)))
-                  for m in re.finditer(
-                      r"slides?\s*1\s*[-–—]\s*(\d{1,4})[^.\n]{0,180}?(?:core|primary|actual|lecture|chapter)",
-                      text, flags=re.I,
-                  ):
+                  for m in re.finditer(r"slides?\s*1\s*[-–—]\s*(\d{1,4})[^.\n]{0,180}?(?:core|primary|actual|lecture|chapter)", text, flags=re.I):
                       candidates.append(int(m.group(1)))
-                  for m in re.finditer(
-                      r"slides?\s*(\d{1,4})\s*(?:through|to|[-–—])\s*(\d{1,4})[^.\n]{0,220}?(?:external|unrelated|recommended|filter(?:ed)?\s*out|host[- ]page)",
-                      text, flags=re.I,
-                  ):
+                  for m in re.finditer(r"slides?\s*(\d{1,4})\s*(?:through|to|[-–—])\s*(\d{1,4})[^.\n]{0,220}?(?:external|unrelated|recommended|filter(?:ed)?\s*out|host[- ]page)", text, flags=re.I):
                       start=int(m.group(1))
                       if start > 1:
                           candidates.append(start-1)
@@ -63,34 +52,14 @@ jobs:
           if 'def _semantic_slide_ceiling' not in s:
               s=s.replace(marker,helper+marker,1)
 
-          old="""    semantic_slides: set[int] = set()
-              for row in ai_profile.coverage_items:
-                  semantic_slides.update(_anchor_slides(row.source_anchor))
-
-              merged = list(ai_profile.coverage_items)
-          """
-          old=dedent(old)
-          new=dedent("""    semantic_slides: set[int] = set()
-              for row in ai_profile.coverage_items:
-                  semantic_slides.update(_anchor_slides(row.source_anchor))
-              semantic_ceiling = _semantic_slide_ceiling(ai_profile)
-
-              merged = list(ai_profile.coverage_items)
-          """)
-          assert old in s, repr(old)
+          old="    semantic_slides: set[int] = set()\n    for row in ai_profile.coverage_items:\n        semantic_slides.update(_anchor_slides(row.source_anchor))\n\n    merged = list(ai_profile.coverage_items)\n"
+          new="    semantic_slides: set[int] = set()\n    for row in ai_profile.coverage_items:\n        semantic_slides.update(_anchor_slides(row.source_anchor))\n    semantic_ceiling = _semantic_slide_ceiling(ai_profile)\n\n    merged = list(ai_profile.coverage_items)\n"
+          assert old in s, 'semantic block not found'
           s=s.replace(old,new,1)
 
-          old=dedent("""        item_slides = _anchor_slides(item.source_anchor)
-                  if item_slides and item_slides.issubset(semantic_slides):
-                      continue
-          """)
-          new=dedent("""        item_slides = _anchor_slides(item.source_anchor)
-                  if semantic_ceiling and item_slides and max(item_slides) > semantic_ceiling:
-                      continue
-                  if item_slides and item_slides.issubset(semantic_slides):
-                      continue
-          """)
-          assert old in s, repr(old)
+          old="        item_slides = _anchor_slides(item.source_anchor)\n        if item_slides and item_slides.issubset(semantic_slides):\n            continue\n"
+          new="        item_slides = _anchor_slides(item.source_anchor)\n        if semantic_ceiling and item_slides and max(item_slides) > semantic_ceiling:\n            continue\n        if item_slides and item_slides.issubset(semantic_slides):\n            continue\n"
+          assert old in s, 'item block not found'
           s=s.replace(old,new,1)
           p.write_text(s,encoding='utf-8')
           PY
@@ -99,32 +68,30 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          from textwrap import dedent
           p=Path('iscarb-studio/tests/test_slideshare_source_lock.py')
           s=p.read_text(encoding='utf-8')
           anchor="\nif __name__=='__main__': unittest.main()\n"
           assert anchor in s
           if 'test_semantic_warning_blocks_flattened_host_slides_without_player_metadata' not in s:
-              body=dedent(r'''
-              def test_semantic_warning_blocks_flattened_host_slides_without_player_metadata(self):
-                  td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup)
-                  p=Path(td.name)/'flattened-slideshare.txt'
-                  p.write_text("""SLIDE 3: Software process definition with specification design implementation validation evolution and process descriptions
-              SLIDE 20: Process activities include specification development validation evolution and interleaved managerial activities
-              SLIDE 71: Comprehensive Overview of Software Processes and Models for Effective Development with process model architecture and testing
-              SLIDE 73: Comprehensive Overview of Software Processes and Models in Modern Development with process model design and validation
-              """,encoding='utf-8')
-                  bundle=SourceBundle(items=[SourceItem('primary','P1','slideshare',p,'slideshare')],lecture_focus='',session_minutes=90)
-                  semantic=self._semantic()
-                  semantic.source_warnings=['Slides 59 through 92 contain external slide title artifacts and unrelated topic titles/file names which must be filtered out in favor of the core Chapter 2 content (Slides 1-58).']
-                  profile=reconcile_source_profile(semantic,bundle)
-                  anchors={x.source_anchor for x in profile.coverage_items}
-                  self.assertIn('[P1] SLIDE 20',anchors)
-                  self.assertNotIn('[P1] SLIDE 71',anchors)
-                  self.assertNotIn('[P1] SLIDE 73',anchors)
-              ''')
-              body='\n'.join(('    '+line if line else '') for line in body.strip('\n').splitlines())+'\n'
-              s=s.replace(anchor,'\n'+body+anchor,1)
+              body="""
+    def test_semantic_warning_blocks_flattened_host_slides_without_player_metadata(self):
+        td=tempfile.TemporaryDirectory(); self.addCleanup(td.cleanup)
+        p=Path(td.name)/'flattened-slideshare.txt'
+        p.write_text('''SLIDE 3: Software process definition with specification design implementation validation evolution and process descriptions
+SLIDE 20: Process activities include specification development validation evolution and interleaved managerial activities
+SLIDE 71: Comprehensive Overview of Software Processes and Models for Effective Development with process model architecture and testing
+SLIDE 73: Comprehensive Overview of Software Processes and Models in Modern Development with process model design and validation
+''',encoding='utf-8')
+        bundle=SourceBundle(items=[SourceItem('primary','P1','slideshare',p,'slideshare')],lecture_focus='',session_minutes=90)
+        semantic=self._semantic()
+        semantic.source_warnings=['Slides 59 through 92 contain external slide title artifacts and unrelated topic titles/file names which must be filtered out in favor of the core Chapter 2 content (Slides 1-58).']
+        profile=reconcile_source_profile(semantic,bundle)
+        anchors={x.source_anchor for x in profile.coverage_items}
+        self.assertIn('[P1] SLIDE 20',anchors)
+        self.assertNotIn('[P1] SLIDE 71',anchors)
+        self.assertNotIn('[P1] SLIDE 73',anchors)
+"""
+              s=s.replace(anchor,body+anchor,1)
               p.write_text(s,encoding='utf-8')
           PY
 
