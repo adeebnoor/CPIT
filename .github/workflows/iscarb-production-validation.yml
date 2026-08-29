@@ -1,0 +1,100 @@
+name: ISCARB Production Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-lecture-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: dependable
+            file: lectures/cimt/CPIT455-class2-NooR.pdf
+          - key: reliability
+            file: lectures/cimt/CPIT455-class3-NooR.pdf
+          - key: security
+            file: lectures/cimt/CPIT455-class5-NooR.pdf
+          - key: reuse
+            file: lectures/cimt/CPIT455-class7-NooR.pdf
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation client
+        run: python -m pip install requests pypdf
+      - name: Compile real archived CIMT lecture on live production
+        env:
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+          SOURCE_FILE: ${{ matrix.file }}
+          KEY: ${{ matrix.key }}
+        run: |
+          python - <<'PY'
+          import io, json, os, time, zipfile
+          from pathlib import Path
+          import requests
+          from pypdf import PdfReader
+
+          base=os.environ['BASE_URL'].rstrip('/'); src=Path(os.environ['SOURCE_FILE']); key=os.environ['KEY']
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-production-validation/1.0'})
+          h=s.get(base+'/api/health',timeout=90); h.raise_for_status(); health=h.json()
+          assert health.get('version')=='4.3.0', health
+          assert health.get('presenter_exact_units')==20
+          assert health.get('session_minutes')==90
+          with src.open('rb') as f:
+              r=s.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/pdf')},data={'repair_rounds':'1'},timeout=180)
+          r.raise_for_status(); job=r.json()['job_id']; final=None
+          deadline=time.time()+1500
+          while time.time()<deadline:
+              q=s.get(f'{base}/api/jobs/{job}',timeout=120); q.raise_for_status(); final=q.json()
+              print(key, final.get('status'), final.get('progress'), (final.get('message') or '')[:180])
+              if final.get('status') in {'ready','blocked','error'}: break
+              time.sleep(10)
+          assert final and final.get('status') in {'ready','blocked'}, json.dumps(final)[:5000]
+          bp=final.get('blueprint'); assert bp, json.dumps(final)[:5000]
+          assert len(bp.get('units') or [])==20
+          assert sum(int(u.get('planned_minutes') or 0) for u in bp['units'])==90
+          assert [u.get('number') for u in bp['units']]==list(range(1,21))
+          profile=final.get('source_profile') or {}; majors=[x for x in profile.get('coverage_items',[]) if x.get('importance')=='major']
+          ledger={x.get('coverage_id'):x for x in bp.get('coverage_ledger',[])}
+          missing=[x.get('id') for x in majors if x.get('id') not in ledger]
+          late=[x.get('id') for x in majors if x.get('id') in ledger and int(ledger[x.get('id')].get('first_taught_unit') or 99)>15]
+          assert not missing, ('missing major chapter checkpoints',missing)
+          assert not late, ('major checkpoints taught after Unit 15',late)
+          checks=final.get('deterministic_checks') or {}
+          for ck in ('v14_exactly_20_presenter_jobs','v14_exactly_90_live_minutes','v14_no_unsourced_numeric_precision'):
+              assert checks.get(ck) is True, (ck,checks.get(ck))
+
+          preview=s.get(f'{base}/api/jobs/{job}/presenter',timeout=120); assert preview.status_code==200; assert len(preview.content)>5000
+          assert 'CIMT-native Presenter' in preview.text
+          exports={
+            'pptx':f'/api/jobs/{job}/export/pptx',
+            'presenter_pdf':f'/api/jobs/{job}/export/presenter-pdf',
+            'reading_pdf':f'/api/jobs/{job}/export/pdf',
+            'instructor_docx':f'/api/jobs/{job}/export/docx',
+            'student_docx':f'/api/jobs/{job}/export/student',
+            'json':f'/api/jobs/{job}/export/json',
+          }
+          sizes={}
+          for name,path in exports.items():
+              rr=s.get(base+path,timeout=180); assert rr.status_code==200,(name,rr.status_code,rr.text[:500]); assert len(rr.content)>500,(name,len(rr.content)); sizes[name]=len(rr.content)
+              if name=='pptx':
+                  with zipfile.ZipFile(io.BytesIO(rr.content)) as z:
+                      slides=[x for x in z.namelist() if x.startswith('ppt/slides/slide') and x.endswith('.xml')]; assert len(slides)==20
+              elif name=='presenter_pdf': assert len(PdfReader(io.BytesIO(rr.content)).pages)==20
+          result={'key':key,'job_id':job,'status':final['status'],'version':health['version'],'major_checkpoints':len(majors),'units':20,'minutes':90,'exports':sizes}
+          Path(f'/tmp/{key}-production-result.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+          print('PRODUCTION REAL LECTURE PASS',json.dumps(result))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-validation-${{ matrix.key }}
+          path: /tmp/${{ matrix.key }}-production-result.json
+          if-no-files-found: warn

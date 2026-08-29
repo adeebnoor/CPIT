@@ -1,86 +1,36 @@
-name: ISCARB Render Deploy
+name: ISCARB Render Deploy (Manual)
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - 'iscarb-studio/**'
-      - 'render.yaml'
-      - '.github/workflows/iscarb-render-deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: iscarb-render-deploy
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Resolve expected production version from active uvicorn module
+      - uses: actions/checkout@v4
+      - name: Resolve expected production version
         id: version
         shell: bash
         run: |
-          set -euo pipefail
           expected=$(python - <<'PY'
           import re
           from pathlib import Path
-
           run_text=Path('iscarb-studio/run.py').read_text(encoding='utf-8')
           m=re.search(r'uvicorn\.run\(["\']app\.([A-Za-z0-9_]+):app["\']', run_text)
-          if not m:
-              raise SystemExit('Could not resolve active uvicorn module from iscarb-studio/run.py')
-          module=m.group(1)
-          path=Path('iscarb-studio/app')/(module+'.py')
-          text=path.read_text(encoding='utf-8')
-          value=''
+          if not m: raise SystemExit('Cannot resolve active app module')
+          text=(Path('iscarb-studio/app')/(m.group(1)+'.py')).read_text(encoding='utf-8')
           for line in text.splitlines():
               if line.strip().startswith('PUBLIC_VERSION') and '=' in line:
-                  value=line.split('=',1)[1].strip().strip('"').strip("'")
-                  break
-          if not value:
-              raise SystemExit(f'Could not resolve PUBLIC_VERSION from {path}')
-          print(value)
+                  print(line.split('=',1)[1].strip().strip('"').strip("'")); break
+          else: raise SystemExit('Cannot resolve PUBLIC_VERSION')
           PY
           )
           echo "expected=$expected" >> "$GITHUB_OUTPUT"
-          echo "Expected production version: $expected"
-
-      - name: Check whether production is already current
-        id: current
-        env:
-          EXPECTED_VERSION: ${{ steps.version.outputs.expected }}
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json, os, urllib.request
-          expected=os.environ['EXPECTED_VERSION']
-          url='https://iscarb-lecture-studio.onrender.com/api/health'
-          try:
-              req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-check/1.0'})
-              with urllib.request.urlopen(req,timeout=30) as r:
-                  data=json.loads(r.read().decode())
-              current=str(data.get('version') or '')
-              print('Current production version:',current)
-              with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-                  f.write('current='+current+'\n')
-                  f.write('already_current='+('true' if current==expected else 'false')+'\n')
-          except Exception as e:
-              print('Production health check unavailable:',repr(e))
-              with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:
-                  f.write('current=unknown\n')
-                  f.write('already_current=false\n')
-          PY
-
-      - name: Trigger Render deployment when credentials are configured
-        if: steps.current.outputs.already_current != 'true'
+      - name: Trigger explicit Render deploy
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -89,50 +39,30 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${RENDER_DEPLOY_HOOK_URL:-}" ]; then
-            echo "Using Render deploy hook."
             curl --fail --silent --show-error --retry 3 --retry-all-errors -X POST "$RENDER_DEPLOY_HOOK_URL" >/tmp/render-response.txt
-            echo "Render deploy hook accepted."
           elif [ -n "${RENDER_API_KEY:-}" ] && [ -n "${RENDER_SERVICE_ID:-}" ]; then
-            echo "Using Render API service deployment."
-            code=$(curl --silent --show-error -o /tmp/render-response.txt -w '%{http_code}' \
-              -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
-              -H "Authorization: Bearer ${RENDER_API_KEY}" \
-              -H 'Content-Type: application/json' \
-              --data '{"clearCache":"do_not_clear"}')
-            if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-              echo "::error::Render API deployment request returned HTTP $code"
-              exit 1
-            fi
-            echo "Render API deployment accepted."
+            curl --fail --silent --show-error -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" -H 'Content-Type: application/json' \
+              --data '{"clearCache":"do_not_clear"}' >/tmp/render-response.txt
           else
-            echo "No explicit Render trigger credential is configured. Relying on Render Blueprint autoDeployTrigger=commit for pushes to main, then verifying production below."
+            echo '::error::No Render deploy credential is configured. Use the Render Dashboard Manual Deploy, or add RENDER_DEPLOY_HOOK_URL / RENDER_API_KEY + RENDER_SERVICE_ID.'
+            exit 1
           fi
-
       - name: Verify production version
         env:
           EXPECTED_VERSION: ${{ steps.version.outputs.expected }}
-        shell: bash
         run: |
           python - <<'PY'
           import json, os, time, urllib.request
-          expected=os.environ['EXPECTED_VERSION']
-          url='https://iscarb-lecture-studio.onrender.com/api/health'
-          last=''
-          for _ in range(60):
+          expected=os.environ['EXPECTED_VERSION']; url='https://iscarb-lecture-studio.onrender.com/api/health'; last=''
+          for _ in range(90):
               try:
-                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/4.3'})
-                  with urllib.request.urlopen(req,timeout=30) as r:
-                      data=json.loads(r.read().decode())
-                  last=str(data)
-                  current=str(data.get('version') or '')
-                  print('production version',current,'expected',expected)
-                  if current==expected:
-                      print('Render deployment verified.')
-                      raise SystemExit(0)
-              except SystemExit:
-                  raise
-              except Exception as e:
-                  last=repr(e)
+                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-manual-deploy-verifier/1.0'})
+                  with urllib.request.urlopen(req,timeout=30) as r: data=json.loads(r.read().decode())
+                  last=str(data); print('production',data.get('version'),'expected',expected)
+                  if str(data.get('version') or '')==expected: raise SystemExit(0)
+              except SystemExit: raise
+              except Exception as e: last=repr(e)
               time.sleep(10)
-          raise SystemExit('Production did not advance to expected version during the verification window. Confirm the Render service is linked to main with autoDeploy enabled, or configure RENDER_DEPLOY_HOOK_URL / RENDER_API_KEY + RENDER_SERVICE_ID. Last='+last[:1000])
+          raise SystemExit('Production did not advance. Last='+last[:1000])
           PY
