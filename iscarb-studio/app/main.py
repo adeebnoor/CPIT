@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from .models import JobState, AuditReport, AuditIssue
 from .storage import save_job, load_job, UPLOADS
 from .gemini_service import GeminiService
+from .source_profile_fallback import build_deterministic_source_profile
 from .gate import deterministic_gate, all_required_pass, failed_check_names
 from .session_gate import apply_90_minute_timebox, session_scope_gate
 from .source_bundle import SourceBundle, SourceItem
@@ -138,7 +139,12 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         stage = "source-bundle analysis"
         _update(job, "analyzing", 10, "1/4 · Source Lock: identifying all major P1 topics and technical boundaries…")
-        profile = service.profile_source(bundle)
+        try:
+            profile = service.profile_source(bundle)
+        except Exception as exc:
+            if not _is_quota_error(exc):
+                raise
+            profile = build_deterministic_source_profile(bundle, str(exc))
         job.source_profile = profile
         save_job(job)
 
