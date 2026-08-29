@@ -25,11 +25,11 @@ jobs:
           pip install httpx
       - name: Compile all Python modules
         run: python -m compileall -q iscarb-studio/app iscarb-studio/tests
-      - name: Run v4.3 regression suite
+      - name: Run v4.3 regression suite against synthetic and archived CIMT sources
         working-directory: iscarb-studio
         env:
           PYTHONPATH: .
-        run: python -m unittest tests.test_v43_cimt_native -v
+        run: python -m unittest tests.test_v43_cimt_native tests.test_v43_archived_cimt -v
       - name: Generate inspectable QA outputs
         working-directory: iscarb-studio
         env:
@@ -50,7 +50,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import fitz
-          from PIL import Image, ImageOps, ImageDraw
+          from PIL import Image, ImageDraw
 
           out=Path('/tmp/iscarb-v43-qa'); out.mkdir(exist_ok=True)
           refs=[
