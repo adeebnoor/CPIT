@@ -1,0 +1,62 @@
+name: ISCARB Live Job Diagnostics
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - '.github/workflows/iscarb-live-job-diagnostics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install tools
+        run: python -m pip install requests
+      - name: Probe existing real conversion job
+        env:
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+          JOB_ID: bff09884afae49aa8aaa36aec81ac583
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          BASE=os.environ['BASE_URL'].rstrip('/')
+          JOB=os.environ['JOB_ID']
+          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-job-diagnostics/1.0'})
+          paths={
+            'job':f'/api/jobs/{JOB}',
+            'presenter':f'/api/jobs/{JOB}/presenter',
+            'pptx':f'/api/jobs/{JOB}/export/pptx',
+            'presenter_pdf':f'/api/jobs/{JOB}/export/presenter-pdf',
+            'reading_pdf':f'/api/jobs/{JOB}/export/pdf',
+            'instructor_docx':f'/api/jobs/{JOB}/export/docx',
+            'student_docx':f'/api/jobs/{JOB}/export/student',
+            'blueprint_json':f'/api/jobs/{JOB}/export/json',
+          }
+          for name,path in paths.items():
+              r=S.get(BASE+path,timeout=180)
+              print('ENDPOINT',name,'HTTP',r.status_code,'BYTES',len(r.content),'TYPE',r.headers.get('content-type'))
+              if r.status_code>=400:
+                  print('ERROR_BODY',name,repr(r.text[:1200]))
+              elif name=='job':
+                  j=r.json()
+                  print('JOB_SUMMARY',json.dumps({
+                    'status':j.get('status'),'progress':j.get('progress'),'message':j.get('message'),
+                    'error':j.get('error'),'has_blueprint':bool(j.get('blueprint')),
+                    'gate_failed':[k for k,v in (j.get('deterministic_checks') or {}).items() if v is False][:20]
+                  }))
+              elif name=='blueprint_json':
+                  open('/tmp/blueprint.json','wb').write(r.content)
+          PY
+      - name: Upload real blueprint for local reproduction
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-production-blueprint
+          path: /tmp/blueprint.json
+          if-no-files-found: warn
