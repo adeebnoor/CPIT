@@ -54,6 +54,11 @@ def _health_v430():
         "cross_discipline_visual_residue_guard": True,
         "presenter_exact_units": 20,
         "session_minutes": 90,
+        "visual_lecture_engine": "CIMT+ v4.3",
+        "hero_delivery": "css-native-no-asset",
+        "hero_static_dependency": False,
+        "public_experience": "CIMT+ computing Faculty Studio with source-backed compile, Gate v14, Output Lab, six export surfaces, and visual provenance",
+        "design_language": "CIMT-native Saudi academic computing interface with CSS-native hero card and no external hero asset dependency",
         "release_contract": "semantic audit PASS AND every Gate v14 deterministic check PASS",
     })
     return data
