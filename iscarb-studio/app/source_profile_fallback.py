@@ -1,0 +1,196 @@
+from __future__ import annotations
+
+"""Deterministic P1 source profiling used only when the AI profiling call is unavailable.
+
+The fallback is deliberately conservative: it does not invent subject matter. It
+extracts page/slide/section headings and short source excerpts from the PRIMARY
+file and turns those into a coverage contract. Gemini still receives the full
+source during blueprint generation; this module only prevents the whole compile
+from dying before generation when a profiling-model quota is exhausted.
+"""
+
+import re
+from pathlib import Path
+
+from .models import CoverageItem, SourceProfile, TopicFamily
+from .source_bundle import SourceBundle
+from .source_text import extract_source_text
+
+
+_FURNITURE = {
+    "software engineering", "chapter", "contents", "copyright", "all rights reserved",
+    "ian sommerville", "page", "slide", "learning objectives", "objectives",
+}
+
+
+def _clean(text: str, limit: int = 160) -> str:
+    text = re.sub(r"\s+", " ", str(text or "")).strip(" \t\r\n-|•·")
+    return text[:limit].rstrip(" ,;:-")
+
+
+def _meaningful_lines(text: str) -> list[str]:
+    lines: list[str] = []
+    for raw in str(text or "").splitlines():
+        line = _clean(raw, 180)
+        if len(line) < 3:
+            continue
+        low = line.lower()
+        if low.isdigit() or re.fullmatch(r"\d+[./-]?\d*", low):
+            continue
+        if any(low == x for x in _FURNITURE):
+            continue
+        if line not in lines:
+            lines.append(line)
+    return lines
+
+
+def _knowledge_type(text: str) -> str:
+    low = text.lower()
+    if any(x in low for x in ("algorithm", "pseudo", "procedure", "steps:")):
+        return "ALGORITHM"
+    if any(x in low for x in ("equation", "formula", "probability", "pofod", "rocof", "mtbf", "mttf", "=", "%")):
+        return "EQUATION"
+    if any(x in low for x in ("architecture", "layer", "component", "subsystem", "client-server", "distributed")):
+        return "ARCHITECTURE"
+    if any(x in low for x in ("process", "activities", "workflow", "review", "inspection", "testing")):
+        return "PROCESS"
+    if any(x in low for x in ("protocol", "request", "response", "message", "transaction")):
+        return "PROTOCOL"
+    if any(x in low for x in ("trade-off", "tradeoff", "cost", "versus", " vs ", "advantage", "disadvantage")):
+        return "TRADE_OFF"
+    if any(x in low for x in ("example", "case study", "scenario")):
+        return "EXAMPLE"
+    if any(x in low for x in ("principle", "guideline", "rule", "design for")):
+        return "DESIGN_PRINCIPLE"
+    if any(x in low for x in ("failure", "fault", "behavior", "behaviour", "state", "recovery")):
+        return "SYSTEM_BEHAVIOR"
+    return "CONCEPT"
+
+
+def _pdf_chunks(path: Path) -> list[tuple[int, str, str]]:
+    from pypdf import PdfReader
+    reader = PdfReader(str(path))
+    out: list[tuple[int, str, str]] = []
+    for i, page in enumerate(reader.pages, 1):
+        text = page.extract_text() or ""
+        lines = _meaningful_lines(text)
+        if not lines:
+            continue
+        label = lines[0]
+        excerpt = _clean(" · ".join(lines[:5]), 520)
+        out.append((i, label, excerpt))
+    return out
+
+
+def _pptx_chunks(path: Path) -> list[tuple[int, str, str]]:
+    from pptx import Presentation
+    prs = Presentation(str(path))
+    out: list[tuple[int, str, str]] = []
+    for i, slide in enumerate(prs.slides, 1):
+        raw = "\n".join(sh.text for sh in slide.shapes if hasattr(sh, "text") and sh.text)
+        lines = _meaningful_lines(raw)
+        if not lines:
+            continue
+        out.append((i, lines[0], _clean(" · ".join(lines[:5]), 520)))
+    return out
+
+
+def _doc_chunks(path: Path) -> list[tuple[int, str, str]]:
+    # DOCX/TXT/MD have no reliable slide/page coordinate after extraction. Keep
+    # deterministic numbered sections so every extracted source segment remains traceable.
+    text = extract_source_text(path, limit=500_000)
+    paras = [_clean(x, 520) for x in re.split(r"\n{1,}", text) if _clean(x, 520)]
+    out: list[tuple[int, str, str]] = []
+    for i, para in enumerate(paras[:80], 1):
+        words = para.split()
+        label = _clean(" ".join(words[:12]), 110)
+        out.append((i, label, para))
+    return out
+
+
+def _chunks(path: Path) -> tuple[str, list[tuple[int, str, str]]]:
+    ext = path.suffix.lower()
+    if ext == ".pdf":
+        return "PAGE", _pdf_chunks(path)
+    if ext == ".pptx":
+        return "SLIDE", _pptx_chunks(path)
+    return "SECTION", _doc_chunks(path)
+
+
+def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
+    stem = Path(primary_name).stem.replace("_", " ").replace("-", " ")
+    stem = re.sub(r"\s+", " ", stem).strip()
+    # Prefer a plausible first source heading over a machine filename.
+    if chunks:
+        first = _clean(chunks[0][1], 120)
+        if 5 <= len(first) <= 120 and not re.fullmatch(r"[A-Z0-9_. -]+", first):
+            return first
+    return stem or "Primary lecture"
+
+
+def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI profiler unavailable") -> SourceProfile:
+    primary = bundle.primary
+    coordinate, chunks = _chunks(primary.path)
+    if not chunks:
+        # Last-resort single source item. It is intentionally explicit rather than
+        # pretending that a semantic profile exists when extraction yielded nothing.
+        chunks = [(1, Path(primary.display_name).stem, "Primary source supplied by faculty")]
+
+    # Preserve source order while suppressing exact duplicate headings caused by
+    # recurring lecture furniture. We still keep a page-level coverage item for
+    # every content-bearing source page/slide.
+    families: list[TopicFamily] = []
+    seen_family: set[str] = set()
+    coverage: list[CoverageItem] = []
+    for idx, label, excerpt in chunks[:80]:
+        clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
+        anchor = f"[P1] {coordinate} {idx}"
+        key = re.sub(r"[^a-z0-9]+", " ", clean_label.lower()).strip()
+        is_title_like = len(_meaningful_lines(excerpt)) <= 1 or len(excerpt.split()) < 8
+        importance = "supporting" if is_title_like else "major"
+        coverage.append(CoverageItem(
+            id=f"P1-{coordinate[0]}{idx:02d}",
+            label=clean_label,
+            knowledge_type=_knowledge_type(excerpt),
+            importance=importance,
+            source_anchor=anchor,
+            why_important=_clean(excerpt, 260),
+        ))
+        if key and key not in seen_family and not is_title_like:
+            seen_family.add(key)
+            families.append(TopicFamily(
+                name=clean_label,
+                source_anchor=anchor,
+                why_important=_clean(excerpt, 260),
+            ))
+
+    if not families:
+        first = coverage[0]
+        families = [TopicFamily(name=first.label, source_anchor=first.source_anchor, why_important=first.why_important)]
+        coverage[0].importance = "major"
+
+    title = _title_from(primary.display_name, chunks)
+    focus = _clean(bundle.lecture_focus, 260) or title
+    warning = (
+        "Source profile was built deterministically because the AI profiling call was unavailable: "
+        + _clean(reason, 300)
+        + ". The full primary source is still supplied to blueprint generation; RELEASE still requires normal gates."
+    )
+    return SourceProfile(
+        lecture_title=title,
+        course_or_level="Faculty-supplied lecture",
+        weekly_focus=focus,
+        topic_families=families[:40],
+        coverage_items=coverage[:80],
+        technical_boundaries=[
+            "P1 remains the authority for technical claims and terminology.",
+            "Deterministic fallback records source coordinates; it does not add external technical claims.",
+        ],
+        source_warnings=[warning],
+        session_minutes=90,
+        scope_fit="COMPRESS" if len([x for x in coverage if x.importance == "major"]) > 16 else "FIT",
+        in_scope_families=[x.name for x in families[:40]],
+        deferred_topics=[],
+        source_conflicts=[],
+        source_manifest=bundle.manifest_lines(),
+    )
