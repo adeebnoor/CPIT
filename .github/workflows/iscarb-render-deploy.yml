@@ -1,0 +1,76 @@
+name: ISCARB Render Deploy
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'iscarb-studio/**'
+      - 'render.yaml'
+      - '.github/workflows/iscarb-render-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iscarb-render-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger Render deployment using configured credential
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          set -euo pipefail
+          if [ -n "${RENDER_DEPLOY_HOOK_URL:-}" ]; then
+            echo "Using Render deploy hook."
+            curl --fail --silent --show-error --retry 3 --retry-all-errors -X POST "$RENDER_DEPLOY_HOOK_URL" >/tmp/render-response.txt
+            echo "Render deploy hook accepted."
+          elif [ -n "${RENDER_API_KEY:-}" ] && [ -n "${RENDER_SERVICE_ID:-}" ]; then
+            echo "Using Render API service deployment."
+            code=$(curl --silent --show-error -o /tmp/render-response.txt -w '%{http_code}' \
+              -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H 'Content-Type: application/json' \
+              --data '{"clearCache":"do_not_clear"}')
+            if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+              echo "::error::Render API deployment request returned HTTP $code"
+              exit 1
+            fi
+            echo "Render API deployment accepted."
+          else
+            echo "::error::Render auto-deploy is not advancing production and no GitHub deployment credential is configured. Configure either RENDER_DEPLOY_HOOK_URL, or both RENDER_API_KEY and RENDER_SERVICE_ID, as repository Actions secrets."
+            exit 2
+          fi
+
+      - name: Verify production advances to v4.0.3
+        env:
+          BASE_URL: https://iscarb-lecture-studio.onrender.com
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          url='https://iscarb-lecture-studio.onrender.com/api/health'
+          last=''
+          for _ in range(36):
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/1.0'})
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      data=json.loads(r.read().decode())
+                  last=str(data)
+                  print('production version',data.get('version'))
+                  if data.get('version')=='4.0.3':
+                      print('Render deployment verified.')
+                      raise SystemExit(0)
+              except SystemExit:
+                  raise
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(10)
+          raise SystemExit('Production did not advance to v4.0.3. Last='+last[:1000])
+          PY
