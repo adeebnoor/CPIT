@@ -7,6 +7,14 @@ Phase = Literal["IFHAM", "MARIS", "ATQAN", "MAYYIZ"]
 CIMTLens = Literal["C", "I", "M", "T", "N/A"]
 AlignmentStrength = Literal["direct", "supporting"]
 ScopeFit = Literal["FIT", "COMPRESS", "MIXED"]
+KnowledgeType = Literal[
+    "CONCEPT", "ALGORITHM", "CODE", "ARCHITECTURE", "EQUATION", "PROTOCOL",
+    "PROCESS", "DATA_MODEL", "SYSTEM_BEHAVIOR", "DESIGN_PRINCIPLE", "TRADE_OFF",
+    "EMPIRICAL_RESULT", "EXAMPLE", "OTHER",
+]
+CoverageImportance = Literal["major", "supporting"]
+CoverageDepth = Literal["DEEP", "CONCISE", "INTEGRATED"]
+VisualReuseMode = Literal["USE", "ADAPT", "REDRAW", "NEW"]
 
 
 class TopicFamily(BaseModel):
@@ -15,22 +23,47 @@ class TopicFamily(BaseModel):
     why_important: str = ""
 
 
+class CoverageItem(BaseModel):
+    """Atomic chapter/source element used to prove computing-wide coverage."""
+    id: str
+    label: str
+    knowledge_type: KnowledgeType = "CONCEPT"
+    importance: CoverageImportance = "major"
+    source_anchor: str
+    why_important: str = ""
+
+
 class SourceProfile(BaseModel):
     lecture_title: str
     course_or_level: str = ""
     weekly_focus: str
     topic_families: list[TopicFamily] = Field(min_length=1)
+    coverage_items: list[CoverageItem] = Field(default_factory=list)
     technical_boundaries: list[str] = Field(default_factory=list)
     source_warnings: list[str] = Field(default_factory=list)
 
-    # One live lecture is always 90 minutes. In v1.8 all major PRIMARY topic
-    # families remain in scope; COMPRESS means smart compression, not deferral.
+    # One live lecture is always 90 minutes. All major PRIMARY elements remain
+    # in scope; COMPRESS means intelligent synthesis, never omission.
     session_minutes: int = 90
     scope_fit: ScopeFit = "FIT"
     in_scope_families: list[str] = Field(default_factory=list)
     deferred_topics: list[str] = Field(default_factory=list)
     source_conflicts: list[str] = Field(default_factory=list)
     source_manifest: list[str] = Field(default_factory=list)
+
+    @field_validator("coverage_items", mode="before")
+    @classmethod
+    def cap_coverage_items(cls, value):
+        if isinstance(value, list):
+            seen = set()
+            out = []
+            for item in value:
+                key = str(item.get("id", "") if isinstance(item, dict) else item).strip()
+                if key and key not in seen:
+                    seen.add(key)
+                    out.append(item)
+            return out[:80]
+        return value
 
     @field_validator("in_scope_families", "deferred_topics", "source_conflicts", "source_manifest", mode="before")
     @classmethod
@@ -54,10 +87,6 @@ class CLO(BaseModel):
 class TopicCoverage(BaseModel):
     topic_family: str
     source_anchor: str
-    # Structural parsing accepts any Unit 1-20 so a semantically bad draft can
-    # still reach Content Gate. The hard pedagogical rule remains in gate.py:
-    # every major topic MUST first be taught by Unit 15. If a model returns 16-20,
-    # the Gate fails it and the repair loop must move the actual teaching earlier.
     first_taught_unit: int = Field(ge=1, le=20)
     reinforced_units: list[int] = Field(default_factory=list)
 
@@ -70,6 +99,24 @@ class TopicCoverage(BaseModel):
                 if item not in seen:
                     seen.append(item)
             return seen[:10]
+        return value
+
+
+class CoverageLedgerEntry(BaseModel):
+    coverage_id: str
+    label: str
+    knowledge_type: KnowledgeType = "CONCEPT"
+    source_anchor: str
+    first_taught_unit: int = Field(ge=1, le=20)
+    reinforced_units: list[int] = Field(default_factory=list)
+    depth: CoverageDepth = "CONCISE"
+    representation: str = ""
+
+    @field_validator("reinforced_units", mode="before")
+    @classmethod
+    def trim_reinforcement(cls, value):
+        if isinstance(value, list):
+            return list(dict.fromkeys(value))[:10]
         return value
 
 
@@ -114,6 +161,26 @@ class RubricCriterion(BaseModel):
         return value
 
 
+class VisualPlan(BaseModel):
+    visual_type: str = "concept-map"
+    teaching_purpose: str = ""
+    source_visual_available: bool = False
+    source_page_or_slide: str = ""
+    source_url: str = ""
+    reuse_mode: VisualReuseMode = "NEW"
+    citation: str = "ISCARB visualization"
+    focal_elements: list[str] = Field(default_factory=list)
+    annotation_plan: list[str] = Field(default_factory=list)
+    visual_evidence_role: str = ""
+
+    @field_validator("focal_elements", "annotation_plan", mode="before")
+    @classmethod
+    def cap_visual_lists(cls, value):
+        if isinstance(value, list):
+            return [str(x).strip() for x in value if str(x).strip()][:8]
+        return value
+
+
 class LectureUnit(BaseModel):
     number: int = Field(ge=1, le=20)
     phase: Phase
@@ -130,7 +197,9 @@ class LectureUnit(BaseModel):
     enrichment_basis: list[str] = Field(default_factory=list, max_length=6)
     scenario_assumptions: list[str] = Field(default_factory=list, max_length=5)
 
+    knowledge_types: list[KnowledgeType] = Field(default_factory=list)
     visual_suggestion: str
+    visual_plan: VisualPlan | None = None
     student_action: str
     takeaway: str
     cimtlens: list[CIMTLens] = Field(min_length=1, max_length=4)
@@ -142,6 +211,13 @@ class LectureUnit(BaseModel):
     contextual_enrichment: bool = False
     verify_before_release: bool = False
     planned_minutes: int = Field(default=0, ge=0, le=15)
+
+    @field_validator("knowledge_types", mode="before")
+    @classmethod
+    def cap_knowledge_types(cls, value):
+        if isinstance(value, list):
+            return list(dict.fromkeys(value))[:5]
+        return value
 
     @field_validator("core_content", "pedagogy_content", mode="before")
     @classmethod
@@ -188,6 +264,7 @@ class Blueprint(BaseModel):
     units: list[LectureUnit] = Field(min_length=20, max_length=20)
     source_topic_families: list[str] = Field(min_length=1)
     topic_coverage: list[TopicCoverage] = Field(min_length=1)
+    coverage_ledger: list[CoverageLedgerEntry] = Field(default_factory=list)
     readiness_alignment: list[ReadinessAlignment] = Field(min_length=1)
     rubric_criteria: list[RubricCriterion] = Field(min_length=6)
     release_notes: list[str] = Field(default_factory=list)
@@ -197,6 +274,13 @@ class Blueprint(BaseModel):
     deferred_topics: list[str] = Field(default_factory=list)
 
     model_config = {"populate_by_name": True}
+
+    @field_validator("coverage_ledger", mode="before")
+    @classmethod
+    def cap_coverage_ledger(cls, value):
+        if isinstance(value, list):
+            return value[:80]
+        return value
 
     @field_validator("release_notes", "source_manifest", "deferred_topics", mode="before")
     @classmethod
