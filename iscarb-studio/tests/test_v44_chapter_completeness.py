@@ -9,6 +9,7 @@ from app.source_bundle import SourceBundle, SourceItem
 from app.source_profile_fallback import build_deterministic_source_profile
 from app.cimt_native_v43 import export_cimt_presenter_pdf_v43, export_cimt_presenter_pptx_v43, render_cimt_presenter_preview_v43
 from app import prompts
+from app.main import _ensure_quota_safe_completeness, _major_coverage_gaps
 
 
 class ChapterCompletenessV44Tests(unittest.TestCase):
@@ -49,6 +50,43 @@ class ChapterCompletenessV44Tests(unittest.TestCase):
             self.assertTrue(all(ledger[x].first_taught_unit <= 15 for x in major))
             self.assertEqual(bp.readiness_alignment, [])
             self.assertIn('UNVERIFIED', ' '.join(bp.units[18].pedagogy_content).upper())
+
+    def test_quota_during_repair_replaces_incomplete_semantic_draft_with_complete_blocked_draft(self):
+        profile = self._profile(2)
+        path = self.lecture_dir / 'CPIT455-class2-NooR.pdf'
+        bundle = SourceBundle(items=[SourceItem('primary','P1',path.name,path,path.name)], lecture_focus='', session_minutes=90)
+        incomplete = build_deterministic_blueprint(profile).model_copy(deep=True)
+        major_ids = [x.id for x in profile.coverage_items if x.importance == 'major']
+        incomplete.coverage_ledger = [x for x in incomplete.coverage_ledger if x.coverage_id not in set(major_ids[:4])]
+        missing, late = _major_coverage_gaps(incomplete, profile)
+        self.assertTrue(missing)
+        self.assertFalse(late)
+        repaired, checks, audit, replaced, original_missing, original_late = _ensure_quota_safe_completeness(
+            incomplete, profile, bundle, bundle.combined_local_text(), 'RESOURCE_EXHAUSTED quota exceeded'
+        )
+        self.assertTrue(replaced)
+        self.assertEqual(set(original_missing), set(missing))
+        self.assertEqual(original_late, [])
+        self.assertEqual(_major_coverage_gaps(repaired, profile), ([], []))
+        self.assertEqual(len(repaired.units), 20)
+        self.assertEqual(sum(u.planned_minutes for u in repaired.units), 90)
+        self.assertEqual(repaired.readiness_alignment, [])
+        self.assertFalse(audit.overall_pass)
+        self.assertIsInstance(checks, dict)
+
+    def test_quota_during_repair_preserves_already_complete_semantic_draft(self):
+        profile = self._profile(2)
+        path = self.lecture_dir / 'CPIT455-class2-NooR.pdf'
+        bundle = SourceBundle(items=[SourceItem('primary','P1',path.name,path,path.name)], lecture_focus='', session_minutes=90)
+        complete = build_deterministic_blueprint(profile)
+        result, checks, audit, replaced, missing, late = _ensure_quota_safe_completeness(
+            complete, profile, bundle, bundle.combined_local_text(), 'quota exhausted'
+        )
+        self.assertFalse(replaced)
+        self.assertIs(result, complete)
+        self.assertEqual((missing, late), ([], []))
+        self.assertFalse(audit.overall_pass)
+        self.assertIsInstance(checks, dict)
 
     def test_all_archived_chapters_render_20_slide_outputs(self):
         with tempfile.TemporaryDirectory() as td:
