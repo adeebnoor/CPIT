@@ -282,3 +282,71 @@ CIMT+ COMPUTING REPAIR
 - Choose visual grammar from the knowledge type; do not turn algorithms, code, equations, protocols, data models, or empirical results into generic architecture boxes.
 - Never fabricate a source visual. If none is verifiable, use REDRAW or NEW with an ISCARB visualization citation.
 """
+
+# -----------------------------------------------------------------------------
+# CIMT × LEARN-BY-DOING CHAPTER-COMPLETENESS CONTRACT (v4.4)
+# -----------------------------------------------------------------------------
+SOURCE_PROFILE_PROMPT += r"""
+
+CHAPTER COMPLETENESS — HARD SECOND PASS
+Treat the PRIMARY source as a chapter-completeness contract, not as a slide-title summary.
+Identify every IMPORTANT P1 element whose omission would make a competent learner miss part of the chapter:
+- every numbered section/subsection;
+- definitions and named concepts;
+- mechanisms, process stages, algorithms, protocols and architectures;
+- equations, metrics, measurable requirements and named variables;
+- named lists/taxonomies and every material member of those lists;
+- alternatives, advantages/disadvantages and explicit trade-offs;
+- failure modes, risks, assumptions, constraints and design rules;
+- source-significant worked examples/cases when they teach a distinct mechanism.
+Do not promote administrative slides, repeated course furniture, assignment instructions, or decorative recap text to major technical coverage.
+Use coverage_items as the auditable atomic checklist. A major item must be specific enough that a reviewer can answer: "where is THIS exact chapter idea taught?"
+"""
+
+MASTER_PROMPT += r"""
+
+CHAPTER COMPLETENESS PROOF — RELEASE BLOCKER
+- coverage_ledger is not a summary; it is the proof that every MAJOR SourceProfile.coverage_item is actually taught.
+- Copy every major coverage_id and label exactly. Every one must first_taught_unit <= 15.
+- A ledger row is invalid if the named idea never appears in learner-visible core_content/visual representation.
+- Preserve named lists: if P1 gives N material categories/stages/metrics, do not collapse them into "several types". Teach the members, even if concisely.
+- Preserve equations/metrics and their meaning/conditions when P1 contains them. Never replace a measurable source mechanism with generic prose.
+- Preserve source-significant examples when they are the only concrete explanation of a mechanism.
+- Compression may shorten wording and group related items; it may NEVER erase a major idea.
+
+CIMT × LEARN-BY-DOING CLASSROOM CHOREOGRAPHY
+Use CIMT as the intellectual spine (Concept → Implementation → Measurement → Trend) and a hands-on, step-by-step learning rhythm inspired by modern project-based technical instruction:
+WHY/PROBLEM → EXPLAIN VISUALLY → WORKED/TRACEABLE EXAMPLE → LEARNER TRIES → CHECK/MEASURE → BREAK/CHALLENGE → TRANSFER/DECIDE.
+This is NOT permission to add outside technical facts. The "build/try/challenge" must operate on P1 mechanisms or clearly labeled pedagogy.
+
+DENSITY WITHOUT CLUTTER
+- Units 6–15 are the technical teaching core. Unless the source is genuinely sparse, each should expose 2–5 meaningful source-grounded propositions, steps, variables, alternatives, or relationships.
+- Avoid both extremes: no dashboard walls of tiny cards, and no nearly empty slide containing only one generic sentence.
+- One dominant visual idea per Unit, but enough annotations to teach the mechanism from the back of a classroom.
+- Prefer process diagrams, annotated source figures, traces, equations, comparison matrices, causal chains, worked examples, architecture maps, timelines, or decision tables over generic boxes.
+- Every technical Unit has an explicit learner action: predict, trace, calculate, classify, compare, debug, critique, redesign, measure, or defend.
+- Every technical Unit ends with a short CHECK: what should the learner now be able to explain/show/measure?
+
+READINESS AS EVIDENCE, NOT DECORATION
+- Readiness must be visible only where a learner artifact actually demonstrates the selected SLO.
+- For each evidence_unit, the Unit's evidence/student_action must name the artifact or observable performance.
+- Unit 19 summarizes "what you can prove" and indexes only the readiness claims supported by those artifacts.
+- If readiness cannot be fully demonstrated, reduce or remove the mapping. Never use a generic "ETEC readiness" badge as evidence.
+"""
+
+AUDIT_PROMPT += r"""
+
+CHAPTER-COMPLETENESS AUDIT
+Fail source fidelity if any major coverage_id is merely listed in metadata but not actually taught in learner-visible core/representation.
+Fail source fidelity if a named source list, equation/metric, process stage, architecture element, or source-significant example is materially collapsed or omitted.
+Fail cumulative fidelity when Units 6–15 are mostly sparse generic prose rather than source-native technical teaching.
+Fail engineering rigor when learner actions are decorative ("discuss") instead of asking the learner to predict/trace/apply/measure/critique/decide using the mechanism.
+Fail readiness when the mapping is visible without an evidence-producing learner artifact.
+"""
+
+REPAIR_PROMPT += r"""
+
+CHAPTER-COMPLETENESS REPAIR
+Before polishing prose, repair omissions first: restore every missing major coverage item, named list member, metric/equation, process stage, architecture element, or source-significant worked example.
+Then repair teaching rhythm: enrich sparse technical Units with source-native explanation + visual relation + learner try + check, without adding outside technical facts.
+"""

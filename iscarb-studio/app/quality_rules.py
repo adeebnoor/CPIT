@@ -159,3 +159,29 @@ When repairing:
 - reduce ETEC alignment to the minimum fully evidenced set;
 - never introduce new technical content merely to make a gate pass.
 """
+
+QUALITY_ADDENDUM += r"""
+
+L) CHAPTER COMPLETENESS IS STRONGER THAN TOPIC-FAMILY COVERAGE
+A lecture can mention every broad topic family and still be incomplete. Release requires atomic coverage of every major P1 section/mechanism/metric/list/trade-off recorded in SourceProfile.coverage_items. Metadata-only coverage does not count: the idea must be visible in core_content or its source-native representation by Unit 15.
+
+M) CIMT × LEARN-BY-DOING DELIVERY
+The learner-facing sequence should feel like a taught engineering session rather than a generated dashboard: WHY → CONCEPT → MECHANISM/EXAMPLE → TRY → CHECK/MEASURE → CHALLENGE → TRANSFER/DECIDE. Units 6–15 need enough source-grounded substance to teach from, while keeping one dominant visual job and readable typography.
+
+N) READINESS EVIDENCE TRAIL
+A readiness claim must point to an evidence-producing Unit and artifact. Unit 19 may summarize proven readiness; it must not turn an unverified mapping into an attainment claim.
+"""
+
+AUDIT_ADDENDUM += r"""
+- any major P1 coverage item exists only in the ledger but is not actually taught in learner-visible content;
+- a named list, equation/metric, process stage, architecture element, or source-significant example is materially omitted;
+- Units 6–15 are systematically sparse or generic despite a content-rich P1;
+- readiness appears as a label without an evidence-producing learner action/artifact.
+"""
+
+REPAIR_ADDENDUM += r"""
+- restore atomic chapter coverage before visual polishing;
+- expand sparse technical Units using P1-only mechanisms, examples, lists, equations and relationships;
+- use a learn-by-doing rhythm with an explicit learner try/check rather than passive generic discussion;
+- attach readiness only to the exact artifact-producing Units that justify it.
+"""
