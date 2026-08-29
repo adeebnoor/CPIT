@@ -20,6 +20,7 @@ from .cimt_native_v43 import (
     export_cimt_presenter_pdf_v43,
     render_cimt_presenter_preview_v43,
 )
+from .cimt_presenter_copy_v431 import install_presenter_copy_v431
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
 
 engine = prev.engine
@@ -33,6 +34,10 @@ CIMT_REFERENCE_ARCHIVE = "https://adeebnoor.github.io/CPIT/cimt.html"
 # the tested v4.2 path. Gate v14 adds provenance/presenter safety sentinels.
 engine.deterministic_gate = gate_v14
 
+# Keep the detailed Blueprint intact for audit/export, but let the learner deck
+# prefer concise source-safe visual annotations over verbose metadata prose.
+install_presenter_copy_v431()
+
 
 def _health_v430():
     data = prev._health_v420()
@@ -42,7 +47,8 @@ def _health_v430():
         "deterministic_gate": "v14-provenance-presenter-on-v13",
         "presenter_renderer": "cimt-native-v4.3-preview-pptx-pdf",
         "presenter_visual_contract": "white canvas + green serif hierarchy + gold corner rules + selective red emphasis + large source visuals + readable diagrams",
-        "presenter_text_contract": "semantic shortening without visible ellipsis",
+        "presenter_text_contract": "semantic shortening without visible ellipsis + curated source-safe visual annotations",
+        "presenter_copy_source": "visual_plan.annotation_plan with provenance-safe fallback",
         "source_visual_contract": "information-bearing P1 visuals occupy the main teaching canvas; low-information title slides redraw locally",
         "cimt_reference_archive": CIMT_REFERENCE_ARCHIVE,
         "cross_discipline_visual_residue_guard": True,
