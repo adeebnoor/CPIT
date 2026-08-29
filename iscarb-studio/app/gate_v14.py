@@ -22,6 +22,35 @@ _RESERVED_SCAFFOLD_TERMS = (
     "capability rubric",
 )
 
+_FRAMEWORK_FIRST_TITLE_TERMS = (
+    "saudi context:",
+    "trend & future:",
+    "trend and future:",
+    "practitioner wellbeing:",
+    "practitioner well-being:",
+    "critical ai literacy",
+    "iscarb capability rubric",
+    "bounded assurance case",
+)
+
+
+def _unsourced_numeric_precision(bp: Blueprint, source_text: str) -> list[str]:
+    """Return learner-authored numeric claims that are not traceable to source text.
+
+    Years and unit/page numbers are ignored; the dangerous failure mode here is invented
+    percentages/thresholds/multipliers presented as engineering facts.
+    """
+    source = (source_text or "").lower()
+    authored = []
+    for u in bp.units:
+        blob = " ".join([u.engineering_question, *u.pedagogy_content, *u.enrichment_content, *u.scenario_assumptions, u.student_action, u.takeaway])
+        for token in re.findall(r"(?<!\w)(\d+(?:\.\d+)?)\s*(%|percent|x\b)", blob, flags=re.I):
+            value, suffix = token
+            forms = {f"{value}%", f"{value} %", f"{value} percent", f"{value}x"}
+            if not any(form.lower() in source for form in forms):
+                authored.append(f"{value}{suffix}")
+    return authored
+
 
 def _core_blob(bp: Blueprint, unit_numbers: tuple[int, ...]) -> str:
     return " ".join(
@@ -76,6 +105,17 @@ def deterministic_gate(
             "record / asset protection",
         )
         checks["v14_no_legacy_security_template_residue"] = not any(x in learner for x in legacy)
+
+    # Learner-facing titles should teach the source topic, not expose internal ISCARB
+    # scaffold labels as the dominant classroom headline.
+    titles = [u.title.strip().lower() for u in bp.units]
+    checks["v14_source_first_learner_titles"] = not any(
+        any(term in title for term in _FRAMEWORK_FIRST_TITLE_TERMS) for title in titles
+    )
+
+    # Synthetic activities may use qualitative assumptions, but invented quantitative
+    # thresholds must never look like source facts.
+    checks["v14_no_unsourced_numeric_precision"] = not _unsourced_numeric_precision(bp, source_text)
 
     checks["v14_exactly_20_presenter_jobs"] = len(bp.units) == 20
     checks["v14_exactly_90_live_minutes"] = sum(u.planned_minutes for u in bp.units) == 90
