@@ -27,9 +27,10 @@ app = prev.app
 
 PUBLIC_VERSION = "4.3.0"
 PIPELINE_ID = "faculty-studio-v4.3.0-cimt-native-presenter-gate-v14"
+CIMT_REFERENCE_ARCHIVE = "https://adeebnoor.github.io/CPIT/cimt.html"
 
 # Generation, source lock, normalization, semantic audit and timebox stay on
-# the tested v4.2 path.  Gate v14 adds provenance/presenter safety sentinels.
+# the tested v4.2 path. Gate v14 adds provenance/presenter safety sentinels.
 engine.deterministic_gate = gate_v14
 
 
@@ -40,9 +41,10 @@ def _health_v430():
         "pipeline": PIPELINE_ID,
         "deterministic_gate": "v14-provenance-presenter-on-v13",
         "presenter_renderer": "cimt-native-v4.3-preview-pptx-pdf",
-        "presenter_visual_contract": "white canvas + green serif hierarchy + gold rules + large source visuals + readable diagrams",
+        "presenter_visual_contract": "white canvas + green serif hierarchy + gold corner rules + selective red emphasis + large source visuals + readable diagrams",
         "presenter_text_contract": "semantic shortening without visible ellipsis",
         "source_visual_contract": "information-bearing P1 visuals occupy the main teaching canvas; low-information title slides redraw locally",
+        "cimt_reference_archive": CIMT_REFERENCE_ARCHIVE,
         "cross_discipline_visual_residue_guard": True,
         "presenter_exact_units": 20,
         "session_minutes": 90,
@@ -53,7 +55,7 @@ def _health_v430():
 
 engine.health = _health_v430
 
-# Replace public routes that carry visual output/version semantics.  All tested
+# Replace public routes that carry visual output/version semantics. All tested
 # compile/job/local-repair/starter-kit routes remain mounted from v4.2.
 app.router.routes[:] = [
     route for route in app.router.routes
@@ -72,14 +74,19 @@ def faculty_studio_v430():
     body = body.replace("v4.1.0", "v4.3.0").replace("v4.2.0", "v4.3.0")
     identity_css = '<link rel="stylesheet" href="/static/kau_identity_v410.css?v=4.3.0-kau">'
     native_css = '''<style id="cimt-native-v43-ui">
-      .cimtNativeFlag{position:fixed;right:18px;bottom:18px;z-index:40;background:#fff;color:#055934;border:1px solid #86c242;border-radius:999px;padding:7px 11px;font:800 10px/1.2 Arial,sans-serif;box-shadow:0 8px 24px #0a353e18}
+      .cimtNativeFlag{position:fixed;right:18px;bottom:18px;z-index:40;background:#fff;color:#055934;border:1px solid #86c242;border-radius:999px;padding:7px 11px;font:800 10px/1.2 Arial,sans-serif;box-shadow:0 8px 24px #0a353e18;text-decoration:none}
+      .cimtNativeFlag:hover{transform:translateY(-1px);box-shadow:0 11px 28px #0a353e22}
     </style>'''
     identity_note = (
         '<div class="kauIdentityNote"><b>Visual identity:</b> Faculty Studio interface follows the selected Saudi academic palette. '
         'Learner-facing Presenter output uses the archived CIMT lecture visual grammar. ISCARB remains the project identity; '
         'this interface does not by itself constitute an official institutional endorsement.</div>'
     )
-    native_flag = '<div class="cimtNativeFlag">CIMT-native Presenter · v4.3</div>'
+    native_flag = (
+        f'<a class="cimtNativeFlag" href="{CIMT_REFERENCE_ARCHIVE}" target="_blank" rel="noopener noreferrer" '
+        'title="Open the original CPIT-455 CIMT lecture archive used as the visual reference">'
+        'CIMT archive ↗ · Presenter v4.3</a>'
+    )
     body = body.replace("</head>", identity_css + native_css + "\n</head>")
     body = body.replace("</body>", identity_note + native_flag + "\n</body>")
     return HTMLResponse(body, headers={
