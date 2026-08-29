@@ -1,0 +1,143 @@
+name: One-shot Live Chapter 2 Acceptance Test
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/one-shot-slideshare-ch2-live-test.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  live-ch2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASE_URL: https://iscarb-lecture-studio.onrender.com
+      SOURCE_URL: https://www.slideshare.net/slideshow/ian-sommerville-software-engineering-tenth-edition-pearson-education-limited-2016/287925972
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install QA dependencies
+        run: python -m pip install requests pypdf python-pptx
+      - name: Compile exact Chapter 2 source on live production
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, re, time, requests
+          base=os.environ['BASE_URL'].rstrip('/'); source=os.environ['SOURCE_URL']
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch2-live-acceptance/2026-08-30'})
+          health=None
+          for attempt in range(15):
+              try:
+                  r=s.get(base+'/api/health',timeout=60); r.raise_for_status(); health=r.json(); break
+              except Exception as e:
+                  print('HEALTH RETRY',attempt+1,repr(e),flush=True); time.sleep(10)
+          assert health, 'Render health endpoint unavailable'
+          print('HEALTH',json.dumps(health,ensure_ascii=False),flush=True)
+          r=s.post(base+'/api/compile',data={
+              'primary_url':source,
+              'supporting_urls':'',
+              'lecture_focus':'Preserve the complete Chapter 2 Software Processes technical scope and original teaching logic. Cover every major P1 checkpoint by Unit 15. Use source-first CIMT-native technical visuals. Keep readiness evidence attached to authentic student actions. Do not replace source topics with framework labels and do not invent numeric precision.',
+              'model':'auto',
+              'repair_rounds':'1',
+          },timeout=180)
+          print('COMPILE',r.status_code,r.text[:1200],flush=True); r.raise_for_status()
+          jid=r.json()['job_id']; pathlib.Path('/tmp/job_id.txt').write_text(jid)
+          deadline=time.time()+2100; job=None
+          while time.time()<deadline:
+              jr=s.get(base+'/api/jobs/'+jid,timeout=60); jr.raise_for_status(); job=jr.json()
+              print('STATE',job.get('status'),job.get('progress'),(job.get('message') or '')[:400],flush=True)
+              if job.get('status') in {'ready','blocked','error'}: break
+              time.sleep(8)
+          assert job and job.get('blueprint'), json.dumps(job,ensure_ascii=False)[:6000]
+          bp=job['blueprint']; profile=job.get('source_profile') or {}; checks=job.get('deterministic_checks') or {}
+          assert job.get('status') in {'ready','blocked'}, job.get('status')
+          assert bp.get('session_minutes')==90
+          assert len(bp.get('units') or [])==20
+          assert [u.get('number') for u in bp['units']]==list(range(1,21))
+          assert len(bp.get('clos') or [])==5
+          assert bp.get('source_manifest')
+
+          majors=[x for x in profile.get('coverage_items',[]) if str(x.get('importance','')).lower()=='major']
+          ledger={x.get('coverage_id'):x for x in (bp.get('coverage_ledger') or []) if x.get('coverage_id')}
+          missing=[x.get('id') for x in majors if x.get('id') not in ledger]
+          late=[x.get('id') for x in majors if x.get('id') in ledger and int(ledger[x.get('id')].get('first_taught_unit') or 99)>15]
+
+          profile_blob=json.dumps(profile,ensure_ascii=False).lower()
+          rec_contamination=('recommended presentation' in profile_blob or 'recommendation card' in profile_blob)
+          source_slides=[]
+          for row in profile.get('coverage_items',[]):
+              for m in re.finditer(r'\bslides?\s+(\d+)',str(row.get('source_anchor') or ''),flags=re.I): source_slides.append(int(m.group(1)))
+          out_of_deck=[n for n in source_slides if n>58]
+          assert not rec_contamination, 'SlideShare Recommended content contaminated P1 profile'
+          assert not out_of_deck, ('P1 anchors beyond real 58-slide deck',out_of_deck)
+          assert not missing, ('missing major P1 checkpoints',missing)
+          assert not late, ('major P1 first taught after Unit 15',late)
+
+          learner=' '.join(str(u.get('title') or '')+' '+' '.join(map(str,u.get('core_content') or []))+' '+str(u.get('student_action') or '')+' '+str(u.get('evidence') or '')+' '+str(u.get('pedagogy_content') or '') for u in bp['units']).lower()
+          signatures={'waterfall':'waterfall','incremental development':'incremental','integration/configuration':'integration','requirements engineering':'requirements','design/implementation':'design','validation/testing':'validation','software evolution':'evolution','prototyping':'prototyp','incremental delivery':'delivery','process improvement':'process improvement','measurement/metrics':'measure','maturity model':'matur'}
+          absent=[k for k,v in signatures.items() if v not in learner]
+          assert not absent, ('missing chapter technical signatures',absent)
+
+          readiness=bp.get('readiness_alignment') or []
+          readiness_detail=[]
+          bad_readiness=[]
+          unit_map={u.get('number'):u for u in bp['units']}
+          for row in readiness:
+              eus=row.get('evidence_units') or []
+              valid=[n for n in eus if n in unit_map and (unit_map[n].get('student_action') or unit_map[n].get('evidence'))]
+              atomic=str(row.get('atomicity_evidence') or '').strip()
+              generic=('minimum-sufficient alignment retained only after official' in atomic.lower())
+              readiness_detail.append({'sku':row.get('sku'),'slo':row.get('slo'),'klo':row.get('klo'),'evidence_units':eus,'valid_evidence_units':valid,'atomicity_evidence':atomic,'generic_atomicity':generic})
+              if not eus or len(valid)!=len(eus) or generic: bad_readiness.append(str(row.get('slo') or row.get('sku')))
+
+          fake_precision=[]
+          for u in bp['units']:
+              blob=' '.join([str(u.get('title') or ''),str(u.get('engineering_question') or ''),str(u.get('student_action') or ''),str(u.get('evidence') or ''),' '.join(map(str,u.get('pedagogy_content') or []))])
+              if re.search(r'\b\d+(?:\.\d+)?\s*%',blob): fake_precision.append({'unit':u.get('number'),'text':blob[:260]})
+
+          summary={'health':health,'job_id':jid,'status':job.get('status'),'message':job.get('message'),'title':bp.get('lecture_title'),'units':20,'minutes':90,'clos':5,'major_p1_checkpoints':len(majors),'missing_major':missing,'late_major':late,'source_slide_anchors':sorted(set(source_slides)),'out_of_deck_anchors':out_of_deck,'recommended_contamination':rec_contamination,'absent_technical_signatures':absent,'readiness_count':len(readiness),'readiness_detail':readiness_detail,'bad_readiness':bad_readiness,'fake_precision':fake_precision,'deterministic_failed':[k for k,v in checks.items() if v is False]}
+          pathlib.Path('/tmp/acceptance-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          pathlib.Path('/tmp/job.json').write_text(json.dumps(job,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('CORE ACCEPTANCE',json.dumps(summary,ensure_ascii=False,indent=2),flush=True)
+          PY
+      - name: Download and validate all learner outputs
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, re, zipfile, requests
+          from pypdf import PdfReader
+          from pptx import Presentation
+          from pptx.enum.shapes import MSO_SHAPE_TYPE
+          base=os.environ['BASE_URL'].rstrip('/'); jid=pathlib.Path('/tmp/job_id.txt').read_text().strip()
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch2-live-acceptance/2026-08-30'})
+          out=pathlib.Path('/tmp/ch2-acceptance'); out.mkdir(exist_ok=True)
+          endpoints={'presenter.html':f'/api/jobs/{jid}/presenter','presenter.pptx':f'/api/jobs/{jid}/export/pptx','presenter.pdf':f'/api/jobs/{jid}/export/presenter-pdf','reading-pack.pdf':f'/api/jobs/{jid}/export/pdf','instructor-guide.docx':f'/api/jobs/{jid}/export/docx','student-pack.docx':f'/api/jobs/{jid}/export/student','blueprint.json':f'/api/jobs/{jid}/export/json'}
+          sizes={}
+          for name,path in endpoints.items():
+              r=s.get(base+path,timeout=240); print(name,r.status_code,len(r.content),r.headers.get('content-type')); r.raise_for_status(); assert len(r.content)>500; (out/name).write_bytes(r.content); sizes[name]=len(r.content)
+          prs=Presentation(out/'presenter.pptx'); assert len(prs.slides)==20
+          ppt_text=[' '.join(sh.text for sh in sl.shapes if hasattr(sh,'text_frame')).strip() for sl in prs.slides]
+          pics=[sum(1 for sh in sl.shapes if sh.shape_type==MSO_SHAPE_TYPE.PICTURE) for sl in prs.slides]
+          slide_chars=[len(x) for x in ppt_text]
+          assert min(slide_chars)>20, ('near-empty PPT slide',slide_chars)
+          pp=PdfReader(str(out/'presenter.pdf')); assert len(pp.pages)==20
+          pdf_text=[(p.extract_text() or '').strip() for p in pp.pages]
+          page_chars=[len(x) for x in pdf_text]
+          assert min(page_chars)>20, ('near-empty PDF page',page_chars)
+          all_text='\n'.join(pdf_text).lower()
+          learner_readiness_terms={t:all_text.count(t.lower()) for t in ['readiness','etec','sku','slo','klo','ai may assist','human sign-off','peer critique','falsification']}
+          fake_pdf=[i+1 for i,t in enumerate(pdf_text) if re.search(r'\b\d+(?:\.\d+)?\s*%',t)]
+          for name in ('instructor-guide.docx','student-pack.docx'):
+              with zipfile.ZipFile(out/name) as z: assert 'word/document.xml' in z.namelist()
+          summary=json.loads(pathlib.Path('/tmp/acceptance-summary.json').read_text())
+          summary.update({'presenter_slides':20,'presenter_pdf_pages':20,'ppt_picture_shapes_by_slide':pics,'ppt_picture_shapes_total':sum(pics),'ppt_slide_text_chars':slide_chars,'pdf_page_text_chars':page_chars,'learner_readiness_terms':learner_readiness_terms,'pdf_pages_with_percentages':fake_pdf,'export_sizes':sizes,'all_seven_outputs_valid':True})
+          (out/'acceptance-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          (out/'job.json').write_bytes(pathlib.Path('/tmp/job.json').read_bytes())
+          print('OUTPUT ACCEPTANCE',json.dumps(summary,ensure_ascii=False,indent=2),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: slideshare-ch2-live-acceptance
+          path: /tmp/ch2-acceptance/*
+          if-no-files-found: error
