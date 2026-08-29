@@ -1,0 +1,1 @@
+Decision: completeness takes precedence over preserving a partially repaired semantic draft when Gemini quota is unavailable. If the semantic draft is already source-complete it is preserved; otherwise the system falls back to the deterministic source-bounded draft and explicitly blocks release.
