@@ -1,0 +1,27 @@
+name: Export CIMT Validation Snapshot
+
+on:
+  push:
+    branches: ["fix/cimt-source-first-20260829"]
+    paths:
+      - '.github/workflows/export-cimt-validation-snapshot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/cimt-source-first-20260829
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cimt-validation-snapshot
+          path: |
+            iscarb-studio
+            lectures/cimt
+            render.yaml
+          if-no-files-found: error
