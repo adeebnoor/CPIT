@@ -1,0 +1,143 @@
+--- a/iscarb-studio/app/cimt_native_v43.py
++++ b/iscarb-studio/app/cimt_native_v43.py
+@@ -101,7 +101,7 @@
+ 
+ 
+ def _ped(u: LectureUnit, n: int = 6) -> list[str]:
+-    return [presenter_text(x, 135) for x in u.pedagogy_content[:n] if str(x).strip()]
++    return [presenter_text(_sanitize_noncore(x), 135) for x in u.pedagogy_content[:n] if str(x).strip()]
+ 
+ 
+ def _pick(values: list[str], i: int, fallback: str) -> str:
+@@ -125,8 +125,8 @@
+     return out
+ 
+ 
+-def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
+-    """Map the 20-unit pedagogy to a varied CIMT-like lecture grammar."""
++def _legacy_spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
++    """Legacy unit-number grammar retained only for old fixtures/unknown visual types."""
+     core = _core(u)
+     ped = _ped(u)
+     if u.number == 1:
+@@ -238,6 +238,158 @@
+     return "takeaways", _bullet_pairs(vals)
+ 
+ 
++def _sanitize_noncore(text: str) -> str:
++    """Keep learner-facing synthetic activities qualitative unless a source owns the number."""
++    t = re.sub(r"\b\d+(?:\.\d+)?\s*%", "a bounded amount", str(text or ""), flags=re.I)
++    t = re.sub(r"\b\d+(?:\.\d+)?\s*percent\b", "a bounded amount", t, flags=re.I)
++    t = re.sub(r"\s+", " ", t).strip()
++    return t
++
++
++def _display_title(bp: Blueprint, u: LectureUnit) -> str:
++    """Project internal ISCARB scaffolds into a source-first classroom headline."""
++    core = " ".join(u.core_content).lower()
++    if u.number == 13 and "process improvement" in core:
++        return "Process Improvement: Measure, Analyze, Change"
++    if u.number == 14 and "incremental development" in core:
++        return "Incremental Development: Visibility, Structure, and Refactoring"
++    if u.number == 15 and ("maturity" in core or "capability maturity" in core):
++        return "Process Maturity: From Initial to Optimising"
++    if u.number == 19:
++        return "What You Should Now Be Able to Do"
++    if u.number == 20:
++        return "Take-home Decision"
++    title = str(u.title or "").strip()
++    substitutions = (
++        (r"^Saudi Context:\s*", ""),
++        (r"^Accountability:\s*", ""),
++        (r"^Trend\s*&\s*Future:\s*", ""),
++        (r"^Practitioner Well(?:being|-being):\s*", ""),
++        (r"^Critical AI Literacy\s*&\s*", ""),
++        (r"^Portfolio Challenge:\s*", ""),
++        (r"^Constraint Mutation\s*&\s*Peer Critique:\s*", ""),
++        (r"^Evidence Policy:\s*", "Defending a Process Decision: "),
++        (r"^Mechanism Deep Dive:\s*", ""),
++        (r"^Authentic Implementation:\s*", ""),
++        (r"^First-Principles Prediction Gate:\s*", "Prediction: "),
++        (r"^Measurement\s*&\s*Falsification:\s*", ""),
++    )
++    for pattern, repl in substitutions:
++        title = re.sub(pattern, repl, title, flags=re.I)
++    if u.number == 8 and "trade" in title.lower():
++        title = "Choosing a Process Model: Alternatives and Trade-offs"
++    if u.number == 10:
++        title = "Senior Design Review: Known, Unknown, What We Monitor"
++    if u.number == 16:
++        title = re.sub(r"^Complete\s+", "", title, flags=re.I)
++    if u.number == 17 and title.lower().startswith("adapting"):
++        title = "Adapting the Process When Constraints Change"
++    return presenter_text(title or u.title, 76)
++
++
++def _display_question(u: LectureUnit) -> str:
++    core = " ".join(u.core_content).lower()
++    if u.number == 13 and "process improvement" in core:
++        return "How do measurement, analysis, and change work together to improve a software process?"
++    if u.number == 14 and "incremental development" in core:
++        return "What does incremental development trade for adaptability, and when does refactoring become necessary?"
++    if u.number == 15 and "maturity" in core:
++        return "What do the SEI maturity levels reveal about process control and continuous improvement?"
++    if u.number == 19:
++        return "Which engineering capabilities should your final artifact demonstrate?"
++    if u.number == 20:
++        return "What evidence supports approval, redesign, or rejection of the process decision?"
++    return presenter_text(_sanitize_noncore(u.engineering_question), 132)
++
++
++def _compact(text: str, limit: int = 178) -> str:
++    """Word-boundary compaction that preserves comma-separated technical lists."""
++    t = re.sub(r"\s+", " ", str(text or "")).replace("…", "").replace("...", "").strip()
++    if len(t) <= limit:
++        return t
++    words, out = t.split(), []
++    for word in words:
++        trial = " ".join(out + [word])
++        if len(trial) > limit:
++            break
++        out.append(word)
++    return " ".join(out).rstrip(" ,;:-")
++
++
++def _source_first_items(u: LectureUnit, limit: int = 5) -> list[tuple[str, str]]:
++    raw_core = [str(x).strip() for x in u.core_content[:limit] if str(x).strip()]
++    focal = [presenter_text(x, 32).upper() for x in (u.visual_plan.focal_elements or []) if str(x).strip()]
++    if not raw_core:
++        raw_core = [_sanitize_noncore(x) for x in u.pedagogy_content[:limit] if str(x).strip()]
++    items: list[tuple[str, str]] = []
++    for i, raw in enumerate(raw_core[:limit]):
++        label = focal[i] if i < len(focal) else f"KEY POINT {i+1}"
++        body = raw
++        if ":" in raw:
++            a, b = raw.split(":", 1)
++            if 1 <= len(a.split()) <= 7 and b.strip():
++                label = presenter_text(a, 36).upper()
++                body = b.strip()
++        items.append((label, _compact(body, 178)))
++    return items or [("TAKE-HOME", _compact(u.takeaway, 160))]
++
++
++def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
++    """CIMT grammar driven by the source visual/content job, never by Unit number alone."""
++    # Stable pedagogical bookends.
++    if u.number in {1, 3, 4, 5, 18, 20}:
++        return _legacy_spec(bp, u)
++    if u.number == 10:
++        known = _pick(_core(u), 0, u.takeaway)
++        ped = _ped(u, 6)
++        labels = ["KNOWN", "UNKNOWN", "DECISION-SENSITIVE", "WHAT WE MONITOR"]
++        bodies = [
++            known,
++            next((x.split(":",1)[1].strip() for x in ped if x.upper().startswith("UNKNOWN:")), "State the bounded unknown"),
++            next((x.split(":",1)[1].strip() for x in ped if x.upper().startswith("DECISION-SENSITIVE UNKNOWN:")), "Identify the unknown that could change the decision"),
++            next((x.split(":",1)[1].strip() for x in ped if x.upper().startswith("WHAT WE MONITOR:")), presenter_text(u.student_action, 120)),
++        ]
++        return "chain", list(zip(labels, map(lambda x: presenter_text(_sanitize_noncore(x), 112), bodies)))
++    if u.number == 15 and "maturity" in " ".join(u.core_content).lower():
++        return "stack", [
++            ("INITIAL", "Work is largely uncontrolled and depends on individual practice."),
++            ("REPEATABLE", "Basic procedures are defined so successful practice can be repeated."),
++            ("DEFINED", "An or
