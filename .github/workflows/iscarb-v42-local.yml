@@ -82,7 +82,7 @@ jobs:
           bp=normalize_cimt_sanity_v42(bp)
           assert bounded_language_ok(bp)
 
-          preview=faculty_visual.render_presenter_preview(bp,'READY')
+          preview=faculty_visual.render_faculty_presenter_preview(bp,'READY')
           up=preview.upper()
           assert 'DEPENDABLE SYSTEMS' in up
           assert 'SECURITY ENGINEERING' not in up
