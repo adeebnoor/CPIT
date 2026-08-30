@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+import shutil
+import time
 from pathlib import Path
 from threading import Lock
 
@@ -9,9 +12,15 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 JOBS = DATA / "jobs"
 UPLOADS = DATA / "uploads"
+EXPORTS = DATA / "exports"
 JOBS.mkdir(parents=True, exist_ok=True)
 UPLOADS.mkdir(parents=True, exist_ok=True)
 _LOCK = Lock()
+
+# Faculty download their outputs in the same working session. Keeping raw
+# uploads and rendered exports forever is what eventually fills the container
+# disk and takes the whole service down for everyone.
+RETENTION_HOURS = int(os.getenv("ISCARB_RETENTION_HOURS", "48"))
 
 
 def save_job(job: JobState) -> None:
@@ -32,3 +41,30 @@ def load_job(job_id: str) -> JobState:
 def upload_path(job_id: str, original_name: str) -> Path:
     safe = "".join(c for c in Path(original_name).name if c.isalnum() or c in "._- ") or "lecture"
     return UPLOADS / f"{job_id}__{safe}"
+
+
+def prune_expired(now: float | None = None) -> int:
+    """Delete job records, uploads and exports older than the retention window.
+
+    Returns the number of filesystem entries removed. Never raises: a failed
+    prune must not take down a compile request.
+    """
+    if RETENTION_HOURS <= 0:
+        return 0
+    cutoff = (now if now is not None else time.time()) - RETENTION_HOURS * 3600
+    removed = 0
+    for directory in (JOBS, UPLOADS, EXPORTS):
+        if not directory.exists():
+            continue
+        for entry in directory.iterdir():
+            try:
+                if entry.stat().st_mtime >= cutoff:
+                    continue
+                if entry.is_dir():
+                    shutil.rmtree(entry, ignore_errors=True)
+                else:
+                    entry.unlink(missing_ok=True)
+                removed += 1
+            except OSError:
+                continue
+    return removed

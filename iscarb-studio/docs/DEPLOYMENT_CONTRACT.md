@@ -13,3 +13,38 @@ Release sequence:
 5. A production release is accepted only when health reports v4.3.0 and the live multi-lecture validation passes.
 
 This separation prevents a circular dependency in which production checks wait for Render while Render waits for those same checks.
+
+## Runtime safety limits
+
+The service accepts uploads from anyone who can reach it, so the container
+protects itself rather than trusting the caller:
+
+| Limit | Default | Override |
+|---|---|---|
+| Maximum bytes per uploaded source | 25 MB | `ISCARB_MAX_UPLOAD_MB` |
+| Retention for jobs, uploads and exports | 48 h | `ISCARB_RETENTION_HOURS` (`0` disables) |
+| Concurrent compile workers | 2 | `ISCARB_WORKERS` |
+| Supporting sources per lecture | 7 | — |
+
+Uploads stream to disk against the ceiling and a rejected source is deleted, so
+one oversized request cannot exhaust the disk shared by every faculty job.
+Expired artifacts are pruned at startup and after each compile.
+
+Every response carries `X-Content-Type-Options: nosniff`,
+`Referrer-Policy: strict-origin-when-cross-origin`,
+`Content-Security-Policy: frame-ancestors 'self'` and `X-Frame-Options: SAMEORIGIN`.
+
+## Composition gotcha
+
+`app/main.py` defines the pipeline routes but is **not** the served application.
+`app/faculty_main.py` builds the served app and copies those route objects into
+it. A copied route brings its handler only — middleware, exception handlers and
+lifespan hooks do not travel with it. Register anything application-wide on the
+served app in `faculty_main.py`, never on `engine.app`.
+
+## Storage is ephemeral
+
+The Render `free` plan provides no persistent disk and idles the container after
+inactivity. Compiled outputs therefore survive the working session, not longer:
+faculty must download their exports before leaving the Studio. Attach a Render
+persistent disk if outputs need to outlive a restart.
