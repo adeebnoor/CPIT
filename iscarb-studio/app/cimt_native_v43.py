@@ -246,6 +246,36 @@ def _sanitize_noncore(text: str) -> str:
     return t
 
 
+def _dedupe_repeated_phrase(title: str) -> str:
+    """Collapse a heading that repeats its own opening phrase.
+
+    Slide headers and deck titles often both survive extraction, producing
+    "Chapter 2 - Software Processes Chapter 2 Software Processes 1". Cutting at
+    the first recurrence of the opening phrase keeps the heading readable
+    whatever source produced the repetition.
+    """
+    words = str(title or "").split()
+    if len(words) < 6:
+        return str(title or "").strip()
+    norm = [re.sub(r"[^a-z0-9]", "", w.lower()) for w in words]
+    for size in range(min(6, len(words) // 2), 1, -1):
+        head = norm[:size]
+        for start in range(size, len(norm) - size + 1):
+            if norm[start:start + size] == head:
+                return " ".join(words[:start]).rstrip(" -–—,;:/")
+    return str(title or "").strip()
+
+
+def _trim_on_word_boundary(text: str, limit: int) -> str:
+    """Never end a classroom heading mid-word."""
+    text = str(text or "").strip()
+    if len(text) <= limit:
+        return text
+    head = text[:limit]
+    cut = head.rfind(" ")
+    return (head[:cut] if cut >= limit * 0.6 else head).rstrip(" -–—,;:/")
+
+
 def _display_title(bp: Blueprint, u: LectureUnit) -> str:
     """Project internal ISCARB scaffolds into a source-first classroom headline."""
     core = " ".join(u.core_content).lower()
@@ -284,7 +314,8 @@ def _display_title(bp: Blueprint, u: LectureUnit) -> str:
         title = re.sub(r"^Complete\s+", "", title, flags=re.I)
     if u.number == 17 and title.lower().startswith("adapting"):
         title = "Adapting the Process When Constraints Change"
-    return presenter_text(title or u.title, 76)
+    title = _dedupe_repeated_phrase(title or str(u.title or ""))
+    return _trim_on_word_boundary(title, 76)
 
 
 def _display_question(u: LectureUnit) -> str:
@@ -319,6 +350,19 @@ def _compact(text: str, limit: int = 178) -> str:
 # A checkpoint label and its scaffolding are separated by either punctuation.
 _ITEM_LABEL_SPLIT = re.compile(r"\s*[:\u2014\u2013]\s+")
 
+# The archived CIMT lectures use these glyphs as a deliberate two-level bullet
+# hierarchy. Finding one mid-sentence therefore does not mean the text is dirty:
+# it means a bulleted list was flattened into one line during extraction. The
+# structure is recoverable, so split it back out instead of deleting the evidence.
+_FLATTENED_BULLET = re.compile(r"[\u25a0\u25aa\u2751\u2752\u274f\u2022\u00b7\u25c6\u25cf\u25b6\uf0b2\uf0a7]+\s*")
+
+
+def _unflatten_bullets(raw: str) -> list[str]:
+    """Recover the separate points from a bullet list flattened into one line."""
+    parts = [x.strip(" ;,·-") for x in _FLATTENED_BULLET.split(str(raw or ""))]
+    parts = [x for x in parts if len(x.split()) >= 3]
+    return parts if len(parts) > 1 else [str(raw or "").strip()]
+
 
 def _split_label(raw: str, fallback: str) -> tuple[str, str]:
     """Use a short leading phrase as the item's heading when the line has one."""
@@ -343,7 +387,10 @@ def _source_first_items(u: LectureUnit, limit: int = 6) -> list[tuple[str, str]]
     focal = [presenter_text(x, 32).upper() for x in (u.visual_plan.focal_elements or []) if str(x).strip()]
     items: list[tuple[str, str]] = []
 
-    for i, raw in enumerate([str(x).strip() for x in u.core_content if str(x).strip()][:limit]):
+    source_lines: list[str] = []
+    for raw in [str(x).strip() for x in u.core_content if str(x).strip()]:
+        source_lines.extend(_unflatten_bullets(raw))
+    for i, raw in enumerate(source_lines[:limit]):
         fallback = focal[i] if i < len(focal) else f"KEY POINT {i + 1}"
         label, body = _split_label(raw, fallback)
         items.append((label, _compact(body, 178)))
