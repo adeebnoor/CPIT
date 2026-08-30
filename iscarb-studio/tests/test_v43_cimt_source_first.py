@@ -21,7 +21,12 @@ class CimtSourceFirstRegressionTests(unittest.TestCase):
         u.visual_plan.focal_elements = ['Discovery', 'Configuration', 'Adaptation']
         kind, items = _spec(bp, u)
         self.assertEqual(kind, 'chain')
-        self.assertEqual([x[0] for x in items], ['INTEGRATION AND CONFIGURATION', 'TYPES OF REUSABLE SOFTWARE', 'KEY PROCESS STAGES'])
+        labels = [x[0] for x in items]
+        # Source content leads the slide, in source order. Scaffolding may follow
+        # it (that is what fills the rest of the slide) but must never displace it.
+        self.assertEqual(labels[:3], ['INTEGRATION AND CONFIGURATION', 'TYPES OF REUSABLE SOFTWARE', 'KEY PROCESS STAGES'])
+        for extra in labels[3:]:
+            self.assertTrue(extra.startswith('ISCARB STEP'), f'unlabelled non-source item: {extra}')
 
     def test_framework_first_titles_are_projected_to_source_first_classroom_titles(self):
         bp = make_blueprint()
