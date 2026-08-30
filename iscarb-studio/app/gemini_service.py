@@ -23,6 +23,24 @@ class GeminiNotConfigured(RuntimeError):
     pass
 
 
+def is_transient_model_failure(exc: Exception) -> bool:
+    """Whether the upstream model, not our own code, is what failed.
+
+    Module-level on purpose: callers must be able to classify a failure without
+    holding a service instance, and without the answer changing when the
+    GeminiService name is rebound.
+    """
+    code = getattr(exc, "code", None)
+    if code in {429, 500, 502, 503, 504}:
+        return True
+    text = str(exc).lower()
+    return any(marker in text for marker in (
+        "429", "500", "502", "503", "504", "unavailable", "high demand",
+        "temporarily overloaded", "temporarily unavailable", "rate limit",
+        "internal server error", "service unavailable",
+    ))
+
+
 class GeminiService:
     """Source-grounded Gemini client with capacity-aware retry and model failover."""
 
@@ -53,15 +71,7 @@ class GeminiService:
     def _is_retryable(exc: Exception) -> bool:
         if GeminiService._is_quota_exhausted(exc):
             return False
-        code = getattr(exc, "code", None)
-        if code in {429, 500, 502, 503, 504}:
-            return True
-        text = str(exc).lower()
-        return any(marker in text for marker in (
-            "429", "500", "502", "503", "504", "unavailable", "high demand",
-            "temporarily overloaded", "temporarily unavailable", "rate limit",
-            "internal server error", "service unavailable",
-        ))
+        return is_transient_model_failure(exc)
 
     @staticmethod
     def _backoff(attempt: int) -> None:
