@@ -48,7 +48,13 @@ class ChapterCompletenessV44Tests(unittest.TestCase):
             self.assertEqual(sum(u.planned_minutes for u in bp.units), 90)
             self.assertTrue(major.issubset(ledger))
             self.assertTrue(all(ledger[x].first_taught_unit <= 15 for x in major))
-            self.assertEqual(bp.readiness_alignment, [])
+            # The draft now publishes a readiness trail instead of nothing, but it
+            # must still never present an approved standardized mapping.
+            self.assertTrue(bp.readiness_alignment, 'faculty need a visible readiness trail')
+            for alignment in bp.readiness_alignment:
+                self.assertEqual(alignment.strength, 'supporting')
+                claimed = ' '.join([*alignment.slo_refs, *alignment.klo_refs, alignment.sku]).upper()
+                self.assertIn('UNVERIFIED', claimed)
             self.assertIn('UNVERIFIED', ' '.join(bp.units[18].pedagogy_content).upper())
 
     def test_quota_during_repair_replaces_incomplete_semantic_draft_with_complete_blocked_draft(self):
@@ -70,7 +76,9 @@ class ChapterCompletenessV44Tests(unittest.TestCase):
         self.assertEqual(_major_coverage_gaps(repaired, profile), ([], []))
         self.assertEqual(len(repaired.units), 20)
         self.assertEqual(sum(u.planned_minutes for u in repaired.units), 90)
-        self.assertEqual(repaired.readiness_alignment, [])
+        for alignment in repaired.readiness_alignment:
+            self.assertEqual(alignment.strength, 'supporting')
+            self.assertIn('UNVERIFIED', ' '.join([*alignment.slo_refs, *alignment.klo_refs]).upper())
         self.assertFalse(audit.overall_pass)
         self.assertIsInstance(checks, dict)
 

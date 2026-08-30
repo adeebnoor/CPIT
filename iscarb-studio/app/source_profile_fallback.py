@@ -23,9 +23,42 @@ _FURNITURE = {
 }
 
 
+# PDF and PPTX bullet furniture that survives text extraction. Left in place it
+# reaches the faculty deck as a literal glyph in a slide heading.
+_BULLET_EDGE = " \t\r\n-|\u2022\u00b7\u25a0\u25aa\u25c6\u25cf\u25b6\u25fc\u25fe\u2023\u2043\u00a7\u2192*_"
+
+# A contact block is authorship metadata, never lecture content. Matching the
+# address itself keeps this rule source-agnostic instead of name-specific.
+_CONTACT_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
+
+
+# "SLIDE 73: ..." is how the SlideShare extractor numbers what it scraped. It is
+# scaffolding, not a lecture heading, and must not survive into a unit title.
+_EXTRACTOR_PREFIX = re.compile(r"^\s*(?:slide|page|frame)\s*\d{1,4}\s*[:.\u2013\u2014-]\s*", re.I)
+_INLINE_BULLET = re.compile(r"[\u2022\u00b7\u25a0\u25aa\u25c6\u25cf\u25b6\u25fc\u25fe\u2023\u2043]+")
+
+
+def _display_label(text: str) -> str:
+    """Strip the extractor's slide coordinate from text a human will read.
+
+    Applied only after the coordinate has been captured into the anchor - the
+    "SLIDE 73:" prefix is how the anchor is derived, so removing it any earlier
+    silently downgrades every anchor to a section ordinal.
+    """
+    return _EXTRACTOR_PREFIX.sub("", str(text or "")).strip(_BULLET_EDGE).lstrip(":;,. ")
+
+
 def _clean(text: str, limit: int = 160) -> str:
-    text = re.sub(r"\s+", " ", str(text or "")).strip(" \t\r\n-|•·")
-    return text[:limit].rstrip(" ,;:-")
+    text = re.sub(r"\s+", " ", str(text or ""))
+    # Bullet glyphs survive extraction mid-string too, not only at the edges.
+    text = _INLINE_BULLET.sub(" ", text)
+    text = re.sub(r"\s+", " ", text).strip(_BULLET_EDGE)
+    if len(text) > limit:
+        # Cut on a word boundary so a heading never ends mid-word.
+        head = text[:limit]
+        cut = head.rfind(" ")
+        text = head[:cut] if cut >= limit * 0.6 else head
+    return text.rstrip(" ,;:-")
 
 
 def _meaningful_lines(text: str) -> list[str]:
@@ -80,6 +113,10 @@ def _is_furniture_line(line: str) -> bool:
     if low in exact:
         return True
     if any(low.startswith(x) for x in ("adeeb noor", "it department", "faculty of computing", "king abdulaziz university", "fall 2025")):
+        return True
+    # An instructor contact block is authorship metadata, not teachable content,
+    # and must never become a lecture title or a slide heading.
+    if _CONTACT_RE.search(low):
         return True
     return False
 
@@ -220,10 +257,13 @@ def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
     stem = Path(primary_name).stem.replace("_", " ").replace("-", " ")
     stem = re.sub(r"\s+", " ", stem).strip()
     # Prefer a plausible first source heading over a machine filename.
-    if chunks:
-        first = _clean(chunks[0][1], 120)
-        if 5 <= len(first) <= 120 and not re.fullmatch(r"[A-Z0-9_. -]+", first):
-            return first
+    for _page, label, _body in chunks[:6]:
+        first = _display_label(_clean(label, 120))
+        if not (5 <= len(first) <= 120):
+            continue
+        if re.fullmatch(r"[A-Z0-9_. -]+", first) or _is_furniture_line(first):
+            continue
+        return first
     return stem or "Primary lecture"
 
 
@@ -245,6 +285,8 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
         clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
         embedded_slide = _embedded_slide_number(clean_label)
         anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else f"[P1] {coordinate} {idx}"
+        # The coordinate now lives in the anchor; the heading must read as prose.
+        clean_label = _display_label(clean_label) or f"Source {coordinate.title()} {idx}"
         key = re.sub(r"[^a-z0-9]+", " ", clean_label.lower()).strip()
         source_lines = _meaningful_lines(excerpt.replace(" · ", "\n"))
         importance = _page_importance(clean_label, source_lines, idx)
@@ -299,6 +341,9 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
 
 
 
+MIN_ANCHORS_FOR_SEMANTIC_BOUNDARY = 3
+
+
 def _semantic_slide_ceiling(profile: SourceProfile) -> int | None:
     # Honor explicit Source Lock bounds when flattened host text contains extra slides.
     candidates: list[int] = []
@@ -313,7 +358,50 @@ def _semantic_slide_ceiling(profile: SourceProfile) -> int | None:
             if start > 1:
                 candidates.append(start - 1)
     valid = [x for x in candidates if 2 <= x <= 500]
+
+    # The semantic profile's own anchors are the authoritative chapter extent.
+    # If the model mapped this chapter's families through slide 58, then slide 59
+    # is outside the chapter no matter what the host page happens to serve after
+    # it - recommendation cards, cross-chapter summaries, unrelated decks. A
+    # warning phrase describing that boundary is a convenience, never the only
+    # way to learn it.
+    anchored: set[int] = set()
+    for row in profile.coverage_items or []:
+        anchored.update(_anchor_slides(row.source_anchor))
+    if len(anchored) >= MIN_ANCHORS_FOR_SEMANTIC_BOUNDARY:
+        valid.append(max(anchored))
+
     return min(valid) if valid else None
+
+
+_STOPWORDS = {
+    "the", "a", "an", "and", "or", "of", "for", "to", "in", "on", "with", "vs",
+    "versus", "its", "their", "how", "what", "why", "is", "are", "be", "using",
+}
+
+
+def _significant_tokens(label: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]+", str(label or "").lower())
+    return {w for w in words if len(w) > 2 and w not in _STOPWORDS}
+
+
+def _restates_semantic_coverage(item_tokens: set[str], semantic_token_sets: list[set[str]]) -> bool:
+    """Whether a raw checkpoint only repeats a family the model already mapped.
+
+    Inside a semantically mapped range the model's own family label is the better
+    teaching heading. Re-adding the raw slide line next to it costs a unit of the
+    90-minute budget and teaches nothing new, which is how a deck ends up with a
+    near-empty slide.
+    """
+    if not item_tokens:
+        return False
+    for tokens in semantic_token_sets:
+        if not tokens:
+            continue
+        shared = len(item_tokens & tokens)
+        if shared and shared / min(len(item_tokens), len(tokens)) >= 0.7:
+            return True
+    return False
 
 
 def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) -> SourceProfile:
@@ -325,21 +413,29 @@ def reconcile_source_profile(ai_profile: SourceProfile, bundle: SourceBundle) ->
         semantic_slides.update(_anchor_slides(row.source_anchor))
 
     semantic_ceiling = _semantic_slide_ceiling(ai_profile)
+    semantic_token_sets = [_significant_tokens(x.label) for x in ai_profile.coverage_items]
+    semantic_span = max(semantic_slides) if semantic_slides else 0
 
     merged = list(ai_profile.coverage_items)
     for item in deterministic.coverage_items:
         if item.importance != "major":
             continue
         item_slides = _anchor_slides(item.source_anchor)
+        # A slide past the chapter's semantic extent is not this chapter's content.
         if semantic_ceiling and item_slides and max(item_slides) > semantic_ceiling:
             continue
         if item_slides and item_slides.issubset(semantic_slides):
             continue
+        # Inside the mapped range, keep only what the model genuinely missed.
+        if item_slides and semantic_span and min(item_slides) <= semantic_span:
+            if _restates_semantic_coverage(_significant_tokens(item.label), semantic_token_sets):
+                continue
         key = re.sub(r"[^a-z0-9]+", " ", item.label.lower()).strip()
         if key and key not in existing:
             merged.append(item)
             existing.add(key)
             semantic_slides.update(item_slides)
+            semantic_token_sets.append(_significant_tokens(item.label))
 
     ai_profile.coverage_items = merged[:80]
     ai_profile.deferred_topics = []

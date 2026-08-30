@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import uuid
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse
 
 from . import main as engine
+from .storage import prune_expired
 from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .visual_output_v36 import export_presenter_pptx, render_presenter_preview, export_presenter_pdf
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
@@ -13,7 +16,35 @@ from .faculty_outputs import export_detailed_pdf, export_instructor_guide, expor
 FACULTY_VERSION = "4.0.1"
 PIPELINE_ID = "faculty-studio-v4.0.1-approved-hero-verified-links"
 
-app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION)
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    """Drop artifacts left by earlier container generations before serving."""
+    try:
+        prune_expired()
+    except Exception:
+        pass
+    yield
+
+
+app = FastAPI(title="ISCARB Faculty Studio", version=FACULTY_VERSION, lifespan=_lifespan)
+
+
+@app.middleware("http")
+async def _baseline_security_headers(request, call_next):
+    """Headers every faculty-facing response carries, Presenter preview included.
+
+    frame-ancestors 'self' keeps the preview embeddable inside the Studio while
+    refusing third-party framing; nosniff stops a faculty upload echoed back in
+    an error from being reinterpreted as active content. Registered here rather
+    than on engine.app because only route objects are copied below.
+    """
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Content-Security-Policy", "frame-ancestors 'self'")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    return response
+
 
 for route in engine.app.router.routes:
     path = getattr(route, "path", None)
