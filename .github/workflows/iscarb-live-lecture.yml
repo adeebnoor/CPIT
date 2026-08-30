@@ -1,0 +1,54 @@
+name: ISCARB Live Lecture
+
+# Compiles one lecture on the live Faculty Studio and uploads the actual deck,
+# so a reviewer can open what production produced instead of reading a summary.
+# Outputs upload even when the deck is BLOCKED - that is the deck worth reading.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: Public lecture URL to compile
+        required: false
+        default: https://www.slideshare.net/slideshow/ian-sommerville-software-engineering-tenth-edition-pearson-education-limited-2016/287925972
+      source_file:
+        description: Repository path of a PDF to upload instead of the URL
+        required: false
+        default: ''
+      lecture_focus:
+        description: Optional faculty emphasis
+        required: false
+        default: ''
+      repair_rounds:
+        description: Semantic repair rounds (0-2)
+        required: false
+        default: '1'
+
+permissions:
+  contents: read
+
+jobs:
+  live-lecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install probe client
+        run: python -m pip install requests pypdf
+      - name: Compile on live production and capture the deck
+        run: |
+          python tools/live_lecture_probe.py \
+            --source-url "${{ inputs.source_url }}" \
+            --source-file "${{ inputs.source_file }}" \
+            --lecture-focus "${{ inputs.lecture_focus }}" \
+            --repair-rounds "${{ inputs.repair_rounds }}" \
+            --out live-lecture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-lecture
+          path: live-lecture
+          if-no-files-found: warn
