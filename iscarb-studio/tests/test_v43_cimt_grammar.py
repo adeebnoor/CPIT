@@ -86,3 +86,48 @@ class CimtReferenceGrammarTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DiagramRoutingTests(unittest.TestCase):
+    """Only four visual types were mapped, so architecture, table, timeline and
+    measurement content all fell through to a unit-number layout. The result was
+    that 41% of every teaching span rendered as the same chain, and the layered
+    stack - the archived CIMT signature - was reachable only from one hardcoded
+    special case."""
+
+    @classmethod
+    def setUpClass(cls):
+        from app.deterministic_blueprint_fallback import build_deterministic_blueprint
+        from app.session_gate import apply_90_minute_timebox
+        from app.source_bundle import SourceBundle, SourceItem
+        from app.source_profile_fallback import build_deterministic_source_profile
+        from app.cimt_native_v43 import _spec
+        import collections
+
+        archive = Path(__file__).resolve().parents[2] / "lectures" / "cimt"
+        cls.mix = collections.Counter()
+        cls.decks = 0
+        for pdf in sorted(archive.glob("*.pdf")):
+            bundle = SourceBundle(
+                items=[SourceItem("primary", "P1", pdf.name, pdf, pdf.name)],
+                lecture_focus="", session_minutes=90,
+            )
+            profile = build_deterministic_source_profile(bundle, "routing regression")
+            blueprint = apply_90_minute_timebox(build_deterministic_blueprint(profile), profile, bundle)
+            cls.decks += 1
+            for unit in blueprint.units[5:15]:
+                cls.mix[_spec(blueprint, unit)[0]] += 1
+
+    def test_no_single_form_dominates_the_teaching_span(self):
+        total = sum(self.mix.values())
+        top, count = self.mix.most_common(1)[0]
+        self.assertLess(count / total, 0.40, f"{top} is {100 * count // total}% of every teaching slide")
+
+    def test_the_teaching_span_uses_several_distinct_forms(self):
+        self.assertGreaterEqual(len(self.mix), 4, f"only {len(self.mix)} forms: {dict(self.mix)}")
+
+    def test_the_layered_stack_is_reachable_from_real_content(self):
+        """It is the archived CIMT signature and was previously drawn twice in
+        eleven decks, only via a hardcoded maturity special case."""
+        self.assertGreaterEqual(self.mix.get("stack", 0), self.decks,
+                                f"stack appears {self.mix.get('stack', 0)} times across {self.decks} decks")
