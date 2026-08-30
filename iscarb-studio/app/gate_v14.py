@@ -96,14 +96,45 @@ def _readiness_has_real_evidence_units(bp: Blueprint) -> bool:
     return True
 
 
+# A slide carrying one sentence in a large box is not a taught minute, whether or
+# not a source image sits beside it. A source visual raises the floor it must
+# clear; it never removes the floor.
+MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL = 18
+MIN_TEACHING_WORDS_WITHOUT_VISUAL = 28
+
+
+def _teaching_payload_words(u) -> int:
+    """Words a learner actually reads: source content plus its scaffolding."""
+    return sum(len(str(x).split()) for x in (*u.core_content, *u.pedagogy_content))
+
+
 def _technical_density_ok(bp: Blueprint, profile: SourceProfile | None) -> bool:
     major_count = len([x for x in (profile.coverage_items if profile else []) if x.importance == "major"])
     if major_count < 6:
         return True
     for u in bp.units[5:15]:
-        words = sum(len(str(x).split()) for x in u.core_content)
+        words = _teaching_payload_words(u)
         source_visual = bool(u.visual_plan and u.visual_plan.source_visual_available)
-        if not source_visual and len(u.core_content) < 2 and words < 28:
+        floor = MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL if source_visual else MIN_TEACHING_WORDS_WITHOUT_VISUAL
+        if words < floor:
+            return False
+        if not source_visual and len(u.core_content) < 2 and words < MIN_TEACHING_WORDS_WITHOUT_VISUAL:
+            return False
+    return True
+
+
+def _presenter_density_ok(bp: Blueprint) -> bool:
+    """No unit in the deck may be a near-empty slide.
+
+    _technical_density_ok guards the source-teaching span. This guards the whole
+    deck: the synthesis and assessment units carry pedagogy rather than source
+    content, and a learner staring at two boxes with one sentence each has been
+    given a blank minute regardless of which phase the unit sits in.
+    """
+    for u in bp.units:
+        if _teaching_payload_words(u) < 12:
+            return False
+        if not str(u.student_action or "").strip() or not str(u.takeaway or "").strip():
             return False
     return True
 
@@ -176,6 +207,7 @@ def deterministic_gate(
     # profile checkpoint must be visible in the Unit that claims to teach it.
     checks["v14_major_chapter_items_are_actually_taught"] = _major_items_are_actually_taught(bp, profile)
     checks["v14_technical_units_have_teaching_density"] = _technical_density_ok(bp, profile)
+    checks["v14_no_unit_is_a_near_empty_slide"] = _presenter_density_ok(bp)
 
     # Replace the historical Unit-16 readiness badge requirement with an
     # evidence-trail requirement.  Readiness may appear wherever the artifact is
