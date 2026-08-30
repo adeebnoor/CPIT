@@ -134,6 +134,20 @@ Choose ONE coherent central system for Units 1-20.
 Units 1–5 IFHAM; 6–10 MARIS; 11–15 ATQAN; 16–20 MAYYIZ.
 
 10. EXACT UNIT FUNCTIONS — DOMINANT PURPOSE
+
+GRANULARITY — HOW THESE FUNCTIONS MUST BE WRITTEN.
+Where a Unit function below names a sequence or a set (for example input -> mechanism
+-> output -> assumption -> failure mode, or two alternatives plus the trade-off),
+EACH named element is its OWN core_content entry. Collapsing them into one prose
+sentence is a contract violation: the learner sees one oversized box instead of the
+structure the function describes, and the deterministic density check will reject it.
+Units 6-15 MUST each carry at least three learner-visible entries across
+core_content and pedagogy_content combined, with core_content dominant. If the source
+genuinely supports only one checkpoint for a Unit, keep that single core_content entry
+and add ISCARB scaffolding in pedagogy_content that makes it workable - a step to
+carry out, the condition that would refute it, or the cost of its absence. Never pad
+core_content with content the source does not support in order to reach the count.
+
 UNIT 1 — Engineering Crisis + professional/ethical responsibility. Start with incomplete evidence/conflict/human consequence. Do NOT front-load definitions or reveal diagnosis.
 UNIT 2 — Domain Spine/System Map of ALL P1 families.
 UNIT 3 — Exactly five measurable CLOs, visibly CLO1…CLO5 in pedagogy_content; core_content MUST be empty.
