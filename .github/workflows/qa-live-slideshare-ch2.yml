@@ -1,0 +1,130 @@
+name: QA Live Sommerville Chapter 2
+
+on:
+  push:
+    branches: [qa/live-slideshare-ch2-20260830]
+    paths: ['.github/workflows/qa-live-slideshare-ch2.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  live-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BASE_URL: https://iscarb-lecture-studio.onrender.com
+      SOURCE_URL: https://www.slideshare.net/slideshow/ian-sommerville-software-engineering-tenth-edition-pearson-education-limited-2016/287925972
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests pypdf python-pptx beautifulsoup4
+      - name: Verify deployed service and compile exact source
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, re, time, requests
+          from pypdf import PdfReader
+          from pptx import Presentation
+          from bs4 import BeautifulSoup
+
+          base=os.environ['BASE_URL'].rstrip('/')
+          src=os.environ['SOURCE_URL']
+          out=pathlib.Path('/tmp/live-ch2'); out.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Live-QA-20260830/1.0'})
+
+          h=s.get(base+'/api/health',timeout=90); h.raise_for_status(); health=h.json()
+          print('HEALTH_JSON',json.dumps(health,indent=2,ensure_ascii=False))
+          assert health.get('version')=='4.3.0', health
+          assert 'cimt-native' in str(health.get('presenter_renderer','')).lower(), health
+          (out/'health.json').write_text(json.dumps(health,indent=2),encoding='utf-8')
+
+          r=s.post(base+'/api/compile',data={
+            'primary_url':src,
+            'supporting_urls':'',
+            'lecture_focus':'Preserve the complete Chapter 2 Software Processes scope. Cover software process models, process activities, coping with change, and process improvement; retain source diagrams/tables where information-bearing; use CIMT learn-by-doing choreography without replacing source technical content.',
+            'model':'auto','repair_rounds':'2'
+          },timeout=180)
+          print('SUBMIT',r.status_code,r.text[:1000]); r.raise_for_status()
+          jid=r.json()['job_id']; print('JOB_ID',jid)
+          deadline=time.time()+1800; job=None
+          while time.time()<deadline:
+            rr=s.get(f'{base}/api/jobs/{jid}',timeout=90); rr.raise_for_status(); job=rr.json()
+            print('STATE',job.get('status'),job.get('progress'),(job.get('message') or '')[:260],flush=True)
+            if job.get('status') in {'ready','blocked','error'}: break
+            time.sleep(8)
+          assert job is not None
+          (out/'job.json').write_text(json.dumps(job,indent=2,ensure_ascii=False),encoding='utf-8')
+          assert job.get('status') in {'ready','blocked'}, (job.get('status'),job.get('error'))
+          bp=job.get('blueprint') or {}; profile=job.get('source_profile') or {}
+          assert len(bp.get('units') or [])==20
+          assert bp.get('session_minutes')==90
+          assert len(bp.get('clos') or [])==5
+
+          fam_text=' '.join(str(x.get('name') or '') for x in profile.get('topic_families',[])).lower()
+          expected=['software process models','process activities','coping with change','process improvement']
+          missing_families=[x for x in expected if x not in fam_text]
+          print('MISSING_FAMILIES',missing_families); assert not missing_families
+
+          majors=[x for x in profile.get('coverage_items',[]) if str(x.get('importance','')).lower()=='major']
+          ledger={x.get('coverage_id'):x for x in bp.get('coverage_ledger',[]) if x.get('coverage_id')}
+          missing=[x.get('id') for x in majors if x.get('id') not in ledger]
+          late=[x.get('id') for x in majors if x.get('id') in ledger and int(ledger[x.get('id')].get('first_taught_unit') or 99)>15]
+          print('MAJOR_COUNT',len(majors),'LEDGER',len(ledger),'MISSING',missing,'LATE',late)
+          assert majors and not missing and not late
+
+          all_unit_text=' '.join((str(u.get('title') or '')+' '+' '.join(map(str,u.get('core_content') or []))+' '+str(u.get('student_action') or '')+' '+str(u.get('evidence') or '')) for u in bp.get('units',[])).lower()
+          required=['waterfall','incremental development','integration and configuration','requirements engineering','validation','software evolution','prototyp','incremental delivery','process improvement','capability maturity']
+          absent=[x for x in required if x not in all_unit_text]
+          print('SOURCE_CONCEPT_ABSENT',absent); assert not absent
+
+          # Ensure SlideShare host recommendations did not enter P1.
+          ptext=' '.join(str(x.get('label') or '')+' '+str(x.get('source_anchor') or '') for x in profile.get('coverage_items',[])).lower()
+          recommended_leak=bool(re.search(r'\brecommended presentation\b|\bslide\s+(?:59|60|61|62|63)\b',ptext))
+          print('RECOMMENDED_LEAK',recommended_leak); assert not recommended_leak
+
+          endpoints={
+            'presenter.html':f'/api/jobs/{jid}/presenter',
+            'presenter.pptx':f'/api/jobs/{jid}/export/pptx',
+            'presenter.pdf':f'/api/jobs/{jid}/export/presenter-pdf',
+            'reading.pdf':f'/api/jobs/{jid}/export/pdf',
+            'instructor.docx':f'/api/jobs/{jid}/export/docx',
+            'student.docx':f'/api/jobs/{jid}/export/student',
+            'blueprint.json':f'/api/jobs/{jid}/export/json',
+          }
+          sizes={}
+          for name,path in endpoints.items():
+            x=s.get(base+path,timeout=240); print('FETCH',name,x.status_code,len(x.content)); x.raise_for_status(); assert len(x.content)>500
+            (out/name).write_bytes(x.content); sizes[name]=len(x.content)
+
+          prs=Presentation(out/'presenter.pptx'); assert len(prs.slides)==20
+          pdf=PdfReader(str(out/'presenter.pdf')); assert len(pdf.pages)==20
+          reading=PdfReader(str(out/'reading.pdf')); assert len(reading.pages)>=1
+
+          html=(out/'presenter.html').read_text(encoding='utf-8',errors='ignore')
+          visible=' '.join(BeautifulSoup(html,'html.parser').stripped_strings).lower()
+          for marker in ['software processes','waterfall','incremental']:
+            assert marker in visible, marker
+
+          readiness=bp.get('readiness_alignment') or []
+          print('READINESS_ALIGNMENT_COUNT',len(readiness))
+          readiness_summary=[]
+          for row in readiness:
+            readiness_summary.append({k:row.get(k) for k in ('sku_id','slo_id','gku','evidence_units','clo_ids','mapping_type','rationale','atomicity_evidence')})
+
+          summary={
+            'job_id':jid,'status':job.get('status'),'message':job.get('message'),'version':health.get('version'),'pipeline':health.get('pipeline'),
+            'units':20,'minutes':90,'clos':5,'major_checkpoints':len(majors),'missing_major':missing,'late_major':late,
+            'source_specific_absent':absent,'recommended_leak':recommended_leak,'readiness_alignment':readiness_summary,
+            'presenter_slides':20,'presenter_pdf_pages':20,'reading_pages':len(reading.pages),'sizes':sizes,
+            'deterministic_failures':[k for k,v in (job.get('deterministic_checks') or {}).items() if not v],
+            'audit':job.get('audit')
+          }
+          (out/'summary.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False),encoding='utf-8')
+          print('FINAL_SUMMARY',json.dumps(summary,indent=2,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-sommerville-ch2-after-render
+          path: /tmp/live-ch2/*
+          if-no-files-found: error
