@@ -23,8 +23,17 @@ _FURNITURE = {
 }
 
 
+# PDF and PPTX bullet furniture that survives text extraction. Left in place it
+# reaches the faculty deck as a literal glyph in a slide heading.
+_BULLET_EDGE = " \t\r\n-|\u2022\u00b7\u25a0\u25aa\u25c6\u25cf\u25b6\u25fc\u25fe\u2023\u2043\u00a7\u2192*_"
+
+# A contact block is authorship metadata, never lecture content. Matching the
+# address itself keeps this rule source-agnostic instead of name-specific.
+_CONTACT_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
+
+
 def _clean(text: str, limit: int = 160) -> str:
-    text = re.sub(r"\s+", " ", str(text or "")).strip(" \t\r\n-|•·")
+    text = re.sub(r"\s+", " ", str(text or "")).strip(_BULLET_EDGE)
     return text[:limit].rstrip(" ,;:-")
 
 
@@ -80,6 +89,10 @@ def _is_furniture_line(line: str) -> bool:
     if low in exact:
         return True
     if any(low.startswith(x) for x in ("adeeb noor", "it department", "faculty of computing", "king abdulaziz university", "fall 2025")):
+        return True
+    # An instructor contact block is authorship metadata, not teachable content,
+    # and must never become a lecture title or a slide heading.
+    if _CONTACT_RE.search(low):
         return True
     return False
 
@@ -220,10 +233,13 @@ def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
     stem = Path(primary_name).stem.replace("_", " ").replace("-", " ")
     stem = re.sub(r"\s+", " ", stem).strip()
     # Prefer a plausible first source heading over a machine filename.
-    if chunks:
-        first = _clean(chunks[0][1], 120)
-        if 5 <= len(first) <= 120 and not re.fullmatch(r"[A-Z0-9_. -]+", first):
-            return first
+    for _page, label, _body in chunks[:6]:
+        first = _clean(label, 120)
+        if not (5 <= len(first) <= 120):
+            continue
+        if re.fullmatch(r"[A-Z0-9_. -]+", first) or _is_furniture_line(first):
+            continue
+        return first
     return stem or "Primary lecture"
 
 
