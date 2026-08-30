@@ -119,8 +119,10 @@ _TEACHING_MOVES = [
       "Say what remains unverified after the check succeeds."]),
 ]
 
-# Below this, a slide is a blank minute rather than a taught one.
+# Below this, a slide is a blank minute rather than a taught one. Items are
+# counted as well as words: one long sentence is still one box on the slide.
 _MIN_UNIT_WORDS = 14
+_MIN_UNIT_ITEMS = 3
 
 
 def _teaching_move(idx: int, focus: str):
@@ -251,12 +253,12 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         question = move_question if reused else (
             f"How does {labels[0] if labels else 'this source mechanism'} change the engineering decision?")
         action = move_scaffold[0] if reused else _student_action_for(bucket, labels)
-        ped = [*ped, *move_scaffold] if reused else ped
-        # No teaching slot may go out as a near-empty slide. The material stays
-        # whatever the source supports; the scaffolding that makes it teachable
-        # is ISCARB pedagogy and is declared in the pedagogy channel.
-        if sum(len(str(x).split()) for x in (*core, *ped)) < _MIN_UNIT_WORDS:
-            ped = [*ped, *move_scaffold]
+        # Every teaching slot carries its move. A thin source gives one checkpoint
+        # line, and one line is a single oversized box on the slide - the move is
+        # what makes that checkpoint workable, so it always ships beside it.
+        ped = [*ped, *move_scaffold]
+        if len([x for x in (*core, *ped) if str(x).strip()]) < _MIN_UNIT_ITEMS:
+            ped = [*ped, f"Name what {labels[0] if labels else 'this mechanism'} would cost if it were absent."]
         add(idx, title_, question, core, ped, action,
             f"Source checkpoint(s) covered: {', '.join(labels)}",
             kind, _anchors(bucket), evidence=f"P1 checkpoint evidence: {', '.join(x.id for x in bucket)}")
