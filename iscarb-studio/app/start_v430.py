@@ -8,6 +8,7 @@ collection: white canvas, large green serif headings, gold rules, source-native
 figures, readable diagrams, and no dashboard-style visual chrome.
 """
 
+import os
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -39,11 +40,28 @@ engine.deterministic_gate = gate_v14
 install_presenter_copy_v431()
 
 
+def _deployed_build() -> dict[str, str]:
+    """Identify the code actually serving this request.
+
+    PUBLIC_VERSION is pinned in render.yaml, so it stays 4.3.0 across every
+    commit and cannot tell a fresh deploy from a stale one. Two live validation
+    runs were read as evidence about changes that had not deployed yet before
+    this was added. Render injects the deployed commit; locally there is none,
+    and saying so is better than implying a deploy.
+    """
+    commit = (os.getenv("RENDER_GIT_COMMIT") or "").strip()
+    return {
+        "build_commit": commit[:12] if commit else "unknown-not-a-render-deploy",
+        "build_branch": (os.getenv("RENDER_GIT_BRANCH") or "").strip() or "unknown",
+    }
+
+
 def _health_v430():
     data = prev._health_v420()
     data.update({
         "version": PUBLIC_VERSION,
         "pipeline": PIPELINE_ID,
+        **_deployed_build(),
         "deterministic_gate": "v14-provenance-presenter-on-v13",
         "presenter_renderer": "cimt-native-v4.3-preview-pptx-pdf",
         "presenter_visual_contract": "white canvas + green serif hierarchy + gold corner rules + selective red emphasis + large source visuals + readable diagrams",

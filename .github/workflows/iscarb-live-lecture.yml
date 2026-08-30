@@ -23,6 +23,10 @@ on:
         description: Semantic repair rounds (0-2)
         required: false
         default: '1'
+      expect_commit:
+        description: Refuse to run unless the live build reports this commit (leave empty to skip)
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -45,6 +49,7 @@ jobs:
             --source-file "${{ inputs.source_file }}" \
             --lecture-focus "${{ inputs.lecture_focus }}" \
             --repair-rounds "${{ inputs.repair_rounds }}" \
+            --expect-commit "${{ inputs.expect_commit }}" \
             --out live-lecture
       - uses: actions/upload-artifact@v4
         if: always()
