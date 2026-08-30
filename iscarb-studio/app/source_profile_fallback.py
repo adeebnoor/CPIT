@@ -35,7 +35,10 @@ _CONTACT_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
 # "SLIDE 73: ..." is how the SlideShare extractor numbers what it scraped. It is
 # scaffolding, not a lecture heading, and must not survive into a unit title.
 _EXTRACTOR_PREFIX = re.compile(r"^\s*(?:slide|page|frame)\s*\d{1,4}\s*[:.\u2013\u2014-]\s*", re.I)
-_INLINE_BULLET = re.compile(r"[\u2022\u00b7\u25a0\u25aa\u25c6\u25cf\u25b6\u25fc\u25fe\u2023\u2043]+")
+# U+00B7 is deliberately absent: it is the separator this module joins excerpt
+# lines with, and stripping it collapsed every source slide into one run-on
+# line, which silently broke both importance scoring and furniture detection.
+_INLINE_BULLET = re.compile(r"[\u2022\u25a0\u25aa\u25c6\u25cf\u25b6\u25fc\u25fe\u2023\u2043]+")
 
 
 def _display_label(text: str) -> str:
@@ -267,6 +270,34 @@ def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
     return stem or "Primary lecture"
 
 
+# A running header or footer appears on most slides; a real checkpoint does not.
+RECURRING_FURNITURE_SHARE = 0.30
+MIN_SLIDES_FOR_FREQUENCY_RULE = 8
+
+
+def _recurring_furniture(chunks: list[tuple[int, str, str]]) -> set[str]:
+    """Lines that repeat across the deck, which is what makes them furniture.
+
+    The hardcoded furniture list only knows the CPIT decks. A Sommerville chapter
+    carries its own running footer, and it was being picked up as a checkpoint and
+    printed as a unit heading. Frequency identifies furniture in any deck without
+    naming any of them: content appears on its own slide, chrome appears on all.
+    """
+    if len(chunks) < MIN_SLIDES_FOR_FREQUENCY_RULE:
+        return set()
+    counts: dict[str, int] = {}
+    for _idx, _label, excerpt in chunks:
+        for line in {_norm_key(x) for x in _meaningful_lines(excerpt.replace(" \u00b7 ", "\n"))}:
+            if line:
+                counts[line] = counts.get(line, 0) + 1
+    threshold = max(3, int(len(chunks) * RECURRING_FURNITURE_SHARE))
+    return {line for line, n in counts.items() if n >= threshold}
+
+
+def _norm_key(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(text or "").lower()).strip()
+
+
 def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI profiler unavailable") -> SourceProfile:
     primary = bundle.primary
     coordinate, chunks = _chunks(primary.path)
@@ -278,11 +309,20 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
     # Preserve source order while suppressing exact duplicate headings caused by
     # recurring lecture furniture. We still keep a page-level coverage item for
     # every content-bearing source page/slide.
+    recurring = _recurring_furniture(chunks)
+
     families: list[TopicFamily] = []
     seen_family: set[str] = set()
     coverage: list[CoverageItem] = []
     for idx, label, excerpt in chunks[:80]:
         clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
+        if recurring and _norm_key(_display_label(clean_label)) in recurring:
+            # A running header chosen as this slide's heading says nothing about
+            # the slide. Take the first line that is actually specific to it.
+            for candidate in _meaningful_lines(excerpt.replace(" \u00b7 ", "\n")):
+                if _norm_key(candidate) not in recurring and not _is_furniture_line(candidate):
+                    clean_label = _clean(candidate, 120)
+                    break
         embedded_slide = _embedded_slide_number(clean_label)
         anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else f"[P1] {coordinate} {idx}"
         # The coordinate now lives in the anchor; the heading must read as prose.
