@@ -79,6 +79,22 @@ class RetentionTests(unittest.TestCase):
             fresh.unlink(missing_ok=True)
             stale.unlink(missing_ok=True)
 
+    def test_rasterized_visual_cache_also_expires(self):
+        """Source pages render at 2.6x now, so this directory is the largest one."""
+        storage.VISUAL_CACHE.mkdir(parents=True, exist_ok=True)
+        stale = storage.VISUAL_CACHE / "retention_stale_cache"
+        stale.mkdir(exist_ok=True)
+        (stale / "slide-001.png").write_bytes(b"x" * 2048)
+        old_time = time.time() - (storage.RETENTION_HOURS + 24) * 3600
+        import os
+        os.utime(stale, (old_time, old_time))
+        try:
+            storage.prune_expired()
+            self.assertFalse(stale.exists(), "expired raster cache must be pruned")
+        finally:
+            import shutil
+            shutil.rmtree(stale, ignore_errors=True)
+
     def test_prune_is_disabled_when_retention_is_zero(self):
         original = storage.RETENTION_HOURS
         storage.RETENTION_HOURS = 0

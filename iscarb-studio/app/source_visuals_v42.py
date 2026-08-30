@@ -9,6 +9,7 @@ ISCARB redraw when the source image would merely enlarge a heading.
 """
 
 import re
+from pathlib import Path
 
 from . import source_visuals as base
 from .models import Blueprint, LectureUnit
@@ -52,6 +53,31 @@ def _quality_score(asset: base.VisualAsset, unit: LectureUnit, anchors: set[int]
     return score
 
 
+def _asset_pixel_width(asset) -> int | None:
+    """Pixel width of a source asset, or None when it cannot be measured."""
+    path = base.local_asset(asset)
+    if not path or not Path(path).exists():
+        return None
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            return im.size[0]
+    except Exception:
+        return None
+
+
+def _is_presentable(asset) -> bool:
+    """Whether this asset can fill the teaching canvas without visible softening.
+
+    A source figure earns the main canvas by being readable there. One that has
+    to be enlarged past its own resolution teaches less than a clean redraw of
+    the same mechanism, so it is not eligible for USE. An asset we cannot
+    measure keeps the previous behaviour rather than being rejected on a guess.
+    """
+    width = _asset_pixel_width(asset)
+    return width is None or width >= base.MIN_PRESENTABLE_ASSET_WIDTH
+
+
 def _visual_type(unit: LectureUnit) -> str:
     if unit.visual_plan is not None and unit.visual_plan.visual_type.strip():
         return unit.visual_plan.visual_type.strip()
@@ -75,7 +101,7 @@ def plan_for_unit_v42(bp: Blueprint, unit: LectureUnit, registry: base.VisualReg
             score = _quality_score(best, unit, anchors)
             # A source visual must carry real explanatory information.  Low-info
             # title pages are REDRAW even when the anchor names them explicitly.
-            if score >= 10.0 and not _looks_like_title_only(best):
+            if score >= 10.0 and not _looks_like_title_only(best) and _is_presentable(best):
                 return base.VisualPlan(
                     visual_type,
                     purpose,
