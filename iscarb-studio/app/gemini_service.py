@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import os
 import time
 from pathlib import Path
@@ -78,6 +79,27 @@ class GeminiService:
         # Short exponential backoff: 2s, 4s, then fail over to the next model.
         time.sleep(min(2.0 * (2 ** max(0, attempt)), 8.0))
 
+    # The SDK infers a MIME type from the filename and raises when it cannot.
+    # On the production image .pptx and .docx are not in the local mimetypes
+    # registry, so a faculty member uploading a PowerPoint chapter got
+    # "Unknown mime type" and the whole compile stopped. Every format the
+    # uploader accepts is named here so inference is never relied upon.
+    _MIME_BY_SUFFIX = {
+        ".pdf": "application/pdf",
+        ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".txt": "text/plain",
+        ".md": "text/markdown",
+    }
+
+    @classmethod
+    def _mime_for(cls, path: Path) -> str:
+        known = cls._MIME_BY_SUFFIX.get(path.suffix.lower())
+        if known:
+            return known
+        guessed, _encoding = mimetypes.guess_type(path.name)
+        return guessed or "application/octet-stream"
+
     def _upload(self, path: Path):
         key = str(path.resolve())
         if key in self._uploaded:
@@ -85,7 +107,9 @@ class GeminiService:
         last_exc: Exception | None = None
         for attempt in range(MAX_TRANSIENT_ATTEMPTS):
             try:
-                uploaded = self.client.files.upload(file=str(path))
+                uploaded = self.client.files.upload(
+                    file=str(path), config={"mime_type": self._mime_for(path)}
+                )
                 self._uploaded[key] = uploaded
                 return uploaded
             except Exception as exc:
