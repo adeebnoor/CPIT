@@ -455,6 +455,26 @@ def _spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, str]]]:
     if raw_type in {"concept-map", "concept map", "concept", "map"}:
         return "takeaways", _source_first_items(u, 6)
 
+    # Forms below were previously unreachable from a real lecture: only four
+    # visual types were mapped, so architecture, table, timeline and measurement
+    # content all fell through to a unit-number layout. That is why 41% of every
+    # teaching span rendered as the same chain. Each form here already draws on
+    # all three surfaces; they simply had no route from the content.
+    if raw_type in {"architecture", "layered", "stack", "layers", "system-stack"}:
+        # The layered stack is the archived CIMT signature: each layer sits on the
+        # one below and hides its detail from the one above.
+        return "stack", _source_first_items(u, 6)
+    if raw_type in {"table", "matrix", "grid"}:
+        return "table", _source_first_items(u, 6)
+    if raw_type in {"timeline", "evolution", "lifecycle", "phases"}:
+        return "timeline", _source_first_items(u, 3)
+    if raw_type in {"measurement", "metric", "equation", "curve", "cost", "trend"}:
+        # Cost/benefit and measurement content reads as a curve with annotations,
+        # the way the archived cost/dependability slide does.
+        return "curve", _source_first_items(u, 4)
+    if raw_type in {"failure", "fault", "causal", "chain", "propagation"}:
+        return "chain", _source_first_items(u, 4)
+
     # Archived/synthetic fixtures use historical visual-type tokens; preserve their
     # layout diversity without leaking that unit-number mapping into real lectures.
     return _legacy_spec(bp, u)
