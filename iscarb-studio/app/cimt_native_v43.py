@@ -316,21 +316,44 @@ def _compact(text: str, limit: int = 178) -> str:
     return " ".join(out).rstrip(" ,;:-")
 
 
+# A checkpoint label and its scaffolding are separated by either punctuation.
+_ITEM_LABEL_SPLIT = re.compile(r"\s*[:\u2014\u2013]\s+")
+
+
+def _split_label(raw: str, fallback: str) -> tuple[str, str]:
+    """Use a short leading phrase as the item's heading when the line has one."""
+    parts = _ITEM_LABEL_SPLIT.split(raw, maxsplit=1)
+    if len(parts) == 2 and parts[1].strip() and 1 <= len(parts[0].split()) <= 7:
+        return presenter_text(parts[0], 36).upper(), parts[1].strip()
+    return fallback, raw
+
+
 def _source_first_items(u: LectureUnit, limit: int = 6) -> list[tuple[str, str]]:
-    raw_core = [str(x).strip() for x in u.core_content[:limit] if str(x).strip()]
+    """Source content first, then ISCARB scaffolding, up to the slide's capacity.
+
+    Pedagogy used to appear only when a unit had no source content at all, so a
+    unit carrying one source line and four scaffolding steps rendered as a single
+    large box and the scaffolding never reached the learner. Source stays first
+    and dominant; scaffolding fills the remaining slots rather than being dropped.
+
+    Provenance stays visible: a scaffolding item is headed ISCARB STEP unless the
+    line names its own step, so a learner never reads a teaching move as a claim
+    the source made.
+    """
     focal = [presenter_text(x, 32).upper() for x in (u.visual_plan.focal_elements or []) if str(x).strip()]
-    if not raw_core:
-        raw_core = [_sanitize_noncore(x) for x in u.pedagogy_content[:limit] if str(x).strip()]
     items: list[tuple[str, str]] = []
-    for i, raw in enumerate(raw_core[:limit]):
-        label = focal[i] if i < len(focal) else f"KEY POINT {i+1}"
-        body = raw
-        if ":" in raw:
-            a, b = raw.split(":", 1)
-            if 1 <= len(a.split()) <= 7 and b.strip():
-                label = presenter_text(a, 36).upper()
-                body = b.strip()
+
+    for i, raw in enumerate([str(x).strip() for x in u.core_content if str(x).strip()][:limit]):
+        fallback = focal[i] if i < len(focal) else f"KEY POINT {i + 1}"
+        label, body = _split_label(raw, fallback)
         items.append((label, _compact(body, 178)))
+
+    if len(items) < limit:
+        scaffold = [_sanitize_noncore(x) for x in u.pedagogy_content if str(x).strip()]
+        for j, raw in enumerate(scaffold[: limit - len(items)]):
+            label, body = _split_label(raw, f"ISCARB STEP {j + 1}")
+            items.append((label, _compact(body, 178)))
+
     return items or [("TAKE-HOME", _compact(u.takeaway, 160))]
 
 

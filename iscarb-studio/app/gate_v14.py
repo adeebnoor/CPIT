@@ -101,11 +101,23 @@ def _readiness_has_real_evidence_units(bp: Blueprint) -> bool:
 # clear; it never removes the floor.
 MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL = 18
 MIN_TEACHING_WORDS_WITHOUT_VISUAL = 28
+# Two boxes holding one sentence each is what a reviewer calls an empty slide.
+MIN_TEACHING_ITEMS = 3
 
 
 def _teaching_payload_words(u) -> int:
     """Words a learner actually reads: source content plus its scaffolding."""
     return sum(len(str(x).split()) for x in (*u.core_content, *u.pedagogy_content))
+
+
+def _visible_item_count(u) -> int:
+    """Distinct blocks the slide will draw.
+
+    Word count alone does not measure a slide: one long sentence clears any word
+    floor and still renders as a single oversized box. What a learner sees is the
+    number of separate points, so that is counted separately.
+    """
+    return len([x for x in (*u.core_content, *u.pedagogy_content) if str(x).strip()])
 
 
 def _technical_density_ok(bp: Blueprint, profile: SourceProfile | None) -> bool:
@@ -118,7 +130,9 @@ def _technical_density_ok(bp: Blueprint, profile: SourceProfile | None) -> bool:
         floor = MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL if source_visual else MIN_TEACHING_WORDS_WITHOUT_VISUAL
         if words < floor:
             return False
-        if not source_visual and len(u.core_content) < 2 and words < MIN_TEACHING_WORDS_WITHOUT_VISUAL:
+        # A source figure carries its own structure, so the text beside it may be
+        # briefer; without one the slide must stand on its points alone.
+        if not source_visual and _visible_item_count(u) < MIN_TEACHING_ITEMS:
             return False
     return True
 
