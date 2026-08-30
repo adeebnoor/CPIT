@@ -94,3 +94,30 @@ class ArchivedDeckRichnessTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PromptGranularityContractTests(unittest.TestCase):
+    """The unit functions named structured elements but never said they must be
+    separate entries, so the model collapsed each into one prose line and the
+    teaching span rendered as ten single-box slides."""
+
+    @classmethod
+    def setUpClass(cls):
+        from app import prompts
+        cls.master = prompts.MASTER_PROMPT
+
+    def test_structured_functions_must_become_separate_entries(self):
+        self.assertIn("EACH named element is its OWN core_content entry", self.master)
+
+    def test_teaching_span_has_a_minimum_visible_entry_count(self):
+        self.assertIn("Units 6-15 MUST each carry at least three learner-visible entries", self.master)
+
+    def test_thin_sources_are_scaffolded_rather_than_padded(self):
+        """Reaching the count by inventing source content would be worse than a
+        sparse slide, so the contract has to forbid it explicitly."""
+        self.assertIn("Never pad", self.master)
+        self.assertIn("the source does not support", self.master)
+
+    def test_the_count_matches_what_the_gate_enforces(self):
+        from app.gate_v14 import MIN_TEACHING_ITEMS
+        self.assertEqual(MIN_TEACHING_ITEMS, 3, "prompt and gate disagree on the floor")
