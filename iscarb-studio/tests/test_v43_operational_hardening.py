@@ -144,3 +144,34 @@ class DeploymentHygieneTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DeployIdentityTests(unittest.TestCase):
+    """PUBLIC_VERSION is pinned in render.yaml, so it cannot distinguish a fresh
+    deploy from a stale one. Two live validation runs were misread before the
+    health payload reported the commit it is actually serving."""
+
+    def setUp(self):
+        self.client = TestClient(app)
+
+    def test_health_reports_the_build_it_is_serving(self):
+        body = self.client.get("/api/health").json()
+        self.assertIn("build_commit", body)
+        self.assertIn("build_branch", body)
+
+    def test_build_is_reported_honestly_when_not_a_render_deploy(self):
+        body = self.client.get("/api/health").json()
+        self.assertIn("unknown", body["build_commit"])
+
+    def test_render_commit_is_surfaced_when_present(self):
+        import os
+        from app import start_v430
+        os.environ["RENDER_GIT_COMMIT"] = "abcdef1234567890"
+        os.environ["RENDER_GIT_BRANCH"] = "main"
+        try:
+            build = start_v430._deployed_build()
+            self.assertEqual(build["build_commit"], "abcdef123456")
+            self.assertEqual(build["build_branch"], "main")
+        finally:
+            os.environ.pop("RENDER_GIT_COMMIT", None)
+            os.environ.pop("RENDER_GIT_BRANCH", None)

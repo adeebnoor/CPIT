@@ -65,15 +65,25 @@ def capture_existing(session, base, job: str, out: Path) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     (out / "job.json").write_text(json.dumps(final, indent=2, ensure_ascii=False), encoding="utf-8")
     saved = download_outputs(session, base, job, out) if final.get("blueprint") else {}
-    return {"job_id": job, "version": health.json().get("version"), "origin": f"existing job {job}",
-            "final": final, "saved": saved}
+    return {"job_id": job, "version": health.json().get("version"),
+            "build": health.json().get("build_commit", "unreported"),
+            "origin": f"existing job {job}", "final": final, "saved": saved}
 
 
 def compile_lecture(session, base, args, out: Path) -> dict:
     health = session.get(f"{base}/api/health", timeout=90)
     health.raise_for_status()
-    version = health.json().get("version")
-    print(f"live version: {version}", flush=True)
+    info = health.json()
+    version = info.get("version")
+    build = info.get("build_commit", "unreported")
+    print(f"live version: {version}  build: {build}", flush=True)
+    if args.expect_commit:
+        if not build.startswith(args.expect_commit[:12]):
+            raise SystemExit(
+                f"live build is {build}, expected {args.expect_commit[:12]}. "
+                "The deploy has not landed yet; a run now would judge the previous code."
+            )
+        print("live build matches the commit under test", flush=True)
 
     data = {"repair_rounds": str(args.repair_rounds), "lecture_focus": args.lecture_focus, "model": "auto"}
     if args.source_file:
@@ -107,7 +117,8 @@ def compile_lecture(session, base, args, out: Path) -> dict:
     (out / "job.json").write_text(json.dumps(final or {}, indent=2, ensure_ascii=False), encoding="utf-8")
 
     saved = download_outputs(session, base, job, out) if final and final.get("blueprint") else {}
-    return {"job_id": job, "version": version, "origin": origin, "final": final or {}, "saved": saved}
+    return {"job_id": job, "version": version, "build": build, "origin": origin,
+            "final": final or {}, "saved": saved}
 
 
 def quality_report(result: dict, out: Path) -> list[str]:
@@ -121,6 +132,7 @@ def quality_report(result: dict, out: Path) -> list[str]:
 
     report = {
         "live_version": result["version"],
+        "live_build": result.get("build", "unreported"),
         "job_id": result["job_id"],
         "source": result["origin"],
         "status": final.get("status"),
@@ -168,7 +180,7 @@ def quality_report(result: dict, out: Path) -> list[str]:
     (out / "qa_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
 
     print("\n=== LIVE LECTURE QA ===", flush=True)
-    for key in ("live_version", "status", "lecture_title", "units", "minutes", "clos",
+    for key in ("live_version", "live_build", "status", "lecture_title", "units", "minutes", "clos",
                 "readiness_entries", "major_checkpoints"):
         print(f"  {key:<20} {report[key]}", flush=True)
     print(f"  {'gate':<20} {report['gate_pass']}/{report['gate_total']} passing", flush=True)
@@ -188,6 +200,8 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=1500)
     ap.add_argument("--out", default="live-lecture")
     ap.add_argument("--job-id", default="", help="capture a job that already ran instead of compiling")
+    ap.add_argument("--expect-commit", default="",
+                    help="refuse to run unless the live build reports this commit")
     args = ap.parse_args()
     if not args.job_id and not args.source_url and not args.source_file:
         ap.error("give --job-id, --source-url or --source-file")
