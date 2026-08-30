@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models import JobState, AuditReport, AuditIssue
-from .storage import save_job, load_job, UPLOADS
+from .storage import save_job, load_job, prune_expired, UPLOADS
 from .gemini_service import GeminiService
 from .source_profile_fallback import build_deterministic_source_profile, reconcile_source_profile
 from .gate import deterministic_gate, all_required_pass, failed_check_names
@@ -29,12 +29,22 @@ EXPORTS.mkdir(parents=True, exist_ok=True)
 SERVICE_VERSION = "2.1.0"
 PIPELINE_ID = "visual-grammar-v1-presenter-preview-content-gate-v7"
 
+# This app object defines the pipeline routes but is NOT the app Render serves.
+# faculty_main.py builds the served app and copies these route objects across;
+# middleware, exception handlers and lifespan do not travel with a copied route,
+# so anything app-wide must be registered on the served app instead.
 app = FastAPI(title="ISCARB Lecture Studio", version=SERVICE_VERSION)
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
 RELIABLE_DEFAULT_MODEL = "auto"
 MAX_SUPPORTING = 7
+
+# A 90-minute lecture source is a slide deck or chapter, not a media archive.
+# Streaming with an explicit ceiling keeps one oversized upload from filling the
+# container disk that every other faculty job shares.
+MAX_UPLOAD_BYTES = int(os.getenv("ISCARB_MAX_UPLOAD_MB", "25")) * 1024 * 1024
+UPLOAD_CHUNK = 1024 * 1024
 
 
 def _update(job: JobState, status: str, progress: int, message: str) -> JobState:
@@ -58,8 +68,24 @@ def _save_upload(job_id: str, upload: UploadFile, stem: str) -> Path:
     job_dir = UPLOADS / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     path = job_dir / f"{stem}__{name}"
-    with path.open("wb") as f:
-        shutil.copyfileobj(upload.file, f)
+    written = 0
+    try:
+        with path.open("wb") as f:
+            while True:
+                chunk = upload.file.read(UPLOAD_CHUNK)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > MAX_UPLOAD_BYTES:
+                    raise HTTPException(
+                        413,
+                        f"{name} is larger than the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB limit for one source. "
+                        "Upload the lecture chapter itself rather than a full media archive.",
+                    )
+                f.write(chunk)
+    except HTTPException:
+        path.unlink(missing_ok=True)
+        raise
     return path
 
 
@@ -332,6 +358,10 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
     finally:
         if service is not None:
             service.close()
+        try:
+            prune_expired()
+        except Exception:
+            pass
 
 
 @app.get("/")
