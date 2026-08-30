@@ -22,7 +22,7 @@ protects itself rather than trusting the caller:
 | Limit | Default | Override |
 |---|---|---|
 | Maximum bytes per uploaded source | 25 MB | `ISCARB_MAX_UPLOAD_MB` |
-| Retention for jobs, uploads and exports | 48 h | `ISCARB_RETENTION_HOURS` (`0` disables) |
+| Retention for jobs, uploads, exports and the raster cache | 48 h | `ISCARB_RETENTION_HOURS` (`0` disables) |
 | Concurrent compile workers | 2 | `ISCARB_WORKERS` |
 | Supporting sources per lecture | 7 | — |
 
@@ -48,3 +48,22 @@ The Render `free` plan provides no persistent disk and idles the container after
 inactivity. Compiled outputs therefore survive the working session, not longer:
 faculty must download their exports before leaving the Studio. Attach a Render
 persistent disk if outputs need to outlive a restart.
+
+## Source-visual resolution
+
+Source pages rasterize at `PDF_RENDER_ZOOM = 2.6`, which puts roughly 163 DPI on
+a 13.33in teaching canvas. The previous 1.45x delivered about 91 DPI, which is
+why reused figures looked enlarged and soft. The render zoom is part of the
+cache key, so raising it invalidates pages rasterized at the old setting instead
+of serving them from cache.
+
+A source figure earns the main canvas only if it is readable there. An asset
+narrower than `MIN_PRESENTABLE_ASSET_WIDTH` (1100 px) is not eligible for USE and
+the unit falls back to a redrawn diagram, which teaches more than an image
+enlarged past its own resolution. This matters most for SlideShare sources,
+where the image resolution is whatever the host CDN served. An asset whose size
+cannot be measured keeps its source visual rather than being rejected on a guess.
+
+Cost at this resolution, measured on an archived 22-page chapter: about 9 MB of
+cached pages per deck, and a deck reusing ten source figures produces roughly a
+3.9 MB HTML preview and a 2.8 MB PPTX.

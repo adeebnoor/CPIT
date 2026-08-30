@@ -32,7 +32,16 @@ CACHE_ROOT = DATA_ROOT / "source_visual_cache"
 CACHE_ROOT.mkdir(parents=True, exist_ok=True)
 MAX_VISUAL_BYTES = 4 * 1024 * 1024
 MAX_SLIDES = 80
-PDF_RENDER_ZOOM = 1.45
+
+# A source page has to stay readable once it fills the teaching canvas. At the
+# previous 1.45x a 13.33in slide received roughly 91 DPI, which is what made
+# figures look enlarged and soft; 2.6x lands near 163 DPI, the range where
+# projected and printed diagram text stays crisp.
+PDF_RENDER_ZOOM = 2.6
+
+# Below this a rasterized or downloaded asset cannot be shown full-width without
+# visible softening, so the unit is better served by a redrawn diagram.
+MIN_PRESENTABLE_ASSET_WIDTH = 1100
 
 
 @dataclass(frozen=True)
@@ -172,7 +181,7 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
         stat = path.stat()
     except OSError:
         return None
-    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}")
+    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}")
     manifest_path = cache / "manifest.json"
     if manifest_path.exists():
         try:

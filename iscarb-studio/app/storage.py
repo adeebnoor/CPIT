@@ -13,6 +13,9 @@ DATA = ROOT / "data"
 JOBS = DATA / "jobs"
 UPLOADS = DATA / "uploads"
 EXPORTS = DATA / "exports"
+# Rasterized source pages are large and regenerate on demand, so they expire
+# with everything else rather than growing without bound.
+VISUAL_CACHE = DATA / "source_visual_cache"
 JOBS.mkdir(parents=True, exist_ok=True)
 UPLOADS.mkdir(parents=True, exist_ok=True)
 _LOCK = Lock()
@@ -53,7 +56,7 @@ def prune_expired(now: float | None = None) -> int:
         return 0
     cutoff = (now if now is not None else time.time()) - RETENTION_HOURS * 3600
     removed = 0
-    for directory in (JOBS, UPLOADS, EXPORTS):
+    for directory in (JOBS, UPLOADS, EXPORTS, VISUAL_CACHE):
         if not directory.exists():
             continue
         for entry in directory.iterdir():
