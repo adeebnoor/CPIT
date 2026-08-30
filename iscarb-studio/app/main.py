@@ -11,8 +11,8 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models import JobState, AuditReport, AuditIssue
-from .storage import save_job, load_job, UPLOADS
-from .gemini_service import GeminiService
+from .storage import save_job, load_job, prune_expired, UPLOADS
+from .gemini_service import GeminiService, is_transient_model_failure
 from .source_profile_fallback import build_deterministic_source_profile, reconcile_source_profile
 from .gate import deterministic_gate, all_required_pass, failed_check_names
 from .session_gate import apply_90_minute_timebox, session_scope_gate
@@ -29,12 +29,22 @@ EXPORTS.mkdir(parents=True, exist_ok=True)
 SERVICE_VERSION = "2.1.0"
 PIPELINE_ID = "visual-grammar-v1-presenter-preview-content-gate-v7"
 
+# This app object defines the pipeline routes but is NOT the app Render serves.
+# faculty_main.py builds the served app and copies these route objects across;
+# middleware, exception handlers and lifespan do not travel with a copied route,
+# so anything app-wide must be registered on the served app instead.
 app = FastAPI(title="ISCARB Lecture Studio", version=SERVICE_VERSION)
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
 RELIABLE_DEFAULT_MODEL = "auto"
 MAX_SUPPORTING = 7
+
+# A 90-minute lecture source is a slide deck or chapter, not a media archive.
+# Streaming with an explicit ceiling keeps one oversized upload from filling the
+# container disk that every other faculty job shares.
+MAX_UPLOAD_BYTES = int(os.getenv("ISCARB_MAX_UPLOAD_MB", "25")) * 1024 * 1024
+UPLOAD_CHUNK = 1024 * 1024
 
 
 def _update(job: JobState, status: str, progress: int, message: str) -> JobState:
@@ -58,8 +68,24 @@ def _save_upload(job_id: str, upload: UploadFile, stem: str) -> Path:
     job_dir = UPLOADS / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     path = job_dir / f"{stem}__{name}"
-    with path.open("wb") as f:
-        shutil.copyfileobj(upload.file, f)
+    written = 0
+    try:
+        with path.open("wb") as f:
+            while True:
+                chunk = upload.file.read(UPLOAD_CHUNK)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > MAX_UPLOAD_BYTES:
+                    raise HTTPException(
+                        413,
+                        f"{name} is larger than the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB limit for one source. "
+                        "Upload the lecture chapter itself rather than a full media archive.",
+                    )
+                f.write(chunk)
+    except HTTPException:
+        path.unlink(missing_ok=True)
+        raise
     return path
 
 
@@ -82,6 +108,22 @@ def _is_quota_error(exc: Exception) -> bool:
         "free_tier_requests",
         "generaterequestsperdayperprojectpermodel",
     ))
+
+
+def _is_model_unavailable(exc: Exception) -> bool:
+    """True when Gemini could not answer, whatever the upstream reason.
+
+    GeminiService already retries transient failures three times per model and
+    fails over across models, so an exception reaching here means the model is
+    genuinely unreachable for this job - exhausted quota and sustained 503 /
+    overload / rate-limit alike. Both must reach the deterministic draft: a
+    faculty member waiting on a lecture is better served by a source-complete
+    BLOCKED draft than by a job that ends with no output at all.
+
+    Programming errors inside our own pipeline still propagate, because they
+    match neither classifier and must surface rather than be papered over.
+    """
+    return _is_quota_error(exc) or is_transient_model_failure(exc)
 
 
 def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> AuditReport:
@@ -122,11 +164,11 @@ def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> Audit
                 severity="major",
                 unit_numbers=[],
                 requirement="Semantic release audit",
-                problem=f"Semantic audit unavailable because model quota is exhausted. Deterministic failures: {issue_text}",
-                repair_instruction="Preserve the generated blueprint. Re-run the semantic audit when Gemini quota is available; do not issue RELEASE without it.",
+                problem=f"Semantic audit unavailable because the model could not be reached (exhausted quota or sustained capacity failure). Deterministic failures: {issue_text}",
+                repair_instruction="Preserve the generated blueprint. Re-run the semantic audit when Gemini is reachable again; do not issue RELEASE without it.",
             )
         ],
-        strengths=["The 20-unit blueprint was preserved and deterministic Content Gate checks completed before quota interruption."],
+        strengths=["The 20-unit blueprint was preserved and deterministic Content Gate checks completed before the model became unreachable."],
     )
 
 
@@ -143,7 +185,7 @@ def _major_coverage_gaps(blueprint, profile) -> tuple[list[str], list[str]]:
 
 
 def _ensure_quota_safe_completeness(blueprint, profile, bundle, source_text: str, reason: str):
-    """Guarantee atomic P1 completeness when semantic repair/audit loses quota.
+    """Guarantee atomic P1 completeness when the model becomes unreachable.
 
     A complete semantic Blueprint is preserved.  An incomplete semantic Blueprint
     is replaced by the tested deterministic source-bounded draft.  In both cases
@@ -174,7 +216,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             profile = service.profile_source(bundle)
             profile = reconcile_source_profile(profile, bundle)
         except Exception as exc:
-            if not _is_quota_error(exc):
+            if not _is_model_unavailable(exc):
                 raise
             profile = build_deterministic_source_profile(bundle, str(exc))
         job.source_profile = profile
@@ -185,7 +227,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         try:
             blueprint = service.generate_blueprint(bundle, profile)
         except Exception as exc:
-            if not _is_quota_error(exc):
+            if not _is_model_unavailable(exc):
                 raise
             blueprint = build_deterministic_blueprint(profile)
             blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
@@ -195,7 +237,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             job.deterministic_checks = checks
             job.audit = _deterministic_fallback_audit(checks, str(exc))
             save_job(job)
-            _update(job, "blocked", 100, "BLOCKED — Gemini quota unavailable during generation. A complete source-checkpoint draft was preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds.")
+            _update(job, "blocked", 100, "BLOCKED — Gemini was unreachable during generation. A complete source-checkpoint draft was preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds.")
             return
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint
@@ -214,7 +256,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         try:
             audit = service.audit(bundle, blueprint, det_fail)
         except Exception as exc:
-            if not _is_quota_error(exc):
+            if not _is_model_unavailable(exc):
                 raise
             semantic_available = False
             audit = _deterministic_fallback_audit(checks, str(exc))
@@ -235,7 +277,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             try:
                 blueprint = service.repair(bundle, blueprint, audit, det_fail)
             except Exception as exc:
-                if _is_quota_error(exc):
+                if _is_model_unavailable(exc):
                     blueprint, checks, audit, replaced, missing, late = _ensure_quota_safe_completeness(
                         blueprint, profile, bundle, source_text, str(exc)
                     )
@@ -246,9 +288,9 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
                     save_job(job)
                     if replaced:
                         gap_text = ", ".join(missing + late)
-                        _update(job, "blocked", 100, f"BLOCKED — Gemini quota unavailable during repair. The incomplete semantic draft was replaced by a complete source-checkpoint draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED and RELEASE is forbidden until semantic audit succeeds. Recovered: {gap_text}")
+                        _update(job, "blocked", 100, f"BLOCKED — Gemini was unreachable during repair. The incomplete semantic draft was replaced by a complete source-checkpoint draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED and RELEASE is forbidden until semantic audit succeeds. Recovered: {gap_text}")
                     else:
-                        _update(job, "blocked", 100, "BLOCKED — Gemini quota unavailable during repair. The source-complete semantic draft was preserved; readiness remains UNVERIFIED and RELEASE is forbidden until semantic audit succeeds.")
+                        _update(job, "blocked", 100, "BLOCKED — Gemini was unreachable during repair. The source-complete semantic draft was preserved; readiness remains UNVERIFIED and RELEASE is forbidden until semantic audit succeeds.")
                     return
                 raise
 
@@ -267,7 +309,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
                 audit = service.audit(bundle, blueprint, det_fail)
                 semantic_available = True
             except Exception as exc:
-                if not _is_quota_error(exc):
+                if not _is_model_unavailable(exc):
                     raise
                 semantic_available = False
                 audit = _deterministic_fallback_audit(checks, str(exc))
@@ -281,7 +323,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         job.blueprint = blueprint
         if not semantic_available:
             blueprint, checks, audit, replaced, missing, late = _ensure_quota_safe_completeness(
-                blueprint, profile, bundle, source_text, "Gemini quota exhausted before semantic release assurance completed."
+                blueprint, profile, bundle, source_text, "Gemini became unreachable before semantic release assurance completed."
             )
             job.blueprint = blueprint
             job.deterministic_checks = checks
@@ -289,9 +331,9 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             job.error = None
             save_job(job)
             if replaced:
-                _update(job, "blocked", 100, "BLOCKED — semantic assurance is unavailable because Gemini quota is exhausted. A complete source-checkpoint draft now covers every major P1 checkpoint by Unit 15; readiness is UNVERIFIED and no RELEASE is issued.")
+                _update(job, "blocked", 100, "BLOCKED — semantic assurance is unavailable because Gemini could not be reached. A complete source-checkpoint draft now covers every major P1 checkpoint by Unit 15; readiness is UNVERIFIED and no RELEASE is issued.")
             else:
-                _update(job, "blocked", 100, "BLOCKED — source-complete blueprint preserved and local gates completed; semantic audit is unavailable because Gemini quota is exhausted. Preview and exports remain available, but no RELEASE is issued.")
+                _update(job, "blocked", 100, "BLOCKED — source-complete blueprint preserved and local gates completed; semantic audit is unavailable because Gemini could not be reached. Preview and exports remain available, but no RELEASE is issued.")
         else:
             # Major P1 completeness is non-negotiable even when Gemini remained
             # available through every repair round.
@@ -318,9 +360,9 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
     except Exception as exc:
         try:
             job = load_job(job_id)
-            if job.blueprint is not None and _is_quota_error(exc):
+            if job.blueprint is not None and _is_model_unavailable(exc):
                 job.error = None
-                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; downstream Gemini quota became unavailable during {stage}. Preview and exports remain available.")
+                _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; Gemini became unreachable during {stage}. Preview and exports remain available.")
             else:
                 job.status = "error"
                 job.progress = 100
@@ -332,6 +374,10 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
     finally:
         if service is not None:
             service.close()
+        try:
+            prune_expired()
+        except Exception:
+            pass
 
 
 @app.get("/")
