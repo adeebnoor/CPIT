@@ -961,12 +961,27 @@ def _r_title(c, bp: Blueprint, u: LectureUnit, items):
 
 
 def _r_bullets(c, items, x=65, y=405, width=820, body_size=13.5):
-    row = min(56, 290 / max(1, len(items)))
-    for i, (title, body) in enumerate(items[:6]):
+    """Numbered rows separated by rules, not a column of floating text.
+
+    This drew one 6pt square per item and nothing else, so the four units that
+    use it were the emptiest pages in the deck. The row band, the index and the
+    separator cost nothing and give the eye somewhere to land.
+    """
+    shown = items[:6]
+    row = min(56, 290 / max(1, len(shown)))
+    for i, (title, body) in enumerate(shown):
         yy = y - i * row
-        c.setFillColor(R_GOLD); c.rect(x, yy - 7, 6, 6, fill=1, stroke=0)
+        top, height = yy - row + 16, row - 8
+        if i % 2 == 0:
+            c.setFillColor(R_PALE_GREEN); c.rect(x - 8, top, width + 16, height, fill=1, stroke=0)
+        c.setFillColor(R_GOLD); c.rect(x, top, 3.5, height, fill=1, stroke=0)
+        c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", _snap(6))
+        c.drawString(x + 10, yy + 5, f"{i + 1:02d}")
         c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold", _snap(8.3)); c.drawString(x + 15, yy - 7, presenter_text(title, 32))
         _r_wrap(c, body, x + 145, yy - 5, width - 155, body_size, R_INK, False, 2)
+        if i < len(shown) - 1:
+            c.setStrokeColor(R_LINE); c.setLineWidth(0.6)
+            c.line(x - 8, top - 4, x + width + 8, top - 4)
 
 
 def _r_source(c, bp: Blueprint, u: LectureUnit, plan) -> bool:
@@ -982,6 +997,50 @@ def _r_source(c, bp: Blueprint, u: LectureUnit, plan) -> bool:
         return True
     except Exception:
         return False
+
+
+# The drawable band between the question line and the TRY/CHECK footer. Forms
+# used to hard-code their own vertical extents and stop short of it, which is
+# what left a third of the slide blank.
+# The question line ends near y=445 and the TRY rule is drawn at y=64, so this
+# is the real drawable height. Forms previously stopped at y=150 and left 72pt
+# - a quarter of the band - blank above the footer.
+BAND_TOP = 428.0
+BAND_BOTTOM = 82.0
+
+
+def _arrow(c, x1, y1, x2, y2, color=None, width=1.4, head=6.0):
+    """A line that ends in a head.
+
+    Every "diagram" in this deck was a row of rectangles: a chain with no
+    arrows between its links, a stack with no direction, a curve with no axis.
+    The connective marks are what make a form readable as a diagram rather than
+    as boxes of text, so they are drawn, not implied.
+    """
+    import math
+
+    color = color or R_GREEN_2
+    c.saveState()
+    c.setStrokeColor(color); c.setLineWidth(width)
+    angle = math.atan2(y2 - y1, x2 - x1)
+    # Stop the shaft short so the head tip lands exactly on the target point.
+    c.line(x1, y1, x2 - head * math.cos(angle) * 0.9, y2 - head * math.sin(angle) * 0.9)
+    c.setFillColor(color)
+    path = c.beginPath()
+    path.moveTo(x2, y2)
+    for sign in (1, -1):
+        path.lineTo(x2 - head * math.cos(angle - sign * 0.42),
+                    y2 - head * math.sin(angle - sign * 0.42))
+    path.close()
+    c.drawPath(path, fill=1, stroke=0)
+    c.restoreState()
+
+
+def _tick_label(c, x, y, text, size=6.0, color=None, centred=True):
+    """A small axis or index label."""
+    c.setFillColor(color or R_MUTED)
+    c.setFont("Helvetica-Bold", _snap(size))
+    (c.drawCentredString if centred else c.drawString)(x, y, text)
 
 
 def _r_redraw(c, bp: Blueprint, u: LectureUnit):
@@ -1004,6 +1063,7 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
             for i, (title, body) in enumerate(items[:5]):
                 yy = 400 - (i + 1) * 48
                 c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_WHITE); c.setStrokeColor(R_LINE); c.rect(65, yy, 830, 48, fill=1, stroke=1)
+                c.setStrokeColor(R_LINE); c.setLineWidth(0.6); c.line(258, yy, 258, yy + 48)
                 c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(76, yy + 27, presenter_text(title, 28))
                 _r_wrap(c, body, 270, yy + 30, 605, 9.2, R_INK, False, 3)
         else:
@@ -1013,7 +1073,12 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         c.setFillColor(R_GREEN_2); c.circle(480, 270, 48, fill=1, stroke=0); c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480, 267, "DECISION")
         pos = [(75,380),(75,270),(75,160),(650,380),(650,270),(650,160)]
         for i, (title, body) in enumerate(items[:6]):
-            x,y = pos[i]; c.setFillColor(R_RED if i in {1,4} else R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(x,y,title)
+            x,y = pos[i]
+            # Spokes: without them the hub is decoration and the six items are
+            # unrelated captions parked either side of it.
+            _arrow(c, x + (245 if i < 3 else -10), y + 4, 480 + (-52 if i < 3 else 52), 270 + (30 - (i % 3) * 30),
+                   R_LINE if i % 2 else R_GREEN_2, 0.9, 4.5)
+            c.setFillColor(R_RED if i in {1,4} else R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(x,y,title)
             _r_wrap(c, body, x, y-17, 235, 9.2, R_INK, False, 4)
         return
     if kind == "ladder":
@@ -1025,17 +1090,58 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         _r_wrap(c, "Predict first. Name the mechanism only after the constraint becomes visible.", 80, 400, 360, 13, R_INK, False, 3)
         return
     if kind == "curve":
-        c.setStrokeColor(R_INK); c.line(95,130,560,130); c.line(95,130,95,410)
+        # Gridlines and ticks first, so the curve reads against a scale rather
+        # than floating on an unlabelled pair of axes.
+        c.setStrokeColor(R_LINE); c.setLineWidth(0.5)
+        for g in range(1, 5):
+            gy = 130 + g * 68
+            c.line(95, gy, 560, gy)
+        for g in range(1, 6):
+            gx = 95 + g * 78
+            c.line(gx, 130, gx, 410)
+        c.setStrokeColor(R_INK); c.setLineWidth(1); c.line(95,130,560,130); c.line(95,130,95,410)
+        for g in range(0, 6):
+            gx = 95 + g * 78
+            c.setStrokeColor(R_INK); c.line(gx, 126, gx, 130)
+        for g in range(0, 5):
+            gy = 130 + g * 68
+            c.setStrokeColor(R_INK); c.line(91, gy, 95, gy)
+        _tick_label(c, 327, 112, "DEPENDABILITY ACHIEVED  \u2192", 6.0)
+        c.saveState(); c.translate(78, 270); c.rotate(90)
+        _tick_label(c, 0, 0, "COST  \u2192", 6.0); c.restoreState()
         pts=[(110,145),(175,150),(240,165),(305,190),(365,225),(415,275),(455,340),(485,405)]
         c.setStrokeColor(R_GREEN_2); c.setLineWidth(2)
         for a,b in zip(pts,pts[1:]): c.line(a[0],a[1],b[0],b[1])
+        # Mark where the curve turns: that knee is the engineering decision.
+        c.setFillColor(R_RED); c.circle(415, 275, 3.6, fill=1, stroke=0)
+        _arrow(c, 470, 210, 424, 266, R_RED, 1.1, 5.0)
+        _tick_label(c, 505, 200, "COST TURNS", 5.8, R_RED)
         c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(610,370,items[1][0]); _r_wrap(c,items[1][1],610,350,280,11,R_INK,False,5)
         c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(610,245,items[2][0]); _r_wrap(c,items[2][1],610,225,280,11,R_INK,False,5)
         return
     if kind == "stack":
-        for i,(title,body) in enumerate(items[:6]):
-            yy=385-i*47; c.setFillColor(R_PALE_GREEN if i%2 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(175,yy,610,38,fill=1,stroke=1)
-            c.setFillColor(R_RED if i in {0,5} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(190,yy+15,title); _r_wrap(c,body,285,yy+22,480,8.5,R_INK,False,2,"center")
+        shown = items[:6]
+        # The row pitch used to be a fixed 47pt, so a five-item stack left the
+        # bottom third of the slide empty while its text stayed at 8.5pt. Rows
+        # now divide the whole content band, and the type grows with them.
+        top, bottom = BAND_TOP, BAND_BOTTOM
+        pitch = (top - bottom) / max(1, len(shown))
+        box_h = pitch - 9
+        body_size = 9.0 if pitch < 50 else (11.0 if pitch < 62 else 13.5)
+        for i,(title,body) in enumerate(shown):
+            yy = top - pitch * (i + 1) + (pitch - box_h)
+            c.setFillColor(R_PALE_GREEN if i%2 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(175,yy,610,box_h,fill=1,stroke=1)
+            c.setFillColor(R_RED if i in {0,5} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawString(190,yy+box_h/2-4,title)
+            _r_wrap(c,body,285,yy+box_h-10,480,body_size,R_INK,False,3,"center")
+            _tick_label(c, 160, yy+box_h/2-4, f"L{len(shown)-i}", 6.0, R_MUTED)
+            # A layer that hides detail from the one above it only reads as a
+            # layer when the deck draws where the effect travels.
+            if i:
+                _arrow(c, 800, yy+pitch+2, 800, yy+box_h-2, R_GOLD, 1.2, 5.0)
+        if len(shown) > 1:
+            mid = (top + bottom) / 2
+            _tick_label(c, 828, mid + 5, "CHANGE", 5.8, R_GOLD)
+            _tick_label(c, 828, mid - 5, "RIPPLES", 5.8, R_GOLD)
         return
     if kind == "compare":
         c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8.5)); c.drawCentredString(255,400,items[0][0]); _r_wrap(c,items[0][1],75,350,360,15,R_INK,False,6,"center","Times-Roman")
@@ -1055,17 +1161,33 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(445,245,items[2][0]); _r_wrap(c,items[2][1],445,223,405,12,R_INK,False,5)
         return
     if kind in {"chain","mutation"}:
-        n=len(items); left=55; gap=12; total=850; w=(total-gap*(n-1))/n
+        n=len(items); left=55; gap=26; total=850; w=(total-gap*(n-1))/n
         for i,(title,body) in enumerate(items):
             x=left+i*(w+gap); c.setFillColor(R_RED if i in {1,3} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7.2)); c.drawCentredString(x+w/2,360,title)
-            c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,165,w,170,fill=1,stroke=1); _r_wrap(c,body,x+10,295,w-20,10,R_INK,False,8,"center")
+            c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2)
+            c.rect(x, BAND_BOTTOM, w, 348 - BAND_BOTTOM, fill=1, stroke=1)
+            _r_wrap(c, body, x+10, 328, w-20, 12.0, R_INK, False, 12, "center")
+            _tick_label(c, x+11, 173, f"{i+1:02d}", 6.0, R_MUTED, centred=False)
+            # The link between two stages is the point of the form; without it
+            # the slide is a row of boxes that happen to sit side by side.
+            if i:
+                _arrow(c, x-gap+3, (348+BAND_BOTTOM)/2, x-3, (348+BAND_BOTTOM)/2)
         if kind=="mutation": c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(11)); c.drawCentredString(480,120,"Change one constraint. Re-run the decision.")
         return
     if kind == "timeline":
         c.setStrokeColor(R_GOLD); c.setLineWidth(2); c.line(100,285,860,285)
         xs=[150,480,810]
+        _arrow(c, 855, 285, 872, 285, R_GOLD, 2.0, 7.0)
         for i,(title,body) in enumerate(items[:3]):
-            c.setFillColor(R_RED if i==2 else R_GREEN_2); c.circle(xs[i],285,7,fill=1,stroke=0); c.setFillColor(R_RED if i==2 else R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(xs[i],350,title); _r_wrap(c,body,xs[i]-115,245,230,11,R_INK,False,6,"center")
+            accent = R_RED if i==2 else R_GREEN_2
+            # Stems tie each marker to its label; without them the captions
+            # float free of the axis they are supposed to sit on.
+            c.setStrokeColor(accent); c.setLineWidth(1)
+            c.line(xs[i], 292, xs[i], 340); c.line(xs[i], 278, xs[i], 262)
+            c.setFillColor(R_WHITE); c.setStrokeColor(accent); c.setLineWidth(1.6)
+            c.circle(xs[i],285,7,fill=1,stroke=1)
+            c.setFillColor(accent); c.circle(xs[i],285,3,fill=1,stroke=0)
+            c.setFillColor(R_RED if i==2 else R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(xs[i],350,title); _r_wrap(c,body,xs[i]-115,245,230,11,R_INK,False,6,"center")
         return
     if kind == "burden":
         _r_wrap(c,items[0][1],75,365,320,14,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(235,405,items[0][0])
@@ -1082,7 +1204,12 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.circle(480,275,65,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
         pos=[(75,390),(350,420),(690,390),(75,145),(350,125),(690,145)]
         for i,(title,body) in enumerate(items[:6]):
-            x,y=pos[i]; c.setFillColor(R_RED if i in {0,3} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawCentredString(x+95,y,title); _r_wrap(c,body,x,y-20,190,8.7,R_INK,False,5,"center")
+            x,y=pos[i]
+            c.setStrokeColor(R_LINE); c.setLineWidth(0.9); c.line(x+95, y-6, 480, 275)
+            c.setFillColor(R_RED if i in {0,3} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawCentredString(x+95,y,title); _r_wrap(c,body,x,y-20,190,8.7,R_INK,False,5,"center")
+        # Redraw the hub so the spokes pass behind it, not across the label.
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.circle(480,275,65,fill=1,stroke=1)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
         return
     if kind == "argument":
         y=405
