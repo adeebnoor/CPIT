@@ -147,6 +147,32 @@ def _is_title_like(line: str) -> bool:
     return not (first[:1].islower() and first.lower() not in {"e.g.", "i.e."})
 
 
+# Ten teaching units need distinct material. Below this the deck is the same
+# checkpoint retold, which the old profile still reported as scope_fit="FIT".
+MIN_MAJOR_CHECKPOINTS_FOR_A_LECTURE = 3
+
+
+def _thin_source_warning(coverage) -> list[str]:
+    """Say plainly when the upload cannot support a 90-minute lecture.
+
+    scope_fit only ever distinguished "too much" from "FIT", so a two-page
+    syllabus header was reported as a fit for ninety minutes. Faculty saw a
+    complete-looking twenty-unit deck and a scatter of coverage-rubric misses
+    that never named the actual problem.
+    """
+    majors = len([x for x in coverage if x.importance == "major"])
+    if majors >= MIN_MAJOR_CHECKPOINTS_FOR_A_LECTURE:
+        return []
+    return [
+        f"SOURCE TOO THIN: this upload yields only {majors} major teaching "
+        f"checkpoint{'s' if majors != 1 else ''}, below the {MIN_MAJOR_CHECKPOINTS_FOR_A_LECTURE} "
+        "needed for a 90-minute lecture. The teaching units will revisit the same "
+        "material under different questions rather than cover new ground. Upload the "
+        "chapter or lecture slides themselves; a syllabus, cover page or course "
+        "outline does not carry teachable content."
+    ]
+
+
 def _choose_label(lines: list[str], page_no: int) -> str:
     clean = [x for x in lines if not _is_furniture_line(x)]
     # Numbered chapter sections are the strongest deterministic checkpoint.
@@ -399,7 +425,7 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
             "P1 remains the authority for technical claims and terminology.",
             "Deterministic fallback records source coordinates; it does not add external technical claims.",
         ],
-        source_warnings=[warning],
+        source_warnings=[warning, *_thin_source_warning(coverage)],
         session_minutes=90,
         scope_fit="COMPRESS" if len([x for x in coverage if x.importance == "major"]) > 16 else "FIT",
         in_scope_families=[x.name for x in families[:40]],
