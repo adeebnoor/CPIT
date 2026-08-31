@@ -52,6 +52,19 @@ R_GOLD = colors.HexColor('#C49A27')
 R_RED = colors.HexColor('#E22424')
 R_INK = colors.HexColor('#181818')
 R_MUTED = colors.HexColor('#707070')
+
+# The exported deck used 24 distinct type sizes - 7.2, 7.6, 8.3, 8.7, 9.2, 9.6 -
+# which is not a scale, it is drift from forty separate call sites each picking a
+# number. The archived CIMT reference holds its whole lecture on twelve steps.
+# Every size the renderer asks for is snapped to the nearest step here, so a new
+# call site cannot reintroduce a one-off size. Ties round down: shrinking text
+# cannot overflow a box, growing it can.
+TYPE_SCALE = (5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 13.5, 17.5, 25.0, 31.0)
+
+
+def _snap(size: float) -> float:
+    """Round a requested size to the nearest step on the deck's type scale."""
+    return min(TYPE_SCALE, key=lambda step: (abs(step - size), step > size))
 R_WHITE = colors.white
 R_PALE_GREEN = colors.HexColor('#ECF6EB')
 R_PALE_GOLD = colors.HexColor('#FAF6E5')
@@ -607,6 +620,12 @@ def _ppt_title_slide(slide, bp: Blueprint, u: LectureUnit, items):
     _ppt_text(slide, 10.9, 7.00, 1.5, .22, "01/20", 6.3, MUTED, True, align=PP_ALIGN.RIGHT)
 
 
+# The PPTX equivalent of BAND_TOP/BAND_BOTTOM. The question line clears at
+# about 1.55in and the TRY rule is drawn at 6.43in.
+PPT_BAND_TOP = 1.55
+PPT_BAND_BOTTOM = 6.30
+
+
 def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=19.0):
     items = items[:max_items]
     if not items:
@@ -614,8 +633,13 @@ def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=
     row_h = min(.82, 4.85 / max(1, len(items)))
     for i, (title, body) in enumerate(items):
         yy = y + i * row_h
-        _ppt_rect(slide, x, yy + .18, .08, .08, GOLD)
-        _ppt_text(slide, x + .18, yy, 2.1, .34, presenter_text(title, 32), 11.0, RED if i == 0 else GREEN, True)
+        # Was a single .08in square per row and nothing else, which is why the
+        # bullet units were the emptiest slides in the deck.
+        if i % 2 == 0:
+            _ppt_rect(slide, x - .10, yy - .06, w + .20, row_h - .06, PALE_GREEN)
+        _ppt_rect(slide, x, yy - .06, .05, row_h - .06, GOLD)
+        _ppt_text(slide, x + .12, yy + .02, .34, .22, f"{i + 1:02d}", 8.0, MUTED, True)
+        _ppt_text(slide, x + .50, yy, 1.85, .34, presenter_text(title, 32), 11.0, RED if i == 0 else GREEN, True)
         _ppt_text(slide, x + 2.18, yy - .02, w - 2.2, .55, presenter_text(body, 138), body_size, INK, False, "Aptos")
 
 
@@ -675,15 +699,26 @@ def _ppt_curve(slide, items):
 
 
 def _ppt_stack(slide, items):
-    x, y, w = 2.05, 1.55, 9.25
-    h = .64
-    for i, (title, body) in enumerate(items[:6]):
-        yy = y + i * .74
+    shown = items[:6]
+    if not shown:
+        return
+    x, w = 2.05, 9.25
+    # Matches the PDF stack: rows divide the whole band instead of stepping a
+    # fixed .74in, so a five-item stack no longer stops a quarter of the way
+    # up the slide, and the body type grows with the row.
+    pitch = (PPT_BAND_BOTTOM - PPT_BAND_TOP) / len(shown)
+    h = pitch - .10
+    body_size = 12.5 if pitch < .78 else (15.0 if pitch < .95 else 17.5)
+    for i, (title, body) in enumerate(shown):
+        yy = PPT_BAND_TOP + i * pitch
         _ppt_rect(slide, x, yy, w, h, PALE_GREEN if i % 2 else WHITE, GREEN_2)
-        _ppt_text(slide, x + .12, yy + .12, 1.35, .24, title, 8.8, RED if i in {0,5} else GREEN, True)
-        _ppt_text(slide, x + 1.55, yy + .08, w - 1.70, .42, presenter_text(body, 112), 12.5, INK, False, "Aptos", PP_ALIGN.CENTER)
-    _ppt_text(slide, .82, 2.58, 1.08, 1.50, "SYSTEM\nVIEW", 11.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
-    _ppt_text(slide, 11.48, 2.58, 1.08, 1.50, "SOFTWARE\nVIEW", 11.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+        _ppt_text(slide, x + .12, yy + h / 2 - .12, 1.35, .24, title, 8.8, RED if i in {0,5} else GREEN, True)
+        _ppt_text(slide, x + 1.55, yy + .06, w - 1.70, h - .12, presenter_text(body, 112), body_size, INK, False, "Aptos", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+        _ppt_text(slide, x - .38, yy + h / 2 - .12, .30, .24, f"L{len(shown) - i}", 8.0, MUTED, True, align=PP_ALIGN.RIGHT)
+        if i:
+            _ppt_connector(slide, x + w + .18, yy - pitch + h, x + w + .18, yy, GOLD, 1.4)
+    mid = PPT_BAND_TOP + (PPT_BAND_BOTTOM - PPT_BAND_TOP) / 2
+    _ppt_text(slide, x + w + .30, mid - .22, .95, .44, "CHANGE\nRIPPLES", 8.0, GOLD, True, align=PP_ALIGN.LEFT, valign=MSO_ANCHOR.MIDDLE)
 
 
 def _ppt_compare(slide, items):
@@ -893,6 +928,7 @@ def export_cimt_presenter_pptx_v43(bp: Blueprint, out: Path) -> Path:
 # ---------------------------------------------------------------------------
 
 def _r_wrap(c, text, x, y, width, size=12, color=R_INK, bold=False, max_lines=5, align="left", font=None):
+    size = _snap(size)
     font_name = font or ("Helvetica-Bold" if bold else "Helvetica")
     words = str(text or "").split(); lines: list[str] = []; line = ""
     for word in words:
@@ -915,44 +951,59 @@ def _r_wrap(c, text, x, y, width, size=12, color=R_INK, bold=False, max_lines=5,
 def _r_frame(c, bp: Blueprint, u: LectureUnit, show_decision=False):
     c.setFillColor(R_WHITE); c.rect(0, 0, PDF_W, PDF_H, fill=1, stroke=0)
     c.setFillColor(R_GOLD); c.rect(32, 516, 865, 1.3, fill=1, stroke=0); c.rect(32, 493, 1.3, 24, fill=1, stroke=0)
-    c.setFillColor(R_GREEN); c.setFont("Times-Roman", 25); c.drawString(40, 482, _display_title(bp, u))
+    c.setFillColor(R_GREEN); c.setFont("Times-Roman", _snap(25)); c.drawString(40, 482, _display_title(bp, u))
     _r_wrap(c, _display_question(u), 45, 452, 780, 9.6, R_INK, False, 2)
     c.setStrokeColor(R_GOLD); c.setLineWidth(1.6); c.circle(850, 493, 7.5, fill=0, stroke=1)
-    c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 7); c.drawString(865, 495, "CIMT")
-    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", 4.8); c.drawString(865, 487, "ISCARB")
+    c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(865, 495, "CIMT")
+    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", _snap(4.8)); c.drawString(865, 487, "ISCARB")
     c.setFillColor(R_GOLD); c.rect(40, 31, 850, 1, fill=1, stroke=0)
-    c.setFillColor(R_MUTED); c.setFont("Helvetica", 5.8); c.drawString(40, 20, f"{_subject(bp)} · source-grounded presenter")
+    c.setFillColor(R_MUTED); c.setFont("Helvetica", _snap(5.8)); c.drawString(40, 20, f"{_subject(bp)} · source-grounded presenter")
     c.drawRightString(890, 20, f"{u.number:02d}/20")
     if show_decision:
         c.setStrokeColor(R_GOLD); c.setLineWidth(.8); c.line(48, 64, 875, 64)
-        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", 7); c.drawString(48, 50, "TRY")
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(48, 50, "TRY")
         _r_wrap(c, _try_text(u), 78, 51, 360, 7.5, R_INK, True, 2)
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 6.8); c.drawString(470, 50, "CHECK")
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(6.8)); c.drawString(470, 50, "CHECK")
         _r_wrap(c, _check_text(u), 515, 51, 300, 7.2, R_INK, False, 2)
         ready = _readiness_for_unit(bp, u)
         if ready:
-            c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 4.8); c.drawRightString(875, 36, ready)
+            c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(4.8)); c.drawRightString(875, 36, ready)
 
 
 def _r_title(c, bp: Blueprint, u: LectureUnit, items):
     c.setFillColor(R_WHITE); c.rect(0, 0, PDF_W, PDF_H, fill=1, stroke=0)
     c.setFillColor(R_GOLD); c.rect(42, 480, 850, 1.3, fill=1, stroke=0); c.rect(42, 446, 1.3, 35, fill=1, stroke=0)
     _r_wrap(c, bp.lecture_title, 90, 392, 780, 31, R_GREEN, False, 2, "center", "Times-Roman")
-    c.setFillColor(R_INK); c.setFont("Helvetica", 11); c.drawCentredString(480, 312, "ISCARB Faculty Studio · CIMT-native lecture")
+    c.setFillColor(R_INK); c.setFont("Helvetica", _snap(11)); c.drawCentredString(480, 312, "ISCARB Faculty Studio · CIMT-native lecture")
     c.setFillColor(R_GOLD); c.rect(330, 280, 300, 1.2, fill=1, stroke=0)
     _r_wrap(c, items[0][1], 115, 225, 730, 17.5, R_RED, False, 3, "center", "Times-Roman")
-    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", 8); c.drawCentredString(480, 110, "20 teaching units · 90 live minutes · source fidelity retained")
+    c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(480, 110, "20 teaching units · 90 live minutes · source fidelity retained")
     c.setFillColor(R_GOLD); c.rect(42, 50, 850, 1.2, fill=1, stroke=0)
-    c.setFillColor(R_MUTED); c.setFont("Helvetica", 5.8); c.drawString(45, 36, _source_label(u)); c.drawRightString(892, 36, "01/20")
+    c.setFillColor(R_MUTED); c.setFont("Helvetica", _snap(5.8)); c.drawString(45, 36, _source_label(u)); c.drawRightString(892, 36, "01/20")
 
 
 def _r_bullets(c, items, x=65, y=405, width=820, body_size=13.5):
-    row = min(56, 290 / max(1, len(items)))
-    for i, (title, body) in enumerate(items[:6]):
+    """Numbered rows separated by rules, not a column of floating text.
+
+    This drew one 6pt square per item and nothing else, so the four units that
+    use it were the emptiest pages in the deck. The row band, the index and the
+    separator cost nothing and give the eye somewhere to land.
+    """
+    shown = items[:6]
+    row = min(56, 290 / max(1, len(shown)))
+    for i, (title, body) in enumerate(shown):
         yy = y - i * row
-        c.setFillColor(R_GOLD); c.rect(x, yy - 7, 6, 6, fill=1, stroke=0)
-        c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold", 8.3); c.drawString(x + 15, yy - 7, presenter_text(title, 32))
+        top, height = yy - row + 16, row - 8
+        if i % 2 == 0:
+            c.setFillColor(R_PALE_GREEN); c.rect(x - 8, top, width + 16, height, fill=1, stroke=0)
+        c.setFillColor(R_GOLD); c.rect(x, top, 3.5, height, fill=1, stroke=0)
+        c.setFillColor(R_MUTED); c.setFont("Helvetica-Bold", _snap(6))
+        c.drawString(x + 10, yy + 5, f"{i + 1:02d}")
+        c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold", _snap(8.3)); c.drawString(x + 15, yy - 7, presenter_text(title, 32))
         _r_wrap(c, body, x + 145, yy - 5, width - 155, body_size, R_INK, False, 2)
+        if i < len(shown) - 1:
+            c.setStrokeColor(R_LINE); c.setLineWidth(0.6)
+            c.line(x - 8, top - 4, x + width + 8, top - 4)
 
 
 def _r_source(c, bp: Blueprint, u: LectureUnit, plan) -> bool:
@@ -964,10 +1015,54 @@ def _r_source(c, bp: Blueprint, u: LectureUnit, plan) -> bool:
         img = ImageReader(str(path)); iw, ih = img.getSize(); box = (55, 80, 850, 350)
         scale = min(box[2] / iw, box[3] / ih); dw, dh = iw * scale, ih * scale
         c.drawImage(img, box[0] + (box[2] - dw) / 2, box[1] + (box[3] - dh) / 2, width=dw, height=dh, preserveAspectRatio=True, mask='auto')
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 5.7); c.drawRightString(900, 62, f"ADAPTED VISUAL · P1 {plan.source_slide}")
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(5.7)); c.drawRightString(900, 62, f"ADAPTED VISUAL · P1 {plan.source_slide}")
         return True
     except Exception:
         return False
+
+
+# The drawable band between the question line and the TRY/CHECK footer. Forms
+# used to hard-code their own vertical extents and stop short of it, which is
+# what left a third of the slide blank.
+# The question line ends near y=445 and the TRY rule is drawn at y=64, so this
+# is the real drawable height. Forms previously stopped at y=150 and left 72pt
+# - a quarter of the band - blank above the footer.
+BAND_TOP = 428.0
+BAND_BOTTOM = 82.0
+
+
+def _arrow(c, x1, y1, x2, y2, color=None, width=1.4, head=6.0):
+    """A line that ends in a head.
+
+    Every "diagram" in this deck was a row of rectangles: a chain with no
+    arrows between its links, a stack with no direction, a curve with no axis.
+    The connective marks are what make a form readable as a diagram rather than
+    as boxes of text, so they are drawn, not implied.
+    """
+    import math
+
+    color = color or R_GREEN_2
+    c.saveState()
+    c.setStrokeColor(color); c.setLineWidth(width)
+    angle = math.atan2(y2 - y1, x2 - x1)
+    # Stop the shaft short so the head tip lands exactly on the target point.
+    c.line(x1, y1, x2 - head * math.cos(angle) * 0.9, y2 - head * math.sin(angle) * 0.9)
+    c.setFillColor(color)
+    path = c.beginPath()
+    path.moveTo(x2, y2)
+    for sign in (1, -1):
+        path.lineTo(x2 - head * math.cos(angle - sign * 0.42),
+                    y2 - head * math.sin(angle - sign * 0.42))
+    path.close()
+    c.drawPath(path, fill=1, stroke=0)
+    c.restoreState()
+
+
+def _tick_label(c, x, y, text, size=6.0, color=None, centred=True):
+    """A small axis or index label."""
+    c.setFillColor(color or R_MUTED)
+    c.setFont("Helvetica-Bold", _snap(size))
+    (c.drawCentredString if centred else c.drawString)(x, y, text)
 
 
 def _r_redraw(c, bp: Blueprint, u: LectureUnit):
@@ -980,112 +1075,180 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         c.setFillColor(R_GOLD); c.rect(330, 220, 300, 1.2, fill=1, stroke=0)
         for i, (_, body) in enumerate(items[1:4]):
             x = 75 + i * 285
-            c.setFillColor(R_GOLD); c.setFont("Times-Bold", 12); c.drawString(x, 185, f"0{i+1}")
+            c.setFillColor(R_GOLD); c.setFont("Helvetica-Bold", _snap(12)); c.drawString(x, 185, f"0{i+1}")
             _r_wrap(c, body, x + 32, 186, 235, 10.5, R_INK, True, 4)
         return
     if kind in {"takeaways", "table"}:
         if kind == "table":
             c.setFillColor(R_GOLD); c.rect(65, 400, 830, 28, fill=1, stroke=0)
-            c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", 7.5); c.drawString(76, 410, "CHARACTERISTIC"); c.drawString(270, 410, "WHAT IT MEANS IN THE ENGINEERING DECISION")
+            c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawString(76, 410, "CHARACTERISTIC"); c.drawString(270, 410, "WHAT IT MEANS IN THE ENGINEERING DECISION")
             for i, (title, body) in enumerate(items[:5]):
                 yy = 400 - (i + 1) * 48
                 c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_WHITE); c.setStrokeColor(R_LINE); c.rect(65, yy, 830, 48, fill=1, stroke=1)
-                c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", 8); c.drawString(76, yy + 27, presenter_text(title, 28))
+                c.setStrokeColor(R_LINE); c.setLineWidth(0.6); c.line(258, yy, 258, yy + 48)
+                c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(76, yy + 27, presenter_text(title, 28))
                 _r_wrap(c, body, 270, yy + 30, 605, 9.2, R_INK, False, 3)
         else:
             _r_bullets(c, items)
         return
     if kind == "orbit":
-        c.setFillColor(R_GREEN_2); c.circle(480, 270, 48, fill=1, stroke=0); c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", 9); c.drawCentredString(480, 267, "DECISION")
+        c.setFillColor(R_GREEN_2); c.circle(480, 270, 48, fill=1, stroke=0); c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480, 267, "DECISION")
         pos = [(75,380),(75,270),(75,160),(650,380),(650,270),(650,160)]
         for i, (title, body) in enumerate(items[:6]):
-            x,y = pos[i]; c.setFillColor(R_RED if i in {1,4} else R_GREEN); c.setFont("Helvetica-Bold", 8); c.drawString(x,y,title)
+            x,y = pos[i]
+            # Spokes: without them the hub is decoration and the six items are
+            # unrelated captions parked either side of it.
+            _arrow(c, x + (245 if i < 3 else -10), y + 4, 480 + (-52 if i < 3 else 52), 270 + (30 - (i % 3) * 30),
+                   R_LINE if i % 2 else R_GREEN_2, 0.9, 4.5)
+            c.setFillColor(R_RED if i in {1,4} else R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(x,y,title)
             _r_wrap(c, body, x, y-17, 235, 9.2, R_INK, False, 4)
         return
     if kind == "ladder":
         for i, (title, body) in enumerate(items[:4]):
             x = 80 + i * 205; y = 135 + i * 54
             c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_PALE_GREEN); c.setStrokeColor(R_GOLD); c.rect(x,y,185,48,fill=1,stroke=1)
-            c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(x+8,y+31,title)
+            c.setFillColor(R_RED if i == 0 else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(x+8,y+31,title)
             _r_wrap(c, body, x+8, y+20, 168, 7.7, R_INK, False, 2)
         _r_wrap(c, "Predict first. Name the mechanism only after the constraint becomes visible.", 80, 400, 360, 13, R_INK, False, 3)
         return
     if kind == "curve":
-        c.setStrokeColor(R_INK); c.line(95,130,560,130); c.line(95,130,95,410)
+        # Gridlines and ticks first, so the curve reads against a scale rather
+        # than floating on an unlabelled pair of axes.
+        c.setStrokeColor(R_LINE); c.setLineWidth(0.5)
+        for g in range(1, 5):
+            gy = 130 + g * 68
+            c.line(95, gy, 560, gy)
+        for g in range(1, 6):
+            gx = 95 + g * 78
+            c.line(gx, 130, gx, 410)
+        c.setStrokeColor(R_INK); c.setLineWidth(1); c.line(95,130,560,130); c.line(95,130,95,410)
+        for g in range(0, 6):
+            gx = 95 + g * 78
+            c.setStrokeColor(R_INK); c.line(gx, 126, gx, 130)
+        for g in range(0, 5):
+            gy = 130 + g * 68
+            c.setStrokeColor(R_INK); c.line(91, gy, 95, gy)
+        _tick_label(c, 327, 112, "DEPENDABILITY ACHIEVED  \u2192", 6.0)
+        c.saveState(); c.translate(78, 270); c.rotate(90)
+        _tick_label(c, 0, 0, "COST  \u2192", 6.0); c.restoreState()
         pts=[(110,145),(175,150),(240,165),(305,190),(365,225),(415,275),(455,340),(485,405)]
         c.setStrokeColor(R_GREEN_2); c.setLineWidth(2)
         for a,b in zip(pts,pts[1:]): c.line(a[0],a[1],b[0],b[1])
-        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawString(610,370,items[1][0]); _r_wrap(c,items[1][1],610,350,280,11,R_INK,False,5)
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawString(610,245,items[2][0]); _r_wrap(c,items[2][1],610,225,280,11,R_INK,False,5)
+        # Mark where the curve turns: that knee is the engineering decision.
+        c.setFillColor(R_RED); c.circle(415, 275, 3.6, fill=1, stroke=0)
+        _arrow(c, 470, 210, 424, 266, R_RED, 1.1, 5.0)
+        _tick_label(c, 505, 200, "COST TURNS", 5.8, R_RED)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(610,370,items[1][0]); _r_wrap(c,items[1][1],610,350,280,11,R_INK,False,5)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(610,245,items[2][0]); _r_wrap(c,items[2][1],610,225,280,11,R_INK,False,5)
         return
     if kind == "stack":
-        for i,(title,body) in enumerate(items[:6]):
-            yy=385-i*47; c.setFillColor(R_PALE_GREEN if i%2 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(175,yy,610,38,fill=1,stroke=1)
-            c.setFillColor(R_RED if i in {0,5} else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(190,yy+15,title); _r_wrap(c,body,285,yy+22,480,8.5,R_INK,False,2,"center")
+        shown = items[:6]
+        # The row pitch used to be a fixed 47pt, so a five-item stack left the
+        # bottom third of the slide empty while its text stayed at 8.5pt. Rows
+        # now divide the whole content band, and the type grows with them.
+        top, bottom = BAND_TOP, BAND_BOTTOM
+        pitch = (top - bottom) / max(1, len(shown))
+        box_h = pitch - 9
+        body_size = 9.0 if pitch < 50 else (11.0 if pitch < 62 else 13.5)
+        for i,(title,body) in enumerate(shown):
+            yy = top - pitch * (i + 1) + (pitch - box_h)
+            c.setFillColor(R_PALE_GREEN if i%2 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(175,yy,610,box_h,fill=1,stroke=1)
+            c.setFillColor(R_RED if i in {0,5} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawString(190,yy+box_h/2-4,title)
+            _r_wrap(c,body,285,yy+box_h-10,480,body_size,R_INK,False,3,"center")
+            _tick_label(c, 160, yy+box_h/2-4, f"L{len(shown)-i}", 6.0, R_MUTED)
+            # A layer that hides detail from the one above it only reads as a
+            # layer when the deck draws where the effect travels.
+            if i:
+                _arrow(c, 800, yy+pitch+2, 800, yy+box_h-2, R_GOLD, 1.2, 5.0)
+        if len(shown) > 1:
+            mid = (top + bottom) / 2
+            _tick_label(c, 828, mid + 5, "CHANGE", 5.8, R_GOLD)
+            _tick_label(c, 828, mid - 5, "RIPPLES", 5.8, R_GOLD)
         return
     if kind == "compare":
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8.5); c.drawCentredString(255,400,items[0][0]); _r_wrap(c,items[0][1],75,350,360,15,R_INK,False,6,"center","Times-Roman")
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8.5)); c.drawCentredString(255,400,items[0][0]); _r_wrap(c,items[0][1],75,350,360,15,R_INK,False,6,"center","Times-Roman")
         c.setFillColor(R_GOLD); c.rect(478,135,1.1,270,fill=1,stroke=0)
-        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8.5); c.drawCentredString(705,400,items[1][0]); _r_wrap(c,items[1][1],525,350,360,15,R_INK,False,6,"center","Times-Roman")
-        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(250,95,460,38,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",7); c.drawString(265,110,"TRADE-OFF"); _r_wrap(c,items[2][1],345,113,345,7.8,R_INK,True,2,"center")
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8.5)); c.drawCentredString(705,400,items[1][0]); _r_wrap(c,items[1][1],525,350,360,15,R_INK,False,6,"center","Times-Roman")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(250,95,460,38,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(265,110,"TRADE-OFF"); _r_wrap(c,items[2][1],345,113,345,7.8,R_INK,True,2,"center")
         return
     if kind == "tree":
-        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(350,360,260,50,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",7.5); c.drawCentredString(480,391,items[0][0]); _r_wrap(c,items[0][1],365,378,230,7.6,R_INK,True,2,"center")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(350,360,260,50,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawCentredString(480,391,items[0][0]); _r_wrap(c,items[0][1],365,378,230,7.6,R_INK,True,2,"center")
         xs=[105,315,525,735]
         for i,(title,body) in enumerate(items[1:5]):
-            x=xs[i]; c.setStrokeColor(R_GREEN_2); c.line(480,360,x+60,285); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",7.2); c.drawCentredString(x+60,260,title); _r_wrap(c,body,x,235,120,8.4,R_INK,False,5,"center")
+            x=xs[i]; c.setStrokeColor(R_GREEN_2); c.line(480,360,x+60,285); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(7.2)); c.drawCentredString(x+60,260,title); _r_wrap(c,body,x,235,120,8.4,R_INK,False,5,"center")
         return
     if kind == "context":
-        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(70,145,300,250,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawCentredString(220,365,items[0][0]); _r_wrap(c,items[0][1],95,320,250,14,R_INK,False,7,"center","Times-Roman")
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawString(445,355,items[1][0]); _r_wrap(c,items[1][1],445,333,405,12,R_INK,False,5)
-        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawString(445,245,items[2][0]); _r_wrap(c,items[2][1],445,223,405,12,R_INK,False,5)
+        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(70,145,300,250,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(220,365,items[0][0]); _r_wrap(c,items[0][1],95,320,250,14,R_INK,False,7,"center","Times-Roman")
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(445,355,items[1][0]); _r_wrap(c,items[1][1],445,333,405,12,R_INK,False,5)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(445,245,items[2][0]); _r_wrap(c,items[2][1],445,223,405,12,R_INK,False,5)
         return
     if kind in {"chain","mutation"}:
-        n=len(items); left=55; gap=12; total=850; w=(total-gap*(n-1))/n
+        n=len(items); left=55; gap=26; total=850; w=(total-gap*(n-1))/n
         for i,(title,body) in enumerate(items):
-            x=left+i*(w+gap); c.setFillColor(R_RED if i in {1,3} else R_GREEN); c.setFont("Helvetica-Bold",7.2); c.drawCentredString(x+w/2,360,title)
-            c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,165,w,170,fill=1,stroke=1); _r_wrap(c,body,x+10,295,w-20,10,R_INK,False,8,"center")
-        if kind=="mutation": c.setFillColor(R_RED); c.setFont("Times-Bold",11); c.drawCentredString(480,120,"Change one constraint. Re-run the decision.")
+            x=left+i*(w+gap); c.setFillColor(R_RED if i in {1,3} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7.2)); c.drawCentredString(x+w/2,360,title)
+            c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2)
+            c.rect(x, BAND_BOTTOM, w, 348 - BAND_BOTTOM, fill=1, stroke=1)
+            _r_wrap(c, body, x+10, 328, w-20, 12.0, R_INK, False, 12, "center")
+            _tick_label(c, x+11, 173, f"{i+1:02d}", 6.0, R_MUTED, centred=False)
+            # The link between two stages is the point of the form; without it
+            # the slide is a row of boxes that happen to sit side by side.
+            if i:
+                _arrow(c, x-gap+3, (348+BAND_BOTTOM)/2, x-3, (348+BAND_BOTTOM)/2)
+        if kind=="mutation": c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(11)); c.drawCentredString(480,120,"Change one constraint. Re-run the decision.")
         return
     if kind == "timeline":
         c.setStrokeColor(R_GOLD); c.setLineWidth(2); c.line(100,285,860,285)
         xs=[150,480,810]
+        _arrow(c, 855, 285, 872, 285, R_GOLD, 2.0, 7.0)
         for i,(title,body) in enumerate(items[:3]):
-            c.setFillColor(R_RED if i==2 else R_GREEN_2); c.circle(xs[i],285,7,fill=1,stroke=0); c.setFillColor(R_RED if i==2 else R_GREEN); c.setFont("Helvetica-Bold",8); c.drawCentredString(xs[i],350,title); _r_wrap(c,body,xs[i]-115,245,230,11,R_INK,False,6,"center")
+            accent = R_RED if i==2 else R_GREEN_2
+            # Stems tie each marker to its label; without them the captions
+            # float free of the axis they are supposed to sit on.
+            c.setStrokeColor(accent); c.setLineWidth(1)
+            c.line(xs[i], 292, xs[i], 340); c.line(xs[i], 278, xs[i], 262)
+            c.setFillColor(R_WHITE); c.setStrokeColor(accent); c.setLineWidth(1.6)
+            c.circle(xs[i],285,7,fill=1,stroke=1)
+            c.setFillColor(accent); c.circle(xs[i],285,3,fill=1,stroke=0)
+            c.setFillColor(R_RED if i==2 else R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(xs[i],350,title); _r_wrap(c,body,xs[i]-115,245,230,11,R_INK,False,6,"center")
         return
     if kind == "burden":
-        _r_wrap(c,items[0][1],75,365,320,14,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawCentredString(235,405,items[0][0])
-        _r_wrap(c,items[1][1],75,235,320,13,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawCentredString(235,275,items[1][0])
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawString(560,390,items[2][0]); _r_wrap(c,items[2][1],560,365,320,11.5,R_INK,False,5)
-        c.setFillColor(R_RED); c.setFont("Helvetica-Bold",8); c.drawString(560,260,items[3][0]); _r_wrap(c,items[3][1],560,235,320,11.5,R_INK,False,5)
+        _r_wrap(c,items[0][1],75,365,320,14,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(235,405,items[0][0])
+        _r_wrap(c,items[1][1],75,235,320,13,R_INK,False,5,"center","Times-Roman"); c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(235,275,items[1][0])
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(560,390,items[2][0]); _r_wrap(c,items[2][1],560,365,320,11.5,R_INK,False,5)
+        c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(560,260,items[3][0]); _r_wrap(c,items[3][1],560,235,320,11.5,R_INK,False,5)
         return
     if kind == "ai":
         cols=[(65,R_PALE_GREEN,R_GREEN_2),(345,R_PALE_GOLD,R_GOLD),(625,R_PALE_RED,R_RED)]; data=[items[0],items[1],items[3]]
         for (x,fill,stroke),(title,body) in zip(cols,data):
-            c.setFillColor(fill); c.setStrokeColor(stroke); c.rect(x,145,250,245,fill=1,stroke=1); c.setFillColor(stroke); c.setFont("Helvetica-Bold",8); c.drawCentredString(x+125,360,title); _r_wrap(c,body,x+20,310,210,13,R_INK,False,8,"center","Times-Roman")
+            c.setFillColor(fill); c.setStrokeColor(stroke); c.rect(x,145,250,245,fill=1,stroke=1); c.setFillColor(stroke); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(x+125,360,title); _r_wrap(c,body,x+20,310,210,13,R_INK,False,8,"center","Times-Roman")
         return
     if kind == "portfolio":
-        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.circle(480,275,65,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",9); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.circle(480,275,65,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
         pos=[(75,390),(350,420),(690,390),(75,145),(350,125),(690,145)]
         for i,(title,body) in enumerate(items[:6]):
-            x,y=pos[i]; c.setFillColor(R_RED if i in {0,3} else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawCentredString(x+95,y,title); _r_wrap(c,body,x,y-20,190,8.7,R_INK,False,5,"center")
+            x,y=pos[i]
+            c.setStrokeColor(R_LINE); c.setLineWidth(0.9); c.line(x+95, y-6, 480, 275)
+            c.setFillColor(R_RED if i in {0,3} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawCentredString(x+95,y,title); _r_wrap(c,body,x,y-20,190,8.7,R_INK,False,5,"center")
+        # Redraw the hub so the spokes pass behind it, not across the label.
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.circle(480,275,65,fill=1,stroke=1)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
         return
     if kind == "argument":
         y=405
         widths=[760,690,620,550,480]
         for i,(title,body) in enumerate(items[:5]):
-            w=widths[i]; x=(960-w)/2; c.setFillColor(R_RED if i in {0,3,4} else R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(x,y,title); c.setFillColor(R_PALE_GOLD if i in {0,3} else (R_PALE_GREEN if i in {1,2} else R_PALE_RED)); c.setStrokeColor(R_GOLD if i in {0,3} else R_GREEN_2); c.rect(x+110,y-16,w-110,34,fill=1,stroke=1); _r_wrap(c,body,x+122,y-2,w-134,8.5,R_INK,True,2,"center"); y-=58
+            w=widths[i]; x=(960-w)/2; c.setFillColor(R_RED if i in {0,3,4} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(x,y,title); c.setFillColor(R_PALE_GOLD if i in {0,3} else (R_PALE_GREEN if i in {1,2} else R_PALE_RED)); c.setStrokeColor(R_GOLD if i in {0,3} else R_GREEN_2); c.rect(x+110,y-16,w-110,34,fill=1,stroke=1); _r_wrap(c,body,x+122,y-2,w-134,8.5,R_INK,True,2,"center"); y-=58
         return
     if kind == "rubric":
         cols=3; w=260; h=105; x0=60; y0=295
         for i,(title,body) in enumerate(items[:6]):
-            r,cc=divmod(i,cols); x=x0+cc*290; y=y0-r*145; c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",7.5); c.drawCentredString(x+w/2,y+80,title); c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,y-10,w,70,fill=1,stroke=1); _r_wrap(c,body,x+12,y+35,w-24,9.5,R_INK,False,4,"center")
+            r,cc=divmod(i,cols); x=x0+cc*290; y=y0-r*145; c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawCentredString(x+w/2,y+80,title); c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,y-10,w,70,fill=1,stroke=1); _r_wrap(c,body,x+12,y+35,w-24,9.5,R_INK,False,4,"center")
         return
     if kind == "verdict":
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8); c.drawCentredString(480,400,items[0][0]); _r_wrap(c,items[0][1],100,360,760,18,R_INK,False,4,"center","Times-Roman")
-        c.setFillColor(R_PALE_GREEN); c.setStrokeColor(R_GREEN_2); c.rect(90,180,365,80,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",7); c.drawString(105,240,items[1][0]); _r_wrap(c,items[1][1],105,220,330,9.2,R_INK,True,4,"center")
-        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(505,180,365,80,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold",7); c.drawString(520,240,items[2][0]); _r_wrap(c,items[2][1],520,220,330,9.2,R_INK,True,4,"center")
-        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(220,115,520,36,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold",8.5); c.drawCentredString(480,128,items[3][1])
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(480,400,items[0][0]); _r_wrap(c,items[0][1],100,360,760,18,R_INK,False,4,"center","Times-Roman")
+        c.setFillColor(R_PALE_GREEN); c.setStrokeColor(R_GREEN_2); c.rect(90,180,365,80,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(105,240,items[1][0]); _r_wrap(c,items[1][1],105,220,330,9.2,R_INK,True,4,"center")
+        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(505,180,365,80,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(520,240,items[2][0]); _r_wrap(c,items[2][1],520,220,330,9.2,R_INK,True,4,"center")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(220,115,520,36,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8.5)); c.drawCentredString(480,128,items[3][1])
         return
     _r_bullets(c, items)
 

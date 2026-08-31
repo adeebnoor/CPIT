@@ -131,3 +131,67 @@ class DiagramRoutingTests(unittest.TestCase):
         eleven decks, only via a hardcoded maturity special case."""
         self.assertGreaterEqual(self.mix.get("stack", 0), self.decks,
                                 f"stack appears {self.mix.get('stack', 0)} times across {self.decks} decks")
+
+
+class TypographyDisciplineTests(unittest.TestCase):
+    """The exported deck used 24 distinct type sizes, because forty call sites each
+    picked their own number, and set two non-heading elements in the serif that the
+    visual contract reserves for headings."""
+
+    @classmethod
+    def setUpClass(cls):
+        import tempfile
+        import fitz
+        from app.deterministic_blueprint_fallback import build_deterministic_blueprint
+        from app.session_gate import apply_90_minute_timebox
+        from app.source_bundle import SourceBundle, SourceItem
+        from app.source_profile_fallback import build_deterministic_source_profile
+        from app.cimt_native_v43 import export_cimt_presenter_pdf_v43
+
+        pdf = Path(__file__).resolve().parents[2] / "lectures" / "cimt" / "CPIT455-class2-NooR.pdf"
+        bundle = SourceBundle(
+            items=[SourceItem("primary", "P1", pdf.name, pdf, pdf.name)],
+            lecture_focus="", session_minutes=90,
+        )
+        profile = build_deterministic_source_profile(bundle, "typography regression")
+        blueprint = apply_90_minute_timebox(build_deterministic_blueprint(profile), profile, bundle)
+        cls._tmp = tempfile.TemporaryDirectory()
+        out = export_cimt_presenter_pdf_v43(blueprint, Path(cls._tmp.name) / "deck.pdf")
+        cls.sizes, cls.fonts = set(), set()
+        doc = fitz.open(str(out))
+        cls.pages = len(doc)
+        for page in doc:
+            for block in page.get_text("dict")["blocks"]:
+                for line in block.get("lines", []):
+                    for span in line.get("spans", []):
+                        if span["text"].strip():
+                            cls.sizes.add(round(span["size"], 1))
+                            cls.fonts.add(span["font"])
+        doc.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def test_the_deck_still_exports_every_unit(self):
+        self.assertEqual(self.pages, 20)
+
+    def test_type_sizes_stay_on_the_scale(self):
+        from app.cimt_native_v43 import TYPE_SCALE
+        for size in self.sizes:
+            self.assertIn(size, TYPE_SCALE, f"{size}pt is not a step on the scale")
+
+    def test_the_deck_uses_few_enough_sizes_to_read_as_a_system(self):
+        self.assertLessEqual(len(self.sizes), 12, f"{len(self.sizes)} distinct sizes: {sorted(self.sizes)}")
+
+    def test_serif_is_reserved_for_headings(self):
+        """A serif used for a step number or an instruction reads as a third
+        typeface rather than as the heading voice."""
+        self.assertNotIn("Times-Bold", self.fonts, "a non-heading element is set in the heading serif")
+
+    def test_snapping_rounds_down_on_a_tie(self):
+        """Shrinking text cannot overflow its box; growing it can."""
+        from app.cimt_native_v43 import _snap
+        self.assertEqual(_snap(8.5), 8.0)
+        self.assertEqual(_snap(7.2), 7.0)
+        self.assertEqual(_snap(4.8), 5.0)

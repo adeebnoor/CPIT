@@ -9,6 +9,7 @@ SourceProfile's P1 checkpoints/excerpts, covers every major checkpoint by Unit
 semantic generation/audit path succeeds.
 """
 
+import re
 from itertools import cycle
 
 from .models import (
@@ -125,11 +126,80 @@ _MIN_UNIT_WORDS = 14
 _MIN_UNIT_ITEMS = 3
 
 
+# Each teaching slot has a contracted function (prompts.py section 10). The move
+# is how that function reaches the learner, so the slot -> move mapping is fixed
+# here rather than rotated: slot 8 owes the learner an alternative and its
+# trade-off, slot 9 owes evidence and falsification, slot 15 owes an audit. A
+# modulo rotation happened to satisfy some slots and contradict others.
+_MOVE_FOR_SLOT = {
+    6: "mechanism",      # Mechanism deep dive
+    7: "dependency",     # Implementation grounded in supplied mechanisms
+    8: "alternative",    # Two defensible alternatives + trade-off
+    9: "evidence",       # Measurement + falsification
+    10: "boundary",      # Design review: known / unknown / decision-sensitive
+    11: "application",   # Source-first application
+    12: "failure",       # Accountability: what fails, who notices, who signs off
+    13: "scale",         # Evolution / improvement
+    14: "misconception", # Operating consequences
+    15: "verification",  # Maturity / audit
+}
+_MOVES_BY_NAME = {name: (name, q, sc) for name, q, sc in _TEACHING_MOVES}
+
+
+# Slide headings are often written as questions ("What is dependability").
+# Substituted into a move template that already asks one, they produce
+# "How does What is dependability actually work" - so the interrogative opener
+# is dropped and only the subject is carried into the question.
+_INTERROGATIVE_OPENER = re.compile(
+    r"^(what(?:\s+is|\s+are|\s+do|\s+does)?|why(?:\s+is|\s+are|\s+do|\s+does)?|"
+    r"how(?:\s+is|\s+are|\s+do|\s+does|\s+to)?|when(?:\s+is|\s+are)?|"
+    r"where(?:\s+is|\s+are)?|who(?:\s+is|\s+are)?)\s+",
+    re.IGNORECASE,
+)
+
+
+def _as_noun_phrase(focus: str) -> str:
+    """Reduce a heading to the subject a question template can be built on."""
+    text = str(focus or "").strip().rstrip("?").strip()
+    stripped = _INTERROGATIVE_OPENER.sub("", text, count=1).strip()
+    # Only accept the reduction when something substantive survives.
+    return stripped if len(stripped.split()) >= 1 and len(stripped) >= 3 else text
+
+
 def _teaching_move(idx: int, focus: str):
     """The move for teaching slot `idx` (6..15)."""
-    name, question, scaffold = _TEACHING_MOVES[(idx - 6) % len(_TEACHING_MOVES)]
-    short = focus if len(focus) <= 70 else focus[:70].rsplit(" ", 1)[0]
+    key = _MOVE_FOR_SLOT.get(idx)
+    if key is None:
+        name, question, scaffold = _TEACHING_MOVES[(idx - 6) % len(_TEACHING_MOVES)]
+    else:
+        name, question, scaffold = _MOVES_BY_NAME[key]
+    short = _as_noun_phrase(focus)
+    short = short if len(short) <= 70 else short[:70].rsplit(" ", 1)[0]
     return name, question.format(focus=short), list(scaffold)
+
+
+def _fill_rows(groups, rows) -> list:
+    """Checkpoints for the teaching slots the source could not fill.
+
+    Every empty slot used to borrow rows[-1:], so a chapter with eight
+    checkpoints and ten slots showed its last checkpoint three times over -
+    the learner reads the same page under three headings and the deck covers
+    fewer topics than it has slides. Prefer checkpoints no slot already owns,
+    richest first; only once those run out does a checkpoint appear twice, and
+    then the least-used one goes next.
+    """
+    owned = {id(r) for bucket in groups for r in bucket}
+    unowned = [r for r in rows if id(r) not in owned]
+    unowned.sort(key=lambda r: len(str(r.why_important or r.label)), reverse=True)
+    holes = sum(1 for bucket in groups if not bucket)
+    fill = unowned[:holes]
+    if len(fill) < holes and rows:
+        # Not enough distinct material: repeat in source order rather than
+        # hammering one checkpoint, so the repeats are at least spread out.
+        pool = [r for r in rows if id(r) not in {id(x) for x in fill}] or list(rows)
+        while len(fill) < holes:
+            fill.append(pool[len(fill) % len(pool)])
+    return fill
 
 
 def _student_action_for(bucket, labels) -> str:
@@ -223,11 +293,13 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         "Commit to a prediction, then identify the source statement that could overturn it.", "Prediction must precede explanation.", "process", _anchors(first))
 
     visual_cycle = cycle(["concept-map", "process", "comparison", "timeline", "architecture", "table"])
+    seen_actions: set[str] = set()
+    fill_order = _fill_rows(groups, rows)
     for idx, bucket in enumerate(groups, start=6):
         # A thin source leaves teaching slots without their own checkpoint.
         reused = not bucket
         if reused:
-            bucket = rows[-1:]
+            bucket = [fill_order.pop(0)] if fill_order else rows[-1:]
         labels = [x.label for x in bucket]
         core = [x.why_important or x.label for x in bucket]
         kind = next(visual_cycle)
@@ -250,9 +322,16 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         elif idx == 13: ped = ["Ask what changes next while keeping the source mechanism dominant."]
         elif idx == 14: ped = ["Identify the practitioner/operational consequence implied by the source mechanism; do not invent psychology claims."]
         elif idx == 15: ped = ["AI MAY ASSIST", "AI MUST NOT BE TRUSTED AUTONOMOUSLY", "Claim → Assumption → Source Check → Test → Failure Search → Human Sign-off"]
-        question = move_question if reused else (
-            f"How does {labels[0] if labels else 'this source mechanism'} change the engineering decision?")
-        action = move_scaffold[0] if reused else _student_action_for(bucket, labels)
+        # The slot's contracted question always ships. It used to appear only on
+        # the thin-source path, so a source rich enough to fill every slot got
+        # ten copies of "How does X change the engineering decision?" - the
+        # better the source, the more generic the grammar. Now the move states
+        # what this slot asks of the learner, and the source names its focus.
+        question = move_question
+        action = _student_action_for(bucket, labels)
+        if action in seen_actions:
+            action = move_scaffold[0]
+        seen_actions.add(action)
         # Every teaching slot carries its move. A thin source gives one checkpoint
         # line, and one line is a single oversized box on the slide - the move is
         # what makes that checkpoint workable, so it always ships beside it.
