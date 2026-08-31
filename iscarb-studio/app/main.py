@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models import JobState, AuditReport, AuditIssue
-from .storage import save_job, load_job, prune_expired, UPLOADS
+from .storage import save_job, load_job, prune_expired, JOB_MISSING_MESSAGE, UPLOADS
 from .gemini_service import GeminiService, is_transient_model_failure
 from .source_profile_fallback import build_deterministic_source_profile, reconcile_source_profile
 from .gate import deterministic_gate, all_required_pass, failed_check_names
@@ -497,7 +497,7 @@ def get_job(job_id: str):
     try:
         return load_job(job_id).model_dump(by_alias=True)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
 
 
 @app.get("/api/jobs/{job_id}/presenter")
@@ -505,7 +505,7 @@ def presenter_preview(job_id: str):
     try:
         job = load_job(job_id)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
     return HTMLResponse(
@@ -519,7 +519,7 @@ def export_job(job_id: str, fmt: str):
     try:
         job = load_job(job_id)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
     if job.status not in {"ready", "blocked", "error"}:

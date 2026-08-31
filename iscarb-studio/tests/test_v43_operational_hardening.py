@@ -175,3 +175,29 @@ class DeployIdentityTests(unittest.TestCase):
         finally:
             os.environ.pop("RENDER_GIT_COMMIT", None)
             os.environ.pop("RENDER_GIT_BRANCH", None)
+
+
+class MissingJobMessageTests(unittest.TestCase):
+    """A 404 after a restart must explain itself, not read as a broken system."""
+
+    def test_the_message_names_the_cause_and_the_remedy(self):
+        from app.storage import JOB_MISSING_MESSAGE
+
+        lowered = JOB_MISSING_MESSAGE.lower()
+        self.assertIn("restart", lowered)
+        self.assertIn("re-run", lowered)
+
+    def test_no_handler_still_returns_the_bare_string(self):
+        root = Path(__file__).resolve().parents[1] / "app"
+        for name in ("main.py", "faculty_main.py", "start_v430.py"):
+            text = (root / name).read_text(encoding="utf-8")
+            self.assertNotIn('HTTPException(404, "Job not found")', text,
+                             f"{name} still raises the bare message")
+
+    def test_retention_is_documented_as_an_upper_bound(self):
+        # render.yaml declares no disk, so the 48h window cannot be honoured.
+        source = (Path(__file__).resolve().parents[1] / "app" / "storage.py").read_text(encoding="utf-8")
+        self.assertIn("persistent disk", source)
+        render = (Path(__file__).resolve().parents[2] / "render.yaml").read_text(encoding="utf-8")
+        self.assertNotIn("disk:", render,
+                         "a disk was added; update the retention comment in storage.py")
