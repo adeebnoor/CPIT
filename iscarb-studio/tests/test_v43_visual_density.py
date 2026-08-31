@@ -120,3 +120,46 @@ class ConnectiveMarkTests(unittest.TestCase):
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
+
+
+class VerdictLabelTests(unittest.TestCase):
+    """A slide must not contradict its own headings."""
+
+    @classmethod
+    def setUpClass(cls):
+        from app.cimt_native_v43 import _spec
+
+        pdf = LECTURES / "CPIT455-class2-NooR.pdf"
+        if not pdf.exists():  # pragma: no cover - source bundle not checked out
+            raise unittest.SkipTest(f"missing reference lecture {pdf}")
+        bundle = SourceBundle(
+            items=[SourceItem("primary", "P1", pdf.name, pdf, pdf.name)],
+            lecture_focus="",
+            session_minutes=90,
+        )
+        profile = build_deterministic_source_profile(bundle, "verdict tests")
+        bp = apply_90_minute_timebox(build_deterministic_blueprint(profile), profile, bundle)
+        cls.kind, cls.items = _spec(bp, bp.units[19])
+
+    def test_unit_20_uses_the_verdict_form(self):
+        self.assertEqual(self.kind, "verdict")
+
+    def test_the_options_box_carries_the_verdict_options(self):
+        label, body = self.items[1]
+        self.assertEqual(label, "THE OPTIONS")
+        self.assertIn("APPROVE", body.upper())
+
+    def test_residual_uncertainty_is_not_a_verdict_option(self):
+        # ped[0] is the APPROVE line; taking it put a verdict under this heading.
+        from app.cimt_native_v43 import _names_a_verdict
+
+        label, body = self.items[2]
+        self.assertEqual(label, "RESIDUAL UNCERTAINTY")
+        self.assertFalse(_names_a_verdict(body), f"a verdict option is labelled residual: {body!r}")
+
+    def test_verdict_detection_separates_the_two_kinds_of_line(self):
+        from app.cimt_native_v43 import _names_a_verdict
+
+        self.assertTrue(_names_a_verdict("APPROVE — the evidence supports it."))
+        self.assertTrue(_names_a_verdict("REJECT — the evidence contradicts it."))
+        self.assertFalse(_names_a_verdict("Keep residual uncertainty visible."))
