@@ -124,13 +124,43 @@ def _is_furniture_line(line: str) -> bool:
     return False
 
 
+# A wrapped body line ends where the page ran out of width, so it trails off on
+# a function word and cannot serve as a heading.
+_DANGLING_TAIL = re.compile(
+    r"\b(of|for|to|the|a|an|and|or|but|in|on|at|by|with|from|that|which|is|are|"
+    r"was|were|be|been|as|it|its|their|this|these|those|than|then|so|if|when)$",
+    re.IGNORECASE,
+)
+
+
+def _is_title_like(line: str) -> bool:
+    """True when the line reads as a heading rather than a wrapped body line."""
+    text = str(line or "").strip()
+    if not (2 <= len(text.split()) <= 11) or len(text) > 100:
+        return False
+    if text.endswith((",", ";", ":", "-", "\u2013", "\u2014")):
+        return False
+    if _DANGLING_TAIL.search(text.rstrip(".")):
+        return False
+    first = text.split()[0]
+    # A continuation of the sentence above starts lowercase; a heading does not.
+    return not (first[:1].islower() and first.lower() not in {"e.g.", "i.e."})
+
+
 def _choose_label(lines: list[str], page_no: int) -> str:
     clean = [x for x in lines if not _is_furniture_line(x)]
     # Numbered chapter sections are the strongest deterministic checkpoint.
     for x in clean[:12]:
         if re.match(r"^\d{1,2}\.\d+(?:\.\d+)?\b", x):
             return _clean(x, 120)
-    # Prefer compact title-like lines over body sentences.
+    # Prefer compact title-like lines over body sentences. The word floor used
+    # to be three, which rejected real two-word headings ("Cost/dependability
+    # curve") and then accepted the wrapped body line under them ("Because of
+    # very high costs of") - a mid-sentence fragment became the unit title and
+    # the unit question built on it read as broken English.
+    for x in clean[:12]:
+        if _is_title_like(x):
+            return _clean(x, 120)
     for x in clean[:12]:
         if 3 <= len(x.split()) <= 11 and len(x) <= 100:
             return _clean(x, 120)
