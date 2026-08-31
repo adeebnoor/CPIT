@@ -193,6 +193,7 @@ body:before{
 .sectionHead p{color:var(--kau-neutral-2)!important}
 
 .source,
+.deliverable,
 .box,
 .status,
 .asset,
@@ -209,7 +210,7 @@ body:before{
   content:"";position:absolute;left:0;top:0;right:0;height:4px;
   background:linear-gradient(90deg,var(--kau-deep-green),var(--kau-green),var(--kau-lime));
 }
-.source small{color:var(--kau-green)!important}
+.source small{color:var(--kau-deep-green)!important}
 .source b{color:var(--kau-teal)!important}
 .source p,.principle span,.hint,.statusTop span{color:var(--kau-neutral-2)!important}
 .source button{
@@ -263,6 +264,15 @@ input:focus,textarea:focus,select:focus{
   border-radius:10px;
 }
 .kauIdentityNote b{color:var(--kau-deep-green)}
+
+.deliverable:before{
+  content:"";position:absolute;left:0;top:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--kau-deep-green),var(--kau-green),var(--kau-lime));
+}
+.deliverable small{color:var(--kau-deep-green)!important}
+.deliverable b{color:var(--kau-teal)!important}
+.deliverable p{color:var(--kau-neutral-2)!important}
+.deliverable code{color:var(--kau-deep-green)!important;letter-spacing:.06em}
 
 /* National Design System-inspired outline icon treatment. */
 .source button,.cta,.compileBtn,.badge{transition:all .18s ease}
