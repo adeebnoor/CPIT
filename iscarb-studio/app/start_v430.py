@@ -16,6 +16,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 
 from . import start_v410 as prev
 from .gate_v14 import deterministic_gate as gate_v14
+from .storage import JOB_MISSING_MESSAGE
 from .cimt_native_v43 import (
     export_cimt_presenter_pptx_v43,
     export_cimt_presenter_pdf_v43,
@@ -138,7 +139,7 @@ def presenter_v430(job_id: str):
     try:
         job = engine.load_job(job_id)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
     return HTMLResponse(
@@ -153,7 +154,7 @@ def export_v430(job_id: str, fmt: str):
     try:
         job = engine.load_job(job_id)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
     if job.status not in {"ready", "blocked", "error"}:

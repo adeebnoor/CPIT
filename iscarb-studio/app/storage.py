@@ -23,7 +23,22 @@ _LOCK = Lock()
 # Faculty download their outputs in the same working session. Keeping raw
 # uploads and rendered exports forever is what eventually fills the container
 # disk and takes the whole service down for everyone.
+#
+# This is an UPPER bound, not a guarantee. render.yaml declares no persistent
+# disk, so DATA lives on the container filesystem and is emptied by every
+# deploy, restart, or free-plan spin-down. Effective retention is therefore
+# "until the next restart", which is usually far shorter than the window below.
+# Attaching a persistent disk is what would make this number real.
 RETENTION_HOURS = int(os.getenv("ISCARB_RETENTION_HOURS", "48"))
+
+# A bare "Job not found" reads as a broken system. The usual cause is a restart
+# between compiling and downloading, so the message names it and says what to do.
+JOB_MISSING_MESSAGE = (
+    "Job not found. Compiled lectures are stored on the service container, which "
+    "is emptied whenever the service restarts or sleeps, so a job from an earlier "
+    "session is usually gone rather than broken. Re-run the compile and download "
+    "the outputs before leaving the page."
+)
 
 
 def save_job(job: JobState) -> None:

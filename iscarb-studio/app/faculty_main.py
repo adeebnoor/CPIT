@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse, FileResponse
 
 from . import main as engine
-from .storage import prune_expired
+from .storage import prune_expired, JOB_MISSING_MESSAGE
 from .models import Blueprint, JobState, AuditReport, AuditIssue
 from .visual_output_v36 import export_presenter_pptx, render_presenter_preview, export_presenter_pdf
 from .faculty_outputs import export_detailed_pdf, export_instructor_guide, export_student_pack
@@ -223,7 +223,7 @@ def faculty_presenter(job_id: str):
     try:
         job = engine.load_job(job_id)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
     return HTMLResponse(
@@ -238,7 +238,7 @@ def faculty_export(job_id: str, fmt: str):
     try:
         job = engine.load_job(job_id)
     except FileNotFoundError:
-        raise HTTPException(404, "Job not found")
+        raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
     if job.status not in {"ready", "blocked", "error"}:
