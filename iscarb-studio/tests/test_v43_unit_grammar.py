@@ -154,3 +154,47 @@ class RenderedGrammarTests(unittest.TestCase):
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
+
+
+class ThinSourceTests(unittest.TestCase):
+    """A source with nothing to teach must say so, not ship a full deck quietly."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.thin = LECTURES / "CPIT455-Into-story-NooR.pdf"
+        cls.real = LECTURES / "CPIT455-class1-NooR.pdf"
+        for p in (cls.thin, cls.real):
+            if not p.exists():  # pragma: no cover - source bundle not checked out
+                raise unittest.SkipTest(f"missing reference lecture {p}")
+
+    @staticmethod
+    def _profile_and_checks(pdf: Path):
+        from app.gate_v14 import deterministic_gate
+
+        bundle = SourceBundle(
+            items=[SourceItem("primary", "P1", pdf.name, pdf, pdf.name)],
+            lecture_focus="",
+            session_minutes=90,
+        )
+        profile = build_deterministic_source_profile(bundle, "thin source tests")
+        bp = apply_90_minute_timebox(build_deterministic_blueprint(profile), profile, bundle)
+        return profile, deterministic_gate(bp, profile, bundle.combined_local_text())
+
+    def test_a_syllabus_header_fails_the_named_check(self):
+        # Two pages of course metadata previously produced twenty units and
+        # reported scope_fit FIT, with no check naming the real problem.
+        _, checks = self._profile_and_checks(self.thin)
+        self.assertIn("v14_source_supports_ten_teaching_units", checks)
+        self.assertFalse(checks["v14_source_supports_ten_teaching_units"])
+
+    def test_a_syllabus_header_warns_in_words_faculty_can_act_on(self):
+        profile, _ = self._profile_and_checks(self.thin)
+        warnings = [w for w in profile.source_warnings if "SOURCE TOO THIN" in w]
+        self.assertTrue(warnings, "no thin-source warning was emitted")
+        self.assertIn("syllabus", warnings[0].lower())
+
+    def test_the_thinnest_real_lecture_still_passes(self):
+        # class1 yields four major checkpoints - the floor must not catch it.
+        profile, checks = self._profile_and_checks(self.real)
+        self.assertTrue(checks["v14_source_supports_ten_teaching_units"])
+        self.assertFalse([w for w in profile.source_warnings if "SOURCE TOO THIN" in w])

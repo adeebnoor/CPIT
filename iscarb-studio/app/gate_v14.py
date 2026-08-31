@@ -104,6 +104,13 @@ MIN_TEACHING_WORDS_WITHOUT_VISUAL = 28
 # Two boxes holding one sentence each is what a reviewer calls an empty slide.
 MIN_TEACHING_ITEMS = 3
 
+# A 90-minute lecture needs material to teach. Measured across eleven real
+# uploads, every genuine chapter gave the ten teaching units at least four
+# distinct source checkpoints; a two-page course-syllabus header gave one and
+# still produced a full twenty-unit deck built from that single page. Three is
+# the floor, one below the thinnest real lecture seen.
+MIN_DISTINCT_TEACHING_ANCHORS = 3
+
 
 def _teaching_payload_words(u) -> int:
     """Words a learner actually reads: source content plus its scaffolding."""
@@ -135,6 +142,22 @@ def _technical_density_ok(bp: Blueprint, profile: SourceProfile | None) -> bool:
         if not source_visual and _visible_item_count(u) < MIN_TEACHING_ITEMS:
             return False
     return True
+
+
+def _source_supports_ten_teaching_units(bp) -> bool:
+    """Does the source carry enough distinct material for the teaching units?
+
+    Without this, a source too thin to teach still produced twenty units: the
+    same checkpoint recycled under ten headings, reported only as a scatter of
+    generic coverage-rubric misses that no reader can trace back to the real
+    cause. The failure now has a name faculty can act on.
+    """
+    anchors = {
+        str(u.source_anchor or "").strip()
+        for u in bp.units[5:15]
+        if str(u.source_anchor or "").strip()
+    }
+    return len(anchors) >= MIN_DISTINCT_TEACHING_ANCHORS
 
 
 def _presenter_density_ok(bp: Blueprint) -> bool:
@@ -222,6 +245,7 @@ def deterministic_gate(
     checks["v14_major_chapter_items_are_actually_taught"] = _major_items_are_actually_taught(bp, profile)
     checks["v14_technical_units_have_teaching_density"] = _technical_density_ok(bp, profile)
     checks["v14_no_unit_is_a_near_empty_slide"] = _presenter_density_ok(bp)
+    checks["v14_source_supports_ten_teaching_units"] = _source_supports_ten_teaching_units(bp)
 
     # Replace the historical Unit-16 readiness badge requirement with an
     # evidence-trail requirement.  Readiness may appear wherever the artifact is
