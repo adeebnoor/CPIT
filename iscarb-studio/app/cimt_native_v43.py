@@ -241,10 +241,17 @@ def _legacy_spec(bp: Blueprint, u: LectureUnit) -> tuple[str, list[tuple[str, st
     if u.number == 19:
         return "rubric", [(presenter_text(c.criterion, 45), presenter_text(c.ready, 90)) for c in bp.rubric_criteria[:6]]
     if u.number == 20:
+        # Unit 20's pedagogy is the four verdict options followed by the
+        # residual-uncertainty instruction. Taking ped[0] put the APPROVE line
+        # under a RESIDUAL UNCERTAINTY heading, so the slide contradicted its
+        # own labels. Each side now carries the content its label promises.
+        options = [x for x in ped if _names_a_verdict(x)]
+        residual = next((x for x in ped if not _names_a_verdict(x)), "")
         return "verdict", [
             ("TOP CLAIM", presenter_text(u.takeaway, 165)),
-            ("EVIDENCE", presenter_text(u.evidence or "Trace to CLO evidence and source bounds", 125)),
-            ("RESIDUAL UNCERTAINTY", _pick(ped, 0, "State what remains unknown")),
+            ("THE OPTIONS", presenter_text(" · ".join(options) if options
+                                           else (u.evidence or "Weigh the decision against the evidence"), 300)),
+            ("RESIDUAL UNCERTAINTY", presenter_text(residual or "State what remains unknown", 220)),
             ("VERDICT", "APPROVE | CONDITIONAL | REDESIGN | REJECT"),
         ]
     vals = core[:5] or ped[:5] or [u.takeaway]
@@ -368,6 +375,15 @@ _ITEM_LABEL_SPLIT = re.compile(r"\s*[:\u2014\u2013]\s+")
 # it means a bulleted list was flattened into one line during extraction. The
 # structure is recoverable, so split it back out instead of deleting the evidence.
 _FLATTENED_BULLET = re.compile(r"[\u25a0\u25aa\u2751\u2752\u274f\u2022\u00b7\u25c6\u25cf\u25b6\uf0b2\uf0a7]+\s*")
+
+
+# The four closing options all open by naming themselves, which is what
+# separates them from the residual-uncertainty instruction beside them.
+_VERDICT_WORDS = ("APPROVE", "CONDITIONALLY APPROVE", "REDESIGN", "REJECT")
+
+
+def _names_a_verdict(line: str) -> bool:
+    return str(line or "").strip().upper().startswith(_VERDICT_WORDS)
 
 
 def _unflatten_bullets(raw: str) -> list[str]:
@@ -1082,12 +1098,14 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         if kind == "table":
             c.setFillColor(R_GOLD); c.rect(65, 400, 830, 28, fill=1, stroke=0)
             c.setFillColor(R_WHITE); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawString(76, 410, "CHARACTERISTIC"); c.drawString(270, 410, "WHAT IT MEANS IN THE ENGINEERING DECISION")
-            for i, (title, body) in enumerate(items[:5]):
-                yy = 400 - (i + 1) * 48
-                c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_WHITE); c.setStrokeColor(R_LINE); c.rect(65, yy, 830, 48, fill=1, stroke=1)
-                c.setStrokeColor(R_LINE); c.setLineWidth(0.6); c.line(258, yy, 258, yy + 48)
-                c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(76, yy + 27, presenter_text(title, 28))
-                _r_wrap(c, body, 270, yy + 30, 605, 9.2, R_INK, False, 3)
+            rows = items[:5]
+            row_h = (400 - BAND_BOTTOM) / max(1, len(rows))
+            for i, (title, body) in enumerate(rows):
+                yy = 400 - (i + 1) * row_h
+                c.setFillColor(R_PALE_GOLD if i % 2 == 0 else R_WHITE); c.setStrokeColor(R_LINE); c.rect(65, yy, 830, row_h, fill=1, stroke=1)
+                c.setStrokeColor(R_LINE); c.setLineWidth(0.6); c.line(258, yy, 258, yy + row_h)
+                c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawString(76, yy + row_h/2 - 4, presenter_text(title, 28))
+                _r_wrap(c, body, 270, yy + row_h - 14, 605, 11.0, R_INK, False, 4)
         else:
             _r_bullets(c, items)
         return
@@ -1234,10 +1252,23 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
         c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(9)); c.drawCentredString(480,280,"ENGINEERING"); c.drawCentredString(480,267,"MISSION")
         return
     if kind == "argument":
-        y=405
+        shown = items[:5]
+        # CLAIM -> EVIDENCE -> WARRANT -> COUNTER -> RESIDUAL is a chain of
+        # reasoning. It was drawn as five rows that stopped 75pt above the
+        # footer with nothing joining them, so the sequence was invisible.
+        pitch = (BAND_TOP - BAND_BOTTOM) / max(1, len(shown))
+        box_h = pitch - 16
         widths=[760,690,620,550,480]
-        for i,(title,body) in enumerate(items[:5]):
-            w=widths[i]; x=(960-w)/2; c.setFillColor(R_RED if i in {0,3,4} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(x,y,title); c.setFillColor(R_PALE_GOLD if i in {0,3} else (R_PALE_GREEN if i in {1,2} else R_PALE_RED)); c.setStrokeColor(R_GOLD if i in {0,3} else R_GREEN_2); c.rect(x+110,y-16,w-110,34,fill=1,stroke=1); _r_wrap(c,body,x+122,y-2,w-134,8.5,R_INK,True,2,"center"); y-=58
+        for i,(title,body) in enumerate(shown):
+            w=widths[i]; x=(960-w)/2
+            y = BAND_TOP - pitch * i - box_h / 2
+            c.setFillColor(R_RED if i in {0,3,4} else R_GREEN); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawString(x,y,title)
+            c.setFillColor(R_PALE_GOLD if i in {0,3} else (R_PALE_GREEN if i in {1,2} else R_PALE_RED))
+            c.setStrokeColor(R_GOLD if i in {0,3} else R_GREEN_2)
+            c.rect(x+110, y - box_h/2, w-110, box_h, fill=1, stroke=1)
+            _r_wrap(c, body, x+122, y + box_h/2 - 12, w-134, 10.5, R_INK, True, 3, "center")
+            if i:
+                _arrow(c, 480, y + pitch - box_h/2, 480, y + box_h/2 + 2, R_GOLD, 1.2, 5.5)
         return
     if kind == "rubric":
         cols=3; w=260; h=105; x0=60; y0=295
@@ -1245,10 +1276,24 @@ def _r_redraw(c, bp: Blueprint, u: LectureUnit):
             r,cc=divmod(i,cols); x=x0+cc*290; y=y0-r*145; c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawCentredString(x+w/2,y+80,title); c.setFillColor(R_PALE_GREEN if i%2==0 else R_WHITE); c.setStrokeColor(R_GREEN_2); c.rect(x,y-10,w,70,fill=1,stroke=1); _r_wrap(c,body,x+12,y+35,w-24,9.5,R_INK,False,4,"center")
         return
     if kind == "verdict":
-        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(480,400,items[0][0]); _r_wrap(c,items[0][1],100,360,760,18,R_INK,False,4,"center","Times-Roman")
-        c.setFillColor(R_PALE_GREEN); c.setStrokeColor(R_GREEN_2); c.rect(90,180,365,80,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(105,240,items[1][0]); _r_wrap(c,items[1][1],105,220,330,9.2,R_INK,True,4,"center")
-        c.setFillColor(R_PALE_RED); c.setStrokeColor(R_RED); c.rect(505,180,365,80,fill=1,stroke=1); c.setFillColor(R_RED); c.setFont("Helvetica-Bold", _snap(7)); c.drawString(520,240,items[2][0]); _r_wrap(c,items[2][1],520,220,330,9.2,R_INK,True,4,"center")
-        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(220,115,520,36,fill=1,stroke=1); c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8.5)); c.drawCentredString(480,128,items[3][1])
+        # The closing decision slide left the lower half empty. The two options
+        # now occupy the band, and the residual-uncertainty bar sits under them
+        # rather than floating between them and the footer.
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(8)); c.drawCentredString(480,BAND_TOP-8,items[0][0])
+        _r_wrap(c,items[0][1],100,BAND_TOP-26,760,17.5,R_INK,False,4,"center","Times-Roman")
+        bar_h, gap = 44.0, 18.0
+        top, bottom = BAND_TOP - 120, BAND_BOTTOM + bar_h + gap
+        box_h = top - bottom
+        for x, fill, stroke, (title, body) in (
+            (90, R_PALE_GREEN, R_GREEN_2, items[1]),
+            (505, R_PALE_RED, R_RED, items[2]),
+        ):
+            c.setFillColor(fill); c.setStrokeColor(stroke); c.rect(x, bottom, 365, box_h, fill=1, stroke=1)
+            c.setFillColor(stroke); c.setFont("Helvetica-Bold", _snap(7.5)); c.drawString(x+15, bottom+box_h-20, title)
+            _r_wrap(c, body, x+15, bottom+box_h-38, 330, 11.0, R_INK, True, 6, "center")
+        c.setFillColor(R_PALE_GOLD); c.setStrokeColor(R_GOLD); c.rect(220, BAND_BOTTOM, 520, bar_h, fill=1, stroke=1)
+        c.setFillColor(R_GREEN); c.setFont("Helvetica-Bold", _snap(9))
+        c.drawCentredString(480, BAND_BOTTOM + bar_h/2 - 4, presenter_text(items[3][1], 92))
         return
     _r_bullets(c, items)
 
