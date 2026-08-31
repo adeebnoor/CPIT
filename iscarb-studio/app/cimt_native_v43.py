@@ -620,6 +620,12 @@ def _ppt_title_slide(slide, bp: Blueprint, u: LectureUnit, items):
     _ppt_text(slide, 10.9, 7.00, 1.5, .22, "01/20", 6.3, MUTED, True, align=PP_ALIGN.RIGHT)
 
 
+# The PPTX equivalent of BAND_TOP/BAND_BOTTOM. The question line clears at
+# about 1.55in and the TRY rule is drawn at 6.43in.
+PPT_BAND_TOP = 1.55
+PPT_BAND_BOTTOM = 6.30
+
+
 def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=19.0):
     items = items[:max_items]
     if not items:
@@ -627,8 +633,13 @@ def _ppt_bullets(slide, items, *, x=.78, y=1.55, w=11.5, max_items=6, body_size=
     row_h = min(.82, 4.85 / max(1, len(items)))
     for i, (title, body) in enumerate(items):
         yy = y + i * row_h
-        _ppt_rect(slide, x, yy + .18, .08, .08, GOLD)
-        _ppt_text(slide, x + .18, yy, 2.1, .34, presenter_text(title, 32), 11.0, RED if i == 0 else GREEN, True)
+        # Was a single .08in square per row and nothing else, which is why the
+        # bullet units were the emptiest slides in the deck.
+        if i % 2 == 0:
+            _ppt_rect(slide, x - .10, yy - .06, w + .20, row_h - .06, PALE_GREEN)
+        _ppt_rect(slide, x, yy - .06, .05, row_h - .06, GOLD)
+        _ppt_text(slide, x + .12, yy + .02, .34, .22, f"{i + 1:02d}", 8.0, MUTED, True)
+        _ppt_text(slide, x + .50, yy, 1.85, .34, presenter_text(title, 32), 11.0, RED if i == 0 else GREEN, True)
         _ppt_text(slide, x + 2.18, yy - .02, w - 2.2, .55, presenter_text(body, 138), body_size, INK, False, "Aptos")
 
 
@@ -688,15 +699,26 @@ def _ppt_curve(slide, items):
 
 
 def _ppt_stack(slide, items):
-    x, y, w = 2.05, 1.55, 9.25
-    h = .64
-    for i, (title, body) in enumerate(items[:6]):
-        yy = y + i * .74
+    shown = items[:6]
+    if not shown:
+        return
+    x, w = 2.05, 9.25
+    # Matches the PDF stack: rows divide the whole band instead of stepping a
+    # fixed .74in, so a five-item stack no longer stops a quarter of the way
+    # up the slide, and the body type grows with the row.
+    pitch = (PPT_BAND_BOTTOM - PPT_BAND_TOP) / len(shown)
+    h = pitch - .10
+    body_size = 12.5 if pitch < .78 else (15.0 if pitch < .95 else 17.5)
+    for i, (title, body) in enumerate(shown):
+        yy = PPT_BAND_TOP + i * pitch
         _ppt_rect(slide, x, yy, w, h, PALE_GREEN if i % 2 else WHITE, GREEN_2)
-        _ppt_text(slide, x + .12, yy + .12, 1.35, .24, title, 8.8, RED if i in {0,5} else GREEN, True)
-        _ppt_text(slide, x + 1.55, yy + .08, w - 1.70, .42, presenter_text(body, 112), 12.5, INK, False, "Aptos", PP_ALIGN.CENTER)
-    _ppt_text(slide, .82, 2.58, 1.08, 1.50, "SYSTEM\nVIEW", 11.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
-    _ppt_text(slide, 11.48, 2.58, 1.08, 1.50, "SOFTWARE\nVIEW", 11.5, GREEN, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
+        _ppt_text(slide, x + .12, yy + h / 2 - .12, 1.35, .24, title, 8.8, RED if i in {0,5} else GREEN, True)
+        _ppt_text(slide, x + 1.55, yy + .06, w - 1.70, h - .12, presenter_text(body, 112), body_size, INK, False, "Aptos", PP_ALIGN.CENTER, MSO_ANCHOR.MIDDLE)
+        _ppt_text(slide, x - .38, yy + h / 2 - .12, .30, .24, f"L{len(shown) - i}", 8.0, MUTED, True, align=PP_ALIGN.RIGHT)
+        if i:
+            _ppt_connector(slide, x + w + .18, yy - pitch + h, x + w + .18, yy, GOLD, 1.4)
+    mid = PPT_BAND_TOP + (PPT_BAND_BOTTOM - PPT_BAND_TOP) / 2
+    _ppt_text(slide, x + w + .30, mid - .22, .95, .44, "CHANGE\nRIPPLES", 8.0, GOLD, True, align=PP_ALIGN.LEFT, valign=MSO_ANCHOR.MIDDLE)
 
 
 def _ppt_compare(slide, items):
