@@ -310,10 +310,22 @@ class Blueprint(BlueprintPlan):
     generation_mode: str = "legacy"
 
 
+class SourcePassage(BaseModel):
+    coverage_ids: list[str] = Field(min_length=1, max_length=80)
+    text: str = Field(min_length=20, description="A substantive source-grounded teaching passage of at least four words. This exact text will be shown to students, not hidden in metadata.")
+
+    @field_validator("text")
+    @classmethod
+    def substantive_passage(cls, value):
+        if len(value.split()) < 4:
+            raise ValueError("A source passage needs at least four words, not just a heading")
+        return value
+
+
 class BatchLectureUnit(LectureUnit):
-    # Legacy saved jobs may omit this field, but new generation must explicitly
-    # supply it (an empty list is appropriate only for unassigned pedagogy units).
-    coverage_evidence: list[CoverageEvidence] = Field(description="Required source evidence for every coverage ID assigned to this unit by the locked plan.")
+    # One authoritative value supplies both the visible core and its evidence;
+    # asking a model to repeat an exact quotation in two fields causes drift.
+    source_passages: list[SourcePassage] = Field(max_length=64, description="Required. Every assigned coverage ID must occur in a source-grounded passage. Empty only for units with no assigned source teaching.")
 
 
 class UnitBatch(BaseModel):
@@ -323,7 +335,15 @@ class UnitBatch(BaseModel):
     @classmethod
     def accept_existing_units(cls, value):
         if isinstance(value, list):
-            return [x.model_dump() if isinstance(x, LectureUnit) else x for x in value]
+            result = []
+            for item in value:
+                if isinstance(item, LectureUnit):
+                    data = item.model_dump()
+                    data.setdefault("source_passages", [{"coverage_ids": [e.coverage_id], "text": e.visible_excerpt} for e in item.coverage_evidence])
+                    result.append(data)
+                else:
+                    result.append(item)
+            return result
         return value
 
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import re
 
-from .models import Blueprint, BlueprintPlan, UnitBatch
+from .models import Blueprint, BlueprintPlan, UnitBatch, CoverageEvidence, LectureUnit
 from .prompts import MASTER_PROMPT
 from .quality_rules import QUALITY_ADDENDUM
 from .readiness import READINESS_CONTEXT
@@ -91,6 +91,30 @@ def validate_batch(batch, numbers):
         raise ValueError("Unit phase does not match the fixed 20-unit grammar")
 
 
+def materialize_source_passages(batch, ledger):
+    """Build evidence from the exact visible text, never from a second LLM copy.
+
+    This guarantees structural traceability only. Semantic fidelity still needs
+    the independent audit against the original source bundle.
+    """
+    rows = {row.coverage_id: row for row in ledger}
+    for unit in batch.units:
+        core = list(unit.core_content)
+        evidence = []
+        for passage in unit.source_passages:
+            for coverage_id in dict.fromkeys(passage.coverage_ids):
+                if coverage_id not in rows:
+                    raise ValueError(f"Unknown source coverage ID {coverage_id} in unit {unit.number}")
+                evidence.append(CoverageEvidence(coverage_id=coverage_id,
+                    source_anchor=rows[coverage_id].source_anchor, visible_excerpt=passage.text))
+            if passage.text not in core:
+                core.append(passage.text)
+        unit.core_content = core
+        unit.coverage_evidence = evidence
+        # Assignment must not circumvent the original unit's length limits.
+        LectureUnit.model_validate(unit.model_dump())
+
+
 def context():
     return "\nREADINESS AUTHORITY:\n" + READINESS_CONTEXT + "\nOFFICIAL MAP:\n" + READINESS_KLO_MAP_CONTEXT
 
@@ -132,6 +156,7 @@ def generate(service, bundle, profile):
             + "\nMANDATORY SOURCE ITEMS FOR THESE UNITS:\n" + json.dumps(assigned)
             + "\nALREADY COMPLETED OUTLINE:\n" + json.dumps(completed))
         def validate_candidate(batch):
+            materialize_source_passages(batch, plan.coverage_ledger)
             validate_batch(batch, numbers)
             replacements = {u.number: u for u in batch.units}
             candidate = working.model_copy(update={"units": [replacements.get(u.number, u) for u in working.units]})
@@ -141,7 +166,7 @@ def generate(service, bundle, profile):
             if failed:
                 raise ValueError("Missing learner-visible source evidence: " + ", ".join(failed))
         batch = request_validated(service, bundle, UnitBatch,
-            MASTER_PROMPT + QUALITY_ADDENDUM + "\nBATCH OUTPUT: only the requested units. Each assigned coverage item needs coverage_evidence with its exact ID/anchor and an exact visible_excerpt of AT LEAST FOUR WORDS and 20 characters copied from this unit's core_content. Teach the actual mechanism/example, not just its title. Evidence in notes or a ledger does not count. Preserve complete source figures in visual_plan where relevant. Never put a newly invented scenario detail in core_content: keep source statements general and put hypothetical applications in scenario_assumptions/pedagogy_content with explicit HYPOTHETICAL labeling.",
+            MASTER_PROMPT + QUALITY_ADDENDUM + "\nBATCH OUTPUT: only the requested units. Put assigned source teaching in source_passages: each passage has coverage_ids and substantive source-grounded text of at least four words and 20 characters. Every assigned ID must occur. The program uses this exact text as visible core_content and derives coverage_evidence; do NOT repeat it in either of those fields. Teach the actual mechanism/example, not just its title. Metadata-only coverage does not count. Preserve complete source figures in visual_plan where relevant. Never put a newly invented scenario detail in source_passages or core_content: keep source statements general and put hypothetical applications in scenario_assumptions/pedagogy_content with explicit HYPOTHETICAL labeling.",
             extra, validate_candidate)
         replacement = {u.number: u for u in batch.units}
         working.units = [replacement.get(u.number, u) for u in working.units]
@@ -172,11 +197,14 @@ def repair(service, bundle, blueprint, audit, failures):
         working = Blueprint(**plan.model_dump(), units=working.units, generation_mode=working.generation_mode)
     for offset in range(0, len(numbers), BATCH_SIZE):
         selected = numbers[offset:offset + BATCH_SIZE]
+        def validate_repair(batch):
+            materialize_source_passages(batch, working.coverage_ledger)
+            validate_batch(batch, selected)
         batch = request_validated(service, bundle, UnitBatch,
-            MASTER_PROMPT + QUALITY_ADDENDUM + "\nTARGETED REPAIR: return ONLY requested units. Keep supported content and coverage evidence; correct the listed defects. Other units are immutable.",
+            MASTER_PROMPT + QUALITY_ADDENDUM + "\nTARGETED REPAIR: return ONLY requested units. Put supported source teaching in source_passages with its coverage_ids and exact student-visible text; the program derives core and evidence from this one value. Keep existing source coverage and correct the listed defects. Other units are immutable.",
             working.model_dump_json(by_alias=True) + "\nREQUESTED UNITS: " + json.dumps(selected)
             + "\nAUDIT: " + audit.model_dump_json() + "\nFAILURES: " + json.dumps(failures),
-            lambda b: validate_batch(b, selected))
+            validate_repair)
         replacements = {u.number: u for u in batch.units}
         working.units = [replacements.get(u.number, u) for u in working.units]
     return working
