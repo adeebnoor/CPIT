@@ -33,28 +33,43 @@ def same_source_anchor(left, right):
     return " ".join(left.split()).casefold() == " ".join(right.split()).casefold()
 
 
-def evidence_checks(bp, profile):
-    """Conservative structural evidence, NOT a claim of semantic equivalence."""
-    checks = {}
+def evidence_problems(bp, profile):
+    """Actionable repair reasons from the same rule used by the release gate."""
+    problems = {}
     units = {u.number: u for u in bp.units}
     rows = {r.coverage_id: r for r in bp.coverage_ledger}
-    checks["batch_coverage_ids_unique"] = len(rows) == len(bp.coverage_ledger)
+    problems["batch_coverage_ids_unique"] = "" if len(rows) == len(bp.coverage_ledger) else "Duplicate coverage IDs"
     for item in profile.coverage_items:
         if item.importance != "major":
             continue
         row = rows.get(item.id)
         unit = units.get(row.first_taught_unit) if row else None
-        valid = bool(unit and unit.number <= 15 and same_source_anchor(row.source_anchor, item.source_anchor))
-        if valid:
+        key = f"batch_source_{item.id}_visible_in_unit{row.first_taught_unit:02d}" if row else f"batch_source_{item.id}_assigned"
+        reason = ""
+        if not unit or not 6 <= unit.number <= 15:
+            reason = "Assign a substantive teaching unit numbered 6–15; an introduction or topic map is not source coverage"
+        elif not same_source_anchor(row.source_anchor, item.source_anchor):
+            reason = f"Ledger points to the wrong source coordinates; expected {item.source_anchor}"
+        else:
             visible = " ".join(" ".join(unit.core_content).split()).casefold()
-            valid = any(
-                ev.coverage_id == item.id and same_source_anchor(ev.source_anchor, item.source_anchor)
-                and len(ev.visible_excerpt.split()) >= 4
-                and " ".join(ev.visible_excerpt.split()).casefold() in visible
-                for ev in unit.coverage_evidence
-            )
-        checks[f"batch_source_{item.id}_visible_in_unit{row.first_taught_unit:02d}" if row else f"batch_source_{item.id}_assigned"] = bool(valid)
-    return checks
+            matches = [ev for ev in unit.coverage_evidence if ev.coverage_id == item.id]
+            anchored = [ev for ev in matches if same_source_anchor(ev.source_anchor, item.source_anchor)]
+            substantive = [ev for ev in anchored if len(ev.visible_excerpt.split()) >= 4]
+            if not matches:
+                reason = f"Missing coverage_evidence entry for {item.id} in unit {unit.number}"
+            elif not anchored:
+                reason = f"Evidence has the wrong source coordinates; expected {item.source_anchor}"
+            elif not substantive:
+                reason = "Evidence must contain at least four words, not just a heading"
+            elif not any(" ".join(ev.visible_excerpt.split()).casefold() in visible for ev in substantive):
+                reason = "Evidence excerpt is absent from this unit's core_content; copy an exact passage from its actual teaching content"
+        problems[key] = reason
+    return problems
+
+
+def evidence_checks(bp, profile):
+    """Structural evidence only; independent semantic review remains mandatory."""
+    return {key: not reason for key, reason in evidence_problems(bp, profile).items()}
 
 
 def validate_plan(plan, profile):
@@ -64,7 +79,7 @@ def validate_plan(plan, profile):
     for item in profile.coverage_items:
         if item.importance == "major":
             row = rows.get(item.id)
-            if not row or row.first_taught_unit > 15 or not same_source_anchor(row.source_anchor, item.source_anchor):
+            if not row or not 6 <= row.first_taught_unit <= 15 or not same_source_anchor(row.source_anchor, item.source_anchor):
                 raise ValueError(f"Missing or displaced mandatory source coverage: {item.id}")
 
 
@@ -96,7 +111,7 @@ def request_validated(service, bundle, schema, prompt, extra, validate):
 
 def generate(service, bundle, profile):
     plan = request_validated(service, bundle, BlueprintPlan,
-        MASTER_PROMPT + QUALITY_ADDENDUM + "\nSTAGE: PLAN ONLY. Return metadata, five CLOs, rubric and complete source allocation, NOT units. Copy every major coverage ID and source_anchor exactly. Allocate its first teaching to units 1–15.",
+        MASTER_PROMPT + QUALITY_ADDENDUM + "\nSTAGE: PLAN ONLY. Return metadata, five CLOs, rubric and complete source allocation, NOT units. Copy every major coverage ID and source_anchor exactly. Allocate mandatory source coverage to substantive teaching units 6–15 ONLY. Units 1–5 introduce, map, set outcomes and activate prediction; they must not substitute for teaching source details. Units 16–20 assess and synthesize. Distribute source items coherently across the teaching units, preserving examples and figures.",
         profile.model_dump_json() + context(), lambda p: validate_plan(p, profile))
     # Unfinished slots remain explicitly review-only source drafts, never empty.
     from .deterministic_blueprint_fallback import build_deterministic_blueprint
@@ -116,7 +131,7 @@ def generate(service, bundle, profile):
             candidate = working.model_copy(update={"units": [replacements.get(u.number, u) for u in working.units]})
             ids = {row["coverage_id"] for row in assigned}
             scoped_profile = profile.model_copy(update={"coverage_items": [x for x in profile.coverage_items if x.id in ids]})
-            failed = [k for k, ok in evidence_checks(candidate, scoped_profile).items() if not ok]
+            failed = [f"{k}: {reason}" for k, reason in evidence_problems(candidate, scoped_profile).items() if reason]
             if failed:
                 raise ValueError("Missing learner-visible source evidence: " + ", ".join(failed))
         batch = request_validated(service, bundle, UnitBatch,

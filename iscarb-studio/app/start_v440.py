@@ -3,19 +3,27 @@ from __future__ import annotations
 """ISCARB Faculty Studio v4.4.0 - executable grammar and source-detail release."""
 
 from fastapi import HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from pathlib import Path
 
 from . import start_v430 as prev
 from .gate_v15 import deterministic_gate as gate_v15
 from .presenter_v44 import export_presenter_pdf, export_presenter_pptx, render_presenter_preview
+from .presenter_v44 import PresenterLayoutError
 from .storage import UPLOADS, JOB_MISSING_MESSAGE
 
 engine = prev.engine
 app = prev.app
 
-PUBLIC_VERSION = "4.5.1"
-PIPELINE_ID = "faculty-studio-v4.5.1-batched-generation-evidence-gate-v15"
+
+async def _layout_rejected(request, exc):
+    return JSONResponse(status_code=422, content={"detail": str(exc), "code": "presenter_layout_requires_repair"})
+
+
+app.add_exception_handler(PresenterLayoutError, _layout_rejected)
+
+PUBLIC_VERSION = "4.5.2"
+PIPELINE_ID = "faculty-studio-v4.5.2-preflight-and-evidence-diagnostics"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
@@ -34,6 +42,7 @@ def _health_v440():
         "generation_batch_size": 4,
         "targeted_unit_repair": True,
         "coverage_evidence_required": True,
+        "presenter_overflow_preflight": True,
         "pipeline": PIPELINE_ID,
         "deterministic_gate": "v15-executable-unit-grammar-on-v14",
         "presenter_renderer": "cimt-native-v4.4-source-detail-preserving",
