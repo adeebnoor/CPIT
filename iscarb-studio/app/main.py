@@ -20,7 +20,7 @@ from .source_bundle import SourceBundle, SourceItem
 from .exporters import export_docx, export_pdf
 from .visual_engine import export_presenter_pptx, render_presenter_preview
 from .url_source import materialize_url_source
-from .deterministic_blueprint_fallback import build_deterministic_blueprint
+from .deterministic_blueprint_fallback import build_deterministic_blueprint, fit_presenter_text
 from .free_workflow import DEFAULT_MODE, resolve_mode, save_bundle
 
 APP_ROOT = Path(__file__).resolve().parent
@@ -46,6 +46,17 @@ MAX_SUPPORTING = 7
 # container disk that every other faculty job shares.
 MAX_UPLOAD_BYTES = int(os.getenv("ISCARB_MAX_UPLOAD_MB", "25")) * 1024 * 1024
 UPLOAD_CHUNK = 1024 * 1024
+
+
+def _source_preserving_draft(profile, bundle):
+    """The deterministic draft, timeboxed and condensed to a projectable deck.
+
+    The condensing pass runs after normalization because normalization is what
+    appends the domain spine and readiness lines; measuring the canvas before
+    those exist reports a slide as legible that the renderer will not accept.
+    """
+    draft = apply_90_minute_timebox(build_deterministic_blueprint(profile), profile, bundle)
+    return fit_presenter_text(draft)
 
 
 def _update(job: JobState, status: str, progress: int, message: str) -> JobState:
@@ -229,8 +240,7 @@ def _ensure_quota_safe_completeness(blueprint, profile, bundle, source_text: str
     presenter_failures = _critical_presenter_failures(original_checks)
     replaced = bool(missing or late or presenter_failures)
     if replaced:
-        blueprint = build_deterministic_blueprint(profile)
-        blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+        blueprint = _source_preserving_draft(profile, bundle)
     checks = deterministic_gate(blueprint, profile, source_text)
     checks.update(session_scope_gate(blueprint, profile, bundle))
     audit = _deterministic_fallback_audit(checks, reason)
@@ -248,8 +258,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         # A model outage must never take the user's source or downloads hostage.
         _update(job, "analyzing", 10, "Mapping source pages and preparing a downloadable review draft…")
         profile = build_deterministic_source_profile(bundle)
-        blueprint = build_deterministic_blueprint(profile)
-        blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+        blueprint = _source_preserving_draft(profile, bundle)
         job.source_profile = profile
         job.blueprint = blueprint
         checks = deterministic_gate(blueprint, profile, source_text)
@@ -408,8 +417,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             presenter_failures = _critical_presenter_failures(checks)
             if missing or late or presenter_failures:
                 recovered = ", ".join([*missing, *late, *presenter_failures])
-                blueprint = build_deterministic_blueprint(profile)
-                blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+                blueprint = _source_preserving_draft(profile, bundle)
                 checks = deterministic_gate(blueprint, profile, source_text)
                 checks.update(session_scope_gate(blueprint, profile, bundle))
                 audit = _deterministic_fallback_audit(

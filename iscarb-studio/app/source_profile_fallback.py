@@ -175,11 +175,29 @@ def _thin_source_warning(coverage) -> list[str]:
     ]
 
 
-def _choose_label(lines: list[str], page_no: int) -> str:
+_SECTION_ORDINAL = re.compile(r"^\d{1,2}\.\d+(?:\.\d+)?\b")
+
+
+def _is_heading_label(text: str) -> bool:
+    """Whether a label reads as the page's own heading rather than its prose.
+
+    A page that only continues the previous section has no heading of its own.
+    Its text is still a coverage checkpoint, but promoting it to a topic family
+    put whole sentences on the domain-spine slide, which then overflowed.
+    """
+    clean = str(text or "").strip()
+    if not clean:
+        return False
+    return bool(_SECTION_ORDINAL.match(clean)) or _is_title_like(clean) or (
+        3 <= len(clean.split()) <= 11 and len(clean) <= 100)
+
+
+def _heading_line(lines: list[str]) -> str | None:
+    """The page's own heading, or None when it carries body text only."""
     clean = [x for x in lines if not _is_furniture_line(x)]
     # Numbered chapter sections are the strongest deterministic checkpoint.
     for x in clean[:12]:
-        if re.match(r"^\d{1,2}\.\d+(?:\.\d+)?\b", x):
+        if _SECTION_ORDINAL.match(x):
             return _clean(x, 120)
     # Prefer compact title-like lines over body sentences. The word floor used
     # to be three, which rejected real two-word headings ("Cost/dependability
@@ -192,7 +210,49 @@ def _choose_label(lines: list[str], page_no: int) -> str:
     for x in clean[:12]:
         if 3 <= len(x.split()) <= 11 and len(x) <= 100:
             return _clean(x, 120)
-    return _clean(clean[0] if clean else f"Primary source page {page_no}", 120)
+    return None
+
+
+def _choose_label(lines: list[str], page_no: int) -> str:
+    heading = _heading_line(lines)
+    if heading:
+        return heading
+    clean = [x for x in lines if not _is_furniture_line(x)]
+    # Nothing on the page reads as a heading, so build one from its opening
+    # statement. Returning the raw line printed a wrapped body fragment as the
+    # slide heading, which is what "ends mid thought" was catching downstream.
+    return _headline_from(clean[:3]) if clean else f"Primary source page {page_no}"
+
+
+MIN_HEADLINE_WORDS = 3
+
+
+def _headline_from(lines) -> str:
+    """A readable heading derived from body text, never a mid-sentence fragment.
+
+    Takes the following lines as well as the first: a page wraps its sentences at
+    the column width, so the opening statement usually finishes on the next line.
+    Reading only the first line produced headings that stopped in the middle of
+    the sentence they were built from.
+    """
+    if isinstance(lines, str):
+        lines = [lines]
+    text = _clean(" ".join(str(x) for x in list(lines)[:3]), 400)
+    # A heading is the page's first claim, not a run of them.
+    text = re.split(r"(?<=[.!?])\s+|\s+[·•]\s+", text, maxsplit=1)[0].strip()
+    # A colon usually separates a topic from its expansion ("Security threats
+    # fall into three types: ..."). Take the topic, unless the topic is a single
+    # administrative word ("Exercises:") that names nothing teachable.
+    head = text.split(":", 1)[0].strip()
+    if len(head.split()) >= MIN_HEADLINE_WORDS:
+        text = head
+    text = _clean(text, 120)
+    # A width-driven clip lands wherever the line ran out, so drop trailing
+    # function words until the heading stands on its own.
+    words = text.split()
+    while len(words) > MIN_HEADLINE_WORDS and _DANGLING_TAIL.search(words[-1]):
+        words.pop()
+    return " ".join(words).rstrip(" ,;:-")
 
 
 
@@ -319,7 +379,7 @@ def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
     stem = re.sub(r"\s+", " ", stem).strip()
     # Prefer a plausible first source heading over a machine filename.
     for _page, label, _body in chunks[:6]:
-        first = _display_label(_clean(label, 120))
+        first = _strip_page_coordinate(_display_label(_clean(label, 120)))
         if not (5 <= len(first) <= 120):
             continue
         if re.fullmatch(r"[A-Z0-9_. -]+", first) or _is_furniture_line(first):
@@ -345,15 +405,70 @@ def _recurring_furniture(chunks: list[tuple[int, str, str]]) -> set[str]:
         return set()
     counts: dict[str, int] = {}
     for _idx, _label, excerpt in chunks:
-        for line in {_norm_key(x) for x in _meaningful_lines(excerpt.replace(" \u00b7 ", "\n"))}:
-            if line:
-                counts[line] = counts.get(line, 0) + 1
+        keys = set()
+        for x in _meaningful_lines(excerpt.replace(" \u00b7 ", "\n")):
+            keys |= _furniture_keys(x)
+        for line in keys:
+            counts[line] = counts.get(line, 0) + 1
     threshold = max(3, int(len(chunks) * RECURRING_FURNITURE_SHARE))
     return {line for line, n in counts.items() if n >= threshold}
 
 
 def _norm_key(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", str(text or "").lower()).strip()
+
+
+# A page coordinate is not part of the heading a learner reads.
+_LEADING_PAGE_NO = re.compile(r"^\s*\d{1,4}\s+(?=[^\d\s])")
+_TRAILING_PAGE_NO = re.compile(r"\s+\d{1,4}\s*$")
+
+
+def _strip_page_coordinate(text: str) -> str:
+    """Drop a leading/trailing page number from a heading, keeping section numbers.
+
+    "14.1 I Security risk management 369" is a real heading wearing a page number;
+    the number belongs in the source anchor, never in the slide title. A section
+    ordinal ("14.1", "14.2.2") is part of the heading and is left in place because
+    it is followed by a dot rather than whitespace.
+    """
+    out = _TRAILING_PAGE_NO.sub("", _LEADING_PAGE_NO.sub("", str(text or ""))).strip()
+    return out if len(out.split()) >= 2 else str(text or "").strip()
+
+
+def _furniture_keys(text: str) -> set[str]:
+    """Comparison keys for one line: exact, plus page-coordinate-free when it wears one.
+
+    A book chapter prints the same header on every page and only the page number
+    changes, so exact-string frequency never saw a repeat: "Chapter 14 I Security
+    engineering 367" and "368 Chapter 14 I Security engineering" are two distinct
+    strings, and both were surviving as teaching checkpoints - the faculty deck's
+    domain spine then read as a list of page headers.
+
+    The number-free form is only compared for a line that carries its number at the
+    edge, where a page coordinate sits. A body line whose number is part of what it
+    says ("Body sentence number 4") keeps its exact key, so a series of numbered
+    content lines is never mistaken for chrome. A section heading is unaffected
+    either way: it spans a few pages and stays far below the recurrence threshold.
+    """
+    keys = {_norm_key(text)}
+    raw = str(text or "")
+    if _LEADING_PAGE_NO.search(raw) or _TRAILING_PAGE_NO.search(raw):
+        keys.add(_norm_key(_strip_page_coordinate(raw)))
+    return {k for k in keys if k}
+
+
+# A spine entry has to be projectable next to a dozen others. A source page that
+# carries no heading of its own contributes a checkpoint, not a family name, and
+# the family names that remain are compacted to heading length.
+MAX_FAMILY_NAME_CHARS = 64
+
+
+def _family_name(label: str) -> str:
+    text = _clean(label, MAX_FAMILY_NAME_CHARS)
+    words = text.split()
+    while len(words) > MIN_HEADLINE_WORDS and _DANGLING_TAIL.search(words[-1]):
+        words.pop()
+    return " ".join(words).rstrip(" ,;:-") or str(label or "").strip()
 
 
 def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -> SourceProfile:
@@ -374,17 +489,18 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -
     coverage: list[CoverageItem] = []
     for idx, label, excerpt in chunks[:80]:
         clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
-        if recurring and _norm_key(_display_label(clean_label)) in recurring:
+        if recurring and _furniture_keys(_display_label(clean_label)) & recurring:
             # A running header chosen as this slide's heading says nothing about
             # the slide. Take the first line that is actually specific to it.
-            for candidate in _meaningful_lines(excerpt.replace(" \u00b7 ", "\n")):
-                if _norm_key(candidate) not in recurring and not _is_furniture_line(candidate):
-                    clean_label = _clean(candidate, 120)
+            candidates = _meaningful_lines(excerpt.replace(" \u00b7 ", "\n"))
+            for position, candidate in enumerate(candidates):
+                if not (_furniture_keys(candidate) & recurring) and not _is_furniture_line(candidate):
+                    clean_label = _headline_from(candidates[position:position + 3])
                     break
         embedded_slide = _embedded_slide_number(clean_label)
         anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else f"[P1] {coordinate} {idx}"
         # The coordinate now lives in the anchor; the heading must read as prose.
-        clean_label = _display_label(clean_label) or f"Source {coordinate.title()} {idx}"
+        clean_label = _strip_page_coordinate(_display_label(clean_label)) or f"Source {coordinate.title()} {idx}"
         key = re.sub(r"[^a-z0-9]+", " ", clean_label.lower()).strip()
         source_lines = _meaningful_lines(excerpt.replace(" · ", "\n"))
         importance = _page_importance(clean_label, source_lines, idx)
@@ -398,10 +514,10 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -
             # Preserve the source payload. Display compaction is not extraction.
             why_important=excerpt,
         ))
-        if key and key not in seen_family and not is_title_like:
+        if key and key not in seen_family and not is_title_like and _is_heading_label(clean_label):
             seen_family.add(key)
             families.append(TopicFamily(
-                name=clean_label,
+                name=_family_name(clean_label),
                 source_anchor=anchor,
                 why_important=_clean(excerpt, 260),
             ))

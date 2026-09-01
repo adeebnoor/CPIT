@@ -144,20 +144,77 @@ def wrap(value: str, width: float, size: float, bold=False) -> list[str]:
     return list(_wrapped(clean(value), width, size, bold))
 
 
+# Break points a reader already expects inside a long token: a URL breaks after
+# its separators, not in the middle of a word.
+_TOKEN_BREAKS = "/-_.,:;=&?"
+
+# A link or an identifier is a real token a line can be broken inside; article
+# URLs carrying a full headline run past 150 characters and still belong on the
+# slide. A run far longer than that is not a word at all, and it keeps tripping
+# the horizontal-overflow guard so the artifact is refused rather than typeset
+# as a wall of one token.
+MAX_BREAKABLE_TOKEN_CHARS = 300
+
+
+def _split_long_token(word: str, font: str, size: float, width: float) -> list[str]:
+    """Break a token that cannot fit on a line of its own.
+
+    A source excerpt sometimes carries a URL or an identifier longer than the
+    column. Left whole it is drawn straight off the page, and the layout shrinks
+    the whole slide chasing a fit it can never reach - which is how one link in a
+    source page dropped a teaching slide to 10pt. Every character is kept; only
+    the line it sits on changes.
+    """
+    pieces, current = [], ""
+    for char in word:
+        if current and stringWidth(current + char, font, size) > width:
+            cut = max((current.rfind(x) for x in _TOKEN_BREAKS), default=-1)
+            # Break after a separator when one is close enough to the end that
+            # the line still carries most of its content.
+            if cut >= len(current) * .5:
+                pieces.append(current[:cut + 1])
+                current = current[cut + 1:]
+            else:
+                pieces.append(current)
+                current = ""
+        current += char
+    if current:
+        pieces.append(current)
+    return pieces or [word]
+
+
 @lru_cache(maxsize=4096)
 def _wrapped(value: str, width: float, size: float, bold: bool) -> tuple[str, ...]:
     font = "ISCARB-Bold" if bold else "ISCARB"
     lines, current = [], ""
     for word in value.split():
-        candidate = (current + " " + word).strip()
-        if current and stringWidth(candidate, font, size) > width:
-            lines.append(current)
-            current = word
-        else:
-            current = candidate
+        parts = [word]
+        if len(word) <= MAX_BREAKABLE_TOKEN_CHARS and stringWidth(word, font, size) > width:
+            parts = _split_long_token(word, font, size, width)
+        for part in parts:
+            candidate = (current + " " + part).strip()
+            if current and stringWidth(candidate, font, size) > width:
+                lines.append(current)
+                current = part
+            else:
+                current = candidate
     if current:
         lines.append(current)
     return tuple(lines)
+
+
+def _overflows(blocks) -> bool:
+    """A word too long to break is as unprojectable as a column that runs off the page.
+
+    The wrapper puts an unbreakable token (a URL, a long identifier) on a line of
+    its own and reports nothing, so a vertical-only fit test called the layout
+    good and the export preflight then refused to render it. Measuring the drawn
+    line here keeps the gate's verdict and the exporter's verdict the same.
+    """
+    return any(
+        stringWidth(line, "ISCARB-Bold" if block.bold else "ISCARB", block.size) > block.width + .1
+        for block in blocks for line in block.lines
+    )
 
 
 def item_layout(items, x, y, width, height, preferred=21, minimum=10):
@@ -173,8 +230,9 @@ def item_layout(items, x, y, width, height, preferred=21, minimum=10):
                 cursor += len(label_lines) * label_size * 1.22 + max(1, size * .2)
             blocks.append(Text(x, cursor, width, body_lines, size))
             cursor += len(body_lines) * size * 1.22 + max(2, size * .4)
-        if cursor <= y + height or size == 6:
-            return blocks, size, cursor <= y + height
+        fits = cursor <= y + height and not _overflows(blocks)
+        if fits or size == 6:
+            return blocks, size, fits
 
 
 def text_layout(items, x=44, y=166, width=872, height=278):

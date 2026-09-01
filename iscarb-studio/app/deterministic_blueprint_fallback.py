@@ -16,6 +16,7 @@ from .models import (
     Blueprint, CLO, CoverageLedgerEntry, LectureUnit, ReadinessAlignment,
     RubricCriterion, SourceProfile, TopicCoverage, VisualPlan,
 )
+from .unit_contract import TAG_OWNERS
 
 # One-word competency labels give a learner nothing to act on. Each entry names
 # the competency and what its absence costs in this decision.
@@ -27,6 +28,34 @@ _HSTACK = [
     "Risk-aware design — identify the failure that would be least recoverable and design against it first.",
     "Ethical responsibility — refuse to present an unverified result as if it were established.",
 ]
+
+
+# CIMT is the intellectual spine: Concept -> Implementation -> Measurement ->
+# Trend. Every unit used to be stamped "C", so three quarters of the compass was
+# missing from a deck that actually performs all four jobs - the mechanism units
+# implement, the measurement/review units measure, and the evolution, AI-audit
+# and verdict units read the trend. The lens follows the slot's contracted job.
+_CIMT_BY_UNIT = {
+    1: ["C"], 2: ["C"], 3: ["C"], 4: ["C"], 5: ["C"],
+    6: ["C", "I"], 7: ["I"], 8: ["I"], 9: ["M"], 10: ["M"],
+    11: ["I"], 12: ["I", "M"], 13: ["T"], 14: ["M", "T"], 15: ["T"],
+    16: ["I"], 17: ["T"], 18: ["M"], 19: ["M"], 20: ["T"],
+}
+
+
+def _obligations(unit_number: int) -> tuple[list[str], list[str]]:
+    """The IDR/EER tags this slot owns under the shared unit contract.
+
+    The slots are built to the same contract the tag map describes, so the
+    obligations were being performed and simply never recorded. Recording them
+    is bookkeeping, not proof: the role checks in Gate v15 are what test whether
+    the work is actually visible to the learner.
+    """
+    owned = [tag for tag, owner in TAG_OWNERS.items() if owner == unit_number]
+    return (
+        sorted([x for x in owned if x.startswith("IDR")], key=lambda t: int(t.split("-")[1])),
+        sorted([x for x in owned if x.startswith("EER")], key=lambda t: int(t.split("-")[1])),
+    )
 
 
 def _clip(text: str, n: int = 220) -> str:
@@ -84,10 +113,51 @@ def _atomic_source_entries(row, limit: int | None = None) -> list[str]:
     return out[:limit] if limit else out
 
 
+def _row_weight(row) -> int:
+    return sum(len(statement.split()) for statement in _atomic_source_entries(row))
+
+
 def _groups(rows, count: int = 10):
+    """Split the checkpoints across the teaching slots, in source order, by weight.
+
+    Splitting by position alone gave each slot the same number of source pages
+    regardless of what was on them, so a slot that drew a two-word slide became a
+    hollow teaching minute while its neighbour carried three dense pages. The
+    split still never reorders the chapter; it only chooses where to cut.
+    """
+    rows = list(rows)
     buckets = [[] for _ in range(count)]
-    for i, row in enumerate(rows):
-        buckets[min(count - 1, (i * count) // max(1, len(rows)))].append(row)
+    if not rows:
+        return buckets
+    weights = [max(1, _row_weight(row)) for row in rows]
+    remaining_weight = sum(weights)
+    index = 0
+    for slot in range(count):
+        slots_left = count - slot
+        # Always leave one checkpoint for each slot that still has to be filled.
+        available = len(rows) - index - (slots_left - 1)
+        if available <= 0:
+            # Fewer checkpoints than slots left: one each, in source order, so no
+            # checkpoint is left out of the ledger it is supposed to be taught in.
+            for spare in range(slot, count):
+                if index >= len(rows):
+                    break
+                buckets[spare].append(rows[index])
+                index += 1
+            break
+        if slots_left == 1:
+            buckets[slot] = rows[index:]
+            break
+        target = remaining_weight / slots_left
+        taken = 0
+        while available > 0:
+            buckets[slot].append(rows[index])
+            taken += weights[index]
+            remaining_weight -= weights[index]
+            index += 1
+            available -= 1
+            if taken >= target:
+                break
     return buckets
 
 
@@ -215,6 +285,26 @@ def _as_noun_phrase(focus: str) -> str:
     return stripped if len(stripped.split()) >= 1 and len(stripped) >= 3 else text
 
 
+# A checkpoint label is a heading, not a sentence to be dropped whole into a
+# question. Clipping it at a character budget left questions ending on "and" or
+# "of", which reads as broken English and fails the mid-thought gate.
+_FOCUS_DANGLING = re.compile(
+    r"^(of|for|to|the|a|an|and|or|in|on|at|by|with|from|that|which|is|are|as|its|be|than|then)$",
+    re.IGNORECASE,
+)
+MAX_FOCUS_CHARS = 70
+
+
+def _short_focus(focus: str) -> str:
+    text = " ".join(str(focus or "").split())
+    if len(text) > MAX_FOCUS_CHARS:
+        text = text[:MAX_FOCUS_CHARS].rsplit(" ", 1)[0]
+    words = text.rstrip(" ,;:-").split()
+    while len(words) > 2 and _FOCUS_DANGLING.match(words[-1]):
+        words.pop()
+    return " ".join(words).rstrip(" ,;:-") or "this source mechanism"
+
+
 def _teaching_move(idx: int, focus: str):
     """The move for teaching slot `idx` (6..15)."""
     key = _MOVE_FOR_SLOT.get(idx)
@@ -222,8 +312,7 @@ def _teaching_move(idx: int, focus: str):
         name, question, scaffold = _TEACHING_MOVES[(idx - 6) % len(_TEACHING_MOVES)]
     else:
         name, question, scaffold = _MOVES_BY_NAME[key]
-    short = _as_noun_phrase(focus)
-    short = short if len(short) <= 70 else short[:70].rsplit(" ", 1)[0]
+    short = _short_focus(_as_noun_phrase(focus))
     return name, question.format(focus=short), list(scaffold)
 
 
@@ -260,27 +349,41 @@ def _student_action_for(bucket, labels) -> str:
     return template.format(focus=focus)
 
 
+# Publishing five readiness rows never made the trail more informative; the gate
+# asks for a minimum-sufficient claim, and the draft has exactly one thing to say
+# per family it can point at.
+MAX_READINESS_ROWS = 2
+
+
 def _readiness_trail(profile: SourceProfile, clos, rows) -> list[ReadinessAlignment]:
     """A traceable readiness trail, explicitly not an approved ETEC mapping.
 
     Faculty need to see what this lecture can and cannot evidence. An empty list
-    shows nothing; inventing SLO codes would claim an alignment nobody approved.
-    So every entry links a real source family to the units that actually produce
-    an artifact, and marks the standardized references UNVERIFIED in place.
+    shows nothing; printing official SKU/SLO codes would present an alignment
+    nobody approved as if it were standardized. So each entry names a real source
+    family, points at the units that actually produce an artifact, and keeps the
+    standardized references marked UNVERIFIED in place.
     """
-    families = [x.name for x in profile.topic_families[:5]] or [x.label for x in rows[:5]]
+    families = [x.name for x in profile.topic_families[:MAX_READINESS_ROWS]] or [
+        x.label for x in rows[:MAX_READINESS_ROWS]]
     trail: list[ReadinessAlignment] = []
     for i, family in enumerate(families):
+        # These fields are printed on the readiness slide, so the placeholder stays
+        # short and the explanation lives in the rationale beneath it. Spelling the
+        # whole disclaimer into the SKU field pushed Unit 16 off its own canvas.
+        # It also stays spaced rather than hyphenated: an unbreakable 34-character
+        # token cannot be wrapped, and one such token overflows the column on its own.
         trail.append(ReadinessAlignment(
-            gku=f"Computing knowledge exercised by: {family}",
-            sku=f"UNVERIFIED — locally derived from P1 family '{family}'; no approved ETEC SKU mapping was produced in this pass.",
+            gku="UNVERIFIED — no approved ETEC GKU mapping",
+            sku="UNVERIFIED — no approved ETEC SKU mapping",
             slo_refs=["UNVERIFIED-NO-APPROVED-SLO-MAPPING"],
             klo_refs=["UNVERIFIED-NO-APPROVED-KLO-MAPPING"],
             strength="supporting",
             rationale=(
+                f"Locally derived from P1 family '{family}'; no approved ETEC SKU mapping was produced in this pass. "
                 f"Units 16-20 produce artifacts that exercise '{family}', so the capability is evidenced locally. "
-                "Standardized readiness stays unverified because semantic alignment did not run, and no page of the "
-                "ETEC standard is cited in this deterministic pass."
+                "Standardized readiness stays unverified because the source does not use enough of any published SKU "
+                "vocabulary to reference it, and no semantic alignment ran in this pass."
             ),
             atomicity_evidence=(
                 f"One family, one claim: '{family}' is evidenced only by the listed units, each of which records its own "
@@ -291,6 +394,89 @@ def _readiness_trail(profile: SourceProfile, clos, rows) -> list[ReadinessAlignm
             standard_source_pages=[0],
         ))
     return trail
+
+
+# Floors the condensing pass must never cross: they are the gate's own teaching
+# minimums, so trimming for legibility can never hollow a slide out.
+MIN_CORE_WORDS_ON_A_TEACHING_SLIDE = 12
+MIN_PAYLOAD_WORDS_ON_A_SLIDE = 28
+MIN_VISIBLE_ITEMS_ON_A_SLIDE = 3
+MAX_MERGED_STATEMENT_CHARS = 320
+MAX_FIT_ROUNDS = 60
+_CONTINUES_NOTE = "Condensed for the canvas: the slide carries the statements that fit; the rest of this checkpoint stays in the source at"
+
+
+def _merge_shortest_pair(unit) -> bool:
+    """Join the two adjacent source statements that cost the least to combine.
+
+    Ten list members are ten boxes on the slide, and the box overhead - not the
+    words - is what pushes the renderer below its readable floor. Merging keeps
+    every source fact and buys back the space a dropped statement would have.
+    """
+    core = [str(x).strip() for x in unit.core_content if str(x).strip()]
+    best, cost = None, None
+    for i in range(len(core) - 1):
+        combined = len(core[i]) + len(core[i + 1]) + 2
+        if combined > MAX_MERGED_STATEMENT_CHARS:
+            continue
+        if cost is None or combined < cost:
+            best, cost = i, combined
+    if best is None:
+        return False
+    core[best] = core[best].rstrip(" .;,") + "; " + core[best + 1]
+    del core[best + 1]
+    unit.core_content = core
+    return True
+
+
+def _drop_last_statement(unit, teaching: bool) -> bool:
+    """Stop the slide short of the excerpt, and record that in the unit's evidence."""
+    core = [str(x).strip() for x in unit.core_content if str(x).strip()]
+    if len(core) < 2:
+        return False
+    remaining = core[:-1]
+    words = sum(len(x.split()) for x in remaining)
+    payload = words + sum(len(str(x).split()) for x in unit.pedagogy_content)
+    items = len(remaining) + len([x for x in unit.pedagogy_content if str(x).strip()])
+    if teaching and (words < MIN_CORE_WORDS_ON_A_TEACHING_SLIDE
+                     or payload < MIN_PAYLOAD_WORDS_ON_A_SLIDE
+                     or items < MIN_VISIBLE_ITEMS_ON_A_SLIDE):
+        return False
+    unit.core_content = remaining
+    # The note belongs in the unit's evidence record, not on the slide: the
+    # presenter already prints this unit's source anchor, and spending three
+    # lines of the canvas explaining the trim is what forced the next trim.
+    anchor = str(unit.source_anchor or "P1").strip() or "P1"
+    if _CONTINUES_NOTE not in unit.evidence:
+        unit.evidence = f"{unit.evidence} {_CONTINUES_NOTE} {anchor}.".strip()
+    return True
+
+
+def fit_presenter_text(bp: Blueprint) -> Blueprint:
+    """Condense the draft until every teaching slide is legible at the gate's floor.
+
+    A source-preserving draft copies whole source pages into a teaching slot, and
+    a slot carrying three pages cannot be projected: the renderer drops the body
+    below 16pt and the release gate rejects the deck - which is what left a free
+    draft with a list of unreadable-unit failures nobody could clear. Related
+    statements are merged first, so no source fact is lost while the box count
+    falls. Only when merging is exhausted does a slide stop short of the excerpt,
+    and it then names the anchor where the checkpoint continues.
+    """
+    from .presenter_v44 import readability_problems
+
+    for _round in range(MAX_FIT_ROUNDS):
+        problems = [n for n in readability_problems(bp) if 5 <= n <= 15]
+        if not problems:
+            break
+        progressed = False
+        for number in problems:
+            unit = bp.units[number - 1]
+            if _merge_shortest_pair(unit) or _drop_last_statement(unit, teaching=number >= 6):
+                progressed = True
+        if not progressed:
+            break
+    return bp
 
 
 def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
@@ -326,24 +512,31 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
     mins = [4,5,4,4,5] + [5]*10 + [4,4,4,3,3]
     phases = ["IFHAM"]*5 + ["MARIS"]*5 + ["ATQAN"]*5 + ["MAYYIZ"]*5
 
-    def add(n, title_, q, core, ped, action, takeaway, kind, anchor="N/A — ISCARB PEDAGOGY", evidence=""):
+    def add(n, title_, q, core, ped, action, takeaway, kind, anchor="N/A — ISCARB PEDAGOGY", evidence="",
+            verify=False):
+        inherited, elite = _obligations(n)
         units.append(LectureUnit(
             number=n, phase=phases[n-1], title=title_, engineering_question=q,
             core_content=[str(x).strip() for x in core], pedagogy_content=[str(x).strip() for x in ped],
             enrichment_content=[], enrichment_basis=[], scenario_assumptions=[],
             knowledge_types=list(dict.fromkeys([x.knowledge_type for x in (groups[n-6] if 6 <= n <= 15 else [])])) or ["CONCEPT"],
             visual_suggestion=kind, visual_plan=_visual(kind, q, groups[n-6] if 6 <= n <= 15 else []),
-            student_action=action, takeaway=takeaway, cimtlens=["C"],
+            student_action=action, takeaway=takeaway, cimtlens=list(_CIMT_BY_UNIT[n]),
             clo_ids=[clos[min(4, max(0, (n-1)//4))].id], source_anchor=anchor,
-            inherited_requirements=[], elite_requirements=[], evidence=evidence,
-            contextual_enrichment=False, verify_before_release=True, planned_minutes=mins[n-1],
+            inherited_requirements=inherited, elite_requirements=elite, evidence=evidence,
+            # Flagging all twenty units said only "this is a draft", which the job
+            # status, the audit report and the release notes already say, and it
+            # left a gate failure no repair could ever clear. The flag now marks
+            # the units that carry a real unresolved decision: a teaching slot the
+            # source could not fill with its own checkpoint.
+            contextual_enrichment=False, verify_before_release=verify, planned_minutes=mins[n-1],
         ))
 
     add(1, f"{title}: the engineering decision", "What can we responsibly decide before the missing evidence is resolved?", [],
         ["Start from the source and an evidence gap; do not reveal the diagnosis first."],
         "Write one prediction and one piece of evidence you would need before committing.",
         "A defensible decision begins by separating what the source supports from what remains unknown.", "title")
-    add(2, "Domain spine", "What are the major source families that structure this chapter?", [*family_names[:8]],
+    add(2, "Domain spine", "What are the major source families that structure this chapter?", [*family_names],
         ["Connect the chapter families before studying mechanisms in isolation."], "Sketch the source spine and mark the family you expect to be most decision-sensitive.",
         "The chapter is one connected engineering argument, not a list of slides.", "concept-map", "[P1]")
     add(3, "Five outcomes for this lecture", "What should you be able to explain, apply, compare, evaluate, and defend?", [],
@@ -420,7 +613,8 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             ped = [*ped, f"Name what {labels[0] if labels else 'this mechanism'} would cost if it were absent."]
         add(idx, title_, question, core, ped, action,
             f"Source checkpoint(s) covered: {', '.join(labels)}",
-            kind, _anchors(bucket), evidence=f"P1 checkpoint evidence: {', '.join(x.id for x in bucket)}")
+            kind, _anchors(bucket), evidence=f"P1 checkpoint evidence: {', '.join(x.id for x in bucket)}",
+            verify=reused)
 
     add(16, "Build the decision artifact", "Can you integrate the chapter mechanisms into one coherent engineering response?", [],
         ["Use only mechanisms already taught from P1; nothing new may be introduced here.",
@@ -476,31 +670,66 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             representation=f"Unit {unit_no}: source checkpoint + learner application",
         ))
 
+    # Every locked family gets a coverage row. Truncating at ten silently declared
+    # a narrower lecture than the source profile locked, and the deck then failed
+    # its own topic-coverage contract on any chapter with more than ten families.
     topic_coverage = [
-        TopicCoverage(topic_family=x.name, source_anchor=x.source_anchor, first_taught_unit=min(15, 6+i), reinforced_units=[16,18])
-        for i, x in enumerate(profile.topic_families[:10])
+        TopicCoverage(topic_family=x.name, source_anchor=x.source_anchor,
+                      first_taught_unit=min(15, 6 + i), reinforced_units=[16, 18])
+        for i, x in enumerate(profile.topic_families)
     ] or [TopicCoverage(topic_family=rows[0].label, source_anchor=rows[0].source_anchor, first_taught_unit=6, reinforced_units=[16,18])]
 
-    rubric_names = [
-        "Technical correctness + source fidelity", "First-principles / mechanism reasoning",
-        "Alternatives + trade-off engineering judgment", "Evidence + falsification / verification quality",
-        "Constraint adaptation + risk-aware redesign", "Professional accountability + readiness discipline",
+    # One descriptor set repeated six times told a marker nothing about which
+    # capability was being judged, and its length forced the rubric table below
+    # the 12pt readable floor. Each criterion now names what its own levels look
+    # like, in wording short enough to project.
+    rubric_levels = [
+        ("Technical correctness + source fidelity",
+         "Every claim traced to P1, precise and complete.",
+         "Claims are correct and anchored to the source.",
+         "Mostly correct; some anchors are missing.",
+         "Contradicts P1 or cites no source at all."),
+        ("First-principles / mechanism reasoning",
+         "Derives the mechanism from its constraints.",
+         "Explains the mechanism in the right order.",
+         "Names the steps without connecting them.",
+         "Restates the slide; no mechanism shown."),
+        ("Alternatives + trade-off engineering judgment",
+         "Two defensible options, each with its cost.",
+         "One alternative and the trade-off it carries.",
+         "An alternative named; trade-off left vague.",
+         "One option only, with no trade-off."),
+        ("Evidence + falsification / verification quality",
+         "States the measure and what would refute it.",
+         "Gives the evidence and a check on it.",
+         "Evidence given; nothing could disconfirm it.",
+         "Assertion offered in place of evidence."),
+        ("Constraint adaptation + risk-aware redesign",
+         "Reruns the decision under the new constraint.",
+         "Adjusts the design to the new constraint.",
+         "Notes the change but keeps the old answer.",
+         "The constraint change is ignored."),
+        ("Professional accountability + readiness discipline",
+         "Names owner, sign-off, and what is unverified.",
+         "Names the responsible role and its evidence.",
+         "Accountability implied but never assigned.",
+         "No owner and no review status."),
     ]
     rubric = [RubricCriterion(
         criterion=name,
-        distinguished="Source-anchored, complete, precise, and transferable.",
-        ready="Correct and supported with a clear artifact.",
-        developing="Partly correct or incompletely evidenced.",
-        not_yet_ready="Unsupported, incomplete, or contradicted by P1.",
+        distinguished=distinguished,
+        ready=ready,
+        developing=developing,
+        not_yet_ready=not_yet,
         readiness_refs=["UNVERIFIED — evidenced by Units 16, 18 and 19; no approved ETEC SLO mapping in this pass."],
-    ) for name in rubric_names]
+    ) for name, distinguished, ready, developing, not_yet in rubric_levels]
 
     return Blueprint(
         lecture_title=title,
         engineering_thesis=f"Use the complete primary-source chapter to make a bounded engineering decision about {title}.",
         central_engineering_crisis=f"A team must make a consequential decision about {title} while distinguishing source-supported knowledge from unresolved assumptions.",
         named_ethical_purpose="Make an evidence-proportionate professional decision without overstating what the source or the learner artifact proves.",
-        clos=clos, units=units, source_topic_families=family_names[:20], topic_coverage=topic_coverage,
+        clos=clos, units=units, source_topic_families=family_names, topic_coverage=topic_coverage,
         coverage_ledger=ledger, readiness_alignment=_readiness_trail(profile, clos, rows), rubric_criteria=rubric,
         release_notes=["QUOTA-SAFE DRAFT ONLY: semantic generation/audit unavailable; readiness unverified; release forbidden."],
         session_minutes=90, source_manifest=profile.source_manifest, deferred_topics=[],
