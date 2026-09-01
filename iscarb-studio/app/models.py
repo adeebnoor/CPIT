@@ -186,7 +186,7 @@ class CoverageEvidence(BaseModel):
     coverage_id: str
     source_anchor: str
     # Exact excerpt from this unit's visible core, not a claim in a ledger.
-    visible_excerpt: str = Field(min_length=20)
+    visible_excerpt: str = Field(min_length=20, description="At least four words, copied verbatim from this unit's core_content; a heading alone is not evidence.")
 
 
 class LectureUnit(BaseModel):
@@ -310,8 +310,21 @@ class Blueprint(BlueprintPlan):
     generation_mode: str = "legacy"
 
 
+class BatchLectureUnit(LectureUnit):
+    # Legacy saved jobs may omit this field, but new generation must explicitly
+    # supply it (an empty list is appropriate only for unassigned pedagogy units).
+    coverage_evidence: list[CoverageEvidence] = Field(description="Required source evidence for every coverage ID assigned to this unit by the locked plan.")
+
+
 class UnitBatch(BaseModel):
-    units: list[LectureUnit] = Field(min_length=1, max_length=4)
+    units: list[BatchLectureUnit] = Field(min_length=1, max_length=4)
+
+    @field_validator("units", mode="before")
+    @classmethod
+    def accept_existing_units(cls, value):
+        if isinstance(value, list):
+            return [x.model_dump() if isinstance(x, LectureUnit) else x for x in value]
+        return value
 
 
 class AuditIssue(BaseModel):

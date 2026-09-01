@@ -274,7 +274,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
         save_job(job)
 
         stage = "20-unit generation + readiness alignment"
-        _update(job, "generating", 35, "2/4 · Engineering Compiler: building 20 Units with complete P1 coverage and smart compression…")
+        _update(job, "generating", 35, "2/4 · Building the source-allocation plan, then five batches of four units…")
         def save_batch(snapshot, completed):
             job.blueprint = snapshot
             job.audit = _deterministic_fallback_audit({}, "Independent semantic audit not yet performed.")
@@ -418,7 +418,15 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
     except Exception as exc:
         try:
             job = load_job(job_id)
-            if job.blueprint is not None and _is_model_unavailable(exc):
+            from .batched_generation import GenerationContractError
+            if job.blueprint is not None and isinstance(exc, GenerationContractError):
+                job.error = None
+                job.audit = _deterministic_fallback_audit({}, "Generated content failed local quality validation.")
+                job.audit.issues.append(AuditIssue(severity="major", unit_numbers=[],
+                    requirement="Generation batch source-evidence contract", problem=str(exc),
+                    repair_instruction="Repair the identified source-evidence defect before release; preserved draft units are not semantically approved."))
+                _update(job, "blocked", 100, "REVIEW REQUIRED — a generated batch failed source-evidence validation after its correction attempt. Completed batches and the source-review draft remain available; no verified release is issued. " + str(exc))
+            elif job.blueprint is not None and _is_model_unavailable(exc):
                 job.error = None
                 _update(job, "blocked", 100, f"BLOCKED — generated blueprint preserved; Gemini became unreachable during {stage}. Preview and exports remain available.")
             else:
@@ -539,7 +547,7 @@ async def compile_lecture(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued for ISCARB v2.1 — source lock, Precision Gate, then local Visual Grammar + Presenter Preview…",
+        message="Queued — source analysis, batched generation, source-evidence checks, then independent audit…",
         filename=display_name,
         model=chosen_model,
         source_manifest=bundle.manifest_lines(),
