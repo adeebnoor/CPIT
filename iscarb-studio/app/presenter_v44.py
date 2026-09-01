@@ -71,15 +71,17 @@ def contextual_items(u):
 def teaching_items(bp: Blueprint, u: LectureUnit) -> list[tuple[str, str]]:
     if u.number == 1:
         return [("ENGINEERING CRISIS", clean(bp.central_engineering_crisis)),
-                ("PROFESSIONAL PURPOSE", clean(bp.named_ethical_purpose))]
+                ("PROFESSIONAL PURPOSE", clean(bp.named_ethical_purpose)),
+                *[split_item(x, "PRIMARY SOURCE") for x in u.core_content]]
     if u.number == 3:
         return [(c.id, clean(c.statement)) for c in bp.clOs]
     if u.number == 4:
         return [split_item(x) for x in u.pedagogy_content]
     if u.number == 5:
-        # Prediction must be visible before the mechanism is revealed. Its
-        # source material remains in the Blueprint/notes and Units 6–15.
-        return contextual_items(u) + [split_item(x, "REASONING STEP") for x in u.pedagogy_content]
+        # Keep the full explanation after prediction; never silently rely on
+        # another unit to contain this unit's source facts.
+        return (contextual_items(u) + [split_item(x, "REASONING STEP") for x in u.pedagogy_content]
+                + ([("SOURCE EXPLANATION", " ".join(clean(x) for x in u.core_content))] if u.core_content else []))
     if u.number == 19:
         return [(r.criterion, " | ".join([r.distinguished, r.ready, r.developing, r.not_yet_ready]))
                 for r in bp.rubric_criteria]
@@ -124,11 +126,12 @@ def item_layout(items, x, y, width, height, preferred=21, minimum=10):
     for size in range(preferred, 5, -1):
         blocks, cursor = [], y
         for label, body in items:
-            label_lines = wrap(label, width, max(11, size - 3), True) if label else []
+            label_size = max(6, size - 3)
+            label_lines = wrap(label, width, label_size, True) if label else []
             body_lines = wrap(body, width, size)
             if label_lines:
-                blocks.append(Text(x, cursor, width, label_lines, max(11, size - 3), GREEN, True))
-                cursor += len(label_lines) * max(11, size - 3) * 1.18 + 4
+                blocks.append(Text(x, cursor, width, label_lines, label_size, GREEN, True))
+                cursor += len(label_lines) * label_size * 1.22 + 4
             blocks.append(Text(x, cursor, width, body_lines, size))
             cursor += len(body_lines) * size * 1.22 + max(9, size * .6)
         if cursor <= y + height or size == 6:
@@ -170,7 +173,7 @@ def unit_layout(bp, u, plan=None):
                  *[split_item(x) for x in u.pedagogy_content if clean(x)],
                  *contextual_items(u),
                  ("YOUR TASK", clean(u.student_action))]
-        blocks, size, fits = item_layout(items, 702, 65, 218, 433, preferred=17)
+        blocks, size, fits = item_layout(items, 636, 65, 284, 433, preferred=17)
         return blocks, size, fits, source
     blocks, size, fits = text_layout(teaching_items(bp, u))
     return blocks, size, fits, None
@@ -263,9 +266,9 @@ def _draw_page(c, bp, u, plan, release_state="REVIEW"):
         _line(c, 42, x=36, width=884)
         with Image.open(source) as im:
             iw,ih=im.size
-            scale=min(642/iw,454/ih)
+            scale=min(576/iw,454/ih)
             dw,dh=iw*scale,ih*scale
-            c.drawImage(ImageReader(im),36+(642-dw)/2,H-54-dh,width=dw,height=dh)
+            c.drawImage(ImageReader(im),36+(576-dw)/2,H-54-dh,width=dw,height=dh)
         for block in blocks:
             _text(c,block)
         _text(c,Text(36,520,800,[clean(u.source_anchor)+" · Original source page; ISCARB practice at right"],8,MUTED))
@@ -351,9 +354,9 @@ def export_presenter_pptx(bp: Blueprint, out: Path, source_root=None, release_st
         if source:
             add(slide,Text(36,17,850,[f"ISCARB / {PHASES.get(u.phase,u.phase)} / {JOBS[u.number-1]}"],10,GREEN,True))
             with Image.open(source) as im: iw,ih=im.size
-            scale=min(642/iw,454/ih)
+            scale=min(576/iw,454/ih)
             dw,dh=iw*scale,ih*scale
-            slide.shapes.add_picture(str(source),Inches((36+(642-dw)/2)/72),Inches(54/72),width=Inches(dw/72),height=Inches(dh/72))
+            slide.shapes.add_picture(str(source),Inches((36+(576-dw)/2)/72),Inches(54/72),width=Inches(dw/72),height=Inches(dh/72))
             for block in blocks: add(slide,block)
             add(slide,Text(36,520,800,[clean(u.source_anchor)+" · Original source page; ISCARB practice at right"],8,MUTED))
             add(slide,Text(865,517,60,[f"{u.number:02d} / 20"],9,GREEN,True))

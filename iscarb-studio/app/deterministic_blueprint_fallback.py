@@ -386,14 +386,22 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             # Same material, a different question of it - never the same slide twice.
             title_ = f"{title_}: {move_name}"
         ped = []
-        if idx == 8: ped = ["Compare at least two source-derived alternatives; make the trade-off explicit."]
-        elif idx == 9: ped = ["State the measure and the observation that would falsify the current decision."]
-        elif idx == 10: ped = ["KNOWN", "UNKNOWN", "DECISION-SENSITIVE UNKNOWN", "WHAT WE MONITOR"]
+        if idx == 8: ped = [f"Alternative A: Apply {labels[0]} under the source's stated conditions.",
+                            "Alternative B: Retain the current design until those conditions are evidenced.",
+                            "Trade-off: Compare the cost of changing the design with the risk of delaying the decision."]
+        elif idx == 9: ped = [f"Measure: Choose an observable result of {labels[0]} and record its test conditions.",
+                              "Falsifier: Identify a result that contradicts the source-based prediction; revise the decision if observed."]
+        elif idx == 10: ped = [f"Known: Identify the claims explicitly supported by {labels[0]}.",
+                               "Unknown: List assumptions for which the source supplies no evidence.",
+                               "Decision-sensitive unknown: Select the missing fact that would reverse your design choice.",
+                               "Monitor: Define an observation, its owner, and the condition requiring a new decision."]
         elif idx == 11: ped = ["Use a Saudi/Gulf constraint only as an explicit hypothetical unless P1 supports it."]
         elif idx == 12: ped = ["Name the responsible role, evidence owner, and sign-off point without adding new technology."]
         elif idx == 13: ped = ["Ask what changes next while keeping the source mechanism dominant."]
         elif idx == 14: ped = ["Identify the practitioner/operational consequence implied by the source mechanism; do not invent psychology claims."]
-        elif idx == 15: ped = ["AI MAY ASSIST", "AI MUST NOT BE TRUSTED AUTONOMOUSLY", "Claim → Assumption → Source Check → Test → Failure Search → Human Sign-off"]
+        elif idx == 15: ped = ["AI MAY ASSIST: Propose test cases for the source mechanism, subject to verification.",
+                               "AI MUST NOT BE TRUSTED AUTONOMOUSLY: Approve the design or certify its safety.",
+                               "Human sign-off: Check each claim against the source, test it, search for failures, then record the responsible reviewer."]
         # The slot's contracted question always ships. It used to appear only on
         # the thin-source path, so a source rich enough to fill every slot got
         # ten copies of "How does X change the engineering decision?" - the
@@ -407,7 +415,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         # Every teaching slot carries its move. A thin source gives one checkpoint
         # line, and one line is a single oversized box on the slide - the move is
         # what makes that checkpoint workable, so it always ships beside it.
-        ped = [*ped, *move_scaffold]
+        ped = ped if idx in {8, 9, 10, 15} else [*ped, *move_scaffold]
         if len([x for x in (*core, *ped) if str(x).strip()]) < _MIN_UNIT_ITEMS:
             ped = [*ped, f"Name what {labels[0] if labels else 'this mechanism'} would cost if it were absent."]
         add(idx, title_, question, core, ped, action,

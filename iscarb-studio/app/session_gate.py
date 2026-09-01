@@ -83,6 +83,11 @@ def session_scope_gate(bp: Blueprint, profile: SourceProfile, bundle: SourceBund
     checks["unit5_prediction_is_visible_before_explanation"] = "predict" in q5 and any(
         marker in q5 for marker in ["before", "without", "given only", "from the evidence", "from these constraints"]
     )
+    # A substantive first PREDICT step is visible before the following
+    # constraint/derivation even when the question uses ordinary language.
+    from .gate_v15 import _unit5_contract
+    if u5.pedagogy_content and u5.pedagogy_content[0].strip().lower().startswith("predict:"):
+        checks["unit5_prediction_is_visible_before_explanation"] = _unit5_contract(u5)
 
     # ATQAN functions are integrated pedagogy, while learner-facing titles remain source/topic-first.
     # Keep the historical check names for API compatibility; the semantics are now "present and integrated",

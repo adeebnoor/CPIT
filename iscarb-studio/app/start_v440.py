@@ -14,8 +14,8 @@ from .storage import UPLOADS, JOB_MISSING_MESSAGE
 engine = prev.engine
 app = prev.app
 
-PUBLIC_VERSION = "4.4.0"
-PIPELINE_ID = "faculty-studio-v4.4.0-executable-20-unit-grammar-gate-v15"
+PUBLIC_VERSION = "4.4.1"
+PIPELINE_ID = "faculty-studio-v4.4.1-bounded-generation-source-first-gate-v15"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
@@ -27,6 +27,10 @@ def _health_v440():
     data = prev._health_v430()
     data.update({
         "version": PUBLIC_VERSION,
+        "model_request_timeout_seconds": 150,
+        "model_job_budget_seconds": 600,
+        "source_only_mode": True,
+        "draft_downloads_during_audit": True,
         "pipeline": PIPELINE_ID,
         "deterministic_gate": "v15-executable-unit-grammar-on-v14",
         "presenter_renderer": "cimt-native-v4.4-source-detail-preserving",
@@ -86,15 +90,24 @@ def presenter_v440(job_id: str):
 @app.get("/api/jobs/{job_id}/export/{fmt}")
 def export_v440(job_id: str, fmt: str):
     fmt = fmt.lower()
+    if fmt == "source-pdf":
+        from .source_visuals import _find_local_primary_pdf
+        _presenter_job(job_id)
+        source = _find_local_primary_pdf(UPLOADS / job_id)
+        if source is None:
+            raise HTTPException(404, "This job has no original PDF. Use the original uploaded document.")
+        return FileResponse(source, media_type="application/pdf", filename=f"ISCARB_{job_id}_Original_Source.pdf")
     if fmt not in {"pptx", "presenter-pdf", "presenter_pdf", "visual-pdf"}:
         return prev.export_v430(job_id, fmt)
     job = _presenter_job(job_id)
-    if job.status not in {"ready", "blocked", "error"}:
-        raise HTTPException(409, "Compilation is still in progress")
+    # Snapshots during audit are explicitly marked REVIEW DRAFT, never READY.
     engine.EXPORTS.mkdir(parents=True, exist_ok=True)
     suffix = "pptx" if fmt == "pptx" else "pdf"
-    path = engine.EXPORTS / f"ISCARB_{job_id}_Visual_Presenter.{suffix}"
+    import uuid
+    from starlette.background import BackgroundTask
+    path = engine.EXPORTS / f"ISCARB_{job_id}_{uuid.uuid4().hex}_Visual_Presenter.{suffix}"
     exporter = export_presenter_pptx if suffix == "pptx" else export_presenter_pdf
     exporter(job.blueprint, path, source_root=UPLOADS / job_id, release_state=job.status)
     media = "application/vnd.openxmlformats-officedocument.presentationml.presentation" if suffix == "pptx" else "application/pdf"
-    return FileResponse(path, media_type=media, filename=path.name)
+    return FileResponse(path, media_type=media, filename=f"ISCARB_{job_id}_Visual_Presenter.{suffix}",
+                        background=BackgroundTask(path.unlink, missing_ok=True))
