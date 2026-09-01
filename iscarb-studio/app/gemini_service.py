@@ -276,24 +276,8 @@ class GeminiService:
         return result
 
     def generate_blueprint(self, bundle: SourceBundle, profile: SourceProfile) -> Blueprint:
-        extra = (
-            "\nSOURCE PROFILE (90-minute full-coverage contract):\n"
-            + profile.model_dump_json(indent=2)
-            + "\n\nBUNDLE MANIFEST:\n"
-            + bundle.manifest_text()
-            + "\n\nETEC IT 2025 READINESS PROFILE (alignment authority only):\n"
-            + READINESS_CONTEXT
-            + "\n\nOFFICIAL ETEC SLO-TO-KLO MAP (must be copied exactly; do not infer):\n"
-            + READINESS_KLO_MAP_CONTEXT
-        )
-        return self._generate_structured(
-            bundle=bundle,
-            prompt=MASTER_PROMPT + QUALITY_ADDENDUM,
-            schema=Blueprint,
-            extra_text=extra,
-            preferred_model=self.model,
-            thinking_level="low",
-        )
+        from .batched_generation import generate
+        return generate(self, bundle, profile)
 
     def audit(self, bundle: SourceBundle, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
         extra = (
@@ -318,25 +302,5 @@ class GeminiService:
         )
 
     def repair(self, bundle: SourceBundle, blueprint: Blueprint, audit: AuditReport, deterministic_failures: list[str]) -> Blueprint:
-        extra = (
-            "\nBUNDLE MANIFEST:\n"
-            + bundle.manifest_text()
-            + "\nETEC IT 2025 READINESS PROFILE:\n"
-            + READINESS_CONTEXT
-            + "\nOFFICIAL ETEC SLO-TO-KLO MAP:\n"
-            + READINESS_KLO_MAP_CONTEXT
-            + "\nCURRENT BLUEPRINT:\n"
-            + blueprint.model_dump_json(by_alias=True, indent=2)
-            + "\nAUDIT REPORT:\n"
-            + audit.model_dump_json(indent=2)
-            + "\nDETERMINISTIC FAILURES:\n"
-            + json.dumps(deterministic_failures, ensure_ascii=False)
-        )
-        return self._generate_structured(
-            bundle=bundle,
-            prompt=REPAIR_PROMPT + REPAIR_ADDENDUM,
-            schema=Blueprint,
-            extra_text=extra,
-            preferred_model=self.model,
-            thinking_level="low",
-        )
+        from .batched_generation import repair
+        return repair(self, bundle, blueprint, audit, deterministic_failures)

@@ -182,6 +182,13 @@ class VisualPlan(BaseModel):
         return value
 
 
+class CoverageEvidence(BaseModel):
+    coverage_id: str
+    source_anchor: str
+    # Exact excerpt from this unit's visible core, not a claim in a ledger.
+    visible_excerpt: str = Field(min_length=20)
+
+
 class LectureUnit(BaseModel):
     number: int = Field(ge=1, le=20)
     phase: Phase
@@ -206,6 +213,7 @@ class LectureUnit(BaseModel):
     cimtlens: list[CIMTLens] = Field(min_length=1, max_length=4)
     clo_ids: list[Literal["CLO1", "CLO2", "CLO3", "CLO4", "CLO5"]] = Field(min_length=1)
     source_anchor: str = ""
+    coverage_evidence: list[CoverageEvidence] = Field(default_factory=list)
     inherited_requirements: list[str] = Field(default_factory=list)
     elite_requirements: list[str] = Field(default_factory=list)
     evidence: str = ""
@@ -258,13 +266,12 @@ class LectureUnit(BaseModel):
         return value
 
 
-class Blueprint(BaseModel):
+class BlueprintPlan(BaseModel):
     lecture_title: str
     engineering_thesis: str
     central_engineering_crisis: str
     named_ethical_purpose: str
     clOs: list[CLO] = Field(alias="clos", min_length=5, max_length=5)
-    units: list[LectureUnit] = Field(min_length=20, max_length=20)
     source_topic_families: list[str] = Field(min_length=1)
     topic_coverage: list[TopicCoverage] = Field(min_length=1)
     coverage_ledger: list[CoverageLedgerEntry] = Field(default_factory=list)
@@ -296,6 +303,15 @@ class Blueprint(BaseModel):
                     result.append(text)
             return result[:20]
         return value
+
+
+class Blueprint(BlueprintPlan):
+    units: list[LectureUnit] = Field(min_length=20, max_length=20)
+    generation_mode: str = "legacy"
+
+
+class UnitBatch(BaseModel):
+    units: list[LectureUnit] = Field(min_length=1, max_length=4)
 
 
 class AuditIssue(BaseModel):

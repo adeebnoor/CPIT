@@ -150,7 +150,9 @@ def test_production_entry_serves_v44_and_scoped_exports():
 from app.start_v440 import app
 c=TestClient(app)
 h=c.get('/api/health').json()
-assert h['version']=='4.4.1'
+assert h['version']=='4.5.0'
+assert h['generation_batch_size']==4
+assert h['targeted_unit_repair'] is True
 assert 'v15' in h['deterministic_gate']
 p=c.get('/')
 assert p.status_code==200 and 'studio_v440.js' in p.text
