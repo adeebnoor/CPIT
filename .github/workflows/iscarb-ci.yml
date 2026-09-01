@@ -89,6 +89,8 @@ jobs:
           class FakeTypes:
               GenerateContentConfig = DummyConfig
               ThinkingConfig = DummyConfig
+              HttpOptions = DummyConfig
+              HttpRetryOptions = DummyConfig
           class FakeModels:
               def __init__(self): self.calls = 0
               def generate_content(self, **kwargs):
