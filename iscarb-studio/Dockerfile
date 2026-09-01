@@ -7,6 +7,11 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+# Embed a real Unicode font in PDFs instead of relying on viewer-specific
+# Helvetica substitution (which distorted spacing and mathematical symbols).
+RUN apt-get update && apt-get install -y --no-install-recommends fonts-dejavu-core \
+    && apt-get clean
+
 # Dependencies resolve in their own layer so application edits do not force a
 # full reinstall on every deploy.
 COPY requirements.txt .

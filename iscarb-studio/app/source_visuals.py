@@ -52,6 +52,7 @@ class VisualAsset:
     source_url: str = ""
     local_path: str = ""
     source_kind: str = "public"
+    visual_area_ratio: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -109,7 +110,7 @@ TEACHING_PURPOSE = {
     20: "Close the original crisis with a bounded engineering verdict supported by evidence.",
 }
 
-SOURCE_VISUAL_PRIORITY = {2, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14}
+SOURCE_VISUAL_PRIORITY = {2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 
 _STOP = {
     "the", "and", "for", "with", "from", "into", "that", "this", "what", "which",
@@ -150,6 +151,8 @@ def _primary_display_name(source_manifest: list[str]) -> str | None:
 def _find_local_primary_pdf(source_root: Path | None) -> Path | None:
     if not source_root or not source_root.exists():
         return None
+    if source_root.is_file():
+        return source_root if source_root.suffix.lower() == ".pdf" else None
     patterns = ("P1__*.pdf", "P1/*.pdf", "**/P1__*.pdf", "**/linked_source.pdf")
     candidates: list[Path] = []
     for pattern in patterns:
@@ -181,7 +184,7 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
         stat = path.stat()
     except OSError:
         return None
-    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}")
+    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}:v44")
     manifest_path = cache / "manifest.json"
     if manifest_path.exists():
         try:
@@ -206,7 +209,9 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
                 pix = page.get_pixmap(matrix=fitz.Matrix(PDF_RENDER_ZOOM, PDF_RENDER_ZOOM), alpha=False)
                 pix.save(str(image_path))
             page_text = " ".join(page.get_text("text").split())[:1600]
-            assets.append(VisualAsset(slide_no, "", page_text or f"Primary lecture page {slide_no}", f"local:{path.name}", str(image_path), "local-pdf"))
+            image_area = max((fitz.Rect(info["bbox"]).get_area() for info in page.get_image_info()), default=0)
+            ratio = min(1.0, image_area / max(1.0, page.rect.get_area()))
+            assets.append(VisualAsset(slide_no, "", page_text or f"Primary lecture page {slide_no}", f"local:{path.name}", str(image_path), "local-pdf", ratio))
     finally:
         doc.close()
     if not assets:
@@ -277,7 +282,9 @@ def _build_slideshare_registry(url: str) -> VisualRegistry | None:
 
 
 def load_registry(bp: Blueprint, source_root: Path | None = None) -> VisualRegistry | None:
-    local_pdf = _find_local_primary_pdf(source_root) or _discover_local_primary_pdf(bp)
+    # An explicitly scoped export must never borrow another user's identically
+    # named file when its own upload has expired.
+    local_pdf = _find_local_primary_pdf(source_root) if source_root is not None else _discover_local_primary_pdf(bp)
     if local_pdf:
         registry = _build_pdf_registry(local_pdf, local_pdf.name.removeprefix("P1__").rsplit(".", 1)[0])
         if registry:
@@ -289,17 +296,31 @@ def load_registry(bp: Blueprint, source_root: Path | None = None) -> VisualRegis
 
 
 def anchor_slides(anchor: str) -> list[int]:
-    text = str(anchor or "")
-    m = re.search(r"(?:slides?|pp?\.?|pages?)\s*(\d+)\s*[-–—]\s*(\d+)", text, flags=re.I)
-    if m:
-        a, b = int(m.group(1)), int(m.group(2))
-        if a <= b and b - a <= 30:
-            return list(range(a, b + 1))
-    m = re.search(r"(?:slides?|pp?\.?|pages?)\s*(\d+)", text, flags=re.I)
-    if m:
-        return [int(m.group(1))]
-    m = re.search(r"\[P1\][^0-9]{0,10}(\d+)", text, flags=re.I)
-    return [int(m.group(1))] if m else []
+    r"""Return every explicit page/slide coordinate in a provenance anchor.
+
+    ``pp?\.?`` used to accept a bare ``P``.  In an anchor such as
+    ``[P1] PAGE 7`` it therefore read the source label's ``1`` as page one and
+    reused the cover slide throughout the deck.  The parser now requires an
+    actual PAGE/SLIDE token (or the conventional p./pp. abbreviation), and it
+    preserves multiple coordinates such as ``PAGE 4; PAGE 5``.
+    """
+    text = str(anchor or "").replace("–", "-").replace("—", "-")
+    marker = re.compile(
+        r"(?:slides?|pages?|p{1,2}\.)\s*(\d+)(?:\s*-\s*(\d+))?",
+        flags=re.I,
+    )
+    found: list[int] = []
+    for match in marker.finditer(text):
+        start = int(match.group(1))
+        end = int(match.group(2) or start)
+        if end < start:
+            start, end = end, start
+        if end - start > 30:
+            continue
+        for number in range(start, end + 1):
+            if number not in found:
+                found.append(number)
+    return found
 
 
 def _keywords(unit: LectureUnit) -> set[str]:

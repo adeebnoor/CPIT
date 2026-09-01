@@ -71,8 +71,11 @@ class RenderedDensityTests(unittest.TestCase):
         self.assertEqual(len(self.doc), 20)
 
     def test_almost_no_page_is_near_blank(self):
-        marks = self._page_marks()
-        thin = [i + 1 for i, (d, im) in enumerate(marks) if d < 12 and im == 0]
+        # Decorative rules are not teaching evidence. Count actual body words
+        # or source images, so twelve empty boxes cannot pass a density test.
+        thin = [i + 1 for i, page in enumerate(self.doc)
+                if len(page.get_text("text", clip=pymupdf.Rect(40, 110, 910, 440)).split()) < 18
+                and not page.get_images()]
         # The cover and the two closing summary slides are legitimately sparse.
         self.assertLessEqual(len(thin), 4, f"near-blank pages: {thin}")
 

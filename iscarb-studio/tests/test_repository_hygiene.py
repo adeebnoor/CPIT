@@ -11,7 +11,7 @@ class RepositoryHygieneTests(unittest.TestCase):
 
     def test_public_launcher_is_current(self):
         t = (self.root / 'iscarb.html').read_text(encoding='utf-8')
-        self.assertIn('?v=4.3.0', t)
+        self.assertIn('?v=4.4.0', t)
         self.assertNotIn('?v=3.3', t)
 
     def test_archive_back_links_have_real_target(self):

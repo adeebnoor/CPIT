@@ -152,21 +152,21 @@ UNIT 1 — Engineering Crisis + professional/ethical responsibility. Start with 
 UNIT 2 — Domain Spine/System Map of ALL P1 families.
 UNIT 3 — Exactly five measurable CLOs, visibly CLO1…CLO5 in pedagogy_content; core_content MUST be empty.
 UNIT 4 — H-Stack with EXACTLY these six competencies in pedagogy_content: analytical reasoning; engineering judgment; evidence-based reasoning; socio-technical thinking; risk-aware design; ethical responsibility.
-UNIT 5 — FIRST-PRINCIPLES PREDICTION GATE. engineering_question MUST ask the learner to PREDICT BEFORE seeing/naming the model. Sequence: PREDICT → CONSTRAINT → DERIVATION → NAMED PRINCIPLE.
+UNIT 5 — FIRST-PRINCIPLES PREDICTION GATE. engineering_question MUST ask the learner to PREDICT BEFORE seeing/naming the model. Use four separate pedagogy_content entries labelled "PREDICT:", "CONSTRAINT:", "DERIVE:", "NAME:". Each must contain a substantive source-specific reasoning step, not just a label. Put any necessary scenario conditions in scenario_assumptions so they reach the learner.
 UNIT 6 — Mechanism Deep Dive: input → mechanism → output → assumption → failure mode.
 UNIT 7 — Implementation grounded only in supplied mechanisms.
-UNIT 8 — At least two defensible source-derived alternatives + explicit trade-off.
-UNIT 9 — Measurement + falsification.
-UNIT 10 — MARIS Senior Design Review + KNOWN / UNKNOWN / DECISION-SENSITIVE UNKNOWN / WHAT WE MONITOR.
-UNIT 11 — SOURCE-FIRST APPLICATION. Teach the next major P1 mechanism in a concrete application. Integrate a materially decision-changing Saudi constraint only in pedagogy/scenario if it genuinely changes the decision; if unsupported, label it HYPOTHETICAL. Do not prefix the learner-facing title with “Saudi Context”.
+UNIT 8 — At least two defensible source-derived alternatives + explicit trade-off. Include separate substantive entries "Alternative A:", "Alternative B:", and "Trade-off:". Do not falsely present complementary mechanisms as mutually exclusive choices; compare bounded applications/design choices when needed.
+UNIT 9 — Measurement + falsification. Include "Measure:" naming the observable quantity and "Falsifier:" naming the observation that would overturn the decision. Each entry must explain a concrete test, not say "measure it".
+UNIT 10 — MARIS Senior Design Review. Four separate pedagogy entries "Known:", "Unknown:", "Decision-sensitive unknown:", "Monitor:" each contain at least four words of substantive explanation after the label. Bare labels are a gate failure.
+UNIT 11 — SOURCE-FIRST APPLICATION. Teach the next major P1 mechanism in a concrete application. Include a materially decision-changing Saudi/Gulf constraint in pedagogy/scenario; if not supported by P1, label it HYPOTHETICAL and introduce no outside factual claim. Explain how it changes the decision. Do not prefix the learner-facing title with “Saudi Context”.
 UNIT 12 — SOURCE-FIRST ACCOUNTABILITY. Keep the P1 mechanism dominant in title/question/core; integrate roles, responsibility, pre/post-conditions, ethics, or accountability in pedagogy when relevant.
 UNIT 13 — SOURCE-FIRST EVOLUTION/IMPROVEMENT. Teach the P1 mechanism first. A future-facing question may appear in pedagogy/enrichment only when it follows from the source; unsupported future technology is a DESIGN EXPLORATION, never the title’s factual premise.
 UNIT 14 — SOURCE-FIRST OPERATING CONSEQUENCES. Continue the P1 technical spine. Practitioner workload/wellbeing may be a bounded pedagogical consequence when supported by the mechanism, but must never replace the weekly technical topic or introduce invented psychology/alert-burden claims.
-UNIT 15 — SOURCE-FIRST MATURITY/AUDIT. Teach the P1 mechanism first. Critical AI literacy is an optional audit move in pedagogy (AI MAY ASSIST; human sign-off remains required) and must not replace a source-derived technical title.
+UNIT 15 — SOURCE-FIRST MATURITY/AUDIT. Teach the P1 mechanism first. Critical AI literacy is REQUIRED in pedagogy: "AI MAY ASSIST:" names a bounded permitted task; "AI MUST NOT BE TRUSTED AUTONOMOUSLY:" names the forbidden autonomous decision; identify a source check, test/failure search, and human sign-off. The AI audit must not replace the source-derived technical topic.
 UNIT 16 — Source-grounded Design Challenge on the same central system. Include Gulf orientation only as orientation.
 UNIT 17 — Change the Constraint + Peer Critique on the same central system.
 UNIT 18 — Defend the Decision with CLAIM → EVIDENCE → WARRANT → COUNTER-EVIDENCE → RESIDUAL UNCERTAINTY; keep all factual claims source-bounded.
-UNIT 19 — Take-home Capabilities: translate the rubric into six concise learner-visible abilities; detailed four-level descriptors stay in rubric metadata, not six dashboard cards.
+UNIT 19 — Four-level capability rubric: show six source-relevant criteria across Distinguished, Ready, Developing, and Not Yet Ready. The four levels MUST be visible in the learner deck, not only metadata. Keep each criterion to at most six words and each level descriptor to at most eight precise, observable words. Avoid repeating a generic descriptor in every row.
 UNIT 20 — Take-home Decision / bounded assurance on the same central system. Never use absolute assurance language.
 
 11. FULL COVERAGE + DEPTH ALLOCATION
@@ -276,7 +276,11 @@ Only set source_visual_available=true when P1 actually contains a relevant sourc
 Every visual_plan must include teaching_purpose, focal_elements, annotation_plan, citation, and visual_evidence_role.
 
 E. PRESENTER TEXT BUDGET
-Design the presenter for approximately 15–35 visible words on most Units and at most about 50 when technical labels are necessary. Put detail in Reading Pack / Instructor Guide, not on the visual surface.
+The Presenter is concise, not skeletal.
+- A technical REDRAW/NEW Unit normally carries 35–80 visible words across 3–6 atomic entries; up to 100 is allowed when a named list, equation, protocol, trace, or decision table would otherwise be materially incomplete.
+- A Unit that reuses an information-bearing P1 visual may use only 15–40 words of added annotation because the source figure carries the detail.
+- Never hit a word target by padding, and never meet a visual budget by deleting a named source item. Move secondary explanation to the Reading Pack only after the complete technical relation remains visible on the slide.
+- A title plus one generic sentence is a failed Unit, not visual restraint.
 """
 
 AUDIT_PROMPT += r"""

@@ -36,7 +36,52 @@ def _clip(text: str, n: int = 220) -> str:
 
 def _major(profile: SourceProfile):
     rows = [x for x in profile.coverage_items if x.importance == "major"]
+    # A source-significant example can be essential teaching material even when
+    # it is not itself a numbered chapter section.  Use such examples to fill a
+    # teaching slot before recycling an earlier checkpoint; administrative
+    # recap/assignment slides remain excluded.
+    if len(rows) < 10:
+        excluded = ("assignment", "to master", "take-home", "class", "contents")
+        examples = [
+            x for x in profile.coverage_items
+            if x.importance != "major"
+            and (x.knowledge_type == "EXAMPLE" or re.search(r"\bAI\b|contemporary|trend", x.label, re.I))
+            and not any(term in x.label.lower() for term in excluded)
+        ]
+        rows.extend(x for x in examples if x.id not in {r.id for r in rows})
     return rows or profile.coverage_items[:1]
+
+
+def _atomic_source_entries(row, limit: int | None = None) -> list[str]:
+    """Recover the teachable statements flattened into one source excerpt.
+
+    Source profiling preserves slide lines with a middle-dot separator.  The
+    old fallback clipped the entire excerpt to 250 characters and stored it as
+    one ``core_content`` entry, dropping named list members and producing one
+    oversized box.  Keep the source order, remove duplicated headings/furniture,
+    and expose each remaining statement as its own learner-visible entry.
+    """
+    raw = str(row.why_important or row.label or "")
+    parts = re.split(r"\s*[·•▪■◆❑❒❏]\s*", raw)
+    label_key = re.sub(r"[^a-z0-9]+", " ", str(row.label).lower()).strip()
+    furniture = ("adeeb noor", "it department", "faculty of computing", "king abdulaziz university", "fall 2025")
+    out: list[str] = []
+    for part in parts:
+        text = " ".join(part.split()).strip(" -:;,")
+        key = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+        if not text or any(x in text.lower() for x in furniture):
+            continue
+        if key == label_key or text in out:
+            continue
+        # Physical PDF line breaks are not sentence boundaries. Rejoin wrapped
+        # continuations before constructing learner-facing statements.
+        dangling = r"\b(of|for|to|the|a|an|and|or|in|on|at|by|with|from|that|is|are|it|as|its|be|more|high)$"
+        if out and (text[:1].islower() or re.search(dangling, out[-1], re.I)):
+            out[-1] += " " + text
+        else:
+            out.append(text)
+    out = out or [str(row.why_important or row.label)]
+    return out[:limit] if limit else out
 
 
 def _groups(rows, count: int = 10):
@@ -58,7 +103,11 @@ def _visual(kind: str, purpose: str, rows=()) -> VisualPlan:
         reuse_mode="NEW",
         citation="ISCARB deterministic source-bounded draft",
         focal_elements=[_clip(x.label, 42) for x in list(rows)[:6]],
-        annotation_plan=[_clip(x.why_important, 130) for x in list(rows)[:6] if x.why_important],
+        annotation_plan=[
+            _clip(statement, 145)
+            for row in list(rows)[:6]
+            for statement in _atomic_source_entries(row, 3)
+        ][:8],
         visual_evidence_role="Draft representation; faculty review required before release.",
     )
 
@@ -247,6 +296,21 @@ def _readiness_trail(profile: SourceProfile, clos, rows) -> list[ReadinessAlignm
 def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
     rows = _major(profile)
     groups = _groups(rows, 10)
+    # When P1 itself contains an AI example, Unit 15 should audit that source
+    # example rather than recycling an unrelated earlier checkpoint under an AI
+    # heading.  This is a content move, not an enrichment: the row keeps its P1
+    # anchor and the other checkpoints retain source order.
+    ai_examples = [
+        row for row in rows
+        if row.knowledge_type == "EXAMPLE"
+        and re.search(r"\bAI\b", f"{row.label} {row.why_important}", re.I)
+    ]
+    if ai_examples and not groups[9]:
+        selected = ai_examples[-1]
+        for bucket in groups:
+            if selected in bucket:
+                bucket.remove(selected)
+        groups[9].append(selected)
     family_names = [x.name for x in profile.topic_families] or [x.label for x in rows[:6]]
     title = profile.lecture_title
 
@@ -265,7 +329,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
     def add(n, title_, q, core, ped, action, takeaway, kind, anchor="N/A — ISCARB PEDAGOGY", evidence=""):
         units.append(LectureUnit(
             number=n, phase=phases[n-1], title=title_, engineering_question=q,
-            core_content=[_clip(x, 250) for x in core], pedagogy_content=[_clip(x, 220) for x in ped],
+            core_content=[str(x).strip() for x in core], pedagogy_content=[str(x).strip() for x in ped],
             enrichment_content=[], enrichment_basis=[], scenario_assumptions=[],
             knowledge_types=list(dict.fromkeys([x.knowledge_type for x in (groups[n-6] if 6 <= n <= 15 else [])])) or ["CONCEPT"],
             visual_suggestion=kind, visual_plan=_visual(kind, q, groups[n-6] if 6 <= n <= 15 else []),
@@ -289,7 +353,11 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         "Identify which competency would fail first if the source were misunderstood.", "Judgment combines technical reasoning, evidence, risk, people, and responsibility.", "concept-map")
     first = rows[:2]
     add(5, "Prediction gate", "PREDICT before seeing the full mechanism: what result follows from the source constraints?",
-        [_clip(x.why_important or x.label, 240) for x in first], ["PREDICT → CONSTRAINT → DERIVE → NAME"],
+        [statement for row in first for statement in _atomic_source_entries(row)],
+        ["PREDICT: State the behaviour you expect before naming the mechanism.",
+         "CONSTRAINT: Identify the source-supported condition that limits that prediction.",
+         "DERIVE: Trace why that condition changes the expected behaviour.",
+         "NAME: Name the principle only after defending the derivation."],
         "Commit to a prediction, then identify the source statement that could overturn it.", "Prediction must precede explanation.", "process", _anchors(first))
 
     visual_cycle = cycle(["concept-map", "process", "comparison", "timeline", "architecture", "table"])
@@ -301,7 +369,11 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         if reused:
             bucket = [fill_order.pop(0)] if fill_order else rows[-1:]
         labels = [x.label for x in bucket]
-        core = [x.why_important or x.label for x in bucket]
+        core = [
+            statement
+            for row in bucket
+            for statement in _atomic_source_entries(row)
+        ]
         kind = next(visual_cycle)
         if any(x.knowledge_type == "PROCESS" for x in bucket): kind = "process"
         elif any(x.knowledge_type == "ARCHITECTURE" for x in bucket): kind = "architecture"

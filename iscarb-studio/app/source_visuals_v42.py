@@ -20,17 +20,35 @@ def _word_count(text: str) -> int:
 
 
 def _looks_like_title_only(asset: base.VisualAsset) -> bool:
+    if asset.slide_number != 1 and asset.visual_area_ratio >= .25:
+        # A diagram-only page can contain little extractable text. Its actual
+        # image content, not an OCR word count, makes it information-bearing.
+        return False
     text = " ".join((asset.alt_text or "").split())
     wc = _word_count(text)
     if wc < 11:
         return True
     low = text.lower()
     # Typical source-slide furniture should not make a two-word title look rich.
-    furniture = ["chapter", "software engineering", "ian sommerville", "©", "copyright"]
+    furniture = [
+        "chapter", "software engineering", "ian sommerville", "©", "copyright",
+        "department", "faculty", "university", "semester", "fall", "spring",
+        "professor", "phd", "course", "class",
+    ]
     stripped = low
     for token in furniture:
         stripped = stripped.replace(token, " ")
     meaningful = [w for w in re.findall(r"[a-z][a-z0-9-]{2,}", stripped) if w not in {"page", "slide", "edition"}]
+    technical_cues = {
+        "definition", "example", "process", "model", "architecture", "system",
+        "failure", "risk", "cost", "requirements", "properties", "activities",
+        "algorithm", "equation", "protocol", "metric", "trade", "advantages",
+    }
+    # Cover slides often contain enough author/course furniture to clear a raw
+    # word-count rule.  Unless a first page also carries real explanatory cues,
+    # it is not teaching material and must never fill a Unit's main canvas.
+    if asset.slide_number == 1 and not (technical_cues & set(meaningful)):
+        return True
     return len(set(meaningful)) < 7
 
 
@@ -38,6 +56,8 @@ def _quality_score(asset: base.VisualAsset, unit: LectureUnit, anchors: set[int]
     if _looks_like_title_only(asset):
         return -100.0
     score = base._asset_score(asset, unit, anchors)
+    if asset.visual_area_ratio >= .25:
+        score += 12.0
     wc = _word_count(asset.alt_text)
     if 18 <= wc <= 120:
         score += 8.0
@@ -93,8 +113,8 @@ def plan_for_unit_v42(bp: Blueprint, unit: LectureUnit, registry: base.VisualReg
     if registry and unit.number in base.SOURCE_VISUAL_PRIORITY and source_backed:
         anchors = set(base.anchor_slides(anchor))
         pool = [a for a in registry.assets if not anchors or a.slide_number in anchors]
-        if not pool:
-            pool = list(registry.assets)
+        # An unavailable explicit page is not permission to substitute another
+        # page. Leave the pool empty and produce a provenance-safe redraw.
         ranked = sorted(pool, key=lambda a: _quality_score(a, unit, anchors), reverse=True)
         if ranked:
             best = ranked[0]
