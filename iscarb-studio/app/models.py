@@ -191,8 +191,8 @@ class LectureUnit(BaseModel):
     # core_content: ONLY technical content demonstrably supported by the user-supplied lecture bundle.
     # pedagogy_content: ISCARB instructional/assessment scaffolding.
     # enrichment_content: external/current/cultural/contextual extensions not present in the lecture bundle.
-    core_content: list[str] = Field(default_factory=list, max_length=8)
-    pedagogy_content: list[str] = Field(default_factory=list, max_length=8)
+    core_content: list[str] = Field(default_factory=list, max_length=64)
+    pedagogy_content: list[str] = Field(default_factory=list, max_length=16)
     enrichment_content: list[str] = Field(default_factory=list, max_length=6)
     enrichment_basis: list[str] = Field(default_factory=list, max_length=6)
     scenario_assumptions: list[str] = Field(default_factory=list, max_length=5)
@@ -223,7 +223,9 @@ class LectureUnit(BaseModel):
     @classmethod
     def cap_main_lists(cls, value):
         if isinstance(value, list):
-            return [x for x in value if str(x).strip()][:8]
+            # Reject an oversized response explicitly via field validation;
+            # never silently throw away source facts after the eighth item.
+            return [x for x in value if str(x).strip()]
         return value
 
     @field_validator("enrichment_content", "enrichment_basis", mode="before")

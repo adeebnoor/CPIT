@@ -67,7 +67,7 @@ def _clean(text: str, limit: int = 160) -> str:
 def _meaningful_lines(text: str) -> list[str]:
     lines: list[str] = []
     for raw in str(text or "").splitlines():
-        line = _clean(raw, 180)
+        line = _clean(raw, 4000)
         if len(line) < 3:
             continue
         low = line.lower()
@@ -82,6 +82,8 @@ def _meaningful_lines(text: str) -> list[str]:
 
 def _knowledge_type(text: str) -> str:
     low = text.lower()
+    if re.match(r"(?:example\b|case study\b|ex\s*[;:.])", low.strip()):
+        return "EXAMPLE"
     if any(x in low for x in ("algorithm", "pseudo", "procedure", "steps:")):
         return "ALGORITHM"
     if any(x in low for x in ("equation", "formula", "probability", "pofod", "rocof", "mtbf", "mttf", "=", "%")):
@@ -94,7 +96,7 @@ def _knowledge_type(text: str) -> str:
         return "PROTOCOL"
     if any(x in low for x in ("trade-off", "tradeoff", "cost", "versus", " vs ", "advantage", "disadvantage")):
         return "TRADE_OFF"
-    if any(x in low for x in ("example", "case study", "scenario")):
+    if any(x in low for x in ("example", "case study", "scenario")) or re.search(r"\bex\s*[;:.]", low):
         return "EXAMPLE"
     if any(x in low for x in ("principle", "guideline", "rule", "design for")):
         return "DESIGN_PRINCIPLE"
@@ -235,7 +237,7 @@ def _pdf_chunks(path: Path) -> list[tuple[int, str, str]]:
         if not lines:
             continue
         label = _choose_label(lines, i)
-        excerpt = _clean(" · ".join(x for x in lines[:8] if not _is_furniture_line(x)), 720)
+        excerpt = " · ".join(x for x in lines if not _is_furniture_line(x))
         out.append((i, label, excerpt))
     return out
 
@@ -249,7 +251,7 @@ def _pptx_chunks(path: Path) -> list[tuple[int, str, str]]:
         lines = _meaningful_lines(raw)
         if not lines:
             continue
-        out.append((i, _choose_label(lines, i), _clean(" · ".join(x for x in lines[:8] if not _is_furniture_line(x)), 720)))
+        out.append((i, _choose_label(lines, i), " · ".join(x for x in lines if not _is_furniture_line(x))))
     return out
 
 
@@ -393,7 +395,8 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
             knowledge_type=_knowledge_type(excerpt),
             importance=importance,
             source_anchor=anchor,
-            why_important=_clean(excerpt, 260),
+            # Preserve the source payload. Display compaction is not extraction.
+            why_important=excerpt,
         ))
         if key and key not in seen_family and not is_title_like:
             seen_family.add(key)

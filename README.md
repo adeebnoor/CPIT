@@ -1,12 +1,12 @@
 # CPIT · ISCARB Faculty Studio
 
-This repository contains the CPIT-455 teaching archive and the active **ISCARB Faculty Studio v4.3.0**.
+This repository contains the CPIT-455 teaching archive and the active **ISCARB Faculty Studio v4.4.0**.
 
 ## Project map
 - `index.html`, `cimt.html`, `imam.html`, `iscarb.html`: public GitHub Pages surfaces.
 - `slides/`, `lectures/`: preserved teaching/source archive.
 - `iscarb-studio/`: FastAPI application deployed to Render.
-- `iscarb-studio/run.py`: active entry point (`app.start_v430:app`).
+- `iscarb-studio/run.py`: active entry point (`app.start_v440:app`).
 - `iscarb-studio/app/start_v*.py` and `gate_v*.py`: intentional composition chain; do not bulk-delete these versioned modules.
 - `tools/sanitize_static_site.py`: public archive sanitizer and fragment validator.
 

@@ -15,4 +15,4 @@ services:
       - key: ISCARB_WORKERS
         value: "2"
       - key: ISCARB_RELEASE_VERSION
-        value: "4.3.0"
+        value: "4.4.0"

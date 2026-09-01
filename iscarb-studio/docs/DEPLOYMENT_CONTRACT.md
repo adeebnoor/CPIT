@@ -10,7 +10,7 @@ Release sequence:
 2. Let repository CI complete successfully.
 3. Render auto-deploys the changed `iscarb-studio` tree.
 4. Run `ISCARB Production Validation` against multiple archived CIMT lectures.
-5. A production release is accepted only when health reports v4.3.0 and the live multi-lecture validation passes.
+5. A production release is accepted only when health reports v4.4.0 / Gate v15 and the live multi-lecture validation passes.
 
 This separation prevents a circular dependency in which production checks wait for Render while Render waits for those same checks.
 

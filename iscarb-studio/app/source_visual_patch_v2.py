@@ -10,28 +10,13 @@ import re
 
 from . import source_visuals as sv
 
+_parse_explicit_coordinates = sv.anchor_slides
+
 
 def robust_anchor_slides(anchor: str) -> list[int]:
-    text = str(anchor or "").upper().replace("–", "-").replace("—", "-")
-    # Avoid clever parsing: first locate the literal source-location word, then
-    # read the one or two integers that follow it.
-    marker = re.search(r"SLIDES?|PAGES?", text)
-    if marker:
-        tail = text[marker.end(): marker.end() + 40]
-        nums = [int(x) for x in re.findall(r"[0-9]+", tail)]
-        if nums:
-            first = nums[0]
-            if len(nums) >= 2 and "-" in tail.split(str(nums[1]), 1)[0]:
-                second = nums[1]
-                if first <= second and second - first <= 30:
-                    return list(range(first, second + 1))
-            return [first]
-    p1 = re.search(r"\[P1\]", text)
-    if p1:
-        nums = re.findall(r"[0-9]+", text[p1.end():p1.end()+20])
-        if nums:
-            return [int(nums[0])]
-    return []
+    # Share the parser used outside application bootstrap too. Source IDs,
+    # chapter numbers and coverage IDs are not page coordinates.
+    return _parse_explicit_coordinates(anchor)
 
 
 def robust_plan_for_unit(bp, unit, registry=None):

@@ -184,6 +184,26 @@ def _major_coverage_gaps(blueprint, profile) -> tuple[list[str], list[str]]:
     return missing, late
 
 
+def _critical_presenter_failures(checks: dict[str, bool]) -> list[str]:
+    """Failures that make a 20-page file pedagogically unusable.
+
+    Provenance/readiness defects may still leave a useful review draft.  A
+    broken unit grammar, missing source detail, or near-empty technical span
+    does not.  In those cases the complete deterministic source-bounded draft
+    is safer than preserving a polished but hollow semantic draft.
+    """
+    critical = {
+        "v14_major_chapter_items_are_actually_taught",
+        "v14_technical_units_have_teaching_density",
+        "v14_no_unit_is_a_near_empty_slide",
+        "v14_source_supports_ten_teaching_units",
+        "v15_complete_20_unit_grammar",
+        "v15_technical_units_retain_source_detail",
+        "v15_no_source_fragment_ends_mid_thought",
+    }
+    return [name for name in critical if checks.get(name) is False]
+
+
 def _ensure_quota_safe_completeness(blueprint, profile, bundle, source_text: str, reason: str):
     """Guarantee atomic P1 completeness when the model becomes unreachable.
 
@@ -192,7 +212,10 @@ def _ensure_quota_safe_completeness(blueprint, profile, bundle, source_text: str
     the result remains non-releasable because semantic assurance is unavailable.
     """
     missing, late = _major_coverage_gaps(blueprint, profile)
-    replaced = bool(missing or late)
+    original_checks = deterministic_gate(blueprint, profile, source_text)
+    original_checks.update(session_scope_gate(blueprint, profile, bundle))
+    presenter_failures = _critical_presenter_failures(original_checks)
+    replaced = bool(missing or late or presenter_failures)
     if replaced:
         blueprint = build_deterministic_blueprint(profile)
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
@@ -287,7 +310,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
                     job.error = None
                     save_job(job)
                     if replaced:
-                        gap_text = ", ".join(missing + late)
+                        gap_text = ", ".join([*missing, *late]) or "presenter completeness checks"
                         _update(job, "blocked", 100, f"BLOCKED — Gemini was unreachable during repair. The incomplete semantic draft was replaced by a complete source-checkpoint draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED and RELEASE is forbidden until semantic audit succeeds. Recovered: {gap_text}")
                     else:
                         _update(job, "blocked", 100, "BLOCKED — Gemini was unreachable during repair. The source-complete semantic draft was preserved; readiness remains UNVERIFIED and RELEASE is forbidden until semantic audit succeeds.")
@@ -338,8 +361,9 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             # Major P1 completeness is non-negotiable even when Gemini remained
             # available through every repair round.
             missing, late = _major_coverage_gaps(blueprint, profile)
-            if missing or late:
-                recovered = ", ".join(missing + late)
+            presenter_failures = _critical_presenter_failures(checks)
+            if missing or late or presenter_failures:
+                recovered = ", ".join([*missing, *late, *presenter_failures])
                 blueprint = build_deterministic_blueprint(profile)
                 blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
                 checks = deterministic_gate(blueprint, profile, source_text)
@@ -353,7 +377,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
                 job.audit = audit
                 job.error = None
                 save_job(job)
-                _update(job, "blocked", 100, "BLOCKED — semantic repair exhausted with unresolved major P1 coverage gaps. The incomplete draft was replaced by a source-complete review draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED; no RELEASE is issued. Recovered: " + recovered)
+                _update(job, "blocked", 100, "BLOCKED — semantic repair exhausted with unresolved chapter coverage or learner-visible Unit grammar. The hollow draft was replaced by a source-complete review draft covering every major P1 checkpoint by Unit 15. Readiness is UNVERIFIED; no RELEASE is issued. Recovered: " + recovered)
             else:
                 _update(job, "blocked", 100, "BLOCKED — Precision Gate found unresolved content issues. Preview and exports remain available for faculty review.")
 
