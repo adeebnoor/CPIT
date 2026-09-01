@@ -181,7 +181,16 @@ def deterministic_gate(
     checks["unit3_clos_in_pedagogy_channel"] = all(f"clo{i}" in u3p for i in range(1, 6))
     checks["unit4_hstack_in_pedagogy_channel"] = all(term in u4p for term in hstack_terms)
     checks["unit10_design_review_in_pedagogy_channel"] = "senior design review" not in _core_text(bp.units[9])
-    checks["unit15_ai_in_pedagogy_channel"] = not bool(re.search(r"\bai\b|artificial intelligence", _core_text(bp.units[14])))
+    # The channel rule bans ISCARB AI-use INSTRUCTIONS in core, not technical
+    # AI knowledge actually present in P1 (e.g. Dependable Systems pp. 12–13).
+    # This is a channel check only; semantic source fidelity is still required.
+    ai_core = _core_text(bp.units[14])
+    ai_pattern = r"\bai\b|artificial intelligence"
+    ai_scaffold = any(term in ai_core for term in (
+        "ai may assist", "ai must not be trusted autonomously", "ai must not autonomously",
+    ))
+    source_ai = bool(re.search(ai_pattern, source_text, flags=re.I)) and "p1" in bp.units[14].source_anchor.lower()
+    checks["unit15_ai_in_pedagogy_channel"] = not ai_scaffold and (not re.search(ai_pattern, ai_core) or source_ai)
     checks["unit18_evidence_method_in_pedagogy_channel"] = not any(
         term in _core_text(bp.units[17]) for term in ["warrant", "counter-evidence", "residual uncertainty", "evidence policy framework"]
     )

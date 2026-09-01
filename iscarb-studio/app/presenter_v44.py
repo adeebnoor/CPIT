@@ -217,20 +217,25 @@ def unit_layout(bp, u, plan=None):
     return blocks, size, fits, None
 
 
-def readable_text_contract(bp: Blueprint) -> bool:
+def readability_problems(bp: Blueprint) -> dict[int, str]:
     # Source availability is resolved at export too; the gate checks the
     # conservative text representation rather than trusting an unavailable URL.
+    problems = {}
     for u in bp.units:
         if len(wrap(u.engineering_question,872,13))>2 or len(wrap("YOUR TASK "+u.student_action,872,13))>2:
-            return False
+            problems[u.number] = "Shorten the engineering question/task to two lines without changing its purpose."
         if u.number == 19:
             if rubric_layout(bp)[1] < 12:
-                return False
+                problems[u.number] = "Condense repeated rubric wording; preserve six criteria and all four descriptors at 12pt or larger."
             continue
         _, size, fits, _ = unit_layout(bp, u)
         if not fits or size < 16:
-            return False
-    return True
+            problems[u.number] = "Condense duplicate wording and long scaffolds, preserving every source fact/list/example; body text must fit at 16pt or larger."
+    return problems
+
+
+def readable_text_contract(bp: Blueprint) -> bool:
+    return not readability_problems(bp)
 
 
 def preflight_layout(bp, source_root=None):

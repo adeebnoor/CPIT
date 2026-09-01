@@ -50,12 +50,12 @@ def _contains(blob: str, *families: tuple[str, ...] | str) -> bool:
 
 def _unit3_contract(unit: LectureUnit) -> bool:
     pedagogy = " ".join(unit.pedagogy_content).upper()
-    return not unit.core_content and all(f"CLO{i}" in pedagogy for i in range(1, 6))
+    return not unit.core_content and len(unit.pedagogy_content) == 5 and all(f"CLO{i}" in pedagogy for i in range(1, 6))
 
 
 def _unit4_contract(unit: LectureUnit) -> bool:
     pedagogy = " ".join(unit.pedagogy_content).lower()
-    return all(label in pedagogy for label in HSTACK_LABELS) and len(unit.pedagogy_content) == 6
+    return not unit.core_content and all(label in pedagogy for label in HSTACK_LABELS) and len(unit.pedagogy_content) == 6
 
 
 def _unit5_contract(unit: LectureUnit) -> bool:
@@ -148,6 +148,25 @@ def _no_fragment_endings(bp: Blueprint) -> bool:
     return True
 
 
+def unit_role_checks(bp: Blueprint, numbers=None) -> dict[str, bool]:
+    selected = set(numbers if numbers is not None else range(1, 21))
+    checks = {}
+    for unit in bp.units:
+        if unit.number not in selected:
+            continue
+        if unit.number == 3:
+            checks["v15_unit03_five_clos_only"] = _unit3_contract(unit)
+        elif unit.number == 4:
+            checks["v15_unit04_hstack_is_exact"] = _unit4_contract(unit)
+        elif unit.number == 5:
+            checks["v15_unit05_predict_constraint_derive_name"] = _unit5_contract(unit)
+        elif 6 <= unit.number <= 15:
+            checks[f"v15_unit{unit.number:02d}_job_is_visible"] = _teaching_contract(unit)
+        else:
+            checks[f"v15_unit{unit.number:02d}_job_is_visible"] = _bookend_contract(unit, bp)
+    return checks
+
+
 def deterministic_gate(
     bp: Blueprint,
     profile: SourceProfile | None = None,
@@ -165,19 +184,17 @@ def deterministic_gate(
         checks["v15_complete_20_unit_grammar"] = False
         return checks
     checks["v15_phase_sequence_is_exact"] = [u.phase for u in bp.units] == EXPECTED_PHASES
-    checks["v15_unit03_five_clos_only"] = _unit3_contract(bp.units[2])
-    checks["v15_unit04_hstack_is_exact"] = _unit4_contract(bp.units[3])
-    checks["v15_unit05_predict_constraint_derive_name"] = _unit5_contract(bp.units[4])
-
-    for unit in bp.units[5:15]:
-        checks[f"v15_unit{unit.number:02d}_job_is_visible"] = _teaching_contract(unit)
-    for unit in [bp.units[0], bp.units[1], *bp.units[15:20]]:
-        checks[f"v15_unit{unit.number:02d}_job_is_visible"] = _bookend_contract(unit, bp)
+    checks.update(unit_role_checks(bp))
 
     role_checks = [value for key, value in checks.items() if key.startswith("v15_unit")]
     checks["v15_complete_20_unit_grammar"] = all(role_checks)
     checks["v15_technical_units_retain_source_detail"] = _source_detail_retained(bp, profile)
     checks["v15_no_source_fragment_ends_mid_thought"] = _no_fragment_endings(bp)
-    from .presenter_v44 import readable_text_contract
-    checks["v15_presenter_fits_readable_canvas"] = readable_text_contract(bp)
+    from .presenter_v44 import readability_problems
+    readability = readability_problems(bp)
+    checks["v15_presenter_fits_readable_canvas"] = not readability
+    # A global fit failure alone previously sent repair down the metadata path.
+    # Localize the affected units without relaxing any font/fit threshold.
+    for unit in bp.units:
+        checks[f"presenter_unit{unit.number:02d}_readable"] = unit.number not in readability
     return checks
