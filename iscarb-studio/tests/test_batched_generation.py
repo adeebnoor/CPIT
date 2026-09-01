@@ -69,7 +69,8 @@ def test_timeout_preserves_last_completed_batch_without_claiming_completion(sour
     with pytest.raises(TimeoutError):
         generate(service, None, profile)
     assert service.partial_blueprint.generation_mode == "batched-partial"
-    assert [u.model_dump() for u in service.partial_blueprint.units[:4]] == [u.model_dump() for u in bp.units[:4]]
+    from app.models import LectureUnit
+    assert [LectureUnit.model_validate(u.model_dump()).model_dump() for u in service.partial_blueprint.units[:4]] == [u.model_dump() for u in bp.units[:4]]
 
 
 def test_targeted_repair_does_not_rewrite_nineteen_good_units(source):
@@ -114,7 +115,9 @@ def test_source_evidence_compares_coordinates_not_page_label_spelling():
 
 
 def test_new_generation_schema_requires_explicit_source_evidence():
-    assert "coverage_evidence" in UnitBatch.model_json_schema()["$defs"]["BatchLectureUnit"]["required"]
+    schema = UnitBatch.model_json_schema()
+    assert "source_passages" in schema["$defs"]["BatchLectureUnit"]["required"]
+    assert set(schema["$defs"]["SourcePassage"]["required"]) == {"coverage_ids", "text"}
 
 
 def test_repair_diagnostic_distinguishes_missing_quote_from_missing_id(source):
@@ -148,3 +151,26 @@ def test_cross_phase_batch_gets_canonical_labels_without_a_model_retry(source):
     result = request_validated(service, None, UnitBatch, "", "", lambda b: validate_batch(b, [5,6,7,8]))
     assert [u.phase for u in result.units] == ["IFHAM","MARIS","MARIS","MARIS"]
     assert service._generate_structured.call_count == 1
+
+
+def test_source_passage_builds_visible_text_and_evidence_from_one_value(source):
+    from app.batched_generation import materialize_source_passages
+    profile, bp = prepared(source)
+    batch = UnitBatch(units=[bp.units[5]])
+    unit = batch.units[0]
+    assert unit.source_passages
+    unit.core_content = []
+    unit.coverage_evidence = []
+    materialize_source_passages(batch, bp.coverage_ledger)
+    assert all(e.visible_excerpt in unit.core_content for e in unit.coverage_evidence)
+    bp.units[5] = unit
+    assert all(evidence_checks(bp, profile).values())
+
+
+def test_source_passages_cannot_invent_coverage_ids(source):
+    from app.batched_generation import materialize_source_passages
+    _, bp = prepared(source)
+    batch = UnitBatch(units=[bp.units[5]])
+    batch.units[0].source_passages[0].coverage_ids = ["NOT-IN-THE-SOURCE"]
+    with pytest.raises(ValueError, match="Unknown source coverage ID"):
+        materialize_source_passages(batch, bp.coverage_ledger)
