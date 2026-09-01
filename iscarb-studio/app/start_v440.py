@@ -22,8 +22,8 @@ async def _layout_rejected(request, exc):
 
 app.add_exception_handler(PresenterLayoutError, _layout_rejected)
 
-PUBLIC_VERSION = "4.5.4"
-PIPELINE_ID = "faculty-studio-v4.5.4-shared-unit-contract"
+PUBLIC_VERSION = "4.5.5"
+PIPELINE_ID = "faculty-studio-v4.5.5-visible-crisis-contract"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and

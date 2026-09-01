@@ -166,7 +166,7 @@ def generate(service, bundle, profile):
             failed = [f"{k}: {reason}" for k, reason in evidence_problems(candidate, scoped_profile).items() if reason]
             failed += [f"{k}: {reason}" for k, reason in role_problems(candidate, numbers).items()]
             if failed:
-                raise ValueError("Source/role contract failed: " + ", ".join(failed) + contract_text(numbers))
+                raise ValueError("Source/role contract failed: " + ", ".join(failed))
         batch = request_validated(service, bundle, UnitBatch,
             MASTER_PROMPT + QUALITY_ADDENDUM + "\nBATCH OUTPUT: only the requested units. Put assigned source teaching in source_passages: each passage has coverage_ids and substantive source-grounded text of at least four words and 20 characters. Every assigned ID must occur. The program uses this exact text as visible core_content and derives coverage_evidence; do NOT repeat it in either of those fields. Teach the actual mechanism/example, not just its title. Metadata-only coverage does not count. Preserve complete source figures in visual_plan where relevant. Never put a newly invented scenario detail in source_passages or core_content: keep source statements general and put hypothetical applications in scenario_assumptions/pedagogy_content with explicit HYPOTHETICAL labeling.",
             extra, validate_candidate)
@@ -222,7 +222,7 @@ def repair(service, bundle, blueprint, audit, failures):
                 for r in working.coverage_ledger if r.first_taught_unit in selected])
             problems.update({k: v for k, v in evidence_problems(candidate, scoped).items() if v})
             if problems:
-                raise ValueError(json.dumps(problems) + contract_text(selected))
+                raise ValueError(json.dumps(problems))
         batch = request_validated(service, bundle, UnitBatch,
             MASTER_PROMPT + QUALITY_ADDENDUM + "\nTARGETED REPAIR: return ONLY requested units. Put supported source teaching in source_passages with its coverage_ids and exact student-visible text; the program derives core and evidence from this one value. Keep existing source coverage and correct the listed defects. Other units are immutable.",
             working.model_dump_json(by_alias=True) + "\nREQUESTED UNITS: " + json.dumps(selected)

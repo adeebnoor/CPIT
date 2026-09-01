@@ -99,7 +99,8 @@ def teaching_items(bp: Blueprint, u: LectureUnit) -> list[tuple[str, str]]:
     if u.number == 1:
         return [("ENGINEERING CRISIS", clean(bp.central_engineering_crisis)),
                 ("PROFESSIONAL PURPOSE", clean(bp.named_ethical_purpose)),
-                *[split_item(x, "PRIMARY SOURCE") for x in u.core_content]]
+                *[split_item(x, "PRIMARY SOURCE") for x in u.core_content],
+                *[split_item(x, "FRAMING") for x in u.pedagogy_content]]
     if u.number == 3:
         return [(c.id, clean(c.statement)) for c in bp.clOs]
     if u.number == 4:
