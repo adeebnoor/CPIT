@@ -115,3 +115,24 @@ def test_source_evidence_compares_coordinates_not_page_label_spelling():
 
 def test_new_generation_schema_requires_explicit_source_evidence():
     assert "coverage_evidence" in UnitBatch.model_json_schema()["$defs"]["BatchLectureUnit"]["required"]
+
+
+def test_repair_diagnostic_distinguishes_missing_quote_from_missing_id(source):
+    from app.batched_generation import evidence_problems
+    profile, bp = prepared(source)
+    row = next(r for r in bp.coverage_ledger if any(x.id==r.coverage_id and x.importance=="major" for x in profile.coverage_items))
+    unit = bp.units[row.first_taught_unit-1]
+    ev = next(x for x in unit.coverage_evidence if x.coverage_id==row.coverage_id)
+    ev.visible_excerpt = "This passage is not actually taught in this unit."
+    assert any("absent from" in reason for reason in evidence_problems(bp,profile).values())
+    unit.coverage_evidence = [x for x in unit.coverage_evidence if x.coverage_id != row.coverage_id]
+    assert any("Missing coverage_evidence" in reason for reason in evidence_problems(bp,profile).values())
+
+
+def test_domain_spine_is_not_a_substitute_for_teaching_source_details(source):
+    profile, bp = prepared(source)
+    plan = BlueprintPlan.model_validate(bp.model_dump())
+    row = next(r for r in plan.coverage_ledger if any(x.id==r.coverage_id and x.importance=="major" for x in profile.coverage_items))
+    row.first_taught_unit = 2
+    with pytest.raises(ValueError, match="mandatory source coverage"):
+        validate_plan(plan, profile)

@@ -68,6 +68,32 @@ def contextual_items(u):
         for i,x in enumerate(u.enrichment_content) if clean(x)]
 
 
+def compact_source_fragments(items):
+    """Pack short extraction fragments without summarizing or removing words.
+
+    PDF extraction often makes every cell/line a separate item. Giving each
+    fragment a full paragraph gap wastes the page. Preserve labels and complete
+    longer statements; join only consecutive short unlabeled fragments.
+    """
+    if len(items) < 12:
+        return items
+    result, pending = [], []
+    def flush():
+        if pending:
+            result.append(("", "; ".join(pending)))
+            pending.clear()
+    for label, body in items:
+        if label or len(body.split()) >= 12:
+            flush()
+            result.append((label, body))
+        else:
+            if sum(len(x.split()) for x in pending) + len(body.split()) > 40:
+                flush()
+            pending.append(body)
+    flush()
+    return result
+
+
 def teaching_items(bp: Blueprint, u: LectureUnit) -> list[tuple[str, str]]:
     if u.number == 1:
         return [("ENGINEERING CRISIS", clean(bp.central_engineering_crisis)),
@@ -85,7 +111,7 @@ def teaching_items(bp: Blueprint, u: LectureUnit) -> list[tuple[str, str]]:
     if u.number == 19:
         return [(r.criterion, " | ".join([r.distinguished, r.ready, r.developing, r.not_yet_ready]))
                 for r in bp.rubric_criteria]
-    core = [split_item(x) for x in u.core_content if clean(x)]
+    core = compact_source_fragments([split_item(x) for x in u.core_content if clean(x)])
     ped = [split_item(x) for x in u.pedagogy_content if clean(x)]
     if core and not core[0][0]:
         core[0] = ("PRIMARY SOURCE", core[0][1])
@@ -103,6 +129,10 @@ class Text:
     size: float
     color: str = INK
     bold: bool = False
+
+
+class PresenterLayoutError(ValueError):
+    """The source is preserved, but this 20-page projection cannot fit safely."""
 
 
 def wrap(value: str, width: float, size: float, bold=False) -> list[str]:
@@ -131,9 +161,9 @@ def item_layout(items, x, y, width, height, preferred=21, minimum=10):
             body_lines = wrap(body, width, size)
             if label_lines:
                 blocks.append(Text(x, cursor, width, label_lines, label_size, GREEN, True))
-                cursor += len(label_lines) * label_size * 1.22 + 4
+                cursor += len(label_lines) * label_size * 1.22 + max(1, size * .2)
             blocks.append(Text(x, cursor, width, body_lines, size))
-            cursor += len(body_lines) * size * 1.22 + max(9, size * .6)
+            cursor += len(body_lines) * size * 1.22 + max(2, size * .4)
         if cursor <= y + height or size == 6:
             return blocks, size, cursor <= y + height
 
@@ -193,6 +223,34 @@ def readable_text_contract(bp: Blueprint) -> bool:
         if not fits or size < 16:
             return False
     return True
+
+
+def preflight_layout(bp, source_root=None):
+    """Shared PDF/PPTX/preview geometry check; never return a clipped artifact."""
+    plans = list(plans_for_blueprint_v42(bp, source_root=source_root))
+    failures = []
+    for u, plan in zip(bp.units, plans):
+        blocks, _, fits, source = unit_layout(bp, u, plan)
+        bottom = 498 if source else 448
+        if u.number == 19 and not source:
+            blocks = rubric_layout(bp)[0]
+            fits = True
+        unsafe = not fits or any(
+            b.y + len(b.lines) * b.size * 1.22 > bottom
+            or any(stringWidth(line, "ISCARB-Bold" if b.bold else "ISCARB", b.size) > b.width + .1 for line in b.lines)
+            for b in blocks)
+        if not source:
+            unsafe = unsafe or len(wrap(u.engineering_question, 872, 13)) > 2 or len(wrap("YOUR TASK " + u.student_action, 872, 13)) > 2
+            frame_blocks = [title_block(bp.lecture_title if u.number == 1 else u.title),
+                Text(44, 120, 872, wrap(u.engineering_question, 872, 13), 13),
+                Text(44, 470, 872, wrap("YOUR TASK " + u.student_action, 872, 13), 13)]
+            unsafe = unsafe or any(any(stringWidth(line, "ISCARB-Bold" if b.bold else "ISCARB", b.size) > b.width + .1 for line in b.lines) for b in frame_blocks)
+        unsafe = unsafe or stringWidth(clean(u.source_anchor), "ISCARB", 8) > 790
+        if unsafe:
+            failures.append(u.number)
+    if failures:
+        raise PresenterLayoutError("Presenter cannot fit units " + ", ".join(map(str, failures)) + ". No clipped file was generated. Shorten/restructure these units; the original source and blueprint remain available.")
+    return plans
 
 
 def title_block(title):
@@ -288,10 +346,11 @@ def _draw_page(c, bp, u, plan, release_state="REVIEW"):
 
 def export_presenter_pdf(bp: Blueprint, out: Path, source_root=None, release_state="REVIEW") -> Path:
     out=Path(out)
+    plans = preflight_layout(bp, source_root)
     c=canvas.Canvas(str(out),pagesize=(W,H))
     c.setTitle(bp.lecture_title)
     c.setAuthor("ISCARB Faculty Studio")
-    for u,plan in zip(bp.units,plans_for_blueprint_v42(bp,source_root=source_root)):
+    for u,plan in zip(bp.units,plans):
         _draw_page(c,bp,u,plan,release_state)
         c.showPage()
     c.save()
@@ -301,9 +360,10 @@ def export_presenter_pdf(bp: Blueprint, out: Path, source_root=None, release_sta
 def render_presenter_preview(bp: Blueprint, release_state="BLOCKED", source_root=None) -> str:
     # The browser previews the actual PDF surface: one projection, no separate
     # HTML layout that can falsely pass while downloaded slides clip content.
+    plans = preflight_layout(bp, source_root)
     buf=io.BytesIO()
     c=canvas.Canvas(buf,pagesize=(W,H))
-    for u,plan in zip(bp.units,plans_for_blueprint_v42(bp,source_root=source_root)):
+    for u,plan in zip(bp.units,plans):
         _draw_page(c,bp,u,plan,release_state)
         c.showPage()
     c.save()
@@ -325,6 +385,7 @@ def render_presenter_preview(bp: Blueprint, release_state="BLOCKED", source_root
 
 def export_presenter_pptx(bp: Blueprint, out: Path, source_root=None, release_state="REVIEW") -> Path:
     # Native editable text and source images use the exact PDF layout plan.
+    plans = preflight_layout(bp, source_root)
     from pptx import Presentation
     from pptx.util import Inches, Pt
     from pptx.dml.color import RGBColor
@@ -347,7 +408,7 @@ def export_presenter_pptx(bp: Blueprint, out: Path, source_root=None, release_st
             p.space_before=p.space_after=Pt(0)
             p.line_spacing=1.22
 
-    for u,plan in zip(bp.units,plans_for_blueprint_v42(bp,source_root=source_root)):
+    for u,plan in zip(bp.units,plans):
         slide=prs.slides.add_slide(prs.slide_layouts[6])
         add(slide,Text(805,20,120,["VERIFIED RELEASE" if release_state.upper()=="READY" else "REVIEW DRAFT"],8,MUTED,True))
         blocks,_,_,source=unit_layout(bp,u,plan)
