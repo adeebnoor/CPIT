@@ -128,6 +128,17 @@ def _is_model_unavailable(exc: Exception) -> bool:
 
 def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> AuditReport:
     failed = [name for name, ok in checks.items() if not ok]
+    # Do not expose raw provider errors (which may contain request details),
+    # and do not call an intentionally offline draft a provider outage.
+    reason_lower = reason.lower()
+    if "timed out" in reason_lower or "time budget" in reason_lower or "timeout" in reason_lower:
+        reason_label = "The model request exceeded its time limit."
+    elif "quota" in reason_lower or "resource_exhausted" in reason_lower:
+        reason_label = "The configured model quota was exhausted."
+    elif "not yet performed" in reason_lower:
+        reason_label = "Independent semantic audit has not been performed for this source-preserving draft."
+    else:
+        reason_label = "Independent semantic assurance is unavailable or incomplete."
 
     def category_pass(markers: tuple[str, ...]) -> bool:
         return not any(any(marker in name for marker in markers) for name in failed)
@@ -164,11 +175,11 @@ def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> Audit
                 severity="major",
                 unit_numbers=[],
                 requirement="Semantic release audit",
-                problem=f"Semantic audit unavailable because the model could not be reached (exhausted quota or sustained capacity failure). Deterministic failures: {issue_text}",
+                problem=f"{reason_label} No verified release is issued. Deterministic failures: {issue_text}",
                 repair_instruction="Preserve the generated blueprint. Re-run the semantic audit when Gemini is reachable again; do not issue RELEASE without it.",
             )
         ],
-        strengths=["The 20-unit blueprint was preserved and deterministic Content Gate checks completed before the model became unreachable."],
+        strengths=["The 20-unit review draft was preserved and local checks completed; semantic approval is not claimed."],
     )
 
 
