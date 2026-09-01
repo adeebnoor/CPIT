@@ -1,12 +1,12 @@
 """Transport-free contract tests. These do not certify model output quality."""
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
-from app.batched_generation import generate, repair, evidence_checks, validate_batch, validate_plan
+from app.batched_generation import generate, repair, evidence_checks, validate_batch, validate_plan, GenerationContractError
 from app.models import BlueprintPlan, UnitBatch, CoverageEvidence, AuditReport, AuditIssue
-from tests.test_v44_release import source
+from tests.test_v44_release import source, LECTURE
 
 
 def prepared(source):
@@ -69,7 +69,7 @@ def test_timeout_preserves_last_completed_batch_without_claiming_completion(sour
     with pytest.raises(TimeoutError):
         generate(service, None, profile)
     assert service.partial_blueprint.generation_mode == "batched-partial"
-    assert service.partial_blueprint.units[:4] == bp.units[:4]
+    assert [u.model_dump() for u in service.partial_blueprint.units[:4]] == [u.model_dump() for u in bp.units[:4]]
 
 
 def test_targeted_repair_does_not_rewrite_nineteen_good_units(source):
@@ -86,3 +86,32 @@ def test_targeted_repair_does_not_rewrite_nineteen_good_units(source):
     assert all(result.units[i] == bp.units[i] for i in range(20) if i != 4)
     assert bp.units[4].title != "Repaired prediction"
     assert service._generate_structured.call_count == 1
+
+
+def test_rejected_model_content_is_review_required_not_an_application_crash(source):
+    from app import main
+    from app.models import JobState
+    from app.source_bundle import SourceBundle, SourceItem
+    profile, _ = source
+    job = JobState(id="contract-test", status="queued",progress=0,message="")
+    bundle = SourceBundle(items=[SourceItem("primary","P1",LECTURE.name,LECTURE,LECTURE.name)],lecture_focus="",session_minutes=90)
+    service = Mock()
+    service.profile_source.return_value = profile
+    service.generate_blueprint.side_effect = GenerationContractError("Missing learner-visible source evidence: unit01")
+    with patch.object(main,"load_job",return_value=job), patch.object(main,"save_job"), patch.object(main,"prune_expired"), patch.object(main,"GeminiService",return_value=service):
+        main._compile(job.id,bundle,"auto",0)
+    assert job.status == "blocked"
+    assert job.error is None and job.blueprint is not None
+    assert job.audit.overall_pass is False
+    assert any("unit01" in i.problem for i in job.audit.issues)
+
+
+def test_source_evidence_compares_coordinates_not_page_label_spelling():
+    from app.batched_generation import same_source_anchor
+    assert same_source_anchor("[P1] PAGE 7", "[P1] SLIDE 7")
+    assert not same_source_anchor("[P1] PAGE 7", "[P1] PAGE 8")
+    assert not same_source_anchor("[P1] PAGE 7", "[S1] PAGE 7")
+
+
+def test_new_generation_schema_requires_explicit_source_evidence():
+    assert "coverage_evidence" in UnitBatch.model_json_schema()["$defs"]["BatchLectureUnit"]["required"]

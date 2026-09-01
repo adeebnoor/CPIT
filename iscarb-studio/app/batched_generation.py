@@ -18,6 +18,21 @@ BATCH_SIZE = 4
 PHASES = ["IFHAM"] * 5 + ["MARIS"] * 5 + ["ATQAN"] * 5 + ["MAYYIZ"] * 5
 
 
+class GenerationContractError(ValueError):
+    """A generated candidate failed quality validation, not an application crash."""
+
+
+def same_source_anchor(left, right):
+    """Compare source coordinates, not the spelling of PAGE versus SLIDE."""
+    from .source_visuals import anchor_slides
+    left_ids = set(re.findall(r"\b(?:P1|S[1-9]\d*)\b", left.upper()))
+    right_ids = set(re.findall(r"\b(?:P1|S[1-9]\d*)\b", right.upper()))
+    left_pages, right_pages = set(anchor_slides(left)), set(anchor_slides(right))
+    if left_ids and right_ids and left_pages and right_pages:
+        return left_ids == right_ids and left_pages == right_pages
+    return " ".join(left.split()).casefold() == " ".join(right.split()).casefold()
+
+
 def evidence_checks(bp, profile):
     """Conservative structural evidence, NOT a claim of semantic equivalence."""
     checks = {}
@@ -29,11 +44,11 @@ def evidence_checks(bp, profile):
             continue
         row = rows.get(item.id)
         unit = units.get(row.first_taught_unit) if row else None
-        valid = bool(unit and unit.number <= 15 and row.source_anchor == item.source_anchor)
+        valid = bool(unit and unit.number <= 15 and same_source_anchor(row.source_anchor, item.source_anchor))
         if valid:
             visible = " ".join(" ".join(unit.core_content).split()).casefold()
             valid = any(
-                ev.coverage_id == item.id and ev.source_anchor == item.source_anchor
+                ev.coverage_id == item.id and same_source_anchor(ev.source_anchor, item.source_anchor)
                 and len(ev.visible_excerpt.split()) >= 4
                 and " ".join(ev.visible_excerpt.split()).casefold() in visible
                 for ev in unit.coverage_evidence
@@ -49,7 +64,7 @@ def validate_plan(plan, profile):
     for item in profile.coverage_items:
         if item.importance == "major":
             row = rows.get(item.id)
-            if not row or row.first_taught_unit > 15 or row.source_anchor != item.source_anchor:
+            if not row or row.first_taught_unit > 15 or not same_source_anchor(row.source_anchor, item.source_anchor):
                 raise ValueError(f"Missing or displaced mandatory source coverage: {item.id}")
 
 
@@ -75,7 +90,7 @@ def request_validated(service, bundle, schema, prompt, extra, validate):
             return result
         except ValueError as exc:
             if attempt:
-                raise
+                raise GenerationContractError(str(exc)) from exc
             extra += "\nLOCAL CONTRACT FAILURE: " + str(exc) + "\nCorrect this output only.\n" + result.model_dump_json(by_alias=True)
 
 
@@ -105,7 +120,7 @@ def generate(service, bundle, profile):
             if failed:
                 raise ValueError("Missing learner-visible source evidence: " + ", ".join(failed))
         batch = request_validated(service, bundle, UnitBatch,
-            MASTER_PROMPT + QUALITY_ADDENDUM + "\nBATCH OUTPUT: only the requested units. Each assigned coverage item needs coverage_evidence with its exact ID/anchor and an exact visible_excerpt copied from this unit's core_content. Teach the actual mechanism/example, not just its title. Evidence in notes or a ledger does not count. Preserve complete source figures in visual_plan where relevant.",
+            MASTER_PROMPT + QUALITY_ADDENDUM + "\nBATCH OUTPUT: only the requested units. Each assigned coverage item needs coverage_evidence with its exact ID/anchor and an exact visible_excerpt of AT LEAST FOUR WORDS and 20 characters copied from this unit's core_content. Teach the actual mechanism/example, not just its title. Evidence in notes or a ledger does not count. Preserve complete source figures in visual_plan where relevant. Never put a newly invented scenario detail in core_content: keep source statements general and put hypothetical applications in scenario_assumptions/pedagogy_content with explicit HYPOTHETICAL labeling.",
             extra, validate_candidate)
         replacement = {u.number: u for u in batch.units}
         working.units = [replacement.get(u.number, u) for u in working.units]

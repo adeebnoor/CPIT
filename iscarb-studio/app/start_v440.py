@@ -14,8 +14,8 @@ from .storage import UPLOADS, JOB_MISSING_MESSAGE
 engine = prev.engine
 app = prev.app
 
-PUBLIC_VERSION = "4.5.0"
-PIPELINE_ID = "faculty-studio-v4.5.0-batched-generation-evidence-gate-v15"
+PUBLIC_VERSION = "4.5.1"
+PIPELINE_ID = "faculty-studio-v4.5.1-batched-generation-evidence-gate-v15"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
