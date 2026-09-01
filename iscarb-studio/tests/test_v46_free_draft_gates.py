@@ -156,6 +156,54 @@ class FreeDraftGateTests(unittest.TestCase):
                                       f"unit {unit.number} was trimmed without saying so")
 
 
+class SourceFidelityTests(unittest.TestCase):
+    """What the deck says about the lecture has to match the lecture."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.pdf = LECTURES / "CPIT455-class2-NooR.pdf"
+        if not cls.pdf.exists():
+            raise unittest.SkipTest("archived lecture unavailable")
+        cls.profile, cls.bp, _checks = _draft(cls.pdf)
+
+    def test_the_title_is_the_subject_not_the_session_number(self):
+        """"Class2: Dependable Systems" would travel into every derived sentence."""
+        self.assertEqual(self.profile.lecture_title, "Dependable Systems")
+        self.assertNotIn("class2", self.bp.central_engineering_crisis.lower())
+        self.assertNotIn("class2", self.bp.units[0].title.lower())
+
+    def test_the_outcome_the_source_declares_is_the_first_clo(self):
+        self.assertEqual(
+            self.bp.clOs[0].statement,
+            "Design dependability in systems by using redundancy and diversity",
+        )
+        self.assertIn("PAGE 3", self.bp.clOs[0].evidence_expected)
+
+    def test_the_prediction_gate_does_not_preempt_the_units_that_teach(self):
+        """Unit 5 asks for a prediction; it must not print Unit 6 and 7's pages."""
+        gate = set(self.bp.units[4].core_content)
+        for number in (6, 7):
+            taught = set(self.bp.units[number - 1].core_content)
+            self.assertFalse(gate & taught, f"unit 5 reprints unit {number}")
+        self.assertTrue(self.bp.units[4].core_content, "the prediction gate lost its source framing")
+
+    def test_the_spine_names_the_pages_it_maps(self):
+        """A bare [P1] let the visual planner illustrate the spine with any page."""
+        from app.source_visuals import anchor_slides
+        spine = anchor_slides(self.bp.units[1].source_anchor)
+        self.assertTrue(spine)
+        self.assertTrue(set(spine) <= {
+            page for family in self.profile.topic_families
+            for page in anchor_slides(family.source_anchor)
+        })
+
+    def test_a_teaching_unit_keeps_the_single_page_anchor_its_figure_needs(self):
+        """A multi-page anchor forfeits the source figure; one page per slot."""
+        from app.source_visuals import anchor_slides
+        single = [u.number for u in self.bp.units[5:15] if len(anchor_slides(u.source_anchor)) == 1]
+        self.assertGreaterEqual(len(single), 9, "teaching slots lost their source pages")
+
+
 class RunningHeaderTests(unittest.TestCase):
     """A chapter header repeats with only its page number changing."""
 
