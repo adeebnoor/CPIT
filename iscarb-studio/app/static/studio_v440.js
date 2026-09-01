@@ -5,7 +5,16 @@ const JOBS = ['Professional crisis','Domain spine','Five measurable CLOs','Six H
 const PHASES = ['UNDERSTAND','PRACTISE','MASTER','DISTINGUISH'];
 let jobId = null, timer = null, failures = 0, busy = false, renderedStage = '';
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function setBusy(value) { busy = value; $('compileBtn').disabled = value; $('compileBtn').innerHTML = value ? 'Building your lecture…' : 'Build & audit my lecture <span>↗</span>'; }
+function setBusy(value) { busy = value; $('compileBtn').disabled = value; $('importBtn').disabled = value; $('model').disabled = value; $('compileBtn').innerHTML = value ? 'Preparing your lecture…' : ($('model').value==='source-only' ? 'Create free review draft <span>↗</span>' : 'Build & audit with free-tier AI <span>↗</span>'); }
+function modeSelection() {
+  const offline=$('model').value==='source-only';
+  $('modeHint').textContent=offline?'No API key, credits, or payment needed. Create a source-preserving review draft, download an authoring prompt, then import your edited Blueprint.':'Optional AI uses the configured Gemini project. Its free quota and data-use terms apply; the website cannot verify account billing.';
+  $('freeConfirmLabel').hidden=offline;$('freeWarning').hidden=offline;
+  $('repair').disabled=offline;if(offline)$('repair').value='0';
+  setBusy(busy);
+}
+$('model').addEventListener('change',modeSelection);
+modeSelection();
 function sourceSelection() {
   const file = $('primaryFile').files[0];
   $('fileName').textContent = file ? file.name : 'Drop your lecture here';
@@ -38,6 +47,7 @@ $('compileForm').addEventListener('submit',async e=>{
   e.preventDefault(); if(busy)return;
   const file=$('primaryFile').files[0],url=$('primaryUrl').value.trim();
   $('formError').textContent='';
+  if($('model').value==='free'&&!$('freeConfirm').checked){$('formError').textContent='Confirm the project is on the unpaid Free Tier, or choose the no-API workspace.';return;}
   if((!file&&!url)||(file&&url)){$('formError').textContent='Choose exactly one primary source: a file or a URL.';return;}
   if(file&&!/\.(pdf|pptx|docx|txt|md)$/i.test(file.name)){$('formError').textContent='Use a PDF, PPTX, DOCX, TXT, or MD file.';return;}
   if(file&&file.size>25*1024*1024){$('formError').textContent='The primary file is too large. Use a file smaller than 25 MB.';return;}
@@ -47,6 +57,7 @@ $('compileForm').addEventListener('submit',async e=>{
   const fd=new FormData();if(file)fd.append('primary_lecture',file);fd.append('primary_url',url);
   [...$('supportFiles').files].forEach(f=>fd.append('supporting_files',f));
   fd.append('supporting_urls',$('supportUrls').value);fd.append('lecture_focus',$('focus').value);fd.append('model',$('model').value);fd.append('repair_rounds',$('repair').value);
+  fd.append('free_tier_confirmed',String($('freeConfirm').checked));
   try {const result=await request('/api/compile',{method:'POST',body:fd});if(!result.job_id)throw new Error('The server did not return a job identifier.');jobId=result.job_id;remember(jobId);await poll();}
   catch(error){$('error').textContent=error.name==='AbortError'?'The upload timed out. No automatic retry was sent; check your connection before trying again.':error.message;setBusy(false);}
 });
@@ -62,6 +73,15 @@ async function poll(){
   timer=setTimeout(poll,Math.min(15000,3000*(failures+1)));
 }
 $('retryPoll').addEventListener('click',()=>{failures=0;$('retryPoll').hidden=true;setBusy(true);poll();});
+$('importForm').addEventListener('submit',async e=>{
+  e.preventDefault();if(busy||!jobId)return;
+  const file=$('blueprintFile').files[0];$('importError').textContent='';
+  if(!file||!file.name.toLowerCase().endsWith('.json')){$('importError').textContent='Choose your completed Blueprint JSON file.';return;}
+  if(file.size>25*1024*1024){$('importError').textContent='Use a JSON file smaller than 25 MB.';return;}
+  const fd=new FormData();fd.append('blueprint_file',file);setBusy(true);
+  try {const result=await request('/api/jobs/'+encodeURIComponent(jobId)+'/import-blueprint',{method:'POST',body:fd});jobId=result.job_id;remember(jobId);renderedStage='';failures=0;await poll();}
+  catch(error){$('importError').textContent=error.name==='AbortError'?'Import timed out. Your previous draft has not been overwritten.':error.message;setBusy(false);}
+});
 function unitCheck(number,checks){const prefix=`v15_unit${String(number).padStart(2,'0')}_`;const matches=Object.entries(checks).filter(([key])=>key.startsWith(prefix));return !matches.length?'unknown':matches.every(([,value])=>value===true)?'pass':'fail';}
 function render(job){
   const bp=job.blueprint;if(!bp)return;const audit=job.audit||{},checks=job.deterministic_checks||{},entries=Object.entries(checks),failed=entries.filter(([,v])=>v!==true);
@@ -75,6 +95,9 @@ function render(job){
   const stats=[[`${units.length}/20`,'Units in the Blueprint'],[`${grammar}/20`,'Unit grammar checks passed'],[major.length?`${covered.length}/${major.length}`:'Not checked','Major checkpoints mapped by U15'],[String(units.reduce((sum,u)=>sum+(u.planned_minutes||0),0)),'Planned teaching minutes']];
   $('metrics').innerHTML=stats.map(([value,label])=>`<div class="metric"><strong>${escapeHTML(value)}</strong><span>${escapeHTML(label)}</span></div>`).join('');
   const id=encodeURIComponent(jobId);
+  const completed=['ready','blocked','error'].includes(job.status);
+  $('manualWorkspace').hidden=!completed||!job.source_profile;
+  $('authoringPrompt').href='/api/jobs/'+id+'/authoring-prompt';
   $('outputAssets').innerHTML=`<div class="asset"><b>Visual Presenter</b><a target="_blank" rel="noopener noreferrer" href="/api/jobs/${id}/presenter">Preview ↗</a><a href="/api/jobs/${id}/export/pptx">PPTX</a><a href="/api/jobs/${id}/export/presenter-pdf">PDF</a></div><div class="asset"><b>Original source · all pages</b><a href="/api/jobs/${id}/export/source-pdf">Original PDF ↓</a><small>Keep the source alongside your teaching deck. Figures and examples are never removed from this file.</small></div><div class="asset"><b>Reading Pack</b><a href="/api/jobs/${id}/export/pdf">PDF ↓</a></div><div class="asset"><b>Instructor Guide</b><a href="/api/jobs/${id}/export/docx">DOCX ↓</a></div><div class="asset"><b>Student Pack</b><a href="/api/jobs/${id}/export/student">DOCX ↓</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON ↓</a></div>`;
   if(!['ready','blocked','error'].includes(job.status)){
     $('resultSummary').textContent='Generation/audit is still running. Preview and download the saved REVIEW DRAFT now. Faculty and student packs become available when processing finishes.';

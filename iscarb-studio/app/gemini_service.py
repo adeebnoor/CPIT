@@ -26,6 +26,17 @@ class GeminiNotConfigured(RuntimeError):
     pass
 
 
+class GeminiQuotaPaused(RuntimeError):
+    """Safe public diagnostic: a quota response is not proof billing is needed."""
+
+    def __init__(self, operation: str):
+        super().__init__(
+            f"429 RESOURCE_EXHAUSTED during {operation}. This job paused without retrying the quota failure. "
+            "Use the no-API workflow or wait for your free quota to renew. "
+            "Minute and daily limits differ; daily quotas reset at midnight Pacific time."
+        )
+
+
 def is_transient_model_failure(exc: Exception) -> bool:
     """Whether the upstream model, not our own code, is what failed.
 
@@ -77,9 +88,11 @@ class GeminiService:
 
     @staticmethod
     def _is_quota_exhausted(exc: Exception) -> bool:
+        if getattr(exc, "code", None) == 429:
+            return True
         text = str(exc).lower()
         return any(marker in text for marker in (
-            "resource_exhausted", "quota exceeded", "free_tier_requests",
+            "429", "resource_exhausted", "quota exceeded", "free_tier_requests",
             "generatecontentinputtokenspermodel", "generaterequestsperdayperprojectpermodel",
         ))
 
@@ -116,6 +129,9 @@ class GeminiService:
         return guessed or "application/octet-stream"
 
     def _upload(self, path: Path):
+        paused = getattr(self, "_source_upload_quota_failure", None)
+        if paused is not None:
+            raise paused
         key = str(path.resolve())
         if key in self._uploaded:
             return self._uploaded[key]
@@ -131,7 +147,8 @@ class GeminiService:
             except Exception as exc:
                 last_exc = exc
                 if self._is_quota_exhausted(exc):
-                    raise
+                    self._source_upload_quota_failure = GeminiQuotaPaused("source upload")
+                    raise self._source_upload_quota_failure from exc
                 if not self._is_retryable(exc) or attempt >= MAX_TRANSIENT_ATTEMPTS - 1:
                     raise
                 self._backoff(attempt)
@@ -162,6 +179,11 @@ class GeminiService:
         self.client.close()
 
     def _models_for(self, preferred: str) -> list[str]:
+        if getattr(self, "model", "") == "free":
+            # One documented free-tier model for every stage; do not fan out
+            # into other models/accounts after a provider quota rejection.
+            from .free_workflow import FREE_MODEL
+            return [FREE_MODEL]
         if preferred in {"", "auto", "AUTO"}:
             ordered = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"]
         elif preferred == "gemini-3.7-flash":
@@ -247,6 +269,8 @@ class GeminiService:
                         raise
                     if self._is_quota_exhausted(exc):
                         exhausted.add(candidate)
+                        if self.model == "free":
+                            raise GeminiQuotaPaused("model generation") from exc
                         break
                     if not self._is_retryable(exc):
                         raise
@@ -261,7 +285,7 @@ class GeminiService:
             raise RuntimeError(
                 "Gemini quota is exhausted for every model ISCARB could use automatically "
                 f"({names}). Exhausted models were skipped for the rest of this job. "
-                "Check this project's quota and billing in Google AI Studio before retrying."
+                "Wait for the project's free quota to renew or use the no-API authoring workflow."
             ) from last_exc
         if last_exc is not None:
             raise last_exc

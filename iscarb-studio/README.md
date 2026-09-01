@@ -1,4 +1,4 @@
-# ISCARB Faculty Studio v3
+# ISCARB Faculty Studio v4.6
 
 **Engineering better university teaching.**
 
@@ -7,11 +7,31 @@ ISCARB Faculty Studio turns one complete weekly lecture into a **90-minute, 20-u
 ## Start in three minutes
 
 1. Open the live Faculty Studio.
-2. Choose **Use a Ready Lecture** or **Upgrade My Lecture**.
+2. Choose a source from the library or upload your own lecture.
 3. Provide exactly one PRIMARY lecture (file or public URL).
 4. Optionally add supporting files/URLs.
-5. Compile, inspect the Presenter Preview, and read the release result.
+5. Keep **Free workspace · no API calls** selected, create a draft, and inspect its checks and presenter.
 6. Use the **Faculty Starter Kit** before piloting the method across multiple weeks.
+
+## Work without API credits
+
+The default source-preserving draft, authoring-prompt download, JSON import,
+local checks and exports make **zero model API calls**. After creating a draft,
+download its authoring prompt and use it with the original source in an authoring
+tool you already have access to (that tool has its own limits), or edit the
+Blueprint JSON yourself. Import the completed JSON in the same workspace.
+Import creates a new draft and keeps the original files attached, including PDF
+figures. Download outputs before leaving: Render's free container is temporary.
+
+These are review drafts, not independently verified lectures. Local checks do
+not establish semantic approval or classroom readiness.
+
+Optional **Gemini free-tier AI** uses one free-tier-eligible model and requires
+confirmation that the configured project is unpaid. The app cannot inspect
+Google billing; a billed project may incur charges. No-API mode is the only
+mode guaranteeing zero model API usage. Quota rejection stops the job: wait for
+the applicable quota to renew or continue with manual authoring. No payment,
+account switching, or quota bypass is required by the free workspace.
 
 ## Three entry points
 

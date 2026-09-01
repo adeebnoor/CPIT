@@ -22,8 +22,8 @@ async def _layout_rejected(request, exc):
 
 app.add_exception_handler(PresenterLayoutError, _layout_rejected)
 
-PUBLIC_VERSION = "4.5.6"
-PIPELINE_ID = "faculty-studio-v4.5.6-stage-consistent-quota-failover"
+PUBLIC_VERSION = "4.6.0"
+PIPELINE_ID = "faculty-studio-v4.6.0-free-first-source-preserving-workspace"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
@@ -35,6 +35,11 @@ def _health_v440():
     data = prev._health_v430()
     data.update({
         "version": PUBLIC_VERSION,
+        "default_model": "source-only",
+        "default_api_calls": 0,
+        "manual_authoring_round_trip": True,
+        "free_tier_model": "gemini-3.5-flash-lite",
+        "billing_policy": "No billing changes. No-API default; optional Gemini requests require an unbilled project for free use. The app cannot inspect account billing.",
         "model_request_timeout_seconds": 150,
         "model_job_budget_seconds": 600,
         "source_only_mode": True,
@@ -62,6 +67,9 @@ def _health_v440():
 
 
 engine.health = _health_v440
+
+from .free_workflow import install_routes
+install_routes(app, engine)
 
 app.router.routes[:] = [
     route for route in app.router.routes

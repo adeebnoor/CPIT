@@ -356,7 +356,7 @@ def _norm_key(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", str(text or "").lower()).strip()
 
 
-def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI profiler unavailable") -> SourceProfile:
+def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -> SourceProfile:
     primary = bundle.primary
     coordinate, chunks = _chunks(primary.path)
     if not chunks:
@@ -417,7 +417,7 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "AI p
         "Source profile was built deterministically because the AI profiling call was unavailable: "
         + _clean(reason, 300)
         + ". The full primary source is still supplied to blueprint generation; RELEASE still requires normal gates."
-    )
+    ) if reason else "Source profile built locally without an AI call. This is a source inventory, not semantic approval; RELEASE still requires normal gates."
     return SourceProfile(
         lecture_title=title,
         course_or_level="Faculty-supplied lecture",
