@@ -26,3 +26,14 @@ Changes:
 Regression tests reproduce these defects with transport-free fixtures. They
 prove compiler behavior, not that a model-generated lecture is correct. Live
 acceptance must still pass every deterministic check and independent audit.
+
+## 4.5.5 follow-up: visible opening crisis
+
+The first live 4.5.4 attempt stopped at the opening-unit role check. Inspection
+found that this check ignored `central_engineering_crisis` and
+`named_ethical_purpose`, even though the presenter displays those fields on
+slide 1. The check now includes that actual visible content; the evidence gap
+and decision requirements remain mandatory. A regression verifies both the
+valid displayed crisis and rejection of a generic introduction. The generator
+also receives explicit Decision/Unknown prompts. Public rejection messages no
+longer dump the full instructional contract; correction still receives it.

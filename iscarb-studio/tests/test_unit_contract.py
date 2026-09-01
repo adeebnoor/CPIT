@@ -133,3 +133,25 @@ def test_metadata_repair_cannot_reallocate_the_source(source):
     result = repair(service, None, bp, audit_for(requirement="Readiness alignment"), ["readiness_alignment_present"])
     assert result.coverage_ledger == bp.coverage_ledger
     assert result.topic_coverage == bp.topic_coverage
+
+
+def test_crisis_check_reads_the_actual_presenter_content(source):
+    from app.presenter_v44 import teaching_items
+    _, bp = source
+    bp = bp.model_copy(deep=True)
+    unit = bp.units[0]
+    unit.title = "Service interruption"
+    unit.engineering_question = "What should the team do now?"
+    unit.core_content = unit.pedagogy_content = unit.scenario_assumptions = []
+    unit.student_action = unit.takeaway = unit.evidence = "Explain your reasoning."
+    bp.central_engineering_crisis = "The team must decide whether to resume service while failure evidence is missing."
+    bp.named_ethical_purpose = "Protect service users."
+    assert bp.central_engineering_crisis in [text for _, text in teaching_items(bp, unit)]
+    assert unit_role_checks(bp, [1])["v15_unit01_job_is_visible"]
+    bp.central_engineering_crisis = "An introduction to dependable systems."
+    assert not unit_role_checks(bp, [1])["v15_unit01_job_is_visible"]
+    unit.pedagogy_content = ["Decision: Decide whether service may resume.", "Unknown: Identify the missing failure evidence."]
+    visible = " ".join(text for _, text in teaching_items(bp, unit))
+    assert "Decide whether service may resume" in visible
+    assert "Identify the missing failure evidence" in visible
+    assert unit_role_checks(bp, [1])["v15_unit01_job_is_visible"]

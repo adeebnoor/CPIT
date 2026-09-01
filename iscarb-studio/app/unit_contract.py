@@ -9,7 +9,7 @@ import json
 
 
 UNIT_JOBS = {
-    1: "Open ONE ill-structured crisis and professional purpose. Ask for a decision with missing evidence/unknowns. Do not reveal the diagnosis. Keep technical definitions for units 6–15.",
+    1: "Open ONE ill-structured crisis and professional purpose. The plan's central_engineering_crisis is displayed on this slide. Include a concrete Decision: question and an Unknown: evidence gap in pedagogy_content. Do not reveal the diagnosis. Keep technical definitions for units 6–15.",
     2: "Domain Spine: map ALL locked source topic families in at least two source-grounded core entries, with a P1 anchor. This map is not first teaching of source details.",
     3: "Exactly five CLOs: core_content=[], source_passages=[], source_anchor=''. pedagogy_content contains exactly CLO1: through CLO5:, matching the locked plan's measurable CLO statements. Never attach source facts to this outcomes page.",
     4: "Exactly six pedagogy_content entries, one applied capability each: Analytical reasoning; Engineering judgment; Evidence-based reasoning; Socio-technical thinking; Risk-aware design; Ethical responsibility. core_content=[] and source_passages=[].",
