@@ -275,12 +275,18 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         stage = "20-unit generation + readiness alignment"
         _update(job, "generating", 35, "2/4 · Engineering Compiler: building 20 Units with complete P1 coverage and smart compression…")
+        def save_batch(snapshot, completed):
+            job.blueprint = snapshot
+            job.audit = _deterministic_fallback_audit({}, "Independent semantic audit not yet performed.")
+            job.deterministic_checks = {"batch_all_units_generated": False}
+            _update(job, "generating", 35 + completed, f"Generated {completed}/20 units. Unfinished units remain source-only review drafts; semantic audit pending.")
+        service.on_batch = save_batch
         try:
             blueprint = service.generate_blueprint(bundle, profile)
         except Exception as exc:
             if not _is_model_unavailable(exc):
                 raise
-            blueprint = build_deterministic_blueprint(profile)
+            blueprint = getattr(service, "partial_blueprint", None) or build_deterministic_blueprint(profile)
             blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
             job.blueprint = blueprint
             checks = deterministic_gate(blueprint, profile, source_text)
@@ -288,7 +294,7 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             job.deterministic_checks = checks
             job.audit = _deterministic_fallback_audit(checks, str(exc))
             save_job(job)
-            _update(job, "blocked", 100, "BLOCKED — Gemini was unreachable during generation. A complete source-checkpoint draft was preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds.")
+            _update(job, "blocked", 100, "BLOCKED — Gemini was unreachable during generation. Completed batches and remaining source-review units were preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds.")
             return
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint

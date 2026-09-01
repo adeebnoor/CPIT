@@ -14,8 +14,8 @@ from .storage import UPLOADS, JOB_MISSING_MESSAGE
 engine = prev.engine
 app = prev.app
 
-PUBLIC_VERSION = "4.4.1"
-PIPELINE_ID = "faculty-studio-v4.4.1-bounded-generation-source-first-gate-v15"
+PUBLIC_VERSION = "4.5.0"
+PIPELINE_ID = "faculty-studio-v4.5.0-batched-generation-evidence-gate-v15"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
@@ -31,6 +31,9 @@ def _health_v440():
         "model_job_budget_seconds": 600,
         "source_only_mode": True,
         "draft_downloads_during_audit": True,
+        "generation_batch_size": 4,
+        "targeted_unit_repair": True,
+        "coverage_evidence_required": True,
         "pipeline": PIPELINE_ID,
         "deterministic_gate": "v15-executable-unit-grammar-on-v14",
         "presenter_renderer": "cimt-native-v4.4-source-detail-preserving",

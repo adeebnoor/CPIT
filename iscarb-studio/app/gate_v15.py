@@ -154,6 +154,13 @@ def deterministic_gate(
     source_text: str = "",
 ) -> dict[str, bool]:
     checks = gate_v14(bp, profile, source_text)
+    if bp.generation_mode.startswith("batched"):
+        from .batched_generation import evidence_checks
+        checks["batch_all_units_generated"] = bp.generation_mode == "batched"
+        checks["batch_source_profile_available"] = profile is not None
+        if profile is not None:
+            checks.update(evidence_checks(bp, profile))
+    checks["v15_unit_numbers_are_exact"] = [u.number for u in bp.units] == list(range(1, 21))
     if len(bp.units) != 20:
         checks["v15_complete_20_unit_grammar"] = False
         return checks
