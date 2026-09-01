@@ -49,7 +49,7 @@ jobs:
           health = client.get('/api/health')
           assert health.status_code == 200
           h = health.json()
-          assert h['version'] == '4.5.3', h
+          assert h['version'] == '4.5.4', h
           assert h['presenter_exact_units'] == 20
           assert h['session_minutes'] == 90
           assert h['deterministic_gate'].startswith('v15')

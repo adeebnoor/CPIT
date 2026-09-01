@@ -280,6 +280,7 @@ class GeminiService:
         return generate(self, bundle, profile)
 
     def audit(self, bundle: SourceBundle, blueprint: Blueprint, deterministic_failures: list[str] | None = None) -> AuditReport:
+        from .unit_contract import contract_text
         extra = (
             "\nBUNDLE MANIFEST:\n"
             + bundle.manifest_text()
@@ -291,6 +292,8 @@ class GeminiService:
             + blueprint.model_dump_json(by_alias=True, indent=2)
             + "\nDETERMINISTIC CHECK FAILURES:\n"
             + json.dumps(deterministic_failures or [], ensure_ascii=False)
+            + contract_text()
+            + "\nAudit the actual source and student-visible work. Quote the defective field in each issue; never infer its meaning from a check name alone. Repairs must obey the authoritative channel/role contract above."
         )
         return self._generate_structured(
             bundle=bundle,
