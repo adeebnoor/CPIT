@@ -18,6 +18,8 @@ from .source_bundle import SourceBundle
 
 T = TypeVar("T", bound=BaseModel)
 MAX_TRANSIENT_ATTEMPTS = 3
+REQUEST_TIMEOUT_SECONDS = 150
+JOB_MODEL_BUDGET_SECONDS = 600
 
 
 class GeminiNotConfigured(RuntimeError):
@@ -31,6 +33,8 @@ def is_transient_model_failure(exc: Exception) -> bool:
     holding a service instance, and without the answer changing when the
     GeminiService name is rebound.
     """
+    if isinstance(exc, TimeoutError) or "timeout" in type(exc).__name__.lower():
+        return True
     code = getattr(exc, "code", None)
     if code in {429, 500, 502, 503, 504}:
         return True
@@ -56,9 +60,19 @@ class GeminiService:
         except Exception as exc:
             raise GeminiNotConfigured("google-genai is not installed. Run: pip install -r requirements.txt") from exc
         self._types = types
-        self.client = genai.Client(api_key=self.api_key)
+        self._deadline = time.monotonic() + JOB_MODEL_BUDGET_SECONDS
+        self.client = genai.Client(api_key=self.api_key, http_options=types.HttpOptions(
+            timeout=REQUEST_TIMEOUT_SECONDS * 1000,
+            retry_options=types.HttpRetryOptions(attempts=1),
+        ))
         self._uploaded: dict[str, object] = {}
         self.active_model = ""
+
+    def _remaining_seconds(self):
+        remaining = getattr(self, "_deadline", time.monotonic() + JOB_MODEL_BUDGET_SECONDS) - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("Model time budget exhausted; preserve the draft for faculty review.")
+        return min(REQUEST_TIMEOUT_SECONDS, remaining)
 
     @staticmethod
     def _is_quota_exhausted(exc: Exception) -> bool:
@@ -106,6 +120,7 @@ class GeminiService:
             return self._uploaded[key]
         last_exc: Exception | None = None
         for attempt in range(MAX_TRANSIENT_ATTEMPTS):
+            self._remaining_seconds()
             try:
                 uploaded = self.client.files.upload(
                     file=str(path), config={"mime_type": self._mime_for(path)}
@@ -137,10 +152,13 @@ class GeminiService:
     def close(self) -> None:
         for uploaded in list(self._uploaded.values()):
             try:
-                self.client.files.delete(name=uploaded.name)  # type: ignore[attr-defined]
+                self.client.files.delete(name=uploaded.name, config=self._types.DeleteFileConfig(
+                    http_options=self._types.HttpOptions(timeout=5000,
+                        retry_options=self._types.HttpRetryOptions(attempts=1))))
             except Exception:
                 pass
         self._uploaded.clear()
+        self.client.close()
 
     def _models_for(self, preferred: str) -> list[str]:
         if preferred in {"", "auto", "AUTO"}:
@@ -167,6 +185,7 @@ class GeminiService:
         return json.dumps(raw, ensure_ascii=False, separators=(",", ":"))
 
     def _generate_structured(self, *, bundle: SourceBundle, prompt: str, schema: Type[T], extra_text: str = "", preferred_model: str | None = None, thinking_level: str = "low") -> T:
+        self._remaining_seconds()
         source_contents = self._source_contents(bundle)
         model = preferred_model or self.model
         schema_text = self._compact_schema(schema)
@@ -181,10 +200,13 @@ class GeminiService:
             transport_attempt = 0
 
             while transport_attempt < MAX_TRANSIENT_ATTEMPTS:
+                remaining = self._remaining_seconds()
                 try:
                     config = self._types.GenerateContentConfig(
                         response_mime_type="application/json",
                         thinking_config=self._types.ThinkingConfig(thinking_level=thinking_level),
+                        http_options=self._types.HttpOptions(timeout=max(1, int(remaining * 1000)),
+                            retry_options=self._types.HttpRetryOptions(attempts=1)),
                     )
                     response = self.client.models.generate_content(
                         model=candidate,
@@ -211,6 +233,9 @@ class GeminiService:
                         ) from validation_exc
                 except Exception as exc:
                     last_exc = exc
+                    # A stalled request must not repeat three times on every model.
+                    if isinstance(exc, TimeoutError) or "timeout" in type(exc).__name__.lower():
+                        raise TimeoutError("Model request timed out; the generated draft is preserved.") from exc
                     if isinstance(exc, RuntimeError) and "did not match" in str(exc):
                         raise
                     if self._is_quota_exhausted(exc):

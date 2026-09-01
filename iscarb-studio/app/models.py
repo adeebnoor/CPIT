@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Literal
+import time
 from pydantic import BaseModel, Field, field_validator
 
 Phase = Literal["IFHAM", "MARIS", "ATQAN", "MAYYIZ"]
@@ -317,6 +318,7 @@ class AuditReport(BaseModel):
 
 
 class JobState(BaseModel):
+    created_at: float = Field(default_factory=time.time)
     id: str
     status: Literal["queued", "analyzing", "generating", "auditing", "repairing", "ready", "blocked", "error"]
     progress: int = Field(ge=0, le=100)

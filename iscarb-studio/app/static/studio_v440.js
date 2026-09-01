@@ -3,7 +3,7 @@ const $ = id => document.getElementById(id);
 const SOURCE_NAMES = ['Dependable Systems','Reliability Engineering','Safety Engineering','Security Engineering','Resilience Engineering','Software Reuse','Component-Based Engineering','Distributed Software Engineering'];
 const JOBS = ['Professional crisis','Domain spine','Five measurable CLOs','Six H-Stack capabilities','Predict · Constrain · Derive · Name','First-principles mechanism','Implementation structure','Alternatives & trade-offs','Measurement & falsification','Known · Unknown · Monitor','Contextual application','Accountability','Contemporary practice','Practitioner consequences','Critical AI literacy','Portfolio challenge','Constraint mutation','Evidence policy','Four-level rubric','Bounded assurance'];
 const PHASES = ['UNDERSTAND','PRACTISE','MASTER','DISTINGUISH'];
-let jobId = null, timer = null, failures = 0, busy = false;
+let jobId = null, timer = null, failures = 0, busy = false, renderedStage = '';
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setBusy(value) { busy = value; $('compileBtn').disabled = value; $('compileBtn').innerHTML = value ? 'Building your lecture…' : 'Build & audit my lecture <span>↗</span>'; }
 function sourceSelection() {
@@ -41,7 +41,7 @@ $('compileForm').addEventListener('submit',async e=>{
   if((!file&&!url)||(file&&url)){$('formError').textContent='Choose exactly one primary source: a file or a URL.';return;}
   if(file&&!/\.(pdf|pptx|docx|txt|md)$/i.test(file.name)){$('formError').textContent='Use a PDF, PPTX, DOCX, TXT, or MD file.';return;}
   if(file&&file.size>25*1024*1024){$('formError').textContent='The primary file is too large. Use a file smaller than 25 MB.';return;}
-  clearTimeout(timer);jobId=null;remember(null);failures=0;setBusy(true);
+  clearTimeout(timer);jobId=null;remember(null);failures=0;renderedStage='';setBusy(true);
   $('status').hidden=false;$('result').hidden=true;$('retryPoll').hidden=true;$('error').textContent='';
   updateProgress({status:'queued',progress:0,message:'Uploading and locking your primary source…'});
   const fd=new FormData();if(file)fd.append('primary_lecture',file);fd.append('primary_url',url);
@@ -54,6 +54,7 @@ function updateProgress(job){const progress=Math.min(100,Math.max(0,Number(job.p
 async function poll(){
   if(!jobId)return;clearTimeout(timer);
   try {const job=await request('/api/jobs/'+encodeURIComponent(jobId));failures=0;updateProgress(job);
+    if(job.blueprint && renderedStage!==job.status+':'+job.progress){render(job);renderedStage=job.status+':'+job.progress;}
     if(['ready','blocked','error'].includes(job.status)){setBusy(false);$('retryPoll').hidden=true;render(job);return;}
   } catch(error){failures++;$('error').textContent=error.name==='AbortError'?'The status request timed out. Your server-side job may still be running.':error.message;
     if(error.status===404||failures>=4){setBusy(false);$('retryPoll').hidden=error.status===404;if(error.status===404)remember(null);return;}
@@ -74,7 +75,12 @@ function render(job){
   const stats=[[`${units.length}/20`,'Units in the Blueprint'],[`${grammar}/20`,'Unit grammar checks passed'],[major.length?`${covered.length}/${major.length}`:'Not checked','Major checkpoints mapped by U15'],[String(units.reduce((sum,u)=>sum+(u.planned_minutes||0),0)),'Planned teaching minutes']];
   $('metrics').innerHTML=stats.map(([value,label])=>`<div class="metric"><strong>${escapeHTML(value)}</strong><span>${escapeHTML(label)}</span></div>`).join('');
   const id=encodeURIComponent(jobId);
-  $('outputAssets').innerHTML=`<div class="asset"><b>Visual Presenter</b><a target="_blank" rel="noopener noreferrer" href="/api/jobs/${id}/presenter">Preview ↗</a><a href="/api/jobs/${id}/export/pptx">PPTX</a><a href="/api/jobs/${id}/export/presenter-pdf">PDF</a></div><div class="asset"><b>Reading Pack</b><a href="/api/jobs/${id}/export/pdf">PDF ↓</a></div><div class="asset"><b>Instructor Guide</b><a href="/api/jobs/${id}/export/docx">DOCX ↓</a></div><div class="asset"><b>Student Pack</b><a href="/api/jobs/${id}/export/student">DOCX ↓</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON ↓</a></div>`;
+  $('outputAssets').innerHTML=`<div class="asset"><b>Visual Presenter</b><a target="_blank" rel="noopener noreferrer" href="/api/jobs/${id}/presenter">Preview ↗</a><a href="/api/jobs/${id}/export/pptx">PPTX</a><a href="/api/jobs/${id}/export/presenter-pdf">PDF</a></div><div class="asset"><b>Original source · all pages</b><a href="/api/jobs/${id}/export/source-pdf">Original PDF ↓</a><small>Keep the source alongside your teaching deck. Figures and examples are never removed from this file.</small></div><div class="asset"><b>Reading Pack</b><a href="/api/jobs/${id}/export/pdf">PDF ↓</a></div><div class="asset"><b>Instructor Guide</b><a href="/api/jobs/${id}/export/docx">DOCX ↓</a></div><div class="asset"><b>Student Pack</b><a href="/api/jobs/${id}/export/student">DOCX ↓</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON ↓</a></div>`;
+  if(!['ready','blocked','error'].includes(job.status)){
+    $('resultSummary').textContent='Generation/audit is still running. Preview and download the saved REVIEW DRAFT now. Faculty and student packs become available when processing finishes.';
+    [...$('outputAssets').children].slice(2).forEach(el=>el.hidden=true);
+  }
+  if(!/\.pdf(?:[?#].*)?$/i.test(job.filename||'')) $('outputAssets').children[1].hidden=true;
   $('unitGrid').replaceChildren();
   for(let n=1;n<=20;n++){const unit=units.find(u=>u.number===n),state=unit?unitCheck(n,checks):'fail';const el=document.createElement('details');el.className='unit '+state;
     el.innerHTML=`<summary><span>${String(n).padStart(2,'0')} / ${PHASES[Math.floor((n-1)/5)]} · ${state==='unknown'?'NOT CHECKED':state.toUpperCase()}</span><strong>${escapeHTML(JOBS[n-1])}</strong></summary><div class="unitBody"><p><b>${escapeHTML(unit?.title||'Missing unit')}</b></p><p>${escapeHTML(unit?.engineering_question||'')}</p><p><b>Source:</b> ${escapeHTML(unit?.source_anchor||'Not recorded')}</p><p><b>Learner task:</b> ${escapeHTML(unit?.student_action||'Not recorded')}</p></div>`;$('unitGrid').appendChild(el);}

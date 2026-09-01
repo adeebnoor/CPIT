@@ -230,8 +230,25 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
     stage = "startup"
     try:
         job = load_job(job_id)
-        service = GeminiService(model=model)
         source_text = bundle.combined_local_text()
+
+        # Save a source-preserving draft before any external-model request.
+        # A model outage must never take the user's source or downloads hostage.
+        _update(job, "analyzing", 10, "Mapping source pages and preparing a downloadable review draft…")
+        profile = build_deterministic_source_profile(bundle)
+        blueprint = build_deterministic_blueprint(profile)
+        blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
+        job.source_profile = profile
+        job.blueprint = blueprint
+        checks = deterministic_gate(blueprint, profile, source_text)
+        checks.update(session_scope_gate(blueprint, profile, bundle))
+        job.deterministic_checks = checks
+        job.audit = _deterministic_fallback_audit(checks, "Source-preserving draft; independent semantic audit not yet performed.")
+        save_job(job)
+        if model == "source-only":
+            _update(job, "blocked", 100, "Source-preserving review draft ready. No AI calls were made. Review the learning activities and download the original source alongside the presenter; this is not an independently audited release.")
+            return
+        service = GeminiService(model=model)
 
         stage = "source-bundle analysis"
         _update(job, "analyzing", 10, "1/4 · Source Lock: identifying all major P1 topics and technical boundaries…")
