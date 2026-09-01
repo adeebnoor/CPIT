@@ -21,6 +21,7 @@ from .exporters import export_docx, export_pdf
 from .visual_engine import export_presenter_pptx, render_presenter_preview
 from .url_source import materialize_url_source
 from .deterministic_blueprint_fallback import build_deterministic_blueprint
+from .free_workflow import DEFAULT_MODE, resolve_mode, save_bundle
 
 APP_ROOT = Path(__file__).resolve().parent
 EXPORTS = APP_ROOT.parent / "data" / "exports"
@@ -37,7 +38,7 @@ app = FastAPI(title="ISCARB Lecture Studio", version=SERVICE_VERSION)
 app.mount("/static", StaticFiles(directory=APP_ROOT / "static"), name="static")
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("ISCARB_WORKERS", "2")))
 ALLOWED_EXTS = {".pdf", ".pptx", ".docx", ".txt", ".md"}
-RELIABLE_DEFAULT_MODEL = "auto"
+RELIABLE_DEFAULT_MODEL = DEFAULT_MODE
 MAX_SUPPORTING = 7
 
 # A 90-minute lecture source is a slide deck or chapter, not a media archive.
@@ -133,8 +134,8 @@ def _deterministic_fallback_audit(checks: dict[str, bool], reason: str) -> Audit
     reason_lower = reason.lower()
     if "timed out" in reason_lower or "time budget" in reason_lower or "timeout" in reason_lower:
         reason_label = "The model request exceeded its time limit."
-    elif "quota" in reason_lower or "resource_exhausted" in reason_lower:
-        reason_label = "The configured model quota was exhausted."
+    elif "quota" in reason_lower or "resource_exhausted" in reason_lower or "429" in reason_lower:
+        reason_label = "Gemini rejected a request at a quota/rate limit. Minute and daily limits differ; a paid upgrade is not required by ISCARB."
     elif "not yet performed" in reason_lower:
         reason_label = "Independent semantic audit has not been performed for this source-preserving draft."
     else:
@@ -263,13 +264,18 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
 
         stage = "source-bundle analysis"
         _update(job, "analyzing", 10, "1/4 · Source Lock: identifying all major P1 topics and technical boundaries…")
-        try:
-            profile = service.profile_source(bundle)
-            profile = reconcile_source_profile(profile, bundle)
-        except Exception as exc:
-            if not _is_model_unavailable(exc):
-                raise
-            profile = build_deterministic_source_profile(bundle, str(exc))
+        if model == "free":
+            # The source was already mapped locally. Do not spend a free-tier
+            # generation request repeating that work; the model still receives P1.
+            profile.source_warnings[0] = "Free-tier mode: source profiling ran locally to save an API call. Full sources are supplied for generation; all release gates remain required."
+        else:
+            try:
+                profile = service.profile_source(bundle)
+                profile = reconcile_source_profile(profile, bundle)
+            except Exception as exc:
+                if not _is_model_unavailable(exc):
+                    raise
+                profile = build_deterministic_source_profile(bundle, str(exc))
         job.source_profile = profile
         save_job(job)
 
@@ -294,7 +300,11 @@ def _compile(job_id: str, bundle: SourceBundle, model: str, repair_rounds: int) 
             job.deterministic_checks = checks
             job.audit = _deterministic_fallback_audit(checks, str(exc))
             save_job(job)
-            _update(job, "blocked", 100, "BLOCKED — Gemini was unreachable during generation. Completed batches and remaining source-review units were preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds.")
+            if _is_quota_error(exc):
+                message = "FREE-TIER LIMIT — Gemini rejected a request (429). No repeated quota attempts were sent. Continue with the no-API authoring prompt and JSON import, or retry after your free quota renews. Minute and daily limits differ; daily quotas reset at midnight Pacific time. No billing upgrade is required by this workflow. REVIEW DRAFT only."
+            else:
+                message = "BLOCKED — Gemini was unreachable during generation. Completed batches and remaining source-review units were preserved; readiness is UNVERIFIED and RELEASE is forbidden until semantic generation/audit succeeds."
+            _update(job, "blocked", 100, message)
             return
         blueprint = apply_90_minute_timebox(blueprint, profile, bundle)
         job.blueprint = blueprint
@@ -488,7 +498,14 @@ async def compile_lecture(
     lecture_focus: str = Form(default=""),
     model: str = Form(default=""),
     repair_rounds: int = Form(default=1),
+    free_tier_confirmed: bool = Form(default=False),
 ):
+    try:
+        chosen_model = resolve_mode(model)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    if chosen_model == "free" and not free_tier_confirmed:
+        raise HTTPException(400, "Confirm that the configured Gemini project is on the unpaid Free Tier, or choose Free workspace (no API). ISCARB cannot inspect account billing.")
     primary_url = primary_url.strip()
     lecture_focus = lecture_focus.strip()
     has_primary_file = primary_lecture is not None and bool(primary_lecture.filename)
@@ -502,7 +519,9 @@ async def compile_lecture(
     if len(support_files) + len(support_urls) > MAX_SUPPORTING:
         raise HTTPException(400, f"Use at most {MAX_SUPPORTING} supporting sources for one 90-minute lecture.")
 
-    repair_rounds = max(0, min(int(repair_rounds), 2))
+    repair_rounds = max(0, min(int(repair_rounds), 1 if chosen_model == "free" else 2))
+    if chosen_model == "source-only":
+        repair_rounds = 0
     job_id = uuid.uuid4().hex
     job_dir = UPLOADS / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
@@ -542,12 +561,12 @@ async def compile_lecture(
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
 
-    chosen_model = model.strip() or RELIABLE_DEFAULT_MODEL
+    save_bundle(bundle, job_dir)
     job = JobState(
         id=job_id,
         status="queued",
         progress=2,
-        message="Queued — source analysis, batched generation, source-evidence checks, then independent audit…",
+        message="Queued — preparing a free source-preserving draft (no API calls)…" if chosen_model == "source-only" else "Queued — free-tier generation and audit; provider quotas still apply…",
         filename=display_name,
         model=chosen_model,
         source_manifest=bundle.manifest_lines(),
