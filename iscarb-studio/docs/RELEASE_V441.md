@@ -18,3 +18,11 @@ Source-only output is a **review draft**, not a semantic-audit PASS or ETEC cert
 ## Regression coverage
 
 Tests cover deadline exhaustion, timeout classification, source-only completion without a model, complete coverage ledger, source preservation in opening/prediction units, non-vacuous grammar checks, active-audit PDF/PPTX exports, 20 pages/slides, PDF canvas bounds, exact original PDF bytes and export cleanup.
+
+## Production verification — 2026-09-01
+
+- Render served 4.4.1 at commit `8deb1069c815`.
+- Source-only runs completed for CIMT class 2 and class 3: 20 units, terminal review status, no application error.
+- Class 2 presenter PDF, PPTX, original PDF, reading PDF, instructor DOCX, student DOCX and blueprint JSON all returned HTTP 200. Downloaded files opened successfully; PDF/PPTX had 20 pages/slides, reading pack had 24 pages. Original PDF bytes matched the repository source. Both tested presenters had no out-of-canvas words.
+- The AI run did **not** achieve semantic release. It terminated with a preserved review draft instead of leaving downloads blocked. This verifies the failure-recovery path, not successful automatic certification.
+- CI: 186 tests and 131 subtests passed, plus runtime smoke and capacity retry. An additional diagnostic-message regression test was added afterward.

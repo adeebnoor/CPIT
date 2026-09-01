@@ -15,6 +15,15 @@ def test_timeout_is_an_outage_not_a_programming_error():
     assert not is_transient_model_failure(AttributeError("missing units"))
 
 
+def test_draft_reason_does_not_mislabel_offline_mode_as_quota_failure():
+    from app.main import _deterministic_fallback_audit
+    offline=_deterministic_fallback_audit({},'Independent semantic audit not yet performed.')
+    timeout=_deterministic_fallback_audit({},'Model request timed out')
+    assert 'not been performed' in offline.issues[0].problem
+    assert 'quota' not in offline.issues[0].problem
+    assert 'time limit' in timeout.issues[0].problem
+
+
 def test_exhausted_job_budget_never_starts_another_request():
     service=object.__new__(GeminiService)
     service._deadline=time.monotonic()-1
