@@ -65,3 +65,12 @@ assert r.status_code==422
 assert r.json()['code']=='presenter_layout_requires_repair'
 '''
     subprocess.run([sys.executable, '-c', code], check=True, capture_output=True, text=True, timeout=30)
+
+
+def test_wrap_cache_is_bounded_and_does_not_share_mutable_lines():
+    from app.presenter_v44 import wrap, _wrapped
+    first = wrap("Keep the complete source statement intact.", 200, 16)
+    original = first.copy()
+    first.clear()
+    assert wrap("Keep the complete source statement intact.", 200, 16) == original
+    assert _wrapped.cache_info().maxsize == 4096

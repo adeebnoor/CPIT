@@ -100,6 +100,12 @@ def request_validated(service, bundle, schema, prompt, extra, validate):
     for attempt in range(2):
         result = service._generate_structured(bundle=bundle, prompt=prompt,
             schema=schema, extra_text=extra, preferred_model=service.model, thinking_level="low")
+        if isinstance(result, UnitBatch):
+            # Phase is fixed routing metadata, not an LLM judgment. A batch can
+            # straddle phases (unit 5 is IFHAM; 6–8 are MARIS). Canonicalizing
+            # labels does not establish or waive the learner-visible role gate.
+            for unit in result.units:
+                unit.phase = PHASES[unit.number - 1]
         try:
             validate(result)
             return result
