@@ -66,6 +66,7 @@ class GeminiService:
             retry_options=types.HttpRetryOptions(attempts=1),
         ))
         self._uploaded: dict[str, object] = {}
+        self._quota_exhausted_models: set[str] = set()
         self.active_model = ""
 
     def _remaining_seconds(self):
@@ -168,9 +169,9 @@ class GeminiService:
         elif preferred == "gemini-3.6-flash":
             ordered = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"]
         elif preferred == "gemini-3.5-flash":
-            ordered = ["gemini-3.5-flash", "gemini-3.5-flash-lite"]
+            ordered = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.6-flash"]
         elif preferred == "gemini-3.5-flash-lite":
-            ordered = ["gemini-3.5-flash-lite", "gemini-3.5-flash"]
+            ordered = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash"]
         else:
             ordered = [preferred, "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"]
         result: list[str] = []
@@ -192,9 +193,15 @@ class GeminiService:
         base_prompt = prompt + extra_text + "\n\nOUTPUT CONTRACT: Return ONLY one JSON object validating against this schema. No markdown fences.\nJSON_SCHEMA:\n" + schema_text
         last_exc: Exception | None = None
         last_text = ""
-        quota_exhausted_models: list[str] = []
+        # Quota belongs to the provider. Never retry an exhausted model in a
+        # later stage of this job; use only the already-configured alternatives.
+        exhausted = getattr(self, "_quota_exhausted_models", set())
+        self._quota_exhausted_models = exhausted
+        candidates = self._models_for(model)
 
-        for candidate in self._models_for(model):
+        for candidate in candidates:
+            if candidate in exhausted:
+                continue
             full_prompt = base_prompt
             format_repair_used = False
             transport_attempt = 0
@@ -239,7 +246,7 @@ class GeminiService:
                     if isinstance(exc, RuntimeError) and "did not match" in str(exc):
                         raise
                     if self._is_quota_exhausted(exc):
-                        quota_exhausted_models.append(candidate)
+                        exhausted.add(candidate)
                         break
                     if not self._is_retryable(exc):
                         raise
@@ -249,12 +256,12 @@ class GeminiService:
                         break
                     self._backoff(transport_attempt - 1)
 
-        if quota_exhausted_models and last_exc is not None:
-            names = ", ".join(dict.fromkeys(quota_exhausted_models))
+        if candidates and all(candidate in exhausted for candidate in candidates):
+            names = ", ".join(candidates)
             raise RuntimeError(
                 "Gemini quota is exhausted for every model ISCARB could use automatically "
-                f"({names}). No repeated quota-burning retries were made. "
-                "Daily RPD limits reset at midnight Pacific time; alternatively enable Gemini billing/higher quota."
+                f"({names}). Exhausted models were skipped for the rest of this job. "
+                "Check this project's quota and billing in Google AI Studio before retrying."
             ) from last_exc
         if last_exc is not None:
             raise last_exc
