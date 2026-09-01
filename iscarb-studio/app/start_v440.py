@@ -22,8 +22,8 @@ async def _layout_rejected(request, exc):
 
 app.add_exception_handler(PresenterLayoutError, _layout_rejected)
 
-PUBLIC_VERSION = "4.5.5"
-PIPELINE_ID = "faculty-studio-v4.5.5-visible-crisis-contract"
+PUBLIC_VERSION = "4.5.6"
+PIPELINE_ID = "faculty-studio-v4.5.6-stage-consistent-quota-failover"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
@@ -45,6 +45,8 @@ def _health_v440():
         "batch_role_validation": True,
         "shared_generation_audit_contract": True,
         "repair_preserves_source_allocation": True,
+        "stage_consistent_model_failover": True,
+        "skip_exhausted_models_within_job": True,
         "presenter_overflow_preflight": True,
         "pipeline": PIPELINE_ID,
         "deterministic_gate": "v15-executable-unit-grammar-on-v14",
