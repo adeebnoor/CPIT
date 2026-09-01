@@ -374,6 +374,28 @@ def _chunks(path: Path) -> tuple[str, list[tuple[int, str, str]]]:
     return "SECTION", _doc_chunks(path)
 
 
+# "Class2: Dependable Systems" names the session; the lecture is about dependable
+# systems. The ordinal travels into every derived sentence - the crisis, the five
+# CLOs, the Unit 1 heading - and reads as "a decision about Class2: Dependable
+# Systems", so it is dropped once, here, where the title is chosen.
+_SESSION_PREFIX = re.compile(
+    r"^\s*(?:class|lecture|lesson|session|week|lab)\s*"
+    r"[-\u2013\u2014]?\s*\d{1,3}[a-z]?\s*(?:[:.)\-\u2013\u2014]|\b)\s*",
+    re.IGNORECASE,
+)
+
+
+def _strip_session_prefix(title: str) -> str:
+    text = str(title or "").strip()
+    stripped = _SESSION_PREFIX.sub("", text, count=1).strip(" -\u2013\u2014:.")
+    # Only accept the reduction when a real subject survives it: "Class 2" on its
+    # own is the best title that page offers, and a remainder that continues the
+    # phrase ("Part 2 of the design review") means the ordinal was not a prefix.
+    if len(stripped.split()) < 2 or stripped.split()[0].lower() in _STOPWORDS:
+        return text
+    return stripped
+
+
 def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
     stem = Path(primary_name).stem.replace("_", " ").replace("-", " ")
     stem = re.sub(r"\s+", " ", stem).strip()
@@ -384,8 +406,8 @@ def _title_from(primary_name: str, chunks: list[tuple[int, str, str]]) -> str:
             continue
         if re.fullmatch(r"[A-Z0-9_. -]+", first) or _is_furniture_line(first):
             continue
-        return first
-    return stem or "Primary lecture"
+        return _strip_session_prefix(first)
+    return _strip_session_prefix(stem) or "Primary lecture"
 
 
 # A running header or footer appears on most slides; a real checkpoint does not.

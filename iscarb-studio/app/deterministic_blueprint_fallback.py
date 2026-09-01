@@ -81,6 +81,25 @@ def _major(profile: SourceProfile):
     return rows or profile.coverage_items[:1]
 
 
+# Slides that set up the lecture before its first checkpoint: the opening claim,
+# the framing quote. They are not teaching checkpoints, but they are the source's
+# own way of posing the question, which is exactly what a prediction gate needs.
+_ADMINISTRATIVE = ("assignment", "to master", "take-home", "class", "contents", "outline")
+
+
+def _framing_row(profile: SourceProfile, rows):
+    major_ids = {row.id for row in rows}
+    # Skip the cover page; stop where the teaching material begins.
+    for item in profile.coverage_items[1:]:
+        if item.id in major_ids:
+            break
+        if any(term in item.label.lower() for term in _ADMINISTRATIVE):
+            continue
+        if len(str(item.why_important or "").split()) >= 8:
+            return item
+    return None
+
+
 def _atomic_source_entries(row, limit: int | None = None) -> list[str]:
     """Recover the teachable statements flattened into one source excerpt.
 
@@ -95,17 +114,30 @@ def _atomic_source_entries(row, limit: int | None = None) -> list[str]:
     label_key = re.sub(r"[^a-z0-9]+", " ", str(row.label).lower()).strip()
     furniture = ("adeeb noor", "it department", "faculty of computing", "king abdulaziz university", "fall 2025")
     out: list[str] = []
+    dropped_label = ""
     for part in parts:
         text = " ".join(part.split()).strip(" -:;,")
         key = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
         if not text or any(x in text.lower() for x in furniture):
             continue
         if key == label_key or text in out:
+            # The label is not repeated as a statement, but a heading the page
+            # wrapped ("Ex; AI enhancement in health" / "system dependability")
+            # leaves its tail behind as an orphan. Carry the heading with it.
+            if key == label_key:
+                dropped_label = str(row.label)
             continue
+        if not out and dropped_label and text[:1].islower():
+            text = f"{dropped_label} {text}"
+            dropped_label = ""
         # Physical PDF line breaks are not sentence boundaries. Rejoin wrapped
         # continuations before constructing learner-facing statements.
         dangling = r"\b(of|for|to|the|a|an|and|or|in|on|at|by|with|from|that|is|are|it|as|its|be|more|high)$"
-        if out and (text[:1].islower() or re.search(dangling, out[-1], re.I)):
+        # An open bracket is as much a continuation as a trailing "of": the
+        # wilderness-weather example broke as "(Forecasting" / "Processes:
+        # creates predictions)" and reached the slide as two broken fragments.
+        unclosed = bool(out) and out[-1].count("(") > out[-1].count(")")
+        if out and (unclosed or text[:1].islower() or re.search(dangling, out[-1], re.I)):
             out[-1] += " " + text
         else:
             out.append(text)
@@ -264,6 +296,24 @@ _MOVE_FOR_SLOT = {
 }
 _MOVES_BY_NAME = {name: (name, q, sc) for name, q, sc in _TEACHING_MOVES}
 
+# A slot revisiting material an earlier unit taught owes the learner a different
+# task, not the same one under a new heading - and not the scaffold line already
+# printed above it. One per move, so a thin source that revisits the same
+# checkpoint several times still asks for different work each time.
+_SECOND_PASS_BY_MOVE = {
+    "mechanism": "Write the steps of {focus} in order, and mark the one you cannot perform from the source alone.",
+    "boundary": "Name one system {focus} would be the wrong choice for, and say what makes it wrong.",
+    "failure": "Describe the first observable sign that {focus} has failed, and who would see it.",
+    "alternative": "Name one defensible alternative to {focus} and the property it gives up.",
+    "evidence": "Write the observation that would support {focus} and the one that would refute it.",
+    "application": "Carry {focus} through to one concrete choice in this lecture's decision.",
+    "misconception": "Write the plausible-but-wrong reading of {focus}, then the source line that settles it.",
+    "scale": "Say what changes about {focus} at ten times the scale, and which assumption breaks first.",
+    "dependency": "List what must already be true before {focus} can be used at all.",
+    "verification": "Define the check that would let you rely on {focus}, and what stays unverified after it passes.",
+}
+_SECOND_PASS_ACTION = "Answer this slide's question for {focus} using only what the source states."
+
 
 # Slide headings are often written as questions ("What is dependability").
 # Substituted into a move template that already asks one, they produce
@@ -302,6 +352,12 @@ def _short_focus(focus: str) -> str:
     words = text.rstrip(" ,;:-").split()
     while len(words) > 2 and _FOCUS_DANGLING.match(words[-1]):
         words.pop()
+    # The label is dropped into the middle of a sentence, so its leading article
+    # is lowercased: "Where does The sociotechnical systems stack stop applying?"
+    # reads as a typo. Anything else - a section ordinal, a proper noun, an
+    # acronym - keeps the capitalization the source gave it.
+    if words and words[0] in ("The", "A", "An"):
+        words[0] = words[0].lower()
     return " ".join(words).rstrip(" ,;:-") or "this source mechanism"
 
 
@@ -332,18 +388,23 @@ def _fill_rows(groups, rows) -> list:
     holes = sum(1 for bucket in groups if not bucket)
     fill = unowned[:holes]
     if len(fill) < holes and rows:
-        # Not enough distinct material: repeat in source order rather than
-        # hammering one checkpoint, so the repeats are at least spread out.
+        # Not enough distinct material: a slot has to revisit a checkpoint some
+        # other unit already teaches. Send it to the richest ones first - a second
+        # pass over a dense page has something new to ask, a second pass over a
+        # one-line page has nothing - and spread the repeats rather than hammering
+        # a single checkpoint.
         pool = [r for r in rows if id(r) not in {id(x) for x in fill}] or list(rows)
+        pool.sort(key=lambda r: len(str(r.why_important or r.label)), reverse=True)
         while len(fill) < holes:
             fill.append(pool[len(fill) % len(pool)])
     return fill
 
 
 def _student_action_for(bucket, labels) -> str:
-    focus = labels[0] if labels else "this source mechanism"
-    if len(focus) > 70:
-        focus = focus[:70].rsplit(" ", 1)[0]
+    # A source heading is often written as a question ("What is dependability").
+    # Dropped into a task template it read as "Define What is dependability in
+    # your own words"; only the subject belongs in the sentence.
+    focus = _short_focus(_as_noun_phrase(labels[0] if labels else "this source mechanism"))
     kinds = [x.knowledge_type for x in bucket] or ["CONCEPT"]
     template = _ACTION_BY_KNOWLEDGE.get(kinds[0], _ACTION_BY_KNOWLEDGE["CONCEPT"])
     return template.format(focus=focus)
@@ -353,6 +414,51 @@ def _student_action_for(bucket, labels) -> str:
 # asks for a minimum-sufficient claim, and the draft has exactly one thing to say
 # per family it can point at.
 MAX_READINESS_ROWS = 2
+
+
+# A lecture that states its own learning outcome has already answered the
+# question Unit 3 asks. Replacing it with five generic outcomes dropped the one
+# thing the source actually committed to teaching.
+_OUTCOME_MARKER = re.compile(r"\bCLOs?\b\s*[^A-Za-z0-9\u00b7]{0,12}\s*")
+_OUTCOME_DANGLING = re.compile(
+    r"\b(of|for|to|the|a|an|and|or|in|on|at|by|with|from|that|which|is|are|as|its|be|using)$",
+    re.IGNORECASE,
+)
+MAX_DECLARED_OUTCOME_WORDS = 40
+MIN_DECLARED_OUTCOME_WORDS = 4
+
+
+def _declared_outcome(profile: SourceProfile):
+    """The learning outcome the source states in its own words, with its anchor.
+
+    The statement is usually wrapped across source lines, which profiling keeps
+    as middle-dot separated fragments, so it is rejoined the same way a source
+    checkpoint is: while the quote is still open, while the next fragment starts
+    mid-sentence, or while this one ends on a word that cannot end a sentence.
+    """
+    for row in profile.coverage_items:
+        text = " ".join(str(row.why_important or "").split())
+        marker = _OUTCOME_MARKER.search(text)
+        if not marker:
+            continue
+        segments = [x.strip() for x in text[marker.end():].split("\u00b7") if x.strip()]
+        if not segments:
+            continue
+        quoted = text[marker.start():marker.end()].rstrip().endswith(("\"", "\u201c", "\u2018", "\u00ab"))
+        statement = segments[0]
+        for segment in segments[1:]:
+            open_quote = quoted and not re.search(r"[\"\u201d\u2019\u00bb]", statement)
+            if not (open_quote or segment[:1].islower() or _OUTCOME_DANGLING.search(statement)):
+                break
+            statement = f"{statement} {segment}"
+            if len(statement.split()) >= MAX_DECLARED_OUTCOME_WORDS:
+                break
+        statement = re.split(r"[\"\u201d\u2019\u00bb]", statement)[0]
+        statement = " ".join(statement.split()).strip(" \"'.,;:")
+        # A cross-reference ("see CLO 3") is not an outcome statement.
+        if len(statement.split()) >= MIN_DECLARED_OUTCOME_WORDS:
+            return statement[:1].upper() + statement[1:], (row.source_anchor or "[P1]")
+    return None
 
 
 def _readiness_trail(profile: SourceProfile, clos, rows) -> list[ReadinessAlignment]:
@@ -497,11 +603,34 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             if selected in bucket:
                 bucket.remove(selected)
         groups[9].append(selected)
+
+    # A lecture often states its AI position once more on a page no teaching slot
+    # owns - a take-home line, a summary bullet. Dropping it left the AI slot with
+    # a caption and nothing to teach while the source's own sentence about AI went
+    # unused. It is quoted with its own page citation inside the statement, so the
+    # unit keeps the single-page anchor its source figure is drawn from.
+    taught_ids = {row.id for row in rows}
+    ai_statements: list[str] = []
+    for row in profile.coverage_items:
+        if row.id in taught_ids:
+            continue
+        for statement in _atomic_source_entries(row):
+            if re.search(r"\bAI\b|artificial intelligence", statement, re.I):
+                citation = (row.source_anchor or "[P1]").strip()
+                ai_statements.append(f"{citation} — {statement}")
     family_names = [x.name for x in profile.topic_families] or [x.label for x in rows[:6]]
     title = profile.lecture_title
 
+    declared = _declared_outcome(profile)
     clos = [
-        CLO(id="CLO1", statement=f"Explain the source-defined foundations of {title}.", evidence_expected="Source-anchored concept map or explanation."),
+        CLO(
+            id="CLO1",
+            statement=(declared[0] if declared else f"Explain the source-defined foundations of {title}."),
+            evidence_expected=(
+                f"Learner artifact evidencing the outcome the source itself declares ({declared[1]})."
+                if declared else "Source-anchored concept map or explanation."
+            ),
+        ),
         CLO(id="CLO2", statement=f"Apply source-defined mechanisms from {title} to a bounded engineering task.", evidence_expected="Worked application using only P1 mechanisms."),
         CLO(id="CLO3", statement="Compare defensible alternatives and justify an engineering trade-off.", evidence_expected="Decision comparison with explicit trade-off."),
         CLO(id="CLO4", statement="Evaluate evidence, uncertainty, and a falsification condition for the decision.", evidence_expected="Evidence note with counter-evidence and residual uncertainty."),
@@ -536,15 +665,24 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         ["Start from the source and an evidence gap; do not reveal the diagnosis first."],
         "Write one prediction and one piece of evidence you would need before committing.",
         "A defensible decision begins by separating what the source supports from what remains unknown.", "title")
+    # The spine names the pages it maps. A bare "[P1]" left the visual planner
+    # free to illustrate the spine with any page in the chapter, and it chose an
+    # unrelated mechanism slide - a source figure captioned as something it is not.
+    spine_anchor = "; ".join(dict.fromkeys(
+        x.source_anchor for x in profile.topic_families if x.source_anchor)) or "[P1]"
     add(2, "Domain spine", "What are the major source families that structure this chapter?", [*family_names],
         ["Connect the chapter families before studying mechanisms in isolation."], "Sketch the source spine and mark the family you expect to be most decision-sensitive.",
-        "The chapter is one connected engineering argument, not a list of slides.", "concept-map", "[P1]")
+        "The chapter is one connected engineering argument, not a list of slides.", "concept-map", spine_anchor)
     add(3, "Five outcomes for this lecture", "What should you be able to explain, apply, compare, evaluate, and defend?", [],
         [f"{c.id}: {c.statement}" for c in clos], "Choose the CLO that will be hardest to prove and state why.",
         "Every outcome requires visible evidence, not recognition alone.", "table")
     add(4, "Engineering judgment stack", "Which competencies are required to turn chapter knowledge into a decision?", [], _HSTACK,
         "Identify which competency would fail first if the source were misunderstood.", "Judgment combines technical reasoning, evidence, risk, people, and responsibility.", "concept-map")
-    first = rows[:2]
+    # Unit 5 asks for a prediction before the mechanism is taught. Copying the
+    # first two checkpoints here printed the answer on the slide and then showed
+    # the same source text again in Units 6 and 7 - the same page three times.
+    # The chapter's own framing page is the material this slot actually wants.
+    first = [_framing_row(profile, rows)] if _framing_row(profile, rows) else rows[:1]
     add(5, "Prediction gate", "PREDICT before seeing the full mechanism: what result follows from the source constraints?",
         [statement for row in first for statement in _atomic_source_entries(row)],
         ["PREDICT: State the behaviour you expect before naming the mechanism.",
@@ -567,6 +705,9 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             for row in bucket
             for statement in _atomic_source_entries(row)
         ]
+        anchor = _anchors(bucket)
+        if idx == 15 and ai_statements:
+            core = [*core, *[x for x in ai_statements if x not in core]]
         kind = next(visual_cycle)
         if any(x.knowledge_type == "PROCESS" for x in bucket): kind = "process"
         elif any(x.knowledge_type == "ARCHITECTURE" for x in bucket): kind = "architecture"
@@ -603,7 +744,10 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         question = move_question
         action = _student_action_for(bucket, labels)
         if action in seen_actions:
-            action = move_scaffold[0]
+            # The scaffold lines are already printed as this slide's pedagogy, so
+            # borrowing one made the learner task a copy of the line above it.
+            focus = _short_focus(_as_noun_phrase(labels[0] if labels else "this mechanism"))
+            action = _SECOND_PASS_BY_MOVE.get(move_name, _SECOND_PASS_ACTION).format(focus=focus)
         seen_actions.add(action)
         # Every teaching slot carries its move. A thin source gives one checkpoint
         # line, and one line is a single oversized box on the slide - the move is
@@ -613,7 +757,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             ped = [*ped, f"Name what {labels[0] if labels else 'this mechanism'} would cost if it were absent."]
         add(idx, title_, question, core, ped, action,
             f"Source checkpoint(s) covered: {', '.join(labels)}",
-            kind, _anchors(bucket), evidence=f"P1 checkpoint evidence: {', '.join(x.id for x in bucket)}",
+            kind, anchor, evidence=f"P1 checkpoint evidence: {', '.join(x.id for x in bucket)}",
             verify=reused)
 
     add(16, "Build the decision artifact", "Can you integrate the chapter mechanisms into one coherent engineering response?", [],
