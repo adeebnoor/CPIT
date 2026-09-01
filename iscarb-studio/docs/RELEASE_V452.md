@@ -28,3 +28,16 @@ Regression tests cover no-file-on-overflow for PDF/PPTX, preview consistency,
 source-word preservation, HTTP 422 handling, evidence-repair diagnostics, and
 rejection of introductory-unit source allocation. Full live acceptance of this
 release remains separate from these deterministic tests.
+
+## Live follow-up
+
+On 4.5.2, the class-3 source-only review job completed and its PDF/PPTX downloads
+both returned HTTP 200 (3,792,505 and 2,976,526 bytes). This is an export test,
+not semantic acceptance. The class-2 AI trial saved four units, then rejected
+a cross-phase batch because model-provided phase labels were wrong.
+
+Follow-up fixes derive phase labels from unit numbers before checking the batch;
+content and learner-visible role checks are unchanged. Text wrapping now uses a
+bounded 4,096-entry immutable cache. The saved class-3 sample produced identical
+layout blocks in 0.164 seconds versus 0.406 seconds uncached; this is not a claim
+about end-to-end generation latency. Live semantic acceptance remains unproven.

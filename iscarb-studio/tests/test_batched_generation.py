@@ -136,3 +136,15 @@ def test_domain_spine_is_not_a_substitute_for_teaching_source_details(source):
     row.first_taught_unit = 2
     with pytest.raises(ValueError, match="mandatory source coverage"):
         validate_plan(plan, profile)
+
+
+def test_cross_phase_batch_gets_canonical_labels_without_a_model_retry(source):
+    from app.batched_generation import request_validated
+    _, bp = source
+    batch = UnitBatch(units=bp.units[4:8])
+    for unit in batch.units:
+        unit.phase = "MARIS"
+    service = SimpleNamespace(model="auto", _generate_structured=Mock(return_value=batch))
+    result = request_validated(service, None, UnitBatch, "", "", lambda b: validate_batch(b, [5,6,7,8]))
+    assert [u.phase for u in result.units] == ["IFHAM","MARIS","MARIS","MARIS"]
+    assert service._generate_structured.call_count == 1

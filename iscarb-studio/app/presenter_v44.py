@@ -13,6 +13,7 @@ import html
 import io
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image
@@ -137,9 +138,16 @@ class PresenterLayoutError(ValueError):
 
 def wrap(value: str, width: float, size: float, bold=False) -> list[str]:
     """Measure every word; never silently discard a suffix or a final line."""
+    # The column balancer revisits the same text/width/font at many splits.
+    # Return a copy so callers cannot mutate the bounded shared cache.
+    return list(_wrapped(clean(value), width, size, bold))
+
+
+@lru_cache(maxsize=4096)
+def _wrapped(value: str, width: float, size: float, bold: bool) -> tuple[str, ...]:
     font = "ISCARB-Bold" if bold else "ISCARB"
     lines, current = [], ""
-    for word in clean(value).split():
+    for word in value.split():
         candidate = (current + " " + word).strip()
         if current and stringWidth(candidate, font, size) > width:
             lines.append(current)
@@ -148,7 +156,7 @@ def wrap(value: str, width: float, size: float, bold=False) -> list[str]:
             current = candidate
     if current:
         lines.append(current)
-    return lines
+    return tuple(lines)
 
 
 def item_layout(items, x, y, width, height, preferred=21, minimum=10):
