@@ -385,6 +385,44 @@ _FOCUS_DANGLING = re.compile(
 MAX_FOCUS_CHARS = 70
 
 
+# A source heading is sometimes a full clause ("People are the weakest link",
+# "Software Security: why matters"), not a noun. Dropped into a question template
+# that expects a noun it produced broken English - "How does People are the
+# weakest link actually work" - which read as generic machine output rather than
+# a lecture engaging its source. A clause is quoted verbatim instead and bridged
+# with a noun, so the question is grammatical AND puts the source's own words on
+# the slide; a genuine noun phrase is used directly.
+_FINITE_VERB = re.compile(
+    r"\b(are|is|was|were|be|been|being|can|could|will|would|shall|should|may|might|must|"
+    r"has|have|had|do|does|did|matter|matters|compromis\w*)\b", re.IGNORECASE)
+_RELATIVE_CUT = re.compile(r"\s+\b(where|which|that|whose|why|how|when)\b.*$", re.IGNORECASE)
+
+
+def _focus_phrase(focus: str) -> str:
+    """A grammatical subject a question can be built on, faithful to the source."""
+    text = " ".join(str(focus or "").split()).strip()
+    # "Software Security: why matters" - the teachable subject is before the colon.
+    if ":" in text:
+        head = text.split(":", 1)[0].strip()
+        if len(head.split()) >= 1 and re.search(r"[A-Za-z]", head):
+            text = head
+    text = _INTERROGATIVE_OPENER.sub("", text, count=1).strip() or text
+    # "System layers where security [may be compromised]" - keep the head noun.
+    head = _RELATIVE_CUT.sub("", text).strip()
+    if head and re.search(r"[A-Za-z]", head) and len(head.split()) >= 1:
+        text = head
+    if _FINITE_VERB.search(text):
+        clause = text.rstrip(" .,;:")
+        if clause[:1].isupper() and not clause.split()[0].isupper() and clause.split()[0] not in _KEEP_CAPS:
+            clause = clause[:1].lower() + clause[1:]
+        return f'the source\'s point that "{clause}"'
+    return _short_focus(_as_noun_phrase(text))
+
+
+# Proper nouns / acronyms whose leading capital is part of the term.
+_KEEP_CAPS = {"AI", "API", "CIA", "OWASP", "TLS", "HTTP", "HTTPS", "GDPR", "ETEC", "IoT", "DDoS"}
+
+
 def _short_focus(focus: str) -> str:
     text = " ".join(str(focus or "").split())
     if len(text) > MAX_FOCUS_CHARS:
@@ -436,7 +474,7 @@ def _teaching_move(idx: int, focus: str, kinds=()):
         name, question, scaffold = _TEACHING_MOVES[(idx - 6) % len(_TEACHING_MOVES)]
     else:
         name, question, scaffold = _MOVES_BY_NAME[key]
-    short = _short_focus(_as_noun_phrase(focus))
+    short = _focus_phrase(focus)
     return name, _question_for(name, question, list(kinds)).format(focus=short), list(scaffold)
 
 
@@ -472,7 +510,7 @@ def _student_action_for(bucket, labels) -> str:
     # A source heading is often written as a question ("What is dependability").
     # Dropped into a task template it read as "Define What is dependability in
     # your own words"; only the subject belongs in the sentence.
-    focus = _short_focus(_as_noun_phrase(labels[0] if labels else "this source mechanism"))
+    focus = _focus_phrase(labels[0] if labels else "this source mechanism")
     kinds = [x.knowledge_type for x in bucket] or ["CONCEPT"]
     template = _ACTION_BY_KNOWLEDGE.get(kinds[0], _ACTION_BY_KNOWLEDGE["CONCEPT"])
     return template.format(focus=focus)
@@ -888,6 +926,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         # The parts of one long section carry the same heading; a slot teaching
         # two of them is titled with the section once, not "(part 1) / (part 2)".
         labels = list(dict.fromkeys(re.sub(r"\s*\(part \d+\)$", "", x.label) for x in bucket))
+        focus_phrase = _focus_phrase(labels[0] if labels else "this mechanism")
         core = [
             statement
             for row in bucket
@@ -909,12 +948,12 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             # Same material, a different question of it - never the same slide twice.
             title_ = f"{title_}: {move_name}"
         ped = []
-        if idx == 8: ped = [f"Alternative A: Apply {labels[0]} under the source's stated conditions.",
+        if idx == 8: ped = [f"Alternative A: Apply {focus_phrase} under the source's stated conditions.",
                             "Alternative B: Retain the current design until those conditions are evidenced.",
                             "Trade-off: Compare the cost of changing the design with the risk of delaying the decision."]
-        elif idx == 9: ped = [f"Measure: Choose an observable result of {labels[0]} and record its test conditions.",
+        elif idx == 9: ped = [f"Measure: Choose an observable result of {focus_phrase} and record its test conditions.",
                               "Falsifier: Identify a result that contradicts the source-based prediction; revise the decision if observed."]
-        elif idx == 10: ped = [f"Known: Identify the claims explicitly supported by {labels[0]}.",
+        elif idx == 10: ped = [f"Known: Identify the claims explicitly supported by {focus_phrase}.",
                                "Unknown: List assumptions for which the source supplies no evidence.",
                                "Decision-sensitive unknown: Select the missing fact that would reverse your design choice.",
                                "Monitor: Define an observation, its owner, and the condition requiring a new decision."]
@@ -935,15 +974,14 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         if action in seen_actions:
             # The scaffold lines are already printed as this slide's pedagogy, so
             # borrowing one made the learner task a copy of the line above it.
-            focus = _short_focus(_as_noun_phrase(labels[0] if labels else "this mechanism"))
-            action = _SECOND_PASS_BY_MOVE.get(move_name, _SECOND_PASS_ACTION).format(focus=focus)
+            action = _SECOND_PASS_BY_MOVE.get(move_name, _SECOND_PASS_ACTION).format(focus=focus_phrase)
         seen_actions.add(action)
         # Every teaching slot carries its move. A thin source gives one checkpoint
         # line, and one line is a single oversized box on the slide - the move is
         # what makes that checkpoint workable, so it always ships beside it.
         ped = ped if idx in {8, 9, 10, 15} else [*ped, *move_scaffold]
         if len([x for x in (*core, *ped) if str(x).strip()]) < _MIN_UNIT_ITEMS:
-            ped = [*ped, f"Name what {labels[0] if labels else 'this mechanism'} would cost if it were absent."]
+            ped = [*ped, f"Name what {focus_phrase} would cost if it were absent."]
         add(idx, title_, question, core, ped, action,
             f"Source checkpoint(s) covered: {', '.join(labels)}",
             kind, anchor, evidence=f"P1 checkpoint evidence: {', '.join(x.id for x in bucket)}",
