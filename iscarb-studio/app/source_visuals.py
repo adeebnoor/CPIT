@@ -39,6 +39,50 @@ MAX_SLIDES = 80
 # projected and printed diagram text stays crisp.
 PDF_RENDER_ZOOM = 2.6
 
+# A lecture page whose body is one large picture - a news photograph, a quote
+# card, a diagram pasted whole - is a picture with a title bar around it.
+# Rendering the whole page shrinks that picture into a corner of the slide, so
+# the picture's own box is cropped as a separate asset. The crop keeps whatever
+# the lecturer drew on top of it, which is usually the point of the slide.
+PICTURE_KIND = "local-pdf-picture"
+MIN_PICTURE_AREA_SHARE = .34
+
+
+def _whole_words(page, box):
+    """Grow the crop until it no longer cuts through a line of the page's text.
+
+    Cropping to the pictures alone sliced a title mid-word, which reads as a
+    broken render rather than as a picture. A block the crop only clips is
+    taken in whole; a block entirely outside it stays outside.
+    """
+    for _ in range(3):
+        grown = fitz.Rect(box)
+        for block in page.get_text("blocks"):
+            rect = fitz.Rect(block[:4])
+            if str(block[4]).strip() and rect.intersects(box) and not box.contains(rect):
+                grown |= rect
+        if grown == box:
+            break
+        box = grown
+    return box & page.rect
+
+
+def _text_boxes_in(page, box) -> tuple[tuple[float, float, float, float], ...]:
+    """The page's own text blocks, as fractions of the cropped picture."""
+    boxes = []
+    for block in page.get_text("blocks"):
+        rect = fitz.Rect(block[:4])
+        if not str(block[4]).strip() or not rect.intersects(box):
+            continue
+        clipped = rect & box
+        if clipped.get_area() <= 0:
+            continue
+        boxes.append((
+            (clipped.x0 - box.x0) / box.width, (clipped.y0 - box.y0) / box.height,
+            (clipped.x1 - box.x0) / box.width, (clipped.y1 - box.y0) / box.height,
+        ))
+    return tuple(boxes)
+
 # Below this a rasterized or downloaded asset cannot be shown full-width without
 # visible softening, so the unit is better served by a redrawn diagram.
 MIN_PRESENTABLE_ASSET_WIDTH = 1100
@@ -53,6 +97,10 @@ class VisualAsset:
     local_path: str = ""
     source_kind: str = "public"
     visual_area_ratio: float = 0.0
+    # Where the source's own words sit inside this asset, as (x0, y0, x1, y1)
+    # fractions of it. A presenter laying teaching text on the picture uses
+    # these to keep the lecturer's own labels uncovered.
+    text_boxes: tuple[tuple[float, float, float, float], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -184,12 +232,13 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
         stat = path.stat()
     except OSError:
         return None
-    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}:v50")
+    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}:v55")
     manifest_path = cache / "manifest.json"
     if manifest_path.exists():
         try:
             data = json.loads(manifest_path.read_text(encoding="utf-8"))
-            assets = tuple(VisualAsset(**x) for x in data.get("assets", []))
+            assets = tuple(VisualAsset(**{**x, "text_boxes": tuple(tuple(float(v) for v in b) for b in x.get("text_boxes", ()))})
+                           for x in data.get("assets", []))
             if assets and all(Path(a.local_path).exists() for a in assets if a.local_path):
                 return VisualRegistry(data.get("source_url", f"local:{path.name}"), data.get("source_title", source_title or path.stem), assets, "local-pdf")
         except Exception:
@@ -212,6 +261,22 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
             image_area = max((fitz.Rect(info["bbox"]).get_area() for info in page.get_image_info()), default=0)
             ratio = min(1.0, image_area / max(1.0, page.rect.get_area()))
             assets.append(VisualAsset(slide_no, "", page_text or f"Primary lecture page {slide_no}", f"local:{path.name}", str(image_path), "local-pdf", ratio))
+            if ratio >= MIN_PICTURE_AREA_SHARE:
+                # The union of the page's pictures, not just the biggest one:
+                # a slide often pastes a diagram as several images side by side,
+                # and cropping to one of them cut the others off the slide.
+                box = fitz.Rect()
+                for info in page.get_image_info():
+                    box |= fitz.Rect(info["bbox"])
+                box = _whole_words(page, box)
+                picture_path = cache / f"picture-{slide_no:03d}.png"
+                if not picture_path.exists() or picture_path.stat().st_size < 1000:
+                    # The crop is projected as large as the whole page was, so it
+                    # is rendered at least as many pixels wide - cropping must
+                    # enlarge the picture, never soften it.
+                    zoom = min(MAX_FIGURE_ZOOM, PDF_RENDER_ZOOM * page.rect.width / max(1.0, box.width))
+                    page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), clip=box, alpha=False).save(str(picture_path))
+                assets.append(VisualAsset(slide_no, "", page_text or f"Primary lecture page {slide_no}", f"local:{path.name}", str(picture_path), PICTURE_KIND, ratio, _text_boxes_in(page, box)))
             for figure_no, (clip, caption, labels) in enumerate(_captioned_figures(page), 1):
                 figure_path = cache / f"figure-{slide_no:03d}-{figure_no}.png"
                 if not figure_path.exists() or figure_path.stat().st_size < 1000:

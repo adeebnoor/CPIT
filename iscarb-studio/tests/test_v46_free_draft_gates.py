@@ -525,5 +525,91 @@ class LongTokenWrapTests(unittest.TestCase):
         self.assertTrue(_overflows(blocks))
 
 
+class SourcePictureTests(unittest.TestCase):
+    """A lecture page that is mostly picture is projected as the picture."""
+
+    LECTURE = LECTURES / "CPIT455-class5-NooR.pdf"
+
+    @classmethod
+    def setUpClass(cls):
+        from app import source_visuals as sv
+        cls.sv = sv
+        cls.registry = sv._build_pdf_registry(cls.LECTURE, cls.LECTURE.stem)
+        assert cls.registry is not None
+
+    def _picture(self, page: int):
+        return next(a for a in self.registry.assets
+                    if a.slide_number == page and a.source_kind == self.sv.PICTURE_KIND)
+
+    def test_a_picture_page_is_cropped_out_of_its_own_page(self):
+        """Page 8 is a news photograph inside a title bar; the photo is the asset."""
+        page = next(a for a in self.registry.assets
+                    if a.slide_number == 8 and a.source_kind == "local-pdf")
+        picture = self._picture(8)
+        self.assertNotEqual(picture.local_path, page.local_path)
+        from PIL import Image
+        with Image.open(picture.local_path) as crop, Image.open(page.local_path) as whole:
+            self.assertGreater(crop.width / crop.height, whole.width / whole.height,
+                               "the crop must drop the page's margins, not keep them")
+
+    def test_the_crop_is_never_softer_than_the_page_it_came_from(self):
+        from PIL import Image
+        for asset in self.registry.assets:
+            if asset.source_kind != self.sv.PICTURE_KIND:
+                continue
+            page = next(a for a in self.registry.assets
+                        if a.slide_number == asset.slide_number and a.source_kind == "local-pdf")
+            with self.subTest(page=asset.slide_number), \
+                 Image.open(asset.local_path) as crop, Image.open(page.local_path) as whole:
+                self.assertGreaterEqual(crop.width, whole.width * .95)
+
+    def test_a_picture_page_beats_a_page_of_prose_in_the_same_range(self):
+        """Unit 6 used to show a "Chapter Summary" paragraph over the photo two pages on."""
+        from app.source_visuals_v42 import plans_for_blueprint_v42
+        _profile, bp, _checks = _draft(self.LECTURE)
+        plans = list(plans_for_blueprint_v42(bp, source_root=self.LECTURE))
+        unit = bp.units[5]
+        self.assertIn(8, self.sv.anchor_slides(unit.source_anchor))
+        self.assertEqual(plans[5].source_slide, 8)
+        self.assertEqual(plans[5].asset.source_kind, self.sv.PICTURE_KIND)
+
+    def test_teaching_text_never_lands_on_the_lecturer_s_own_words(self):
+        from app.presenter_v44 import (exact_source_path, is_source_picture, overlay_items,
+                                       overlay_layout, source_text_rects)
+        from app.source_visuals_v42 import plans_for_blueprint_v42
+        _profile, bp, _checks = _draft(self.LECTURE)
+        plans = list(plans_for_blueprint_v42(bp, source_root=self.LECTURE))
+        laid = 0
+        for unit, plan in zip(bp.units, plans):
+            source = exact_source_path(unit, plan)
+            if not (source and is_source_picture(plan)):
+                continue
+            placed = overlay_layout(overlay_items(unit), source, plan)
+            if not placed:
+                continue
+            laid += 1
+            for _labels, _body, _size, x, y, height, width in placed:
+                for fx0, fy0, fx1, fy1 in source_text_rects(plan, source):
+                    with self.subTest(unit=unit.number):
+                        self.assertFalse(x < fx1 and fx0 < x + width and y < fy1 and fy0 < y + height,
+                                         "a teaching block covered text the lecturer wrote")
+        self.assertTrue(laid, "no unit used the picture-slide layout at all")
+
+    def test_a_picture_slide_still_carries_every_teaching_item(self):
+        from app.presenter_v44 import (exact_source_path, is_source_picture, overlay_items,
+                                       overlay_layout)
+        from app.source_visuals_v42 import plans_for_blueprint_v42
+        _profile, bp, _checks = _draft(self.LECTURE)
+        plans = list(plans_for_blueprint_v42(bp, source_root=self.LECTURE))
+        for unit, plan in zip(bp.units, plans):
+            source = exact_source_path(unit, plan)
+            if not (source and is_source_picture(plan)):
+                continue
+            placed = overlay_layout(overlay_items(unit), source, plan)
+            if placed:
+                with self.subTest(unit=unit.number):
+                    self.assertEqual(len(placed), len(overlay_items(unit)))
+
+
 if __name__ == "__main__":
     unittest.main()
