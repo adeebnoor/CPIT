@@ -128,6 +128,27 @@ class FreeDraftGateTests(unittest.TestCase):
             with self.subTest(lecture=name):
                 preflight_layout(bp)
 
+    def test_no_slide_is_a_wall_of_text(self):
+        """Fitting at 16pt is a floor; the contract asks for 35-80 visible words."""
+        from app.deterministic_blueprint_fallback import MAX_VISIBLE_WORDS
+        for name, _profile, bp, _checks in self.drafts:
+            with self.subTest(lecture=name):
+                for unit in bp.units:
+                    words = sum(len(str(x).split()) for x in (*unit.core_content, *unit.pedagogy_content))
+                    self.assertLessEqual(words, MAX_VISIBLE_WORDS, f"unit {unit.number} is a wall of text")
+
+    def test_the_opening_states_the_decision_the_lecture_is_for(self):
+        """Every deck used to open on the same template with a different noun."""
+        for name, profile, bp, _checks in self.drafts:
+            with self.subTest(lecture=name):
+                from app.deterministic_blueprint_fallback import _declared_outcome
+                if not _declared_outcome(profile):
+                    continue
+                opening = " ".join(bp.units[0].pedagogy_content)
+                self.assertIn("DECISION", opening)
+                self.assertIn("UNKNOWN", opening)
+                self.assertNotIn("must make a consequential decision", bp.central_engineering_crisis)
+
     def test_every_teaching_slide_is_projectable(self):
         for name, _profile, bp, _checks in self.drafts:
             with self.subTest(lecture=name):
@@ -403,7 +424,11 @@ class ClosingPointsTests(unittest.TestCase):
         closing = bp.units[19]
         self.assertIn("PAGE 3", closing.source_anchor)
         blob = " ".join(closing.core_content).lower()
-        self.assertIn("redundancy and diversity improve system dependability", blob)
+        self.assertIn("system dependability is for business success", blob)
+        # The outcome itself is Unit 3's job; the closing slide owes the claims.
+        self.assertNotIn("the key clo", blob)
+        # "...Reliability, Safety" / "Security, Resilience" is one list, not two.
+        self.assertIn("safety security, resilience", blob)
 
 
 class RunningHeaderTests(unittest.TestCase):
