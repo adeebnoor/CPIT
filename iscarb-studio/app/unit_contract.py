@@ -19,17 +19,27 @@ UNIT_JOBS = {
     8: "Teach P1 and compare TWO defensible alternatives using three separate pedagogy entries: Alternative A:, Alternative B:, Trade-off:. Each has at least four meaningful words after the label. Name the real alternatives and what is sacrificed; do not invent an unsupported technology.",
     9: "Teach P1 with separate pedagogy entries Measure: and Falsifier:, each at least four meaningful words. Name an observable result, test conditions and a result that would disconfirm the decision. Unsupplied test data must be explicitly hypothetical.",
     10: "Design review: four separate pedagogy entries Known:, Unknown:, Decision-sensitive unknown:, Monitor:. Each has at least four meaningful words after its label, applied to this system. A heading alone does not count.",
-    11: "Teach P1, then integrate a concrete Saudi application in pedagogy under an explicitly HYPOTHETICAL scenario. State the constraint/condition that changes the decision. Do not invent a national mandate.",
+    11: "Teach P1, then integrate a concrete Saudi/local application under an explicitly HYPOTHETICAL bounded constraint. The learner must solve it using ONLY mechanisms already taught in the current P1 lecture; do not import later-chapter technology and do not invent a national mandate.",
     12: "Teach P1 and integrate accountability: name the responsible role/owner, the evidence they check, and the sign-off/escalation decision. Keep the title source-first.",
-    13: "Teach P1 and ask how a change/future improvement affects its mechanism. Use hypothetical exploration unless the source supplies a contemporary fact. Keep the title source-first.",
+    13: "Teach P1 and run a bounded scalability/trend stress test. Name one explicit numeric or structural variable (for example load, node count, centralized-to-distributed, or one-to-many deployments) and ask which source assumption fails FIRST. Open-ended 'what changes?' prompts do not pass.",
     14: "Teach P1 and integrate practitioner workload/wellbeing as a bounded design question or source-supported consequence, not an invented empirical claim.",
-    15: "Teach assigned P1 content (including technical AI if actually in P1). Put the instructional AI-use rules ONLY in pedagogy_content: AI MAY ASSIST:, AI MUST NOT BE TRUSTED AUTONOMOUSLY:, Human sign-off:. Include claim, assumption, source check, test, failure search and accountable sign-off. Never move these instructional rules into core_content.",
+    15: "Teach assigned P1 content (including technical AI if actually in P1). Put instructional AI-use rules ONLY in pedagogy_content: AI MAY ASSIST: may generate candidate test cases/failure probes or structure drafts; AI MUST NOT BE TRUSTED AUTONOMOUSLY: may not approve/certify the design; Human sign-off: the learner personally checks P1, evidence and failure cases and owns the final decision. Never move these rules into core_content.",
     16: "Launch one source-grounded design/portfolio artifact with a trade-off and observable evidence. Name only the locked, fully supported ETEC readiness target(s) and the artifact that demonstrates them.",
     17: "Change a constraint, require peer critique and a revised/redesigned artifact with rerun evidence. Do not pre-solve with untaught technology.",
     18: "Evidence protocol lives in pedagogy_content, NOT core_content: Claim:, Evidence:, Warrant:, Counter-evidence:, Residual uncertainty:. Apply the chain to the learner's decision. Do not cite P1 as the source of this ISCARB method.",
-    19: "Use the locked plan's exactly six rubric criteria with all four substantive levels: Distinguished, Ready, Developing, Not Yet Ready. These are assessment pedagogy, not P1 technical core.",
-    20: "Bounded assurance: Claim, Evidence, Warrant, Residual uncertainty and a decision among APPROVE / CONDITIONALLY APPROVE / REDESIGN / REJECT. No absolute guarantees. Apply it to the same central system; assurance scaffolds belong in pedagogy, not core.",
+    19: "Use exactly six capability criteria with four substantive levels. Every credited capability must be demonstrated through performance, a learner artifact and a P1 source anchor; recall alone earns no capability credit. These are assessment pedagogy, not P1 technical core.",
+    20: "Bounded assurance: Claim, Evidence, Warrant, Residual uncertainty and APPROVE / CONDITIONALLY APPROVE / REDESIGN / REJECT. The learner must DEFEND the verdict with a P1 anchor plus a learner artifact and state counter-evidence/next verification. No absolute guarantees; assurance scaffolds stay in pedagogy.",
 }
+
+MASTER_GUIDELINES = """
+ISCARB MASTER GUIDELINES (release conditions across all advanced software-engineering topics):
+1) COGNITIVE LOAD: Never paste PRIMARY-source paragraphs into presenter slides. Use one short engineering maxim or very short bullets; keep narrative detail in P1 / speaker notes.
+2) VISUAL-TEXT ALIGNMENT: Prefer a P1 figure that directly explains the Unit. If no useful P1 visual exists, use a semantically matched public visual or redraw. Never repeat the same asset in another Unit unless Unit 17 explicitly mutates/traces a variable on it.
+3) BOUNDED LOCAL CONTEXT: Local scenarios are explicitly hypothetical, state a precise constraint, and may use only mechanisms already taught in this P1 lecture.
+4) SCALABILITY/TREND: Name an explicit numeric or structural stress variable and ask which assumption fails first; reject generic 'what changes when it grows?' questions.
+5) AI GOVERNANCE: AI may generate candidate tests/options/draft structure; accountable human engineering sign-off cannot be delegated to the model.
+6) PERFORMANCE GRADING: Capability credit and final verdicts require defended learner performance, one learner artifact, and traceable P1 evidence.
+"""
 
 CHANNEL_CONTRACT = """
 AUTHORITATIVE FIELD AND ROLE CONTRACT (applies to generators AND auditors):
@@ -61,7 +71,7 @@ TAG_OWNERS = {
 
 
 def contract_text(numbers=range(1, 21)):
-    result = [CHANNEL_CONTRACT]
+    result = [MASTER_GUIDELINES, CHANNEL_CONTRACT]
     for n in numbers:
         tags = [tag for tag, owner in TAG_OWNERS.items() if owner == n]
         result.append(f"UNIT {n}: {UNIT_JOBS[n]} Required obligations: {', '.join(tags)}. "
