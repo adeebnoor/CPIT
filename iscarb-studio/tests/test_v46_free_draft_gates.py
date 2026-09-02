@@ -121,6 +121,13 @@ class FreeDraftGateTests(unittest.TestCase):
                 self.assertEqual(bp.source_topic_families, families)
                 self.assertEqual([x.topic_family for x in bp.topic_coverage], families)
 
+    def test_the_gate_and_the_exporter_agree(self):
+        """A deck that clears every check has to be one the exporter will render."""
+        from app.presenter_v44 import preflight_layout
+        for name, _profile, bp, _checks in self.drafts:
+            with self.subTest(lecture=name):
+                preflight_layout(bp)
+
     def test_every_teaching_slide_is_projectable(self):
         for name, _profile, bp, _checks in self.drafts:
             with self.subTest(lecture=name):

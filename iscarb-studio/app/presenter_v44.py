@@ -301,11 +301,19 @@ def unit_layout(bp, u, plan=None):
     return blocks, size, fits, None
 
 
+# The footer prints the anchor on one line at 8pt. A unit citing every page of a
+# chapter overran it, and only the export preflight noticed: the deck cleared
+# every gate and then refused to produce a file.
+MAX_ANCHOR_WIDTH = 790
+
+
 def readability_problems(bp: Blueprint) -> dict[int, str]:
     # Source availability is resolved at export too; the gate checks the
     # conservative text representation rather than trusting an unavailable URL.
     problems = {}
     for u in bp.units:
+        if stringWidth(clean(u.source_anchor), "ISCARB", 8) > MAX_ANCHOR_WIDTH:
+            problems[u.number] = "Cite the source span in one printable phrase; the anchor line does not fit the footer."
         if len(wrap(u.engineering_question,872,13))>2 or len(wrap("YOUR TASK "+u.student_action,872,13))>2:
             problems[u.number] = "Shorten the engineering question/task to two lines without changing its purpose."
         if u.number == 19:
@@ -342,7 +350,7 @@ def preflight_layout(bp, source_root=None):
                 Text(44, 120, 872, wrap(u.engineering_question, 872, 13), 13),
                 Text(44, 470, 872, wrap("YOUR TASK " + u.student_action, 872, 13), 13)]
             unsafe = unsafe or any(any(stringWidth(line, "ISCARB-Bold" if b.bold else "ISCARB", b.size) > b.width + .1 for line in b.lines) for b in frame_blocks)
-        unsafe = unsafe or stringWidth(clean(u.source_anchor), "ISCARB", 8) > 790
+        unsafe = unsafe or stringWidth(clean(u.source_anchor), "ISCARB", 8) > MAX_ANCHOR_WIDTH
         if unsafe:
             failures.append(u.number)
     if failures:
