@@ -7,6 +7,7 @@ slides the renderer could not project. These tests hold that closed.
 """
 from __future__ import annotations
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -193,7 +194,15 @@ class SourceFidelityTests(unittest.TestCase):
         cls.pdf = LECTURES / "CPIT455-class2-NooR.pdf"
         if not cls.pdf.exists():
             raise unittest.SkipTest("archived lecture unavailable")
-        cls.profile, cls.bp, _checks = _draft(cls.pdf)
+        # The visual registry resolves the primary source by its upload name.
+        cls._dir = tempfile.TemporaryDirectory()
+        cls.root = Path(cls._dir.name)
+        shutil.copyfile(cls.pdf, cls.root / f"P1__{cls.pdf.name}")
+        cls.profile, cls.bp, _checks = _draft(cls.root / f"P1__{cls.pdf.name}")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._dir.cleanup()
 
     def test_the_title_is_the_subject_not_the_session_number(self):
         """"Class2: Dependable Systems" would travel into every derived sentence."""
@@ -226,11 +235,20 @@ class SourceFidelityTests(unittest.TestCase):
             for page in anchor_slides(family.source_anchor)
         })
 
-    def test_a_teaching_unit_keeps_the_single_page_anchor_its_figure_needs(self):
-        """A multi-page anchor forfeits the source figure; one page per slot."""
-        from app.source_visuals import anchor_slides
-        single = [u.number for u in self.bp.units[5:15] if len(anchor_slides(u.source_anchor)) == 1]
-        self.assertGreaterEqual(len(single), 9, "teaching slots lost their source pages")
+    def test_the_source_page_is_what_a_teaching_slide_shows(self):
+        """A unit teaching two source pages used to show neither, and read as prose."""
+        from app.source_visuals_v42 import plans_for_blueprint_v42
+        from app.presenter_v44 import exact_source_path, source_caption
+        plans = plans_for_blueprint_v42(self.bp, source_root=self.root)
+        shown = [u.number for u, plan in zip(self.bp.units, plans)
+                 if 6 <= u.number <= 15 and exact_source_path(u, plan)]
+        self.assertEqual(len(shown), 10, "teaching slides fell back to text")
+        # A picture of one page must not read as a claim about the pages beside it.
+        for unit, plan in zip(self.bp.units, plans):
+            if unit.number in shown and len(unit.source_anchor.split(";")) > 1:
+                caption = source_caption(unit, plan)
+                self.assertIn("shown", caption)
+                self.assertIn("this unit teaches", caption)
 
 
 # A printed chapter, not a slide deck: running headers, numbered sections,

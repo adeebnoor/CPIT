@@ -262,18 +262,19 @@ def text_layout(items, x=44, y=166, width=872, height=278):
     return best
 
 
+# The source page is the teaching surface; the text column is what a slide falls
+# back to when the source has no page to show. A unit teaching two source pages
+# used to show neither, because one picture beside a two-page anchor looked like
+# a claim about both - so half a deck became prose about slides the learner
+# could have simply been shown. The picture is shown and the caption says
+# exactly which page it is, which is what the provenance rule was protecting.
+SOURCE_VISUAL_UNITS = frozenset({5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15})
+
+
 def exact_source_path(u, plan):
-    if not 6 <= u.number <= 15 or plan is None or plan.reuse_mode != "USE":
+    if u.number not in SOURCE_VISUAL_UNITS or plan is None or plan.reuse_mode != "USE":
         return None
-    coordinates = anchor_slides(u.source_anchor)
-    if _is_figure(plan):
-        # A captioned figure cropped from one of the pages this unit cites stands
-        # for itself, not for the pages around it: a section that runs over three
-        # book pages may still show the diagram printed inside it.
-        if plan.source_slide not in coordinates:
-            return None
-    # A single selected page picture must not impersonate a multi-page source claim.
-    elif len(coordinates) != 1 or coordinates[0] != plan.source_slide:
+    if plan.source_slide not in anchor_slides(u.source_anchor):
         return None
     path = local_asset(plan.asset) if plan.asset else None
     return path if path and path.exists() else None
@@ -284,8 +285,14 @@ def _is_figure(plan) -> bool:
 
 
 def source_caption(u, plan) -> str:
-    what = "Source figure from the cited pages" if _is_figure(plan) else "Original source page"
-    return f"{clean(u.source_anchor)} · {what}; ISCARB practice at right"
+    """Name the page on screen, and the span the unit teaches, without conflating them."""
+    coordinates = anchor_slides(u.source_anchor)
+    coordinate = "SLIDE" if "SLIDE" in (u.source_anchor or "").upper() else "PAGE"
+    shown = f"[P1] {coordinate} {plan.source_slide}" if plan.source_slide else clean(u.source_anchor)
+    what = "source figure" if _is_figure(plan) else "original source page"
+    if len(coordinates) > 1:
+        return f"{shown} shown · this unit teaches {clean(u.source_anchor)} · {what}; ISCARB practice at right"
+    return f"{shown} · {what}; ISCARB practice at right"
 
 
 def unit_layout(bp, u, plan=None):
