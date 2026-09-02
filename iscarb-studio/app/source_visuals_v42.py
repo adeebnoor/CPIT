@@ -85,6 +85,10 @@ def _quality_score(asset: base.VisualAsset, unit: LectureUnit, anchors: set[int]
     if asset.source_kind == base.FIGURE_KIND:
         # The chapter's own diagram beats a rendering of the page it sits on.
         score += 14.0
+    if asset.source_kind == base.PICTURE_KIND:
+        # The picture the lecturer pasted onto the page beats a rendering of the
+        # page it was pasted on, which is the same picture inside a title bar.
+        score += 6.0
     if asset.visual_area_ratio >= .25:
         score += 12.0
     wc = _word_count(asset.alt_text)
@@ -140,6 +144,25 @@ def _is_presentable(asset) -> bool:
     return width is None or width >= base.MIN_PRESENTABLE_ASSET_WIDTH
 
 
+# A page of prose wins a keyword count against a picture every time - the
+# picture has almost no words to match on - which is how a "Chapter Summary"
+# slide kept beating the diagram two pages before it. Inside a unit's own
+# anchor range a picture the lecturer chose to project is at least as good a
+# teaching surface as a paragraph, so it takes the canvas whenever it is nearly
+# as relevant. It never reaches outside the range, so provenance is unchanged.
+PICTURE_PREFERENCE_SHARE = .6
+
+
+def _prefer_source_picture(ranked, unit, anchors):
+    if not ranked or ranked[0].source_kind == base.PICTURE_KIND:
+        return ranked
+    top = _quality_score(ranked[0], unit, anchors)
+    for asset in ranked:
+        if asset.source_kind == base.PICTURE_KIND and _quality_score(asset, unit, anchors) >= top * PICTURE_PREFERENCE_SHARE:
+            return [asset, *(a for a in ranked if a is not asset)]
+    return ranked
+
+
 def _visual_type(unit: LectureUnit) -> str:
     if unit.visual_plan is not None and unit.visual_plan.visual_type.strip():
         return unit.visual_plan.visual_type.strip()
@@ -158,6 +181,7 @@ def plan_for_unit_v42(bp: Blueprint, unit: LectureUnit, registry: base.VisualReg
         # An unavailable explicit page is not permission to substitute another
         # page. Leave the pool empty and produce a provenance-safe redraw.
         ranked = sorted(pool, key=lambda a: _quality_score(a, unit, anchors), reverse=True)
+        ranked = _prefer_source_picture(ranked, unit, anchors)
         if ranked:
             best = ranked[0]
             score = _quality_score(best, unit, anchors)
