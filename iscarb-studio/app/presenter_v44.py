@@ -24,7 +24,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
 from .models import Blueprint, LectureUnit
-from .source_visuals import anchor_slides, local_asset
+from .source_visuals import FIGURE_KIND, anchor_slides, local_asset
 from .source_visuals_v42 import plans_for_blueprint_v42
 
 W, H = 960, 540
@@ -41,6 +41,16 @@ else:
     registerFont(TTFont("ISCARB-Bold", str(_FONT_ROOT / "VeraBd.ttf")))
 INK, GREEN, GOLD, MUTED = "#182B29", "#005B39", "#B78A36", "#526460"
 PHASES = {"IFHAM": "UNDERSTAND", "MARIS": "PRACTISE", "ATQAN": "MASTER", "MAYYIZ": "DISTINGUISH"}
+# The CIMT compass is the spine the archived CPIT-455 decks put on their own
+# slides. The Blueprint records a lens per unit; printing it in the header tells
+# a learner which kind of thinking the slide is asking for.
+LENSES = {"C": "CONCEPT", "I": "IMPLEMENTATION", "M": "MEASUREMENT", "T": "TREND"}
+
+
+def eyebrow(u) -> str:
+    lenses = " · ".join(LENSES.get(x, x) for x in (u.cimtlens or []))
+    phase = PHASES.get(u.phase, u.phase)
+    return f"ISCARB / {phase}" + (f" · {lenses}" if lenses else "") + f" / {JOBS[u.number-1]}"
 JOBS = [
     "Professional decision & crisis", "Domain spine", "Five measurable outcomes", "Six H-Stack capabilities",
     "Predict · Constrain · Derive · Name", "Mechanism from first principles", "Implementation structure",
@@ -255,12 +265,27 @@ def text_layout(items, x=44, y=166, width=872, height=278):
 def exact_source_path(u, plan):
     if not 6 <= u.number <= 15 or plan is None or plan.reuse_mode != "USE":
         return None
-    # A single selected picture must not impersonate a multi-page source claim.
     coordinates = anchor_slides(u.source_anchor)
-    if len(coordinates) != 1 or coordinates[0] != plan.source_slide:
+    if _is_figure(plan):
+        # A captioned figure cropped from one of the pages this unit cites stands
+        # for itself, not for the pages around it: a section that runs over three
+        # book pages may still show the diagram printed inside it.
+        if plan.source_slide not in coordinates:
+            return None
+    # A single selected page picture must not impersonate a multi-page source claim.
+    elif len(coordinates) != 1 or coordinates[0] != plan.source_slide:
         return None
     path = local_asset(plan.asset) if plan.asset else None
     return path if path and path.exists() else None
+
+
+def _is_figure(plan) -> bool:
+    return bool(plan is not None and plan.asset is not None and getattr(plan.asset, "source_kind", "") == FIGURE_KIND)
+
+
+def source_caption(u, plan) -> str:
+    what = "Source figure from the cited pages" if _is_figure(plan) else "Original source page"
+    return f"{clean(u.source_anchor)} · {what}; ISCARB practice at right"
 
 
 def unit_layout(bp, u, plan=None):
@@ -347,7 +372,7 @@ def _line(c, y, color=GOLD, x=44, width=872):
 
 
 def _frame(c, bp, u):
-    _text(c, Text(44, 20, 760, [f"ISCARB / {PHASES.get(u.phase, u.phase)} / {JOBS[u.number-1]}"], 10, GREEN, True))
+    _text(c, Text(44, 20, 760, [eyebrow(u)], 10, GREEN, True))
     _text(c, title_block(bp.lecture_title if u.number == 1 else u.title))
     _text(c, Text(44, 120, 872, wrap(u.engineering_question, 872, 13), 13, MUTED))
     _line(c, 111)
@@ -392,7 +417,7 @@ def _rubric(c,bp):
 def _draw_page(c, bp, u, plan, release_state="REVIEW"):
     blocks,size,fits,source = unit_layout(bp,u,plan)
     if source:
-        _text(c, Text(36, 17, 850, [f"ISCARB / {PHASES.get(u.phase,u.phase)} / {JOBS[u.number-1]}"], 10, GREEN, True))
+        _text(c, Text(36, 17, 850, [eyebrow(u)], 10, GREEN, True))
         _line(c, 42, x=36, width=884)
         with Image.open(source) as im:
             iw,ih=im.size
@@ -401,7 +426,7 @@ def _draw_page(c, bp, u, plan, release_state="REVIEW"):
             c.drawImage(ImageReader(im),36+(576-dw)/2,H-54-dh,width=dw,height=dh)
         for block in blocks:
             _text(c,block)
-        _text(c,Text(36,520,800,[clean(u.source_anchor)+" · Original source page; ISCARB practice at right"],8,MUTED))
+        _text(c,Text(36,520,800,[source_caption(u,plan)],8,MUTED))
         _text(c,Text(865,517,60,[f"{u.number:02d} / 20"],9,GREEN,True))
         _text(c,Text(805,18,120,["VERIFIED RELEASE" if release_state.upper()=="READY" else "REVIEW DRAFT"],8,MUTED,True))
         return
@@ -485,17 +510,17 @@ def export_presenter_pptx(bp: Blueprint, out: Path, source_root=None, release_st
         add(slide,Text(805,20,120,["VERIFIED RELEASE" if release_state.upper()=="READY" else "REVIEW DRAFT"],8,MUTED,True))
         blocks,_,_,source=unit_layout(bp,u,plan)
         if source:
-            add(slide,Text(36,17,850,[f"ISCARB / {PHASES.get(u.phase,u.phase)} / {JOBS[u.number-1]}"],10,GREEN,True))
+            add(slide,Text(36,17,850,[eyebrow(u)],10,GREEN,True))
             with Image.open(source) as im: iw,ih=im.size
             scale=min(576/iw,454/ih)
             dw,dh=iw*scale,ih*scale
             slide.shapes.add_picture(str(source),Inches((36+(576-dw)/2)/72),Inches(54/72),width=Inches(dw/72),height=Inches(dh/72))
             for block in blocks: add(slide,block)
-            add(slide,Text(36,520,800,[clean(u.source_anchor)+" · Original source page; ISCARB practice at right"],8,MUTED))
+            add(slide,Text(36,520,800,[source_caption(u,plan)],8,MUTED))
             add(slide,Text(865,517,60,[f"{u.number:02d} / 20"],9,GREEN,True))
             slide.notes_slide.notes_text_frame.text = "[Sources]\n"+clean(u.source_anchor)+"\n[/Sources]\n"+"\n".join(u.core_content+u.pedagogy_content)
             continue
-        add(slide,Text(44,20,872,[f"ISCARB / {PHASES.get(u.phase,u.phase)} / {JOBS[u.number-1]}"],10,GREEN,True))
+        add(slide,Text(44,20,872,[eyebrow(u)],10,GREEN,True))
         add(slide,title_block(bp.lecture_title if u.number==1 else u.title))
         add(slide,Text(44,120,872,wrap(u.engineering_question,872,13),13,MUTED))
         if u.number==19:

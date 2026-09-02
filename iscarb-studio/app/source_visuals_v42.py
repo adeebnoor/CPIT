@@ -19,7 +19,33 @@ def _word_count(text: str) -> int:
     return len(re.findall(r"[A-Za-z0-9][A-Za-z0-9+/#_.-]*", text or ""))
 
 
+# A book page whose only content is running prose cannot fill a slide: enlarged
+# to the canvas it is a wall of 10pt text, and the chapter's own figures are
+# cropped separately anyway. A dense lecture slide is a different thing - it was
+# authored to be projected - so the rule applies only to portrait pages, which
+# is what separates a printed page from a 16:9 or 4:3 slide.
+MAX_WORDS_FOR_A_PAGE_VISUAL = 220
+
+
+def _is_portrait(asset) -> bool:
+    size = _asset_pixel_size(asset)
+    return bool(size and size[1] > size[0])
+
+
+def _is_text_wall(asset: base.VisualAsset) -> bool:
+    return (
+        asset.source_kind != base.FIGURE_KIND
+        and asset.visual_area_ratio < .05
+        and _word_count(asset.alt_text or "") > MAX_WORDS_FOR_A_PAGE_VISUAL
+        and _is_portrait(asset)
+    )
+
+
 def _looks_like_title_only(asset: base.VisualAsset) -> bool:
+    # A cropped, captioned figure is information-bearing by construction; its
+    # alt text is the caption plus its labels, which a word count would call thin.
+    if asset.source_kind == base.FIGURE_KIND:
+        return False
     if asset.slide_number != 1 and asset.visual_area_ratio >= .25:
         # A diagram-only page can contain little extractable text. Its actual
         # image content, not an OCR word count, makes it information-bearing.
@@ -53,9 +79,12 @@ def _looks_like_title_only(asset: base.VisualAsset) -> bool:
 
 
 def _quality_score(asset: base.VisualAsset, unit: LectureUnit, anchors: set[int]) -> float:
-    if _looks_like_title_only(asset):
+    if _looks_like_title_only(asset) or _is_text_wall(asset):
         return -100.0
     score = base._asset_score(asset, unit, anchors)
+    if asset.source_kind == base.FIGURE_KIND:
+        # The chapter's own diagram beats a rendering of the page it sits on.
+        score += 14.0
     if asset.visual_area_ratio >= .25:
         score += 12.0
     wc = _word_count(asset.alt_text)
@@ -71,6 +100,19 @@ def _quality_score(asset: base.VisualAsset, unit: LectureUnit, anchors: set[int]
         if cue in low:
             score += 1.5
     return score
+
+
+def _asset_pixel_size(asset):
+    """(width, height) in pixels, or None when the asset cannot be measured."""
+    path = base.local_asset(asset)
+    if not path or not Path(path).exists():
+        return None
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            return im.size
+    except Exception:
+        return None
 
 
 def _asset_pixel_width(asset) -> int | None:

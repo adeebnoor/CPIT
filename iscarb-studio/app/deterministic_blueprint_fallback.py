@@ -84,18 +84,44 @@ def _major(profile: SourceProfile):
 # Slides that set up the lecture before its first checkpoint: the opening claim,
 # the framing quote. They are not teaching checkpoints, but they are the source's
 # own way of posing the question, which is exactly what a prediction gate needs.
-_ADMINISTRATIVE = ("assignment", "to master", "take-home", "class", "contents", "outline")
+_ADMINISTRATIVE = ("assignment", "to master", "class", "contents", "outline")
+
+# A lecture that summarizes itself has written the closing slide already. The
+# CPIT-455 decks all carry one ("Take-home points", "Chapter Summary", "Key
+# Points"), and it was being filed as supporting material and never shown, so
+# the deck ended on ISCARB's verdict scaffold with none of the source's own
+# closing claims beside it.
+_CLOSING_PAGE = ("take-home point", "chapter summary", "key points", "summary of", "in summary")
+
+
+def _closing_row(profile: SourceProfile, rows):
+    taught = {row.id for row in rows}
+    for item in profile.coverage_items:
+        if item.id in taught:
+            continue
+        label = str(item.label or "").lower()
+        if any(term in label for term in _CLOSING_PAGE) and len(str(item.why_important or "").split()) >= 12:
+            return item
+    return None
+
+
+# A slide deck opens on a cover (title, author, term); a book chapter opens on
+# its objectives. The cover says nothing a learner can predict from, the
+# objectives page says exactly that, and word count is what separates them.
+MIN_WORDS_FOR_AN_OPENER_TO_TEACH = 40
 
 
 def _framing_row(profile: SourceProfile, rows):
     major_ids = {row.id for row in rows}
-    # Skip the cover page; stop where the teaching material begins.
-    for item in profile.coverage_items[1:]:
+    for position, item in enumerate(profile.coverage_items):
         if item.id in major_ids:
-            break
+            break  # teaching material begins here
+        words = len(str(item.why_important or "").split())
+        if position == 0 and words < MIN_WORDS_FOR_AN_OPENER_TO_TEACH:
+            continue  # a cover page
         if any(term in item.label.lower() for term in _ADMINISTRATIVE):
             continue
-        if len(str(item.why_important or "").split()) >= 8:
+        if words >= 8:
             return item
     return None
 
@@ -509,6 +535,8 @@ MIN_PAYLOAD_WORDS_ON_A_SLIDE = 28
 MIN_VISIBLE_ITEMS_ON_A_SLIDE = 3
 MAX_MERGED_STATEMENT_CHARS = 320
 MAX_FIT_ROUNDS = 60
+MAX_STATEMENTS_BEFORE_FIT = 12
+MAX_CLOSING_STATEMENTS = 6
 _CONTINUES_NOTE = "Condensed for the canvas: the slide carries the statements that fit; the rest of this checkpoint stays in the source at"
 
 
@@ -571,14 +599,24 @@ def fit_presenter_text(bp: Blueprint) -> Blueprint:
     """
     from .presenter_v44 import readability_problems
 
+    # A book section arrives as forty sentences. No canvas holds more than a
+    # dozen statements at a readable size, so the surplus is set aside before
+    # the layout loop rather than measured away one sentence per round, which
+    # is what turned a free compile into a forty-second wait. The trim is
+    # recorded the same way as any other: the evidence names where it continues.
+    for unit in bp.units:
+        while len(unit.core_content) > MAX_STATEMENTS_BEFORE_FIT:
+            if not _drop_last_statement(unit, teaching=6 <= unit.number <= 15):
+                break
+
     for _round in range(MAX_FIT_ROUNDS):
-        problems = [n for n in readability_problems(bp) if 5 <= n <= 15]
+        problems = [n for n in readability_problems(bp) if 5 <= n <= 15 or n == 20]
         if not problems:
             break
         progressed = False
         for number in problems:
             unit = bp.units[number - 1]
-            if _merge_shortest_pair(unit) or _drop_last_statement(unit, teaching=number >= 6):
+            if _merge_shortest_pair(unit) or _drop_last_statement(unit, teaching=6 <= number <= 15):
                 progressed = True
         if not progressed:
             break
@@ -699,7 +737,9 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         reused = not bucket
         if reused:
             bucket = [fill_order.pop(0)] if fill_order else rows[-1:]
-        labels = [x.label for x in bucket]
+        # The parts of one long section carry the same heading; a slot teaching
+        # two of them is titled with the section once, not "(part 1) / (part 2)".
+        labels = list(dict.fromkeys(re.sub(r"\s*\(part \d+\)$", "", x.label) for x in bucket))
         core = [
             statement
             for row in bucket
@@ -789,7 +829,11 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         "Attach one artifact to each capability you claim; do not claim readiness without an approved SLO mapping.",
         "Capability claims require evidence. Standardized readiness remains unverified until semantic alignment runs.", "rubric",
         evidence="Capability-to-artifact index naming which claims are evidenced and which remain unverified.")
-    add(20, "Take-home decision", "APPROVE, CONDITIONALLY APPROVE, REDESIGN, or REJECT — what does the evidence support?", [],
+    # The learner decides against what the lecture itself said it was teaching.
+    closing = _closing_row(profile, rows)
+    closing_core = _atomic_source_entries(closing, MAX_CLOSING_STATEMENTS) if closing else []
+    closing_anchor = (closing.source_anchor or "[P1]").strip() if closing else "N/A — ISCARB PEDAGOGY"
+    add(20, "Take-home decision", "APPROVE, CONDITIONALLY APPROVE, REDESIGN, or REJECT — what does the evidence support?", closing_core,
         ["APPROVE — the evidence supports the decision as it stands.",
          "CONDITIONALLY APPROVE — it holds only if a named condition is verified first.",
          "REDESIGN — the mechanism is sound but this application of it is not.",
@@ -797,7 +841,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
          "Keep residual uncertainty visible and state what must be verified next."],
         "Choose the bounded verdict and write the next verification action.",
         "No release claim is allowed from fallback mode; this draft requires semantic review.", "verdict",
-        evidence="Bounded verdict with the named next verification action.")
+        closing_anchor, evidence="Bounded verdict with the named next verification action.")
 
     # Map every major source checkpoint to a teaching unit no later than Unit 15.
     ledger = []
