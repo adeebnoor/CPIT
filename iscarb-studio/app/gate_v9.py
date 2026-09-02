@@ -236,7 +236,7 @@ def normalize_blueprint_for_output_lab(bp: Blueprint) -> Blueprint:
     _normalize_unit5_first_principles(out)
     readiness_line = (
         f"READINESS ORIENTATION REFERENCE — {READINESS_ORIENTATION_URL} "
-        "(orientation gateway only; ETEC Academic Standards remain the assessment authority)."
+        "(orientation only; ETEC standards remain the authority)."
     )
     for idx in [15, 16]:
         unit = out.units[idx]
@@ -328,7 +328,7 @@ def normalize_blueprint_for_gate(
     # 5) Readiness orientation reference is mandatory in BOTH Portfolio/Mutation units.
     readiness_line = (
         f"READINESS ORIENTATION REFERENCE — {READINESS_ORIENTATION_URL} "
-        "(orientation gateway only; ETEC Academic Standards remain the assessment authority)."
+        "(orientation only; ETEC standards remain the authority)."
     )
     for idx in [15, 16]:
         unit = out.units[idx]

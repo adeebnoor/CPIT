@@ -153,8 +153,11 @@ def _fix_unit16_readiness_trace(out: Blueprint) -> None:
     parts: list[str] = []
     for row in out.readiness_alignment[:2]:
         refs = ", ".join(row.slo_refs)
-        parts.append(f"{row.sku} ({refs})")
-    target = "ETEC READINESS TARGET — " + " | ".join(parts) + ". Evidence must remain source-supported and minimum-sufficient."
+        # Two rows carrying the same unverified placeholder printed it twice.
+        entry = f"{row.sku} ({refs})"
+        if entry not in parts:
+            parts.append(entry)
+    target = "ETEC READINESS TARGET — " + " | ".join(parts) + "."
     blob = " ".join([*u16.pedagogy_content, *u16.enrichment_content, u16.student_action]).lower()
     if "etec" not in blob or not any(row.sku.lower() in blob or any(s.lower() in blob for s in row.slo_refs) for row in out.readiness_alignment):
         _append_bounded(u16.pedagogy_content, target, 8)

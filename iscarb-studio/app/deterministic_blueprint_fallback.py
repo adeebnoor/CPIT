@@ -21,12 +21,12 @@ from .unit_contract import TAG_OWNERS
 # One-word competency labels give a learner nothing to act on. Each entry names
 # the competency and what its absence costs in this decision.
 _HSTACK = [
-    "Analytical reasoning — decompose the chapter mechanism until each step can be checked on its own.",
-    "Engineering judgment — choose between defensible options when the source does not decide for you.",
-    "Evidence-based reasoning — state which source statement supports each claim, and which does not.",
-    "Socio-technical thinking — account for the people and processes the mechanism actually runs through.",
-    "Risk-aware design — identify the failure that would be least recoverable and design against it first.",
-    "Ethical responsibility — refuse to present an unverified result as if it were established.",
+    "Analytical reasoning — check each step of the mechanism on its own.",
+    "Engineering judgment — choose when the source does not decide for you.",
+    "Evidence-based reasoning — name the statement behind each claim.",
+    "Socio-technical thinking — account for the people the mechanism runs through.",
+    "Risk-aware design — design first against the least recoverable failure.",
+    "Ethical responsibility — never present an unverified result as established.",
 ]
 
 
@@ -126,6 +126,9 @@ def _framing_row(profile: SourceProfile, rows):
     return None
 
 
+MAX_LIST_TAIL_WORDS = 4
+
+
 def _atomic_source_entries(row, limit: int | None = None) -> list[str]:
     """Recover the teachable statements flattened into one source excerpt.
 
@@ -163,7 +166,15 @@ def _atomic_source_entries(row, limit: int | None = None) -> list[str]:
         # wilderness-weather example broke as "(Forecasting" / "Processes:
         # creates predictions)" and reached the slide as two broken fragments.
         unclosed = bool(out) and out[-1].count("(") > out[-1].count(")")
-        if out and (unclosed or text[:1].islower() or re.search(dangling, out[-1], re.I)):
+        # "Five key dimensions: Availability, Reliability, Safety" / "Security,
+        # Resilience" is one list the slide broke in two. A short tail after a
+        # line that never finished its sentence belongs to it.
+        list_tail = (
+            bool(out) and len(text.split()) <= MAX_LIST_TAIL_WORDS
+            and not out[-1].rstrip().endswith((".", "!", "?", ":", ";"))
+            and "," in out[-1]
+        )
+        if out and (unclosed or list_tail or text[:1].islower() or re.search(dangling, out[-1], re.I)):
             out[-1] += " " + text
         else:
             out.append(text)
@@ -321,6 +332,9 @@ _MOVE_FOR_SLOT = {
     15: "verification",  # Maturity / audit
 }
 _MOVES_BY_NAME = {name: (name, q, sc) for name, q, sc in _TEACHING_MOVES}
+# Prompts the slot's contract does not require. When a slide runs long these are
+# what it can afford to lose; the labelled contract lines never are.
+_OPTIONAL_SCAFFOLD = {line for _name, _question, scaffold in _TEACHING_MOVES for line in scaffold}
 
 # A slot revisiting material an earlier unit taught owes the learner a different
 # task, not the same one under a new heading - and not the scaffold line already
@@ -387,15 +401,43 @@ def _short_focus(focus: str) -> str:
     return " ".join(words).rstrip(" ,;:-") or "this source mechanism"
 
 
-def _teaching_move(idx: int, focus: str):
-    """The move for teaching slot `idx` (6..15)."""
+# A slot's job is fixed, but the checkpoint that lands in it is whatever the
+# chapter had at that point. Asking "what would you use instead of Security
+# terminology" is the contract meeting material it does not fit: a glossary has
+# no alternative. The job stays; the sentence follows the kind of knowledge.
+_QUESTION_BY_KIND = {
+    "alternative": {
+        ("CONCEPT", "EXAMPLE", "RESULT"): "Which reading of {focus} would you defend, and what does choosing it cost you?",
+        ("DATA_MODEL", "EQUATION"): "What would you record or compute instead of {focus}, and what would that cost?",
+    },
+    "evidence": {
+        ("CONCEPT", "EXAMPLE"): "What would you have to observe before relying on {focus}?",
+    },
+    "failure": {
+        ("CONCEPT", "EXAMPLE"): "Where does {focus} break down first, and who notices?",
+    },
+    "misconception": {
+        ("PROCESS", "ALGORITHM", "PROTOCOL"): "Which step of {focus} is most often got wrong, and why?",
+    },
+}
+
+
+def _question_for(move: str, default: str, kinds) -> str:
+    for group, template in _QUESTION_BY_KIND.get(move, {}).items():
+        if any(kind in group for kind in kinds):
+            return template
+    return default
+
+
+def _teaching_move(idx: int, focus: str, kinds=()):
+    """The move for teaching slot `idx` (6..15), phrased for what it is teaching."""
     key = _MOVE_FOR_SLOT.get(idx)
     if key is None:
         name, question, scaffold = _TEACHING_MOVES[(idx - 6) % len(_TEACHING_MOVES)]
     else:
         name, question, scaffold = _MOVES_BY_NAME[key]
     short = _short_focus(_as_noun_phrase(focus))
-    return name, question.format(focus=short), list(scaffold)
+    return name, _question_for(name, question, list(kinds)).format(focus=short), list(scaffold)
 
 
 def _fill_rows(groups, rows) -> list:
@@ -517,6 +559,47 @@ def _spine_anchor(profile: SourceProfile) -> str:
     return f"[P1] {coordinate}S {pages[0]}\u2013{pages[-1]}"
 
 
+# Slide 1 states the decision in one line. A lecture that declares two outcomes
+# in one sentence ("...components & Describe an approach to...") states them in
+# forty words, which is a paragraph, not an opening.
+MAX_OPENING_OUTCOME_WORDS = 18
+
+
+def _short_outcome(outcome: str) -> str:
+    """The first outcome, short enough to open on. CLO1 still carries it in full."""
+    text = re.split(r"\s+&\s+|;\s+|,\s+and\s+then\s+", str(outcome or "").strip(), maxsplit=1)[0]
+    words = text.rstrip(".").split()
+    if len(words) > MAX_OPENING_OUTCOME_WORDS:
+        words = words[:MAX_OPENING_OUTCOME_WORDS]
+        while len(words) > 4 and _FOCUS_DANGLING.match(words[-1]):
+            words.pop()
+    return " ".join(words).rstrip(" ,;:-")
+
+
+def _norm_words(text: str) -> set:
+    return {x for x in re.findall(r"[a-z]{3,}", str(text or "").lower())}
+
+
+def _central_crisis(title: str, declared) -> str:
+    """The stake slide 1 opens on, in the lecture's own terms where it has them.
+
+    The template sentence named the lecture and said nothing else, so every deck
+    opened on the same crisis with a different noun in it. A lecture that
+    declares what it is teaching has already said what is at stake.
+    """
+    if declared:
+        short = _short_outcome(declared[0])
+        outcome = short[0].lower() + short[1:]
+        return (
+            f"A team has to {outcome} on a real case, using only what {title} supports "
+            "and naming what it leaves unresolved."
+        )
+    return (
+        f"A team must make a consequential decision about {title} while distinguishing "
+        "source-supported knowledge from unresolved assumptions."
+    )
+
+
 def _readiness_trail(profile: SourceProfile, clos, rows) -> list[ReadinessAlignment]:
     """A traceable readiness trail, explicitly not an approved ETEC mapping.
 
@@ -566,8 +649,25 @@ MIN_VISIBLE_ITEMS_ON_A_SLIDE = 3
 MAX_MERGED_STATEMENT_CHARS = 320
 MAX_FIT_ROUNDS = 60
 MAX_STATEMENTS_BEFORE_FIT = 12
-MAX_CLOSING_STATEMENTS = 6
+MAX_CLOSING_STATEMENTS = 4
+# The presenter contract asks a teaching slide for 35-80 visible technical words.
+# Fitting at 16pt is a floor, not a budget: a slide can clear it carrying a
+# hundred and twenty words and still be a wall of text nobody reads standing up.
+MAX_VISIBLE_WORDS = 85
 _CONTINUES_NOTE = "Condensed for the canvas: the slide carries the statements that fit; the rest of this checkpoint stays in the source at"
+
+
+def _visible_words(unit) -> int:
+    return sum(len(str(x).split()) for x in (*unit.core_content, *unit.pedagogy_content))
+
+
+def _drop_optional_scaffold(unit) -> bool:
+    """Remove one ISCARB prompt that no unit contract requires."""
+    for statement in reversed(unit.pedagogy_content):
+        if statement in _OPTIONAL_SCAFFOLD and len(unit.pedagogy_content) > 1:
+            unit.pedagogy_content.remove(statement)
+            return True
+    return False
 
 
 def _merge_shortest_pair(unit) -> bool:
@@ -635,18 +735,26 @@ def fit_presenter_text(bp: Blueprint) -> Blueprint:
     # is what turned a free compile into a forty-second wait. The trim is
     # recorded the same way as any other: the evidence names where it continues.
     for unit in bp.units:
+        teaching = 6 <= unit.number <= 15
         while len(unit.core_content) > MAX_STATEMENTS_BEFORE_FIT:
-            if not _drop_last_statement(unit, teaching=6 <= unit.number <= 15):
+            if not _drop_last_statement(unit, teaching=teaching):
                 break
+        while _visible_words(unit) > MAX_VISIBLE_WORDS:
+            # Scaffolding goes before source text: the move's prompts are ISCARB's
+            # words, and the checkpoint's are the lecture's.
+            if _drop_optional_scaffold(unit) or _drop_last_statement(unit, teaching=teaching):
+                continue
+            break
 
     for _round in range(MAX_FIT_ROUNDS):
-        problems = [n for n in readability_problems(bp) if 5 <= n <= 15 or n == 20]
+        problems = [n for n in readability_problems(bp) if n == 1 or 5 <= n <= 15 or n == 20]
         if not problems:
             break
         progressed = False
         for number in problems:
             unit = bp.units[number - 1]
-            if _merge_shortest_pair(unit) or _drop_last_statement(unit, teaching=6 <= number <= 15):
+            if (_merge_shortest_pair(unit) or _drop_optional_scaffold(unit)
+                    or _drop_last_statement(unit, teaching=6 <= number <= 15)):
                 progressed = True
         if not progressed:
             break
@@ -692,8 +800,11 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
     declared = _declared_outcome(profile)
     clos = [
         CLO(
+            # A lecture that declares two outcomes in one breath states them in
+            # forty words. The outcomes slide shows the first; the page it was
+            # read from is named beside it, and carries the rest.
             id="CLO1",
-            statement=(declared[0] if declared else f"Explain the source-defined foundations of {title}."),
+            statement=(_short_outcome(declared[0]) if declared else f"Explain the source-defined foundations of {title}."),
             evidence_expected=(
                 f"Learner artifact evidencing the outcome the source itself declares ({declared[1]})."
                 if declared else "Source-anchored concept map or explanation."
@@ -729,8 +840,19 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
             contextual_enrichment=False, verify_before_release=verify, planned_minutes=mins[n-1],
         ))
 
+    # Slide 1 used to carry one line of method and no stake. The lecture states
+    # what it is for and how much material it brings; saying both is what makes
+    # the rest of the hour a sequence rather than twenty separate slides.
+    opening = ["Start from the source and an evidence gap; do not reveal the diagnosis first."]
+    if declared:
+        short = _short_outcome(declared[0])
+        opening.insert(0, f"DECISION — can you {short[0].lower()}{short[1:]}, on this case, today?")
+    opening.insert(1 if declared else 0, (
+        f"UNKNOWN — the chapter gives you {len(family_names)} families of material and "
+        "does not say which one decides this case."
+    ))
     add(1, f"{title}: the engineering decision", "What can we responsibly decide before the missing evidence is resolved?", [],
-        ["Start from the source and an evidence gap; do not reveal the diagnosis first."],
+        opening,
         "Write one prediction and one piece of evidence you would need before committing.",
         "A defensible decision begins by separating what the source supports from what remains unknown.", "title")
     spine_anchor = _spine_anchor(profile)
@@ -781,7 +903,8 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         if idx == 8: kind = "comparison"
         if idx == 9: kind = "table"
         title_ = " / ".join(labels[:2]) if labels else f"Source mechanism {idx-5}"
-        move_name, move_question, move_scaffold = _teaching_move(idx, labels[0] if labels else "this mechanism")
+        move_name, move_question, move_scaffold = _teaching_move(
+            idx, labels[0] if labels else "this mechanism", [x.knowledge_type for x in bucket])
         if reused:
             # Same material, a different question of it - never the same slide twice.
             title_ = f"{title_}: {move_name}"
@@ -857,7 +980,12 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         evidence="Capability-to-artifact index naming which claims are evidenced and which remain unverified.")
     # The learner decides against what the lecture itself said it was teaching.
     closing = _closing_row(profile, rows)
-    closing_core = _atomic_source_entries(closing, MAX_CLOSING_STATEMENTS) if closing else []
+    # The summary page usually opens by restating the outcome, which Unit 3
+    # already carries as CLO1. The closing slide owes the learner the claims.
+    closing_core = [
+        statement for statement in (_atomic_source_entries(closing) if closing else [])
+        if not (declared and _norm_words(declared[0]) & _norm_words(statement) == _norm_words(declared[0]))
+    ][:MAX_CLOSING_STATEMENTS]
     closing_anchor = (closing.source_anchor or "[P1]").strip() if closing else "N/A — ISCARB PEDAGOGY"
     add(20, "Take-home decision", "APPROVE, CONDITIONALLY APPROVE, REDESIGN, or REJECT — what does the evidence support?", closing_core,
         ["APPROVE — the evidence supports the decision as it stands.",
@@ -941,7 +1069,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
     return Blueprint(
         lecture_title=title,
         engineering_thesis=f"Use the complete primary-source chapter to make a bounded engineering decision about {title}.",
-        central_engineering_crisis=f"A team must make a consequential decision about {title} while distinguishing source-supported knowledge from unresolved assumptions.",
+        central_engineering_crisis=_central_crisis(title, declared),
         named_ethical_purpose="Make an evidence-proportionate professional decision without overstating what the source or the learner artifact proves.",
         clos=clos, units=units, source_topic_families=family_names, topic_coverage=topic_coverage,
         coverage_ledger=ledger, readiness_alignment=_readiness_trail(profile, clos, rows), rubric_criteria=rubric,
