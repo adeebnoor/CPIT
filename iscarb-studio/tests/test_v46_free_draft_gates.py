@@ -449,6 +449,40 @@ class ClosingPointsTests(unittest.TestCase):
         self.assertIn("safety security, resilience", blob)
 
 
+class LandingPageTests(unittest.TestCase):
+    """The page is the app's front door: it has to keep the app wired."""
+
+    PAGE = Path(__file__).resolve().parents[1] / "app" / "static" / "index_v440.html"
+    SCRIPT = Path(__file__).resolve().parents[1] / "app" / "static" / "studio_v440.js"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.html = cls.PAGE.read_text(encoding="utf-8")
+
+    def test_every_control_the_compiler_script_reaches_for_exists(self):
+        import re
+        needed = sorted(set(re.findall(r"\$\('([A-Za-z]+)'\)", self.SCRIPT.read_text(encoding="utf-8"))))
+        missing = [x for x in needed if f'id="{x}"' not in self.html]
+        self.assertEqual(missing, [], "the redesign dropped controls the pipeline drives")
+
+    def test_every_label_names_a_control_that_exists(self):
+        import re
+        for control in re.findall(r'<label[^>]*for="([^"]+)"', self.html):
+            self.assertIn(f'id="{control}"', self.html, f"label points at missing control {control!r}")
+        self.assertNotIn("<label>", self.html, "a control was left without an accessible name")
+
+    def test_live_regions_survive_a_restyle(self):
+        for token in ('role="status"', 'aria-live="polite"', 'role="alert"', 'aria-live="assertive"'):
+            self.assertIn(token, self.html)
+
+    def test_both_languages_ship_in_the_markup(self):
+        """The language control chooses one; it cannot invent the other."""
+        self.assertIn('data-lang="ar"', self.html)
+        self.assertIn('data-lang="en"', self.html)
+        self.assertIn('lang="ar"', self.html)
+        self.assertIn("site_v460.js", self.html)
+
+
 class RunningHeaderTests(unittest.TestCase):
     """A chapter header repeats with only its page number changing."""
 

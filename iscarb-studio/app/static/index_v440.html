@@ -1,25 +1,350 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr" data-theme="dark">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Build source-grounded lectures with an auditable 20-unit learning sequence. ISCARB Faculty Studio.">
-<title>ISCARB · Lecture Studio</title>
-<link rel="stylesheet" href="/static/studio_v440.css?v=4.6.0">
-<script src="/static/studio_v440.js?v=4.6.0" defer></script>
+<meta name="description" content="ISCARB Faculty Studio — turn any lecture into a defendable learning experience, grounded in the source you upload.">
+<title>ISCARB Faculty Studio · Saudi Academic Engineering</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='9' fill='%23140c08'/%3E%3Cpath d='M24 9l4.6 6.4L36 17l-4.4 6.2L33 31l-9-2.6L15 31l1.4-7.8L12 17l7.4-1.6z' fill='none' stroke='%23e0c168' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/studio_v460.css?v=4.6.6">
+<script src="/static/site_v460.js?v=4.6.6" defer></script>
+<script src="/static/studio_v440.js?v=4.6.6" defer></script>
 </head>
 <body>
 <a class="skip" href="#upgrade">Skip to lecture builder</a>
-<header class="header"><a class="brand" href="#home"><span class="brandMark">I<span>↗</span></span><span><strong>ISCARB</strong><small>LECTURE STUDIO</small></span></a><nav aria-label="Main navigation"><a href="#sources">Source library</a><a href="#upgrade">Build a lecture</a><a href="/starter-kit">Faculty guide ↗</a></nav><span class="version">4.6 <i></i> Gate v15</span></header>
+
+<header class="header">
+  <a class="brand" href="#home" aria-label="ISCARB Faculty Studio, home">
+    <svg class="brandMark" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+      <rect x="1.5" y="1.5" width="45" height="45" rx="9" stroke="#c2185b" stroke-width="1.6"/>
+      <g stroke="#e0c168" stroke-width="1.3" stroke-linejoin="round">
+        <path d="M24 9l4.6 6.4L36 17l-4.4 6.2L33 31l-9-2.6L15 31l1.4-7.8L12 17l7.4-1.6z"/>
+        <circle cx="24" cy="23" r="4.4"/>
+      </g>
+      <path d="M24 34.5l3 4.5h-6z" fill="#c2185b"/>
+    </svg>
+    <span><strong>ISCARB Faculty Studio</strong><small>Saudi Academic Engineering</small></span>
+  </a>
+  <nav aria-label="Main navigation">
+    <a class="on" href="#home">Home</a>
+    <a href="#sources">Source Library</a>
+    <a href="#upgrade">Upgrade My Lecture</a>
+    <a href="#outputs">Outputs</a>
+    <a href="/starter-kit">Guides</a>
+    <a href="#about">About Us</a>
+  </nav>
+  <div class="headerTools">
+    <span class="version">4.6 · Gate v15</span>
+    <span class="langPick">
+      <button type="button" data-set-lang="ar" aria-pressed="false" lang="ar">عربي</button>
+      <span aria-hidden="true">|</span>
+      <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+    </span>
+    <button class="iconBtn" id="themeToggle" type="button" aria-pressed="false" title="Switch to light">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/>
+      </svg>
+      <span class="visually-hidden" hidden>Toggle colour theme</span>
+    </button>
+    <a class="signIn" href="/starter-kit">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20c.9-3.7 3.8-5.6 7.2-5.6s6.3 1.9 7.2 5.6"/></svg>
+      <span>Sign In</span>
+    </a>
+  </div>
+</header>
+
 <main id="home">
-<section class="hero shell"><div class="heroCopy"><p class="eyebrow">FOR EDUCATORS WHO CARE ABOUT THE DETAILS</p><h1>Your source.<br>A stronger <em>learning experience.</em></h1><p class="intro">Turn a lecture into a source-grounded engineering session. Keep the important ideas. Make students reason, practise, and defend a decision.</p><div class="actions"><a class="button primary" href="#upgrade">Build my lecture <span>↗</span></a><a class="textLink" href="#sources">Start with a sample source →</a></div><p class="fine">90 minutes · 20 cognitive jobs · Every release must pass both audits</p></div><div class="heroPreview" aria-label="Illustration of the lecture's learning sequence"><div class="paper"><div class="paperHeader"><span>ISCARB / LEARNING SEQUENCE</span><span>01—20</span></div><h2>From understanding<br>to a defensible decision.</h2><div class="sequence"><div><span>01—05</span><strong>Understand</strong><p>Frame the crisis. Predict before explaining.</p></div><div><span>06—10</span><strong>Practise</strong><p>Use the mechanism. Test the evidence.</p></div><div><span>11—15</span><strong>Master</strong><p>Apply constraints. Own the consequences.</p></div><div><span>16—20</span><strong>Distinguish</strong><p>Build, adapt, assess, and defend.</p></div></div><div class="paperFoot"><span>PRIMARY SOURCE → LEARNER EVIDENCE</span><span>↗</span></div></div><span class="previewCaption">A learning sequence, not twenty empty slides.</span></div></section>
-<div class="principleBar shell"><p><strong>Source first</strong><span>Technical claims stay anchored to P1.</span></p><p><strong>Content preserved</strong><span>Definitions, lists, examples, and figures matter.</span></p><p><strong>Readiness earned</strong><span>A review draft is never labelled verified.</span></p></div>
 
-<section class="shell section" id="sources"><div class="sectionHeading"><div><p class="eyebrow">01 / CHOOSE YOUR MATERIAL</p><h2>A better starting point.</h2></div><p>Original CIMT PDFs from the CPIT archive. Direct files preserve source pages and figures; upload your own lecture below for a different topic.</p></div><div class="sourceGrid" id="sourceGrid"></div><a class="textLink archiveLink" href="https://adeebnoor.github.io/CPIT/cimt.html" target="_blank" rel="noopener noreferrer">Browse the complete CIMT archive ↗</a></section>
+<section class="hero shell">
+  <div>
+    <h1>
+      <span lang="ar" dir="rtl" data-lang="ar">حوّل أي محاضرة إلى تجربة تعليمية <em>هندسية</em></span>
+      <span data-lang="en">Turn any lecture into a defendable <em>learning experience.</em></span>
+    </h1>
+    <svg class="rule" width="240" height="10" viewBox="0 0 240 10" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+      <path d="M2 5h44M62 5h50M128 5h50M194 5h44"/><circle cx="54" cy="5" r="3"/><circle cx="120" cy="5" r="3"/><circle cx="186" cy="5" r="3"/>
+    </svg>
+    <p class="heroSub">
+      <span lang="ar" dir="rtl" data-lang="ar">من مصدر موثوق إلى تجربة صفية جاهزة للدفاع.</span>
+      <span data-lang="en">From trusted source to classroom experience—ready to defend.</span>
+    </p>
+    <div class="actions">
+      <a class="button primary" href="#upgrade">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 4v10M12 4l-4 4M12 4l4 4M4.5 17.5v2h15v-2"/></svg>
+        Upgrade My Lecture
+      </a>
+      <a class="button" href="#sources">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5.5h7v13H4zM13 5.5h7v13h-7z"/></svg>
+        Explore Library
+      </a>
+    </div>
+  </div>
 
-<section class="builderSection" id="upgrade"><div class="shell"><div class="sectionHeading"><div><p class="eyebrow">02 / BUILD & AUDIT</p><h2>Give your lecture a stronger structure.</h2></div><p>One primary source defines the technical scope. Supporting material may clarify it, but cannot silently replace it.</p></div><div class="builderGrid"><div class="builder"><form id="compileForm"><div class="formHeading"><h3>Primary source <span>P1</span></h3><span>Choose a file or a public link</span></div><label class="dropzone" id="dropzone" for="primaryFile"><span class="uploadIcon">↑</span><strong id="fileName">Drop your lecture here</strong><span>or choose a file · PDF, PPTX, DOCX, TXT, MD</span><input type="file" id="primaryFile" accept=".pdf,.pptx,.docx,.txt,.md"><small>Original PDF recommended for faithful figures.</small></label><div class="or"><span>OR USE A PUBLIC LINK</span></div><label for="primaryUrl">Primary source URL</label><input type="url" id="primaryUrl" placeholder="https://example.edu/lecture.pdf"><p class="hint" id="sourceHint">Direct PDF links retain source visuals. Some presentation hosts restrict image access.</p><div class="field"><label for="focus">What would you like to emphasise? <span class="optional">Optional</span></label><textarea id="focus" rows="2" placeholder="For example: help students distinguish reliability from availability."></textarea><p class="hint">Emphasis changes the teaching approach, not the mandatory source coverage.</p></div><div class="field modeChoice"><label for="model">How would you like to work?</label><select id="model" aria-describedby="modeHint"><option value="source-only" selected>Free workspace · no API calls</option><option value="free">Optional AI · Gemini free-tier quota</option></select><p class="hint" id="modeHint">No API key, credits, or payment needed. Create a source-preserving review draft, download an authoring prompt, then import your edited Blueprint.</p><label class="freeConfirm" id="freeConfirmLabel" hidden><input id="freeConfirm" type="checkbox"> I confirm this website’s Gemini project is on the unpaid Free Tier.</label><p class="hint" id="freeWarning" hidden>AI uses Gemini 3.5 Flash-Lite and stops at quota errors. The website cannot verify your billing tier; an already-billed project can incur charges. Use the no-API workspace for zero API usage. Free-tier data may be used by Google to improve products; do not send confidential material.</p></div><details class="advanced"><summary>Supporting sources & generation settings <span>+</span></summary><div class="grid2"><div class="field"><label for="supportFiles">Supporting files</label><input type="file" id="supportFiles" multiple accept=".pdf,.pptx,.docx,.txt,.md"></div><div class="field"><label for="supportUrls">Supporting URLs</label><textarea id="supportUrls" rows="2" placeholder="One URL per line"></textarea></div><div class="field"><label for="repair">Automatic repair rounds</label><select id="repair"><option selected>0</option><option>1</option></select></div></div></details><div id="formError" class="error" role="alert" aria-live="assertive"></div><button type="submit" class="button primary compileBtn" id="compileBtn">Create free review draft <span>↗</span></button><p class="privacyNote">Files and results are temporary and may disappear after a server restart. Download the outputs you want to keep.</p></form></div><aside class="builderAside"><p class="eyebrow">THE RELEASE CONTRACT</p><h3>Twenty units.<br>Twenty real jobs.</h3><p>A page count alone is not a quality check. The compiler checks each unit’s role, source coverage, evidence, and readable presentation.</p><ol class="checks"><li><span>01</span><div><strong>Lock the source</strong><p>Map primary topics and exact source coordinates.</p></div></li><li><span>02</span><div><strong>Build the learning sequence</strong><p>Teach major source material by Unit 15. Use the final five to demonstrate capability.</p></div></li><li><span>03</span><div><strong>Audit and repair</strong><p>Run deterministic checks and an independent semantic review.</p></div></li></ol><div class="reviewNote"><strong>What if a check fails?</strong><p>You receive a clearly marked review draft with failed checks exposed. It is not a verified lecture.</p></div><a class="textLink" href="/starter-kit">Read the 20-unit specification →</a></aside></div>
-<section class="status" id="status" hidden role="status" aria-live="polite" aria-atomic="true"><div class="statusTop"><div><span class="eyebrow">COMPILATION</span><h3 id="state">QUEUED</h3><p id="message">Preparing your source…</p></div><strong id="pct">0%</strong></div><div class="barTrack" role="progressbar" aria-label="Compilation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div id="bar"></div></div><p class="error" id="error" role="alert" aria-live="assertive"></p><button type="button" class="textLink" id="retryPoll" hidden>Reconnect to this job →</button></section>
-<section class="result" id="result" hidden><div class="resultTop"><div><p class="eyebrow">03 / YOUR LECTURE WORKSPACE</p><h2 id="lectureTitle"></h2></div><span class="badge" id="releaseBadge"></span></div><p id="resultSummary"></p><div class="metrics" id="metrics"></div><div class="outputAssets" id="outputAssets"></div><section class="manualWorkspace" id="manualWorkspace" hidden aria-labelledby="manualTitle"><p class="eyebrow">FREE / NO API CALLS</p><h3 id="manualTitle">Edit your lecture without API credits.</h3><p>Download the authoring prompt and your original source. Use them in an authoring tool you already have access to, or edit the Blueprint JSON yourself. Import the completed JSON here; source files and figures stay attached.</p><p class="hint">Your authoring tool has its own limits. Import runs local checks, not an independent semantic audit. Imported lectures remain REVIEW DRAFTS.</p><a class="button" id="authoringPrompt" href="#">Download authoring prompt ↓</a><form id="importForm"><label for="blueprintFile">Completed Blueprint JSON</label><input type="file" id="blueprintFile" accept=".json,application/json" required><button class="button primary" id="importBtn" type="submit">Import & check locally</button><p class="error" id="importError" role="alert"></p></form></section><h3 class="subhead">The 20-unit check</h3><p class="hint">Open a unit to inspect its source, learner task, and exact check result.</p><div class="unitGrid" id="unitGrid"></div><details class="auditDetails" id="auditDetails"><summary>Audit details <span id="failureCount"></span></summary><div id="gates"></div><ul id="failureList"></ul></details><details class="auditDetails"><summary>Primary-source coverage ledger</summary><div class="tableScroll"><table><thead><tr><th>Source element</th><th>Source</th><th>First taught</th><th>Status</th></tr></thead><tbody id="coverageBody"></tbody></table></div></details></section>
-</div></section>
-<section class="shell section" id="outputs"><div class="sectionHeading"><div><p class="eyebrow">READY FOR THE CLASSROOM WORKFLOW</p><h2>One lecture. A complete teaching kit.</h2></div><p>Preview the actual PDF layout, edit the PowerPoint, and inspect the reasoning behind every unit.</p></div><div class="deliverables"><article><span>01 / PRESENT</span><h3>Visual Presenter</h3><p>20 units with source figures, complete statements, and visible learner tasks.</p><small>EDITABLE PPTX · PDF · PREVIEW</small></article><article><span>02 / PREPARE</span><h3>Faculty materials</h3><p>A detailed reading pack and instructor guide preserve the full argument and teaching notes.</p><small>PDF · DOCX</small></article><article><span>03 / PRACTISE & VERIFY</span><h3>Student pack & Blueprint</h3><p>Activities for the learner. A structured coverage and provenance record for the educator.</p><small>DOCX · JSON</small></article></div></section>
-</main><footer class="shell footer"><a class="brand" href="#home"><strong>ISCARB</strong><span>Built for meaningful teaching.</span></a><p>Source fidelity · Engineering judgment · Evidence<br><small>Project identity only; no institutional endorsement implied.</small></p></footer>
-</body></html>
+  <div class="heroArt" aria-hidden="true">
+    <svg viewBox="0 0 720 400" role="presentation">
+      <defs>
+        <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#d8a86a"/><stop offset="1" stop-color="#8a5a2f"/>
+        </linearGradient>
+        <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#e0b57c"/><stop offset="1" stop-color="#9c6636"/>
+        </linearGradient>
+      </defs>
+      <!-- Najdi mud-brick fort -->
+      <g fill="url(#wall)">
+        <path d="M300 175h150v170H300z"/>
+        <path d="M452 205h96v140h-96z" opacity=".92"/>
+        <path d="M255 235h44v110h-44z" opacity=".85"/>
+      </g>
+      <g fill="#7d4f28" opacity=".55">
+        <rect x="322" y="215" width="16" height="26" rx="2"/><rect x="352" y="215" width="16" height="26" rx="2"/>
+        <rect x="382" y="215" width="16" height="26" rx="2"/><rect x="412" y="215" width="16" height="26" rx="2"/>
+        <rect x="475" y="243" width="14" height="24" rx="2"/><rect x="505" y="243" width="14" height="24" rx="2"/>
+        <rect x="350" y="285" width="34" height="60" rx="3"/>
+      </g>
+      <!-- crenellations -->
+      <g fill="#e6bd85">
+        <path d="M300 168h12l6-14 6 14h12l6-14 6 14h12l6-14 6 14h12l6-14 6 14h12l6-14 6 14h12l6-14 6 14h12v9H300z"/>
+        <path d="M452 198h10l5-12 5 12h10l5-12 5 12h10l5-12 5 12h10l5-12 5 12h11v8h-96z"/>
+        <path d="M255 228h9l5-11 5 11h9l5-11 5 11h9v8h-47z"/>
+      </g>
+      <!-- palms -->
+      <g stroke="#caa06a" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M568 345v-52"/><path d="M568 293c-14-9-26-8-34-1M568 293c14-9 26-8 34-1M568 293c-9-14-8-25-2-32M568 293c9-14 8-25 2-32"/>
+        <path d="M604 345v-38"/><path d="M604 307c-11-7-20-6-26-1M604 307c11-7 20-6 26-1M604 307c-7-11-6-19-2-24"/>
+      </g>
+      <!-- dune -->
+      <path d="M0 345c120-26 210-14 300 0s230 24 420-8v63H0z" fill="url(#sand)"/>
+      <!-- camel caravan -->
+      <g fill="#4e3018">
+        <g transform="translate(60,286) scale(1.55)">
+          <path d="M4 30V17c0-5 4-8 9-8h7l4-7 4 7h8c5 0 8 3 8 8v13h-5V21c-4 3-8 4-13 4s-9-1-13-4v9z"/>
+          <path d="M8 30h3.5v13H8zM18 30h3.5v13H18zM28 30h3.5v13H28zM37 30h3.5v13H37z"/>
+          <path d="M39 9c2-3 5-4 7-3-2 1-3 3-3 5z"/>
+        </g>
+        <g transform="translate(196,296) scale(1.5)">
+          <path d="M4 30V17c0-5 4-8 9-8h7l4-7 4 7h8c5 0 8 3 8 8v13h-5V21c-4 3-8 4-13 4s-9-1-13-4v9z"/>
+          <path d="M8 30h3.5v13H8zM18 30h3.5v13H18zM28 30h3.5v13H28zM37 30h3.5v13H37z"/>
+          <path d="M39 9c2-3 5-4 7-3-2 1-3 3-3 5z"/>
+        </g>
+        <g transform="translate(330,304) scale(1.42)">
+          <path d="M4 30V17c0-5 4-8 9-8h7l4-7 4 7h8c5 0 8 3 8 8v13h-5V21c-4 3-8 4-13 4s-9-1-13-4v9z"/>
+          <path d="M8 30h3.5v13H8zM18 30h3.5v13H18zM28 30h3.5v13H28zM37 30h3.5v13H37z"/>
+          <path d="M39 9c2-3 5-4 7-3-2 1-3 3-3 5z"/>
+        </g>
+        <!-- driver walking ahead of the caravan -->
+        <g transform="translate(22,292) scale(1.35)">
+          <circle cx="10" cy="4" r="4.4"/>
+          <path d="M4.6 10h10.8l3.2 33h-5.4l-2.9-17-3.1 17H1.4z"/>
+        </g>
+      </g>
+      <!-- rosette motif -->
+      <g stroke="#c2185b" stroke-width="1.6" fill="none" opacity=".85" transform="translate(470,60)">
+        <circle cx="0" cy="0" r="9"/><circle cx="0" cy="0" r="26"/>
+        <path d="M0-46C13-30 13-16 0 0 -13-16 -13-30 0-46zM0 46C13 30 13 16 0 0 -13 16 -13 30 0 46zM-46 0C-30 13-16 13 0 0-16-13-30-13-46 0zM46 0C30 13 16 13 0 0 16-13 30-13 46 0z"/>
+        <path d="M-33-33C-19-25-8-14 0 0-14-8-25-19-33-33zM33 33C19 25 8 14 0 0 14 8 25 19 33 33zM33-33C25-19 14-8 0 0 8-14 19-25 33-33zM-33 33C-25 19-14 8 0 0-8 14-19 25-33 33z"/>
+      </g>
+    </svg>
+
+    <div class="floatCard card-a">
+      <b>Lecture Blueprint <i>⌄</i></b>
+      <div class="rows"><span></span><span></span><span></span></div>
+    </div>
+    <div class="floatCard card-b">
+      <b>Lecture Outputs <i>✕</i></b>
+      <div class="chips"><i>▤</i><i>▣</i><i>▦</i><i>◫</i></div>
+    </div>
+    <div class="floatCard card-c">
+      <b>Evidence &amp; Alignment <i>✓</i></b>
+      <div class="bars"><i style="height:40%"></i><i style="height:65%"></i><i style="height:52%"></i><i style="height:88%"></i><i style="height:70%"></i><i style="height:96%"></i></div>
+    </div>
+  </div>
+</section>
+
+<section class="section shell" id="sources">
+  <div class="sectionHead">
+    <div>
+      <h2><span class="ornament">❦</span><span lang="ar" dir="rtl" data-lang="ar">مكتبة المصادر الأصلية</span><span data-lang="en">Original Source Library</span></h2>
+      <p><span lang="ar" dir="rtl" data-lang="ar">ابدأ من مصادر موثوقة وقابلة للاقتباس ومتوائمة سعوديًا.</span><span data-lang="en">Start from trusted, citable, Saudi-aligned sources.</span></p>
+    </div>
+    <a class="viewAll" href="https://adeebnoor.github.io/CPIT/cimt.html" target="_blank" rel="noopener noreferrer">View all ›</a>
+  </div>
+  <div class="libraryRow" id="sourceGrid"></div>
+</section>
+
+<section class="section shell" id="upgrade">
+  <div class="buildGrid">
+    <div class="panel">
+      <h2><span lang="ar" dir="rtl" data-lang="ar">طوّر محاضرتي</span><span data-lang="en">Upgrade My Lecture</span></h2>
+      <p class="lede"><span lang="ar" dir="rtl" data-lang="ar">ارفع مصدرك أو ألصق رابطه. نتكفّل بالباقي.</span><span data-lang="en">Upload or link your source. We handle the rest.</span></p>
+      <form id="compileForm">
+        <div class="dropRow">
+          <label class="dropzone" id="dropzone" for="primaryFile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 16V5M12 5L8 9M12 5l4 4M4 15v4h16v-4"/></svg>
+            <strong id="fileName">Drag &amp; drop your file here</strong>
+            <span>or click to browse</span>
+            <input type="file" id="primaryFile" accept=".pdf,.pptx,.docx,.txt,.md">
+            <small>PDF, PPTX, DOCX (max 25MB)</small>
+          </label>
+          <div class="linkSide">
+            <span class="or">— or paste a public link</span>
+            <label for="primaryUrl">Primary source URL</label>
+            <input type="url" id="primaryUrl" placeholder="https://example.com/lecture">
+            <p class="hint" id="sourceHint">Direct PDF links retain source visuals. Some presentation hosts restrict image access.</p>
+            <button type="submit" class="button primary analyze" id="compileBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>
+              Analyze Source
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="focus">What would you like to emphasise? <span class="optional">Optional</span></label>
+          <textarea id="focus" rows="2" placeholder="For example: help students distinguish reliability from availability."></textarea>
+          <p class="hint">Emphasis changes the teaching approach, not the mandatory source coverage.</p>
+        </div>
+
+        <div class="modeChoice">
+          <label for="model">How would you like to work?</label>
+          <select id="model" aria-describedby="modeHint">
+            <option value="source-only" selected>Free workspace · no API calls</option>
+            <option value="free">Optional AI · Gemini free-tier quota</option>
+          </select>
+          <p class="hint" id="modeHint">No API key, credits, or payment needed. Create a source-preserving review draft, download an authoring prompt, then import your edited Blueprint.</p>
+          <label class="freeConfirm" id="freeConfirmLabel" hidden><input id="freeConfirm" type="checkbox"> I confirm this website’s Gemini project is on the unpaid Free Tier.</label>
+          <p class="hint" id="freeWarning" hidden>AI uses Gemini 3.5 Flash-Lite and stops at quota errors. The website cannot verify your billing tier; an already-billed project can incur charges. Use the no-API workspace for zero API usage. Free-tier data may be used by Google to improve products; do not send confidential material.</p>
+        </div>
+
+        <details class="advanced">
+          <summary>Supporting sources &amp; generation settings <span aria-hidden="true">+</span></summary>
+          <div class="grid2">
+            <div><label for="supportFiles">Supporting files</label><input type="file" id="supportFiles" multiple accept=".pdf,.pptx,.docx,.txt,.md"></div>
+            <div><label for="supportUrls">Supporting URLs</label><textarea id="supportUrls" rows="2" placeholder="One URL per line"></textarea></div>
+            <div><label for="repair">Automatic repair rounds</label><select id="repair"><option selected>0</option><option>1</option></select></div>
+          </div>
+        </details>
+
+        <p class="error" id="formError" role="alert" aria-live="assertive"></p>
+        <p class="privacyNote">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"/></svg>
+          Your content is secure and used only for academic enhancement.
+        </p>
+      </form>
+    </div>
+
+    <aside class="panel" id="about">
+      <p class="eyebrow">THE RELEASE CONTRACT</p>
+      <h2><span lang="ar" dir="rtl" data-lang="ar">عشرون وحدة، عشرون مهمة حقيقية</span><span data-lang="en">Twenty units. Twenty real jobs.</span></h2>
+      <p class="lede">A page count is not a quality check. The compiler checks each unit’s role, source coverage, evidence, and readable presentation.</p>
+      <ol class="checks">
+        <li><span>01</span><div><strong>Lock the source</strong><p>Map primary topics and exact source coordinates.</p></div></li>
+        <li><span>02</span><div><strong>Build the learning sequence</strong><p>Teach major source material by Unit 15. Use the final five to demonstrate capability.</p></div></li>
+        <li><span>03</span><div><strong>Audit and repair</strong><p>Run deterministic checks and an independent semantic review.</p></div></li>
+      </ol>
+      <p class="hint"><strong>What if a check fails?</strong> You receive a clearly marked review draft with the failed checks exposed. It is not a verified lecture.</p>
+    </aside>
+  </div>
+
+  <section class="status" id="status" hidden role="status" aria-live="polite" aria-atomic="true">
+    <div class="statusTop">
+      <div><p class="eyebrow">COMPILATION</p><h3 id="state">QUEUED</h3><p id="message">Preparing your source…</p></div>
+      <strong id="pct">0%</strong>
+    </div>
+    <div class="barTrack" role="progressbar" aria-label="Compilation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div id="bar"></div></div>
+    <p class="error" id="error" role="alert" aria-live="assertive"></p>
+    <button type="button" class="button" id="retryPoll" hidden>Reconnect to this job →</button>
+  </section>
+
+  <section class="result" id="result" hidden>
+    <div class="resultTop">
+      <div><p class="eyebrow">YOUR LECTURE WORKSPACE</p><h2 id="lectureTitle"></h2></div>
+      <span class="badge" id="releaseBadge"></span>
+    </div>
+    <p id="resultSummary"></p>
+    <div class="metrics" id="metrics"></div>
+    <div class="outputAssets" id="outputAssets"></div>
+
+    <section class="manualWorkspace" id="manualWorkspace" hidden aria-labelledby="manualTitle">
+      <p class="eyebrow">FREE / NO API CALLS</p>
+      <h3 id="manualTitle">Edit your lecture without API credits.</h3>
+      <p>Download the authoring prompt and your original source. Use them in an authoring tool you already have access to, or edit the Blueprint JSON yourself. Import the completed JSON here; source files and figures stay attached.</p>
+      <p class="hint">Your authoring tool has its own limits. Import runs local checks, not an independent semantic audit. Imported lectures remain REVIEW DRAFTS.</p>
+      <a class="button" id="authoringPrompt" href="#">Download authoring prompt ↓</a>
+      <form id="importForm">
+        <label for="blueprintFile">Completed Blueprint JSON</label>
+        <input type="file" id="blueprintFile" accept=".json,application/json" required>
+        <button class="button primary" id="importBtn" type="submit">Import &amp; check locally</button>
+        <p class="error" id="importError" role="alert"></p>
+      </form>
+    </section>
+
+    <h3 class="subhead">The 20-unit check</h3>
+    <p class="hint">Open a unit to inspect its source, learner task, and exact check result.</p>
+    <div class="unitGrid" id="unitGrid"></div>
+    <details class="auditDetails" id="auditDetails">
+      <summary>Audit details <span id="failureCount"></span></summary>
+      <div id="gates"></div>
+      <ul id="failureList"></ul>
+    </details>
+    <details class="auditDetails">
+      <summary>Primary-source coverage ledger</summary>
+      <div class="tableScroll"><table><thead><tr><th>Source element</th><th>Source</th><th>First taught</th><th>Status</th></tr></thead><tbody id="coverageBody"></tbody></table></div>
+    </details>
+  </section>
+</section>
+
+<section class="section shell" id="outputs">
+  <div class="sectionHead">
+    <div>
+      <h2><span class="ornament">❦</span><span lang="ar" dir="rtl" data-lang="ar">ماذا يحصل عليه عضو هيئة التدريس</span><span data-lang="en">What Faculty Get</span></h2>
+      <p><span lang="ar" dir="rtl" data-lang="ar">خمسة مخرجات قابلة للدفاع — متوائمة ومنظّمة وجاهزة للتدريس.</span><span data-lang="en">Five defendable outputs—aligned, structured, and ready to teach.</span></p>
+    </div>
+  </div>
+  <div class="outputRow">
+    <article class="output"><span class="num">01</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M9 20h6M12 17v3M6 8h7M6 11h5"/></svg>
+      <h3>Visual Presenter</h3><p>Slide deck with the original source pages, diagrams and speaking notes.</p></article>
+    <article class="output"><span class="num">02</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5.5c3-1.3 5.3-1.3 8 0v13c-2.7-1.3-5-1.3-8 0zM20 5.5c-3-1.3-5.3-1.3-8 0v13c2.7-1.3 5-1.3 8 0z"/></svg>
+      <h3>Faculty Reading Pack</h3><p>Curated readings with summaries, key takeaways &amp; citations.</p></article>
+    <article class="output"><span class="num">03</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <h3>Instructor Guide</h3><p>Lesson flow, timing plan, checks &amp; facilitation tips.</p></article>
+    <article class="output"><span class="num">04</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8.5" cy="9" r="3"/><circle cx="16" cy="10.5" r="2.4"/><path d="M3 19c.7-3 2.9-4.5 5.5-4.5S13.3 16 14 19M15 19c.4-2.2 1.9-3.4 3.6-3.4S21.6 16.8 22 19"/></svg>
+      <h3>Student Activity Pack</h3><p>Worksheets, problem sets &amp; team activities.</p></article>
+    <article class="output"><span class="num">05</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l7.5 3v6c0 5-3.2 8-7.5 9-4.3-1-7.5-4-7.5-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>
+      <h3>Blueprint &amp; Readiness</h3><p>Alignment map, evidence report &amp; class readiness checklist.</p></article>
+  </div>
+</section>
+</main>
+
+<section class="principles" aria-label="Design principles">
+  <div class="principle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h6M15.5 16.5l1.6 1.6 3-3.2"/></svg>
+    <div><strong><span lang="ar" dir="rtl" data-lang="ar">أمانة المصدر</span><span data-lang="en">Source Fidelity</span></strong><span>We cite what we use.</span></div>
+  </div>
+  <div class="principle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4.4l2.8 2M9 2.5h6"/></svg>
+    <div><strong><span lang="ar" dir="rtl" data-lang="ar">هيكلة ٩٠ دقيقة</span><span data-lang="en">90-Minute Structure</span></strong><span>Engaging, focused, achievable.</span></div>
+  </div>
+  <div class="principle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l6 3v6c0 4.4-2.6 7.2-6 8-3.4-.8-6-3.6-6-8V6z"/><path d="M12 8v5M12 15.6v.6"/></svg>
+    <div><strong><span lang="ar" dir="rtl" data-lang="ar">قائم على الدليل</span><span data-lang="en">Evidence First</span></strong><span>Outcomes, data &amp; references.</span></div>
+  </div>
+  <div class="principle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.4l2.7 2.7L16.2 9"/></svg>
+    <div><strong><span lang="ar" dir="rtl" data-lang="ar">جاهزية للتدريس</span><span data-lang="en">Teaching Readiness</span></strong><span>Practical, clear, classroom-ready.</span></div>
+  </div>
+  <div class="principle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5l3 4.2 5-1-1 5 4.2 3-4.2 3 1 5-5-1-3 4.2-3-4.2-5 1 1-5-4.2-3 4.2-3-1-5 5 1z"/></svg>
+    <div><strong><span lang="ar" dir="rtl" data-lang="ar">مواءمة ثقافية</span><span data-lang="en">Cultural Alignment</span></strong><span>Rooted in Saudi context &amp; values.</span></div>
+  </div>
+</section>
+
+<footer class="footer shell">
+  <div><strong>ISCARB Faculty Studio</strong><br>Built for meaningful teaching.</div>
+  <div>Source fidelity · Engineering judgment · Evidence<br>Project identity only; no institutional endorsement implied.</div>
+</footer>
+</body>
+</html>
