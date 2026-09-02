@@ -525,6 +525,49 @@ class LongTokenWrapTests(unittest.TestCase):
         self.assertTrue(_overflows(blocks))
 
 
+class SourceTextTests(unittest.TestCase):
+    """A teaching slide shows the source's own sentences, not just its title."""
+
+    LECTURE = LECTURES / "CPIT455-class5-NooR.pdf"
+
+    def test_focus_phrase_never_slots_a_clause_as_a_noun(self):
+        from app.deterministic_blueprint_fallback import _focus_phrase
+        # A declarative heading is quoted, not dropped into noun position.
+        self.assertEqual(_focus_phrase("People are the weakest link"),
+                         'the source\'s point that "people are the weakest link"')
+        # A colon heading keeps the teachable subject before the colon.
+        self.assertEqual(_focus_phrase("Software Security: why matters"), "Software Security")
+        # A genuine noun phrase is used directly.
+        self.assertEqual(_focus_phrase("Security terminology"), "Security terminology")
+
+    def test_no_teaching_question_reads_as_broken_english(self):
+        _profile, bp, _checks = _draft(self.LECTURE)
+        for unit in bp.units:
+            if 6 <= unit.number <= 15:
+                with self.subTest(unit=unit.number):
+                    # The clause-as-noun bug produced "How does People are the
+                    # weakest link actually work"; a quoted claim never does.
+                    q = unit.engineering_question
+                    self.assertNotRegex(q, r"\b(How|Where|What) (does|is|are) [A-Z][a-z]+ (are|is) ")
+
+    def test_a_source_slide_prints_the_source_s_own_sentences(self):
+        from app.presenter_v44 import source_highlights, clean
+        _profile, bp, _checks = _draft(self.LECTURE)
+        shown = 0
+        for unit in bp.units:
+            if not 6 <= unit.number <= 15:
+                continue
+            highlights = source_highlights(unit)
+            core = [clean(c) for c in unit.core_content]
+            for _label, body in highlights:
+                # Each highlight is a real source sentence taken from the unit's
+                # own core content, never an ISCARB scaffold line.
+                with self.subTest(unit=unit.number):
+                    self.assertTrue(any(body in c or body == c for c in core), body)
+            shown += 1 if highlights else 0
+        self.assertGreaterEqual(shown, 6, "most teaching units should surface a source sentence")
+
+
 class SourcePictureTests(unittest.TestCase):
     """A lecture page that is mostly picture is projected as the picture."""
 

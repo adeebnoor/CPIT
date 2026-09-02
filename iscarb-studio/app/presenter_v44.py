@@ -506,10 +506,47 @@ def overlay_layout(items, source, plan=None):
     return None
 
 
+# The source's own sentences are the thing the slide teaches. On a side-by-side
+# slide the page is shown small, so the sentences the unit is built on are also
+# printed as text - the student reads the source, not only a shrunk picture of
+# it. Diagram pages extract as label soup ("Poor P&P Complex systems"), which is
+# not a sentence, so only entries that read as one are shown.
+_SOURCE_SENTENCE = re.compile(r"[a-z].*[a-z]", re.IGNORECASE)
+MIN_SOURCE_HIGHLIGHT_WORDS = 5
+MAX_SOURCE_HIGHLIGHT_WORDS = 26
+MAX_SOURCE_HIGHLIGHTS = 2
+
+
+def _reads_as_sentence(text: str) -> bool:
+    words = text.split()
+    if not (MIN_SOURCE_HIGHLIGHT_WORDS <= len(words) <= MAX_SOURCE_HIGHLIGHT_WORDS):
+        return False
+    if ":" in text and _SOURCE_SENTENCE.search(text.split(":", 1)[1]):
+        return True
+    lowers = sum(1 for w in words if w[:1].islower())
+    return lowers >= max(2, len(words) // 2)
+
+
+def source_highlights(u) -> list[tuple[str, str]]:
+    """Up to two real source sentences the unit is built on, for display as text."""
+    out = []
+    for raw in u.core_content:
+        text = clean(raw)
+        text = re.sub(r"^\[P1\][^\u2014-]*[\u2014-]\s*", "", text).strip()
+        if _reads_as_sentence(text) and text not in {b for _, b in out}:
+            # One header, then continuation lines - two "FROM THE SOURCE" labels
+            # stacked read as a mistake rather than as one source excerpt.
+            out.append(("FROM THE SOURCE" if not out else "", text))
+        if len(out) >= MAX_SOURCE_HIGHLIGHTS:
+            break
+    return out
+
+
 def unit_layout(bp, u, plan=None):
     source = exact_source_path(u, plan)
     if source:
         items = [("ENGINEERING QUESTION", clean(u.engineering_question)),
+                 *source_highlights(u),
                  *[split_item(x) for x in u.pedagogy_content if clean(x)],
                  *contextual_items(u),
                  ("YOUR TASK", clean(u.student_action))]
