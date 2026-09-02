@@ -265,7 +265,7 @@ def _page_importance(label: str, lines: list[str], page_no: int) -> str:
         "key clo", "availability: system is ready", "to master today's lesson",
         "ai era", "ai revolution", "aligning with industry trends", "keeping up with trends",
         "example", "ex;", "remember", "cautionary tale", "how to show this",
-        "topics covered", "key points",
+        "topics covered", "key points", "references", "exercises", "further reading",
     )
     slide_no = _embedded_slide_number(label)
     if page_no == 1 or slide_no == 1 or any(m in low for m in support_markers):
@@ -287,19 +287,250 @@ def _page_importance(label: str, lines: list[str], page_no: int) -> str:
     return "major" if len(content_lines) >= 4 and len(" ".join(content_lines).split()) >= 28 else "supporting"
 
 
+class Chunk(tuple):
+    """One coverage chunk: (idx, label, excerpt), plus the source pages it spans.
+
+    A slide deck chunks one page at a time, so the index is the page. A book
+    chapter chunks by section, and a section runs over several pages; the pages
+    travel with the chunk so the anchor can cite all of them while the tuple
+    shape every existing caller unpacks stays the same.
+    """
+    pages: tuple[int, ...]
+
+    def __new__(cls, idx: int, label: str, excerpt: str, pages=()):
+        obj = super().__new__(cls, (idx, label, excerpt))
+        obj.pages = tuple(pages) or (idx,)
+        return obj
+
+
 def _pdf_chunks(path: Path) -> list[tuple[int, str, str]]:
     from pypdf import PdfReader
     reader = PdfReader(str(path))
-    out: list[tuple[int, str, str]] = []
+    pages: list[tuple[int, list[str]]] = []
     for i, page in enumerate(reader.pages, 1):
         text = page.extract_text() or ""
         lines = _meaningful_lines(text)
-        if not lines:
-            continue
+        if lines:
+            pages.append((i, lines))
+    if _looks_like_book(pages):
+        # pypdf breaks kerned words apart ("soft ware", "engi neering") on
+        # typeset book pages; PyMuPDF reads the same pages cleanly. Decks keep
+        # the pypdf lines their furniture rules were tuned on.
+        return _section_chunks(_fitz_page_lines(path) or pages)
+    out: list[tuple[int, str, str]] = []
+    for position, (i, lines) in enumerate(pages):
         label = _choose_label(lines, i)
-        excerpt = " · ".join(x for x in lines if not _is_furniture_line(x))
-        out.append((i, label, excerpt))
+        body = [x for x in lines if not _is_furniture_line(x)]
+        following = pages[position + 1][1] if position + 1 < len(pages) else []
+        excerpt = " · ".join(_carry_dangling_tail(body, [x for x in following if not _is_furniture_line(x)]))
+        out.append(Chunk(i, label, excerpt))
     return out
+
+
+# The page ended, the sentence did not. Nothing on this page can complete it, so
+# the statement reached the slide as "...the infrastructure is configured to".
+MAX_CARRIED_LINES = 2
+
+
+def _carry_dangling_tail(body: list[str], following: list[str]) -> list[str]:
+    """Complete a page's last sentence from the page that continues it."""
+    if not body or not following:
+        return body
+    tail = body[-1].rstrip()
+    if not _DANGLING_TAIL.search(tail.rstrip(".")) or tail.endswith((".", "!", "?", ":")):
+        return body
+    carried = tail
+    for line in following[:MAX_CARRIED_LINES]:
+        carried = f"{carried} {line.strip()}"
+        if carried.rstrip().endswith((".", "!", "?")):
+            break
+    return [*body[:-1], carried]
+
+
+# A book chapter is not a slide deck: its unit of meaning is the section, not
+# the page. Chunking it by page gave every teaching slot a heading that was the
+# first wrapped line of prose on some page ("attack. / 14.3 I System
+# survivability") and split each section across two or three slots. The
+# instructor's own decks title each slide with the section it teaches; a chapter
+# is chunked the same way.
+MIN_BOOK_PAGES = 6
+MIN_BOOK_WORDS_PER_PAGE = 200
+BOOK_HEADER_SHARE = 0.5
+MAX_SECTION_WORDS = 900
+MAX_EXCERPT_CHARS = 3200
+_RUNNING_HEADER_GLYPH = re.compile(r"^\d{1,2}(?:\.\d+)*\s+I\s+\S")
+_SECTION_HEADING = re.compile(r"^(\d{1,2}\.\d+(?:\.\d+)?)\s+([A-Z][^.]{2,80})$")
+_ORDINAL_ONLY = re.compile(r"^\d{1,2}\.\d+(?:\.\d+)?$")
+_BACK_MATTER = ("references", "exercises", "further reading", "key points", "chapter summary", "summary")
+
+
+def _fitz_page_lines(path: Path) -> list[tuple[int, list[str]]]:
+    try:
+        import fitz
+        doc = fitz.open(str(path))
+    except Exception:
+        return []
+    pages: list[tuple[int, list[str]]] = []
+    try:
+        for i, page in enumerate(doc, 1):
+            lines = _meaningful_lines(page.get_text("text"))
+            if lines:
+                pages.append((i, lines))
+    finally:
+        doc.close()
+    return pages
+
+
+def _back_matter_name(line: str) -> str:
+    """"K E Y  P O I N T S" and "References" both name a back-matter block."""
+    text = str(line or "").strip().rstrip(":")
+    if not text or len(text) > 40:
+        return ""
+    compact = re.sub(r"\s+", "", text).lower()
+    names = {re.sub(r"\s+", "", x): x for x in _BACK_MATTER}
+    if compact in names and (text.isupper() or len(text.split()) <= 3):
+        return names[compact].title()
+    return ""
+
+
+def _is_running_header(line: str) -> bool:
+    text = str(line or "").strip()
+    if len(text.split()) < 2:
+        return False
+    edge_number = bool(_LEADING_PAGE_NO.search(text) or _TRAILING_PAGE_NO.search(text))
+    return edge_number or bool(_RUNNING_HEADER_GLYPH.match(text))
+
+
+def _looks_like_book(pages: list[tuple[int, list[str]]]) -> bool:
+    if len(pages) < MIN_BOOK_PAGES:
+        return False
+    words = sorted(sum(len(x.split()) for x in lines) for _n, lines in pages)
+    if words[len(words) // 2] < MIN_BOOK_WORDS_PER_PAGE:
+        return False
+    with_header = sum(1 for _n, lines in pages if any(_is_running_header(x) for x in lines[:3]))
+    return with_header / len(pages) >= BOOK_HEADER_SHARE
+
+
+def _join_wrapped(lines: list[str]) -> str:
+    """Rejoin lines the column width broke, restoring hyphenated words."""
+    text = ""
+    for line in lines:
+        if not text:
+            text = line
+        elif text.endswith("-") and line[:1].islower():
+            text = text[:-1] + line
+        else:
+            text = f"{text} {line}"
+    return text
+
+
+def _sentences(text: str) -> list[str]:
+    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z(\"\u201c])", " ".join(text.split()))
+    return [x.strip() for x in parts if x.strip()]
+
+
+def _recurring_lines(pages: list[tuple[int, list[str]]]) -> set[str]:
+    """Running headers by frequency, page-number-free, before any sectioning.
+
+    The edge-number rule catches "368 Chapter 14 I Security engineering"; a
+    reader that emits the header and its page number as separate lines leaves
+    "Chapter 14 I Security engineering" bare, and it opened every section's
+    first sentence. What makes it a header is that it is on half the pages.
+    """
+    counts: dict[str, int] = {}
+    for _n, lines in pages:
+        keys = set()
+        for line in lines[:4]:
+            keys |= _furniture_keys(line)
+        for key in keys:
+            counts[key] = counts.get(key, 0) + 1
+    threshold = max(3, int(len(pages) * RECURRING_FURNITURE_SHARE))
+    return {key for key, n in counts.items() if n >= threshold}
+
+
+def _section_chunks(pages: list[tuple[int, list[str]]]) -> list[Chunk]:
+    recurring = _recurring_lines(pages)
+
+    def is_header(line: str) -> bool:
+        return _is_running_header(line) or bool(_furniture_keys(line) & recurring)
+
+    first_page, first_lines = pages[0]
+    title = next((x for x in first_lines if not is_header(x) and not x.isdigit()), "Primary lecture")
+    title = _clean(title, 120)
+    # (label, [(line, page), ...]) in source order. The opener page is its own
+    # chunk; sections start from the second page, so a contents list on the
+    # opener never spawns empty sections.
+    sections: list[tuple[str, list[tuple[str, int]]]] = [(title, [(x, first_page) for x in first_lines if not is_header(x)])]
+    current_label = f"Introduction to {title}"
+    current: list[tuple[str, int]] = []
+    pending_ordinal = ""
+
+    def close():
+        nonlocal current
+        if current:
+            sections.append((current_label, current))
+        current = []
+
+    for page_no, lines in pages[1:]:
+        for line in lines:
+            if is_header(line):
+                continue
+            if _ORDINAL_ONLY.match(line):
+                pending_ordinal = line
+                continue
+            if pending_ordinal:
+                line = f"{pending_ordinal} {line}"
+                pending_ordinal = ""
+            heading = _SECTION_HEADING.match(line)
+            if heading and len(line.split()) <= 9:
+                close()
+                current_label = _clean(line, 120)
+                continue
+            back_matter = _back_matter_name(line)
+            if back_matter:
+                close()
+                current_label = back_matter
+                continue
+            current.append((line, page_no))
+    close()
+
+    out: list[Chunk] = []
+    for label, entries in sections:
+        for part_no, part in enumerate(_split_long_section(entries), 1):
+            part_label = label if part_no == 1 and len(entries) == len(part) else f"{label} (part {part_no})"
+            text = _join_wrapped([line for line, _p in part])
+            excerpt = " · ".join(_sentences(text))
+            if len(excerpt) > MAX_EXCERPT_CHARS:
+                excerpt = excerpt[:MAX_EXCERPT_CHARS].rsplit(" · ", 1)[0]
+            page_list = sorted({p for _l, p in part})
+            out.append(Chunk(len(out) + 1, part_label, excerpt, page_list))
+    return out
+
+
+def _split_long_section(entries: list[tuple[str, int]]) -> list[list[tuple[str, int]]]:
+    """Cut a section that outruns one teaching slot at a sentence boundary.
+
+    The design-guidelines section of a chapter runs to five pages; as one chunk
+    it would take one slot and lose most of itself to the canvas, while a thin
+    section next to it took a slot of its own.
+    """
+    total = sum(len(line.split()) for line, _p in entries)
+    if total <= MAX_SECTION_WORDS:
+        return [entries]
+    parts_wanted = -(-total // MAX_SECTION_WORDS)
+    target = total / parts_wanted
+    parts: list[list[tuple[str, int]]] = []
+    current: list[tuple[str, int]] = []
+    count = 0
+    for line, page in entries:
+        current.append((line, page))
+        count += len(line.split())
+        if count >= target and line.rstrip().endswith((".", "!", "?")) and len(parts) < parts_wanted - 1:
+            parts.append(current)
+            current, count = [], 0
+    if current:
+        parts.append(current)
+    return parts
 
 
 def _pptx_chunks(path: Path) -> list[tuple[int, str, str]]:
@@ -493,6 +724,15 @@ def _family_name(label: str) -> str:
     return " ".join(words).rstrip(" ,;:-") or str(label or "").strip()
 
 
+def _anchor_for_pages(coordinate: str, pages) -> str:
+    pages = sorted(set(int(x) for x in pages))
+    if len(pages) == 1:
+        return f"[P1] {coordinate} {pages[0]}"
+    if pages == list(range(pages[0], pages[-1] + 1)):
+        return f"[P1] {coordinate}S {pages[0]}\u2013{pages[-1]}"
+    return "; ".join(f"[P1] {coordinate} {x}" for x in pages)
+
+
 def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -> SourceProfile:
     primary = bundle.primary
     coordinate, chunks = _chunks(primary.path)
@@ -509,7 +749,9 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -
     families: list[TopicFamily] = []
     seen_family: set[str] = set()
     coverage: list[CoverageItem] = []
-    for idx, label, excerpt in chunks[:80]:
+    for chunk in chunks[:80]:
+        idx, label, excerpt = chunk
+        pages = tuple(getattr(chunk, "pages", ()) or (idx,))
         clean_label = _clean(label, 120) or f"Source {coordinate.title()} {idx}"
         if recurring and _furniture_keys(_display_label(clean_label)) & recurring:
             # A running header chosen as this slide's heading says nothing about
@@ -520,10 +762,11 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -
                     clean_label = _headline_from(candidates[position:position + 3])
                     break
         embedded_slide = _embedded_slide_number(clean_label)
-        anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else f"[P1] {coordinate} {idx}"
+        anchor = f"[P1] SLIDE {embedded_slide}" if embedded_slide else _anchor_for_pages(coordinate, pages)
         # The coordinate now lives in the anchor; the heading must read as prose.
         clean_label = _strip_page_coordinate(_display_label(clean_label)) or f"Source {coordinate.title()} {idx}"
-        key = re.sub(r"[^a-z0-9]+", " ", clean_label.lower()).strip()
+        # The parts of one long section are one family with several checkpoints.
+        key = re.sub(r"[^a-z0-9]+", " ", re.sub(r"\s*\(part \d+\)$", "", clean_label).lower()).strip()
         source_lines = _meaningful_lines(excerpt.replace(" · ", "\n"))
         importance = _page_importance(clean_label, source_lines, idx)
         is_title_like = importance == "supporting"
@@ -539,7 +782,7 @@ def build_deterministic_source_profile(bundle: SourceBundle, reason: str = "") -
         if key and key not in seen_family and not is_title_like and _is_heading_label(clean_label):
             seen_family.add(key)
             families.append(TopicFamily(
-                name=_family_name(clean_label),
+                name=_family_name(re.sub(r"\s*\(part \d+\)$", "", clean_label)),
                 source_anchor=anchor,
                 why_important=_clean(excerpt, 260),
             ))

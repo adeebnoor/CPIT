@@ -7,6 +7,7 @@ slides the renderer could not project. These tests hold that closed.
 """
 from __future__ import annotations
 
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -202,6 +203,200 @@ class SourceFidelityTests(unittest.TestCase):
         from app.source_visuals import anchor_slides
         single = [u.number for u in self.bp.units[5:15] if len(anchor_slides(u.source_anchor)) == 1]
         self.assertGreaterEqual(len(single), 9, "teaching slots lost their source pages")
+
+
+# A printed chapter, not a slide deck: running headers, numbered sections,
+# multi-page prose and captioned vector figures. Built here rather than checked
+# in, because the real textbook it stands for is not ours to redistribute.
+SECTIONS = [
+    ("13.1 Security risk management", [
+        "Security risk assessment and management is essential for effective security engineering.",
+        "Risk management is concerned with assessing the possible losses that might ensue from attacks.",
+        "Preliminary risk assessment identifies generic risks that apply to a system and decides whether",
+        "an adequate level of security can be achieved at a reasonable cost.",
+        "Life-cycle risk assessment takes place during system development and is principally concerned",
+        "with deriving the security requirements the delivered system has to satisfy in operation.",
+    ]),
+    ("13.2 Design for security", [
+        "Architectural design decisions affect the security of an application in ways that are hard to",
+        "reverse once the system has been built and deployed to its operational environment.",
+        "Protection is organized as a layered architecture where each layer protects the assets behind it.",
+        "Distribution decisions determine whether assets are located on a single or on several platforms.",
+        "Distributing assets reduces the losses that may arise from a single successful attack, although",
+        "it also increases the number of platforms an attacker may choose to target.",
+    ]),
+    ("13.3 System survivability", [
+        "Survivability is the ability of a system to continue to deliver services whilst under attack.",
+        "Survivability analysis identifies the critical services, the plausible attacks on them, and the",
+        "components that an attacker could compromise to deny those services to legitimate users.",
+        "Three complementary strategies for survivability are resistance, recognition and recovery.",
+        "Recovery matters most when an attack has already succeeded and the loss must be contained.",
+    ]),
+]
+
+
+# A printed page carries far more prose than a slide; the density is what tells
+# the profiler it is reading a book rather than a deck.
+BODY_LINES_PER_PAGE = 34
+
+
+def _prose(lines: list[str], count: int) -> list[str]:
+    """Distinct lines: the profiler drops repeats, and a page of repeats is thin."""
+    openers = ["In practice,", "For this reason,", "As a result,", "In the same way,", "By contrast,", "More precisely,"]
+    out = []
+    while len(out) < count:
+        opener = openers[len(out) // max(1, len(lines)) % len(openers)]
+        line = lines[len(out) % len(lines)]
+        out.append(f"{opener} {line[0].lower()}{line[1:]}" if len(out) >= len(lines) else line)
+        if len(out) >= count:
+            break
+    return out
+
+
+def _write_chapter(path: Path) -> Path:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas as pdf_canvas
+    c = pdf_canvas.Canvas(str(path), pagesize=A4)
+    width, height = A4
+    page_no = 366
+
+    def opener():
+        c.setFont("Helvetica-Bold", 22)
+        c.drawString(70, height - 120, "Security engineering")
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(70, height - 170, "Objectives")
+        c.setFont("Helvetica", 10)
+        y = height - 195
+        for line in [
+            "The objective of this chapter is to introduce issues that should be considered when",
+            "designing secure application systems. When you have read this chapter you will:",
+            "understand the difference between application security and infrastructure security;",
+            "know how security risk assessment is used in the specification of security requirements;",
+            "be aware of a set of design guidelines for secure systems engineering;",
+            "understand the notion of system survivability and be able to identify survivable services.",
+        ]:
+            c.drawString(70, y, line)
+            y -= 16
+        c.showPage()
+
+    def header(number):
+        c.setFont("Helvetica", 9)
+        if number % 2:
+            c.drawString(70, height - 60, f"{number} Chapter 13 I Security engineering")
+        else:
+            c.drawRightString(width - 70, height - 60, f"13.1 I Security risk management {number}")
+
+    def body(lines, start_y):
+        c.setFont("Helvetica", 10)
+        y = start_y
+        for line in lines:
+            c.drawString(70, y, line)
+            y -= 15
+        return y
+
+    opener()
+    for index, (title, lines) in enumerate(SECTIONS):
+        page_no += 1
+        header(page_no)
+        c.setFont("Helvetica-Bold", 13)
+        c.drawString(70, height - 110, title)
+        y = body(_prose(lines, BODY_LINES_PER_PAGE - 6), height - 140)
+        if index == 1:
+            top = y - 30
+            for column, label in enumerate(("Platform protection", "Application protection", "Record protection")):
+                x = 150 + column * 130
+                c.rect(x, top - 40, 110, 40)
+                c.setFont("Helvetica", 8)
+                c.drawCentredString(x + 55, top - 24, label)
+            c.setFont("Helvetica-Bold", 9)
+            c.drawString(70, top - 70, "Figure 13.4")
+            c.setFont("Helvetica", 9)
+            c.drawString(130, top - 70, "A layered protection architecture")
+        c.showPage()
+        page_no += 1
+        header(page_no)
+        body(_prose(lines, BODY_LINES_PER_PAGE), height - 110)
+        c.showPage()
+
+    page_no += 1
+    header(page_no)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(70, height - 110, "Key Points")
+    c.setFont("Helvetica", 10)
+    y = height - 140
+    for line in [
+        "Security engineering focuses on systems that can resist malicious attacks.",
+        "Risk management assesses the losses that might follow an attack on the system.",
+        "A layered protection architecture protects assets behind successive barriers.",
+        "Survivability strategies are resistance, recognition and recovery.",
+    ]:
+        c.drawString(70, y, line)
+        y -= 16
+    c.showPage()
+    c.save()
+    return path
+
+
+class BookChapterTests(unittest.TestCase):
+    """A book chapter is not a slide deck; both have to compile."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._dir = tempfile.TemporaryDirectory()
+        cls.book = _write_chapter(Path(cls._dir.name) / "chapter.pdf")
+        cls.profile, cls.bp, cls.checks = _draft(cls.book)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._dir.cleanup()
+
+    def test_the_chapter_compiles_without_avoidable_failures(self):
+        unexpected = sorted(k for k, v in self.checks.items() if v is False and k not in BY_DESIGN)
+        self.assertEqual(unexpected, [])
+
+    def test_units_are_titled_with_the_chapters_own_sections(self):
+        """Page chunking titled units with the first wrapped line of prose."""
+        titles = " | ".join(u.title for u in self.bp.units[5:15])
+        for section, _lines in SECTIONS:
+            self.assertIn(section, titles, f"{section} is not taught under its own heading")
+
+    def test_a_running_header_is_never_a_unit_heading(self):
+        for unit in self.bp.units:
+            self.assertNotIn("Chapter 13 I", unit.title)
+            self.assertNotIn("13.1 I Security risk management", unit.title)
+
+    def test_the_chapters_figure_reaches_the_deck(self):
+        from app.source_visuals import FIGURE_KIND, load_registry
+        registry = load_registry(self.bp, source_root=self.book)
+        figures = [a for a in registry.assets if a.source_kind == FIGURE_KIND]
+        self.assertTrue(figures, "the chapter's diagram was never cropped out of its page")
+        self.assertTrue(figures[0].alt_text.startswith("Figure 13.4"), figures[0].alt_text[:60])
+        from PIL import Image
+        with Image.open(figures[0].local_path) as im:
+            self.assertGreaterEqual(im.size[0], 1100, "the crop is too small to fill the canvas")
+
+    def test_a_page_of_running_prose_never_fills_the_canvas(self):
+        """Enlarged to the slide it is a wall of 10pt text, and it is not a figure."""
+        from app.source_visuals import FIGURE_KIND, load_registry
+        from app.source_visuals_v42 import _is_text_wall, _is_portrait
+        registry = load_registry(self.bp, source_root=self.book)
+        pages = [a for a in registry.assets if a.source_kind != FIGURE_KIND]
+        self.assertTrue(all(_is_portrait(a) for a in pages), "a printed page should read as portrait")
+        self.assertTrue(any(_is_text_wall(a) for a in pages), "prose pages are being offered as visuals")
+
+
+class ClosingPointsTests(unittest.TestCase):
+    """The lecture summarizes itself; that summary belongs in the closing unit."""
+
+    def test_the_sources_own_take_home_points_close_the_deck(self):
+        pdf = LECTURES / "CPIT455-class2-NooR.pdf"
+        if not pdf.exists():
+            self.skipTest("archived lecture unavailable")
+        _profile, bp, _checks = _draft(pdf)
+        closing = bp.units[19]
+        self.assertIn("PAGE 3", closing.source_anchor)
+        blob = " ".join(closing.core_content).lower()
+        self.assertIn("redundancy and diversity improve system dependability", blob)
 
 
 class RunningHeaderTests(unittest.TestCase):

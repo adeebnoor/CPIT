@@ -184,7 +184,7 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
         stat = path.stat()
     except OSError:
         return None
-    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}:v44")
+    cache = _cache_dir(f"pdf:{path.resolve()}:{stat.st_mtime_ns}:{stat.st_size}:z{PDF_RENDER_ZOOM}:v50")
     manifest_path = cache / "manifest.json"
     if manifest_path.exists():
         try:
@@ -212,6 +212,17 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
             image_area = max((fitz.Rect(info["bbox"]).get_area() for info in page.get_image_info()), default=0)
             ratio = min(1.0, image_area / max(1.0, page.rect.get_area()))
             assets.append(VisualAsset(slide_no, "", page_text or f"Primary lecture page {slide_no}", f"local:{path.name}", str(image_path), "local-pdf", ratio))
+            for figure_no, (clip, caption, labels) in enumerate(_captioned_figures(page), 1):
+                figure_path = cache / f"figure-{slide_no:03d}-{figure_no}.png"
+                if not figure_path.exists() or figure_path.stat().st_size < 1000:
+                    # Vector art is crisp at any zoom; pick the zoom that makes the
+                    # crop presentable full-width rather than the page's zoom.
+                    zoom = min(MAX_FIGURE_ZOOM, max(PDF_RENDER_ZOOM, MIN_PRESENTABLE_ASSET_WIDTH * 1.1 / max(1.0, clip.width)))
+                    page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), clip=clip, alpha=False).save(str(figure_path))
+                assets.append(VisualAsset(
+                    slide_no, "", f"{caption}. {labels}"[:1600], f"local:{path.name}", str(figure_path),
+                    FIGURE_KIND, min(1.0, clip.get_area() / max(1.0, page.rect.get_area())),
+                ))
     finally:
         doc.close()
     if not assets:
@@ -223,6 +234,103 @@ def _build_pdf_registry(path: Path, source_title: str | None = None) -> VisualRe
         "source_kind": registry.source_kind, "assets": [asdict(x) for x in assets],
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     return registry
+
+
+# A book chapter carries its diagrams as vector drawings under a "Figure N.N"
+# caption, not as embedded images, so the page-level registry saw a text wall
+# and the deck showed no figure at all. Each captioned figure is cropped into an
+# asset of its own, anchored to the page it was printed on.
+FIGURE_KIND = "local-pdf-figure"
+MAX_FIGURE_ZOOM = 6.0
+_FIGURE_CAPTION = re.compile(r"^(?:Figure|Fig\.|Table)\s+\d{1,2}[.\-]\d{1,2}\b")
+# The figure sits above or beside its caption; drawings farther away than this
+# belong to something else on the page.
+FIGURE_REACH_ABOVE = 330.0
+FIGURE_REACH_BELOW = 24.0
+# How close a text block has to sit to the artwork to be part of the figure.
+LABEL_REACH = 8.0
+
+
+# A figure label is a few words in a narrow box. The body paragraph that follows
+# the figure spans the text column and runs for lines; growing into it turned a
+# clean diagram crop into a diagram with a page of prose stapled underneath.
+MAX_LABEL_WORDS = 10
+MAX_LABEL_WIDTH_SHARE = 0.45
+
+
+def _is_figure_label(rect, text: str, caption_rect, page_rect) -> bool:
+    if len(text.split()) > MAX_LABEL_WORDS or rect.width > page_rect.width * MAX_LABEL_WIDTH_SHARE:
+        return False
+    # The caption is the figure's bottom edge; body text sits below it.
+    if rect.y0 > caption_rect.y1 + 4:
+        return False
+    near_edge = rect.y1 < page_rect.height * .14 or rect.y0 > page_rect.height * .9
+    return not near_edge
+
+
+def _captioned_figures(page) -> list[tuple["fitz.Rect", str, str]]:
+    """(clip, caption, label text) for every captioned figure drawn on the page."""
+    page_rect = page.rect
+    blocks = [(fitz.Rect(b[:4]), " ".join(str(b[4]).split())) for b in page.get_text("blocks") if str(b[4]).strip()]
+    captions = [
+        (rect, text) for rect, text in blocks
+        # An in-text mention ("Figure 14.5 shows the architecture of...") runs on
+        # as a paragraph; the caption itself is a short block.
+        if _FIGURE_CAPTION.match(text) and len(text.split()) <= 14 and rect.width < page_rect.width * .6
+    ]
+    if not captions:
+        return []
+    # Page frames and crop marks cover most of the page; a figure never does. A
+    # figure drawn as a stack of thin lines (a layer diagram) has zero-height
+    # paths, so a line counts by its length - but a rule that spans the text
+    # column is page furniture, not part of any figure.
+    drawings = []
+    for d in page.get_drawings():
+        r = fitz.Rect(d["rect"])
+        if r.height >= page_rect.height * .6 or r.width >= page_rect.width * .9:
+            continue
+        boxy = r.width > 2 and r.height > 2
+        line = (r.width > 40 or r.height > 40) and min(r.width, r.height) <= 2 and r.width < page_rect.width * .6
+        if boxy or line:
+            # A zero-height line is an "empty" rect to PyMuPDF and never
+            # intersects anything; give it a hairline of area so it takes part.
+            drawings.append(fitz.Rect(r.x0, r.y0 - 0.5, r.x1, r.y1 + 0.5) if line else r)
+    if not drawings:
+        return []
+    found = []
+    for caption_rect, caption in captions:
+        band = fitz.Rect(0, caption_rect.y0 - FIGURE_REACH_ABOVE, page_rect.width, caption_rect.y1 + FIGURE_REACH_BELOW)
+        nearby = [r for r in drawings if band.intersects(r) and r.y1 > caption_rect.y0 - FIGURE_REACH_ABOVE]
+        if len(nearby) < 2:
+            continue
+        clip = fitz.Rect(nearby[0])
+        for r in nearby[1:]:
+            clip |= r
+        # A heading printed just above the first box ("Platform-Level Protection")
+        # is part of the figure, and cropping to the drawings alone sliced it in
+        # half. Text sitting against the artwork is pulled into the clip, then the
+        # clip is re-measured so a label pulls in the label above it.
+        labels: list[str] = []
+        for _pass in range(3):
+            reach = fitz.Rect(clip.x0 - LABEL_REACH, clip.y0 - LABEL_REACH, clip.x1 + LABEL_REACH, clip.y1 + LABEL_REACH)
+            attached = [
+                (rect, text) for rect, text in blocks
+                if rect.intersects(reach) and (rect, text) != (caption_rect, caption)
+                and _is_figure_label(rect, text, caption_rect, page_rect)
+            ]
+            grown = fitz.Rect(clip)
+            for rect, _text in attached:
+                grown |= rect
+            labels = [text for _rect, text in attached]
+            if grown == clip:
+                break
+            clip = grown
+        clip |= caption_rect
+        clip = fitz.Rect(clip.x0 - 6, clip.y0 - 6, clip.x1 + 6, clip.y1 + 6) & page_rect
+        if clip.width < 80 or clip.height < 50:
+            continue
+        found.append((clip, caption, " ".join(labels)[:600]))
+    return found
 
 
 def _candidate_image_url(img) -> str:
