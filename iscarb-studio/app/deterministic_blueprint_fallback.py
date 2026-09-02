@@ -487,6 +487,36 @@ def _declared_outcome(profile: SourceProfile):
     return None
 
 
+# The presenter prints a unit's anchor on one footer line. A spine that lists
+# fifteen families listed fifteen anchors, which the export preflight rejected as
+# unprintable - the deck passed every gate and then produced no file.
+MAX_LISTED_SPINE_ANCHORS = 5
+
+
+def _spine_anchor(profile: SourceProfile) -> str:
+    """Where the domain spine's families come from, short enough to print.
+
+    A bare "[P1]" left the visual planner free to illustrate the spine with any
+    page in the chapter, and it chose an unrelated mechanism slide. Listing every
+    family's anchor names them exactly but does not fit; past a handful the span
+    they cover says the same thing in one phrase.
+    """
+    from .source_visuals import anchor_slides
+
+    anchors = list(dict.fromkeys(x.source_anchor for x in profile.topic_families if x.source_anchor))
+    if not anchors:
+        return "[P1]"
+    if len(anchors) <= MAX_LISTED_SPINE_ANCHORS:
+        return "; ".join(anchors)
+    coordinate = "SLIDE" if "SLIDE" in anchors[0].upper() else "PAGE"
+    pages = sorted({page for anchor in anchors for page in anchor_slides(anchor)})
+    if not pages:
+        return "[P1]"
+    if len(pages) == 1:
+        return f"[P1] {coordinate} {pages[0]}"
+    return f"[P1] {coordinate}S {pages[0]}\u2013{pages[-1]}"
+
+
 def _readiness_trail(profile: SourceProfile, clos, rows) -> list[ReadinessAlignment]:
     """A traceable readiness trail, explicitly not an approved ETEC mapping.
 
@@ -703,11 +733,7 @@ def build_deterministic_blueprint(profile: SourceProfile) -> Blueprint:
         ["Start from the source and an evidence gap; do not reveal the diagnosis first."],
         "Write one prediction and one piece of evidence you would need before committing.",
         "A defensible decision begins by separating what the source supports from what remains unknown.", "title")
-    # The spine names the pages it maps. A bare "[P1]" left the visual planner
-    # free to illustrate the spine with any page in the chapter, and it chose an
-    # unrelated mechanism slide - a source figure captioned as something it is not.
-    spine_anchor = "; ".join(dict.fromkeys(
-        x.source_anchor for x in profile.topic_families if x.source_anchor)) or "[P1]"
+    spine_anchor = _spine_anchor(profile)
     add(2, "Domain spine", "What are the major source families that structure this chapter?", [*family_names],
         ["Connect the chapter families before studying mechanisms in isolation."], "Sketch the source spine and mark the family you expect to be most decision-sensitive.",
         "The chapter is one connected engineering argument, not a list of slides.", "concept-map", spine_anchor)
