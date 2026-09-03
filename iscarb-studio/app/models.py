@@ -217,6 +217,9 @@ class LectureUnit(BaseModel):
     inherited_requirements: list[str] = Field(default_factory=list)
     elite_requirements: list[str] = Field(default_factory=list)
     evidence: str = ""
+    # Source statements removed from the visible canvas for legibility are preserved here
+    # and written into presenter notes. They are never silently discarded.
+    overflow_content: list[str] = Field(default_factory=list, max_length=128)
     contextual_enrichment: bool = False
     verify_before_release: bool = False
     planned_minutes: int = Field(default=0, ge=0, le=15)

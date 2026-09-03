@@ -22,8 +22,8 @@ async def _layout_rejected(request, exc):
 
 app.add_exception_handler(PresenterLayoutError, _layout_rejected)
 
-PUBLIC_VERSION = "4.6.0"
-PIPELINE_ID = "faculty-studio-v4.6.0-free-first-source-preserving-workspace"
+PUBLIC_VERSION = "4.6.11"
+PIPELINE_ID = "faculty-studio-v4.6.11-strict-20-unit-density-source-preserving"
 
 # Gate v15 is the active compiler release gate. Presenter rendering remains on
 # the CIMT-native surface, now hardened for exact source-page selection and
@@ -102,6 +102,19 @@ def _presenter_job(job_id):
         raise HTTPException(404, JOB_MISSING_MESSAGE)
     if job.blueprint is None:
         raise HTTPException(409, "No blueprint is available yet")
+    # Auto-heal previously stored hollow drafts before preview/export.
+    critical = engine._critical_presenter_failures(job.deterministic_checks or {})
+    if critical and job.source_profile is not None:
+        try:
+            from .free_workflow import load_bundle
+            bundle = load_bundle(job, UPLOADS / job_id)
+            job.blueprint = engine._source_preserving_draft(job.source_profile, bundle)
+            checks = engine.deterministic_gate(job.blueprint, job.source_profile, bundle.combined_local_text())
+            checks.update(engine.session_scope_gate(job.blueprint, job.source_profile, bundle))
+            job.deterministic_checks = checks
+            engine.save_job(job)
+        except Exception:
+            pass
     return job
 
 
