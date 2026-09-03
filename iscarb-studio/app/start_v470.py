@@ -14,6 +14,8 @@ from .master_guidelines_v470 import apply_master_guidelines, plans_for_blueprint
 PUBLIC_VERSION = "4.7.0"
 PIPELINE_ID = "faculty-studio-v4.7.0-master-guidelines-visual-first"
 
+# Apply the master rules to both newly built deterministic drafts and any
+# source-preserving rebuild invoked by the live engine.
 _original_build = draft_builder.build_deterministic_blueprint
 
 def _build_v470(profile):
@@ -29,9 +31,11 @@ def _source_draft_v470(profile, bundle):
 
 engine_main._source_preserving_draft = _source_draft_v470
 
+# All presenter surfaces use the same source-first, non-repeating visual planner.
 source_visuals_v42.plans_for_blueprint_v42 = plans_for_blueprint_v470
 presenter_v44.plans_for_blueprint_v42 = plans_for_blueprint_v470
 
+# Gate v16 is the release gate, not an advisory report.
 base.engine.deterministic_gate = gate_v16
 engine_main.deterministic_gate = gate_v16
 
@@ -56,6 +60,8 @@ def _critical_v470(checks):
 
 engine_main._critical_presenter_failures = _critical_v470
 
+# Preview/export knows the actual selected assets, so this is where visual
+# duplication and semantic alignment are tested against real plans.
 _original_presenter_job = base._presenter_job
 
 def _presenter_job_v470(job_id: str):
@@ -78,6 +84,7 @@ def _presenter_job_v470(job_id: str):
 
 base._presenter_job = _presenter_job_v470
 
+# Health/version contract.
 base.PUBLIC_VERSION = PUBLIC_VERSION
 base.PIPELINE_ID = PIPELINE_ID
 _prev_health = base._health_v440

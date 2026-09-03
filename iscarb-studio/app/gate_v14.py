@@ -99,8 +99,8 @@ def _readiness_has_real_evidence_units(bp: Blueprint) -> bool:
 # A slide carrying one sentence in a large box is not a taught minute, whether or
 # not a source image sits beside it. A source visual raises the floor it must
 # clear; it never removes the floor.
-MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL = 18
-MIN_TEACHING_WORDS_WITHOUT_VISUAL = 28
+MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL = 24
+MIN_TEACHING_WORDS_WITHOUT_VISUAL = 35
 # Two boxes holding one sentence each is what a reviewer calls an empty slide.
 MIN_TEACHING_ITEMS = 3
 
@@ -169,7 +169,11 @@ def _presenter_density_ok(bp: Blueprint) -> bool:
     given a blank minute regardless of which phase the unit sits in.
     """
     for u in bp.units:
-        if _teaching_payload_words(u) < 12:
+        floor = 24 if u.number != 19 else 20
+        if _teaching_payload_words(u) < floor:
+            return False
+        visible_items = len([x for x in (*u.core_content, *u.pedagogy_content) if str(x).strip()])
+        if u.number != 19 and visible_items < 3:
             return False
         if not str(u.student_action or "").strip() or not str(u.takeaway or "").strip():
             return False

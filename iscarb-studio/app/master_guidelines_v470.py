@@ -176,20 +176,61 @@ def apply_master_guidelines(bp: Blueprint) -> Blueprint:
     # 6) Performance-based grading: the criterion names the capability; the level
     # descriptor says what observable defense/evidence earns the level. Keep the
     # cells short enough to project at 12pt.
-    short_criteria = [
-        "Technical correctness + P1 fidelity",
-        "Mechanism reasoning",
-        "Alternatives + trade-offs",
-        "Evidence + falsification",
-        "Constraint adaptation",
-        "Professional accountability + readiness",
-    ]
-    for row, criterion in zip(bp.rubric_criteria, short_criteria):
+    # One shared descriptor repeated down every row is a table that measures
+    # nothing: six criteria x four levels printed the same two sentences, so a
+    # marker could not separate a learner who traced a mechanism from one who
+    # recited it. Each cell now names the observable act that earns that level
+    # for that capability, which is what "performance-based" has to mean.
+    RUBRIC_ROWS = (
+        (
+            "Technical correctness + P1 fidelity",
+            "Correct; quotes the bounding P1 line.",
+            "Correct; points to the right P1 section.",
+            "Mostly right; P1 anchor approximate.",
+            "From memory; no P1 anchor.",
+        ),
+        (
+            "Mechanism reasoning",
+            "Traces a new input; predicts the break.",
+            "Traces a familiar input correctly.",
+            "Names steps; cannot run them.",
+            "Names it; no trace attempted.",
+        ),
+        (
+            "Alternatives + trade-offs",
+            "Two options; names what each costs.",
+            "A second option and one real trade-off.",
+            "Alternative named; treated as free.",
+            "One option, as the only possibility.",
+        ),
+        (
+            "Evidence + falsification",
+            "Names what would disprove it; looked.",
+            "Names support and what would weaken it.",
+            "Support only; no disconfirming test.",
+            "Asserted; no evidence either way.",
+        ),
+        (
+            "Constraint adaptation",
+            "Redesigns in P1 and prices the change.",
+            "Redesigns using P1 mechanisms only.",
+            "Imports an untaught mechanism.",
+            "Answer unchanged by the constraint.",
+        ),
+        (
+            "Professional accountability + readiness",
+            "Owns it; residual risk and next check.",
+            "Owns it; states what stays unverified.",
+            "Verdict given; ownership vague.",
+            "Defers, or withholds nothing.",
+        ),
+    )
+    for row, (criterion, distinguished, ready, developing, not_yet) in zip(bp.rubric_criteria, RUBRIC_ROWS):
         row.criterion = criterion
-        row.distinguished = "Defends under challenge with precise P1 evidence."
-        row.ready = "Performs correctly; cites relevant P1 evidence."
-        row.developing = "Partial performance; incomplete evidence link."
-        row.not_yet_ready = "Assertion only; no defensible P1 evidence."
+        row.distinguished = distinguished
+        row.ready = ready
+        row.developing = developing
+        row.not_yet_ready = not_yet
     u19 = bp.units[18]
     u19.pedagogy_content = [
         "PERFORMANCE: Defend the engineering decision; recall alone does not earn capability credit.",

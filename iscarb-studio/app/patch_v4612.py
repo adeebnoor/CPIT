@@ -100,6 +100,7 @@ def _download_public(asset):
 
 
 def install():
+    # Source figures first; public web only when the source has no useful visual.
     original_score = sv._asset_score
     def score(asset, unit, anchors):
         value = original_score(asset, unit, anchors)
@@ -146,6 +147,7 @@ def install():
         return original_caption(unit, plan_)
     pv.source_caption = caption
 
+    # Unit 1 must contain a small source-grounded stake, not only framework text.
     original_build = db.build_deterministic_blueprint
     def build(profile):
         bp = original_build(profile)
@@ -156,6 +158,7 @@ def install():
         return bp
     db.build_deterministic_blueprint = build
 
+    # Reading-pack export: preserve detail in notes/source but keep summary cells short.
     original_pdf = fo.export_detailed_pdf
     def detailed(bp, out):
         copy = bp.model_copy(deep=True)

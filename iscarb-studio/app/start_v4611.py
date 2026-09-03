@@ -13,6 +13,7 @@ from . import start_v440 as base
 from . import gate_v14
 from . import main as engine_main
 from . import deterministic_blueprint_fallback as draft_builder
+from . import presenter_v44
 from .free_workflow import load_bundle
 from .storage import UPLOADS
 
@@ -21,7 +22,9 @@ engine = base.engine
 PUBLIC_VERSION = "4.6.11"
 PIPELINE_ID = "faculty-studio-v4.6.11-strict-20-unit-output-quality"
 
+# ---------------------------------------------------------------------------
 # 1) A slide with a few labels is not a teaching unit.
+# ---------------------------------------------------------------------------
 gate_v14.MIN_TEACHING_WORDS_WITH_SOURCE_VISUAL = 24
 gate_v14.MIN_TEACHING_WORDS_WITHOUT_VISUAL = 35
 
@@ -42,7 +45,11 @@ def _strict_presenter_density(bp):
 
 gate_v14._presenter_density_ok = _strict_presenter_density
 
+# ---------------------------------------------------------------------------
 # 2) Never silently throw source detail away while fitting the canvas.
+#    The visible slide stays readable; removed detail is retained in evidence
+#    and therefore can be carried into editable-PPTX speaker notes.
+# ---------------------------------------------------------------------------
 _original_drop = draft_builder._drop_last_statement
 
 
@@ -59,7 +66,10 @@ def _drop_last_statement_preserving_source(unit, teaching: bool):
 
 draft_builder._drop_last_statement = _drop_last_statement_preserving_source
 
-# 3) Hollow/illegible presentation checks are critical.
+# ---------------------------------------------------------------------------
+# 3) Treat hollow/illegible presentation checks as critical. A semantic draft
+#    does not get to stay merely because its metadata is technically complete.
+# ---------------------------------------------------------------------------
 _original_critical = engine_main._critical_presenter_failures
 
 
@@ -79,7 +89,9 @@ def _critical_presenter_failures(checks):
 
 engine_main._critical_presenter_failures = _critical_presenter_failures
 
-# 4) Self-heal old jobs when the user opens/downloads them.
+# ---------------------------------------------------------------------------
+# 4) Self-heal old jobs at the moment the user opens/downloads them.
+# ---------------------------------------------------------------------------
 _original_presenter_job = base._presenter_job
 
 
@@ -95,14 +107,17 @@ def _presenter_job_v4611(job_id: str):
             job.deterministic_checks = checks
             engine.save_job(job)
         except Exception:
-            # Historical source bundles can expire; never destroy the saved draft.
+            # Never destroy a saved draft if its historical source bundle has
+            # expired; the normal endpoint will still show the saved artifact.
             pass
     return job
 
 
 base._presenter_job = _presenter_job_v4611
 
+# ---------------------------------------------------------------------------
 # 5) Editable PPTX notes retain source overflow/evidence for faculty use.
+# ---------------------------------------------------------------------------
 _original_pptx = base.export_presenter_pptx
 
 
@@ -124,7 +139,7 @@ def _pptx_with_preserved_notes(bp, out: Path, source_root=None, release_state="R
 
 base.export_presenter_pptx = _pptx_with_preserved_notes
 
-# Update user-facing health/version strings without replacing routes.
+# Update all user-facing health/version strings without replacing routes.
 base.PUBLIC_VERSION = PUBLIC_VERSION
 base.PIPELINE_ID = PIPELINE_ID
 base.engine.health = base._health_v440
