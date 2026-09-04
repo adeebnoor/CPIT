@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'iscarb-studio/**'
+      - 'lectures/cimt/CPIT455-class2-NooR.pdf'
+      - 'lectures/cimt/CPIT455-class3-NooR.pdf'
+      - 'lectures/cimt/CPIT455-class5-NooR.pdf'
       - '.github/workflows/iscarb-production-smoke-v693.yml'
   workflow_dispatch:
 
@@ -13,7 +16,7 @@ permissions:
 jobs:
   production-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,7 +29,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r iscarb-studio/requirements.txt
       - name: Compile production patch chain
-        run: python -m compileall -q iscarb-studio/app iscarb-studio/smoke_prod.py
+        run: python -m compileall -q iscarb-studio/app iscarb-studio/smoke_prod.py iscarb-studio/e2e_prod.py
       - name: Run exact production presenter smoke
         working-directory: iscarb-studio
         run: python smoke_prod.py
+      - name: Run real lecture source-only E2E
+        working-directory: iscarb-studio
+        run: python e2e_prod.py
