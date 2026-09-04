@@ -1,0 +1,42 @@
+name: ISCARB Hero Recovery Inspect
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-hero-recover.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: Inspect archived raster heroes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+          for name in ['hero_v670.jpg','hero_v672.webp','hero_v690.webp']:
+              p=Path('iscarb-studio/app/static')/name
+              b=p.read_bytes()
+              print(name,'bytes',len(b),'sha256',hashlib.sha256(b).hexdigest())
+              try:
+                  im=Image.open(p)
+                  im.load()
+                  print('OPEN_OK',name,'format',im.format,'size',im.size,'mode',im.mode)
+                  im.convert('RGB').save(name+'.jpg',quality=96,optimize=True,progressive=True)
+              except Exception as e:
+                  print('OPEN_FAIL',name,repr(e))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archived-hero-inspection
+          path: '*.jpg'
