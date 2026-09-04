@@ -1,0 +1,119 @@
+name: ISCARB Ch13 Security Live Regression
+
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-ch13-security-live.yml'
+      - 'iscarb-studio/app/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ch13-security-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'requests>=2.31,<3'
+      - name: Compile unseen CCSU Security Engineering source against live ISCARB
+        env:
+          ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
+          SOURCE_URL: https://cs.ccsu.edu/~stan/classes/CS410/Notes16/13-SecurityEngineering.html
+        run: |
+          python - <<'PY'
+          import json, os, re, time
+          from pathlib import Path
+          import requests
+
+          base=os.environ['ISCARB_BASE'].rstrip('/')
+          source=os.environ['SOURCE_URL']
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.0'})
+
+          src=s.get(source,timeout=60)
+          assert src.status_code==200,src.status_code
+          for marker in ('Security Engineering','Confidentiality','Integrity','Availability','Security risk assessment','Secure systems design'):
+              assert marker.lower() in src.text.lower(),marker
+          print('SOURCE PASS — unseen CCSU Chapter 13 source fetched')
+
+          r=s.post(base+'/api/compile',data={
+              'primary_url':source,
+              'supporting_urls':'',
+              'lecture_focus':'',
+              'model':'source-only',
+              'repair_rounds':'0',
+              'free_tier_confirmed':'false',
+          },timeout=90)
+          assert r.status_code==200,(r.status_code,r.text[:1000])
+          jid=r.json()['job_id']; print('JOB',jid)
+          deadline=time.time()+240
+          while time.time()<deadline:
+              st=s.get(f'{base}/api/jobs/{jid}',timeout=60); assert st.status_code==200
+              job=st.json()
+              if job.get('status') in {'blocked','ready','error'}: break
+              time.sleep(2)
+          else: raise AssertionError('compile timeout')
+          assert job.get('status') in {'blocked','ready'},(job.get('status'),job.get('error'))
+          assert not job.get('error'),job.get('error')
+
+          bp=job['blueprint']; units=bp['units']
+          assert len(units)==20 and [u['number'] for u in units]==list(range(1,21))
+          checks=job.get('deterministic_checks') or {}
+          assert checks.get('v15_complete_20_unit_grammar') is True,[(k,v) for k,v in checks.items() if k.startswith('v15_unit') and v is not True]
+          assert checks.get('v15_technical_units_retain_source_detail') is True
+          assert checks.get('v15_no_source_fragment_ends_mid_thought') is True
+          assert checks.get('v15_presenter_fits_readable_canvas') is True,[k for k,v in checks.items() if k.startswith('presenter_unit') and v is not True]
+
+          u2=units[1]
+          assert 5 <= len(u2.get('core_content',[])) <= 8,('domain-spine',u2.get('core_content'))
+
+          crisis=(bp.get('central_engineering_crisis') or '').strip()
+          bad='A team must make a consequential decision about'
+          assert bad.lower() not in crisis.lower(),('generic-crisis',crisis)
+          assert len(crisis.split())>=12,('thin-crisis',crisis)
+
+          corpus=' '.join(
+              [crisis,bp.get('named_ethical_purpose','')]
+              + [str(x) for u in units for x in [u.get('title',''),u.get('engineering_question',''),*(u.get('core_content') or []),*(u.get('pedagogy_content') or []),u.get('student_action',''),u.get('takeaway','')]]
+          ).lower()
+          for marker in ('confidential','integrity','availability','risk','security'):
+              assert marker in corpus,('missing-source-concept',marker)
+          for banned in ('wikipedia','second amendment','unsplash','pexels','pixabay'):
+              assert banned not in corpus,('public-image-fallback',banned)
+
+          summary={
+              'job_id':jid,
+              'status':job.get('status'),
+              'crisis':crisis,
+              'domain_spine':u2.get('core_content',[]),
+              'unit_titles':[u['title'] for u in units],
+              'strict20':checks.get('v15_complete_20_unit_grammar'),
+              'readable':checks.get('v15_presenter_fits_readable_canvas'),
+          }
+          Path('ch13_security_result.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False),encoding='utf-8')
+
+          p=s.get(f'{base}/api/jobs/{jid}/presenter',timeout=150)
+          assert p.status_code==200,(p.status_code,p.text[:500] if 'text' in p.headers.get('content-type','') else len(p.content))
+          Path('Ch13_SecurityEngineering_ISCARB.pptx').write_bytes(p.content)
+
+          z=s.get(f'{base}/api/jobs/{jid}/export/package',timeout=180)
+          assert z.status_code==200,(z.status_code,z.text[:500] if 'text' in z.headers.get('content-type','') else len(z.content))
+          assert z.content[:2]==b'PK'
+          Path('Ch13_SecurityEngineering_ISCARB_package.zip').write_bytes(z.content)
+          print('CH13 LIVE PASS — unseen source + 20/20 grammar + non-generic crisis + source-grounded concepts + readable presenter')
+          print(json.dumps(summary,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iscarb-ch13-security-live
+          path: |
+            ch13_security_result.json
+            Ch13_SecurityEngineering_ISCARB.pptx
+            Ch13_SecurityEngineering_ISCARB_package.zip
+          if-no-files-found: ignore
+          retention-days: 7
