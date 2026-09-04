@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 MAX_EXTRACTED_CHARS = 220_000
+WEB_HEADING_PREFIX = "SOURCE HEADING: "
 
 
 def _validate_public_url(url: str) -> str:
@@ -85,6 +86,14 @@ def _extract_slideshare(soup: BeautifulSoup, source_url: str) -> str | None:
 
 
 def _extract_html(data: bytes, source_url: str) -> str:
+    """Extract a public web lecture while preserving its author-supplied headings.
+
+    Previous extraction flattened h1-h4 and body paragraphs into identical text
+    blocks. The deterministic profiler then had to guess headings from the first
+    words of prose, which could turn a wrapped sentence fragment into a slide
+    title. A lightweight heading marker preserves document structure without
+    changing or enriching the source's technical content.
+    """
     soup = BeautifulSoup(data, "html.parser")
     host = (urlparse(source_url).hostname or "").lower()
     if "slideshare.net" in host:
@@ -97,12 +106,13 @@ def _extract_html(data: bytes, source_url: str) -> str:
     title = _clean(soup.title.get_text(" ", strip=True)) if soup.title else "Web source"
     chunks: list[str] = [f"SOURCE URL: {source_url}", f"SOURCE TITLE: {title}", "SOURCE TYPE: public web page", ""]
     seen: set[str] = set()
+    heading_tags = {"h1", "h2", "h3", "h4"}
     for tag in soup.find_all(["h1", "h2", "h3", "h4", "p", "li", "td", "th"]):
         text = _clean(tag.get_text(" ", strip=True))
         if len(text) < 3 or text in seen:
             continue
         seen.add(text)
-        chunks.append(text)
+        chunks.append(f"{WEB_HEADING_PREFIX}{text}" if tag.name in heading_tags else text)
         if sum(len(x) for x in chunks) >= MAX_EXTRACTED_CHARS:
             break
     return "\n\n".join(chunks)[:MAX_EXTRACTED_CHARS]
