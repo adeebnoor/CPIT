@@ -1,0 +1,32 @@
+name: ISCARB v6.9.3 Production Smoke
+
+on:
+  push:
+    paths:
+      - 'iscarb-studio/**'
+      - '.github/workflows/iscarb-production-smoke-v693.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install production dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r iscarb-studio/requirements.txt
+      - name: Compile production patch chain
+        run: python -m compileall -q iscarb-studio/app iscarb-studio/smoke_prod.py
+      - name: Run exact production presenter smoke
+        working-directory: iscarb-studio
+        run: python smoke_prod.py
