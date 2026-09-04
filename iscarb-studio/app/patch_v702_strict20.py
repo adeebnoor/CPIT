@@ -7,7 +7,9 @@ single generic heading. Short TXT/DOCX sources can legitimately profile as one
 topic family even when their source text contains several distinct technical
 claims. This patch does not weaken Gate v15 and does not invent a taxonomy: it
 fills the spine only from P1 topic-family names, P1 coverage labels and complete
-source statements already preserved in the deterministic profile.
+source statements already preserved in the deterministic profile. A final
+readability fit runs after all production draft patches so no post-fit mutation
+can leave a unit below the presenter readability contract.
 """
 
 import re
@@ -27,10 +29,8 @@ def _norm(value: str) -> str:
 
 def _clean_node(value: str) -> str:
     text = " ".join(str(value or "").split()).strip(" -•·:;,.")
-    # Source excerpts often carry an explicit P1 coordinate before the claim.
     text = re.sub(r"^\[P1\]\s*(?:SLIDE|PAGE)?\s*\d*(?:[-–]\d+)?\s*[—:;-]*\s*", "", text, flags=re.I)
     if len(text) > MAX_NODE_CHARS:
-        # Prefer a complete clause/sentence boundary rather than a raw character cut.
         head = text[:MAX_NODE_CHARS]
         boundary = max(head.rfind(";"), head.rfind(":"), head.rfind(","))
         if boundary >= 36:
@@ -43,8 +43,6 @@ def _clean_node(value: str) -> str:
 
 def _source_statements(value: str):
     raw = " ".join(str(value or "").split())
-    # Profiling preserves bullets with a middle dot; plain-text uploads need
-    # sentence splitting too. Keep complete source statements only.
     for part in re.split(r"\s*[·•▪■◆]\s*|(?<=[.!?])\s+|\s*;\s*", raw):
         clean = _clean_node(part)
         if 4 <= len(clean.split()) <= 22:
@@ -60,7 +58,6 @@ def _spine_candidates(profile, current: list[str]) -> list[str]:
         key = _norm(clean)
         if not clean or len(clean.split()) < 2 or key in seen:
             return
-        # Avoid near-duplicate headings that differ only by section numbering.
         for existing in seen:
             if key == existing or (len(key) > 18 and (key in existing or existing in key)):
                 return
@@ -72,8 +69,6 @@ def _spine_candidates(profile, current: list[str]) -> list[str]:
     for family in getattr(profile, "topic_families", []) or []:
         add(getattr(family, "name", ""))
     coverage = list(getattr(profile, "coverage_items", []) or [])
-    # Major checkpoints first; supporting items are allowed only to complete a
-    # readable map when the deterministic profiler produced too few families.
     coverage.sort(key=lambda row: 0 if getattr(row, "importance", "") == "major" else 1)
     for row in coverage:
         add(getattr(row, "label", ""))
@@ -96,8 +91,6 @@ def _repair_unit2(blueprint, profile):
         return blueprint
     current = list(getattr(unit, "core_content", []) or [])
     nodes = _spine_candidates(profile, current)
-    # Never fabricate missing nodes. Gate v15 still blocks a truly content-thin
-    # source if it cannot supply at least two source-backed nodes.
     if nodes:
         unit.core_content = nodes
     anchor = str(getattr(unit, "source_anchor", "") or "").strip()
@@ -116,7 +109,10 @@ def apply_v702_patch(app) -> None:
 
     def strict_draft(profile, bundle):
         blueprint = previous(profile, bundle)
-        return _repair_unit2(blueprint, profile)
+        blueprint = _repair_unit2(blueprint, profile)
+        # Earlier production patches may adjust unit pedagogy after the base
+        # builder's fit pass. Re-fit the final draft rather than relaxing Gate v15.
+        return engine.fit_presenter_text(blueprint)
 
     engine._source_preserving_draft = strict_draft
     base.engine._source_preserving_draft = strict_draft
@@ -129,6 +125,7 @@ def apply_v702_patch(app) -> None:
             "strict20_patch": "v7.0.2",
             "domain_spine_source_derived": True,
             "domain_spine_target_nodes": [MIN_SPINE_NODES, MAX_SPINE_NODES],
+            "final_readability_refit": True,
             "gate_v15_weakened": False,
         })
         return data
