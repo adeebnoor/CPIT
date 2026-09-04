@@ -1,0 +1,56 @@
+name: ISCARB Hero Live Check
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-hero-live-check.yml'
+      - 'iscarb-studio/app/home_v670.py'
+      - 'iscarb-studio/app/static/hero_v672.webp'
+
+permissions:
+  contents: read
+
+jobs:
+  hero-live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pillow
+      - name: Validate live hero image
+        env:
+          BASE: https://iscarb-lecture-studio.onrender.com
+        run: |
+          python - <<'PY'
+          import hashlib, io, os, time
+          import requests
+          from PIL import Image, ImageStat
+          base=os.environ['BASE'].rstrip('/')
+          # Render may still be activating the pushed image. Poll until v7.1.x home is reachable.
+          for _ in range(60):
+              h=requests.get(base+'/',timeout=30)
+              if h.status_code==200:
+                  break
+              time.sleep(2)
+          assert h.status_code==200
+          r=requests.get(base+'/static/hero_v672.webp?v=hero-live-check',timeout=60)
+          assert r.status_code==200,r.status_code
+          assert r.content[:4]==b'RIFF' and b'WEBP' in r.content[:16],r.content[:20]
+          img=Image.open(io.BytesIO(r.content)).convert('RGB')
+          print('HERO',img.size,'bytes',len(r.content),'sha256',hashlib.sha256(r.content).hexdigest())
+          stat=ImageStat.Stat(img.resize((64,36)))
+          print('MEAN_RGB',tuple(round(v,2) for v in stat.mean),'EXTREMA',img.getextrema())
+          # Reject an accidentally all-black/near-empty image.
+          assert max(stat.mean) > 20, stat.mean
+          img.save('live_hero.png')
+          open('home.html','w',encoding='utf-8').write(h.text)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-hero-proof
+          path: |
+            live_hero.png
+            home.html
