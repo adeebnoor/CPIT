@@ -1,0 +1,123 @@
+name: ISCARB v6.9.3 Live Render Strict E2E
+
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-live-v693-strict.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HTTP client
+        run: pip install 'requests>=2.31,<3'
+      - name: Exercise live Render with three real lectures
+        env:
+          ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
+        run: |
+          python - <<'PY'
+          import io, os, time, zipfile
+          from pathlib import Path
+          import requests
+
+          BASE=os.environ['ISCARB_BASE'].rstrip('/')
+          S=requests.Session()
+          S.headers.update({'User-Agent':'ISCARB-strict-live-E2E/6.9.3'})
+          forbidden=('wikipedia.org','wikimedia.org','second amendment','down syndrome')
+          generic=('a team must make a consequential decision','consequential decision under uncertainty')
+          cases=[
+            ('Dependable Systems',Path('lectures/cimt/CPIT455-class2-NooR.pdf'),False),
+            ('Reliability Engineering',Path('lectures/cimt/CPIT455-class3-NooR.pdf'),False),
+            ('Security Engineering',Path('lectures/cimt/CPIT455-class5-NooR.pdf'),True),
+          ]
+
+          home=S.get(BASE+'/',timeout=90)
+          assert home.status_code==200,(home.status_code,home.text[:500])
+          assert 'hero_v672.webp?v=6.9.3' in home.text
+          health=S.get(BASE+'/api/health',timeout=90)
+          assert health.status_code==200,health.text[:500]
+          h=health.json()
+          assert h.get('version')=='6.9.3',h
+          assert h.get('public_web_image_fallback') is False,h
+          assert h.get('presenter_preview_500_fix') is True,h
+          print('LIVE PASS — home + health v6.9.3 + approved hero + public fallback disabled')
+
+          for title,path,security in cases:
+            assert path.is_file() and path.stat().st_size>10000,path
+            with path.open('rb') as fh:
+              r=S.post(BASE+'/api/compile',files={'primary_lecture':(path.name,fh,'application/pdf')},data={
+                'primary_url':'','supporting_urls':'','lecture_focus':title,'model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'
+              },timeout=90)
+            assert r.status_code==200,(title,r.status_code,r.text[:1000])
+            job_id=r.json().get('job_id')
+            assert job_id and len(job_id)==32,(title,r.text)
+
+            deadline=time.time()+150
+            while time.time()<deadline:
+              state=S.get(f'{BASE}/api/jobs/{job_id}',timeout=45)
+              assert state.status_code==200,(title,state.status_code,state.text[:500])
+              job=state.json()
+              if job.get('status') in {'ready','blocked','error'}: break
+              time.sleep(1)
+            else: raise AssertionError(f'{title}: live compile timeout')
+            assert job['status']=='blocked',(title,job.get('status'),job.get('error'),job.get('message'))
+            assert not job.get('error'),(title,job.get('error'))
+            bp=job['blueprint']; units=bp['units']
+            assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
+            u2=next(u for u in units if u['number']==2)
+            spine=[str(x).strip() for x in u2.get('core_content',[]) if str(x).strip()]
+            assert 1<=len(spine)<=8,(title,len(spine),spine)
+            if len(bp.get('source_topic_families',[]))>=5: assert len(spine)>=5,(title,len(spine),spine)
+            opening=' '.join([str(bp.get('central_engineering_crisis','')),str(units[0].get('engineering_question','')),' '.join(map(str,units[0].get('core_content',[])))]).lower()
+            for phrase in generic: assert phrase not in opening,(title,'generic opening',opening)
+            if security:
+              assert 'review required' not in opening,(title,'security crisis missing',opening)
+              assert any(k in opening for k in ('risk','threat','attack','failure','breach','vulnerab','comprom','unauthor','damage','harm','security')),(title,opening)
+
+            preview=S.get(f'{BASE}/api/jobs/{job_id}/presenter',timeout=120)
+            assert preview.status_code==200,(title,'presenter',preview.status_code,preview.text[:500])
+            assert len(preview.text)>10000
+            low=preview.text.lower()
+            for bad in forbidden: assert bad not in low,(title,'forbidden preview',bad)
+
+            endpoints={
+              'pptx':f'/api/jobs/{job_id}/export/pptx',
+              'presenter-pdf':f'/api/jobs/{job_id}/export/presenter-pdf',
+              'source-pdf':f'/api/jobs/{job_id}/export/source-pdf',
+              'reading-pdf':f'/api/jobs/{job_id}/export/pdf',
+              'instructor-docx':f'/api/jobs/{job_id}/export/docx',
+              'student-docx':f'/api/jobs/{job_id}/export/student',
+              'blueprint-json':f'/api/jobs/{job_id}/export/json',
+              'authoring-prompt':f'/api/jobs/{job_id}/authoring-prompt',
+            }
+            blobs={}
+            for name,ep in endpoints.items():
+              out=S.get(BASE+ep,timeout=150)
+              assert out.status_code==200,(title,name,out.status_code,out.text[:500] if 'text' in out.headers.get('content-type','') else len(out.content))
+              blobs[name]=out.content
+              assert len(out.content)>(500 if name in {'blueprint-json','authoring-prompt'} else 5000),(title,name,len(out.content))
+            assert blobs['presenter-pdf'][:4]==b'%PDF'
+            assert blobs['source-pdf'][:4]==b'%PDF'
+            assert blobs['reading-pdf'][:4]==b'%PDF'
+            for name in ('pptx','instructor-docx','student-docx'): assert blobs[name][:2]==b'PK',(title,name,blobs[name][:8])
+            with zipfile.ZipFile(io.BytesIO(blobs['pptx'])) as z:
+              names=z.namelist(); assert 'ppt/presentation.xml' in names
+              slides=[n for n in names if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+              assert 22<=len(slides)<=30,(title,'slide count',len(slides))
+              text=' '.join(z.read(n).decode('utf-8','ignore').lower() for n in names if n.endswith('.xml') or n.endswith('.rels'))
+              for bad in forbidden: assert bad not in text,(title,'forbidden PPTX',bad)
+            print(f'LIVE E2E PASS — {title}: 20 units; Domain Spine {len(spine)} nodes; preview + 8 outputs; PPTX {len(slides)} slides')
+
+          print('ISCARB LIVE STRICT E2E PASS — Dependable + Reliability + Security on Render production')
+          PY
