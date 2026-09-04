@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""ISCARB v6.9.4 production home surface + generic IT intake + single-language UI."""
+"""ISCARB production home surface + generic IT intake + single-language UI."""
 from pathlib import Path
 from fastapi.responses import HTMLResponse
 from .start_v670_prod import app
@@ -15,6 +15,7 @@ from .patch_v700_generic import apply_generic_it_patch
 from .patch_v702_strict20 import apply_v702_patch
 from .patch_v703_web_source import apply_v703_patch
 from .patch_v704_source_detail import apply_v704_patch
+from .patch_v705_web_visuals import apply_v705_patch
 
 apply_v671_patch(app)
 apply_v680_patch(app)
@@ -27,21 +28,22 @@ apply_generic_it_patch(app)
 apply_v702_patch(app)
 apply_v703_patch(app)
 apply_v704_patch(app)
+apply_v705_patch(app)
 PUBLIC_VERSION = "6.9.4"
-UI_RELEASE = "7.0.3"
+UI_RELEASE = "7.0.7"
 APPROVED_HERO = "hero_v672.webp"
 APPROVED_HERO_BLOB = "600190c7bec39e20e0f1578682c11e94f0c9337e"
 
 app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", None) != "/"]
 
 _V670_STYLE = r"""
-<style id="iscarb-v703-home-patch">
+<style id="iscarb-v707-home-patch">
 :root{--iscarb-bg:#05070D;--iscarb-magenta:#FF258C;--iscarb-cyan:#2CDCFF;--iscarb-gold:#DCB56B;--iscarb-text:#F5F5F8;--iscarb-muted:#B7BDC8}
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
-.heroArt{position:relative!important;min-height:350px!important;border-radius:28px;overflow:hidden;background-color:#05070D!important;background-image:url('/static/hero_v672.webp?v=7.0.1')!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;isolation:isolate}
+.heroArt{position:relative!important;min-height:350px!important;border-radius:28px;overflow:hidden;background-color:#05070D!important;background-image:url('/static/hero_v672.webp?v=7.0.7')!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;isolation:isolate}
 .heroArt::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.02),rgba(5,7,13,0) 55%,rgba(5,7,13,.01))}
-.heroArt::after{content:"20 CORE UNITS  ·  SOURCE-LOCKED  ·  NO PUBLIC FALLBACK";position:absolute;right:16px;bottom:16px;z-index:3;padding:8px 12px;border:1px solid rgba(255,37,140,.55);border-radius:999px;background:rgba(5,7,13,.82);color:var(--iscarb-text);font-size:10px;font-weight:800;letter-spacing:.07em;backdrop-filter:blur(8px)}
-html[data-lang="ar"] .heroArt::after{content:"٢٠ وحدة أساسية  ·  مقيدة بالمصدر  ·  بلا صور عامة";right:auto;left:16px;letter-spacing:0;font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif}
+.heroArt::after{content:"20 CORE UNITS  ·  SOURCE-LOCKED  ·  SOURCE FIGURES FIRST";position:absolute;right:16px;bottom:16px;z-index:3;padding:8px 12px;border:1px solid rgba(255,37,140,.55);border-radius:999px;background:rgba(5,7,13,.82);color:var(--iscarb-text);font-size:10px;font-weight:800;letter-spacing:.07em;backdrop-filter:blur(8px)}
+html[data-lang="ar"] .heroArt::after{content:"٢٠ وحدة أساسية  ·  مقيدة بالمصدر  ·  صور المصدر أولاً";right:auto;left:16px;letter-spacing:0;font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif}
 .heroArt>svg,.heroArt>.floatCard{display:none!important}.version{color:var(--iscarb-cyan)!important;font-weight:800!important}.brand small{color:var(--iscarb-cyan)!important}.hero h1 em{color:var(--iscarb-magenta)!important}.heroSub{max-width:620px}#state{letter-spacing:.06em}#outputAssets a[aria-busy="true"]{opacity:.72;cursor:wait;text-decoration:none}
 .languageToggle{min-width:76px!important;border:1px solid rgba(220,181,107,.32)!important;border-radius:999px!important;padding:7px 11px!important;color:var(--iscarb-gold)!important;background:rgba(220,181,107,.04)!important;font-weight:750!important}.languageToggle:hover{border-color:var(--iscarb-gold)!important;background:rgba(220,181,107,.09)!important}
 html[data-lang="ar"] body{text-align:right}html[data-lang="ar"] .header nav,html[data-lang="ar"] .headerTools{direction:rtl}html[data-lang="ar"] input,html[data-lang="ar"] textarea,html[data-lang="ar"] select{text-align:right}
@@ -53,17 +55,16 @@ html[data-lang="ar"] body{text-align:right}html[data-lang="ar"] .header nav,html
 @app.get("/")
 def faculty_studio_v670_home():
     body = (Path(__file__).with_name("static") / "index_v440.html").read_text(encoding="utf-8")
-    # Prevent a bilingual flash before JavaScript reads the saved preference.
     body = body.replace('<html lang="en" dir="ltr" data-theme="dark">', '<html lang="en" dir="ltr" data-theme="dark" data-lang="en">', 1)
-    body = body.replace("4.6 · Gate v15", "7.0.3 · IT-wide · Gate v15")
+    body = body.replace("4.6 · Gate v15", "7.0.7 · IT-wide · Gate v15")
     body = body.replace("Saudi Academic Engineering", "Saudi Engineering Learning System")
-    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.0.3")
-    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.0.3")
-    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.0.3")
+    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.0.7")
+    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.0.7")
+    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.0.7")
     body = body.replace(
         "</head>",
         _V670_STYLE
-        + '\n<script src="/static/site_v671_fix.js?v=7.0.3" defer></script>'
+        + '\n<script src="/static/site_v671_fix.js?v=7.0.7" defer></script>'
         + '\n<script src="/static/site_v700_generic.js?v=it-scope-v2" defer></script>'
         + '\n<script src="/static/site_v701_i18n.js?v=single-language-v1" defer></script>\n</head>',
         1,
@@ -78,6 +79,6 @@ def faculty_studio_v670_home():
             "X-ISCARB-UI": UI_RELEASE,
             "X-ISCARB-Hero-Asset": APPROVED_HERO,
             "X-ISCARB-Hero-Blob": APPROVED_HERO_BLOB,
-            "X-ISCARB-Home": "v7.0.3-generic-it-single-language-approved-camel-hero-gate-v15-structured-web-source",
+            "X-ISCARB-Home": "v7.0.7-generic-it-single-language-approved-camel-hero-source-figures-first-gate-v15",
         },
     )
