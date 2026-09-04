@@ -1,0 +1,145 @@
+from __future__ import annotations
+
+"""ISCARB v7.0.7 - source-page figure registry for linked web lectures.
+
+A linked HTML lecture is still P1. Its figures must therefore be treated exactly
+like figures in an uploaded P1 PDF: source figure first, then a native ISCARB
+redraw, then text-first. This patch reads only the figure manifest created while
+materializing the supplied page. It never searches the public web for imagery.
+
+The existing v6.9.4 local-PDF registry remains first priority and unchanged, so
+Dependable Systems / Reliability and other uploaded lecture decks cannot regress.
+"""
+
+import json
+from pathlib import Path
+
+from . import patch_v694 as latency
+from . import source_visuals as sv
+from . import source_visuals_v42 as sv42
+from . import presenter_v44
+from . import presenter_v67_prod as presenter
+from . import start_v440 as base
+from .url_source import WEB_IMAGE_MANIFEST
+
+_PATCHED = False
+SOURCE_WEB_KIND = "source-web"
+
+
+def _source_url(bp) -> str:
+    return str(sv.primary_url_from_manifest(getattr(bp, "source_manifest", []) or []) or "").strip()
+
+
+def _manifest_candidates(bp, source_root: Path | None = None) -> list[Path]:
+    candidates: list[Path] = []
+    if source_root is not None:
+        root = Path(source_root)
+        if root.is_file():
+            root = root.parent
+        direct = root / WEB_IMAGE_MANIFEST
+        if direct.exists():
+            candidates.append(direct)
+        try:
+            candidates.extend(p for p in root.glob(f"**/{WEB_IMAGE_MANIFEST}") if p.is_file())
+        except Exception:
+            pass
+
+    # Export routes sometimes receive only the saved Blueprint. In that case,
+    # resolve the manifest by the exact P1 URL recorded inside it; never borrow
+    # a merely similar job or another user's source.
+    wanted_url = _source_url(bp)
+    if wanted_url and sv.UPLOAD_ROOT.exists():
+        try:
+            for manifest in sv.UPLOAD_ROOT.glob(f"*/{WEB_IMAGE_MANIFEST}"):
+                if manifest in candidates or not manifest.is_file():
+                    continue
+                try:
+                    data = json.loads(manifest.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                if str(data.get("source_url") or "").strip() == wanted_url:
+                    candidates.append(manifest)
+        except Exception:
+            pass
+    return candidates
+
+
+def _registry_from_manifest(bp, source_root: Path | None = None):
+    wanted_url = _source_url(bp)
+    for manifest in _manifest_candidates(bp, source_root):
+        try:
+            data = json.loads(manifest.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        source_url = str(data.get("source_url") or "").strip()
+        if wanted_url and source_url and source_url != wanted_url:
+            continue
+        assets = []
+        for row in data.get("assets", []) or []:
+            local_path = Path(str(row.get("local_path") or ""))
+            if not local_path.exists() or local_path.stat().st_size < 1000:
+                continue
+            context = " · ".join(
+                x for x in [str(row.get("alt_text") or "").strip(), str(row.get("context") or "").strip()]
+                if x
+            )[:1600]
+            try:
+                section = max(1, int(row.get("section") or 1))
+            except Exception:
+                section = 1
+            assets.append(sv.VisualAsset(
+                slide_number=section,
+                image_url=str(row.get("image_url") or ""),
+                alt_text=context or f"Primary source figure near section {section}",
+                source_url=source_url,
+                local_path=str(local_path),
+                source_kind=SOURCE_WEB_KIND,
+                visual_area_ratio=1.0,
+            ))
+        if assets:
+            return sv.VisualRegistry(
+                source_url or wanted_url or "source-web",
+                str(data.get("source_title") or "Primary web lecture"),
+                tuple(assets),
+                SOURCE_WEB_KIND,
+            )
+    return None
+
+
+def _source_first_load_registry(bp, source_root: Path | None = None):
+    # Keep the approved local-PDF path exactly as v6.9.4 implemented it.
+    local_pdf_registry = latency._fast_load_registry(bp, source_root=source_root)
+    if local_pdf_registry is not None:
+        return local_pdf_registry
+    # Linked HTML may reuse only figures authored into the supplied P1 page.
+    return _registry_from_manifest(bp, source_root=source_root)
+
+
+def apply_v705_patch(app) -> None:
+    global _PATCHED
+    if _PATCHED:
+        return
+    _PATCHED = True
+
+    sv.load_registry = _source_first_load_registry
+    for module in (sv42, presenter_v44, presenter):
+        if hasattr(module, "load_registry"):
+            setattr(module, "load_registry", _source_first_load_registry)
+
+    previous_health = base._health_v440
+
+    def health():
+        data = dict(previous_health())
+        data.update({
+            "web_source_visuals": "v7.0.7-source-page-only",
+            "visual_priority": "P1 source figure > ISCARB native redraw > text-first",
+            "linked_html_source_figures": True,
+            "same_page_image_capture": True,
+            "public_web_image_fallback": False,
+            "random_keyword_image_search": False,
+            "legacy_local_pdf_visuals_preserved": True,
+        })
+        return data
+
+    base._health_v440 = health
+    base.engine.health = health
