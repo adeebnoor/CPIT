@@ -4,6 +4,13 @@ on:
   push:
     paths:
       - '.github/workflows/iscarb-generic-it-e2e.yml'
+      - 'iscarb-studio/app/home_v670.py'
+      - 'iscarb-studio/app/patch_v700_generic.py'
+      - 'iscarb-studio/app/static/site_v460.js'
+      - 'iscarb-studio/app/static/site_v700_generic.js'
+      - 'iscarb-studio/app/static/site_v701_i18n.js'
+      - 'iscarb-studio/app/static/hero_v672.webp'
+      - 'iscarb-studio/app/gate_v15.py'
   workflow_dispatch:
 
 permissions:
@@ -19,27 +26,51 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install 'requests>=2.31,<3'
-      - name: Exercise generic IT upload, presenter and package
+      - name: Exercise language, approved hero, strict grammar and generic IT flow
         env:
           ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
         run: |
           python - <<'PY'
-          import io, os, time, zipfile
+          import hashlib, io, os, re, time, zipfile
+          from pathlib import Path
           import requests
 
           BASE=os.environ['ISCARB_BASE'].rstrip('/')
-          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/1.0'})
+          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/2.0'})
 
+          # Product surface: one language at a time, no bilingual default.
           home=S.get(BASE+'/',timeout=60); assert home.status_code==200
-          assert '/static/site_v700_generic.js?v=it-scope-v1' in home.text
-          js=S.get(BASE+'/static/site_v700_generic.js?v=it-scope-v1',timeout=60); assert js.status_code==200
+          assert 'data-lang="en"' in home.text
+          assert '/static/site_v700_generic.js?v=it-scope-v2' in home.text
+          assert '/static/site_v701_i18n.js?v=single-language-v1' in home.text
+          assert 'hero_v672.webp?v=7.0.1' in home.text
+          lang=S.get(BASE+'/static/site_v460.js?v=7.0.1',timeout=60); assert lang.status_code==200
+          assert "pageLangToggle" in lang.text and "Never enter the old bilingual" in lang.text
+          generic=S.get(BASE+'/static/site_v700_generic.js?v=it-scope-v2',timeout=60); assert generic.status_code==200
+          i18n=S.get(BASE+'/static/site_v701_i18n.js?v=single-language-v1',timeout=60); assert i18n.status_code==200
           for marker in ('IT Lecture Intake Sheet','Auto-detect from uploaded source','Complete IT Lecture Package','Any other IT / computing lecture'):
-              assert marker in js.text, marker
+              assert marker in generic.text, marker
+          for marker in ('بطاقة تعريف المحاضرة','قواعد الوحدات العشرين','استوديو تحويل محاضرات تقنية المعلومات'):
+              assert marker in i18n.text, marker
+          print('LANGUAGE PASS — English default + one top toggle + Arabic localization payload')
+
+          # Exact approved camel/desert hero bytes, not the later tiny replacement.
+          live_hero=S.get(BASE+'/static/hero_v672.webp?v=7.0.1',timeout=60); assert live_hero.status_code==200
+          local_hero=Path('iscarb-studio/app/static/hero_v672.webp').read_bytes()
+          assert live_hero.content==local_hero, (len(live_hero.content),len(local_hero))
+          assert len(local_hero)>20000, len(local_hero)
+          digest=hashlib.sha256(local_hero).hexdigest()
+          print('HERO PASS — hero_v672.webp exact deployed bytes; sha256',digest)
+
           health=S.get(BASE+'/api/health',timeout=60); assert health.status_code==200
           h=health.json(); assert h.get('generic_it_scope') is True,h
           assert h.get('course_hardcoding') is False,h
           assert h.get('software_engineering_dependency') is False,h
           assert h.get('complete_package_export') is True,h
+          assert h.get('single_interface_language') is True,h
+          assert h.get('strict_20_unit_contract') is True,h
+          assert h.get('strict_20_unit_gate')=='v15_complete_20_unit_grammar',h
+          assert h.get('approved_hero_asset')=='hero_v672.webp',h
 
           cases={
             'Databases & data management': '''Database normalization lecture. A relation stores StudentID, StudentName, CourseID, CourseName, InstructorID, InstructorName and Grade. Functional dependencies determine candidate keys. First normal form requires atomic attributes. Second normal form removes partial dependency on part of a composite key. Third normal form removes transitive dependency on non-key attributes. Decomposition should preserve dependencies and ideally be lossless. Learners compare update, insertion and deletion anomalies, derive decompositions, test keys, and use joins to reconstruct information. The lecture also distinguishes normalization from denormalization and asks when performance requirements justify a controlled redundancy decision.''',
@@ -63,10 +94,21 @@ jobs:
               assert job.get('status')=='blocked',(domain,job.get('status'),job.get('error'))
               assert not job.get('error'),(domain,job.get('error'))
               units=job['blueprint']['units']; assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
+              checks=job.get('deterministic_checks') or {}
+              assert checks.get('v15_unit_numbers_are_exact') is True,(domain,'numbers',checks.get('v15_unit_numbers_are_exact'))
+              assert checks.get('v15_phase_sequence_is_exact') is True,(domain,'phases',checks.get('v15_phase_sequence_is_exact'))
+              role={k:v for k,v in checks.items() if re.match(r'^v15_unit\d{2}_',k)}
+              assert len(role)==20,(domain,'role-count',len(role),sorted(role))
+              failed=[k for k,v in role.items() if v is not True]
+              assert not failed,(domain,'unit-role-failures',failed)
+              assert checks.get('v15_complete_20_unit_grammar') is True,(domain,'grammar',[(k,v) for k,v in checks.items() if k.startswith('v15_unit') and not v])
+              assert checks.get('v15_technical_units_retain_source_detail') is True,(domain,'detail')
+              assert checks.get('v15_no_source_fragment_ends_mid_thought') is True,(domain,'fragment')
+              assert checks.get('v15_presenter_fits_readable_canvas') is True,(domain,'readability')
               blob=(' '.join(str(x) for u in units for x in u.get('core_content',[]))).lower()
               assert 'cpit-455' not in blob and 'original cpit-455 lecture' not in blob
               p=S.get(f'{BASE}/api/jobs/{jid}/presenter',timeout=90); assert p.status_code==200,(domain,p.status_code,p.text[:300])
-              print('GENERIC IT PASS —',domain,'20 units + presenter')
+              print('STRICT 20 PASS —',domain,'20/20 role contracts + readable presenter')
 
           domain,jid=jobs[0]
           z=S.get(f'{BASE}/api/jobs/{jid}/export/package',timeout=150)
@@ -78,5 +120,5 @@ jobs:
               assert required <= names,(required-names)
               assert any(n.startswith('00_Original_Source/') for n in names)
           print('GENERIC IT PACKAGE PASS — original + presenter + guides + blueprint')
-          print('ISCARB GENERIC IT LIVE E2E PASS — databases + networks + AI/data')
+          print('ISCARB LIVE STRICT PASS — single language + approved camel hero + 20/20 rules + generic IT')
           PY
