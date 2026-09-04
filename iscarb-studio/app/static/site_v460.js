@@ -1,27 +1,39 @@
 /* Language and theme controls for the ISCARB landing page.
-   Both languages ship in the markup: the control decides which is shown, and
-   the choice survives a reload. Nothing here touches the compile pipeline. */
+   The page is always in ONE language at a time. English is the default; the
+   single header button switches the complete interface to Arabic and back. */
 (function () {
+  'use strict';
   var root = document.documentElement;
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private window */ } }
   };
 
+  function languageButton() {
+    var host = document.querySelector('.langPick');
+    if (!host) return null;
+    var button = document.getElementById('pageLangToggle');
+    if (!button) {
+      host.innerHTML = '<button type="button" id="pageLangToggle" class="languageToggle"></button>';
+      button = document.getElementById('pageLangToggle');
+    }
+    return button;
+  }
+
   function applyLang(value) {
-    if (value === 'ar' || value === 'en') {
-      root.setAttribute('data-lang', value);
-      root.setAttribute('lang', value);
-      root.setAttribute('dir', value === 'ar' ? 'rtl' : 'ltr');
-    } else {
-      root.removeAttribute('data-lang');
-      root.setAttribute('lang', 'en');
-      root.setAttribute('dir', 'ltr');
+    value = value === 'ar' ? 'ar' : 'en';
+    root.setAttribute('data-lang', value);
+    root.setAttribute('lang', value);
+    root.setAttribute('dir', value === 'ar' ? 'rtl' : 'ltr');
+    var button = languageButton();
+    if (button) {
+      button.textContent = value === 'ar' ? 'English' : 'العربية';
+      button.setAttribute('lang', value === 'ar' ? 'en' : 'ar');
+      button.setAttribute('dir', value === 'ar' ? 'ltr' : 'rtl');
+      button.setAttribute('aria-label', value === 'ar' ? 'Switch interface to English' : 'تحويل الواجهة إلى العربية');
+      button.title = value === 'ar' ? 'Switch to English' : 'التحويل إلى العربية';
     }
-    var buttons = document.querySelectorAll('[data-set-lang]');
-    for (var i = 0; i < buttons.length; i++) {
-      buttons[i].setAttribute('aria-pressed', String(buttons[i].dataset.setLang === value));
-    }
+    try { document.dispatchEvent(new CustomEvent('iscarb:language', { detail: { language: value } })); } catch (e) { /* old browser */ }
   }
 
   function applyTheme(value) {
@@ -34,9 +46,9 @@
   }
 
   document.addEventListener('click', function (event) {
-    var langBtn = event.target.closest ? event.target.closest('[data-set-lang]') : null;
+    var langBtn = event.target.closest ? event.target.closest('#pageLangToggle') : null;
     if (langBtn) {
-      var next = root.getAttribute('data-lang') === langBtn.dataset.setLang ? '' : langBtn.dataset.setLang;
+      var next = root.getAttribute('data-lang') === 'ar' ? 'en' : 'ar';
       store.set('iscarb-lang', next);
       applyLang(next);
       return;
@@ -48,6 +60,7 @@
     }
   });
 
-  applyLang(store.get('iscarb-lang') || '');
+  // Never enter the old bilingual/no-data-lang state.
+  applyLang(store.get('iscarb-lang') === 'ar' ? 'ar' : 'en');
   applyTheme(store.get('iscarb-theme') || 'dark');
 })();
