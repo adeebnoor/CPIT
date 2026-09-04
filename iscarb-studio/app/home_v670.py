@@ -36,7 +36,7 @@ _V670_STYLE = r"""
 <style id="iscarb-v703-home-patch">
 :root{--iscarb-bg:#05070D;--iscarb-magenta:#FF258C;--iscarb-cyan:#2CDCFF;--iscarb-gold:#DCB56B;--iscarb-text:#F5F5F8;--iscarb-muted:#B7BDC8}
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
-.heroArt{position:relative!important;min-height:350px!important;border-radius:28px;overflow:hidden;background-color:#05070D!important;background-image:url('/static/hero_v672.webp?v=7.0.3')!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;isolation:isolate}
+.heroArt{position:relative!important;min-height:350px!important;border-radius:28px;overflow:hidden;background-color:#05070D!important;background-image:url('/static/hero_v672.webp?v=7.0.1')!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;isolation:isolate}
 .heroArt::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.02),rgba(5,7,13,0) 55%,rgba(5,7,13,.01))}
 .heroArt::after{content:"20 CORE UNITS  ·  SOURCE-LOCKED  ·  NO PUBLIC FALLBACK";position:absolute;right:16px;bottom:16px;z-index:3;padding:8px 12px;border:1px solid rgba(255,37,140,.55);border-radius:999px;background:rgba(5,7,13,.82);color:var(--iscarb-text);font-size:10px;font-weight:800;letter-spacing:.07em;backdrop-filter:blur(8px)}
 html[data-lang="ar"] .heroArt::after{content:"٢٠ وحدة أساسية  ·  مقيدة بالمصدر  ·  بلا صور عامة";right:auto;left:16px;letter-spacing:0;font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif}
