@@ -153,13 +153,16 @@ def main() -> None:
     health = client.get("/api/health")
     assert health.status_code == 200
     h = health.json()
-    assert h.get("version") == "6.9.3", h
+    assert h.get("version") == "6.9.4", h
     assert h.get("public_web_image_fallback") is False, h
     assert h.get("presenter_preview_500_fix") is True, h
+    assert h.get("approved_hero_asset") == "hero_v671.svg", h
+    assert h.get("hero_decoder_safe") is True, h
 
     home = client.get("/")
     assert home.status_code == 200
-    assert "hero_v672.webp?v=6.9.3" in home.text
+    assert "hero_v671.svg?v=7.1.1" in home.text
+    assert "7.1.1 · IT-wide · Multi-source · Gate v15" in home.text
 
     for title, source, require_security_crisis in LECTURES:
         job = _compile_source_only(title, source)
@@ -168,7 +171,7 @@ def main() -> None:
         unit2 = next(u for u in job["blueprint"]["units"] if u["number"] == 2)
         print(f"E2E PASS — {title}: 20 units; Domain Spine {len(unit2.get('core_content', []))} nodes; preview + 8 outputs healthy")
 
-    print("ISCARB strict real-lecture E2E PASS — Dependable, Reliability, Security")
+    print("ISCARB strict real-lecture E2E PASS — Dependable, Reliability, Security + decoder-safe hero")
 
 
 if __name__ == "__main__":
