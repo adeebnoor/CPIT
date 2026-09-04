@@ -6,10 +6,11 @@ This intentionally exercises the exact surfaces that have regressed in the past:
 - production patch import order
 - current LectureUnit schema vs. Balanced30 planning
 - presenter HTML/PPTX/PDF rendering
-- source-native visual policy / public-web block
+- source-native visual policy / public-web fallback block
 - curated Domain Spine
 - generic-crisis block
 - approved Black Desert hero asset
+- single-language UI and source-figures-first policy
 
 The Docker image must not deploy if any of these checks fail.
 """
@@ -26,8 +27,6 @@ ROOT = Path(__file__).resolve().parent
 APP = ROOT / "app"
 PRESENTER = APP / "presenter_v67_prod.py"
 
-# Render reconstructs this module in run.py. Reconstruct it here too so the
-# build smoke test runs against exactly the same presenter payload.
 if not PRESENTER.exists():
     chunks = sorted(ROOT.glob("presenter_v67_prod.xz.b64.*"))
     assert chunks, "presenter_v67_prod payload chunks are missing"
@@ -37,7 +36,6 @@ if not PRESENTER.exists():
 os.environ["ISCARB_DISABLE_PUBLIC_IMAGES"] = "1"
 os.environ["ISCARB_VISUAL_POLICY"] = "p1-source>native>local-context>text-first"
 
-# Importing the production home applies the live patch chain in deployment order.
 from app.home_v670 import faculty_studio_v670_home  # noqa: E402
 from app import master_guidelines_v470 as master  # noqa: E402
 from app import patch_v690  # noqa: E402
@@ -56,8 +54,6 @@ def _phase(n: int) -> str:
 
 
 def _unit(n: int) -> LectureUnit:
-    # U02 deliberately has >6 rows: Domain Spine must never become expansion dump.
-    # U06 deliberately has >6 source-backed rows: one genuine source expansion is expected.
     if n == 2:
         core = [f"13.{i} Security engineering domain node {i}" for i in range(1, 11)]
         anchor = "[P1] Slide 2"
@@ -129,9 +125,6 @@ def _blueprint() -> Blueprint:
 
 def main() -> None:
     bp = _blueprint()
-
-    # 1) Exact regression that caused the September 4 presenter 500.
-    # Current LectureUnit has no overflow_content attribute; planning must not touch it.
     assert not hasattr(bp.units[0], "overflow_content"), "Smoke fixture unexpectedly has legacy overflow_content"
     plan = presenter._physical_plan(bp)
     assert plan[0][0] == "cover" and plan[-1][0] == "close"
@@ -140,7 +133,6 @@ def main() -> None:
     assert not any(kind == "expansion" and getattr(unit, "number", None) == 2 for kind, unit, _ in plan), "Domain Spine expanded into a heading dump"
     assert any(kind == "expansion" and getattr(unit, "number", None) == 6 for kind, unit, _ in plan), "Genuine source overflow was not expanded"
 
-    # 2) Policy invariants.
     assert os.environ.get("ISCARB_DISABLE_PUBLIC_IMAGES") == "1"
     assert getattr(master, "PUBLIC_VISUAL_UNITS", frozenset()) == frozenset(), "Public visual units were re-enabled"
     assert patch_v690._GENERIC_CRISIS.search("A team must make a consequential decision under uncertainty."), "Generic crisis guard regressed"
@@ -151,19 +143,17 @@ def main() -> None:
     if hasattr(presenter, "_public_candidates"):
         assert presenter._public_candidates(bp, bp.units[0]) == [], "Presenter public candidate fallback is active"
 
-    # 3) Production home / hero identity + single-language surface.
     hero = APP / "static" / "hero_v672.webp"
     assert hero.exists() and hero.stat().st_size >= 20_000, "Approved Black Desert hero asset is missing/truncated"
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_v672.webp?v=7.0.1" in html, "Production home is not using the approved hero"
+    assert "hero_v672.webp?v=7.0.7" in html, "Production home is not using the approved hero"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
     assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
-    assert "NO PUBLIC FALLBACK" in html, "Production home policy badge regressed"
-    assert "7.0.1" in html, "Production home UI version stamp regressed"
+    assert "SOURCE FIGURES FIRST" in html, "Source-figures-first policy badge regressed"
+    assert "7.0.7" in html, "Production home UI version stamp regressed"
 
-    # 4) End-to-end presenter renderers: HTML preview + PPTX + PDF.
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
         root = Path(td)
         preview = presenter.render_presenter_preview(bp, "BLOCKED", source_root=root)
@@ -184,7 +174,7 @@ def main() -> None:
             assert len([n for n in names if n.startswith("ppt/slides/slide") and n.endswith(".xml")]) >= 22, "PPTX lost expected core slides"
         assert pdf.read_bytes()[:4] == b"%PDF", "PDF export signature is invalid"
 
-    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; approved hero + single-language UI; HTML/PPTX/PDF renderers healthy")
+    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; approved hero + single-language UI; HTML/PPTX/PDF renderers healthy")
 
 
 if __name__ == "__main__":
