@@ -1,4 +1,4 @@
-name: ISCARB v6.9.4 Live Render Strict E2E
+name: ISCARB v7.1 Live Render Strict E2E
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
 
           BASE=os.environ['ISCARB_BASE'].rstrip('/')
           S=requests.Session()
-          S.headers.update({'User-Agent':'ISCARB-strict-live-E2E/6.9.4'})
+          S.headers.update({'User-Agent':'ISCARB-strict-live-E2E/7.1'})
           forbidden=('wikipedia.org','wikimedia.org','second amendment','down syndrome','classified information')
           generic=('a team must make a consequential decision','consequential decision under uncertainty')
           cases=[
@@ -44,7 +44,8 @@ jobs:
 
           home=S.get(BASE+'/',timeout=90)
           assert home.status_code==200,(home.status_code,home.text[:500])
-          assert 'hero_v672.webp?v=6.9.4' in home.text
+          assert 'hero_v672.webp?v=7.1.0' in home.text
+          assert 'site_v710_sources.js?v=clean-multisource-v1' in home.text
           health=S.get(BASE+'/api/health',timeout=90)
           assert health.status_code==200,health.text[:500]
           h=health.json()
@@ -55,7 +56,10 @@ jobs:
           assert h.get('presenter_request_rebuild') is False,h
           assert h.get('text_document_as_visual') is False,h
           assert int(h.get('source_visual_page_cap',99)) <= 18,h
-          print('LIVE PASS — home + health v6.9.4 + latency-safe source-native policy')
+          assert h.get('supporting_sources_enabled') is True,h
+          assert h.get('max_supporting_sources')==7,h
+          assert h.get('package_preserves_all_sources') is True,h
+          print('LIVE PASS — v7.1 home + v6.9.4 engine + latency-safe source-native + multi-source policy')
 
           for title,path,security in cases:
             assert path.is_file() and path.stat().st_size>10000,path
@@ -107,24 +111,29 @@ jobs:
               'student-docx':f'/api/jobs/{job_id}/export/student',
               'blueprint-json':f'/api/jobs/{job_id}/export/json',
               'authoring-prompt':f'/api/jobs/{job_id}/authoring-prompt',
+              'package':f'/api/jobs/{job_id}/export/package',
             }
             blobs={}
             for name,ep in endpoints.items():
-              out=S.get(BASE+ep,timeout=150)
+              out=S.get(BASE+ep,timeout=180)
               assert out.status_code==200,(title,name,out.status_code,out.text[:500] if 'text' in out.headers.get('content-type','') else len(out.content))
               blobs[name]=out.content
               assert len(out.content)>(500 if name in {'blueprint-json','authoring-prompt'} else 5000),(title,name,len(out.content))
             assert blobs['presenter-pdf'][:4]==b'%PDF'
             assert blobs['source-pdf'][:4]==b'%PDF'
             assert blobs['reading-pdf'][:4]==b'%PDF'
-            for name in ('pptx','instructor-docx','student-docx'): assert blobs[name][:2]==b'PK',(title,name,blobs[name][:8])
+            for name in ('pptx','instructor-docx','student-docx','package'): assert blobs[name][:2]==b'PK',(title,name,blobs[name][:8])
             with zipfile.ZipFile(io.BytesIO(blobs['pptx'])) as z:
               names=z.namelist(); assert 'ppt/presentation.xml' in names
               slides=[n for n in names if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
               assert 22<=len(slides)<=30,(title,'slide count',len(slides))
               text=' '.join(z.read(n).decode('utf-8','ignore').lower() for n in names if n.endswith('.xml') or n.endswith('.rels'))
               for bad in forbidden: assert bad not in text,(title,'forbidden PPTX',bad)
-            print(f'LIVE E2E PASS — {title}: 20 units; Domain Spine {len(spine)} nodes; presenter {preview_s:.1f}s; preview + 8 outputs; PPTX {len(slides)} slides')
+            with zipfile.ZipFile(io.BytesIO(blobs['package'])) as z:
+              names=z.namelist()
+              assert any(n.startswith('00_Original_Sources/P1__') for n in names),(title,names[:20])
+              assert '01_Visual_Presenter.pptx' in names and '06_Blueprint.json' in names
+            print(f'LIVE E2E PASS — {title}: 20 units; Domain Spine {len(spine)} nodes; presenter {preview_s:.1f}s; preview + 9 outputs; PPTX {len(slides)} slides')
 
-          print('ISCARB LIVE STRICT E2E PASS — Dependable + Reliability + Security on Render production v6.9.4')
+          print('ISCARB LIVE STRICT E2E PASS — Dependable + Reliability + Security on Render production v7.1 surface')
           PY
