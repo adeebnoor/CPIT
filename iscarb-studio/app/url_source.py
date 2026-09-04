@@ -70,7 +70,6 @@ def _extract_slideshare(soup: BeautifulSoup, source_url: str) -> str | None:
         src = str(img.get("src") or img.get("data-src") or img.get("data-lazy-src") or "")
         if len(alt) < 35 or "slidesharecdn" not in src:
             continue
-        # Main slides normally carry chapter/page text in their alt attributes.
         if alt in seen:
             continue
         seen.add(alt)
@@ -86,13 +85,13 @@ def _extract_slideshare(soup: BeautifulSoup, source_url: str) -> str | None:
 
 
 def _extract_html(data: bytes, source_url: str) -> str:
-    """Extract a public web lecture while preserving its author-supplied headings.
+    """Extract a public web lecture while preserving its visible structure.
 
-    Previous extraction flattened h1-h4 and body paragraphs into identical text
-    blocks. The deterministic profiler then had to guess headings from the first
-    words of prose, which could turn a wrapped sentence fragment into a slide
-    title. A lightweight heading marker preserves document structure without
-    changing or enriching the source's technical content.
+    Modern pages use h1-h6/p/li; older university lecture notes often use HTML
+    definition lists (dt/dd), table cells, or blockquotes instead. Treating only
+    p/li as content silently dropped named strategy lists from otherwise readable
+    sources. This extractor keeps those author-visible blocks, deduplicates them,
+    and never follows images or public-web visual fallbacks.
     """
     soup = BeautifulSoup(data, "html.parser")
     host = (urlparse(source_url).hostname or "").lower()
@@ -106,8 +105,9 @@ def _extract_html(data: bytes, source_url: str) -> str:
     title = _clean(soup.title.get_text(" ", strip=True)) if soup.title else "Web source"
     chunks: list[str] = [f"SOURCE URL: {source_url}", f"SOURCE TITLE: {title}", "SOURCE TYPE: public web page", ""]
     seen: set[str] = set()
-    heading_tags = {"h1", "h2", "h3", "h4"}
-    for tag in soup.find_all(["h1", "h2", "h3", "h4", "p", "li", "td", "th"]):
+    heading_tags = {"h1", "h2", "h3", "h4", "h5", "h6"}
+    content_tags = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "dt", "dd", "td", "th", "blockquote", "pre"]
+    for tag in soup.find_all(content_tags):
         text = _clean(tag.get_text(" ", strip=True))
         if len(text) < 3 or text in seen:
             continue
