@@ -7,9 +7,13 @@ single generic heading. Short TXT/DOCX sources can legitimately profile as one
 topic family even when their source text contains several distinct technical
 claims. This patch does not weaken Gate v15 and does not invent a taxonomy: it
 fills the spine only from P1 topic-family names, P1 coverage labels and complete
-source statements already preserved in the deterministic profile. A final
-readability fit runs after all production draft patches so no post-fit mutation
-can leave a unit below the presenter readability contract.
+source statements already preserved in the deterministic profile.
+
+The production chain also adds a Unit-13 scale/stress exercise after the base
+layout fit. For long source headings that exercise can overflow even though its
+technical core is small. The repair below shortens only ISCARB-authored framing;
+it preserves P1 core_content and its source anchor, then re-runs the unchanged
+readability gate.
 """
 
 import re
@@ -99,6 +103,46 @@ def _repair_unit2(blueprint, profile):
     return blueprint
 
 
+def _short_focus(unit) -> str:
+    """A concise source-derived noun/heading for framing, never new content."""
+    title = " ".join(str(getattr(unit, "title", "") or "").split())
+    # Remove the ISCARB suffix first, then take the source's first complete clause.
+    title = re.sub(r"\s*:\s*(?:scale|stress(?: test)?|evolution|improvement)\s*$", "", title, flags=re.I)
+    focus = re.split(r"[.!?;:]", title, maxsplit=1)[0].strip()
+    focus = re.sub(r"\blecture\b\s*$", "", focus, flags=re.I).strip()
+    if not focus and getattr(unit, "core_content", None):
+        focus = re.split(r"[.!?;:]", str(unit.core_content[0]), maxsplit=1)[0].strip()
+    words = focus.split()
+    if len(words) > 7:
+        words = words[:7]
+    return " ".join(words).rstrip(" ,;:-") or "the source mechanism"
+
+
+def _compact_unit13(blueprint):
+    """Keep the Unit-13 scale job visible while removing layout-only verbosity."""
+    from .presenter_v44 import readability_problems
+
+    if 13 not in readability_problems(blueprint):
+        return blueprint
+    unit = next((u for u in getattr(blueprint, "units", []) if getattr(u, "number", None) == 13), None)
+    if unit is None:
+        return blueprint
+    focus = _short_focus(unit)
+    # These are pedagogy, not source claims. The P1 technical statement and anchor
+    # below them remain unchanged. Every line still performs Gate-v15's Unit-13
+    # evolution/scale job explicitly.
+    unit.title = f"{focus}: scale boundary"
+    unit.engineering_question = f"What changes first when {focus} is stressed at a larger scale?"
+    unit.pedagogy_content = [
+        "SCALE CHANGE: increase deployment scale or distribution.",
+        "FAIL-FIRST: identify the first source assumption that breaks.",
+        "REDESIGN: use only P1 mechanisms and state the accepted cost.",
+    ]
+    unit.student_action = "Name the first assumption that fails at scale, then redesign with P1 mechanisms and state the cost."
+    unit.takeaway = "Scale can expose a source assumption that requires redesign."
+    return blueprint
+
+
 def apply_v702_patch(app) -> None:
     global _PATCHED
     if _PATCHED:
@@ -110,8 +154,8 @@ def apply_v702_patch(app) -> None:
     def strict_draft(profile, bundle):
         blueprint = previous(profile, bundle)
         blueprint = _repair_unit2(blueprint, profile)
-        # Earlier production patches may adjust unit pedagogy after the base
-        # builder's fit pass. Re-fit the final draft rather than relaxing Gate v15.
+        blueprint = engine.fit_presenter_text(blueprint)
+        blueprint = _compact_unit13(blueprint)
         return engine.fit_presenter_text(blueprint)
 
     engine._source_preserving_draft = strict_draft
@@ -126,6 +170,7 @@ def apply_v702_patch(app) -> None:
             "domain_spine_source_derived": True,
             "domain_spine_target_nodes": [MIN_SPINE_NODES, MAX_SPINE_NODES],
             "final_readability_refit": True,
+            "unit13_readability_compaction": True,
             "gate_v15_weakened": False,
         })
         return data
