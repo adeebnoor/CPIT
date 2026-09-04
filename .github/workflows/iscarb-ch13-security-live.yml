@@ -32,7 +32,7 @@ jobs:
 
           base=os.environ['ISCARB_BASE'].rstrip('/')
           source=os.environ['SOURCE_URL']
-          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.1'})
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.2'})
 
           src=s.get(source,timeout=60)
           assert src.status_code==200,src.status_code
@@ -90,21 +90,23 @@ jobs:
               [crisis,bp.get('named_ethical_purpose','')]
               + [str(x) for u in units for x in [u.get('title',''),u.get('engineering_question',''),*(u.get('core_content') or []),*(u.get('pedagogy_content') or []),u.get('student_action',''),u.get('takeaway','')]]
           ).lower()
-          for marker in ('confidential','integrity','availability','risk','security'):
-              assert marker in corpus,('missing-source-concept',marker)
-          for banned in ('wikipedia','second amendment','unsplash','pexels','pixabay'):
-              assert banned not in corpus,('public-image-fallback',banned)
-
           summary={
               'job_id':jid,
               'status':job.get('status'),
               'crisis':crisis,
               'domain_spine':u2.get('core_content',[]),
               'unit_titles':[u['title'] for u in units],
+              'unit_core':{str(u['number']):u.get('core_content',[]) for u in units},
               'strict20':checks.get('v15_complete_20_unit_grammar'),
               'readable':checks.get('v15_presenter_fits_readable_canvas'),
           }
           Path('ch13_security_result.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False),encoding='utf-8')
+          print('CH13 COVERAGE DIAGNOSTIC —',json.dumps(summary,ensure_ascii=False))
+
+          for marker in ('confidential','integrity','availability','risk','security'):
+              assert marker in corpus,('missing-source-concept',marker)
+          for banned in ('wikipedia','second amendment','unsplash','pexels','pixabay'):
+              assert banned not in corpus,('public-image-fallback',banned)
 
           p=s.get(f'{base}/api/jobs/{jid}/presenter',timeout=150)
           assert p.status_code==200,(p.status_code,p.text[:500] if 'text' in p.headers.get('content-type','') else len(p.content))
