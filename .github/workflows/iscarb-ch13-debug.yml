@@ -1,0 +1,43 @@
+name: ISCARB Ch13 Debug
+on:
+  push:
+    paths: ['.github/workflows/iscarb-ch13-debug.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install 'requests>=2.31,<3'
+      - env:
+          BASE: https://iscarb-lecture-studio.onrender.com
+          SRC: https://cs.ccsu.edu/~stan/classes/CS410/Notes16/13-SecurityEngineering.html
+        run: |
+          python - <<'PY'
+          import json, os, time, requests
+          s=requests.Session(); b=os.environ['BASE']; src=os.environ['SRC']
+          r=s.post(b+'/api/compile',data={'primary_url':src,'supporting_urls':'','lecture_focus':'','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=90)
+          print('compile',r.status_code,r.text[:300]); jid=r.json()['job_id']
+          for _ in range(120):
+              j=s.get(f'{b}/api/jobs/{jid}',timeout=60).json()
+              if j.get('status') in {'blocked','ready','error'}: break
+              time.sleep(2)
+          print('terminal',j.get('status'),j.get('error'))
+          c=j.get('deterministic_checks') or {}
+          print('V15',json.dumps({k:v for k,v in c.items() if k.startswith('v15_') or k.startswith('presenter_unit')},ensure_ascii=False))
+          bp=j.get('blueprint') or {}; units=bp.get('units') or []
+          for u in units:
+              if 6 <= u.get('number',0) <= 15:
+                  core=u.get('core_content') or []
+                  print('U',u['number'],'WORDS',sum(len(str(x).split()) for x in core),'ANCHOR',u.get('source_anchor'),'TITLE',u.get('title'),'CORE',json.dumps(core,ensure_ascii=False))
+          p=j.get('source_profile') or {}
+          print('TITLE',p.get('lecture_title'))
+          print('FAMILIES',json.dumps(p.get('topic_families',[]),ensure_ascii=False))
+          print('COVERAGE_COUNT',len(p.get('coverage_items',[])))
+          print('COVERAGE_TAIL',json.dumps((p.get('coverage_items') or [])[-40:],ensure_ascii=False))
+          PY
