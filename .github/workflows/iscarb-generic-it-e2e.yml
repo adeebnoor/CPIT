@@ -6,6 +6,7 @@ on:
       - '.github/workflows/iscarb-generic-it-e2e.yml'
       - 'iscarb-studio/app/home_v670.py'
       - 'iscarb-studio/app/patch_v700_generic.py'
+      - 'iscarb-studio/app/patch_v702_strict20.py'
       - 'iscarb-studio/app/static/site_v460.js'
       - 'iscarb-studio/app/static/site_v700_generic.js'
       - 'iscarb-studio/app/static/site_v701_i18n.js'
@@ -36,9 +37,8 @@ jobs:
           import requests
 
           BASE=os.environ['ISCARB_BASE'].rstrip('/')
-          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/2.0'})
+          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/2.1'})
 
-          # Product surface: one language at a time, no bilingual default.
           home=S.get(BASE+'/',timeout=60); assert home.status_code==200
           assert 'data-lang="en"' in home.text
           assert '/static/site_v700_generic.js?v=it-scope-v2' in home.text
@@ -54,7 +54,6 @@ jobs:
               assert marker in i18n.text, marker
           print('LANGUAGE PASS — English default + one top toggle + Arabic localization payload')
 
-          # Exact approved camel/desert hero bytes, not the later tiny replacement.
           live_hero=S.get(BASE+'/static/hero_v672.webp?v=7.0.1',timeout=60); assert live_hero.status_code==200
           local_hero=Path('iscarb-studio/app/static/hero_v672.webp').read_bytes()
           assert live_hero.content==local_hero, (len(live_hero.content),len(local_hero))
@@ -71,6 +70,8 @@ jobs:
           assert h.get('strict_20_unit_contract') is True,h
           assert h.get('strict_20_unit_gate')=='v15_complete_20_unit_grammar',h
           assert h.get('approved_hero_asset')=='hero_v672.webp',h
+          assert h.get('strict20_patch')=='v7.0.2',h
+          assert h.get('gate_v15_weakened') is False,h
 
           cases={
             'Databases & data management': '''Database normalization lecture. A relation stores StudentID, StudentName, CourseID, CourseName, InstructorID, InstructorName and Grade. Functional dependencies determine candidate keys. First normal form requires atomic attributes. Second normal form removes partial dependency on part of a composite key. Third normal form removes transitive dependency on non-key attributes. Decomposition should preserve dependencies and ideally be lossless. Learners compare update, insertion and deletion anomalies, derive decompositions, test keys, and use joins to reconstruct information. The lecture also distinguishes normalization from denormalization and asks when performance requirements justify a controlled redundancy decision.''',
@@ -94,6 +95,8 @@ jobs:
               assert job.get('status')=='blocked',(domain,job.get('status'),job.get('error'))
               assert not job.get('error'),(domain,job.get('error'))
               units=job['blueprint']['units']; assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
+              u2=next(u for u in units if u['number']==2)
+              assert 2<=len(u2.get('core_content',[]))<=8,(domain,'domain-spine',u2.get('core_content'))
               checks=job.get('deterministic_checks') or {}
               assert checks.get('v15_unit_numbers_are_exact') is True,(domain,'numbers',checks.get('v15_unit_numbers_are_exact'))
               assert checks.get('v15_phase_sequence_is_exact') is True,(domain,'phases',checks.get('v15_phase_sequence_is_exact'))
@@ -104,7 +107,8 @@ jobs:
               assert checks.get('v15_complete_20_unit_grammar') is True,(domain,'grammar',[(k,v) for k,v in checks.items() if k.startswith('v15_unit') and not v])
               assert checks.get('v15_technical_units_retain_source_detail') is True,(domain,'detail')
               assert checks.get('v15_no_source_fragment_ends_mid_thought') is True,(domain,'fragment')
-              assert checks.get('v15_presenter_fits_readable_canvas') is True,(domain,'readability')
+              unreadable=[k for k,v in checks.items() if k.startswith('presenter_unit') and v is not True]
+              assert checks.get('v15_presenter_fits_readable_canvas') is True,(domain,'readability',unreadable)
               blob=(' '.join(str(x) for u in units for x in u.get('core_content',[]))).lower()
               assert 'cpit-455' not in blob and 'original cpit-455 lecture' not in blob
               p=S.get(f'{BASE}/api/jobs/{jid}/presenter',timeout=90); assert p.status_code==200,(domain,p.status_code,p.text[:300])
