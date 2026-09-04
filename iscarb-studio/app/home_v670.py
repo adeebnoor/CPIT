@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""ISCARB v6.9.4 production home surface."""
+"""ISCARB v6.9.4 production home surface + generic IT intake."""
 from pathlib import Path
 from fastapi.responses import HTMLResponse
 from .start_v670_prod import app
@@ -11,6 +11,7 @@ from .patch_v691 import apply_v691_patch
 from .patch_v692 import apply_v692_patch
 from .patch_v693 import apply_v693_patch
 from .patch_v694 import apply_v694_patch
+from .patch_v700_generic import apply_generic_it_patch
 
 apply_v671_patch(app)
 apply_v680_patch(app)
@@ -19,6 +20,7 @@ apply_v691_patch(app)
 apply_v692_patch(app)
 apply_v693_patch(app)
 apply_v694_patch(app)
+apply_generic_it_patch(app)
 PUBLIC_VERSION = "6.9.4"
 
 app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", None) != "/"]
@@ -46,7 +48,9 @@ def faculty_studio_v670_home():
     body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=6.9.4")
     body = body.replace(
         "</head>",
-        _V670_STYLE + '\n<script src="/static/site_v671_fix.js?v=6.9.4" defer></script>\n</head>',
+        _V670_STYLE
+        + '\n<script src="/static/site_v671_fix.js?v=6.9.4" defer></script>'
+        + '\n<script src="/static/site_v700_generic.js?v=it-scope-v1" defer></script>\n</head>',
         1,
     )
     return HTMLResponse(
@@ -56,6 +60,6 @@ def faculty_studio_v670_home():
             "Pragma": "no-cache",
             "Expires": "0",
             "X-ISCARB-Version": PUBLIC_VERSION,
-            "X-ISCARB-Home": "v6.9.4-source-native-latency-safe-textgold-approved-hero",
+            "X-ISCARB-Home": "v6.9.4-source-native-latency-safe-generic-it-intake",
         },
     )
