@@ -6,7 +6,8 @@ on:
     paths:
       - '.github/workflows/iscarb-hero-live-check.yml'
       - 'iscarb-studio/app/home_v670.py'
-      - 'iscarb-studio/app/static/hero_v672.webp'
+      - 'iscarb-studio/app/patch_v711_hero.py'
+      - 'iscarb-studio/app/static/hero_v671.svg'
 
 permissions:
   contents: read
@@ -14,43 +15,67 @@ permissions:
 jobs:
   hero-live:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install requests pillow
-      - name: Validate live hero image
+      - run: pip install requests pillow cairosvg
+      - name: Validate live camel hero and rasterize proof
         env:
           BASE: https://iscarb-lecture-studio.onrender.com
         run: |
           python - <<'PY'
           import hashlib, io, os, time
           import requests
+          import cairosvg
           from PIL import Image, ImageStat
+
           base=os.environ['BASE'].rstrip('/')
-          # Render may still be activating the pushed image. Poll until v7.1.x home is reachable.
-          for _ in range(60):
-              h=requests.get(base+'/',timeout=30)
-              if h.status_code==200:
-                  break
+          # Wait specifically for the new release, not merely for any 200 home.
+          h=None
+          for _ in range(90):
+              try:
+                  h=requests.get(base+'/',timeout=30)
+                  if h.status_code==200 and 'hero_v671.svg?v=7.1.1' in h.text and '7.1.1' in h.text:
+                      break
+              except requests.RequestException:
+                  pass
               time.sleep(2)
-          assert h.status_code==200
-          r=requests.get(base+'/static/hero_v672.webp?v=hero-live-check',timeout=60)
+          assert h is not None and h.status_code==200
+          assert 'hero_v671.svg?v=7.1.1' in h.text, 'v7.1.1 hero reference is not live'
+          assert 'hero_v672.webp' not in h.text, 'deprecated corrupt WebP is still referenced'
+
+          r=requests.get(base+'/static/hero_v671.svg?v=7.1.1-live-proof',timeout=60)
           assert r.status_code==200,r.status_code
-          assert r.content[:4]==b'RIFF' and b'WEBP' in r.content[:16],r.content[:20]
-          img=Image.open(io.BytesIO(r.content)).convert('RGB')
-          print('HERO',img.size,'bytes',len(r.content),'sha256',hashlib.sha256(r.content).hexdigest())
-          stat=ImageStat.Stat(img.resize((64,36)))
-          print('MEAN_RGB',tuple(round(v,2) for v in stat.mean),'EXTREMA',img.getextrema())
-          # Reject an accidentally all-black/near-empty image.
-          assert max(stat.mean) > 20, stat.mean
-          img.save('live_hero.png')
+          text=r.text
+          assert '<svg' in text and 'ISCARB Black Desert hero' in text and 'id="camel"' in text
+          assert len(r.content)>5000,len(r.content)
+          print('HERO SVG bytes',len(r.content),'sha256',hashlib.sha256(r.content).hexdigest())
+
+          png=cairosvg.svg2png(bytestring=r.content,output_width=1600,output_height=900)
+          img=Image.open(io.BytesIO(png)).convert('RGB')
+          stat=ImageStat.Stat(img.resize((80,45)))
+          mean=tuple(round(v,2) for v in stat.mean)
+          extrema=img.getextrema()
+          print('RASTER PROOF',img.size,'MEAN_RGB',mean,'EXTREMA',extrema)
+          assert img.size==(1600,900)
+          assert max(stat.mean)>20,stat.mean
+          assert any(lo < hi for lo,hi in extrema),extrema
+          img.save('live_camel_hero.png')
           open('home.html','w',encoding='utf-8').write(h.text)
+
+          health=requests.get(base+'/api/health',timeout=60)
+          assert health.status_code==200
+          hd=health.json()
+          assert hd.get('approved_hero_asset')=='hero_v671.svg',hd
+          assert hd.get('hero_decoder_safe') is True,hd
+          print('ISCARB HERO LIVE PASS — decoder-safe SVG + inline fallback + raster proof')
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: live-hero-proof
+          name: live-camel-hero-proof
           path: |
-            live_hero.png
+            live_camel_hero.png
             home.html
