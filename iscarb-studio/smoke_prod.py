@@ -151,15 +151,17 @@ def main() -> None:
     if hasattr(presenter, "_public_candidates"):
         assert presenter._public_candidates(bp, bp.units[0]) == [], "Presenter public candidate fallback is active"
 
-    # 3) Production home / hero identity.
+    # 3) Production home / hero identity + single-language surface.
     hero = APP / "static" / "hero_v672.webp"
     assert hero.exists() and hero.stat().st_size >= 20_000, "Approved Black Desert hero asset is missing/truncated"
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_v672.webp?v=6.9.4" in html, "Production home is not using the approved hero"
+    assert "hero_v672.webp?v=7.0.1" in html, "Production home is not using the approved hero"
+    assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
+    assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
     assert "NO PUBLIC FALLBACK" in html, "Production home policy badge regressed"
-    assert "6.9.4" in html, "Production home version stamp regressed"
+    assert "7.0.1" in html, "Production home UI version stamp regressed"
 
     # 4) End-to-end presenter renderers: HTML preview + PPTX + PDF.
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
@@ -182,7 +184,7 @@ def main() -> None:
             assert len([n for n in names if n.startswith("ppt/slides/slide") and n.endswith(".xml")]) >= 22, "PPTX lost expected core slides"
         assert pdf.read_bytes()[:4] == b"%PDF", "PDF export signature is invalid"
 
-    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; HTML/PPTX/PDF renderers healthy")
+    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; approved hero + single-language UI; HTML/PPTX/PDF renderers healthy")
 
 
 if __name__ == "__main__":
