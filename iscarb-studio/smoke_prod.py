@@ -157,9 +157,9 @@ def main() -> None:
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_v672.webp?v=6.9.3" in html, "Production home is not using the approved hero"
+    assert "hero_v672.webp?v=6.9.4" in html, "Production home is not using the approved hero"
     assert "NO PUBLIC FALLBACK" in html, "Production home policy badge regressed"
-    assert "6.9.3" in html, "Production home version stamp regressed"
+    assert "6.9.4" in html, "Production home version stamp regressed"
 
     # 4) End-to-end presenter renderers: HTML preview + PPTX + PDF.
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
