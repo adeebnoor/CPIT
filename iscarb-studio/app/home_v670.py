@@ -24,12 +24,12 @@ _V670_STYLE = r"""
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
 .heroArt{
   position:relative!important;min-height:390px!important;border-radius:28px;
-  overflow:hidden;background:#05070D url('/static/hero_v671.svg?v=6.7.2') center/cover no-repeat!important;
+  overflow:hidden;background:#05070D url('/static/hero_v672.webp?v=6.7.3') center/cover no-repeat!important;
   isolation:isolate;
 }
 .heroArt::before{
   content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(5,7,13,.10),rgba(5,7,13,0) 48%,rgba(5,7,13,.05));
+  background:linear-gradient(90deg,rgba(5,7,13,.06),rgba(5,7,13,0) 50%,rgba(5,7,13,.03));
 }
 .heroArt::after{
   content:"20 CORE UNITS  ·  SOURCE-AWARE  ·  GATE v19";
@@ -51,14 +51,14 @@ def faculty_studio_v670_home():
     body = (Path(__file__).with_name("static") / "index_v440.html").read_text(encoding="utf-8")
     body = body.replace("4.6 · Gate v15", "6.7 · Gate v19")
     body = body.replace("Saudi Academic Engineering", "Saudi Engineering Learning System")
-    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=6.7.2")
-    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=6.7.2")
-    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=6.7.2")
+    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=6.7.3")
+    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=6.7.3")
+    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=6.7.3")
     body = body.replace("</head>", _V670_STYLE + "\n</head>", 1)
     return HTMLResponse(body, headers={
         "Cache-Control":"no-store, no-cache, must-revalidate, max-age=0",
         "Pragma":"no-cache",
         "Expires":"0",
         "X-ISCARB-Version":PUBLIC_VERSION,
-        "X-ISCARB-Home":"v6.7-black-desert-hd",
+        "X-ISCARB-Home":"v6.7-black-desert-raster-hd",
     })
