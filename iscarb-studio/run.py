@@ -6,6 +6,8 @@ import uvicorn
 
 # Production safety: never fetch unrelated public-web/Wikipedia imagery for lecture slides.
 os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
+os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>text-first")
+os.environ.setdefault("ISCARB_BUILD_ID", "6.9.2")
 
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
