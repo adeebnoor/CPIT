@@ -10,7 +10,7 @@ This intentionally exercises the exact surfaces that have regressed in the past:
 - curated Domain Spine
 - generic-crisis block
 - approved Black Desert hero asset
-- single-language UI and source-figures-first policy
+- single-language UI, clean multi-source intake and source-figures-first policy
 
 The Docker image must not deploy if any of these checks fail.
 """
@@ -148,11 +148,12 @@ def main() -> None:
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_v672.webp?v=7.0.7" in html, "Production home is not using the approved hero"
+    assert "hero_v672.webp?v=7.1.0" in html, "Production home is not using the approved hero"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
     assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
+    assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"
     assert "SOURCE FIGURES FIRST" in html, "Source-figures-first policy badge regressed"
-    assert "7.0.7" in html, "Production home UI version stamp regressed"
+    assert "7.1.0" in html, "Production home UI version stamp regressed"
 
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
         root = Path(td)
@@ -174,7 +175,7 @@ def main() -> None:
             assert len([n for n in names if n.startswith("ppt/slides/slide") and n.endswith(".xml")]) >= 22, "PPTX lost expected core slides"
         assert pdf.read_bytes()[:4] == b"%PDF", "PDF export signature is invalid"
 
-    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; approved hero + single-language UI; HTML/PPTX/PDF renderers healthy")
+    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; approved hero + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
 
 
 if __name__ == "__main__":
