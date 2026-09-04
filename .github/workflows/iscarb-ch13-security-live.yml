@@ -32,7 +32,7 @@ jobs:
 
           base=os.environ['ISCARB_BASE'].rstrip('/')
           source=os.environ['SOURCE_URL']
-          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.0'})
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.1'})
 
           src=s.get(source,timeout=60)
           assert src.status_code==200,src.status_code
@@ -65,7 +65,17 @@ jobs:
           checks=job.get('deterministic_checks') or {}
           assert checks.get('v15_complete_20_unit_grammar') is True,[(k,v) for k,v in checks.items() if k.startswith('v15_unit') and v is not True]
           assert checks.get('v15_technical_units_retain_source_detail') is True
-          assert checks.get('v15_no_source_fragment_ends_mid_thought') is True
+          dangling=re.compile(r'\b(of|for|to|the|a|an|and|or|in|on|at|by|with|from|that|is|are)$',re.I)
+          offenders=[]
+          for u in units:
+              for field,value in [('title',u.get('title','')),('engineering_question',u.get('engineering_question','')),('student_action',u.get('student_action','')),('takeaway',u.get('takeaway',''))]:
+                  clean=str(value or '').strip().rstrip('?.!;:')
+                  if clean and dangling.search(clean): offenders.append((u['number'],field,value))
+              for i,value in enumerate(u.get('core_content') or []):
+                  clean=str(value or '').strip().rstrip('?.!;:')
+                  if clean and dangling.search(clean): offenders.append((u['number'],f'core[{i}]',value))
+          if offenders: print('FRAGMENT OFFENDERS —',json.dumps(offenders,ensure_ascii=False))
+          assert checks.get('v15_no_source_fragment_ends_mid_thought') is True,offenders
           assert checks.get('v15_presenter_fits_readable_canvas') is True,[k for k,v in checks.items() if k.startswith('presenter_unit') and v is not True]
 
           u2=units[1]
