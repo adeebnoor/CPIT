@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-"""ISCARB v7.0.7 - source-page figure registry for linked web lectures.
+"""ISCARB v7.0.8 - source-page figure registry for linked web lectures.
 
-A linked HTML lecture is still P1. Its figures must therefore be treated exactly
-like figures in an uploaded P1 PDF: source figure first, then a native ISCARB
-redraw, then text-first. This patch reads only the figure manifest created while
-materializing the supplied page. It never searches the public web for imagery.
+A linked HTML lecture is still P1. Its figures are treated like figures in an
+uploaded P1 PDF: source figure first, then a native ISCARB redraw, then text-first.
+Only figures authored into the supplied page are eligible; there is no public
+image search or keyword fallback.
 
-The existing v6.9.4 local-PDF registry remains first priority and unchanged, so
-Dependable Systems / Reliability and other uploaded lecture decks cannot regress.
+For HTML sources each figure is used at most once. Repeating the same risk diagram
+across five slides is not visual pedagogy; after its best semantic match the other
+units return to native, source-grounded diagrams. Local-PDF behavior stays exactly
+on the approved v6.9.4 path so earlier lectures do not regress.
 """
 
 import json
@@ -24,6 +26,7 @@ from .url_source import WEB_IMAGE_MANIFEST
 
 _PATCHED = False
 SOURCE_WEB_KIND = "source-web"
+WEB_FIGURE_REUSE_CAP = 1
 
 
 def _source_url(bp) -> str:
@@ -44,9 +47,6 @@ def _manifest_candidates(bp, source_root: Path | None = None) -> list[Path]:
         except Exception:
             pass
 
-    # Export routes sometimes receive only the saved Blueprint. In that case,
-    # resolve the manifest by the exact P1 URL recorded inside it; never borrow
-    # a merely similar job or another user's source.
     wanted_url = _source_url(bp)
     if wanted_url and sv.UPLOAD_ROOT.exists():
         try:
@@ -107,12 +107,56 @@ def _registry_from_manifest(bp, source_root: Path | None = None):
 
 
 def _source_first_load_registry(bp, source_root: Path | None = None):
-    # Keep the approved local-PDF path exactly as v6.9.4 implemented it.
     local_pdf_registry = latency._fast_load_registry(bp, source_root=source_root)
     if local_pdf_registry is not None:
         return local_pdf_registry
-    # Linked HTML may reuse only figures authored into the supplied P1 page.
     return _registry_from_manifest(bp, source_root=source_root)
+
+
+def _web_unique_plans(bp, source_root: Path | None = None):
+    """Assign every embedded P1 web figure to only its strongest unit match."""
+    registry = _source_first_load_registry(bp, source_root=source_root)
+    if registry is None or registry.source_kind != SOURCE_WEB_KIND:
+        # Delegate local-PDF and no-registry behavior to the original planner.
+        return _PREVIOUS_PLANS(bp, source_root=source_root)
+
+    # Start from native/source-grounded redraw plans. Then promote only the best
+    # one-to-one unit/figure matches to USE.
+    plans = [sv.plan_for_unit(bp, unit, None) for unit in bp.units]
+    candidates: list[tuple[float, int, int]] = []
+    for unit_index, unit in enumerate(bp.units):
+        if unit.number not in sv.SOURCE_VISUAL_PRIORITY or not sv._looks_source_backed(unit.source_anchor or ""):
+            continue
+        anchors = set(sv.anchor_slides(unit.source_anchor or ""))
+        for asset_index, asset in enumerate(registry.assets):
+            score = sv._asset_score(asset, unit, anchors)
+            if score >= 8.0:
+                candidates.append((score, unit_index, asset_index))
+
+    candidates.sort(key=lambda row: row[0], reverse=True)
+    used_units: set[int] = set()
+    used_assets: set[int] = set()
+    for score, unit_index, asset_index in candidates:
+        if unit_index in used_units or asset_index in used_assets:
+            continue
+        unit = bp.units[unit_index]
+        asset = registry.assets[asset_index]
+        plans[unit_index] = sv.VisualPlan(
+            sv.VISUAL_TYPES.get(unit.number, "concept-visual"),
+            sv.TEACHING_PURPOSE.get(unit.number, "Make the engineering decision visible."),
+            "USE",
+            f"Source figure: [P1] section {asset.slide_number} · {registry.source_title}",
+            True,
+            asset.slide_number,
+            asset,
+            (unit.takeaway, unit.student_action),
+        )
+        used_units.add(unit_index)
+        used_assets.add(asset_index)
+    return plans
+
+
+_PREVIOUS_PLANS = sv.plans_for_blueprint
 
 
 def apply_v705_patch(app) -> None:
@@ -122,19 +166,23 @@ def apply_v705_patch(app) -> None:
     _PATCHED = True
 
     sv.load_registry = _source_first_load_registry
+    sv.plans_for_blueprint = _web_unique_plans
     for module in (sv42, presenter_v44, presenter):
         if hasattr(module, "load_registry"):
             setattr(module, "load_registry", _source_first_load_registry)
+        if hasattr(module, "plans_for_blueprint"):
+            setattr(module, "plans_for_blueprint", _web_unique_plans)
 
     previous_health = base._health_v440
 
     def health():
         data = dict(previous_health())
         data.update({
-            "web_source_visuals": "v7.0.7-source-page-only",
+            "web_source_visuals": "v7.0.8-source-page-only-unique",
             "visual_priority": "P1 source figure > ISCARB native redraw > text-first",
             "linked_html_source_figures": True,
             "same_page_image_capture": True,
+            "source_web_figure_reuse_cap": WEB_FIGURE_REUSE_CAP,
             "public_web_image_fallback": False,
             "random_keyword_image_search": False,
             "legacy_local_pdf_visuals_preserved": True,
