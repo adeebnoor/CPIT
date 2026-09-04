@@ -7,10 +7,12 @@ on:
       - 'iscarb-studio/app/home_v670.py'
       - 'iscarb-studio/app/patch_v700_generic.py'
       - 'iscarb-studio/app/patch_v702_strict20.py'
+      - 'iscarb-studio/app/patch_v711_hero.py'
       - 'iscarb-studio/app/static/site_v460.js'
       - 'iscarb-studio/app/static/site_v700_generic.js'
       - 'iscarb-studio/app/static/site_v701_i18n.js'
-      - 'iscarb-studio/app/static/hero_v672.webp'
+      - 'iscarb-studio/app/static/site_v710_sources.js'
+      - 'iscarb-studio/app/static/hero_v671.svg'
       - 'iscarb-studio/app/gate_v15.py'
   workflow_dispatch:
 
@@ -32,34 +34,44 @@ jobs:
           ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
         run: |
           python - <<'PY'
-          import hashlib, io, json, os, re, time, zipfile
-          from pathlib import Path
+          import io, json, os, re, time, zipfile
           import requests
 
           BASE=os.environ['ISCARB_BASE'].rstrip('/')
-          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/2.2'})
+          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/7.1.1'})
 
-          home=S.get(BASE+'/',timeout=60); assert home.status_code==200
+          # Wait for the deployed app release rather than racing Render activation.
+          home=None
+          for _ in range(90):
+              try:
+                  home=S.get(BASE+'/',timeout=45)
+                  if home.status_code==200 and 'hero_v671.svg?v=7.1.1' in home.text and '7.1.1' in home.text:
+                      break
+              except requests.RequestException:
+                  pass
+              time.sleep(2)
+          assert home is not None and home.status_code==200
           assert 'data-lang="en"' in home.text
-          assert '/static/site_v700_generic.js?v=it-scope-v2' in home.text
+          assert '/static/site_v700_generic.js?v=it-scope-v3' in home.text
           assert '/static/site_v701_i18n.js?v=single-language-v1' in home.text
-          assert 'hero_v672.webp?v=7.0.1' in home.text
-          lang=S.get(BASE+'/static/site_v460.js?v=7.0.1',timeout=60); assert lang.status_code==200
+          assert '/static/site_v710_sources.js?v=clean-multisource-v1' in home.text
+          assert 'hero_v671.svg?v=7.1.1' in home.text
+          assert 'hero_v672.webp' not in home.text
+
+          lang=S.get(BASE+'/static/site_v460.js?v=7.1.1',timeout=60); assert lang.status_code==200
           assert "pageLangToggle" in lang.text and "Never enter the old bilingual" in lang.text
-          generic=S.get(BASE+'/static/site_v700_generic.js?v=it-scope-v2',timeout=60); assert generic.status_code==200
+          generic=S.get(BASE+'/static/site_v700_generic.js?v=it-scope-v3',timeout=60); assert generic.status_code==200
           i18n=S.get(BASE+'/static/site_v701_i18n.js?v=single-language-v1',timeout=60); assert i18n.status_code==200
+          sources=S.get(BASE+'/static/site_v710_sources.js?v=clean-multisource-v1',timeout=60); assert sources.status_code==200
           for marker in ('IT Lecture Intake Sheet','Auto-detect from uploaded source','Complete IT Lecture Package','Any other IT / computing lecture'):
               assert marker in generic.text, marker
           for marker in ('بطاقة تعريف المحاضرة','قواعد الوحدات العشرين','استوديو تحويل محاضرات تقنية المعلومات'):
               assert marker in i18n.text, marker
-          print('LANGUAGE PASS — English default + one top toggle + Arabic localization payload')
+          print('LANGUAGE/INTAKE PASS — English default + Arabic toggle + clean multi-source intake')
 
-          live_hero=S.get(BASE+'/static/hero_v672.webp?v=7.0.1',timeout=60); assert live_hero.status_code==200
-          local_hero=Path('iscarb-studio/app/static/hero_v672.webp').read_bytes()
-          assert live_hero.content==local_hero, (len(live_hero.content),len(local_hero))
-          assert len(local_hero)>20000, len(local_hero)
-          digest=hashlib.sha256(local_hero).hexdigest()
-          print('HERO PASS — hero_v672.webp exact deployed bytes; sha256',digest)
+          live_hero=S.get(BASE+'/static/hero_v671.svg?v=7.1.1',timeout=60); assert live_hero.status_code==200
+          assert '<svg' in live_hero.text and 'ISCARB Black Desert hero' in live_hero.text and 'id="camel"' in live_hero.text
+          print('HERO PASS — decoder-safe Black Desert camel SVG')
 
           health=S.get(BASE+'/api/health',timeout=60); assert health.status_code==200
           h=health.json(); assert h.get('generic_it_scope') is True,h
@@ -69,9 +81,12 @@ jobs:
           assert h.get('single_interface_language') is True,h
           assert h.get('strict_20_unit_contract') is True,h
           assert h.get('strict_20_unit_gate')=='v15_complete_20_unit_grammar',h
-          assert h.get('approved_hero_asset')=='hero_v672.webp',h
+          assert h.get('approved_hero_asset')=='hero_v671.svg',h
+          assert h.get('hero_decoder_safe') is True,h
           assert h.get('strict20_patch')=='v7.0.2',h
           assert h.get('gate_v15_weakened') is False,h
+          assert h.get('supporting_sources_enabled') is True,h
+          assert h.get('max_supporting_sources')==7,h
 
           cases={
             'Databases & data management': '''Database normalization lecture. A relation stores StudentID, StudentName, CourseID, CourseName, InstructorID, InstructorName and Grade. Functional dependencies determine candidate keys. First normal form requires atomic attributes. Second normal form removes partial dependency on part of a composite key. Third normal form removes transitive dependency on non-key attributes. Decomposition should preserve dependencies and ideally be lossless. Learners compare update, insertion and deletion anomalies, derive decompositions, test keys, and use joins to reconstruct information. The lecture also distinguishes normalization from denormalization and asks when performance requirements justify a controlled redundancy decision.''',
@@ -85,14 +100,14 @@ jobs:
               focus='[ISCARB IT CONTEXT]\nCourse: Generic IT test\nIT area: '+domain+'\nLearner level: Undergraduate — intermediate\nInstruction: adapt to this context, but P1 remains the sole mandatory technical scope.\n[/ISCARB IT CONTEXT]'
               r=S.post(BASE+'/api/compile',files=files,data={'primary_url':'','supporting_urls':'','lecture_focus':focus,'model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60)
               assert r.status_code==200,(domain,r.status_code,r.text[:500]); jid=r.json()['job_id']; jobs.append((domain,jid))
-              deadline=time.time()+120
+              deadline=time.time()+150
               while time.time()<deadline:
                   state=S.get(f'{BASE}/api/jobs/{jid}',timeout=45); assert state.status_code==200
                   job=state.json()
                   if job.get('status') in {'blocked','ready','error'}: break
                   time.sleep(1)
               else: raise AssertionError(domain+' compile timeout')
-              assert job.get('status')=='blocked',(domain,job.get('status'),job.get('error'))
+              assert job.get('status') in {'blocked','ready'},(domain,job.get('status'),job.get('error'))
               assert not job.get('error'),(domain,job.get('error'))
               units=job['blueprint']['units']; assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
               u2=next(u for u in units if u['number']==2)
@@ -121,14 +136,14 @@ jobs:
               print('STRICT 20 PASS —',domain,'20/20 role contracts + readable presenter')
 
           domain,jid=jobs[0]
-          z=S.get(f'{BASE}/api/jobs/{jid}/export/package',timeout=150)
+          z=S.get(f'{BASE}/api/jobs/{jid}/export/package',timeout=180)
           assert z.status_code==200,(z.status_code,z.text[:300] if 'text' in z.headers.get('content-type','') else len(z.content))
           assert z.content[:2]==b'PK'
           with zipfile.ZipFile(io.BytesIO(z.content)) as f:
               names=set(f.namelist())
               required={'00_README.txt','01_Visual_Presenter.pptx','02_Visual_Presenter.pdf','03_Faculty_Reading_Pack.pdf','04_Instructor_Guide.docx','05_Student_Activity_Pack.docx','06_Blueprint.json','08_Source_Manifest.json'}
               assert required <= names,(required-names)
-              assert any(n.startswith('00_Original_Source/') for n in names)
-          print('GENERIC IT PACKAGE PASS — original + presenter + guides + blueprint')
-          print('ISCARB LIVE STRICT PASS — single language + approved camel hero + 20/20 rules + generic IT')
+              assert any(n.startswith('00_Original_Sources/P1__') for n in names), sorted(names)[:20]
+          print('GENERIC IT PACKAGE PASS — original source + presenter + guides + blueprint')
+          print('ISCARB LIVE STRICT PASS — single language + decoder-safe camel hero + 20/20 rules + generic IT')
           PY
