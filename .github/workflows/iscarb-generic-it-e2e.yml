@@ -32,12 +32,12 @@ jobs:
           ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
         run: |
           python - <<'PY'
-          import hashlib, io, os, re, time, zipfile
+          import hashlib, io, json, os, re, time, zipfile
           from pathlib import Path
           import requests
 
           BASE=os.environ['ISCARB_BASE'].rstrip('/')
-          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/2.1'})
+          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/2.2'})
 
           home=S.get(BASE+'/',timeout=60); assert home.status_code==200
           assert 'data-lang="en"' in home.text
@@ -108,6 +108,12 @@ jobs:
               assert checks.get('v15_technical_units_retain_source_detail') is True,(domain,'detail')
               assert checks.get('v15_no_source_fragment_ends_mid_thought') is True,(domain,'fragment')
               unreadable=[k for k,v in checks.items() if k.startswith('presenter_unit') and v is not True]
+              if unreadable:
+                  for key in unreadable:
+                      n=int(re.search(r'(\d{2})',key).group(1))
+                      u=next(x for x in units if x['number']==n)
+                      payload={f:u.get(f) for f in ('number','title','engineering_question','core_content','pedagogy_content','student_action','takeaway','source_anchor','planned_minutes')}
+                      print('UNREADABLE PAYLOAD —',domain,json.dumps(payload,ensure_ascii=False))
               assert checks.get('v15_presenter_fits_readable_canvas') is True,(domain,'readability',unreadable)
               blob=(' '.join(str(x) for u in units for x in u.get('core_content',[]))).lower()
               assert 'cpit-455' not in blob and 'original cpit-455 lecture' not in blob
