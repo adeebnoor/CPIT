@@ -69,8 +69,6 @@ def _build_package(job_id: str) -> Path:
     if _good_zip(package):
         return package
 
-    # Generate/cache each normal output first. Do this outside the package lock:
-    # _ensure_export has its own per-job lock and is intentionally non-reentrant.
     outputs = {
         "01_Visual_Presenter.pptx": _ORIGINAL_ENSURE(job_id, "pptx"),
         "02_Visual_Presenter.pdf": _ORIGINAL_ENSURE(job_id, "presenter-pdf"),
@@ -132,6 +130,7 @@ def _build_package(job_id: str) -> Path:
                     "source_manifest": list(getattr(job, "source_manifest", []) or []),
                     "it_scope": list(IT_SCOPE),
                     "scope_policy": "generic IT/computing; no CPIT-455 or Software Engineering course dependency",
+                    "strict_20_unit_gate": "v15_complete_20_unit_grammar",
                 }, ensure_ascii=False, indent=2))
             tmp.replace(package)
         finally:
@@ -152,8 +151,6 @@ def apply_generic_it_patch(app) -> None:
             return _build_package(job_id)
         return _ORIGINAL_ENSURE(job_id, fmt)
 
-    # The already-installed generic /export/{fmt} route resolves this module
-    # global at request time, so adding package support here needs no new route.
     reliability._ensure_export = ensure_export
 
     previous_health = base._health_v440
@@ -168,6 +165,14 @@ def apply_generic_it_patch(app) -> None:
             "supported_it_domains": list(IT_SCOPE),
             "complete_package_export": True,
             "complete_package_format": "zip",
+            "single_interface_language": True,
+            "interface_languages": ["en", "ar"],
+            "interface_default_language": "en",
+            "strict_20_unit_contract": True,
+            "strict_20_unit_gate": "v15_complete_20_unit_grammar",
+            "unit_role_checks": "v15_unit01..v15_unit20",
+            "approved_hero_asset": "hero_v672.webp",
+            "approved_hero_blob": "600190c7bec39e20e0f1578682c11e94f0c9337e",
         })
         return data
 
