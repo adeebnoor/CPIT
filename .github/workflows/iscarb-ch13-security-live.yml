@@ -32,7 +32,7 @@ jobs:
 
           base=os.environ['ISCARB_BASE'].rstrip('/')
           source=os.environ['SOURCE_URL']
-          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.2'})
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-Ch13-live-regression/1.3'})
 
           src=s.get(source,timeout=60)
           assert src.status_code==200,src.status_code
@@ -90,9 +90,13 @@ jobs:
               [crisis,bp.get('named_ethical_purpose','')]
               + [str(x) for u in units for x in [u.get('title',''),u.get('engineering_question',''),*(u.get('core_content') or []),*(u.get('pedagogy_content') or []),u.get('student_action',''),u.get('takeaway','')]]
           ).lower()
+          profile=job.get('source_profile') or {}
           summary={
               'job_id':jid,
               'status':job.get('status'),
+              'profile_title':profile.get('lecture_title'),
+              'profile_families':profile.get('topic_families',[]),
+              'profile_coverage':profile.get('coverage_items',[]),
               'crisis':crisis,
               'domain_spine':u2.get('core_content',[]),
               'unit_titles':[u['title'] for u in units],
