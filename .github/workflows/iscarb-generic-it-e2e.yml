@@ -1,0 +1,82 @@
+name: ISCARB Generic IT Live E2E
+
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-generic-it-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-it-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'requests>=2.31,<3'
+      - name: Exercise generic IT upload, presenter and package
+        env:
+          ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
+        run: |
+          python - <<'PY'
+          import io, os, time, zipfile
+          import requests
+
+          BASE=os.environ['ISCARB_BASE'].rstrip('/')
+          S=requests.Session(); S.headers.update({'User-Agent':'ISCARB-generic-IT-E2E/1.0'})
+
+          home=S.get(BASE+'/',timeout=60); assert home.status_code==200
+          assert '/static/site_v700_generic.js?v=it-scope-v1' in home.text
+          js=S.get(BASE+'/static/site_v700_generic.js?v=it-scope-v1',timeout=60); assert js.status_code==200
+          for marker in ('IT Lecture Intake Sheet','Auto-detect from uploaded source','Complete IT Lecture Package','Any other IT / computing lecture'):
+              assert marker in js.text, marker
+          health=S.get(BASE+'/api/health',timeout=60); assert health.status_code==200
+          h=health.json(); assert h.get('generic_it_scope') is True,h
+          assert h.get('course_hardcoding') is False,h
+          assert h.get('software_engineering_dependency') is False,h
+          assert h.get('complete_package_export') is True,h
+
+          cases={
+            'Databases & data management': '''Database normalization lecture. A relation stores StudentID, StudentName, CourseID, CourseName, InstructorID, InstructorName and Grade. Functional dependencies determine candidate keys. First normal form requires atomic attributes. Second normal form removes partial dependency on part of a composite key. Third normal form removes transitive dependency on non-key attributes. Decomposition should preserve dependencies and ideally be lossless. Learners compare update, insertion and deletion anomalies, derive decompositions, test keys, and use joins to reconstruct information. The lecture also distinguishes normalization from denormalization and asks when performance requirements justify a controlled redundancy decision.''',
+            'Networks & infrastructure': '''IP networking lecture. IPv4 addresses contain network and host portions. A subnet mask or CIDR prefix determines the boundary. Learners convert prefix lengths, calculate address ranges, identify network and broadcast addresses, count usable hosts, and compare fixed-length with variable-length subnetting. Routing decisions use destination prefixes and longest-prefix match. The lecture discusses default routes, route aggregation, overlapping prefixes, addressing constraints, and how a mistaken mask can isolate hosts or send traffic to the wrong gateway.''',
+            'AI & data science': '''Machine learning model evaluation lecture. A classifier produces predictions compared with ground truth. The confusion matrix separates true positives, false positives, true negatives and false negatives. Accuracy can be misleading under class imbalance. Precision, recall, specificity and F1 answer different questions. Threshold changes trade false positives against false negatives. ROC and precision-recall curves summarize threshold behavior. Learners choose metrics based on decision costs, detect data leakage, separate training validation and test sets, and explain why evaluation must match deployment conditions.''',
+          }
+
+          jobs=[]
+          for domain,text in cases.items():
+              files={'primary_lecture':('lecture.txt',io.BytesIO(text.encode()),'text/plain')}
+              focus='[ISCARB IT CONTEXT]\nCourse: Generic IT test\nIT area: '+domain+'\nLearner level: Undergraduate — intermediate\nInstruction: adapt to this context, but P1 remains the sole mandatory technical scope.\n[/ISCARB IT CONTEXT]'
+              r=S.post(BASE+'/api/compile',files=files,data={'primary_url':'','supporting_urls':'','lecture_focus':focus,'model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60)
+              assert r.status_code==200,(domain,r.status_code,r.text[:500]); jid=r.json()['job_id']; jobs.append((domain,jid))
+              deadline=time.time()+120
+              while time.time()<deadline:
+                  state=S.get(f'{BASE}/api/jobs/{jid}',timeout=45); assert state.status_code==200
+                  job=state.json()
+                  if job.get('status') in {'blocked','ready','error'}: break
+                  time.sleep(1)
+              else: raise AssertionError(domain+' compile timeout')
+              assert job.get('status')=='blocked',(domain,job.get('status'),job.get('error'))
+              assert not job.get('error'),(domain,job.get('error'))
+              units=job['blueprint']['units']; assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
+              blob=(' '.join(str(x) for u in units for x in u.get('core_content',[]))).lower()
+              assert 'cpit-455' not in blob and 'original cpit-455 lecture' not in blob
+              p=S.get(f'{BASE}/api/jobs/{jid}/presenter',timeout=90); assert p.status_code==200,(domain,p.status_code,p.text[:300])
+              print('GENERIC IT PASS —',domain,'20 units + presenter')
+
+          domain,jid=jobs[0]
+          z=S.get(f'{BASE}/api/jobs/{jid}/export/package',timeout=150)
+          assert z.status_code==200,(z.status_code,z.text[:300] if 'text' in z.headers.get('content-type','') else len(z.content))
+          assert z.content[:2]==b'PK'
+          with zipfile.ZipFile(io.BytesIO(z.content)) as f:
+              names=set(f.namelist())
+              required={'00_README.txt','01_Visual_Presenter.pptx','02_Visual_Presenter.pdf','03_Faculty_Reading_Pack.pdf','04_Instructor_Guide.docx','05_Student_Activity_Pack.docx','06_Blueprint.json','08_Source_Manifest.json'}
+              assert required <= names,(required-names)
+              assert any(n.startswith('00_Original_Source/') for n in names)
+          print('GENERIC IT PACKAGE PASS — original + presenter + guides + blueprint')
+          print('ISCARB GENERIC IT LIVE E2E PASS — databases + networks + AI/data')
+          PY
