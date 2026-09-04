@@ -12,6 +12,7 @@ from .patch_v692 import apply_v692_patch
 from .patch_v693 import apply_v693_patch
 from .patch_v694 import apply_v694_patch
 from .patch_v700_generic import apply_generic_it_patch
+from .patch_v702_strict20 import apply_v702_patch
 
 apply_v671_patch(app)
 apply_v680_patch(app)
@@ -21,6 +22,7 @@ apply_v692_patch(app)
 apply_v693_patch(app)
 apply_v694_patch(app)
 apply_generic_it_patch(app)
+apply_v702_patch(app)
 PUBLIC_VERSION = "6.9.4"
 UI_RELEASE = "7.0.1"
 APPROVED_HERO = "hero_v672.webp"
@@ -72,6 +74,6 @@ def faculty_studio_v670_home():
             "X-ISCARB-UI": UI_RELEASE,
             "X-ISCARB-Hero-Asset": APPROVED_HERO,
             "X-ISCARB-Hero-Blob": APPROVED_HERO_BLOB,
-            "X-ISCARB-Home": "v7.0.1-generic-it-single-language-approved-camel-hero-gate-v15",
+            "X-ISCARB-Home": "v7.0.1-generic-it-single-language-approved-camel-hero-gate-v15-strict20-v702",
         },
     )
