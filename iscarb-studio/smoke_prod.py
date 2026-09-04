@@ -9,7 +9,7 @@ This intentionally exercises the exact surfaces that have regressed in the past:
 - source-native visual policy / public-web fallback block
 - curated Domain Spine
 - generic-crisis block
-- approved Black Desert hero asset
+- decoder-safe Black Desert camel hero
 - single-language UI, clean multi-source intake and source-figures-first policy
 
 The Docker image must not deploy if any of these checks fail.
@@ -143,17 +143,20 @@ def main() -> None:
     if hasattr(presenter, "_public_candidates"):
         assert presenter._public_candidates(bp, bp.units[0]) == [], "Presenter public candidate fallback is active"
 
-    hero = APP / "static" / "hero_v672.webp"
-    assert hero.exists() and hero.stat().st_size >= 20_000, "Approved Black Desert hero asset is missing/truncated"
+    hero = APP / "static" / "hero_v671.svg"
+    assert hero.exists() and hero.stat().st_size >= 5_000, "Approved Black Desert camel SVG is missing/truncated"
+    hero_text = hero.read_text(encoding="utf-8")
+    assert "ISCARB Black Desert hero" in hero_text and 'id="camel"' in hero_text, "Approved camel hero lost its semantic artwork"
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_v672.webp?v=7.1.0" in html, "Production home is not using the approved hero"
+    assert "hero_v671.svg?v=7.1.1" in html, "Production home is not using the decoder-safe camel hero"
+    assert "hero_v672.webp" not in html, "Deprecated corrupt WebP is still referenced by the production home"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
     assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
     assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"
     assert "SOURCE FIGURES FIRST" in html, "Source-figures-first policy badge regressed"
-    assert "7.1.0" in html, "Production home UI version stamp regressed"
+    assert "7.1.1" in html, "Production home UI version stamp regressed"
 
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
         root = Path(td)
@@ -175,7 +178,7 @@ def main() -> None:
             assert len([n for n in names if n.startswith("ppt/slides/slide") and n.endswith(".xml")]) >= 22, "PPTX lost expected core slides"
         assert pdf.read_bytes()[:4] == b"%PDF", "PDF export signature is invalid"
 
-    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; approved hero + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
+    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; decoder-safe camel hero + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
 
 
 if __name__ == "__main__":
