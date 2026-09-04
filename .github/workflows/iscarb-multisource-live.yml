@@ -1,0 +1,176 @@
+name: ISCARB v7.1 Multi-Source Live E2E
+
+on:
+  push:
+    paths:
+      - 'iscarb-studio/app/**'
+      - 'iscarb-studio/smoke_prod.py'
+      - '.github/workflows/iscarb-multisource-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  multisource-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'requests>=2.31,<3' 'python-pptx>=0.6.23' 'python-docx>=1.1' 'reportlab>=4.0'
+      - name: Exercise live website, PowerPoint, PDF, Word and supporting sources
+        env:
+          ISCARB_BASE: https://iscarb-lecture-studio.onrender.com
+          WEB_SOURCE: https://cs.ccsu.edu/~stan/classes/CS410/Notes16/13-SecurityEngineering.html
+        run: |
+          python - <<'PY'
+          import io, os, time, zipfile
+          from pathlib import Path
+          import requests
+          from pptx import Presentation
+          from docx import Document
+          from reportlab.pdfgen import canvas
+          from reportlab.lib.pagesizes import letter
+
+          base=os.environ['ISCARB_BASE'].rstrip('/')
+          web_source=os.environ['WEB_SOURCE']
+          s=requests.Session(); s.headers.update({'User-Agent':'ISCARB-v7.1-multisource-live/1.0'})
+
+          # Home + health must expose the cleaned input contract.
+          h=s.get(base+'/',timeout=60); assert h.status_code==200,h.status_code
+          text=h.text
+          assert 'site_v710_sources.js?v=clean-multisource-v1' in text
+          assert '7.1.0' in text
+          health=s.get(base+'/api/health',timeout=60); assert health.status_code==200
+          hd=health.json()
+          assert hd.get('generic_it_scope') is True
+          assert hd.get('supporting_sources_enabled') is True
+          assert hd.get('max_supporting_sources')==7
+          assert hd.get('package_preserves_all_sources') is True
+          accepted={x.upper() for x in hd.get('accepted_file_types',[])}
+          assert {'PDF','PPTX','DOCX'}.issubset(accepted),accepted
+          print('HOME/HEALTH PASS — clean v7.1 multi-source contract active')
+
+          out=Path('fixtures'); out.mkdir(exist_ok=True)
+          sections=[
+              ('Security objectives','Confidentiality, integrity and availability define the protection goals and the evidence needed to judge whether a system can resist malicious attacks.'),
+              ('Security levels','Infrastructure, application and operational security create different attack surfaces, owners and controls.'),
+              ('Assets and threats','Assets have value; threats can exploit vulnerabilities through attacks; controls reduce exposure and support recovery.'),
+              ('Risk assessment','Identify assets, value, exposure, threats, attacks, controls, feasibility and security requirements.'),
+              ('Security requirements','Identification, authentication, authorization, integrity, privacy, intrusion detection, auditing and maintenance requirements constrain design.'),
+              ('Secure architecture','Protection and distribution trade off security, usability, performance, cost and recoverability.'),
+              ('Layered protection','Platform, application and record-level controls compartmentalize assets and reduce blast radius.'),
+              ('Design guidelines','Avoid single points of failure, fail securely, log actions, validate inputs, use redundancy and design for recovery.'),
+              ('Security testing','Experience-based testing, penetration testing, tool analysis and formal verification provide different evidence.'),
+              ('Assurance verdict','A bounded security decision states claim, evidence, counter-evidence, residual uncertainty and next verification.'),
+          ]
+
+          # PPTX fixture.
+          prs=Presentation()
+          for i in range(16):
+              title,body=sections[i%len(sections)]
+              sl=prs.slides.add_slide(prs.slide_layouts[1])
+              sl.shapes.title.text=f'{i+1}. {title}'
+              sl.placeholders[1].text=body+' The engineering decision must remain traceable to source evidence.'
+          pptx=out/'primary_security.pptx'; prs.save(pptx)
+
+          # DOCX fixture with paragraphs + table.
+          doc=Document(); doc.add_heading('Security Engineering Source',0)
+          for i in range(3):
+              for title,body in sections:
+                  doc.add_heading(title,level=1); doc.add_paragraph(body)
+          table=doc.add_table(rows=1,cols=3); table.rows[0].cells[0].text='Asset'; table.rows[0].cells[1].text='Threat'; table.rows[0].cells[2].text='Control'
+          row=table.add_row().cells; row[0].text='Patient data'; row[1].text='Unauthorized disclosure'; row[2].text='Encryption + authorization + audit'
+          docx=out/'primary_security.docx'; doc.save(docx)
+
+          # PDF fixture.
+          pdf=out/'primary_security.pdf'; c=canvas.Canvas(str(pdf),pagesize=letter)
+          for i in range(18):
+              title,body=sections[i%len(sections)]
+              c.setFont('Helvetica-Bold',18); c.drawString(54,735,f'{i+1}. {title}')
+              c.setFont('Helvetica',11)
+              words=(body+' Evidence must connect the mechanism to the decision, trade-off and verification.').split()
+              line=''; y=700
+              for word in words:
+                  if len(line+' '+word)>85:
+                      c.drawString(54,y,line);y-=16;line=word
+                  else: line=(line+' '+word).strip()
+              if line:c.drawString(54,y,line)
+              c.showPage()
+          c.save()
+
+          txt=out/'supporting_notes.txt'
+          txt.write_text('\n\n'.join(f'{t}: {b}' for t,b in sections),encoding='utf-8')
+          support_doc=out/'supporting_context.docx'; d=Document(); d.add_heading('Supporting security context',0)
+          d.add_paragraph('This supporting source clarifies examples and evidence only. It does not replace the primary technical scope.')
+          for t,b in sections[:5]: d.add_heading(t,level=1); d.add_paragraph(b)
+          d.save(support_doc)
+
+          def wait_job(jid):
+              deadline=time.time()+300
+              while time.time()<deadline:
+                  r=s.get(f'{base}/api/jobs/{jid}',timeout=60); assert r.status_code==200,(r.status_code,r.text[:500])
+                  job=r.json()
+                  if job.get('status') in {'blocked','ready','error'}: return job
+                  time.sleep(2)
+              raise AssertionError('compile timeout '+jid)
+
+          def validate_outputs(jid, expected_sources):
+              p=s.get(f'{base}/api/jobs/{jid}/export/pptx',timeout=180); assert p.status_code==200,(p.status_code,p.text[:300] if 'text' in p.headers.get('content-type','') else len(p.content))
+              assert p.content[:2]==b'PK'
+              with zipfile.ZipFile(io.BytesIO(p.content)) as zf:
+                  assert 'ppt/presentation.xml' in zf.namelist(), 'invalid PPTX package'
+              pdfout=s.get(f'{base}/api/jobs/{jid}/export/presenter-pdf',timeout=180); assert pdfout.status_code==200; assert pdfout.content[:4]==b'%PDF'
+              pack=s.get(f'{base}/api/jobs/{jid}/export/package',timeout=240); assert pack.status_code==200,(pack.status_code,pack.text[:300] if 'text' in pack.headers.get('content-type','') else len(pack.content))
+              with zipfile.ZipFile(io.BytesIO(pack.content)) as zf:
+                  names=zf.namelist()
+                  originals=[n for n in names if n.startswith('00_Original_Sources/')]
+                  assert len(originals)>=expected_sources,(originals,expected_sources)
+                  assert any('/P1__' in n for n in originals),originals
+                  assert '01_Visual_Presenter.pptx' in names and '06_Blueprint.json' in names
+              return len(p.content),len(pack.content)
+
+          def compile_case(name, data, files, expected_sources):
+              r=s.post(base+'/api/compile',data=data,files=files,timeout=120)
+              assert r.status_code==200,(name,r.status_code,r.text[:1000])
+              jid=r.json()['job_id']; job=wait_job(jid)
+              assert job.get('status') in {'blocked','ready'},(name,job.get('status'),job.get('error'))
+              assert not job.get('error'),(name,job.get('error'))
+              units=(job.get('blueprint') or {}).get('units') or []
+              assert len(units)==20 and [u.get('number') for u in units]==list(range(1,21)),(name,len(units))
+              manifest=job.get('source_manifest') or []
+              assert len(manifest)>=expected_sources,(name,manifest)
+              pptx_bytes,package_bytes=validate_outputs(jid,expected_sources)
+              print(f'{name} PASS — job {jid}; 20 units; {len(manifest)} sources; PPTX {pptx_bytes} bytes; package {package_bytes} bytes')
+
+          common={'lecture_focus':'','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'}
+
+          # A. Public website as P1.
+          compile_case('WEBSITE PRIMARY',{**common,'primary_url':web_source,'supporting_urls':''},[],1)
+
+          # B. PowerPoint P1 + Word supporting + public supporting website.
+          with pptx.open('rb') as fp, support_doc.open('rb') as fs:
+              compile_case('PPTX PRIMARY + MIXED SUPPORT',{**common,'primary_url':'','supporting_urls':web_source},[
+                  ('primary_lecture',(pptx.name,fp,'application/vnd.openxmlformats-officedocument.presentationml.presentation')),
+                  ('supporting_files',(support_doc.name,fs,'application/vnd.openxmlformats-officedocument.wordprocessingml.document')),
+              ],3)
+
+          # C. PDF P1 + TXT supporting.
+          with pdf.open('rb') as fp, txt.open('rb') as fs:
+              compile_case('PDF PRIMARY + FILE SUPPORT',{**common,'primary_url':'','supporting_urls':''},[
+                  ('primary_lecture',(pdf.name,fp,'application/pdf')),
+                  ('supporting_files',(txt.name,fs,'text/plain')),
+              ],2)
+
+          # D. Word P1 + PowerPoint supporting.
+          with docx.open('rb') as fp, pptx.open('rb') as fs:
+              compile_case('DOCX PRIMARY + PPTX SUPPORT',{**common,'primary_url':'','supporting_urls':''},[
+                  ('primary_lecture',(docx.name,fp,'application/vnd.openxmlformats-officedocument.wordprocessingml.document')),
+                  ('supporting_files',(pptx.name,fs,'application/vnd.openxmlformats-officedocument.presentationml.presentation')),
+              ],2)
+
+          print('ISCARB v7.1 MULTI-SOURCE LIVE PASS — website + PPTX + PDF + DOCX + mixed supporting sources + real PPTX/PDF/package exports')
+          PY
