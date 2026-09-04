@@ -16,6 +16,7 @@ from .patch_v702_strict20 import apply_v702_patch
 from .patch_v703_web_source import apply_v703_patch
 from .patch_v704_source_detail import apply_v704_patch
 from .patch_v705_web_visuals import apply_v705_patch
+from .patch_v711_hero import apply_v711_hero_patch
 
 apply_v671_patch(app)
 apply_v680_patch(app)
@@ -29,6 +30,7 @@ apply_v702_patch(app)
 apply_v703_patch(app)
 apply_v704_patch(app)
 apply_v705_patch(app)
+apply_v711_hero_patch(app)
 PUBLIC_VERSION = "6.9.4"
 UI_RELEASE = "7.1.1"
 APPROVED_HERO = "hero_v671.svg"
@@ -40,7 +42,7 @@ _V670_STYLE = r"""
 <style id="iscarb-v711-home-patch">
 :root{--iscarb-bg:#05070D;--iscarb-magenta:#FF258C;--iscarb-cyan:#2CDCFF;--iscarb-gold:#DCB56B;--iscarb-text:#F5F5F8;--iscarb-muted:#B7BDC8}
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
-.heroArt{position:relative!important;min-height:350px!important;border-radius:28px;overflow:hidden;background-color:#05070D!important;background-image:url('/static/hero_v672.webp?v=7.1.0')!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;isolation:isolate}
+.heroArt{position:relative!important;min-height:350px!important;border-radius:28px;overflow:hidden;background-color:#05070D!important;background-image:url('/static/hero_v671.svg?v=7.1.1')!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;isolation:isolate}
 .heroArt>svg{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:0!important}
 .heroArt>.heroPhoto{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;z-index:1!important}
 .heroArt::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.02),rgba(5,7,13,0) 55%,rgba(5,7,13,.01))}
