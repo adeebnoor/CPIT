@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-"""v7.1.1 hero delivery hardening.
+"""v7.1.2 hero delivery hardening.
 
-The earlier hero_v672.webp file is retained only as a deprecated repository asset;
-it is not used by the live home because the stored WebP payload is not reliably
-decodable.  The live page uses the repository's vector Black Desert camel hero,
-with the existing inline SVG as a no-network fallback.
+Use the original repository raster Black Desert camel image directly. No redraw,
+vector substitute, or generated replacement is used on the production home.
 """
 
 from . import start_v440 as base
 
 _PATCHED = False
-APPROVED_HERO = "hero_v671.svg"
-APPROVED_HERO_BLOB = "8882ed948a0fae492d7bdb906c4237d5133d9bc3"
+APPROVED_HERO = "hero_v670.jpg"
+APPROVED_HERO_BLOB = "4bacaf6641105b29a1768f5cdaed6c26200f522e"
 
 
 def apply_v711_hero_patch(app) -> None:
@@ -28,10 +26,10 @@ def apply_v711_hero_patch(app) -> None:
         data.update({
             "approved_hero_asset": APPROVED_HERO,
             "approved_hero_blob": APPROVED_HERO_BLOB,
-            "hero_delivery": "external SVG image + inline SVG fallback",
-            "hero_decoder_safe": True,
-            "hero_webp_deprecated": True,
-            "hero_live_release": "7.1.1",
+            "hero_delivery": "original repository JPEG raster",
+            "hero_original_raster": True,
+            "hero_redraw": False,
+            "hero_live_release": "7.1.2",
         })
         return data
 
