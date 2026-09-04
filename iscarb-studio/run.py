@@ -4,6 +4,9 @@ import lzma
 from pathlib import Path
 import uvicorn
 
+# Production safety: never fetch unrelated public-web/Wikipedia imagery for lecture slides.
+os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
+
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
 if not PRESENTER.exists():
