@@ -19,6 +19,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Production must not deploy if the active patch chain cannot render the current
+# LectureUnit schema, or if the source-native/public-web/hero invariants regress.
+# This exercises the live presenter payload and HTML/PPTX/PDF exporters.
+RUN python smoke_prod.py
+
 # The service only ever reads its own source and writes under data/. Running it
 # unprivileged means a defect in source parsing cannot rewrite the application.
 RUN useradd --create-home --uid 10001 iscarb \
