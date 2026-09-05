@@ -5,7 +5,10 @@ import run  # installs production patch chain
 from app import start_v440 as base
 from app import patch_v731_projection_legibility as leg
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.3.1-golden-v660-clean-projection", os.getenv("ISCARB_BUILD_ID")
+assert os.getenv("ISCARB_BUILD_ID") in {
+    "7.3.1-golden-v660-clean-projection",
+    "7.3.2-golden-v660-native-figures",
+}, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("projection_legibility_version") == "v7.3.1", health
 assert health.get("projection_min_ppt_task_pt", 0) >= 10.0, health
@@ -29,7 +32,7 @@ leg._clean_visible_gates(bp)
 assert len(u.pedagogy_content) == 1 and u.pedagogy_content[0].startswith("MICRO-CASE"), u.pedagogy_content
 assert u.student_action.startswith("TIMEBOX:"), u.student_action
 label, task = leg._split_timebox(u.student_action)
-assert "5" in label and "7" in label and "min" in label.lower(), label
+assert label == "5-7 min", label
 assert len(task.split()) <= 23, u.student_action
 
-print("PASS: v7.3.1 projection legibility + whitespace guard")
+print("PASS: v7.3.1 projection legibility + v7.3.2 timebox-range repair")
