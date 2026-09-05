@@ -1,0 +1,31 @@
+name: ISCARB Stop Auto Resume v716
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-stop-autoresume-v716.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make saved-job resume explicit instead of automatic
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('iscarb-studio/app/static/studio_v440.js')
+          s=p.read_text()
+          old="try {const saved=localStorage.getItem('iscarb.job.v44');if(saved&&/^[a-f0-9-]{16,64}$/i.test(saved)){jobId=saved;$('status').hidden=false;setBusy(true);poll();}}catch{/* Resume is optional. */}"
+          new="try {const saved=localStorage.getItem('iscarb.job.v44');if(saved&&/^[a-f0-9-]{16,64}$/i.test(saved)){jobId=saved;$('status').hidden=false;$('retryPoll').hidden=false;$('state').textContent='PAUSED';$('message').textContent='A previous lecture job is available. Reconnect only if you want to continue it.';$('pct').textContent='—';$('bar').style.width='0%';$('progressTrack').setAttribute('aria-valuenow','0');}}catch{/* Resume is optional and never starts network activity on page load. */}"
+          if old not in s: raise SystemExit('Expected auto-resume tail not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          print('AUTO_RESUME_REMOVED', 'setBusy(true);poll();' not in s[-600:])
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb-studio/app/static/studio_v440.js
+          git commit -m 'Stop stale saved-job polling during initial page load'
+          git push
