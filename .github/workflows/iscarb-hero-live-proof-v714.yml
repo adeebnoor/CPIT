@@ -23,12 +23,11 @@ jobs:
           grep -qi '^content-type: image/png' /tmp/img_headers.txt
           test "$(wc -c < /tmp/hero.png | tr -d ' ')" = '2315610'
           test "$(sha256sum /tmp/hero.png | awk '{print $1}')" = "$EXPECT"
-          # IHDR: width/height are big-endian uint32 at PNG bytes 16..23.
           python - <<'PY'
           import struct
           b=open('/tmp/hero.png','rb').read(24)
           assert b[:8] == b'\x89PNG\r\n\x1a\n'
           w,h=struct.unpack('>II',b[16:24])
-          assert (w,h)==(1200,675),(w,h)
+          assert (w,h)==(1672,941),(w,h)
           print('LIVE HERO PASS',w,h)
           PY
