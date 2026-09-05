@@ -22,6 +22,8 @@ RUN python smoke_golden_v728.py
 RUN python smoke_editor_gates_v729.py
 # Universal cross-course meta-structure + deterministic feedback loop.
 RUN python smoke_universal_meta_v730.py
+# Projection legibility: no tiny rubric, no gate dumps, no sparse expansions.
+RUN python smoke_projection_v731.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
