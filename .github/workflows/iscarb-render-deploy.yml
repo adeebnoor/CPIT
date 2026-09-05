@@ -1,10 +1,19 @@
-name: ISCARB Render Deploy (Manual)
+name: ISCARB Render Deploy
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'iscarb-studio/**'
+      - '.github/workflows/iscarb-render-deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: iscarb-production-deploy
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -45,10 +54,10 @@ jobs:
               -H "Authorization: Bearer ${RENDER_API_KEY}" -H 'Content-Type: application/json' \
               --data '{"clearCache":"do_not_clear"}' >/tmp/render-response.txt
           else
-            echo '::error::No Render deploy credential is configured. Use the Render Dashboard Manual Deploy, or add RENDER_DEPLOY_HOOK_URL / RENDER_API_KEY + RENDER_SERVICE_ID.'
+            echo '::error::No Render deploy credential is configured. Add RENDER_DEPLOY_HOOK_URL or RENDER_API_KEY + RENDER_SERVICE_ID.'
             exit 1
           fi
-      - name: Verify production version
+      - name: Verify production version and clean contract
         env:
           EXPECTED_VERSION: ${{ steps.version.outputs.expected }}
         run: |
@@ -57,12 +66,14 @@ jobs:
           expected=os.environ['EXPECTED_VERSION']; url='https://iscarb-lecture-studio.onrender.com/api/health'; last=''
           for _ in range(90):
               try:
-                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-manual-deploy-verifier/1.0'})
+                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/2.0','Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=30) as r: data=json.loads(r.read().decode())
-                  last=str(data); print('production',data.get('version'),'expected',expected)
-                  if str(data.get('version') or '')==expected: raise SystemExit(0)
+                  last=str(data); print('production',data.get('version'),data.get('release_ui'),'expected',expected)
+                  if (str(data.get('version') or '')==expected and data.get('release_ui')=='7.2.0'
+                      and data.get('clean_release') is True and data.get('dense_p1_decomposition') is True):
+                      raise SystemExit(0)
               except SystemExit: raise
               except Exception as e: last=repr(e)
               time.sleep(10)
-          raise SystemExit('Production did not advance. Last='+last[:1000])
+          raise SystemExit('Production did not advance to clean release. Last='+last[:1000])
           PY
