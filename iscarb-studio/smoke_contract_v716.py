@@ -1,15 +1,22 @@
 from __future__ import annotations
 
-"""Build-time assertions for the final ISCARB v7.1.6 release contract."""
+"""Build-time assertions for the ISCARB v7.2 clean production contract."""
 
 from app.home_v670 import app  # noqa: F401
 from app import start_v440 as base
 from app import unit_contract
+from app.patch_v720_home_clean import _clean_studio_source
+from pathlib import Path
 
 
 def main() -> None:
     h = dict(base._health_v440())
-    assert h.get("release_ui") == "7.1.6", h
+    assert h.get("release_ui") == "7.2.0", h
+    assert h.get("clean_release") is True, h
+    assert h.get("dense_p1_decomposition") is True, h
+    assert h.get("administrative_source_chrome_in_spine") is False, h
+    assert h.get("raw_code_labels_in_spine") is False, h
+    assert h.get("opening_and_presenter_crisis_synchronized") is True, h
     assert h.get("generic_it_scope") is True, h
     assert h.get("course_hardcoding") is False, h
     assert h.get("software_engineering_dependency") is False, h
@@ -43,7 +50,23 @@ def main() -> None:
     assert "DOMAIN SPINE" in contract
     assert "OPENING CRISIS" in contract
 
-    print("ISCARB v7.1.6 final contract smoke PASS")
+    # The client served in v7.2 must not contain the retired hard-coded CPIT
+    # lecture library. The research/history files remain in git; production does
+    # not execute or expose those links.
+    static_root = Path(__file__).resolve().parent / "app" / "static"
+    client = _clean_studio_source(static_root)
+    for retired in (
+        "adeebnoor.github.io/CPIT/lectures/cimt",
+        "CPIT455-class",
+        "SOURCE_NAMES",
+    ):
+        assert retired not in client, retired
+
+    # Exactly one public home route must win after the clean patch.
+    home_routes = [r for r in app.router.routes if getattr(r, "path", None) == "/"]
+    assert len(home_routes) == 1, len(home_routes)
+
+    print("ISCARB v7.2 clean production contract smoke PASS")
 
 
 if __name__ == "__main__":
