@@ -12,7 +12,9 @@ from fastapi.responses import HTMLResponse
 
 
 _RELEASE = "7.3.4"
-_ORIGINAL_HERO = f"/static/hero_user_original.png?v={_RELEASE}"
+_ORIGINAL_HERO_NAME = "hero_user_original.png"
+_ORIGINAL_HERO = f"/static/{_ORIGINAL_HERO_NAME}?v={_RELEASE}"
+_ORIGINAL_HERO_SHA256 = "8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d"
 
 _HOME_STYLE = f"""
 <style id="iscarb-v734-original-hero-lock">
@@ -66,6 +68,9 @@ def apply_v734_home_original_lock_patch(app) -> None:
             raise RuntimeError("ISCARB exact original hero is not present in the homepage")
 
         headers = dict(response.headers)
+        # HTML was modified, so Starlette must calculate the new byte length.
+        headers.pop("content-length", None)
+        headers.pop("Content-Length", None)
         headers.update({
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
@@ -73,6 +78,8 @@ def apply_v734_home_original_lock_patch(app) -> None:
             "X-ISCARB-Version": _RELEASE,
             "X-ISCARB-UI": _RELEASE,
             "X-ISCARB-Hero-Mode": "exact-user-original-png",
+            "X-ISCARB-Hero-Asset": _ORIGINAL_HERO_NAME,
+            "X-ISCARB-Hero-SHA256": _ORIGINAL_HERO_SHA256,
             "X-ISCARB-Home": "v7.3.4-clean-it-wide-exact-original-hero",
         })
         return HTMLResponse(body, status_code=response.status_code, headers=headers)
