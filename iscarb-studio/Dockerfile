@@ -30,6 +30,8 @@ RUN python smoke_golden_v728.py
 # Lock the ZTM-inspired visual contract: exact high-contrast tokens, floating
 # cards, taskbar/timebox semantics, semantic physical plan and HTML disclosure.
 RUN python smoke_ztm_v729.py
+# Final visual QA: concrete Rule 11 transfer and compact/non-duplicated timing pills.
+RUN python smoke_ztm_finish.py
 
 # The service only ever reads its own source and writes under data/. Running it
 # unprivileged means a defect in source parsing cannot rewrite the application.
