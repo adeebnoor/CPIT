@@ -1,0 +1,35 @@
+name: ISCARB Hero Forced Screenshot v715
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-hero-forced-screenshot-v715.yml'
+  workflow_dispatch:
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Capture after render even if Chrome keeps background activity
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet pillow
+          BROWSER="$(command -v google-chrome || command -v chromium)"
+          set +e
+          timeout 18s "$BROWSER" --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-sync --disable-default-apps --no-first-run --disable-component-update --hide-scrollbars --window-size=1648,920 --virtual-time-budget=6000 --run-all-compositor-stages-before-draw --screenshot=/tmp/live.png 'https://iscarb-lecture-studio.onrender.com/'
+          RC=$?
+          set -e
+          echo "CHROME_RC=$RC"
+          test -s /tmp/live.png
+          python - <<'PY'
+          from PIL import Image
+          im=Image.open('/tmp/live.png').convert('RGB')
+          crop=im.crop((780,180,1535,625)); px=list(crop.getdata())
+          orange=sum(1 for r,g,b in px if r>115 and 45<g<190 and b<105 and r>g*1.15)
+          magenta=sum(1 for r,g,b in px if r>145 and b>65 and g<105 and r>g*1.5)
+          bright=sum(1 for r,g,b in px if max(r,g,b)>120)
+          avg=sum(sum(p) for p in px)/(len(px)*3)
+          print('FORCED_SCREENSHOT_STATS',{'size':im.size,'orange':orange,'magenta':magenta,'bright':bright,'avg':round(avg,2)})
+          assert orange>5000, orange
+          assert magenta>300, magenta
+          assert bright>15000, bright
+          print('FORCED_SCREENSHOT_HERO_PASS')
+          PY
