@@ -6,7 +6,10 @@ from app import start_v440 as base
 from app import patch_v730_universal_meta_gates as meta
 from app import patch_v729_editor_gates as assurance
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.3.0-golden-v660-universal-meta-gates", os.getenv("ISCARB_BUILD_ID")
+assert os.getenv("ISCARB_BUILD_ID") in {
+    "7.3.0-golden-v660-universal-meta-gates",
+    "7.3.1-golden-v660-clean-projection",
+}, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("universal_meta_gates_version") == "v7.3.0", health
 assert health.get("universal_meta_gates_count") == 12, health
@@ -16,20 +19,14 @@ assert health.get("assurance_profile_scope", "").endswith("only"), health
 rules = meta.UNIVERSAL_RULES
 assert len(rules) == 12
 assert [r["id"] for r in rules] == [f"U{i:02d}" for i in range(1, 13)]
-assert any(r["name"] == "Global Breaking Variable" for r in rules)
-assert any(r["name"] == "Quantify vs Qualify" for r in rules)
-assert any(r["name"] == "Verification vs Validation" for r in rules)
-assert any(r["name"] == "Ownership & Accountability" for r in rules)
-assert any(r["name"] == "Data Layer" for r in rules)
-assert any(r["name"] == "AI Assist + Continuous Monitoring" for r in rules)
-assert any(r["name"] == "Human-in-the-Loop" for r in rules)
-assert any(r["name"] == "Evidence Chain" for r in rules)
-assert any(r["name"] == "Tool Standardization" for r in rules)
-assert any(r["name"] == "Inspectable Artifact" for r in rules)
-assert any(r["name"] == "Timebox Consistency" for r in rules)
-assert any(r["name"] == "Local Transfer" for r in rules)
+for name in (
+    "Global Breaking Variable", "Quantify vs Qualify", "Verification vs Validation",
+    "Ownership & Accountability", "Data Layer", "AI Assist + Continuous Monitoring",
+    "Human-in-the-Loop", "Evidence Chain", "Tool Standardization",
+    "Inspectable Artifact", "Timebox Consistency", "Local Transfer",
+):
+    assert any(r["name"] == name for r in rules), name
 
-# Deterministic feedback loop: missing answers must be returned for revision.
 bad = meta.evaluate_universal_gate_responses({"answers": {"U01": "schedule slips if staffing drops"}})
 assert bad["status"] == "RETURN_FOR_REVISION" and bad["failed"], bad
 
@@ -49,7 +46,6 @@ answers = {
 good = meta.evaluate_universal_gate_responses({"answers": answers})
 assert good["status"] == "ACCEPT_FOR_REVIEW" and good["overall_pass"], good
 
-# Domain profile must not leak FMEA/MTBF language into an unrelated course.
 profile = NS(lecture_title="Project Management", weekly_focus="Scheduling and delivery")
 bp = NS(lecture_title="Project scheduling", source_topic_families=["Critical path", "Resources"])
 assert assurance._assurance_profile(profile, bp) is False
