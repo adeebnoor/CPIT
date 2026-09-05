@@ -8,8 +8,13 @@ from app import patch_v726_timebox_tasks as timebox
 from app import patch_v727_local_case_scaffold as scaffold
 from app import patch_v728_peer_review_decision_boxes as v728
 
-EXPECTED_BUILD = "7.2.8-golden-v660-timeboxed-scaffolded-peerreview"
-assert os.getenv("ISCARB_BUILD_ID") == EXPECTED_BUILD, os.getenv("ISCARB_BUILD_ID")
+# v7.2.9 changes only the visual projection; all v7.2.8 classroom invariants
+# below must remain true under the new ZTM layer.
+EXPECTED_BUILDS = {
+    "7.2.8-golden-v660-timeboxed-scaffolded-peerreview",
+    "7.2.9-golden-v660-ztm",
+}
+assert os.getenv("ISCARB_BUILD_ID") in EXPECTED_BUILDS, os.getenv("ISCARB_BUILD_ID")
 
 health = dict(base._health_v440())
 assert health.get("time_boxing_version") == "v7.2.6", health
