@@ -18,8 +18,10 @@ COPY . .
 RUN python smoke_prod.py
 RUN python smoke_contract_v716.py
 RUN python smoke_golden_v728.py
-# Mandatory 12-rule readiness/editor gate layer.
+# Domain-specific assurance profile remains available only when relevant.
 RUN python smoke_editor_gates_v729.py
+# Universal cross-course meta-structure + deterministic feedback loop.
+RUN python smoke_universal_meta_v730.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
