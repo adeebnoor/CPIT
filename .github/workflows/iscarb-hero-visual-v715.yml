@@ -1,0 +1,55 @@
+name: ISCARB Hero Visual v715
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-hero-visual-v715.yml'
+  workflow_dispatch:
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Render live site in real Chromium and inspect hero pixels
+        run: |
+          set -euxo pipefail
+          BROWSER="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          echo "BROWSER=$BROWSER"
+          python -m pip install --quiet pillow
+          timeout 35s "$BROWSER" \
+            --headless=new \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --hide-scrollbars \
+            --window-size=1648,920 \
+            --virtual-time-budget=7000 \
+            --screenshot=/tmp/iscarb-live.png \
+            'https://iscarb-lecture-studio.onrender.com/'
+          test -s /tmp/iscarb-live.png
+          python - <<'PY'
+          from PIL import Image
+          im=Image.open('/tmp/iscarb-live.png').convert('RGB')
+          assert im.size==(1648,920), im.size
+          # Right-side hero region at this reference viewport. A blank hero is almost
+          # entirely near-black; the intended original has large orange fort/camels
+          # and a strong magenta rosette.
+          crop=im.crop((780,180,1535,625))
+          px=list(crop.getdata())
+          orange=sum(1 for r,g,b in px if r>115 and 45<g<190 and b<105 and r>g*1.15)
+          magenta=sum(1 for r,g,b in px if r>145 and b>65 and g<105 and r>g*1.5)
+          bright=sum(1 for r,g,b in px if max(r,g,b)>120)
+          mean=sum(sum(p) for p in px)/(3*len(px))
+          print('HERO_VISUAL_STATS', {'orange':orange,'magenta':magenta,'bright':bright,'mean':round(mean,2),'crop':crop.size})
+          assert orange>8000, f'Hero fort/camel orange pixels missing: {orange}'
+          assert magenta>500, f'Hero magenta rosette pixels missing: {magenta}'
+          assert bright>20000, f'Hero remains visually blank/dark: {bright}'
+          print('REAL_CHROMIUM_HERO_VISUAL_PASS')
+          PY
+      - name: Verify v7.1.5 lightweight asset over HTTP
+        run: |
+          set -euxo pipefail
+          curl -fsSL -D /tmp/h.txt https://iscarb-lecture-studio.onrender.com/ -o /tmp/index.html
+          grep -qi '^x-iscarb-ui: 7.1.5' /tmp/h.txt
+          grep -q "hero_user_web.jpg?v=7.1.5" /tmp/index.html
+          ! grep -q "heroPhoto.*hero_user_original.png" /tmp/index.html
+          curl -fsSL 'https://iscarb-lecture-studio.onrender.com/static/hero_user_web.jpg?v=7.1.5' -o /tmp/hero.jpg
+          test "$(wc -c < /tmp/hero.jpg | tr -d ' ')" = '269820'
+          test "$(sha256sum /tmp/hero.jpg | awk '{print $1}')" = 'fcad23fe86a60e6ca881eb46829d5f7dbe894d9bf57a17c0453952edf5ec7c12'
