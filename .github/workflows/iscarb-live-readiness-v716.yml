@@ -1,0 +1,166 @@
+name: ISCARB Live Readiness v716
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-live-readiness-v716.yml'
+
+jobs:
+  database-lecture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install test and rendering tools
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet requests playwright pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
+
+      - name: Wait for final v7.1.6 production contract
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import time, requests
+          url='https://iscarb-lecture-studio.onrender.com/api/health'
+          for i in range(90):
+              try:
+                  r=requests.get(url,timeout=20)
+                  if r.ok:
+                      h=r.json()
+                      print('health',h.get('build_commit'),h.get('release_ui'),h.get('approved_hero_asset'))
+                      if (h.get('release_ui')=='7.1.6' and h.get('generic_it_scope') is True
+                          and h.get('software_engineering_dependency') is False
+                          and h.get('public_web_image_fallback') is False
+                          and h.get('approved_hero_asset')=='hero_user_original.png'):
+                          break
+              except Exception as e: print('wait',repr(e))
+              time.sleep(5)
+          else: raise SystemExit('Final v7.1.6 contract never became live')
+          PY
+
+      - name: Compile real MIT database lecture and verify exports
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/iscarb_readiness
+          python - <<'PY'
+          import json,time,zipfile,requests
+          from io import BytesIO
+          from pathlib import Path
+          base='https://iscarb-lecture-studio.onrender.com'
+          p1='https://ocw.mit.edu/courses/6-830-database-systems-fall-2010/10b223dc3daf6fda4001272799b153a0_MIT6_830F10_lec10.pdf'
+          data={
+              'primary_url':p1,
+              'supporting_urls':'',
+              'lecture_focus':'Database Systems — Transactions and Locking',
+              'model':'source-only',
+              'repair_rounds':'0',
+              'free_tier_confirmed':'false',
+          }
+          r=requests.post(base+'/api/compile',data=data,timeout=60)
+          print('compile',r.status_code,r.text[:500])
+          r.raise_for_status(); jid=r.json()['job_id']
+          Path('/tmp/iscarb_readiness/job_id.txt').write_text(jid)
+          deadline=time.time()+240
+          while time.time()<deadline:
+              s=requests.get(f'{base}/api/jobs/{jid}',timeout=30); s.raise_for_status(); job=s.json()
+              print('job',job.get('status'),job.get('progress'),job.get('message'))
+              if job.get('status') in {'ready','blocked','error'}: break
+              time.sleep(2)
+          else: raise SystemExit('Database lecture job timed out')
+          assert job.get('status') in {'ready','blocked'}, job
+          assert not job.get('error'), job.get('error')
+          bp=job['blueprint']; units=bp['units']
+          assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
+          u2=next(u for u in units if u['number']==2)
+          spine=[str(x).strip() for x in u2.get('core_content',[]) if str(x).strip()]
+          assert 2 <= len(spine) <= 8, spine
+          blob=json.dumps(bp).lower()
+          assert any(t in blob for t in ['transaction','locking','serializ','deadlock']), 'Database source vocabulary missing'
+          assert 'a team must make a consequential decision' not in blob
+          for bad in ['second amendment','down syndrome','wikipedia.org','wikimedia.org']:
+              assert bad not in blob, bad
+          Path('/tmp/iscarb_readiness/job.json').write_text(json.dumps(job,indent=2),encoding='utf-8')
+
+          prev=requests.get(f'{base}/api/jobs/{jid}/presenter',timeout=60)
+          prev.raise_for_status(); Path('/tmp/iscarb_readiness/presenter.html').write_bytes(prev.content)
+          assert 'text/html' in prev.headers.get('content-type','').lower()
+
+          ppt=requests.get(f'{base}/api/jobs/{jid}/export/pptx',timeout=120)
+          ppt.raise_for_status(); Path('/tmp/iscarb_readiness/database_transactions.pptx').write_bytes(ppt.content)
+          assert ppt.content[:2]==b'PK'
+          with zipfile.ZipFile(BytesIO(ppt.content)) as z:
+              names=z.namelist()
+              assert 'ppt/presentation.xml' in names
+              slides=[n for n in names if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+              assert 22 <= len(slides) <= 30, len(slides)
+              allxml=' '.join(z.read(n).decode('utf-8','ignore').lower() for n in names if n.endswith('.xml') or n.endswith('.rels'))
+              for bad in ['second amendment','down syndrome','wikipedia.org','wikimedia.org']:
+                  assert bad not in allxml, bad
+          Path('/tmp/iscarb_readiness/summary.json').write_text(json.dumps({
+              'job_id':jid,'status':job['status'],'core_units':len(units),
+              'domain_spine_nodes':len(spine),'physical_slides':len(slides),
+              'pptx_bytes':len(ppt.content),'p1':p1
+          },indent=2),encoding='utf-8')
+          print('LIVE_DATABASE_PPTX_STRUCTURAL_PASS',len(slides),len(ppt.content))
+          PY
+
+      - name: Render exported PowerPoint to slide images
+        run: |
+          set -euxo pipefail
+          cd /tmp/iscarb_readiness
+          mkdir -p lo_profile rendered
+          timeout 120s libreoffice --headless -env:UserInstallation=file:///tmp/iscarb_readiness/lo_profile --convert-to pdf --outdir rendered database_transactions.pptx
+          test -s rendered/database_transactions.pdf
+          pdftoppm -png -r 72 rendered/database_transactions.pdf rendered/slide >/dev/null 2>&1
+          python - <<'PY'
+          from PIL import Image,ImageDraw
+          from pathlib import Path
+          imgs=sorted(Path('/tmp/iscarb_readiness/rendered').glob('slide-*.png'))
+          assert 22 <= len(imgs) <= 30, len(imgs)
+          thumbs=[]
+          for p in imgs:
+              im=Image.open(p).convert('RGB'); im.thumbnail((480,270)); thumbs.append((p.name,im.copy()))
+          cols=4; rows=(len(thumbs)+cols-1)//cols
+          sheet=Image.new('RGB',(cols*500,rows*300),'white'); d=ImageDraw.Draw(sheet)
+          for i,(name,im) in enumerate(thumbs):
+              x=(i%cols)*500; y=(i//cols)*300
+              sheet.paste(im,(x,y+24)); d.text((x+4,y+4),name,fill='black')
+          sheet.save('/tmp/iscarb_readiness/pptx_contact_sheet.jpg',quality=88)
+          print('PPTX_VISUAL_RENDER_PASS',len(imgs))
+          PY
+
+      - name: Capture live presenter in Chromium
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import asyncio
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+          jid=Path('/tmp/iscarb_readiness/job_id.txt').read_text().strip()
+          url=f'https://iscarb-lecture-studio.onrender.com/api/jobs/{jid}/presenter'
+          async def main():
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,args=['--no-sandbox'])
+                  page=await b.new_page(viewport={'width':1600,'height':1000})
+                  r=await page.goto(url,wait_until='networkidle',timeout=60000)
+                  assert r and r.status==200
+                  await page.wait_for_timeout(1000)
+                  assert await page.evaluate('document.readyState')=='complete'
+                  await page.screenshot(path='/tmp/iscarb_readiness/presenter_full.png',full_page=True)
+                  text=(await page.locator('body').inner_text()).lower()
+                  assert 'transaction' in text or 'locking' in text
+                  assert 'second amendment' not in text and 'down syndrome' not in text
+                  print('PRESENTER_CHROMIUM_PASS',await page.title())
+                  await b.close()
+          asyncio.run(main())
+          PY
+
+      - name: Upload readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-v716-live-database-readiness-${{ github.run_id }}
+          path: /tmp/iscarb_readiness/
+          if-no-files-found: error
+          retention-days: 14
