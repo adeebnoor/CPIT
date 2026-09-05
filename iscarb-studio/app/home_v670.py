@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 """ISCARB production home surface + generic IT intake + single-language UI."""
-import base64
 import hashlib
 from pathlib import Path
 from fastapi.responses import HTMLResponse
@@ -35,34 +34,24 @@ apply_v705_patch(app)
 apply_v711_hero_patch(app)
 
 PUBLIC_VERSION = "6.9.4"
-UI_RELEASE = "7.1.3"
-APPROVED_HERO = "hero_original_v713.jpg"
+UI_RELEASE = "7.1.4"
+APPROVED_HERO = "hero_user_original.png"
+APPROVED_HERO_SHA256 = "8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d"
 
-# The exact user-supplied hero artwork is stored as independently base64-encoded
-# repository chunks. Decode each chunk separately, then concatenate the bytes.
-_STUDIO_ROOT = Path(__file__).resolve().parents[1]
 _STATIC_ROOT = Path(__file__).with_name("static")
 _HERO_PATH = _STATIC_ROOT / APPROVED_HERO
-_HERO_CHUNKS = sorted(_STUDIO_ROOT.glob("hero_original_v713.jpg.b64.*"))
-if not _HERO_CHUNKS:
-    raise RuntimeError("Original supplied ISCARB hero payload is missing")
-_parts = []
-for _chunk in _HERO_CHUNKS:
-    _text = _chunk.read_text(encoding="ascii").strip()
-    _text += "=" * (-len(_text) % 4)
-    _parts.append(base64.b64decode(_text))
-_hero_bytes = b"".join(_parts)
-if len(_hero_bytes) < 30_000 or not (_hero_bytes.startswith(b"\xff\xd8") and _hero_bytes.endswith(b"\xff\xd9")):
-    raise RuntimeError("Original supplied ISCARB hero payload is incomplete")
-_STATIC_ROOT.mkdir(parents=True, exist_ok=True)
-if (not _HERO_PATH.exists()) or _HERO_PATH.read_bytes() != _hero_bytes:
-    _HERO_PATH.write_bytes(_hero_bytes)
-APPROVED_HERO_SHA256 = hashlib.sha256(_hero_bytes).hexdigest()
+if not _HERO_PATH.exists():
+    raise RuntimeError("Exact user-supplied ISCARB hero PNG is missing")
+_hero_bytes = _HERO_PATH.read_bytes()
+if len(_hero_bytes) != 2_315_610 or not _hero_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+    raise RuntimeError("Exact user-supplied ISCARB hero PNG is invalid")
+if hashlib.sha256(_hero_bytes).hexdigest() != APPROVED_HERO_SHA256:
+    raise RuntimeError("Exact user-supplied ISCARB hero PNG checksum mismatch")
 
 app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", None) != "/"]
 
 _V670_STYLE = r"""
-<style id="iscarb-v713-home-patch">
+<style id="iscarb-v714-home-patch">
 :root{--iscarb-bg:#05070D;--iscarb-magenta:#FF258C;--iscarb-cyan:#2CDCFF;--iscarb-gold:#DCB56B;--iscarb-text:#F5F5F8;--iscarb-muted:#B7BDC8}
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
 .heroArt{position:relative!important;aspect-ratio:16/9!important;min-height:0!important;border-radius:28px;overflow:hidden;background:#05070D!important;background-image:none!important;isolation:isolate;display:flex!important;align-items:center!important;justify-content:center!important}
@@ -83,20 +72,20 @@ html[data-lang="ar"] body{text-align:right}html[data-lang="ar"] .header nav,html
 def faculty_studio_v670_home():
     body = (Path(__file__).with_name("static") / "index_v440.html").read_text(encoding="utf-8")
     body = body.replace('<html lang="en" dir="ltr" data-theme="dark">', '<html lang="en" dir="ltr" data-theme="dark" data-lang="en">', 1)
-    body = body.replace("4.6 · Gate v15", "7.1.3 · IT-wide · Multi-source · Gate v15")
+    body = body.replace("4.6 · Gate v15", "7.1.4 · IT-wide · Multi-source · Gate v15")
     body = body.replace("Saudi Academic Engineering", "Saudi Engineering Learning System")
-    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.1.3")
-    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.1.3")
-    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.1.3")
+    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.1.4")
+    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.1.4")
+    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.1.4")
     body = body.replace(
         '<div class="heroArt" aria-hidden="true">',
-        '<div class="heroArt" aria-hidden="true"><img class="heroPhoto" src="/static/hero_original_v713.jpg?v=7.1.3" alt="" loading="eager" decoding="sync" fetchpriority="high">',
+        '<div class="heroArt" aria-hidden="true"><img class="heroPhoto" src="/static/hero_user_original.png?v=7.1.4" alt="" loading="eager" decoding="sync" fetchpriority="high">',
         1,
     )
     body = body.replace(
         "</head>",
         _V670_STYLE
-        + '\n<script src="/static/site_v671_fix.js?v=7.1.3" defer></script>'
+        + '\n<script src="/static/site_v671_fix.js?v=7.1.4" defer></script>'
         + '\n<script src="/static/site_v700_generic.js?v=it-scope-v3" defer></script>'
         + '\n<script src="/static/site_v701_i18n.js?v=single-language-v1" defer></script>'
         + '\n<script src="/static/site_v710_sources.js?v=clean-multisource-v1" defer></script>\n</head>',
@@ -112,6 +101,6 @@ def faculty_studio_v670_home():
             "X-ISCARB-UI": UI_RELEASE,
             "X-ISCARB-Hero-Asset": APPROVED_HERO,
             "X-ISCARB-Hero-SHA256": APPROVED_HERO_SHA256,
-            "X-ISCARB-Home": "v7.1.3-generic-it-clean-multisource-single-language-user-supplied-original-hero-source-figures-first-gate-v15",
+            "X-ISCARB-Home": "v7.1.4-generic-it-clean-multisource-single-language-exact-user-original-hero-source-figures-first-gate-v15",
         },
     )
