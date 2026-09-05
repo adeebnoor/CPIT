@@ -18,68 +18,106 @@ jobs:
           set -euxo pipefail
           for i in $(seq 1 30); do
             code=$(curl -L -sS -o /tmp/iscarb_health.json -w '%{http_code}' --max-time 20 https://iscarb-lecture-studio.onrender.com/api/health || true)
-            if [ "$code" = "200" ]; then
-              cat /tmp/iscarb_health.json
-              exit 0
-            fi
+            if [ "$code" = "200" ]; then cat /tmp/iscarb_health.json; exit 0; fi
             sleep 2
           done
-          echo 'Production health endpoint did not become ready'
-          cat /tmp/iscarb_health.json || true
           exit 1
-      - name: Prove DOM ready, terminal load state, and visible hero in Chromium
+      - name: Probe homepage resources over HTTP
+        run: |
+          set -u
+          mkdir -p /tmp/iscarb_browser_proof
+          : > /tmp/iscarb_browser_proof/http_probe.txt
+          for path in \
+            '/' \
+            '/static/studio_v460.css?v=7.1.6' \
+            '/static/site_v460.js?v=7.1.6' \
+            '/static/studio_v440.js?v=7.1.6' \
+            '/static/site_v671_fix.js?v=7.1.6' \
+            '/static/site_v700_generic.js?v=it-scope-v3' \
+            '/static/site_v701_i18n.js?v=single-language-v1' \
+            '/static/site_v710_sources.js?v=clean-multisource-v1' \
+            '/static/hero_user_web.jpg?v=7.1.6'; do
+            echo "=== $path ===" | tee -a /tmp/iscarb_browser_proof/http_probe.txt
+            curl -L -sS -o /tmp/probe_body -D /tmp/probe_headers --max-time 20 \
+              -w 'status=%{http_code} type=%{content_type} bytes=%{size_download} total=%{time_total}\n' \
+              "https://iscarb-lecture-studio.onrender.com${path}" 2>&1 | tee -a /tmp/iscarb_browser_proof/http_probe.txt || true
+            tail -n 8 /tmp/probe_headers | tee -a /tmp/iscarb_browser_proof/http_probe.txt || true
+          done
+      - name: Diagnose and prove homepage in real Chromium
         run: |
           set -euxo pipefail
           python - <<'PY'
-          import asyncio,json,time,traceback
+          import asyncio,base64,json,time,traceback
           from pathlib import Path
           from PIL import Image
           from playwright.async_api import async_playwright
           BASE='https://iscarb-lecture-studio.onrender.com/'
-          OUT=Path('/tmp/iscarb_browser_proof')
-          OUT.mkdir(parents=True,exist_ok=True)
+          OUT=Path('/tmp/iscarb_browser_proof'); OUT.mkdir(parents=True,exist_ok=True)
+          async def cdp_shot(context,page,path):
+              session=await context.new_cdp_session(page)
+              shot=await session.send('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False})
+              Path(path).write_bytes(base64.b64decode(shot['data']))
+              await session.detach()
           async def one(stale=False):
               label='stale' if stale else 'clean'
               async with async_playwright() as p:
                   browser=await p.chromium.launch(headless=True,args=['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-sync','--disable-default-apps','--no-first-run','--disable-component-update'])
                   context=await browser.new_context(viewport={'width':1648,'height':920},device_scale_factor=1)
-                  if stale:
-                      await context.add_init_script("localStorage.setItem('iscarb.job.v44','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')")
+                  if stale: await context.add_init_script("localStorage.setItem('iscarb.job.v44','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')")
                   page=await context.new_page()
-                  requests=[]; responses=[]; errs=[]
-                  page.on('request',lambda r: requests.append(r.url))
-                  page.on('response',lambda r: responses.append((r.url,r.status,r.headers.get('content-type',''))))
+                  pending=set(); requests=[]; responses=[]; failed=[]; errs=[]
+                  def req(r): pending.add(r.url); requests.append(r.url)
+                  def done(r): pending.discard(r.url)
+                  def fail(r): pending.discard(r.url); failed.append({'url':r.url,'failure':r.failure})
+                  page.on('request',req); page.on('requestfinished',done); page.on('requestfailed',fail)
+                  page.on('response',lambda r: responses.append({'url':r.url,'status':r.status,'type':r.headers.get('content-type','')}))
                   page.on('pageerror',lambda e: errs.append(str(e)))
                   result={'stale':stale}
                   try:
                       t=time.monotonic()
-                      nav=await page.goto(BASE,wait_until='domcontentloaded',timeout=45000)
-                      dom_dt=time.monotonic()-t
-                      result.update({'navigationStatus':nav.status if nav else None,'finalUrl':page.url,'dom_seconds':round(dom_dt,3),'title':await page.title()})
-                      await page.screenshot(path=str(OUT/f'{label}_landing.png'),full_page=True)
-                      (OUT/f'{label}_landing.html').write_text(await page.content(),encoding='utf-8')
-                      result['bodyExcerpt']=(await page.locator('body').inner_text())[:1200]
+                      nav=await page.goto(BASE,wait_until='commit',timeout=20000)
+                      result['commit_seconds']=round(time.monotonic()-t,3)
+                      result['navigationStatus']=nav.status if nav else None
+                      await page.wait_for_timeout(8000)
+                      result['readyState']=await page.evaluate('document.readyState')
+                      result['title']=await page.title()
+                      result['url']=page.url
+                      result['pendingAfter8s']=sorted(pending)
+                      result['requestFailures']=failed
+                      result['pageErrors']=errs
+                      result['responses']=responses
+                      result['htmlLength']=await page.evaluate('document.documentElement.outerHTML.length')
+                      result['bodyExcerpt']=(await page.locator('body').inner_text())[:1800]
+                      result['heroCount']=await page.locator('.heroArt').count()
                       (OUT/f'{label}_diagnostic.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
-                      assert nav and nav.status==200, result
-                      await page.wait_for_selector('.heroArt',state='visible',timeout=60000)
-                      await page.wait_for_function("document.readyState === 'complete'",timeout=30000)
-                      await page.wait_for_timeout(3500)
-                      state=await page.evaluate('document.readyState')
-                      ui=await page.locator('.version').inner_text()
+                      (OUT/f'{label}_dom.html').write_text(await page.content(),encoding='utf-8')
+                      await cdp_shot(context,page,OUT/f'{label}_8s.png')
+                      print('CHROMIUM_DIAGNOSTIC',json.dumps({k:result[k] for k in ['stale','commit_seconds','navigationStatus','readyState','pendingAfter8s','heroCount']},ensure_ascii=False),flush=True)
+                      if result['readyState']!='complete':
+                          await page.evaluate('window.stop()')
+                          await page.wait_for_timeout(500)
+                          result['readyAfterStop']=await page.evaluate('document.readyState')
+                          result['heroCountAfterStop']=await page.locator('.heroArt').count()
+                          if result['heroCountAfterStop']:
+                              hero=page.locator('.heroArt')
+                              result['heroBackgroundAfterStop']=await hero.evaluate("e=>getComputedStyle(e).backgroundImage")
+                              result['heroBoxAfterStop']=await hero.bounding_box()
+                          await cdp_shot(context,page,OUT/f'{label}_after_stop.png')
+                          (OUT/f'{label}_diagnostic.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+                          raise AssertionError('DOMContentLoaded/load did not finish; pending='+repr(result['pendingAfter8s']))
+                      await page.wait_for_timeout(1500)
                       hero=page.locator('.heroArt')
+                      await hero.wait_for(state='visible',timeout=10000)
                       bg=await hero.evaluate("e=>getComputedStyle(e).backgroundImage")
+                      ui=await page.locator('.version').inner_text()
                       status_visible=await page.locator('#status').is_visible()
                       state_text=await page.locator('#state').inner_text() if status_visible else ''
                       body_text=await page.locator('body').inner_text()
                       transient=[s for s in ['⏳ Loading...','Loading history…','Loading details…'] if s in body_text]
-                      api_job=[u for u in requests if '/api/jobs/' in u]
-                      hero_resp=[x for x in responses if 'hero_user_web.jpg' in x[0]]
+                      hero_resp=[x for x in responses if 'hero_user_web.jpg' in x['url']]
                       box=await hero.bounding_box()
-                      path=OUT/f'{label}.png'
-                      await page.screenshot(path=str(path),full_page=True)
-                      im=Image.open(path).convert('RGB')
-                      if not box:
-                          raise AssertionError('Hero has no bounding box')
+                      await cdp_shot(context,page,OUT/f'{label}_final.png')
+                      im=Image.open(OUT/f'{label}_final.png').convert('RGB')
                       x0=max(0,int(box['x'])); y0=max(0,int(box['y']))
                       x1=min(im.width,int(box['x']+box['width'])); y1=min(im.height,int(box['y']+box['height']))
                       crop=im.crop((x0,y0,x1,y1)); crop.save(OUT/f'{label}_hero.png')
@@ -88,30 +126,25 @@ jobs:
                       magenta=sum(1 for r,g,b in px if r>145 and b>65 and g<105 and r>g*1.5)
                       bright=sum(1 for r,g,b in px if max(r,g,b)>120)
                       avg_luma=sum((0.2126*r+0.7152*g+0.0722*b) for r,g,b in px)/max(1,len(px))
-                      result.update({'readyState':state,'ui':ui,'bg':bg,'status_visible':status_visible,'state_text':state_text,'transientStates':transient,'api_job_requests':api_job,'page_errors':errs,'heroResponses':hero_resp,'heroBox':box,'orange':orange,'magenta':magenta,'bright':bright,'avgLuma':round(avg_luma,2)})
+                      api_job=[u for u in requests if '/api/jobs/' in u]
+                      result.update({'ui':ui,'bg':bg,'statusVisible':status_visible,'stateText':state_text,'transientStates':transient,'heroResponses':hero_resp,'heroBox':box,'orange':orange,'magenta':magenta,'bright':bright,'avgLuma':round(avg_luma,2),'apiJobRequests':api_job})
                       (OUT/f'{label}_diagnostic.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
-                      print('BROWSER_RESULT',json.dumps(result),flush=True)
-                      assert dom_dt<10, result
-                      assert state=='complete', result
                       assert '7.1.6' in ui, result
                       assert 'hero_user_web.jpg?v=7.1.6' in bg, result
-                      assert hero_resp and any(status==200 and ctype.startswith('image/') for _,status,ctype in hero_resp), result
-                      assert not transient, result
+                      assert hero_resp and any(x['status']==200 and x['type'].startswith('image/') for x in hero_resp), result
+                      assert not transient and not errs, result
                       assert orange>5000 and magenta>300 and bright>15000 and avg_luma>35, result
-                      assert not errs, result
                       if stale:
-                          assert not api_job, 'Saved job triggered API polling on initial load: '+repr(api_job)
+                          assert not api_job, result
                           assert state_text=='PAUSED', result
+                      print('BROWSER_RESULT',json.dumps(result,ensure_ascii=False),flush=True)
                       return result
                   except Exception as exc:
-                      result['error']=repr(exc)
-                      result['traceback']=traceback.format_exc()
-                      try:
-                          await page.screenshot(path=str(OUT/f'{label}_failure.png'),full_page=True)
-                          (OUT/f'{label}_failure.html').write_text(await page.content(),encoding='utf-8')
-                          result['bodyExcerpt']=(await page.locator('body').inner_text())[:2000]
-                      except Exception as diag_exc:
-                          result['diagnosticError']=repr(diag_exc)
+                      result['error']=repr(exc); result['traceback']=traceback.format_exc()
+                      try: await cdp_shot(context,page,OUT/f'{label}_failure.png')
+                      except Exception as e: result['cdpScreenshotError']=repr(e)
+                      try: (OUT/f'{label}_failure.html').write_text(await page.content(),encoding='utf-8')
+                      except Exception as e: result['contentError']=repr(e)
                       (OUT/f'{label}_diagnostic.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
                       raise
                   finally:
