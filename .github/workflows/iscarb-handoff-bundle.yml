@@ -1,0 +1,87 @@
+name: ISCARB Handoff Bundle
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-handoff-bundle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build complete ISCARB handoff bundle
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p /tmp/iscarb-handoff/.github/workflows
+          cp -a iscarb-studio /tmp/iscarb-handoff/
+          cp .github/workflows/iscarb-*.yml /tmp/iscarb-handoff/.github/workflows/ 2>/dev/null || true
+          git rev-parse HEAD > /tmp/iscarb-handoff/CURRENT_HEAD.txt
+          git log -1 --format='%H%n%ad%n%s' --date=iso-strict > /tmp/iscarb-handoff/CURRENT_COMMIT.txt
+          cat > /tmp/iscarb-handoff/ISCARB_HANDOFF_NEW_CHAT.md <<'EOF'
+          # ISCARB project handoff
+
+          ## Repository / deployment
+          - GitHub: `adeebnoor/CPIT`, branch `main`
+          - App root: `iscarb-studio/`
+          - Render service: `iscarb-lecture-studio`
+          - Public URL: `https://iscarb-lecture-studio.onrender.com/`
+          - Render service id: `srv-da8k7vss728c73c15ofg`
+          - Render workspace id: `tea-da8k5ubtqb8s73af0sd0`
+
+          ## Product contract
+          ISCARB transforms any IT/computing lecture into a defendable teaching deck. One primary source P1 controls scope. Optional sources S1-S7 may clarify/evidence/contextualize but must not silently replace P1. Supported primary/supporting inputs: public website URL, PDF, PPTX, DOCX, TXT, MD. The engine uses 20 fixed learner-visible ISCARB core jobs; physical slides may expand up to 30 when source-preserving expansion is necessary.
+
+          ## Golden Master / quality contract
+          The approved pedagogical/visual baseline is the previously selected Golden Master: 20 clearly visible rules inside a coherent engineering story, source figures first, large readable typography, BlackNative/TextGold with magenta/cyan accents, no public/random image fallback, no generic crisis, no Domain Spine heading dump, and real source expansion instead of tiny text. The engine must reproduce that quality generically, not hard-code Chapter 13.
+
+          ## Current hero contract
+          The exact user-supplied original desert/camel/fortress artwork is the authoritative hero. It is stored as `iscarb-studio/app/static/hero_user_original.png`. A web-optimized derivative from that exact source is `iscarb-studio/app/static/hero_user_web.jpg`; it is allowed only as a delivery optimization, not as a redesigned substitute. Do not use the old SVG/WebP/hand-drawn replacements.
+
+          ## Current open issue
+          The user reported that the live homepage was still visually blank/loading in Chrome even after the original hero file existed on the server. The raw asset had been verified over HTTP, but that was insufficient: a real-browser visual check timed out, which matches the user's symptom. A lightweight JPEG derivative was then generated from the exact original image (~270 KB versus ~2.3 MB PNG), and production code was moved toward using it as the hero background to eliminate the blank/loading state. Continue by checking the current `main`, current live version, and actual Render deployment; do not assume the bug is fixed until a real Chromium screenshot proves the hero is visibly rendered and the page settles normally.
+
+          ## Testing rules
+          Never claim success from HTTP 200/schema checks alone. For the homepage, use a real browser screenshot/pixel check. For generated PowerPoint, use `/api/jobs/{job_id}/export/pptx`, then validate it is a real ZIP-based PPTX containing `ppt/presentation.xml`; `/presenter` is HTML preview and must never be saved as `.pptx`. For lecture quality, visually inspect the PDF/PPTX, fonts, story, 20 visible rules, source figures and expansion pages.
+
+          ## Important historical technical state
+          - Production patch chain includes v671, v680, v690, v691, v692, v693, v694, generic IT patch, v702 strict20, v703 web source, v704 source detail, v705 web visuals, and hero patch.
+          - Public image fallback is disabled in production.
+          - Source-web figures are restricted to the supplied P1 page and capped to preserve native visual variety.
+          - Build-time smoke test: `iscarb-studio/smoke_prod.py`.
+          - Real local E2E: `iscarb-studio/e2e_prod.py`.
+          - Render auto-deploy has been unreliable empirically even though configured yes; manual deploy has often been required.
+
+          ## What to do first in the next chat
+          1. Read this handoff and inspect the bundle; do not rebuild from scratch.
+          2. Read current `iscarb-studio/app/home_v670.py`, `smoke_prod.py`, hero assets, and the latest hero-related workflows.
+          3. Inspect the live site in a real Chromium browser and capture a screenshot. Confirm whether the exact original hero is actually visible and whether the page finishes loading.
+          4. If still blank/slow, fix the production homepage using the optimized derivative of the exact original (or another browser-safe encoding derived from the exact original), preserve the original as canonical, deploy, then visually verify.
+          5. After the homepage is stable, return to engine quality: source-driven inputs (URL/PDF/PPTX/DOCX + S1-S7) -> Golden-Master-quality lecture.
+
+          ## User preference
+          Work directly, test rigorously, push/deploy yourself when authorized, and report concise Arabic status. Do not ask the user to repeat context already contained here.
+          EOF
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('/tmp/iscarb-handoff')
+          files=[p for p in root.rglob('*') if p.is_file()]
+          total=sum(p.stat().st_size for p in files)
+          print('HANDOFF_FILES',len(files))
+          print('HANDOFF_BYTES',total)
+          print('HAS_HERO_ORIGINAL',(root/'iscarb-studio/app/static/hero_user_original.png').exists())
+          print('HAS_HERO_WEB',(root/'iscarb-studio/app/static/hero_user_web.jpg').exists())
+          PY
+          cd /tmp
+          zip -qr ISCARB_COMPLETE_HANDOFF.zip iscarb-handoff
+          unzip -t ISCARB_COMPLETE_HANDOFF.zip >/dev/null
+          ls -lh ISCARB_COMPLETE_HANDOFF.zip
+      - name: Upload complete handoff bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ISCARB_COMPLETE_HANDOFF
+          path: /tmp/ISCARB_COMPLETE_HANDOFF.zip
+          if-no-files-found: error
+          retention-days: 14
