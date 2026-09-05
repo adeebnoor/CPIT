@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Final production polish: no legacy health/library residue and one visible presenter contract."""
 
+import re
 from fastapi.responses import HTMLResponse
 from . import main as engine
 from . import start_v440 as base
@@ -16,6 +17,60 @@ _RETIRED_HEALTH={
     "source_visual_public_url","public_web_keyword_search",
 }
 
+_REVIEW_REQUIRED = re.compile(r"\breview\s+required\b", re.I)
+
+
+def _scrub_text(value):
+    if not isinstance(value, str):
+        return value
+    return _REVIEW_REQUIRED.sub("faculty inspection needed", value)
+
+
+def _scrub_list(values):
+    if values is None:
+        return values
+    try:
+        return [_scrub_text(x) if isinstance(x, str) else x for x in values]
+    except TypeError:
+        return values
+
+
+def _scrub_review_required(bp):
+    """Remove residual gate wording from learner/package metadata without weakening review semantics."""
+    for attr in ("lecture_title","central_engineering_crisis","engineering_thesis"):
+        if hasattr(bp, attr):
+            try:
+                setattr(bp, attr, _scrub_text(getattr(bp, attr)))
+            except Exception:
+                pass
+    for u in list(getattr(bp,"units",[]) or []):
+        for attr in ("title","engineering_question","student_action","takeaway","source_anchor"):
+            if hasattr(u, attr):
+                try:
+                    setattr(u, attr, _scrub_text(getattr(u, attr)))
+                except Exception:
+                    pass
+        for attr in ("core_content","pedagogy_content","scenario_assumptions","enrichment_content","enrichment_basis"):
+            if hasattr(u, attr):
+                try:
+                    setattr(u, attr, _scrub_list(getattr(u, attr)))
+                except Exception:
+                    pass
+        plan=getattr(u,"visual_plan",None)
+        if plan is not None:
+            field_names=list(getattr(type(plan),"model_fields",{}) or []) or ["visual_evidence_role","design_brief","annotation_plan","provenance","visual_kind"]
+            for attr in field_names:
+                if hasattr(plan, attr):
+                    try:
+                        val=getattr(plan, attr)
+                        if isinstance(val, str):
+                            setattr(plan, attr, _scrub_text(val))
+                        elif isinstance(val, list):
+                            setattr(plan, attr, _scrub_list(val))
+                    except Exception:
+                        pass
+    return bp
+
 
 def _ensure_blackbox(bp):
     units=list(getattr(bp,"units",[]) or [])
@@ -25,6 +80,10 @@ def _ensure_blackbox(bp):
         if ai and not any(str(x).upper().startswith("BLACK-BOX TEST") for x in (u.pedagogy_content or [])):
             u.pedagogy_content.append("BLACK-BOX TEST — If a model decision cannot be explained directly, require observable evidence that makes behavior auditable to an independent reviewer or regulator.")
     return bp
+
+
+def _final_blueprint_clean(bp):
+    return _scrub_review_required(_ensure_blackbox(bp))
 
 
 def apply_v722_final_polish(app):
@@ -37,11 +96,16 @@ def apply_v722_final_polish(app):
     faculty_main.render_presenter_preview=presenter.render_presenter_preview
     faculty_main.export_presenter_pdf=presenter.export_presenter_pdf
 
-    # Last blueprint pass: preserve the explicit black-box auditability question.
+    # Last blueprint pass: preserve black-box auditability and remove residual gate wording.
     previous=engine._source_preserving_draft
-    def final_draft(profile,bundle):return _ensure_blackbox(previous(profile,bundle))
+    def final_draft(profile,bundle):return _final_blueprint_clean(previous(profile,bundle))
     engine._source_preserving_draft=final_draft
     base.engine._source_preserving_draft=final_draft
+
+    previous_timebox=engine.apply_90_minute_timebox
+    def final_timebox(blueprint,profile,bundle):return _final_blueprint_clean(previous_timebox(blueprint,profile,bundle))
+    engine.apply_90_minute_timebox=final_timebox
+    base.engine.apply_90_minute_timebox=final_timebox
 
     # Replace the public root with a thin wrapper around the already-clean v7.2 home,
     # only unifying release identity and cache-busting. No legacy content is reintroduced.
