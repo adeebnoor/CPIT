@@ -21,9 +21,12 @@ COPY . .
 
 # Production must not deploy if the active patch chain cannot render the current
 # LectureUnit schema, or if source-native/public-web/hero invariants regress.
-# The second smoke locks the final IT-wide v7.1.6 contract and metadata.
 RUN python smoke_prod.py
 RUN python smoke_contract_v716.py
+# Lock the user-approved Golden v6.6 classroom contract and the permanent fixes:
+# visible time-boxing, Rule 11 micro-case scaffolding, two-question peer review,
+# and Decision Evidence Boxes on every Source Expansion.
+RUN python smoke_golden_v728.py
 
 # The service only ever reads its own source and writes under data/. Running it
 # unprivileged means a defect in source parsing cannot rewrite the application.
