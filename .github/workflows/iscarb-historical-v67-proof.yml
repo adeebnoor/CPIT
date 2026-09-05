@@ -1,0 +1,106 @@
+name: ISCARB Historical v67 Golden Proof
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-historical-v67-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cc943c1955a20d1b0bf5ffdeef8b87583ded95c5
+      - name: Install historical app and proof tools
+        run: |
+          set -euxo pipefail
+          cd iscarb-studio
+          python -m pip install --quiet -r requirements.txt requests playwright pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
+          mkdir -p /tmp/v67proof
+      - name: Recover authoritative Ch10 source
+        run: |
+          python - <<'PY'
+          import asyncio,hashlib
+          from pathlib import Path
+          from urllib.parse import urljoin
+          from playwright.async_api import async_playwright
+          share='https://firestorage.ai/ja/f/C8CkVtdyu3xl'; name='Ch10 Dependable systems(1).pptx'; sha='6b0ea25f95767c96c2cd9ebafbed4acd8592e42e80a4bc6fb04c4fbe87981750'; dst=Path('/tmp/v67proof')/name
+          def accept(data):
+              if data[:2]!=b'PK' or hashlib.sha256(data).hexdigest()!=sha:return False
+              dst.write_bytes(data);return True
+          async def main():
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,args=['--no-sandbox']); page=await b.new_page(); await page.goto(share,wait_until='networkidle',timeout=60000)
+                  for a in await page.locator('a[href]').all():
+                      try:
+                          u=urljoin(share,await a.get_attribute('href') or '')
+                          if any(k in u.lower() for k in ('download','.pptx','file')):
+                              r=await page.request.get(u,timeout=30000)
+                              if r.ok and accept(await r.body()): await b.close(); return
+                      except Exception: pass
+                  for t in [page.get_by_text(x,exact=False).first for x in [name,'Download','download','ダウンロード']]:
+                      try:
+                          if await t.count() and await t.is_visible():
+                              async with page.expect_download(timeout=12000) as di: await t.click()
+                              if accept(Path(await (await di.value).path()).read_bytes()): await b.close(); return
+                      except Exception: pass
+                  await b.close(); raise SystemExit('source recovery failed')
+          asyncio.run(main())
+          PY
+      - name: Start historical server
+        run: |
+          cd iscarb-studio
+          nohup python run.py >/tmp/v67proof/server.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8000/api/health && break || sleep 2; done
+          curl -fsS http://127.0.0.1:8000/api/health > /tmp/v67proof/health.json
+      - name: Compile and render historical Ch10
+        run: |
+          python - <<'PY'
+          import json,time,zipfile,subprocess
+          from pathlib import Path
+          import requests
+          from PIL import Image,ImageDraw,ImageStat
+          base='http://127.0.0.1:8000'; od=Path('/tmp/v67proof'); src=od/'Ch10 Dependable systems(1).pptx'
+          with src.open('rb') as f:
+              r=requests.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/vnd.openxmlformats-officedocument.presentationml.presentation')},data={'primary_url':'','supporting_urls':'','lecture_focus':'Chapter 10 — Dependable Systems','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=120)
+          r.raise_for_status(); jid=r.json()['job_id']; (od/'job_id.txt').write_text(jid)
+          for _ in range(180):
+              job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
+              if job.get('status') in {'ready','blocked','error'}:break
+              time.sleep(1)
+          (od/'job.json').write_text(json.dumps(job,indent=2,ensure_ascii=False),encoding='utf-8')
+          assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
+          for fmt,name in [('pptx','HISTORICAL_v67_Ch10.pptx'),('presenter-pdf','HISTORICAL_v67_Ch10.pdf')]:
+              rr=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180); rr.raise_for_status(); (od/name).write_bytes(rr.content)
+          ppt=od/'HISTORICAL_v67_Ch10.pptx'
+          with zipfile.ZipFile(ppt) as z:
+              slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+              (od/'slide_count.txt').write_text(str(len(slides)))
+          rd=od/'rendered'; lo=od/'lo'; rd.mkdir();lo.mkdir()
+          subprocess.run(['libreoffice','--headless',f'-env:UserInstallation=file://{lo}','--convert-to','pdf','--outdir',str(rd),str(ppt)],check=True,timeout=120)
+          subprocess.run(['pdftoppm','-png','-r','105',str(rd/'HISTORICAL_v67_Ch10.pdf'),str(rd/'slide')],check=True,timeout=120)
+          imgs=sorted(rd.glob('slide-*.png')); thumbs=[]
+          for f in imgs:
+              im=Image.open(f).convert('RGB'); assert max(ImageStat.Stat(im).var)>2,f; im.thumbnail((384,216)); thumbs.append((f.name,im.copy()))
+          cols=4; rows=(len(thumbs)+3)//4; sheet=Image.new('RGB',(cols*410,rows*245),'white'); d=ImageDraw.Draw(sheet)
+          for i,(name,im) in enumerate(thumbs):
+              x=(i%cols)*410;y=(i//cols)*245;d.text((x+5,y+3),name,fill='black');sheet.paste(im,(x+5,y+25))
+          sheet.save(od/'HISTORICAL_v67_Ch10_contact_sheet.jpg',quality=94)
+          PY
+      - name: Upload proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-v67-golden-proof-${{ github.run_id }}
+          path: /tmp/v67proof/
+          if-no-files-found: error
+          retention-days: 14
