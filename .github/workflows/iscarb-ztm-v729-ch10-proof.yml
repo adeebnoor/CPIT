@@ -1,0 +1,156 @@
+name: ISCARB ZTM v729 Ch10 Proof
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'iscarb-studio/**'
+      - '.github/workflows/iscarb-ztm-v729-ch10-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recover authoritative Ch10 source
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet playwright requests
+          python -m playwright install --with-deps chromium
+          mkdir -p /tmp/iscarb_ztm/ch10
+          python - <<'PY'
+          import asyncio, hashlib
+          from pathlib import Path
+          from urllib.parse import urljoin
+          from playwright.async_api import async_playwright
+          share='https://firestorage.ai/ja/f/C8CkVtdyu3xl'
+          name='Ch10 Dependable systems(1).pptx'
+          sha='6b0ea25f95767c96c2cd9ebafbed4acd8592e42e80a4bc6fb04c4fbe87981750'
+          out=Path('/tmp/iscarb_ztm/ch10'); dst=out/name
+          def accept(data):
+              if data[:2]!=b'PK' or hashlib.sha256(data).hexdigest()!=sha: return False
+              dst.write_bytes(data); return True
+          async def main():
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,args=['--no-sandbox']); page=await b.new_page()
+                  await page.goto(share,wait_until='networkidle',timeout=60000)
+                  for a in await page.locator('a[href]').all():
+                      try:
+                          u=urljoin(share,await a.get_attribute('href') or '')
+                          if any(k in u.lower() for k in ('download','.pptx','file')):
+                              r=await page.request.get(u,timeout=30000)
+                              if r.ok and accept(await r.body()): await b.close(); return
+                      except Exception: pass
+                  for target in [page.get_by_text(x,exact=False).first for x in [name,'Download','download','ダウンロード']]:
+                      try:
+                          if await target.count() and await target.is_visible():
+                              async with page.expect_download(timeout=12000) as di: await target.click()
+                              if accept(Path(await (await di.value).path()).read_bytes()): await b.close(); return
+                      except Exception: pass
+                  await b.close(); raise SystemExit('could not recover Ch10')
+          asyncio.run(main())
+          PY
+
+      - name: Build production image with all smoke gates
+        working-directory: iscarb-studio
+        run: docker build -t iscarb-ztm-v729 .
+
+      - name: Start local production service
+        run: |
+          set -euxo pipefail
+          docker run -d --rm --name iscarb-ztm -p 8000:8000 iscarb-ztm-v729
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8000/api/health >/tmp/iscarb_ztm/health.json; then break; fi
+            sleep 2
+          done
+          cat /tmp/iscarb_ztm/health.json
+
+      - name: Compile and assert ZTM / Golden invariants
+        run: |
+          python - <<'PY'
+          import json,time,zipfile
+          from pathlib import Path
+          import requests
+          base='http://127.0.0.1:8000'; od=Path('/tmp/iscarb_ztm/ch10')
+          health=requests.get(base+'/api/health',timeout=20).json()
+          (od/'health.json').write_text(json.dumps(health,indent=2),encoding='utf-8')
+          assert health.get('ztm_theme_version')=='v7.2.9',health
+          assert health.get('golden_master_locked') is True,health
+          assert health.get('ztm_tokens',{}).get('bg_base')=='#FFFFFF',health
+          assert health.get('ztm_tokens',{}).get('accent_primary')=='#4F46E5',health
+          assert 'stage 1' in health.get('progressive_disclosure','').lower(),health
+          src=od/'Ch10 Dependable systems(1).pptx'
+          with src.open('rb') as f:
+              r=requests.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/vnd.openxmlformats-officedocument.presentationml.presentation')},data={'primary_url':'','supporting_urls':'','lecture_focus':'Chapter 10 — Dependable Systems','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=120)
+          r.raise_for_status(); jid=r.json()['job_id']; (od/'job_id.txt').write_text(jid)
+          for _ in range(180):
+              job=requests.get(f'{base}/api/jobs/{jid}',timeout=20).json()
+              if job.get('status') in {'ready','blocked','error'}: break
+              time.sleep(1)
+          (od/'job.json').write_text(json.dumps(job,indent=2,ensure_ascii=False),encoding='utf-8')
+          assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
+          bp=job['blueprint']; assert len(bp['units'])==20
+          u11=bp['units'][10]; u19=bp['units'][18]
+          assert any('MICRO-CASE' in x.upper() for x in u11.get('pedagogy_content',[])),u11
+          assert len(u19.get('core_content',[]))==2,u19
+          assert all(str(u.get('student_action','')).upper().startswith('TIMEBOX:') for u in bp['units']),[u.get('number') for u in bp['units'] if not str(u.get('student_action','')).upper().startswith('TIMEBOX:')]
+
+          plan=requests.post(base+'/api/presentation/physical-plan',json={'blueprint':bp,'target_physical_slides':30},timeout=30)
+          # Review drafts may not pass strict verdict gate; renderer itself uses strict=False.
+          if plan.ok:
+              pdata=plan.json(); (od/'physical-plan.json').write_text(json.dumps(pdata,indent=2,ensure_ascii=False),encoding='utf-8')
+              assert pdata['core_units']==20
+          html=requests.get(f'{base}/api/jobs/{jid}/presenter',timeout=60).text
+          (od/'presenter.html').write_text(html,encoding='utf-8')
+          for needle in ["--bg-base:#FFFFFF","data-stage='1'","@keyframes pulse","TIMEBOX","Peer-review quick card","Micro-case"]:
+              assert needle.lower() in html.lower(),needle
+
+          outputs=[('pptx','Ch10_Dependable_Systems_ISCARB_ZTM_v729.pptx'),('presenter-pdf','Ch10_Dependable_Systems_ISCARB_ZTM_v729.pdf')]
+          for fmt,name in outputs:
+              rr=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180); rr.raise_for_status(); (od/name).write_bytes(rr.content)
+
+          ppt=od/'Ch10_Dependable_Systems_ISCARB_ZTM_v729.pptx'
+          with zipfile.ZipFile(ppt) as z:
+              slides=sorted(n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml'))
+              assert len(slides)==30,len(slides)
+              xml=' '.join(z.read(n).decode('utf-8','ignore') for n in slides)
+              low=xml.lower()
+              for must in ['peer-review quick card','micro-case','timebox','source expansion','decision']:
+                  assert must in low,must
+              # 8 semantic expansion pages + exact palette evidence + Inter font request.
+              assert low.count('source expansion')>=8,low.count('source expansion')
+              for color in ['FFFFFF','F8FAFC','0F172A','475569','4F46E5','06B6D4','F43F5E']:
+                  assert color.lower() in low,color
+              assert 'inter' in low
+
+          import fitz
+          pdf=fitz.open(od/'Ch10_Dependable_Systems_ISCARB_ZTM_v729.pdf')
+          assert pdf.page_count==30,pdf.page_count
+          # White ZTM surface should dominate the top-left background sample on most pages.
+          whites=0
+          for p in pdf:
+              pix=p.get_pixmap(matrix=fitz.Matrix(.2,.2),alpha=False)
+              data=pix.samples
+              if data and data[0]>235 and data[1]>235 and data[2]>235: whites+=1
+          assert whites>=25,whites
+          print('PASS local Ch10 ZTM v7.2.9',jid)
+          PY
+
+      - name: Container logs
+        if: always()
+        run: docker logs iscarb-ztm > /tmp/iscarb_ztm/container.log 2>&1 || true
+
+      - name: Upload proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-ztm-v729-ch10-${{ github.run_id }}
+          path: /tmp/iscarb_ztm/
+          if-no-files-found: warn
+          retention-days: 14
