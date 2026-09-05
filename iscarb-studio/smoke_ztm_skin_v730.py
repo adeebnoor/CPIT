@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw
 
-import run  # installs production patch chain
+import run_v730_candidate  # installs the v7.3.0 production patch chain
 from app import start_v440 as base
 from app import start_v670_prod as prod
 from app import patch_v730_ztm_skin_only as skin
@@ -16,7 +16,6 @@ assert base.export_presenter_pdf is skin.export_presenter_pdf_skin
 assert base.export_presenter_pptx is skin.export_presenter_pptx_skin
 assert base.render_presenter_preview is skin.render_presenter_preview_skin
 
-# Exact ZTM tokens remain public.
 t = prod.chapter_design_tokens("Dependable systems")
 css = t.css_variables()
 assert css["--bg-base"] == "#FFFFFF"
@@ -28,8 +27,6 @@ assert css["--accent-cyan"] == "#06B6D4"
 assert css["--alert-urgent"] == "#F43F5E"
 assert all(t.contrast_checks().values()), t.contrast_checks()
 
-# Synthetic regression: dark Golden UI must become white, but a large white
-# source panel and its internal black diagram line must remain pixel-identical.
 img = Image.new("RGB", (960, 540), (5, 7, 13))
 d = ImageDraw.Draw(img)
 d.rectangle((90, 120, 560, 410), fill=(250, 250, 250))
@@ -39,10 +36,9 @@ rects = skin._protected_bright_rects(img)
 assert rects, rects
 out = skin._skin_image(img, 7)
 assert out.getpixel((20,20))[0] > 235, out.getpixel((20,20))
-assert out.getpixel((200,200)) == img.getpixel((200,200)), (out.getpixel((200,200)), img.getpixel((200,200)))
-assert out.getpixel((300,250)) == img.getpixel((300,250)), (out.getpixel((300,250)), img.getpixel((300,250)))
+assert out.getpixel((200,200)) == img.getpixel((200,200))
+assert out.getpixel((300,250)) == img.getpixel((300,250))
 
-# Fresh Golden renderer isolation must load during build, not fail later live.
 golden = skin._load_golden_renderer()
 assert hasattr(golden, "export_presenter_pdf")
 assert hasattr(golden, "export_presenter_pptx")
