@@ -27,6 +27,9 @@ RUN python smoke_contract_v716.py
 # visible time-boxing, Rule 11 micro-case scaffolding, two-question peer review,
 # and Decision Evidence Boxes on every Source Expansion.
 RUN python smoke_golden_v728.py
+# Lock the ZTM-inspired visual contract: exact high-contrast tokens, floating
+# cards, taskbar/timebox semantics, semantic physical plan and HTML disclosure.
+RUN python smoke_ztm_v729.py
 
 # The service only ever reads its own source and writes under data/. Running it
 # unprivileged means a defect in source parsing cannot rewrite the application.
