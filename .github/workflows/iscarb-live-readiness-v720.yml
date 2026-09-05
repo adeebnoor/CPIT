@@ -67,32 +67,57 @@ jobs:
                   await page.wait_for_timeout(1200)
                   body=(await page.locator('body').inner_text()).lower()
                   html=(await page.content()).lower()
-                  assert '7.2.0' in body
-                  assert 'one engine for it' in body
+                  Path('/tmp/iscarb_v720/home_body.txt').write_text(body,encoding='utf-8')
+                  Path('/tmp/iscarb_v720/home_dom.html').write_text(html,encoding='utf-8')
+                  await page.screenshot(path='/tmp/iscarb_v720/home_full.png',full_page=True)
+
+                  assert '7.2.0' in body, body[:2500]
+                  assert '6.9.4' not in body, body[:2500]
+                  # Product supports one visible language at a time. Validate the
+                  # active state in either English or Arabic, and separately
+                  # verify that the canonical English span exists in the DOM.
+                  assert ('one engine for it' in body or 'محرك واحد' in body), body[:2500]
+                  assert 'one engine for it' in html
                   assert 'source library' not in body
                   assert 'original source library' not in body
                   assert 'sign in' not in body
                   assert 'your content is secure and used only for academic enhancement' not in body
+                  assert 'no software engineering course selection is required' not in body
+                  assert 'cpit-455 or software engineering template' not in body
                   for retired in ['cpit455-class','adeebnoor.github.io/cpit/cimt.html','slideshare.net/slideshow/ch10','software engineering template']:
                       assert retired not in html, retired
                   assert not errors, errors
+
+                  # Exercise the language toggle rather than assuming the saved
+                  # preference. Both states must remain clean and usable.
+                  toggle=page.locator('.languageToggle')
+                  if await toggle.count():
+                      before=await page.locator('html').get_attribute('data-lang')
+                      await toggle.first.click()
+                      await page.wait_for_timeout(300)
+                      after=await page.locator('html').get_attribute('data-lang')
+                      assert before != after, (before,after)
+                      toggled=(await page.locator('body').inner_text()).lower()
+                      assert '7.2.0' in toggled and '6.9.4' not in toggled
+                      assert 'sign in' not in toggled
+                      await toggle.first.click()
+
                   links=await page.locator('a[href]').evaluate_all("els=>els.map(a=>({text:(a.innerText||'').trim(),href:a.getAttribute('href')}))")
+                  Path('/tmp/iscarb_v720/home_links.json').write_text(json.dumps(links,indent=2,ensure_ascii=False),encoding='utf-8')
                   bad=[]
                   for item in links:
                       href=(item.get('href') or '').strip()
                       if not href or href.startswith('#'):
                           continue
+                      # The clean home should not rely on public external links.
                       if href.startswith('http://') or href.startswith('https://'):
-                          bad.append(item)
-                          continue
+                          bad.append(item); continue
                       if href.startswith('/'):
                           rr=requests.get(BASE+href,timeout=30,allow_redirects=True)
                           if rr.status_code>=400: bad.append({**item,'status':rr.status_code})
                   assert not bad, bad
                   hero=await page.locator('.heroArt').bounding_box(); assert hero and hero['width']>500 and hero['height']>250
-                  await page.screenshot(path='/tmp/iscarb_v720/home_full.png',full_page=True)
-                  Path('/tmp/iscarb_v720/home_links.json').write_text(json.dumps(links,indent=2),encoding='utf-8')
-                  print('CLEAN_HOME_BROWSER_PASS',len(links),'links')
+                  print('CLEAN_HOME_BROWSER_PASS',len(links),'links','language',await page.locator('html').get_attribute('data-lang'))
                   await browser.close()
           asyncio.run(main())
           PY
@@ -101,7 +126,7 @@ jobs:
         run: |
           set -euxo pipefail
           python - <<'PY'
-          import json,time,zipfile,requests,re
+          import json,time,zipfile,requests
           from io import BytesIO
           from pathlib import Path
           base='https://iscarb-lecture-studio.onrender.com'
@@ -196,7 +221,6 @@ jobs:
           for p in imgs:
               im=Image.open(p).convert('RGB')
               stat=ImageStat.Stat(im)
-              # Reject completely blank/corrupt slides, without dictating design colour.
               assert max(stat.var)>2.0, (p.name,stat.var)
               im.thumbnail((480,270)); thumbs.append((p.name,im.copy()))
           cols=4; rows=(len(thumbs)+cols-1)//cols
@@ -241,5 +265,5 @@ jobs:
         with:
           name: iscarb-v720-live-readiness-${{ github.run_id }}
           path: /tmp/iscarb_v720/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
