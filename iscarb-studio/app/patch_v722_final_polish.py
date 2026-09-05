@@ -86,10 +86,37 @@ def _final_blueprint_clean(bp):
     return _scrub_review_required(_ensure_blackbox(bp))
 
 
+def _install_final_close_patch():
+    p=presenter
+
+    def ppt_close(slide,bp,total):
+        p._ppt_bg(slide); p._ppt_text(slide,.7,.6,3.0,.25,"ISCARB · CLOSE",8.5,p.CYAN,True)
+        p._ppt_text(slide,.7,1.18,9.0,.5,"Bounded engineering verdict",25,p.TEXT,True)
+        p._ppt_text(slide,.7,1.85,9.4,.55,"The lecture closes only after the assurance chain is inspectable.",13,p.MUTED)
+        labs=["CLAIM","EVIDENCE","WARRANT","COUNTER-EVIDENCE","RESIDUAL UNCERTAINTY","VERDICT"]
+        for i,lab in enumerate(labs): p._ppt_box(slide,.62+i*2.08,3.0,1.82,1.55,lab,"",[p.CYAN,p.GOLD,p.BLUE,p.MAGENTA,p.GREEN,p.DANGER][i],title_size=8.2)
+        p._ppt_text(slide,.7,5.4,10.8,.55,"TAKE-HOME CHECKPOINT · State the final verdict and the one piece of evidence that would make you revisit it.",10.5,p.TEXT,True)
+        p._ppt_text(slide,11.0,6.78,1.95,.25,f"CLOSE · {total:02d}/{total:02d}",7.4,p.MUTED,False,p.PP_ALIGN.RIGHT)
+    p._ppt_close=ppt_close
+
+    def pdf_close(c,bp,total):
+        c.setFillColor(p.HexColor(p.BG)); c.rect(0,0,960,540,fill=1,stroke=0)
+        p._pdf_text(c,50,485,180,18,"ISCARB · CLOSE",7.5,p.CYAN,True,max_lines=1)
+        p._pdf_text(c,50,425,620,42,"Bounded engineering verdict",23,p.TEXT,True,max_lines=1)
+        p._pdf_text(c,50,380,680,30,"The lecture closes only after the assurance chain is inspectable.",11,p.MUTED,max_lines=2)
+        labs=["CLAIM","EVIDENCE","WARRANT","COUNTER-EVIDENCE","RESIDUAL UNCERTAINTY","VERDICT"]
+        for i,lab in enumerate(labs): p._pdf_box(c,25+i*155,220,140,90,lab,"",[p.CYAN,p.GOLD,p.BLUE,p.MAGENTA,p.GREEN,p.DANGER][i],title_size=6.5)
+        p._pdf_text(c,50,145,760,30,"TAKE-HOME CHECKPOINT · State the final verdict and the one piece of evidence that would make you revisit it.",8.5,p.TEXT,True,max_lines=2)
+        p._pdf_text(c,795,55,140,16,f"CLOSE · {total:02d}/{total:02d}",6.4,p.MUTED,False,"right",1)
+    p._pdf_close=pdf_close
+
+
 def apply_v722_final_polish(app):
     global _PATCHED
     if _PATCHED:return
     _PATCHED=True
+
+    _install_final_close_patch()
 
     # Make the actual faculty-facing route globals use the final production renderer.
     faculty_main.export_presenter_pptx=presenter.export_presenter_pptx
@@ -140,5 +167,6 @@ def apply_v722_final_polish(app):
             "approved_hero_web_derivative":"hero_user_web.jpg",
             "presenter_activity_labels_dynamic":True,"ai_era_content_visible_in_presenter":True,
             "black_box_auditability_prompt":True,
+            "close_slide_legacy_task_label":False,
         })
         return data
