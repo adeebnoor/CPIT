@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Approved CPIT-455 student lecture showcase.">
+<title>ISCARB | Student Lecture Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05070d;--panel:#101725;--line:#29364d;--ink:#f5f6fa;--muted:#aab5c5;--cyan:#2cdcff;--magenta:#ff258c;--gold:#dcb56b;--green:#34d399}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#05070d,#0b1020 65%,#05070d);color:var(--ink);font-family:Inter,Arial,sans-serif}.wrap{max-width:1240px;margin:auto;padding:20px 28px 66px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-size:11px;font-weight:900}.top a{font-size:10px;color:var(--cyan);font-weight:900;text-decoration:none}
+.hero{position:relative;overflow:hidden;margin-top:20px;border:1px solid rgba(220,181,107,.28);border-radius:30px;min-height:390px;padding:46px;display:flex;align-items:flex-end}.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 56%;filter:brightness(.54)}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,7,13,.94),rgba(5,7,13,.68) 48%,rgba(5,7,13,.15))}.hero-content{position:relative;z-index:2;max-width:760px}.eyebrow{font-size:9px;font-weight:900;letter-spacing:.16em;color:var(--gold)}h1{font-size:clamp(43px,6vw,74px);line-height:.94;letter-spacing:-.055em;margin:12px 0 15px}.hero h1 em{font-family:"Playfair Display",serif;color:var(--cyan);font-style:italic}.hero p{font-size:13px;line-height:1.75;color:#d3dcea;margin:0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:21px}.btn{display:inline-flex;text-decoration:none;padding:11px 14px;border-radius:10px;font-size:10px;font-weight:900}.primary{background:var(--cyan);color:#041018}.secondary{border:1px solid rgba(255,255,255,.2);background:rgba(7,10,16,.7);color:#fff}.pink{background:var(--magenta);color:#fff}
+.info{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.info div{background:rgba(16,23,37,.86);border:1px solid var(--line);border-radius:16px;padding:17px}.info b{font-size:11px;color:var(--gold)}.info p{margin:7px 0 0;color:var(--muted);font-size:10px;line-height:1.6}
+.section{padding-top:55px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:26px;margin-bottom:19px}.kicker{font-size:9px;font-weight:900;letter-spacing:.15em;color:var(--magenta)}h2{font-size:39px;letter-spacing:-.045em;margin:5px 0 0}.count{font-size:10px;color:#8f99a8}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:12px}.card{background:rgba(16,23,37,.9);border:1px solid var(--line);border-radius:18px;padding:20px;min-height:150px}.card .type{font-size:8px;font-weight:900;letter-spacing:.12em;color:var(--cyan)}.card h3{font-size:20px;margin:11px 0 8px;line-height:1.18}.card p{font-size:10px;color:var(--muted);line-height:1.6;margin:0}.card a{display:inline-flex;margin-top:14px;text-decoration:none;color:var(--green);font-size:10px;font-weight:900;border:1px solid rgba(52,211,153,.35);border-radius:8px;padding:8px 10px;background:rgba(52,211,153,.06)}
+.empty{grid-column:1/-1;border:1px dashed #344258;border-radius:18px;padding:30px;text-align:center;color:#9ba6b5;font-size:11px;line-height:1.7}.footer{margin-top:55px;border-top:1px solid var(--line);padding-top:18px;color:#758194;font-size:9px;display:flex;justify-content:space-between}
+@media(max-width:780px){.wrap{padding:15px}.hero{padding:30px 23px;min-height:420px}.hero img{object-position:60% 56%}.info{grid-template-columns:1fr}.section-head{display:block}.count{display:block;margin-top:10px}.footer{display:block}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div class="brand">ISCARB · CPIT-455 · STUDENT SHOWCASE</div><a href="iscarb.html">← Back to lectures</a></div>
+  <section class="hero">
+    <img src="iscarb-studio/app/static/hero_user_original.png?v=students-20260906" alt="ISCARB Saudi heritage identity">
+    <div class="hero-content"><div class="eyebrow">APPROVED STUDENT WORK · PUBLIC READ-ONLY GALLERY</div><h1>Student lectures worth <em>defending.</em></h1><p>This gallery publishes selected student lecture artifacts after course-staff review. The public surface is read-only; approval happens before publishing so names, answers, and assessment material are not exposed accidentally.</p><div class="actions"><a class="btn primary" href="#gallery">View approved lectures</a><a class="btn pink" href="https://github.com/adeebnoor/CPIT/upload/main/lectures/iscarb/students" target="_blank" rel="noopener">Staff publish PDF</a><a class="btn secondary" href="iscarb.html">Course lecture hub</a></div></div>
+  </section>
+
+  <div class="info">
+    <div><b>Student submission</b><p>Submit through the course-approved channel (for example Blackboard). Public GitHub upload is not used as an anonymous student dropbox.</p></div>
+    <div><b>Staff review</b><p>Check names, answer keys, assessment data, copyright, and source attribution before publication.</p></div>
+    <div><b>Public display</b><p>Approved PDFs placed in <code>lectures/iscarb/students/</code> appear here automatically.</p></div>
+  </div>
+
+  <section id="gallery" class="section">
+    <div class="section-head"><div><span class="kicker">APPROVED GALLERY</span><h2>Student lecture library</h2></div><span id="count" class="count">Loading approved PDFs…</span></div>
+    <div id="grid" class="grid"><div class="empty">Checking the approved student lecture folder…</div></div>
+  </section>
+
+  <footer class="footer"><span>ISCARB · CPIT-455 · King Abdulaziz University</span><span>Moderated publishing · public read-only display</span></footer>
+</main>
+<script>
+const API='https://api.github.com/repos/adeebnoor/CPIT/contents/lectures/iscarb/students?ref=main';
+const FOLDER='https://github.com/adeebnoor/CPIT/tree/main/lectures/iscarb/students';
+function titleOf(name){return name.replace(/\.pdf$/i,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();}
+(async()=>{
+  const grid=document.getElementById('grid'), count=document.getElementById('count');
+  try{
+    const r=await fetch(API,{headers:{Accept:'application/vnd.github+json'}});
+    if(!r.ok) throw new Error('folder unavailable');
+    const data=await r.json();
+    const pdfs=(Array.isArray(data)?data:[]).filter(x=>x.type==='file' && /\.pdf$/i.test(x.name)).sort((a,b)=>a.name.localeCompare(b.name));
+    count.textContent=pdfs.length ? `${pdfs.length} approved PDF${pdfs.length===1?'':'s'}` : 'No approved student PDFs yet';
+    if(!pdfs.length){grid.innerHTML='<div class="empty">The showcase is ready. No student PDF has been approved for public display yet.</div>';return;}
+    grid.innerHTML='';
+    for(const f of pdfs){
+      const card=document.createElement('article');card.className='card';
+      const type=document.createElement('div');type.className='type';type.textContent='APPROVED STUDENT LECTURE';
+      const h=document.createElement('h3');h.textContent=titleOf(f.name);
+      const p=document.createElement('p');p.textContent='Public classroom artifact published after course-staff review.';
+      const a=document.createElement('a');a.href=f.download_url;a.target='_blank';a.rel='noopener';a.textContent='Open PDF';
+      card.append(type,h,p,a);grid.append(card);
+    }
+  }catch(err){
+    count.textContent='Gallery folder could not be read';
+    grid.innerHTML=`<div class="empty">The public gallery could not load automatically. <a href="${FOLDER}" target="_blank" rel="noopener" style="color:#2cdcff">Open the approved folder on GitHub</a>.</div>`;
+  }
+})();
+</script>
+</body>
+</html>
