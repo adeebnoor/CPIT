@@ -1,0 +1,54 @@
+name: ISCARB Fetch Firestorage Hero
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-fetch-firestorage-hero.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect share page
+        run: |
+          set -euxo pipefail
+          curl -L --fail --retry 2 -A 'Mozilla/5.0' 'https://firestorage.ai/ja/f/tj_hCE8kvR_i' -o /tmp/share.html
+          wc -c /tmp/share.html
+          grep -Eo 'https?://[^"'"' <]+' /tmp/share.html | head -100 || true
+          grep -Ei 'download|golden_hero_original|nPq1reXN4bCWYq3n|file_id|api/' /tmp/share.html | head -100 || true
+      - name: Try public download candidates
+        run: |
+          python - <<'PY'
+          import re, pathlib, requests
+          html=pathlib.Path('/tmp/share.html').read_text(errors='ignore')
+          urls=[]
+          for m in re.findall(r'https?://[^\"\'<> ]+',html):
+              if any(k in m.lower() for k in ['download','storage','file','object']): urls.append(m.replace('&amp;','&'))
+          print('CANDIDATES',len(urls))
+          for u in urls[:50]:
+              try:
+                  r=requests.get(u,timeout=20,allow_redirects=True)
+                  print(r.status_code,r.headers.get('content-type'),len(r.content),u[:180])
+                  if r.content.startswith(b'\x89PNG') and len(r.content)>100000:
+                      pathlib.Path('iscarb-studio/app/static/hero_user_original.png').write_bytes(r.content)
+                      print('FOUND_PNG',len(r.content))
+                      break
+                  if r.content.startswith(b'\xff\xd8') and len(r.content)>100000:
+                      pathlib.Path('iscarb-studio/app/static/hero_user_original.jpg').write_bytes(r.content)
+                      print('FOUND_JPG',len(r.content))
+                      break
+              except Exception as e: print('ERR',u[:120],e)
+          PY
+      - name: Commit if found
+        run: |
+          if ls iscarb-studio/app/static/hero_user_original.* >/dev/null 2>&1; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add iscarb-studio/app/static/hero_user_original.*
+            git commit -m 'Install user-supplied original ISCARB hero from Firestorage'
+            git push
+          else
+            echo 'No direct image found from share page'
+          fi
