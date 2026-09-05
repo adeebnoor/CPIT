@@ -1,0 +1,123 @@
+name: ISCARB Golden v660 Ch10 Proof
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-golden-v660-ch10.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Install proof tools
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet requests playwright pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
+          mkdir -p /tmp/iscarb_golden/ch10
+
+      - name: Recover authoritative Ch10 source
+        run: |
+          python - <<'PY'
+          import asyncio, hashlib
+          from pathlib import Path
+          from urllib.parse import urljoin
+          from playwright.async_api import async_playwright
+          share='https://firestorage.ai/ja/f/C8CkVtdyu3xl'
+          name='Ch10 Dependable systems(1).pptx'
+          sha='6b0ea25f95767c96c2cd9ebafbed4acd8592e42e80a4bc6fb04c4fbe87981750'
+          out=Path('/tmp/iscarb_golden/ch10'); dst=out/name
+          def accept(data):
+              if data[:2]!=b'PK' or hashlib.sha256(data).hexdigest()!=sha: return False
+              dst.write_bytes(data); return True
+          async def main():
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,args=['--no-sandbox']); page=await b.new_page()
+                  await page.goto(share,wait_until='networkidle',timeout=60000)
+                  for a in await page.locator('a[href]').all():
+                      try:
+                          u=urljoin(share,await a.get_attribute('href') or '')
+                          if any(k in u.lower() for k in ('download','.pptx','file')):
+                              r=await page.request.get(u,timeout=30000)
+                              if r.ok and accept(await r.body()): await b.close(); return
+                      except Exception: pass
+                  for target in [page.get_by_text(x,exact=False).first for x in [name,'Download','download','ダウンロード']]:
+                      try:
+                          if await target.count() and await target.is_visible():
+                              async with page.expect_download(timeout=12000) as di: await target.click()
+                              if accept(Path(await (await di.value).path()).read_bytes()): await b.close(); return
+                      except Exception: pass
+                  await b.close(); raise SystemExit('could not recover Ch10')
+          asyncio.run(main())
+          PY
+
+      - name: Compile Golden Master Ch10 and visual proof
+        run: |
+          python - <<'PY'
+          import json,time,zipfile,subprocess
+          from pathlib import Path
+          import requests
+          from PIL import Image,ImageDraw,ImageStat
+          base='https://iscarb-lecture-studio.onrender.com'; od=Path('/tmp/iscarb_golden/ch10')
+          health=requests.get(base+'/api/health',timeout=30,headers={'Cache-Control':'no-cache'}).json()
+          (od/'health.json').write_text(json.dumps(health,indent=2),encoding='utf-8')
+          assert health.get('release_ui')=='7.2.0',health
+          assert not health.get('kickoff_orientation_mode',False),health
+          src=od/'Ch10 Dependable systems(1).pptx'
+          with src.open('rb') as f:
+              r=requests.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/vnd.openxmlformats-officedocument.presentationml.presentation')},data={'primary_url':'','supporting_urls':'','lecture_focus':'Chapter 10 — Dependable Systems','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=90)
+          r.raise_for_status(); jid=r.json()['job_id']; (od/'job_id.txt').write_text(jid)
+          for _ in range(150):
+              job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
+              if job.get('status') in {'ready','blocked','error'}: break
+              time.sleep(2)
+          (od/'job.json').write_text(json.dumps(job,indent=2,ensure_ascii=False),encoding='utf-8')
+          assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
+          bp=job['blueprint']; assert len(bp['units'])==20
+          blob=json.dumps(bp,ensure_ascii=False).lower()
+          for must in ['dependability','sociotechnical','redundancy','diversity','dependable process','formal method']:
+              assert must in blob,must
+          for bad in ['think-pair-share','core in-class case','post-class artifact','kickoff','second amendment','down syndrome','wikipedia','slideshare']:
+              assert bad not in blob,bad
+          outputs=[('pptx','Ch10_Dependable_Systems_ISCARB_GOLDEN_v660.pptx'),('presenter-pdf','Ch10_Dependable_Systems_ISCARB_GOLDEN_v660.pdf')]
+          for fmt,name in outputs:
+              rr=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180); rr.raise_for_status(); (od/name).write_bytes(rr.content)
+          ppt=od/'Ch10_Dependable_Systems_ISCARB_GOLDEN_v660.pptx'
+          with zipfile.ZipFile(ppt) as z:
+              slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+              assert 22<=len(slides)<=30,len(slides)
+              allxml=' '.join(z.read(n).decode('utf-8','ignore').lower() for n in slides)
+              for must in ['domain spine','prediction gate','bounded verdict']:
+                  assert must in allxml,must
+              for bad in ['think-pair-share','core in-class case','post-class artifact']:
+                  assert bad not in allxml,bad
+          rd=od/'rendered'; lo=od/'lo'; rd.mkdir(); lo.mkdir()
+          subprocess.run(['libreoffice','--headless',f'-env:UserInstallation=file://{lo}','--convert-to','pdf','--outdir',str(rd),str(ppt)],check=True,timeout=120)
+          rp=rd/'Ch10_Dependable_Systems_ISCARB_GOLDEN_v660.pdf'
+          subprocess.run(['pdftoppm','-png','-r','105',str(rp),str(rd/'slide')],check=True,timeout=120)
+          imgs=sorted(rd.glob('slide-*.png')); assert 22<=len(imgs)<=30,len(imgs)
+          thumbs=[]
+          for f in imgs:
+              im=Image.open(f).convert('RGB'); assert max(ImageStat.Stat(im).var)>2,f
+              im.thumbnail((384,216)); thumbs.append((f.name,im.copy()))
+          cols=4; rows=(len(thumbs)+3)//4; sheet=Image.new('RGB',(cols*410,rows*245),'white'); d=ImageDraw.Draw(sheet)
+          for i,(name,im) in enumerate(thumbs):
+              x=(i%cols)*410; y=(i//cols)*245; d.text((x+5,y+3),name,fill='black'); sheet.paste(im,(x+5,y+25))
+          sheet.save(od/'Ch10_GOLDEN_v660_contact_sheet.jpg',quality=94)
+          PY
+
+      - name: Upload Golden Master proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-golden-v660-ch10-${{ github.run_id }}
+          path: /tmp/iscarb_golden/ch10/
+          if-no-files-found: error
+          retention-days: 14
