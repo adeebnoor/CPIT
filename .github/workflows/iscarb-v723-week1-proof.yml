@@ -1,0 +1,146 @@
+name: ISCARB v723 Week1 Proof
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-v723-week1-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install proof tools
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet requests playwright pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
+          mkdir -p /tmp/v723
+
+      - name: Recover exact uploaded P1
+        run: |
+          python - <<'PY'
+          import asyncio,hashlib,re,requests
+          from pathlib import Path
+          from urllib.parse import urljoin
+          from playwright.async_api import async_playwright
+          SHARE='https://firestorage.ai/ja/f/nzVd-opE587r'; EXPECTED='0ab1247275f0097017e558489ec5bb511e57cfa3dab138a3ab64bf12d0d42363'; OUT=Path('/tmp/v723/CPIT455_Elite_Kickoff.pptx')
+          def accept(data):
+              if data[:2]!=b'PK' or hashlib.sha256(data).hexdigest()!=EXPECTED:return False
+              OUT.write_bytes(data);return True
+          async def go():
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,args=['--no-sandbox']); page=await b.new_page(); await page.goto(SHARE,wait_until='networkidle',timeout=60000)
+                  for a in await page.locator('a[href]').all():
+                      try:
+                          href=await a.get_attribute('href'); u=urljoin(SHARE,href or '')
+                          if any(k in u.lower() for k in ('download','.pptx','file')):
+                              rr=await page.request.get(u,timeout=30000)
+                              if rr.ok and accept(await rr.body()): await b.close();return True
+                      except Exception: pass
+                  for target in [page.get_by_text(x,exact=False).first for x in ['CPIT455_Elite_Kickoff.pptx','Download','ダウンロード']]:
+                      try:
+                          if await target.count() and await target.is_visible():
+                              async with page.expect_download(timeout=12000) as di: await target.click()
+                              if accept(Path(await (await di.value).path()).read_bytes()): await b.close();return True
+                      except Exception: pass
+                  await b.close();return False
+          if not asyncio.run(go()): raise SystemExit('exact P1 recovery failed')
+          print('P1 SHA256',hashlib.sha256(OUT.read_bytes()).hexdigest())
+          PY
+
+      - name: Compile authoritative kickoff on live v7.2.3
+        run: |
+          python - <<'PY'
+          import json,time,zipfile,requests
+          from io import BytesIO
+          from pathlib import Path
+          base='https://iscarb-lecture-studio.onrender.com'; out=Path('/tmp/v723'); src=out/'CPIT455_Elite_Kickoff.pptx'
+          h=requests.get(base+'/api/health',timeout=30,headers={'Cache-Control':'no-cache'}).json(); (out/'health.json').write_text(json.dumps(h,indent=2))
+          assert h.get('release_ui')=='7.2.3',h
+          assert h.get('kickoff_orientation_mode') is True and h.get('pptx_table_extraction') is True,h
+          assert h.get('retired_readiness_link_removed') is True and h.get('public_web_image_fallback') is False,h
+          with src.open('rb') as f:
+              r=requests.post(base+'/api/compile',files={'primary_lecture':(src.name,f,'application/vnd.openxmlformats-officedocument.presentationml.presentation')},data={'primary_url':'','supporting_urls':'','lecture_focus':'CPIT-455 Week 1 — Elite Kickoff: engineering decisions, ISCARB flow, professional standards, AI literacy, assessment, roadmap and logistics','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60)
+          r.raise_for_status(); jid=r.json()['job_id']; (out/'job_id.txt').write_text(jid)
+          for _ in range(150):
+              job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
+              if job.get('status') in {'ready','blocked','error'}:break
+              time.sleep(2)
+          (out/'job.json').write_text(json.dumps(job,indent=2),encoding='utf-8')
+          assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
+          bp=job['blueprint']; assert len(bp['units'])==20
+          blob=json.dumps(bp,ensure_ascii=False).lower()
+          for must in ['iscarb engineering flow','professional standards & ai literacy','earning your grade','roadmap & milestones','logistics & next steps','sept 6','dec 20','arnoor@kau.edu.sa','09:00','03:00','decision card','engineering defense']:
+              assert must in blob,('missing',must)
+          for bad in ['gulf.edu.sa','standardized-exams-readiness','etec readiness target — unverified','second amendment','down syndrome','slideshare','a team must make a consequential decision','review required','gold standard mechanism']:
+              assert bad not in blob,('bad',bad)
+          assert bp['units'][1]['title']=='Week 1 map',bp['units'][1]
+          spine=' '.join(bp['units'][1]['core_content']).lower()
+          for node in ['iscarb engineering flow','60-second engineering micro-case','professional standards & ai literacy','assessment & engineering defense','roadmap & milestones','logistics & next steps']:
+              assert node in spine,node
+          assert '1. crisis' not in spine and '3. trade-off' not in spine,spine
+          assert sum('think–pair–share' in u['student_action'].lower() for u in bp['units'])==5
+          assert sum('core in-class case' in u['student_action'].lower() for u in bp['units'])==2
+          assert sum('post-class artifact' in u['student_action'].lower() for u in bp['units'])==4
+          for fmt,name in [('pptx','CPIT455_Week1_ISCARB_v723.pptx'),('presenter-pdf','CPIT455_Week1_ISCARB_v723.pdf'),('pdf','CPIT455_Week1_FacultyPack_v723.pdf'),('docx','CPIT455_Week1_InstructorGuide_v723.docx'),('student','CPIT455_Week1_StudentPack_v723.docx'),('json','CPIT455_Week1_Blueprint_v723.json')]:
+              rr=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180);rr.raise_for_status();(out/name).write_bytes(rr.content)
+          data=(out/'CPIT455_Week1_ISCARB_v723.pptx').read_bytes()
+          with zipfile.ZipFile(BytesIO(data)) as z:
+              assert 'ppt/presentation.xml' in z.namelist(); slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]; assert 22<=len(slides)<=30,len(slides)
+          print('slides',len(slides),'job',jid)
+          PY
+
+      - name: Render PPTX and build contact sheet
+        run: |
+          set -euxo pipefail
+          cd /tmp/v723; mkdir -p rendered lo
+          timeout 120s libreoffice --headless -env:UserInstallation='file:///tmp/v723/lo' --convert-to pdf --outdir rendered CPIT455_Week1_ISCARB_v723.pptx
+          pdftoppm -png -r 110 rendered/CPIT455_Week1_ISCARB_v723.pdf rendered/slide >/dev/null 2>&1
+          python - <<'PY'
+          from PIL import Image,ImageDraw,ImageStat
+          from pathlib import Path
+          imgs=sorted(Path('/tmp/v723/rendered').glob('slide-*.png')); assert 22<=len(imgs)<=30,len(imgs)
+          thumbs=[]
+          for p in imgs:
+              im=Image.open(p).convert('RGB'); assert max(ImageStat.Stat(im).var)>2,p; im.thumbnail((480,270)); thumbs.append((p.name,im.copy()))
+          cols=4; rows=(len(thumbs)+3)//4; sheet=Image.new('RGB',(cols*500,rows*300),'white');d=ImageDraw.Draw(sheet)
+          for i,(name,im) in enumerate(thumbs):
+              x=(i%4)*500;y=(i//4)*300;sheet.paste(im,(x,y+24));d.text((x+4,y+4),name,fill='black')
+          sheet.save('/tmp/v723/CPIT455_Week1_contact_sheet.jpg',quality=92)
+          PY
+
+      - name: Chromium presenter and homepage proof
+        run: |
+          python - <<'PY'
+          import asyncio
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+          async def main():
+              base='https://iscarb-lecture-studio.onrender.com';jid=Path('/tmp/v723/job_id.txt').read_text().strip()
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,args=['--no-sandbox'])
+                  home=await b.new_page(viewport={'width':1600,'height':1000}); errors=[];home.on('pageerror',lambda e:errors.append(str(e)));home.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+                  r=await home.goto(base,wait_until='networkidle',timeout=60000);assert r and r.status==200;hero=await home.locator('.heroArt').bounding_box();assert hero and hero['width']>500 and hero['height']>250;assert not errors,errors;await home.screenshot(path='/tmp/v723/home.png',full_page=True)
+                  page=await b.new_page(viewport={'width':1600,'height':1000}); errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+                  r=await page.goto(f'{base}/api/jobs/{jid}/presenter',wait_until='networkidle',timeout=60000);assert r and r.status==200;text=(await page.locator('body').inner_text()).lower()
+                  for must in ['week 1','iscarb','roadmap','logistics']:assert must in text,must
+                  for bad in ['gulf.edu.sa','review required','gold standard mechanism','second amendment','down syndrome','your task']:assert bad not in text,bad
+                  assert not errors,errors;await page.screenshot(path='/tmp/v723/CPIT455_Week1_presenter.png',full_page=True);await b.close()
+          asyncio.run(main())
+          PY
+
+      - name: Upload proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-v723-week1-proof-${{ github.run_id }}
+          path: /tmp/v723/
+          if-no-files-found: warn
+          retention-days: 14
