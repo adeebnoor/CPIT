@@ -11,44 +11,61 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect share page
+      - name: Fetch and inspect share page
         run: |
           set -euxo pipefail
           curl -L --fail --retry 2 -A 'Mozilla/5.0' 'https://firestorage.ai/ja/f/tj_hCE8kvR_i' -o /tmp/share.html
-          wc -c /tmp/share.html
-          grep -Eo 'https?://[^"'"' <]+' /tmp/share.html | head -100 || true
-          grep -Ei 'download|golden_hero_original|nPq1reXN4bCWYq3n|file_id|api/' /tmp/share.html | head -100 || true
-      - name: Try public download candidates
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('/tmp/share.html').read_text(errors='ignore')
+          print('HTML_BYTES',len(html))
+          for pat in ['download','golden_hero_original','nPq1reXN4bCWYq3n','file_id','api/','tj_hCE8kvR_i']:
+              if pat.lower() in html.lower(): print('FOUND_TOKEN',pat)
+          urls=sorted(set(re.findall(r'https?://[^\"\'<> ]+',html)))
+          print('URLS',len(urls))
+          for u in urls[:200]: print('URL',u[:300])
+          Path('/tmp/urls.txt').write_text('\n'.join(urls))
+          PY
+      - name: Try direct image candidates
         run: |
           python - <<'PY'
-          import re, pathlib, requests
-          html=pathlib.Path('/tmp/share.html').read_text(errors='ignore')
+          from pathlib import Path
+          import re, requests, html as htmlmod
+          page=Path('/tmp/share.html').read_text(errors='ignore')
           urls=[]
-          for m in re.findall(r'https?://[^\"\'<> ]+',html):
-              if any(k in m.lower() for k in ['download','storage','file','object']): urls.append(m.replace('&amp;','&'))
-          print('CANDIDATES',len(urls))
-          for u in urls[:50]:
+          for raw in re.findall(r'https?://[^\"\'<> ]+',page):
+              u=htmlmod.unescape(raw)
+              if any(k in u.lower() for k in ['download','storage','file','object','blob','media','cdn']): urls.append(u)
+          # Also inspect relative href/src/action URLs that look downloadable.
+          for raw in re.findall(r'(?:href|src|action)=[\"\']([^\"\']+)',page,re.I):
+              u=htmlmod.unescape(raw)
+              if u.startswith('/') and any(k in u.lower() for k in ['download','file','object','media']):
+                  urls.append('https://firestorage.ai'+u)
+          seen=set(); candidates=[]
+          for u in urls:
+              if u not in seen: seen.add(u); candidates.append(u)
+          print('CANDIDATES',len(candidates))
+          outdir=Path('iscarb-studio/app/static'); outdir.mkdir(parents=True,exist_ok=True)
+          for u in candidates[:100]:
               try:
-                  r=requests.get(u,timeout=20,allow_redirects=True)
-                  print(r.status_code,r.headers.get('content-type'),len(r.content),u[:180])
+                  r=requests.get(u,timeout=30,allow_redirects=True,headers={'User-Agent':'Mozilla/5.0'})
+                  ct=r.headers.get('content-type','')
+                  print('TRY',r.status_code,ct,len(r.content),r.url[:220])
                   if r.content.startswith(b'\x89PNG') and len(r.content)>100000:
-                      pathlib.Path('iscarb-studio/app/static/hero_user_original.png').write_bytes(r.content)
-                      print('FOUND_PNG',len(r.content))
-                      break
+                      (outdir/'hero_user_original.png').write_bytes(r.content); print('FOUND_PNG',len(r.content)); break
                   if r.content.startswith(b'\xff\xd8') and len(r.content)>100000:
-                      pathlib.Path('iscarb-studio/app/static/hero_user_original.jpg').write_bytes(r.content)
-                      print('FOUND_JPG',len(r.content))
-                      break
-              except Exception as e: print('ERR',u[:120],e)
+                      (outdir/'hero_user_original.jpg').write_bytes(r.content); print('FOUND_JPG',len(r.content)); break
+              except Exception as e: print('ERR',u[:160],repr(e))
           PY
-      - name: Commit if found
+      - name: Commit if image found
         run: |
           if ls iscarb-studio/app/static/hero_user_original.* >/dev/null 2>&1; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add iscarb-studio/app/static/hero_user_original.*
-            git commit -m 'Install user-supplied original ISCARB hero from Firestorage'
+            git commit -m 'Install exact user-supplied ISCARB hero from Firestorage'
             git push
           else
-            echo 'No direct image found from share page'
+            echo 'No direct image candidate found'
           fi
