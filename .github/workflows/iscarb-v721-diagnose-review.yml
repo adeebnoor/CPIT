@@ -1,0 +1,38 @@
+name: ISCARB v721 Diagnose Review Text
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-v721-diagnose-review.yml'
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Compile and locate residual text
+        run: |
+          python - <<'PY'
+          import requests,time,json
+          base='https://iscarb-lecture-studio.onrender.com'
+          p1='https://ocw.mit.edu/courses/6-830-database-systems-fall-2010/10b223dc3daf6fda4001272799b153a0_MIT6_830F10_lec10.pdf'
+          r=requests.post(base+'/api/compile',data={'primary_url':p1,'supporting_urls':'','lecture_focus':'Database Systems — Transactions and Locking','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60);r.raise_for_status();jid=r.json()['job_id']
+          for _ in range(120):
+              job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
+              if job.get('status') in {'ready','blocked','error'}:break
+              time.sleep(2)
+          bp=job['blueprint']
+          hits=[]
+          def walk(x,path='$'):
+              if isinstance(x,dict):
+                  for k,v in x.items():walk(v,f'{path}.{k}')
+              elif isinstance(x,list):
+                  for i,v in enumerate(x):walk(v,f'{path}[{i}]')
+              elif isinstance(x,str) and 'review required' in x.lower():hits.append((path,x))
+          walk(bp)
+          print('JOB',jid,'STATUS',job.get('status'))
+          print('REVIEW_HITS',json.dumps(hits,indent=2,ensure_ascii=False))
+          for i,u in enumerate(bp['units'],1): print('ACTION',i,u.get('student_action'))
+          raise SystemExit(1 if hits else 0)
+          PY
