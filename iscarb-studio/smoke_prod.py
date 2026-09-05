@@ -159,21 +159,21 @@ def main() -> None:
     web_bytes = web.read_bytes()
     assert len(web_bytes) == 269_820, f"Optimized browser hero byte length changed: {len(web_bytes)}"
     assert hashlib.sha256(web_bytes).hexdigest() == "fcad23fe86a60e6ca881eb46829d5f7dbe894d9bf57a17c0453952edf5ec7c12", "Optimized browser hero checksum changed"
-    assert "hero_user_web.jpg?v=7.1.6" in html, "Production home is not using the optimized browser derivative of the exact original hero"
+    assert "hero_user_web.jpg?v=7.2.0" in html, "Production home is not using the optimized browser derivative of the exact original hero"
     assert "hero_user_original.png?v=7.1.4" not in html, "Blocking eager PNG image tag is still referenced by production home"
     for legacy in ("hero_v670.jpg", "hero_v671.svg", "hero_v672.webp", "hero_original_v713.jpg"):
         assert legacy not in html, f"Legacy/substitute hero is still referenced: {legacy}"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
-    assert "/ui/site_v701_i18n_fixed.js?v=single-language-v2" in html, "Guarded single-language localization surface is missing"
+    assert "/ui/site_v701_i18n_fixed.js?v=single-language-v3" in html, "Guarded single-language localization surface is missing"
     i18n = bytes(site_v701_i18n_fixed().body).decode("utf-8", "replace")
     assert "if(el.getAttribute('placeholder')!==target) el.setAttribute('placeholder',target);" in i18n, "Chromium placeholder mutation-loop guard is missing"
-    assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"
+    assert "site_v710_sources.js?v=clean-multisource-v2" in html, "Clean multi-source intake patch is missing"
     studio_js = (APP / "static" / "studio_v440.js").read_text(encoding="utf-8")
     tail = studio_js[-1200:]
     assert "A previous lecture job is available. Reconnect only if you want to continue it." in tail, "Saved-job resume is not explicit"
     assert "setBusy(true);poll();" not in tail, "Initial page load still auto-polls a stale saved job"
     assert "SOURCE FIGURES FIRST" in html, "Source-figures-first policy badge regressed"
-    assert "7.1.6" in html, "Production home UI version stamp regressed"
+    assert "7.2.0" in html, "Production home UI version stamp regressed"
 
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
         root = Path(td)
