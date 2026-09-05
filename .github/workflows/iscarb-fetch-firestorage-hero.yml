@@ -11,29 +11,93 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch share internals
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Discover exact uploaded PNG
+        env:
+          SHARE_URL: https://firestorage.ai/ja/f/6NWUusWQ8b4R
+          SHARE_ID: 6NWUusWQ8b4R
+          FILE_ID: 01a071030f8473d3a338e37743db78f2
+          PUBLIC_ID: LSOYEjF1s2GawNIb
+        run: |
+          pip install requests beautifulsoup4
+          python - <<'PY'
+          import os,re,html as H,requests,json
+          from pathlib import Path
+          from urllib.parse import urljoin
+          s=requests.Session(); s.headers['User-Agent']='Mozilla/5.0'
+          share=os.environ['SHARE_URL']; fid=os.environ['FILE_ID']; pid=os.environ['PUBLIC_ID']; sid=os.environ['SHARE_ID']
+          r=s.get(share,timeout=30); r.raise_for_status(); page=r.text
+          print('SHARE',r.status_code,len(page),r.url)
+          for tok in [fid,pid,sid,'golden_hero_original.png','download','api/']:
+              pos=page.find(tok)
+              print('TOKEN',tok,'POS',pos)
+              if pos>=0: print(page[max(0,pos-1200):pos+2400])
+          # Gather href/src/form/action and absolute URLs.
+          urls=[]
+          for pat in [r'(?:href|src|action)=["\']([^"\']+)', r'https?://[^"\'<> ]+']:
+              for raw in re.findall(pat,page,re.I):
+                  u=urljoin(share,H.unescape(raw))
+                  if u.startswith('http'): urls.append(u)
+          # inspect scripts for API route strings
+          for u in list(dict.fromkeys(urls)):
+              if '.js' not in u: continue
+              try:
+                  rr=s.get(u,timeout=30)
+                  txt=rr.text
+                  if any(k in txt for k in ['download','presign','/api/','publicId','fileId','shareId']):
+                      print('SCRIPT_MATCH',u,'LEN',len(txt))
+                      routes=sorted(set(re.findall(r'["\']([^"\']*(?:download|presign|/api/|file)[^"\']*)["\']',txt,re.I)))
+                      for x in routes[:300]: print('ROUTE',x[:500])
+              except Exception as e: print('SCRIPT_ERR',u,repr(e))
+          # Try plausible public endpoints directly using known IDs.
+          guesses=[
+            f'https://firestorage.ai/api/files/{fid}/download',
+            f'https://firestorage.ai/api/file/{fid}/download',
+            f'https://firestorage.ai/api/download/{fid}',
+            f'https://firestorage.ai/api/public/files/{fid}/download',
+            f'https://firestorage.ai/api/shares/{sid}/files/{fid}/download',
+            f'https://firestorage.ai/api/share/{sid}/files/{fid}/download',
+            f'https://firestorage.ai/api/f/{sid}/{fid}/download',
+            f'https://firestorage.ai/api/objects/{pid}/download',
+            f'https://firestorage.ai/api/object/{pid}/download',
+            f'https://firestorage.ai/api/download/{pid}',
+            f'https://firestorage.ai/download/{pid}',
+            f'https://firestorage.ai/d/{pid}',
+          ]
+          out=Path('iscarb-studio/app/static/hero_user_original.png'); out.parent.mkdir(parents=True,exist_ok=True)
+          def accept(rr,u):
+              b=rr.content; ct=rr.headers.get('content-type','')
+              print('TRY',rr.status_code,ct,len(b),rr.url,'FROM',u)
+              if b.startswith(b'\x89PNG\r\n\x1a\n') and len(b)>1_000_000:
+                  out.write_bytes(b); print('FOUND_EXACT_PNG',len(b)); return True
+              return False
+          for u in guesses:
+              try:
+                  rr=s.get(u,timeout=30,allow_redirects=True)
+                  if accept(rr,u): break
+              except Exception as e: print('GUESS_ERR',u,repr(e))
+          if not out.exists():
+              # Try non-JS links discovered from the page.
+              for u in list(dict.fromkeys(urls)):
+                  if any(x in u.lower() for x in ['download','file','object','media','blob']):
+                      try:
+                          rr=s.get(u,timeout=30,allow_redirects=True)
+                          if accept(rr,u): break
+                      except Exception as e: print('LINK_ERR',u,repr(e))
+          if out.exists():
+              import hashlib
+              b=out.read_bytes(); print('OUTPUT_SHA256',hashlib.sha256(b).hexdigest(),'BYTES',len(b))
+          else:
+              print('EXACT_PNG_NOT_FOUND')
+          PY
+      - name: Commit exact original image if found
         run: |
           set -euxo pipefail
-          curl -L --fail --retry 2 -A 'Mozilla/5.0' 'https://firestorage.ai/ja/f/tj_hCE8kvR_i' -o /tmp/share.html
-          echo '--- SHARE HTML START ---'
-          cat /tmp/share.html
-          echo '--- SHARE HTML END ---'
-          python - <<'PY'
-          from pathlib import Path
-          import re,html as H,requests
-          page=Path('/tmp/share.html').read_text(errors='ignore')
-          srcs=re.findall(r'<script[^>]+src=["\']([^"\']+)',page,re.I)
-          print('SCRIPTS',srcs)
-          for i,s in enumerate(srcs):
-              u=H.unescape(s)
-              if u.startswith('/'): u='https://firestorage.ai'+u
-              try:
-                  r=requests.get(u,timeout=30,headers={'User-Agent':'Mozilla/5.0'})
-                  print('SCRIPT',i,r.status_code,r.url,len(r.content),r.headers.get('content-type'))
-                  txt=r.text
-                  if any(k in txt.lower() for k in ['download','presign','signed','object','file','share']):
-                      print('--- SCRIPT MATCH',i,'---')
-                      print(txt[:200000])
-                      print('--- END SCRIPT',i,'---')
-              except Exception as e: print('SCRIPT_ERR',i,repr(e))
-          PY
+          test -f iscarb-studio/app/static/hero_user_original.png
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb-studio/app/static/hero_user_original.png
+          git commit -m 'Install exact user-supplied ISCARB hero PNG'
+          git push
