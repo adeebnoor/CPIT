@@ -32,8 +32,17 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          cp index.html cimt.html imam.html iscarb.html style.css _site/
+          cp index.html cimt.html imam.html iscarb.html iscarb-students.html style.css _site/
           cp -R slides lectures _site/
+
+          # Preserve the original Saudi heritage visual used by the ISCARB hero.
+          # The HTML references this exact repository path, so publish the same
+          # directory structure into the Pages artifact rather than replacing
+          # the visual with a generic asset.
+          mkdir -p _site/iscarb-studio/app/static
+          cp iscarb-studio/app/static/hero_user_original.png \
+             _site/iscarb-studio/app/static/hero_user_original.png
+
           python tools/sanitize_static_site.py _site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
