@@ -220,7 +220,14 @@ def apply_v717_source_intelligence_patch(app) -> None:
     previous = engine._source_preserving_draft
 
     def intelligent_draft(profile, bundle):
-        return previous(_normalize_profile(profile, bundle), bundle)
+        normalized = _normalize_profile(profile, bundle)
+        bp = previous(normalized, bundle)
+        # This is intentionally the FINAL pass. Later legacy wrappers may still
+        # know how to repair density or wording, but they must not be allowed to
+        # put page-first labels or REVIEW REQUIRED back after source intelligence
+        # has identified a real P1 concept/failure. v6.9 _tighten is source-only:
+        # it selects an exact P1 stake and curates 5–8 P1 family nodes.
+        return v690._tighten(bp, normalized)
 
     engine._source_preserving_draft = intelligent_draft
     base.engine._source_preserving_draft = intelligent_draft
@@ -232,7 +239,7 @@ def apply_v717_source_intelligence_patch(app) -> None:
         data.update({
             "release_ui": "7.1.6",
             "source_intelligence_release": "7.1.7",
-            "source_intelligence": "dense-P1 concept extraction + administrative-page suppression",
+            "source_intelligence": "dense-P1 concept extraction + administrative-page suppression + final source-native tighten",
             "dense_pdf_policy": "derive compact P1 concepts; never use code/example/footer line as Domain Spine node",
             "opening_crisis_selector": "P1 failure/stake sentence first; generic crisis still blocks release",
         })
