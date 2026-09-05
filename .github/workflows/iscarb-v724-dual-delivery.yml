@@ -77,7 +77,8 @@ jobs:
           h=requests.get(base+'/api/health',timeout=30,headers={'Cache-Control':'no-cache'}).json()
           (root/'health.json').write_text(json.dumps(h,indent=2),encoding='utf-8')
           assert h.get('release_ui')=='7.2.4',h
-          assert h.get('kickoff_visual_presenter') is True,h
+          assert h.get('kickoff_presenter_source_faithful') is True and h.get('kickoff_dynamic_unit_titles') is True,h
+          assert h.get('kickoff_roadmap_timeline') is True and h.get('kickoff_logistics_surface') is True,h
           specs=[
             ('week1','CPIT455_Elite_Kickoff.pptx','WEEK1','CPIT-455 Week 1 — Elite Kickoff: engineering decisions, ISCARB flow, professional standards, AI literacy, assessment, roadmap and logistics'),
             ('ch10','Ch10 Dependable systems(1).pptx','CH10','CPIT-455 Chapter 10 — Dependable systems: dependability properties, sociotechnical systems, redundancy/diversity, dependable processes, formal methods and dependability'),
@@ -115,8 +116,8 @@ jobs:
               subprocess.run(['pdftoppm','-png','-r','90',str(rd/f'CPIT455_{label}_ISCARB_v724.pdf'),str(rd/'slide')],check=True,timeout=120)
               imgs=sorted(rd.glob('slide-*.png')); assert imgs
               thumbs=[]
-              for p in imgs:
-                  im=Image.open(p).convert('RGB'); assert max(ImageStat.Stat(im).var)>2,p; im.thumbnail((384,216)); thumbs.append((p.name,im.copy()))
+              for img_path in imgs:
+                  im=Image.open(img_path).convert('RGB'); assert max(ImageStat.Stat(im).var)>2,img_path; im.thumbnail((384,216)); thumbs.append((img_path.name,im.copy()))
               cols=4; rows=(len(thumbs)+3)//4; sheet=Image.new('RGB',(cols*410,rows*245),'white'); d=ImageDraw.Draw(sheet)
               for i,(name,im) in enumerate(thumbs):
                   x=(i%4)*410; y=(i//4)*245; d.text((x+5,y+3),name,fill='black'); sheet.paste(im,(x+5,y+25))
