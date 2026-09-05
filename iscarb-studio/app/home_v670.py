@@ -48,7 +48,8 @@ _HERO_CHUNKS = sorted(_STUDIO_ROOT.glob("hero_original_v713.jpg.b64.*"))
 if not _HERO_CHUNKS:
     raise RuntimeError("Original supplied ISCARB hero payload is missing")
 _payload = "".join(p.read_text(encoding="ascii").strip() for p in _HERO_CHUNKS)
-_hero_bytes = base64.b64decode(_payload, validate=True)
+_payload += "=" * (-len(_payload) % 4)
+_hero_bytes = base64.b64decode(_payload)
 if len(_hero_bytes) < 30_000 or not (_hero_bytes.startswith(b"\xff\xd8") and _hero_bytes.endswith(b"\xff\xd9")):
     raise RuntimeError("Original supplied ISCARB hero payload is incomplete")
 _STATIC_ROOT.mkdir(parents=True, exist_ok=True)
