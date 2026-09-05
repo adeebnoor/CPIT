@@ -1,0 +1,27 @@
+name: ISCARB presenter source diagnostic
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct presenter source
+        working-directory: iscarb-studio
+        run: |
+          python - <<'PY'
+          import base64, lzma
+          from pathlib import Path
+          chunks=sorted(Path('.').glob('presenter_v67_prod.xz.b64.*'))
+          payload=''.join(p.read_text().strip() for p in chunks)
+          Path('presenter_v67_prod.py').write_bytes(lzma.decompress(base64.b64decode(payload)))
+          print('chunks', len(chunks), 'bytes', Path('presenter_v67_prod.py').stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: presenter-v67-source
+          path: iscarb-studio/presenter_v67_prod.py
