@@ -14,36 +14,47 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Resolve Firestorage download endpoint
+      - name: Fetch exact original PNG from Firestorage
         env:
-          SHARE_URL: https://firestorage.ai/ja/f/6NWUusWQ8b4R
+          SHARE_ID: 6NWUusWQ8b4R
           EXPECTED_SHA256: 8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d
         run: |
           pip install requests
           python - <<'PY'
-          import os,re,requests,hashlib,json
+          import os,requests,hashlib
           from pathlib import Path
-          from urllib.parse import urljoin
+          sid=os.environ['SHARE_ID']; expected=os.environ['EXPECTED_SHA256']
+          base='https://api.firestorage.ai/dev/file'
           s=requests.Session(); s.headers['User-Agent']='Mozilla/5.0'
-          share=os.environ['SHARE_URL']; expected=os.environ['EXPECTED_SHA256']
-          page=s.get(share,timeout=30).text
-          scripts=re.findall(r'<script[^>]+src=["\']([^"\']+)',page,re.I)
-          target=None
-          for src in scripts:
-              u=urljoin(share,src)
-              txt=s.get(u,timeout=30).text
-              if '/files/${e.fileId}/download' in txt or '/files/${i.fileId}/download' in txt:
-                  target=txt; print('CLIENT_SCRIPT',u,'LEN',len(txt)); break
-          if not target: raise SystemExit('download client script not found')
-          needles=['let f=','const f=','shareEndpoint','/files?maxResults=1000','/files/${e.fileId}/download','function q(','window.location.pathname','api.firestorage.ai/prod/file']
-          for needle in needles:
-              start=0
-              while True:
-                  p=target.find(needle,start)
-                  if p<0: break
-                  print('\n===',needle,'AT',p,'===\n',target[max(0,p-1800):p+3000])
-                  start=p+len(needle)
-          # Find all production file API literals and nearby content.
-          for m in re.finditer(r'https://api\.firestorage\.ai/prod/file[^"\']*',target):
-              p=m.start(); print('\n=== API_LITERAL ===\n',target[max(0,p-1800):p+3000])
+          listing=s.get(f'{base}/shares/{sid}/files?maxResults=1000',timeout=30)
+          print('LIST',listing.status_code,listing.headers.get('content-type'),listing.text[:1500])
+          listing.raise_for_status()
+          data=listing.json(); files=data.get('files') or []
+          if not files: raise SystemExit('No files returned')
+          chosen=None
+          for x in files:
+              print('FILE',x)
+              if x.get('fileName')=='golden_hero_original.png': chosen=x; break
+          if chosen is None: chosen=files[0]
+          fid=chosen.get('fileId')
+          if not fid: raise SystemExit('No fileId')
+          d=s.post(f'{base}/shares/{sid}/files/{fid}/download',timeout=30)
+          print('DOWNLOAD_META',d.status_code,d.headers.get('content-type'),d.text[:1000])
+          d.raise_for_status(); meta=d.json(); url=meta.get('downloadUrl')
+          if not url: raise SystemExit('No downloadUrl')
+          r=s.get(url,timeout=90,allow_redirects=True)
+          print('SIGNED',r.status_code,r.headers.get('content-type'),len(r.content),r.url[:220])
+          r.raise_for_status(); b=r.content
+          sha=hashlib.sha256(b).hexdigest(); print('SHA256',sha,'BYTES',len(b))
+          if not b.startswith(b'\x89PNG\r\n\x1a\n'): raise SystemExit('Not PNG')
+          if sha != expected: raise SystemExit(f'SHA mismatch {sha}')
+          out=Path('iscarb-studio/app/static/hero_user_original.png'); out.parent.mkdir(parents=True,exist_ok=True); out.write_bytes(b)
           PY
+      - name: Commit exact original image
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb-studio/app/static/hero_user_original.png
+          git commit -m 'Install exact user-supplied ISCARB hero PNG'
+          git push
