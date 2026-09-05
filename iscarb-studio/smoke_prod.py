@@ -37,7 +37,7 @@ if not PRESENTER.exists():
 os.environ["ISCARB_DISABLE_PUBLIC_IMAGES"] = "1"
 os.environ["ISCARB_VISUAL_POLICY"] = "p1-source>native>local-context>text-first"
 
-from app.home_v670 import faculty_studio_v670_home  # noqa: E402
+from app.home_v670 import faculty_studio_v670_home, site_v701_i18n_fixed  # noqa: E402
 from app import master_guidelines_v470 as master  # noqa: E402
 from app import patch_v690  # noqa: E402
 from app import presenter_v67_prod as presenter  # noqa: E402
@@ -164,7 +164,9 @@ def main() -> None:
     for legacy in ("hero_v670.jpg", "hero_v671.svg", "hero_v672.webp", "hero_original_v713.jpg"):
         assert legacy not in html, f"Legacy/substitute hero is still referenced: {legacy}"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
-    assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
+    assert "/ui/site_v701_i18n_fixed.js?v=single-language-v2" in html, "Guarded single-language localization surface is missing"
+    i18n = bytes(site_v701_i18n_fixed().body).decode("utf-8", "replace")
+    assert "if(el.getAttribute('placeholder')!==target) el.setAttribute('placeholder',target);" in i18n, "Chromium placeholder mutation-loop guard is missing"
     assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"
     studio_js = (APP / "static" / "studio_v440.js").read_text(encoding="utf-8")
     tail = studio_js[-1200:]
