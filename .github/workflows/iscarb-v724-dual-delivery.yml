@@ -1,0 +1,134 @@
+name: ISCARB v724 Dual Delivery
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iscarb-v724-dual-delivery.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  delivery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install proof tools
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet requests playwright pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
+          mkdir -p /tmp/iscarb_v724_delivery
+
+      - name: Recover authoritative sources
+        run: |
+          python - <<'PY'
+          import asyncio, hashlib
+          from pathlib import Path
+          from urllib.parse import urljoin
+          from playwright.async_api import async_playwright
+          SOURCES=[
+            ('week1','https://firestorage.ai/ja/f/nzVd-opE587r','CPIT455_Elite_Kickoff.pptx','0ab1247275f0097017e558489ec5bb511e57cfa3dab138a3ab64bf12d0d42363'),
+            ('ch10','https://firestorage.ai/ja/f/C8CkVtdyu3xl','Ch10 Dependable systems(1).pptx','6b0ea25f95767c96c2cd9ebafbed4acd8592e42e80a4bc6fb04c4fbe87981750'),
+          ]
+          async def fetch_one(p,slug,share,name,sha):
+              out=Path('/tmp/iscarb_v724_delivery')/slug; out.mkdir(exist_ok=True)
+              dst=out/name
+              def accept(data):
+                  if data[:2]!=b'PK': return False
+                  if hashlib.sha256(data).hexdigest()!=sha: return False
+                  dst.write_bytes(data); return True
+              b=await p.chromium.launch(headless=True,args=['--no-sandbox'])
+              page=await b.new_page()
+              await page.goto(share,wait_until='networkidle',timeout=60000)
+              for a in await page.locator('a[href]').all():
+                  try:
+                      href=await a.get_attribute('href')
+                      u=urljoin(share,href or '')
+                      if any(k in u.lower() for k in ('download','.pptx','file')):
+                          rr=await page.request.get(u,timeout=30000)
+                          if rr.ok and accept(await rr.body()): await b.close(); return
+                  except Exception: pass
+              for target in [page.get_by_text(x,exact=False).first for x in [name,'Download','download','ダウンロード']]:
+                  try:
+                      if await target.count() and await target.is_visible():
+                          async with page.expect_download(timeout=12000) as di: await target.click()
+                          if accept(Path(await (await di.value).path()).read_bytes()): await b.close(); return
+                  except Exception: pass
+              await page.screenshot(path=str(out/'share_page.png'),full_page=True); await b.close(); raise SystemExit(f'could not recover {slug}')
+          async def main():
+              async with async_playwright() as p:
+                  for row in SOURCES: await fetch_one(p,*row)
+          asyncio.run(main())
+          PY
+
+      - name: Compile, export and render both lectures
+        run: |
+          python - <<'PY'
+          import json, time, zipfile, subprocess, shutil
+          from pathlib import Path
+          import requests
+          from PIL import Image, ImageDraw, ImageStat
+          base='https://iscarb-lecture-studio.onrender.com'
+          root=Path('/tmp/iscarb_v724_delivery')
+          h=requests.get(base+'/api/health',timeout=30,headers={'Cache-Control':'no-cache'}).json()
+          (root/'health.json').write_text(json.dumps(h,indent=2),encoding='utf-8')
+          assert h.get('release_ui')=='7.2.4',h
+          assert h.get('kickoff_visual_presenter') is True,h
+          specs=[
+            ('week1','CPIT455_Elite_Kickoff.pptx','WEEK1','CPIT-455 Week 1 — Elite Kickoff: engineering decisions, ISCARB flow, professional standards, AI literacy, assessment, roadmap and logistics'),
+            ('ch10','Ch10 Dependable systems(1).pptx','CH10','CPIT-455 Chapter 10 — Dependable systems: dependability properties, sociotechnical systems, redundancy/diversity, dependable processes, formal methods and dependability'),
+          ]
+          for slug,filename,label,focus in specs:
+              od=root/slug; src=od/filename
+              with src.open('rb') as f:
+                  r=requests.post(base+'/api/compile',files={'primary_lecture':(filename,f,'application/vnd.openxmlformats-officedocument.presentationml.presentation')},data={'primary_url':'','supporting_urls':'','lecture_focus':focus,'model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=90)
+              r.raise_for_status(); jid=r.json()['job_id']; (od/'job_id.txt').write_text(jid)
+              for _ in range(150):
+                  job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
+                  if job.get('status') in {'ready','blocked','error'}: break
+                  time.sleep(2)
+              (od/'job.json').write_text(json.dumps(job,indent=2,ensure_ascii=False),encoding='utf-8')
+              assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
+              bp=job['blueprint']; assert len(bp['units'])==20
+              blob=json.dumps(bp,ensure_ascii=False).lower()
+              if slug=='week1':
+                  for must in ['roadmap & milestones','earning your grade','logistics & next steps','professional standards & ai literacy','engineering defense','decision card']:
+                      assert must in blob,must
+                  for bad in ['mechanism from first principles','known • unknown','gulf.edu.sa','second amendment','down syndrome','review required','gold standard mechanism']:
+                      assert bad not in blob,bad
+              else:
+                  for must in ['dependability properties','sociotechnical','redundancy','diversity','dependable processes','formal methods']:
+                      assert must in blob,must
+                  for bad in ['second amendment','down syndrome','slideshare','gulf.edu.sa']:
+                      assert bad not in blob,bad
+              for fmt,name in [('pptx',f'CPIT455_{label}_ISCARB_v724.pptx'),('presenter-pdf',f'CPIT455_{label}_ISCARB_v724.pdf'),('pdf',f'CPIT455_{label}_FacultyPack_v724.pdf'),('docx',f'CPIT455_{label}_InstructorGuide_v724.docx'),('student',f'CPIT455_{label}_StudentPack_v724.docx'),('json',f'CPIT455_{label}_Blueprint_v724.json')]:
+                  rr=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180); rr.raise_for_status(); (od/name).write_bytes(rr.content)
+              with zipfile.ZipFile(od/f'CPIT455_{label}_ISCARB_v724.pptx') as z:
+                  slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+                  assert 20<=len(slides)<=35,(slug,len(slides))
+              rd=od/'rendered'; lo=od/'lo'; rd.mkdir(exist_ok=True); lo.mkdir(exist_ok=True)
+              subprocess.run(['libreoffice','--headless',f'-env:UserInstallation=file://{lo}','--convert-to','pdf','--outdir',str(rd),str(od/f'CPIT455_{label}_ISCARB_v724.pptx')],check=True,timeout=120)
+              subprocess.run(['pdftoppm','-png','-r','90',str(rd/f'CPIT455_{label}_ISCARB_v724.pdf'),str(rd/'slide')],check=True,timeout=120)
+              imgs=sorted(rd.glob('slide-*.png')); assert imgs
+              thumbs=[]
+              for p in imgs:
+                  im=Image.open(p).convert('RGB'); assert max(ImageStat.Stat(im).var)>2,p; im.thumbnail((384,216)); thumbs.append((p.name,im.copy()))
+              cols=4; rows=(len(thumbs)+3)//4; sheet=Image.new('RGB',(cols*410,rows*245),'white'); d=ImageDraw.Draw(sheet)
+              for i,(name,im) in enumerate(thumbs):
+                  x=(i%4)*410; y=(i//4)*245; d.text((x+5,y+3),name,fill='black'); sheet.paste(im,(x+5,y+25))
+              sheet.save(od/f'CPIT455_{label}_contact_sheet.jpg',quality=92)
+          shutil.make_archive(str(root/'CPIT455_ISCARB_v724_DUAL_DELIVERY'), 'zip', str(root))
+          PY
+
+      - name: Upload delivery package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-v724-dual-delivery-${{ github.run_id }}
+          path: /tmp/iscarb_v724_delivery/
+          if-no-files-found: warn
+          retention-days: 14
