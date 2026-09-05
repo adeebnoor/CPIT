@@ -8,11 +8,13 @@ from app import patch_v726_timebox_tasks as timebox
 from app import patch_v727_local_case_scaffold as scaffold
 from app import patch_v728_peer_review_decision_boxes as v728
 
-# v7.2.9 changes only the visual projection; all v7.2.8 classroom invariants
-# below must remain true under the new ZTM layer.
+# Later layers may add checks, but the approved Golden v6.6 classroom invariants
+# below must remain true.
 EXPECTED_BUILDS = {
     "7.2.8-golden-v660-timeboxed-scaffolded-peerreview",
+    "7.2.8-golden-v660-curriculum-baseline",
     "7.2.9-golden-v660-ztm",
+    "7.2.9-golden-v660-editor-gates",
 }
 assert os.getenv("ISCARB_BUILD_ID") in EXPECTED_BUILDS, os.getenv("ISCARB_BUILD_ID")
 
