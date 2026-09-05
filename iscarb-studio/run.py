@@ -25,12 +25,14 @@ from app.patch_v726_timebox_tasks import apply_v726_timebox_tasks_patch
 from app.patch_v727_local_case_scaffold import apply_v727_local_case_scaffold_patch
 from app.patch_v728_peer_review_decision_boxes import apply_v728_peer_review_decision_boxes_patch
 from app.patch_v729_ztm_theme import apply_v729_ztm_theme_patch
+from app.patch_v7291_ztm_finish import apply_v7291_ztm_finish_patch
 
 apply_v725_golden_v660_patch(app)
 apply_v726_timebox_tasks_patch(app)
 apply_v727_local_case_scaffold_patch(app)
 apply_v728_peer_review_decision_boxes_patch(app)
 apply_v729_ztm_theme_patch(app)
+apply_v7291_ztm_finish_patch(app)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
