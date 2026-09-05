@@ -1,7 +1,6 @@
 /* ISCARB generic-IT intake surface.
-   The compiled source remains authoritative; this file only removes the visible
-   CPIT-455/Software-Engineering bias from the product surface and collects a
-   small faculty context sheet before the existing compile request is sent. */
+   The uploaded source remains authoritative. This client layer presents a
+   topic-neutral IT intake and collects optional faculty context before compile. */
 (function () {
   'use strict';
 
@@ -46,7 +45,7 @@
     if(secondary){secondary.setAttribute('href','#sources');secondary.lastChild.textContent=' Supported IT Areas';}
 
     var brand=q('.brand small'); if(brand) brand.textContent='IT Lecture Transformation Studio';
-    var version=q('.version'); if(version) version.textContent='6.9.4 · IT-wide';
+    var version=q('.version'); if(version) version.textContent='7.2.0 · CLEAN · IT-WIDE';
     var navSources=q('nav a[href="#sources"]'); if(navSources) navSources.textContent='IT Scope';
     var navUpgrade=q('nav a[href="#upgrade"]'); if(navUpgrade) navUpgrade.textContent='Upload Lecture';
     var navOutputs=q('nav a[href="#outputs"]'); if(navOutputs) navOutputs.textContent='Downloads';
@@ -59,9 +58,9 @@
       <div class="sectionHead">
         <div>
           <h2><span class="ornament">❦</span><span data-lang="en">One engine for IT & computing</span><span lang="ar" dir="rtl" data-lang="ar">محرك واحد لكل تخصصات تقنية المعلومات والحوسبة</span></h2>
-          <p class="itScopeIntro"><span data-lang="en">ISCARB is not a CPIT-455 or Software Engineering template. Upload the lecture you actually teach; the source determines its concepts, mechanisms, examples, formulas and technical vocabulary.</span><span lang="ar" dir="rtl" data-lang="ar">ISCARB ليس قالبًا لمقرر هندسة البرمجيات أو CPIT-455. ارفع المحاضرة التي تدرّسها فعليًا، والمصدر نفسه يحدد المفاهيم والآليات والأمثلة والمعادلات والمصطلحات التقنية.</span></p>
+          <p class="itScopeIntro"><span data-lang="en">Upload the lecture you actually teach. The primary source defines its concepts, mechanisms, examples, formulas and technical vocabulary.</span><span lang="ar" dir="rtl" data-lang="ar">ارفع المحاضرة التي تدرّسها فعليًا؛ المصدر الأساسي هو الذي يحدد المفاهيم والآليات والأمثلة والمعادلات والمصطلحات التقنية.</span></p>
         </div>
-        <span class="itAutoBadge">AUTO SOURCE ADAPTATION</span>
+        <span class="itAutoBadge">SOURCE-ADAPTIVE</span>
       </div>
       <div class="itScopeGrid" aria-label="Supported IT domains">
         <div class="itScopeChip">Programming & software development</div>
@@ -77,8 +76,8 @@
       </div>
       <div class="genericFlow">
         <div><b>1 · Upload</b><span>PDF, PPTX, DOCX, TXT or MD — one primary lecture plus optional supporting sources.</span></div>
-        <div><b>2 · ISCARB transforms</b><span>20 fixed learning units; technical content stays source-locked and topic-adaptive.</span></div>
-        <div><b>3 · Download</b><span>Presenter, PDFs, instructor guide, student pack, blueprint and one complete ZIP package.</span></div>
+        <div><b>2 · Transform</b><span>20 fixed learning units; technical content stays source-locked and topic-adaptive.</span></div>
+        <div><b>3 · Inspect & download</b><span>Presenter, PDFs, instructor guide, student pack, blueprint and one complete ZIP package.</span></div>
       </div>`;
   }
 
@@ -97,7 +96,7 @@
       </div>
       <div class="itIntakeGrid">
         <div class="field"><label for="itCourse">Course name <span class="optional">Optional</span></label><input id="itCourse" type="text" maxlength="100" placeholder="e.g. Database Systems"></div>
-        <div class="field"><label for="itCode">Course code <span class="optional">Optional</span></label><input id="itCode" type="text" maxlength="30" placeholder="e.g. CPIT-240"></div>
+        <div class="field"><label for="itCode">Course code <span class="optional">Optional</span></label><input id="itCode" type="text" maxlength="30" placeholder="e.g. IT-240"></div>
         <div class="field"><label for="itDomain">IT area</label><select id="itDomain"><option value="Auto-detect from uploaded source">Auto-detect from uploaded source</option><option>Programming & software development</option><option>Databases & data management</option><option>Networks & infrastructure</option><option>Cybersecurity</option><option>AI & data science</option><option>Cloud & distributed systems</option><option>Human-computer interaction</option><option>Systems & architecture</option><option>IT governance & service management</option><option>Other IT / computing</option></select></div>
         <div class="field"><label for="itLevel">Learner level</label><select id="itLevel"><option>Auto / infer from source</option><option>Foundation</option><option>Undergraduate — introductory</option><option>Undergraduate — intermediate</option><option>Undergraduate — advanced</option><option>Graduate</option><option>Professional / executive</option></select></div>
       </div>`;
@@ -114,11 +113,9 @@
       focus.placeholder='For example: emphasise SQL joins, routing trade-offs, model evaluation, or a specific lab decision.';
       var label=q('label[for="focus"]'); if(label) label.innerHTML='Teaching emphasis <span class="optional">Optional</span>';
     }
-    var note=document.createElement('p'); note.className='genericUploadNote'; note.textContent='No Software Engineering course selection is required. Leave IT area on Auto-detect for normal use.';
+    var note=document.createElement('p'); note.className='genericUploadNote'; note.textContent='Leave IT area on Auto-detect for normal use; add course context only when it helps the teaching level or emphasis.';
     intake.insertAdjacentElement('afterend',note);
 
-    // Capture phase runs before the existing studio submit listener.  We use the
-    // existing lecture_focus API field so no legacy client or server contract breaks.
     form.addEventListener('submit',function(){
       var focusEl=document.getElementById('focus'); if(!focusEl) return;
       var raw=focusEl.value.replace(/^\[ISCARB IT CONTEXT\][\s\S]*?\[\/ISCARB IT CONTEXT\]\s*/,'').trim();
