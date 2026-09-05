@@ -3,7 +3,7 @@ from __future__ import annotations
 """ISCARB production home surface + generic IT intake + single-language UI."""
 import hashlib
 from pathlib import Path
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from .start_v670_prod import app
 from .patch_v671 import apply_v671_patch
 from .patch_v680 import apply_v680_patch
@@ -58,6 +58,42 @@ if len(_web_bytes) != 269_820 or not (_web_bytes.startswith(b"\xff\xd8") and _we
 if hashlib.sha256(_web_bytes).hexdigest() != WEB_HERO_SHA256:
     raise RuntimeError("Optimized ISCARB web hero checksum mismatch")
 
+# Chromium can starve its event loop if a MutationObserver watches placeholder
+# attributes while the localization pass unconditionally writes the same value
+# back to those attributes. Serve the existing localization source with one
+# idempotence guard so we preserve the complete bilingual dictionary without a
+# second divergent copy of it.
+_I18N_SOURCE = _STATIC_ROOT / "site_v701_i18n.js"
+_I18N_BAD = """      const en=el.dataset.i18nPlaceholderEn;
+      el.setAttribute('placeholder',lang==='ar' && PLACEHOLDER_AR[en] ? PLACEHOLDER_AR[en] : en);"""
+_I18N_FIXED = """      const en=el.dataset.i18nPlaceholderEn;
+      const target=lang==='ar' && PLACEHOLDER_AR[en] ? PLACEHOLDER_AR[en] : en;
+      if(el.getAttribute('placeholder')!==target) el.setAttribute('placeholder',target);"""
+
+
+def _fixed_i18n_source() -> str:
+    source = _I18N_SOURCE.read_text(encoding="utf-8")
+    if _I18N_FIXED in source:
+        return source
+    if _I18N_BAD not in source:
+        raise RuntimeError("ISCARB localization guard target changed unexpectedly")
+    return source.replace(_I18N_BAD, _I18N_FIXED, 1)
+
+
+# Validate the hot-path transformation at process startup rather than failing
+# only when a browser requests the asset.
+_fixed_i18n_source()
+
+
+@app.get("/ui/site_v701_i18n_fixed.js", include_in_schema=False)
+def site_v701_i18n_fixed():
+    return Response(
+        _fixed_i18n_source(),
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
+
+
 app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", None) != "/"]
 
 _V670_STYLE = r"""
@@ -93,7 +129,7 @@ def faculty_studio_v670_home():
         + _V670_STYLE
         + '\n<script src="/static/site_v671_fix.js?v=7.1.6" defer></script>'
         + '\n<script src="/static/site_v700_generic.js?v=it-scope-v3" defer></script>'
-        + '\n<script src="/static/site_v701_i18n.js?v=single-language-v1" defer></script>'
+        + '\n<script src="/ui/site_v701_i18n_fixed.js?v=single-language-v2" defer></script>'
         + '\n<script src="/static/site_v710_sources.js?v=clean-multisource-v1" defer></script>\n</head>',
         1,
     )
