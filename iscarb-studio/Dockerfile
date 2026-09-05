@@ -26,6 +26,8 @@ RUN python smoke_universal_meta_v730.py
 RUN python smoke_projection_v731.py
 # Native P1 figure prominence + visual cues + timebox range repair.
 RUN python smoke_native_figures_v732.py
+# Final figure-first readability + owner/evidence/sign-off repair.
+RUN python smoke_final_readability_v733.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
