@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""v7.2.9 - measurable readiness/editor gates.
+"""v7.2.9 - domain profile: engineering assurance/editor gates.
 
-Adds the user's 12 mandatory critical-thinking, AI/data, methodology, and
-verdict checks to the Golden v6.6 curriculum baseline. These are not a new
-visual theme and they do not rewrite the source lecture; they become concise
-submission gates and slide prompts that the engine can audit before accepting a
-student artifact.
+These 12 stricter checks are useful for dependability/reliability/safety/security
+lectures, but they are NOT universal. v7.3.0 supplies the cross-course meta
+structure. This profile activates only when the lecture title/focus indicates an
+assurance domain, preventing MTBF/FMEA/STPA requirements from leaking into
+unrelated subjects.
 """
 
 from . import main as engine
@@ -30,7 +30,7 @@ RULES = [
     ("R12 Local Owner", "For any local case, name the accountable owner: hospital, ministry, vendor, or unit."),
 ]
 
-NOTE = "Editor/readiness gates v7.2.9 locked: 12 measurable checks for breaking variable, falsifier, quantified uncertainty, data/AI accountability, quantitative evidence, risk decomposition, verification-vs-validation, industry burden, evidence chain, and local owner."
+NOTE = "Assurance domain profile v7.2.9: 12 measurable checks for dependability/reliability/safety/security lectures; inactive for unrelated courses."
 
 
 def _clean(v) -> str:
@@ -50,12 +50,11 @@ def _unit(bp, n):
 
 
 def _tag_task(u, text):
+    if not u:
+        return
     task = _clean(getattr(u, "student_action", ""))
     if text.lower() not in task.lower():
-        if task:
-            u.student_action = task.rstrip(".") + "; " + text
-        else:
-            u.student_action = text
+        u.student_action = (task.rstrip(".") + "; " if task else "") + text
 
 
 def _upgrade_unit(u, gates):
@@ -73,41 +72,47 @@ def _upgrade_unit(u, gates):
                 u.pedagogy_content = _add_unique(getattr(u, "pedagogy_content", []), line, 16)
 
 
+def _assurance_profile(profile, bp) -> bool:
+    text = " ".join([
+        _clean(getattr(profile, "lecture_title", "")),
+        _clean(getattr(profile, "weekly_focus", "")),
+        _clean(getattr(bp, "lecture_title", "")),
+        " ".join(_clean(x) for x in getattr(bp, "source_topic_families", []) or []),
+    ]).lower()
+    keys = (
+        "dependab", "reliab", "safety", "security", "resilien", "fault",
+        "availability", "hazard", "assurance", "critical system",
+    )
+    return any(k in text for k in keys)
+
+
 def _apply_gates(bp):
-    # Critical thinking gates: falsifier, breaking variable, uncertainty.
     _upgrade_unit(_unit(bp, 10), [RULES[0], RULES[1], RULES[2]])
     _tag_task(_unit(bp, 10), "name the breaking variable, falsifier, and monitor/confidence level")
 
-    # Local transfer requires explicit accountable owner.
     _upgrade_unit(_unit(bp, 11), [RULES[11]])
     _tag_task(_unit(bp, 11), "name the accountable local owner")
 
-    # Human/process/AI accountability and industry trade-off.
     _upgrade_unit(_unit(bp, 12), [RULES[5], RULES[9]])
     _tag_task(_unit(bp, 12), "name owner, evidence, sign-off, and documentation-vs-speed trade-off")
 
-    # Methodology: quantitative analysis and risk decomposition.
     _upgrade_unit(_unit(bp, 13), [RULES[6], RULES[7]])
     _tag_task(_unit(bp, 13), "include one quantitative metric and one FMEA/FTA/STPA risk slice")
 
-    # Dynamic reliability in workload/process decisions.
     _upgrade_unit(_unit(bp, 14), [RULES[4], RULES[9]])
     _tag_task(_unit(bp, 14), "include monitoring/maintenance and documentation burden")
 
-    # AI/data layer, accountability, verification vs validation.
     _upgrade_unit(_unit(bp, 15), [RULES[3], RULES[4], RULES[5], RULES[8]])
     _tag_task(_unit(bp, 15), "separate data bias/drift, AI accountability, verification, and validation")
 
-    # Decision artifact and defense must enforce full evidence chain.
     _upgrade_unit(_unit(bp, 16), [RULES[10], RULES[6]])
     _tag_task(_unit(bp, 16), "build the full evidence chain and include one number")
     _upgrade_unit(_unit(bp, 18), [RULES[1], RULES[10]])
     _tag_task(_unit(bp, 18), "include counter-evidence before verdict")
     _upgrade_unit(_unit(bp, 20), [RULES[0], RULES[1], RULES[2], RULES[10], RULES[11]])
-    _tag_task(_unit(bp, 20), "submit only after all mandatory editor gates pass")
+    _tag_task(_unit(bp, 20), "submit only after all mandatory assurance-profile gates pass")
 
-    # Keep a concise instructor-facing checklist without overloading the slide.
-    checklist = "MANDATORY EDITOR GATES - breaking variable; falsifier; confidence/monitor; data bias/drift when applicable; continuous monitoring; human sign-off owner; quantitative metric; FMEA/FTA/STPA slice; verification vs validation; documentation-vs-speed trade-off; full evidence chain; local accountable owner."
+    checklist = "ASSURANCE PROFILE - breaking variable; falsifier; confidence/monitor; data bias/drift when applicable; continuous monitoring; human sign-off; quantitative metric; FMEA/FTA/STPA slice; verification vs validation; documentation-vs-speed trade-off; full evidence chain; local owner."
     notes = list(getattr(bp, "release_notes", []) or [])
     for item in (NOTE, checklist):
         if item not in notes:
@@ -124,7 +129,8 @@ def apply_v729_editor_gates_patch(app):
     _ORIGINAL_DRAFT = engine._source_preserving_draft
 
     def draft(profile, bundle):
-        return _apply_gates(_ORIGINAL_DRAFT(profile, bundle))
+        bp = _ORIGINAL_DRAFT(profile, bundle)
+        return _apply_gates(bp) if _assurance_profile(profile, bp) else bp
 
     engine._source_preserving_draft = draft
     base.engine._source_preserving_draft = draft
@@ -133,10 +139,10 @@ def apply_v729_editor_gates_patch(app):
     def health():
         data = dict(previous_health())
         data.update({
-            "editor_gates_version": "v7.2.9",
-            "editor_gates_count": 12,
-            "editor_gates": [f"{k}: {v}" for k, v in RULES],
-            "submission_feedback_loop": "If a student artifact omits breaking variable, falsifier, quantified uncertainty, data/AI boundary, quantitative metric, risk decomposition, verification-vs-validation, evidence chain, or accountable owner, the engine returns it for revision.",
+            "assurance_profile_version": "v7.2.9",
+            "assurance_profile_count": 12,
+            "assurance_profile_scope": "dependability/reliability/safety/security/assurance domains only",
+            "assurance_profile_gates": [f"{k}: {v}" for k, v in RULES],
         })
         return data
     base._health_v440 = health
