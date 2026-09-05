@@ -9,7 +9,7 @@ This intentionally exercises the exact surfaces that have regressed in the past:
 - source-native visual policy / public-web fallback block
 - curated Domain Spine
 - generic-crisis block
-- exact user-supplied original Black Desert camel PNG hero payload
+- exact user-supplied original Black Desert camel PNG + optimized browser derivative
 - single-language UI, clean multi-source intake and source-figures-first policy
 
 The Docker image must not deploy if any of these checks fail.
@@ -154,14 +154,20 @@ def main() -> None:
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_user_original.png?v=7.1.4" in html, "Production home is not using the exact user-supplied original hero"
+    web = APP / "static" / "hero_user_web.jpg"
+    assert web.exists(), "Optimized browser hero is missing"
+    web_bytes = web.read_bytes()
+    assert len(web_bytes) == 269_820, f"Optimized browser hero byte length changed: {len(web_bytes)}"
+    assert hashlib.sha256(web_bytes).hexdigest() == "fcad23fe86a60e6ca881eb46829d5f7dbe894d9bf57a17c0453952edf5ec7c12", "Optimized browser hero checksum changed"
+    assert "hero_user_web.jpg?v=7.1.5" in html, "Production home is not using the optimized browser derivative of the exact original hero"
+    assert "hero_user_original.png?v=7.1.4" not in html, "Blocking eager PNG image tag is still referenced by production home"
     for legacy in ("hero_v670.jpg", "hero_v671.svg", "hero_v672.webp", "hero_original_v713.jpg"):
         assert legacy not in html, f"Legacy/substitute hero is still referenced: {legacy}"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
     assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
     assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"
     assert "SOURCE FIGURES FIRST" in html, "Source-figures-first policy badge regressed"
-    assert "7.1.4" in html, "Production home UI version stamp regressed"
+    assert "7.1.5" in html, "Production home UI version stamp regressed"
 
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
         root = Path(td)
@@ -183,7 +189,7 @@ def main() -> None:
             assert len([n for n in names if n.startswith("ppt/slides/slide") and n.endswith(".xml")]) >= 22, "PPTX lost expected core slides"
         assert pdf.read_bytes()[:4] == b"%PDF", "PDF export signature is invalid"
 
-    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; exact user-supplied original hero PNG + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
+    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; exact original hero preserved + optimized CSS-background derivative + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
 
 
 if __name__ == "__main__":
