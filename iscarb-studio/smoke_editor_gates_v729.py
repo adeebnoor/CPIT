@@ -4,7 +4,10 @@ import run  # installs production patch chain
 from app import start_v440 as base
 from app import patch_v729_editor_gates as gates
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.3.0-golden-v660-universal-meta-gates"
+assert os.getenv("ISCARB_BUILD_ID") in {
+    "7.3.0-golden-v660-universal-meta-gates",
+    "7.3.1-golden-v660-clean-projection",
+}, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("assurance_profile_version") == "v7.2.9", health
 assert health.get("assurance_profile_count") == 12, health
