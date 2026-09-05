@@ -34,7 +34,7 @@ apply_v705_patch(app)
 apply_v711_hero_patch(app)
 
 PUBLIC_VERSION = "6.9.4"
-UI_RELEASE = "7.1.5"
+UI_RELEASE = "7.1.6"
 ORIGINAL_HERO = "hero_user_original.png"
 ORIGINAL_HERO_SHA256 = "8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d"
 WEB_HERO = "hero_user_web.jpg"
@@ -61,10 +61,10 @@ if hashlib.sha256(_web_bytes).hexdigest() != WEB_HERO_SHA256:
 app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", None) != "/"]
 
 _V670_STYLE = r"""
-<style id="iscarb-v715-home-patch">
+<style id="iscarb-v716-home-patch">
 :root{--iscarb-bg:#05070D;--iscarb-magenta:#FF258C;--iscarb-cyan:#2CDCFF;--iscarb-gold:#DCB56B;--iscarb-text:#F5F5F8;--iscarb-muted:#B7BDC8}
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
-.heroArt{position:relative!important;aspect-ratio:16/9!important;min-height:0!important;border-radius:28px;overflow:hidden;isolation:isolate;display:block!important;background-color:#05070D!important;background-image:url('/static/hero_user_web.jpg?v=7.1.5')!important;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
+.heroArt{position:relative!important;aspect-ratio:16/9!important;min-height:0!important;border-radius:28px;overflow:hidden;isolation:isolate;display:block!important;background-color:#05070D!important;background-image:url('/static/hero_user_web.jpg?v=7.1.6')!important;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
 .heroArt>svg{display:none!important}
 .heroArt>.heroPhoto{display:none!important}
 .heroArt::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.015),rgba(5,7,13,0) 50%,rgba(5,7,13,.015))}
@@ -82,16 +82,16 @@ html[data-lang="ar"] body{text-align:right}html[data-lang="ar"] .header nav,html
 def faculty_studio_v670_home():
     body = (Path(__file__).with_name("static") / "index_v440.html").read_text(encoding="utf-8")
     body = body.replace('<html lang="en" dir="ltr" data-theme="dark">', '<html lang="en" dir="ltr" data-theme="dark" data-lang="en">', 1)
-    body = body.replace("4.6 · Gate v15", "7.1.5 · IT-wide · Multi-source · Gate v15")
+    body = body.replace("4.6 · Gate v15", "7.1.6 · IT-wide · Multi-source · Gate v15")
     body = body.replace("Saudi Academic Engineering", "Saudi Engineering Learning System")
-    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.1.5")
-    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.1.5")
-    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.1.5")
+    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.1.6")
+    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.1.6")
+    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.1.6")
     body = body.replace(
         "</head>",
-        '<link rel="preload" as="image" href="/static/hero_user_web.jpg?v=7.1.5" type="image/jpeg" fetchpriority="high">\n'
+        '<link rel="preload" as="image" href="/static/hero_user_web.jpg?v=7.1.6" type="image/jpeg" fetchpriority="high">\n'
         + _V670_STYLE
-        + '\n<script src="/static/site_v671_fix.js?v=7.1.5" defer></script>'
+        + '\n<script src="/static/site_v671_fix.js?v=7.1.6" defer></script>'
         + '\n<script src="/static/site_v700_generic.js?v=it-scope-v3" defer></script>'
         + '\n<script src="/static/site_v701_i18n.js?v=single-language-v1" defer></script>'
         + '\n<script src="/static/site_v710_sources.js?v=clean-multisource-v1" defer></script>\n</head>',
@@ -108,6 +108,6 @@ def faculty_studio_v670_home():
             "X-ISCARB-Hero-Asset": WEB_HERO,
             "X-ISCARB-Hero-SHA256": WEB_HERO_SHA256,
             "X-ISCARB-Hero-Original-SHA256": ORIGINAL_HERO_SHA256,
-            "X-ISCARB-Home": "v7.1.5-generic-it-clean-multisource-single-language-optimized-original-hero-css-background-source-figures-first-gate-v15",
+            "X-ISCARB-Home": "v7.1.6-generic-it-clean-multisource-single-language-optimized-original-hero-css-background-source-figures-first-gate-v15",
         },
     )
