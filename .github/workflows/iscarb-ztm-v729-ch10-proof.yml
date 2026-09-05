@@ -21,7 +21,7 @@ jobs:
       - name: Recover authoritative Ch10 source
         run: |
           set -euxo pipefail
-          python -m pip install --quiet playwright requests
+          python -m pip install --quiet playwright requests pymupdf
           python -m playwright install --with-deps chromium
           mkdir -p /tmp/iscarb_ztm/ch10
           python - <<'PY'
@@ -81,6 +81,7 @@ jobs:
           health=requests.get(base+'/api/health',timeout=20).json()
           (od/'health.json').write_text(json.dumps(health,indent=2),encoding='utf-8')
           assert health.get('ztm_theme_version')=='v7.2.9',health
+          assert health.get('ztm_finish_version')=='v7.2.9-final',health
           assert health.get('golden_master_locked') is True,health
           assert health.get('ztm_tokens',{}).get('bg_base')=='#FFFFFF',health
           assert health.get('ztm_tokens',{}).get('accent_primary')=='#4F46E5',health
@@ -97,18 +98,20 @@ jobs:
           assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
           bp=job['blueprint']; assert len(bp['units'])==20
           u11=bp['units'][10]; u19=bp['units'][18]
-          assert any('MICRO-CASE' in x.upper() for x in u11.get('pedagogy_content',[])),u11
+          p11=' '.join(u11.get('pedagogy_content',[])).lower()
+          assert 'micro-case' in p11,u11
+          assert 'local case' in p11,u11
+          assert 'saudi hospital' in p11,u11
           assert len(u19.get('core_content',[]))==2,u19
           assert all(str(u.get('student_action','')).upper().startswith('TIMEBOX:') for u in bp['units']),[u.get('number') for u in bp['units'] if not str(u.get('student_action','')).upper().startswith('TIMEBOX:')]
 
           plan=requests.post(base+'/api/presentation/physical-plan',json={'blueprint':bp,'target_physical_slides':30},timeout=30)
-          # Review drafts may not pass strict verdict gate; renderer itself uses strict=False.
           if plan.ok:
               pdata=plan.json(); (od/'physical-plan.json').write_text(json.dumps(pdata,indent=2,ensure_ascii=False),encoding='utf-8')
               assert pdata['core_units']==20
           html=requests.get(f'{base}/api/jobs/{jid}/presenter',timeout=60).text
           (od/'presenter.html').write_text(html,encoding='utf-8')
-          for needle in ["--bg-base:#FFFFFF","data-stage='1'","@keyframes pulse","TIMEBOX","Peer-review quick card","Micro-case"]:
+          for needle in ["--bg-base:#FFFFFF","data-stage='1'","@keyframes pulse","TIMEBOX","Peer-review quick card","Micro-case","Saudi hospital"]:
               assert needle.lower() in html.lower(),needle
 
           outputs=[('pptx','Ch10_Dependable_Systems_ISCARB_ZTM_v729.pptx'),('presenter-pdf','Ch10_Dependable_Systems_ISCARB_ZTM_v729.pdf')]
@@ -121,25 +124,25 @@ jobs:
               assert len(slides)==30,len(slides)
               xml=' '.join(z.read(n).decode('utf-8','ignore') for n in slides)
               low=xml.lower()
-              for must in ['peer-review quick card','micro-case','timebox','source expansion','decision']:
+              for must in ['peer-review quick card','micro-case','saudi hospital','timebox','source expansion','decision']:
                   assert must in low,must
-              # 8 semantic expansion pages + exact palette evidence + Inter font request.
               assert low.count('source expansion')>=8,low.count('source expansion')
               for color in ['FFFFFF','F8FAFC','0F172A','475569','4F46E5','06B6D4','F43F5E']:
                   assert color.lower() in low,color
               assert 'inter' in low
+              assert 'timebox · 1 + 5 min' in low
+              assert 'timebox: 2 min - use one source detail' not in low
 
-          import fitz
-          pdf=fitz.open(od/'Ch10_Dependable_Systems_ISCARB_ZTM_v729.pdf')
+          import pymupdf
+          pdf=pymupdf.open(od/'Ch10_Dependable_Systems_ISCARB_ZTM_v729.pdf')
           assert pdf.page_count==30,pdf.page_count
-          # White ZTM surface should dominate the top-left background sample on most pages.
           whites=0
           for p in pdf:
-              pix=p.get_pixmap(matrix=fitz.Matrix(.2,.2),alpha=False)
+              pix=p.get_pixmap(matrix=pymupdf.Matrix(.2,.2),alpha=False)
               data=pix.samples
               if data and data[0]>235 and data[1]>235 and data[2]>235: whites+=1
           assert whites>=25,whites
-          print('PASS local Ch10 ZTM v7.2.9',jid)
+          print('PASS local Ch10 ZTM v7.2.9 final',jid)
           PY
 
       - name: Container logs
