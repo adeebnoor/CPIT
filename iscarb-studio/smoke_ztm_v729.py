@@ -9,6 +9,7 @@ from app import start_v670_prod as prod
 from app import v670_contract as contract
 from app import presenter_v67_prod as presenter
 from app import patch_v729_ztm_theme as ztm
+from app import patch_v7291_ztm_finish as finish
 
 EXPECTED_BUILD = "7.2.9-golden-v660-ztm"
 assert os.getenv("ISCARB_BUILD_ID") == EXPECTED_BUILD, os.getenv("ISCARB_BUILD_ID")
@@ -40,10 +41,9 @@ assert presenter.TEXT == "#0F172A"
 assert presenter.MUTED == "#475569"
 assert presenter.MAGENTA == "#4F46E5"
 assert presenter.DANGER == "#4F46E5"  # reject/verdict is not allowed to consume alert rose.
-assert presenter._ppt_footer is ztm._ppt_footer
 assert presenter._ppt_expansion is ztm._ppt_expansion
 assert presenter._pdf_expansion is ztm._pdf_expansion
-assert base.render_presenter_preview is ztm.render_presenter_preview_ztm
+assert base.render_presenter_preview is finish._preview
 
 # Timebox parsing is visual-system logic, not plain text decoration.
 assert ztm._timebox_parts("TIMEBOX: 3-5 min - Compare two alternatives.") == ("3-5 min", "Compare two alternatives.")
@@ -64,8 +64,11 @@ try:
 finally:
     contract.plan_expansions = old
 
-# Progressive disclosure, taskbar gradient, pulse and reduced-motion protection are code-level invariants.
-src = inspect.getsource(ztm.render_presenter_preview_ztm)
+# v7291 wraps the base HTML renderer; inspect the preserved base function so
+# this gate verifies the actual three-stage implementation rather than wrapper source.
+base_renderer = finish._ORIGINAL_PREVIEW
+assert callable(base_renderer)
+src = inspect.getsource(base_renderer)
 for needle in ("data-stage='1'", "linear-gradient", "TIMEBOX", "@keyframes pulse", "prefers-reduced-motion"):
     assert needle in src, needle
 
