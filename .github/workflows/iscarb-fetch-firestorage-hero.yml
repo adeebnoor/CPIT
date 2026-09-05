@@ -14,56 +14,36 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Fetch exact original PNG through Firestorage production file API
+      - name: Resolve Firestorage download endpoint
         env:
-          SHARE_ID: 6NWUusWQ8b4R
-          FILE_ID: 01a071030f8473d3a338e37743db78f2
+          SHARE_URL: https://firestorage.ai/ja/f/6NWUusWQ8b4R
           EXPECTED_SHA256: 8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d
         run: |
           pip install requests
           python - <<'PY'
-          import os,requests,hashlib
+          import os,re,requests,hashlib,json
           from pathlib import Path
-          sid=os.environ['SHARE_ID']; fid=os.environ['FILE_ID']; expected=os.environ['EXPECTED_SHA256']
+          from urllib.parse import urljoin
           s=requests.Session(); s.headers['User-Agent']='Mozilla/5.0'
-          base='https://api.firestorage.ai/prod/file/'
-          candidates=[
-              f'{base}shares/{sid}/files/{fid}/download',
-              f'{base}{sid}/files/{fid}/download',
-              f'{base}share/{sid}/files/{fid}/download',
-              f'{base}f/{sid}/files/{fid}/download',
-          ]
-          out=Path('iscarb-studio/app/static/hero_user_original.png'); out.parent.mkdir(parents=True,exist_ok=True)
-          for endpoint in candidates:
-              try:
-                  r=s.get(endpoint,timeout=30,allow_redirects=True)
-                  print('API',r.status_code,r.headers.get('content-type'),len(r.content),r.url)
-                  # Firestorage download endpoint may return JSON {downloadUrl: ...}.
-                  if 'application/json' in r.headers.get('content-type',''):
-                      try:
-                          data=r.json(); print('JSON_KEYS',list(data) if isinstance(data,dict) else type(data).__name__)
-                          dl=data.get('downloadUrl') if isinstance(data,dict) else None
-                          if dl:
-                              rr=s.get(dl,timeout=60,allow_redirects=True)
-                              print('SIGNED',rr.status_code,rr.headers.get('content-type'),len(rr.content),rr.url[:220])
-                              b=rr.content
-                          else: b=b''
-                      except Exception as e: print('JSON_ERR',repr(e)); b=b''
-                  else:
-                      b=r.content
-                  if b.startswith(b'\x89PNG\r\n\x1a\n'):
-                      sha=hashlib.sha256(b).hexdigest(); print('PNG_SHA256',sha,'BYTES',len(b))
-                      if sha != expected: raise SystemExit(f'SHA mismatch: {sha}')
-                      out.write_bytes(b); break
-              except Exception as e:
-                  print('ERR',endpoint,repr(e))
-          if not out.exists(): raise SystemExit('Exact original PNG not fetched')
+          share=os.environ['SHARE_URL']; expected=os.environ['EXPECTED_SHA256']
+          page=s.get(share,timeout=30).text
+          scripts=re.findall(r'<script[^>]+src=["\']([^"\']+)',page,re.I)
+          target=None
+          for src in scripts:
+              u=urljoin(share,src)
+              txt=s.get(u,timeout=30).text
+              if '/files/${e.fileId}/download' in txt or '/files/${i.fileId}/download' in txt:
+                  target=txt; print('CLIENT_SCRIPT',u,'LEN',len(txt)); break
+          if not target: raise SystemExit('download client script not found')
+          needles=['let f=','const f=','shareEndpoint','/files?maxResults=1000','/files/${e.fileId}/download','function q(','window.location.pathname','api.firestorage.ai/prod/file']
+          for needle in needles:
+              start=0
+              while True:
+                  p=target.find(needle,start)
+                  if p<0: break
+                  print('\n===',needle,'AT',p,'===\n',target[max(0,p-1800):p+3000])
+                  start=p+len(needle)
+          # Find all production file API literals and nearby content.
+          for m in re.finditer(r'https://api\.firestorage\.ai/prod/file[^"\']*',target):
+              p=m.start(); print('\n=== API_LITERAL ===\n',target[max(0,p-1800):p+3000])
           PY
-      - name: Commit exact original image
-        run: |
-          set -euxo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add iscarb-studio/app/static/hero_user_original.png
-          git commit -m 'Install exact user-supplied ISCARB hero PNG'
-          git push
