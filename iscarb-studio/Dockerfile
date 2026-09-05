@@ -18,6 +18,8 @@ COPY . .
 RUN python smoke_prod.py
 RUN python smoke_contract_v716.py
 RUN python smoke_golden_v728.py
+# Mandatory 12-rule readiness/editor gate layer.
+RUN python smoke_editor_gates_v729.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
