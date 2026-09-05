@@ -1,0 +1,60 @@
+name: ISCARB Live Browser Debug
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-live-browser-debug.yml'
+  workflow_dispatch:
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect live hero in real Chromium
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet pyppeteer
+          python - <<'PY'
+          import asyncio, json, shutil
+          from pyppeteer import launch
+
+          async def main():
+              exe = shutil.which('google-chrome') or shutil.which('google-chrome-stable') or shutil.which('chromium') or shutil.which('chromium-browser')
+              print('BROWSER', exe)
+              browser = await launch(headless=True, executablePath=exe, args=['--no-sandbox','--disable-dev-shm-usage'])
+              page = await browser.newPage()
+              await page.setViewport({'width': 1648, 'height': 920, 'deviceScaleFactor': 1})
+              page.on('requestfailed', lambda req: print('REQUEST_FAILED', req.url, req.failure))
+              page.on('console', lambda msg: print('CONSOLE', msg.type, msg.text))
+              try:
+                  await page.goto('https://iscarb-lecture-studio.onrender.com/', {'waitUntil':'domcontentloaded', 'timeout':60000})
+              except Exception as e:
+                  print('GOTO_ERR',repr(e))
+              await asyncio.sleep(6)
+              data = await page.evaluate('''() => {
+                const img=document.querySelector('.heroPhoto');
+                const art=document.querySelector('.heroArt');
+                const cs=img?getComputedStyle(img):null;
+                const acs=art?getComputedStyle(art):null;
+                const r=img?img.getBoundingClientRect():null;
+                const ar=art?art.getBoundingClientRect():null;
+                const perf=performance.getEntriesByType('resource').filter(x=>x.name.includes('hero_user_original'));
+                return {
+                  readyState:document.readyState,
+                  imgExists:!!img,
+                  imgComplete:img&&img.complete,
+                  naturalWidth:img&&img.naturalWidth,
+                  naturalHeight:img&&img.naturalHeight,
+                  currentSrc:img&&img.currentSrc,
+                  imgStyle:cs&&{display:cs.display,visibility:cs.visibility,opacity:cs.opacity,position:cs.position,zIndex:cs.zIndex,width:cs.width,height:cs.height,objectFit:cs.objectFit},
+                  artStyle:acs&&{display:acs.display,backgroundImage:acs.backgroundImage,position:acs.position,zIndex:acs.zIndex,overflow:acs.overflow},
+                  imgRect:r&&{x:r.x,y:r.y,w:r.width,h:r.height},
+                  artRect:ar&&{x:ar.x,y:ar.y,w:ar.width,h:ar.height},
+                  perf:perf.map(x=>({name:x.name,duration:x.duration,transferSize:x.transferSize,encodedBodySize:x.encodedBodySize,decodedBodySize:x.decodedBodySize,responseEnd:x.responseEnd})),
+                  centerTag:ar&&document.elementFromPoint(ar.x+ar.width/2,ar.y+ar.height/2)?.tagName,
+                  centerClass:ar&&document.elementFromPoint(ar.x+ar.width/2,ar.y+ar.height/2)?.className
+                };
+              }''')
+              print('DEBUG_JSON', json.dumps(data, ensure_ascii=False))
+              await page.screenshot({'path':'/tmp/live.png','fullPage':False})
+              await browser.close()
+          asyncio.get_event_loop().run_until_complete(main())
+          PY
