@@ -1,0 +1,32 @@
+name: ISCARB Patch Smoke v715
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-patch-smoke-v715.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update smoke gate for optimized original hero
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('iscarb-studio/smoke_prod.py')
+          s=p.read_text()
+          s=s.replace('- exact user-supplied original Black Desert camel PNG hero payload', '- exact user-supplied original Black Desert camel PNG + optimized browser derivative')
+          s=s.replace('assert "hero_user_original.png?v=7.1.4" in html, "Production home is not using the exact user-supplied original hero"', 'web = APP / "static" / "hero_user_web.jpg"\n    assert web.exists(), "Optimized browser hero is missing"\n    web_bytes = web.read_bytes()\n    assert len(web_bytes) == 269_820, f"Optimized browser hero byte length changed: {len(web_bytes)}"\n    assert hashlib.sha256(web_bytes).hexdigest() == "fcad23fe86a60e6ca881eb46829d5f7dbe894d9bf57a17c0453952edf5ec7c12", "Optimized browser hero checksum changed"\n    assert "hero_user_web.jpg?v=7.1.5" in html, "Production home is not using the optimized browser derivative of the exact original hero"\n    assert "hero_user_original.png?v=7.1.4" not in html, "Blocking eager PNG image tag is still referenced by production home"')
+          s=s.replace('assert "7.1.4" in html, "Production home UI version stamp regressed"', 'assert "7.1.5" in html, "Production home UI version stamp regressed"')
+          s=s.replace('exact user-supplied original hero PNG + single-language + multi-source UI', 'exact original hero preserved + optimized CSS-background derivative + single-language + multi-source UI')
+          if 'hero_user_web.jpg?v=7.1.5' not in s:
+              raise SystemExit('smoke patch failed')
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb-studio/smoke_prod.py
+          git commit -m 'Update smoke gate for v7.1.5 optimized hero rendering'
+          git push
