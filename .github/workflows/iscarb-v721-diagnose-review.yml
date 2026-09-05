@@ -1,4 +1,4 @@
-name: ISCARB v721 Diagnose Review Text
+name: ISCARB v721 Diagnose Presenter
 on:
   workflow_dispatch:
   push:
@@ -11,28 +11,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Compile and locate residual text
+      - uses: actions/checkout@v4
+      - name: Reconstruct presenter and inspect relevant code
         run: |
+          cd iscarb-studio
           python - <<'PY'
-          import requests,time,json
-          base='https://iscarb-lecture-studio.onrender.com'
-          p1='https://ocw.mit.edu/courses/6-830-database-systems-fall-2010/10b223dc3daf6fda4001272799b153a0_MIT6_830F10_lec10.pdf'
-          r=requests.post(base+'/api/compile',data={'primary_url':p1,'supporting_urls':'','lecture_focus':'Database Systems — Transactions and Locking','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60);r.raise_for_status();jid=r.json()['job_id']
-          for _ in range(120):
-              job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
-              if job.get('status') in {'ready','blocked','error'}:break
-              time.sleep(2)
-          bp=job['blueprint']
-          hits=[]
-          def walk(x,path='$'):
-              if isinstance(x,dict):
-                  for k,v in x.items():walk(v,f'{path}.{k}')
-              elif isinstance(x,list):
-                  for i,v in enumerate(x):walk(v,f'{path}[{i}]')
-              elif isinstance(x,str) and 'review required' in x.lower():hits.append((path,x))
-          walk(bp)
-          print('JOB',jid,'STATUS',job.get('status'))
-          print('REVIEW_HITS',json.dumps(hits,indent=2,ensure_ascii=False))
-          for i,u in enumerate(bp['units'],1): print('ACTION',i,u.get('student_action'))
-          raise SystemExit(1 if hits else 0)
+          import base64,lzma
+          from pathlib import Path
+          chunks=sorted(Path('.').glob('presenter_v67_prod.xz.b64.*'))
+          payload=''.join(p.read_text().strip() for p in chunks)
+          src=lzma.decompress(base64.b64decode(payload)).decode('utf-8')
+          Path('/tmp/presenter.py').write_text(src)
+          lines=src.splitlines()
+          needles=['YOUR TASK','student_action','enrichment_content','AI MAY PREPARE EVIDENCE','SOURCE EXPANSION']
+          for needle in needles:
+              print('\n###',needle)
+              hits=[i for i,l in enumerate(lines) if needle.lower() in l.lower()]
+              print('hits',hits)
+              for i in hits[:12]:
+                  for j in range(max(0,i-8),min(len(lines),i+12)):
+                      print(f'{j+1:04d}: {lines[j]}')
+                  print('---')
           PY
