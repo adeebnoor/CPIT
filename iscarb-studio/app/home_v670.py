@@ -38,18 +38,20 @@ PUBLIC_VERSION = "6.9.4"
 UI_RELEASE = "7.1.3"
 APPROVED_HERO = "hero_original_v713.jpg"
 
-# The exact user-supplied hero artwork is stored as repository text chunks so the
-# Docker build remains portable. Reconstruct the raster deterministically inside
-# app/static before FastAPI serves the page or the production smoke test runs.
+# The exact user-supplied hero artwork is stored as independently base64-encoded
+# repository chunks. Decode each chunk separately, then concatenate the bytes.
 _STUDIO_ROOT = Path(__file__).resolve().parents[1]
 _STATIC_ROOT = Path(__file__).with_name("static")
 _HERO_PATH = _STATIC_ROOT / APPROVED_HERO
 _HERO_CHUNKS = sorted(_STUDIO_ROOT.glob("hero_original_v713.jpg.b64.*"))
 if not _HERO_CHUNKS:
     raise RuntimeError("Original supplied ISCARB hero payload is missing")
-_payload = "".join(p.read_text(encoding="ascii").strip() for p in _HERO_CHUNKS)
-_payload += "=" * (-len(_payload) % 4)
-_hero_bytes = base64.b64decode(_payload)
+_parts = []
+for _chunk in _HERO_CHUNKS:
+    _text = _chunk.read_text(encoding="ascii").strip()
+    _text += "=" * (-len(_text) % 4)
+    _parts.append(base64.b64decode(_text))
+_hero_bytes = b"".join(_parts)
 if len(_hero_bytes) < 30_000 or not (_hero_bytes.startswith(b"\xff\xd8") and _hero_bytes.endswith(b"\xff\xd9")):
     raise RuntimeError("Original supplied ISCARB hero payload is incomplete")
 _STATIC_ROOT.mkdir(parents=True, exist_ok=True)
