@@ -1,0 +1,31 @@
+name: ISCARB Hero Live Proof v714
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-hero-live-proof-v714.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live page and exact hero bytes
+        run: |
+          set -euxo pipefail
+          BASE='https://iscarb-lecture-studio.onrender.com'
+          EXPECT='8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d'
+          curl -fsSL -D /tmp/headers.txt "$BASE/" -o /tmp/index.html
+          grep -qi '^x-iscarb-ui: 7.1.4' /tmp/headers.txt
+          grep -qi '^x-iscarb-hero-asset: hero_user_original.png' /tmp/headers.txt
+          grep -qi "^x-iscarb-hero-sha256: $EXPECT" /tmp/headers.txt
+          grep -q 'hero_user_original.png?v=7.1.4' /tmp/index.html
+          ! grep -Eq 'hero_v670.jpg|hero_v671.svg|hero_v672.webp|hero_original_v713.jpg' /tmp/index.html
+          curl -fsSL -D /tmp/img_headers.txt "$BASE/static/hero_user_original.png?v=7.1.4" -o /tmp/hero.png
+          grep -qi '^content-type: image/png' /tmp/img_headers.txt
+          test "$(wc -c < /tmp/hero.png | tr -d ' ')" = '2315610'
+          test "$(sha256sum /tmp/hero.png | awk '{print $1}')" = "$EXPECT"
+          python - <<'PY'
+          from PIL import Image
+          im=Image.open('/tmp/hero.png')
+          assert im.size == (1200,675), im.size
+          print('LIVE HERO PASS', im.size, im.mode)
+          PY
