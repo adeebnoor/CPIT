@@ -1,0 +1,41 @@
+name: ISCARB Optimize Hero
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-optimize-hero.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Create lightweight browser hero from exact original
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib
+          src=Path('iscarb-studio/app/static/hero_user_original.png')
+          dst=Path('iscarb-studio/app/static/hero_user_web.jpg')
+          im=Image.open(src).convert('RGB')
+          assert im.size==(1672,941), im.size
+          im.save(dst,'JPEG',quality=88,optimize=True,progressive=True,subsampling=0)
+          b=dst.read_bytes()
+          assert b[:2]==b'\xff\xd8' and b[-2:]==b'\xff\xd9'
+          assert len(b)<900_000, len(b)
+          print('WEB_HERO_BYTES',len(b))
+          print('WEB_HERO_SHA256',hashlib.sha256(b).hexdigest())
+          PY
+      - name: Commit optimized hero
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb-studio/app/static/hero_user_web.jpg
+          git commit -m 'Add optimized web hero derived from exact original'
+          git push
