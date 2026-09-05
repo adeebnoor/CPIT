@@ -17,7 +17,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
 
-      - name: Wait for final v7.1.6 production contract
+      - name: Wait for final production contract and source intelligence
         run: |
           set -euxo pipefail
           python - <<'PY'
@@ -28,15 +28,16 @@ jobs:
                   r=requests.get(url,timeout=20)
                   if r.ok:
                       h=r.json()
-                      print('health',h.get('build_commit'),h.get('release_ui'),h.get('approved_hero_asset'))
-                      if (h.get('release_ui')=='7.1.6' and h.get('generic_it_scope') is True
+                      print('health',h.get('build_commit'),h.get('release_ui'),h.get('source_intelligence_release'),h.get('approved_hero_asset'))
+                      if (h.get('release_ui')=='7.1.6' and h.get('source_intelligence_release')=='7.1.7'
+                          and h.get('generic_it_scope') is True
                           and h.get('software_engineering_dependency') is False
                           and h.get('public_web_image_fallback') is False
                           and h.get('approved_hero_asset')=='hero_user_original.png'):
                           break
               except Exception as e: print('wait',repr(e))
               time.sleep(5)
-          else: raise SystemExit('Final v7.1.6 contract never became live')
+          else: raise SystemExit('Final source-intelligence contract never became live')
           PY
 
       - name: Compile real MIT database lecture and verify exports
@@ -44,7 +45,7 @@ jobs:
           set -euxo pipefail
           mkdir -p /tmp/iscarb_readiness
           python - <<'PY'
-          import json,time,zipfile,requests
+          import json,time,zipfile,requests,re
           from io import BytesIO
           from pathlib import Path
           base='https://iscarb-lecture-studio.onrender.com'
@@ -72,9 +73,21 @@ jobs:
           assert not job.get('error'), job.get('error')
           bp=job['blueprint']; units=bp['units']
           assert len(units)==20 and sorted(u['number'] for u in units)==list(range(1,21))
+          assert 'database systems' in bp.get('lecture_title','').lower() and 'transaction' in bp.get('lecture_title','').lower(), bp.get('lecture_title')
+
+          u1=next(u for u in units if u['number']==1)
+          opening=' '.join([u1.get('title',''),u1.get('engineering_question',''),*u1.get('core_content',[])]).lower()
+          assert 'review required' not in opening, opening
+          assert any(x in opening for x in ['parallel schedule','deadlock','does not','not serializ','wrong']), opening
+
           u2=next(u for u in units if u['number']==2)
           spine=[str(x).strip() for x in u2.get('core_content',[]) if str(x).strip()]
-          assert 2 <= len(spine) <= 8, spine
+          assert 5 <= len(spine) <= 8, spine
+          spine_blob=' | '.join(spine).lower()
+          for bad in ['t1: update','6.830 / 6.814','mit opencourseware','gold standard mechanism','terms of use']:
+              assert bad not in spine_blob, (bad,spine)
+          assert sum(t in spine_blob for t in ['transaction','locking','deadlock','phantom','predicate','range','escrow','serializ','concurrency']) >= 3, spine
+
           blob=json.dumps(bp).lower()
           assert any(t in blob for t in ['transaction','locking','serializ','deadlock']), 'Database source vocabulary missing'
           assert 'a team must make a consequential decision' not in blob
@@ -98,11 +111,12 @@ jobs:
               for bad in ['second amendment','down syndrome','wikipedia.org','wikimedia.org']:
                   assert bad not in allxml, bad
           Path('/tmp/iscarb_readiness/summary.json').write_text(json.dumps({
-              'job_id':jid,'status':job['status'],'core_units':len(units),
+              'job_id':jid,'status':job['status'],'lecture_title':bp.get('lecture_title'),
+              'opening':u1.get('core_content',[]),'spine':spine,'core_units':len(units),
               'domain_spine_nodes':len(spine),'physical_slides':len(slides),
               'pptx_bytes':len(ppt.content),'p1':p1
           },indent=2),encoding='utf-8')
-          print('LIVE_DATABASE_PPTX_STRUCTURAL_PASS',len(slides),len(ppt.content))
+          print('LIVE_DATABASE_PPTX_STRUCTURAL_PASS',len(slides),len(ppt.content),spine)
           PY
 
       - name: Render exported PowerPoint to slide images
@@ -150,6 +164,7 @@ jobs:
                   await page.screenshot(path='/tmp/iscarb_readiness/presenter_full.png',full_page=True)
                   text=(await page.locator('body').inner_text()).lower()
                   assert 'transaction' in text or 'locking' in text
+                  assert 'review required' not in text
                   assert 'second amendment' not in text and 'down syndrome' not in text
                   print('PRESENTER_CHROMIUM_PASS',await page.title())
                   await b.close()
