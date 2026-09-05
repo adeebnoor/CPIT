@@ -9,13 +9,14 @@ This intentionally exercises the exact surfaces that have regressed in the past:
 - source-native visual policy / public-web fallback block
 - curated Domain Spine
 - generic-crisis block
-- exact user-supplied Black Desert camel raster hero payload
+- exact user-supplied original Black Desert camel PNG hero payload
 - single-language UI, clean multi-source intake and source-figures-first policy
 
 The Docker image must not deploy if any of these checks fail.
 """
 
 import base64
+import hashlib
 import lzma
 import os
 import tempfile
@@ -143,22 +144,24 @@ def main() -> None:
     if hasattr(presenter, "_public_candidates"):
         assert presenter._public_candidates(bp, bp.units[0]) == [], "Presenter public candidate fallback is active"
 
-    hero = APP / "static" / "hero_original_v713.jpg"
+    hero = APP / "static" / "hero_user_original.png"
+    assert hero.exists(), "Exact user-supplied original hero PNG is missing"
     hero_bytes = hero.read_bytes()
-    assert hero.exists() and hero.stat().st_size >= 30_000, "User-supplied original hero JPEG is missing/truncated"
-    assert hero_bytes[:2] == b"\xff\xd8" and hero_bytes[-2:] == b"\xff\xd9", "User-supplied hero is not a valid complete JPEG payload"
+    assert len(hero_bytes) == 2_315_610, f"Exact hero byte length changed: {len(hero_bytes)}"
+    assert hero_bytes.startswith(b"\x89PNG\r\n\x1a\n"), "Exact user-supplied hero is not PNG"
+    assert hashlib.sha256(hero_bytes).hexdigest() == "8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d", "Exact hero checksum changed"
+
     response = faculty_studio_v670_home()
     html = bytes(response.body).decode("utf-8", "replace")
     assert response.status_code == 200
-    assert "hero_original_v713.jpg?v=7.1.3" in html, "Production home is not using the user-supplied original hero"
-    assert "hero_v670.jpg?v=7.1.2" not in html, "Legacy cropped raster is still referenced by the production home"
-    assert "hero_v671.svg" not in html, "Vector redraw is still referenced by the production home"
-    assert "hero_v672.webp" not in html, "Deprecated WebP is still referenced by the production home"
+    assert "hero_user_original.png?v=7.1.4" in html, "Production home is not using the exact user-supplied original hero"
+    for legacy in ("hero_v670.jpg", "hero_v671.svg", "hero_v672.webp", "hero_original_v713.jpg"):
+        assert legacy not in html, f"Legacy/substitute hero is still referenced: {legacy}"
     assert 'data-lang="en"' in html, "Production home must start in one language, not bilingual mode"
     assert "site_v701_i18n.js?v=single-language-v1" in html, "Single-language localization surface is missing"
     assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"
     assert "SOURCE FIGURES FIRST" in html, "Source-figures-first policy badge regressed"
-    assert "7.1.3" in html, "Production home UI version stamp regressed"
+    assert "7.1.4" in html, "Production home UI version stamp regressed"
 
     with tempfile.TemporaryDirectory(prefix="iscarb-smoke-") as td:
         root = Path(td)
@@ -180,7 +183,7 @@ def main() -> None:
             assert len([n for n in names if n.startswith("ppt/slides/slide") and n.endswith(".xml")]) >= 22, "PPTX lost expected core slides"
         assert pdf.read_bytes()[:4] == b"%PDF", "PDF export signature is invalid"
 
-    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; user-supplied original hero + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
+    print(f"ISCARB production smoke PASS: {len(plan)} physical slides; public fallback disabled; source figures first; exact user-supplied original hero PNG + single-language + multi-source UI; HTML/PPTX/PDF renderers healthy")
 
 
 if __name__ == "__main__":
