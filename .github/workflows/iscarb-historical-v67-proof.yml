@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: cc943c1955a20d1b0bf5ffdeef8b87583ded95c5
+          ref: c07ad2bfd36057636a5a48bb6ce0a627e588a145
       - name: Install historical app and proof tools
         run: |
           set -euxo pipefail
