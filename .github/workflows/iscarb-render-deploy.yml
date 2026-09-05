@@ -21,24 +21,20 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Resolve expected production version
+      - name: Resolve expected production contract
         id: version
         shell: bash
         run: |
-          expected=$(python - <<'PY'
+          expected_build=$(python - <<'PY'
           import re
           from pathlib import Path
-          run_text=Path('iscarb-studio/run.py').read_text(encoding='utf-8')
-          m=re.search(r'uvicorn\.run\(["\']app\.([A-Za-z0-9_]+):app["\']', run_text)
-          if not m: raise SystemExit('Cannot resolve active app module')
-          text=(Path('iscarb-studio/app')/(m.group(1)+'.py')).read_text(encoding='utf-8')
-          for line in text.splitlines():
-              if line.strip().startswith('PUBLIC_VERSION') and '=' in line:
-                  print(line.split('=',1)[1].strip().strip('"').strip("'")); break
-          else: raise SystemExit('Cannot resolve PUBLIC_VERSION')
+          text=Path('iscarb-studio/run.py').read_text(encoding='utf-8')
+          m=re.search(r'ISCARB_BUILD_ID",\s*"([^"]+)"', text)
+          if not m: raise SystemExit('Cannot resolve ISCARB_BUILD_ID from run.py')
+          print(m.group(1))
           PY
           )
-          echo "expected=$expected" >> "$GITHUB_OUTPUT"
+          echo "expected_build=$expected_build" >> "$GITHUB_OUTPUT"
       - name: Trigger explicit Render deploy
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
@@ -59,21 +55,26 @@ jobs:
           fi
       - name: Verify production version and clean contract
         env:
-          EXPECTED_VERSION: ${{ steps.version.outputs.expected }}
+          EXPECTED_BUILD: ${{ steps.version.outputs.expected_build }}
         run: |
           python - <<'PY'
           import json, os, time, urllib.request
-          expected=os.environ['EXPECTED_VERSION']; url='https://iscarb-lecture-studio.onrender.com/api/health'; last=''
+          expected=os.environ['EXPECTED_BUILD']; url='https://iscarb-lecture-studio.onrender.com/api/health'; last=''
           for _ in range(90):
               try:
-                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/2.0','Cache-Control':'no-cache'})
+                  req=urllib.request.Request(url,headers={'User-Agent':'ISCARB-deploy-verifier/2.1','Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=30) as r: data=json.loads(r.read().decode())
-                  last=str(data); print('production',data.get('version'),data.get('release_ui'),'expected',expected)
-                  if (str(data.get('version') or '')==expected and data.get('release_ui')=='7.2.0'
-                      and data.get('clean_release') is True and data.get('dense_p1_decomposition') is True):
+                  last=str(data); print('production',data.get('version'),data.get('release_ui'),'expected runtime',expected)
+                  if (data.get('release_ui')==expected
+                      and data.get('clean_release') is True
+                      and data.get('dense_p1_decomposition') is True
+                      and data.get('public_web_image_fallback') is False
+                      and data.get('ai_era_dependability') is True
+                      and data.get('micro_example_before_context_case') is True
+                      and data.get('source_expansion_decision_box') is True):
                       raise SystemExit(0)
               except SystemExit: raise
               except Exception as e: last=repr(e)
               time.sleep(10)
-          raise SystemExit('Production did not advance to clean release. Last='+last[:1000])
+          raise SystemExit('Production did not advance to v7.2.1 clean runtime. Last='+last[:1000])
           PY
