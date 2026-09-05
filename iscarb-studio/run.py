@@ -7,7 +7,7 @@ import uvicorn
 # Authoritative curriculum baseline: user-approved Golden v6.6 lecture model.
 os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>text-first")
-os.environ.setdefault("ISCARB_BUILD_ID", "7.3.3-golden-v660-final-readable")
+os.environ.setdefault("ISCARB_BUILD_ID", "7.3.4-home-original-lock")
 
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
@@ -32,6 +32,7 @@ from app.patch_v730_universal_meta_gates import apply_v730_universal_meta_gates_
 from app.patch_v731_projection_legibility import apply_v731_projection_legibility_patch
 from app.patch_v732_native_figures_cues import apply_v732_native_figures_cues_patch
 from app.patch_v733_final_readability import apply_v733_final_readability_patch
+from app.patch_v734_home_original_lock import apply_v734_home_original_lock_patch
 
 apply_v725_golden_v660_patch(app)
 apply_v726_timebox_tasks_patch(app)
@@ -42,6 +43,7 @@ apply_v730_universal_meta_gates_patch(app)
 apply_v731_projection_legibility_patch(app)
 apply_v732_native_figures_cues_patch(app)
 apply_v733_final_readability_patch(app)
+apply_v734_home_original_lock_patch(app)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
