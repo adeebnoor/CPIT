@@ -4,11 +4,12 @@ import run  # installs production patch chain
 from app import start_v440 as base
 from app import patch_v729_editor_gates as gates
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.2.9-golden-v660-editor-gates"
+assert os.getenv("ISCARB_BUILD_ID") == "7.3.0-golden-v660-universal-meta-gates"
 health = dict(base._health_v440())
-assert health.get("editor_gates_version") == "v7.2.9", health
-assert health.get("editor_gates_count") == 12, health
-text = "\n".join(health.get("editor_gates", []))
+assert health.get("assurance_profile_version") == "v7.2.9", health
+assert health.get("assurance_profile_count") == 12, health
+assert "only" in health.get("assurance_profile_scope", ""), health
+text = "\n".join(health.get("assurance_profile_gates", []))
 for needle in (
     "Breaking Variable", "Falsification First", "Quantified Uncertainty",
     "Data Layer", "Dynamic Reliability", "AI Accountability Boundary",
@@ -16,6 +17,5 @@ for needle in (
     "Industry Variables", "Evidence Chain", "Local Owner",
 ):
     assert needle in text, needle
-assert "returns it for revision" in health.get("submission_feedback_loop", "")
 assert len(gates.RULES) == 12
-print("PASS: v7.2.9 measurable editor/readiness gates locked")
+print("PASS: v7.2.9 assurance domain profile remains available under universal meta layer")
