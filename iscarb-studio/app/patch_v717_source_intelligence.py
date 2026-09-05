@@ -230,7 +230,8 @@ def apply_v717_source_intelligence_patch(app) -> None:
     def health():
         data = dict(previous_health())
         data.update({
-            "release_ui": "7.1.7",
+            "release_ui": "7.1.6",
+            "source_intelligence_release": "7.1.7",
             "source_intelligence": "dense-P1 concept extraction + administrative-page suppression",
             "dense_pdf_policy": "derive compact P1 concepts; never use code/example/footer line as Domain Spine node",
             "opening_crisis_selector": "P1 failure/stake sentence first; generic crisis still blocks release",
