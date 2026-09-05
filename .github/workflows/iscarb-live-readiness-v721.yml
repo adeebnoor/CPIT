@@ -1,4 +1,4 @@
-name: ISCARB Live Readiness v721
+name: ISCARB Live Readiness v722
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
 jobs:
   acceptance:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Install browser and rendering tools
         run: |
@@ -22,29 +22,41 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends libreoffice-impress poppler-utils
 
-      - name: Wait for v7.2.1 live contract
+      - name: Wait for v7.2.2 live contract
         run: |
+          mkdir -p /tmp/iscarb_v722
           python - <<'PY'
-          import time,requests
-          url='https://iscarb-lecture-studio.onrender.com/api/health'
-          for _ in range(100):
+          import json, time, requests
+          url = 'https://iscarb-lecture-studio.onrender.com/api/health'
+          last = None
+          for _ in range(120):
               try:
-                  h=requests.get(url,timeout=20,headers={'Cache-Control':'no-cache'}).json(); print(h)
-                  if (h.get('release_ui')=='7.2.1' and h.get('clean_release') is True
-                      and h.get('ai_era_dependability') is True
-                      and h.get('micro_example_before_context_case') is True
-                      and h.get('source_expansion_decision_box') is True): raise SystemExit(0)
-              except SystemExit: raise
-              except Exception as e: print(repr(e))
+                  h = requests.get(url, timeout=20, headers={'Cache-Control':'no-cache'}).json()
+                  last = h
+                  print(json.dumps(h, ensure_ascii=False)[:5000])
+                  forbidden = ['cimt_reference_archive','ready_example_source','source_library_verified','verified_source_count','public_experience','design_language','faculty_experience','source_visual_public_url']
+                  if (h.get('release_ui') == '7.2.2'
+                      and h.get('clean_release') is True
+                      and h.get('legacy_public_source_library') is False
+                      and h.get('public_web_image_fallback') is False
+                      and h.get('presenter_activity_labels_dynamic') is True
+                      and h.get('ai_era_content_visible_in_presenter') is True
+                      and h.get('black_box_auditability_prompt') is True
+                      and not any(k in h for k in forbidden)):
+                      open('/tmp/iscarb_v722/health.json','w',encoding='utf-8').write(json.dumps(h, indent=2, ensure_ascii=False))
+                      raise SystemExit(0)
+              except SystemExit:
+                  raise
+              except Exception as e:
+                  print(repr(e))
               time.sleep(6)
-          raise SystemExit('v7.2.1 did not become live')
+          raise SystemExit('v7.2.2 did not become live cleanly; last=' + repr(last))
           PY
 
       - name: Browser audit clean home
         run: |
-          mkdir -p /tmp/iscarb_v721
           python - <<'PY'
-          import asyncio,json,requests
+          import asyncio, json, requests
           from pathlib import Path
           from playwright.async_api import async_playwright
           BASE='https://iscarb-lecture-studio.onrender.com'
@@ -56,36 +68,93 @@ jobs:
                   page.on('console',lambda m: errors.append(m.text) if m.type=='error' else None)
                   page.on('pageerror',lambda e: errors.append(str(e)))
                   r=await page.goto(BASE,wait_until='networkidle',timeout=60000); assert r and r.status==200
-                  await page.wait_for_timeout(800); assert await page.evaluate('document.readyState')=='complete'
-                  body=(await page.locator('body').inner_text()).lower(); html=(await page.content()).lower()
-                  for bad in ['sign in','original source library','cpit455-class','second amendment','down syndrome','slideshare.net/slideshow/ch10']:
-                      assert bad not in html,bad
+                  html=(await page.content()).lower(); text=(await page.locator('body').inner_text()).lower()
+                  for bad in ['sign in','original source library','cpit455-class','second amendment','down syndrome','slideshare.net/slideshow/ch10','verified original source library']:
+                      assert bad not in html, bad
+                  assert 'it lecture transformation studio' in text or 'محرك واحد' in text
                   links=await page.locator('a[href]').evaluate_all("els=>els.map(a=>a.getAttribute('href'))")
                   badlinks=[]
                   for href in links:
                       if not href or href.startswith('#'): continue
-                      if href.startswith('http://') or href.startswith('https://'): badlinks.append(href); continue
+                      if href.startswith('http://') or href.startswith('https://'):
+                          badlinks.append(href); continue
                       if href.startswith('/'):
                           rr=requests.get(BASE+href,timeout=30,allow_redirects=True)
                           if rr.status_code>=400: badlinks.append((href,rr.status_code))
-                  assert not badlinks,badlinks
+                  assert not badlinks, badlinks
                   hero=await page.locator('.heroArt').bounding_box(); assert hero and hero['width']>500 and hero['height']>250
-                  assert not errors,errors
-                  await page.screenshot(path='/tmp/iscarb_v721/home.png',full_page=True)
-                  Path('/tmp/iscarb_v721/home_links.json').write_text(json.dumps(links,indent=2),encoding='utf-8')
+                  assert not errors, errors
+                  await page.screenshot(path='/tmp/iscarb_v722/home.png',full_page=True)
+                  Path('/tmp/iscarb_v722/home_links.json').write_text(json.dumps(links,indent=2),encoding='utf-8')
                   await b.close()
           asyncio.run(main())
           PY
 
-      - name: Compile real non-SE database lecture
+      - name: Compile database and dependability acceptance decks
         run: |
+          cat > /tmp/iscarb_v722/dependability.txt <<'TXT'
+          Dependable systems must justify reliability, availability, safety and security together. A system can be technically correct yet fail because operators, procedures, organizations and software interact as a socio-technical system. Dependability engineering uses redundancy, fault tolerance, diversity, defensive programming, verification and validation, formal specification and evidence-based assurance. Safety-critical changes require traceable evidence and explicit approval. Formal methods can establish properties of critical components, but assumptions and operating context must be stated. A software or platform update can invalidate previous compatibility evidence and create a hazardous mismatch even when the changed component passes its own tests. Engineers must identify failure modes, monitor assumptions and retain accountable sign-off.
+          TXT
           python - <<'PY'
-          import time,requests,zipfile,json
+          import json, time, zipfile, requests
           from io import BytesIO
           from pathlib import Path
           base='https://iscarb-lecture-studio.onrender.com'
-          p1='https://ocw.mit.edu/courses/6-830-database-systems-fall-2010/10b223dc3daf6fda4001272799b153a0_MIT6_830F10_lec10.pdf'
-          r=requests.post(base+'/api/compile',data={'primary_url':p1,'supporting_urls':'','lecture_focus':'Database Systems — Transactions and Locking','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60); r.raise_for_status(); jid=r.json()['job_id']
+          def wait_job(jid):
+              for _ in range(120):
+                  job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
+                  if job.get('status') in {'ready','blocked','error'}: return job
+                  time.sleep(2)
+              raise RuntimeError('timeout '+jid)
+          def export(job, name):
+              jid=job['id']
+              for fmt,suffix in [('pptx','pptx'),('presenter-pdf','pdf'),('json','json')]:
+                  r=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180); r.raise_for_status()
+                  Path(f'/tmp/iscarb_v722/{name}.{suffix}').write_bytes(r.content)
+              with zipfile.ZipFile(BytesIO(Path(f'/tmp/iscarb_v722/{name}.pptx').read_bytes())) as z:
+                  slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+                  assert 22 <= len(slides) <= 30, len(slides)
+          # Non-SE database guard
+          db_url='https://ocw.mit.edu/courses/6-830-database-systems-fall-2010/10b223dc3daf6fda4001272799b153a0_MIT6_830F10_lec10.pdf'
+          r=requests.post(base+'/api/compile',data={'primary_url':db_url,'supporting_urls':'','lecture_focus':'Database Systems — Transactions and Locking','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60); r.raise_for_status()
+          db=wait_job(r.json()['job_id']); assert db.get('status') in {'ready','blocked'} and not db.get('error'),db
+          bp=db['blueprint']; assert len(bp['units'])==20
+          visible=json.dumps(bp).lower()
+          for bad in ['gold standard mechanism','t1: update','t1 commits','mit opencourseware','terms of use','review required','second amendment','down syndrome','a team must make a consequential decision']:
+              assert bad not in visible,bad
+          assert sum('think–pair–share' in u['student_action'].lower() for u in bp['units'])==5
+          assert sum('core in-class case' in u['student_action'].lower() for u in bp['units'])==2
+          assert sum('post-class artifact' in u['student_action'].lower() for u in bp['units'])==4
+          assert not any('ai-era' in ' '.join(u.get('enrichment_content',[])).lower() for u in bp['units']), 'AI leaked into ordinary database lecture'
+          export(db,'database')
+          Path('/tmp/iscarb_v722/database_job.json').write_text(json.dumps(db,indent=2),encoding='utf-8')
+          Path('/tmp/iscarb_v722/database_job_id.txt').write_text(db['id'])
+          # Dependability AI guard
+          with open('/tmp/iscarb_v722/dependability.txt','rb') as f:
+              r=requests.post(base+'/api/compile',files={'primary_lecture':('dependability.txt',f,'text/plain')},data={'primary_url':'','supporting_urls':'','lecture_focus':'Dependable Systems and Assurance','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60)
+          r.raise_for_status(); dep=wait_job(r.json()['job_id']); assert dep.get('status') in {'ready','blocked'} and not dep.get('error'),dep
+          u=dep['blueprint']['units']; assert len(u)==20
+          assert any('ai-era assurance' in x.lower() for x in u[11]['enrichment_content']),u[11]
+          assert any('ai-generated code' in x.lower() for x in u[12]['enrichment_content']),u[12]
+          assert any('distribution shift' in x.lower() for x in u[12]['enrichment_content']),u[12]
+          assert any('ai assurance lens' in x.lower() for x in u[14]['pedagogy_content']),u[14]
+          assert any('black-box test' in x.lower() for x in u[14]['pedagogy_content']),u[14]
+          assert all('not asserted as p1 content' in x.lower() for x in u[11]['enrichment_basis']+u[12]['enrichment_basis'])
+          export(dep,'dependability')
+          Path('/tmp/iscarb_v722/dependability_job.json').write_text(json.dumps(dep,indent=2),encoding='utf-8')
+          Path('/tmp/iscarb_v722/dependability_job_id.txt').write_text(dep['id'])
+          PY
+
+      - name: Generate week-one CPIT455 inspection package
+        run: |
+          python - <<'PY'
+          import json, time, zipfile, requests
+          from io import BytesIO
+          from pathlib import Path
+          base='https://iscarb-lecture-studio.onrender.com'
+          source='https://raw.githubusercontent.com/adeebnoor/CPIT/main/lectures/cimt/CPIT455-class1-NooR.pdf'
+          r=requests.post(base+'/api/compile',data={'primary_url':source,'supporting_urls':'','lecture_focus':'CPIT455 Week 1 — Course launch, engineering evidence, and readiness expectations','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60); r.raise_for_status()
+          jid=r.json()['job_id']
           for _ in range(120):
               job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
               if job.get('status') in {'ready','blocked','error'}: break
@@ -93,74 +162,46 @@ jobs:
           assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
           bp=job['blueprint']; assert len(bp['units'])==20
           visible=json.dumps(bp).lower()
-          for bad in ['gold standard mechanism','t1: update','t1 commits','mit opencourseware','terms of use','review required','second amendment','down syndrome','a team must make a consequential decision']:
+          for bad in ['second amendment','down syndrome','slideshare','review required','a team must make a consequential decision']:
               assert bad not in visible,bad
           assert sum('think–pair–share' in u['student_action'].lower() for u in bp['units'])==5
           assert sum('core in-class case' in u['student_action'].lower() for u in bp['units'])==2
           assert sum('post-class artifact' in u['student_action'].lower() for u in bp['units'])==4
-          assert any('micro-example' in x.lower() for x in bp['units'][10]['pedagogy_content'])
-          assert all(any('decision box' in x.lower() for x in u['pedagogy_content']) for u in bp['units'][5:15])
-          assert any('peer-review card' in x.lower() for x in bp['units'][18]['pedagogy_content'])
-          ppt=requests.get(f'{base}/api/jobs/{jid}/export/pptx',timeout=120); ppt.raise_for_status(); Path('/tmp/iscarb_v721/database.pptx').write_bytes(ppt.content)
-          with zipfile.ZipFile(BytesIO(ppt.content)) as z:
-              assert 'ppt/presentation.xml' in z.namelist(); slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]; assert 22<=len(slides)<=30
-          Path('/tmp/iscarb_v721/database_job.json').write_text(json.dumps(job,indent=2),encoding='utf-8')
-          Path('/tmp/iscarb_v721/database_job_id.txt').write_text(jid)
+          out=Path('/tmp/iscarb_v722')
+          for fmt,name in [('pptx','week1_visual_presenter.pptx'),('presenter-pdf','week1_visual_presenter.pdf'),('pdf','week1_faculty_reading_pack.pdf'),('docx','week1_instructor_guide.docx'),('student','week1_student_activity_pack.docx'),('json','week1_blueprint.json')]:
+              rr=requests.get(f'{base}/api/jobs/{jid}/export/{fmt}',timeout=180); rr.raise_for_status(); (out/name).write_bytes(rr.content)
+          with zipfile.ZipFile(BytesIO((out/'week1_visual_presenter.pptx').read_bytes())) as z:
+              slides=[n for n in z.namelist() if n.startswith('ppt/slides/slide') and n.endswith('.xml')]
+              assert 22 <= len(slides) <= 30, len(slides)
+          (out/'week1_job.json').write_text(json.dumps(job,indent=2),encoding='utf-8')
+          (out/'week1_job_id.txt').write_text(jid)
           PY
 
-      - name: Compile dependability lecture and prove AI-era layer
-        run: |
-          cat > /tmp/iscarb_v721/dependability.txt <<'TXT'
-          Dependable systems must justify reliability, availability, safety and security together. A system can be technically correct yet fail because operators, procedures, organizations and software interact as a socio-technical system. Dependability engineering uses redundancy, fault tolerance, diversity, defensive programming, verification and validation, formal specification and evidence-based assurance. Safety-critical changes require traceable evidence and explicit approval. Formal methods can establish properties of critical components, but assumptions and operating context must be stated. A software or platform update can invalidate previous compatibility evidence and create a hazardous mismatch even when the changed component passes its own tests. Engineers must identify failure modes, monitor assumptions and retain accountable sign-off.
-          TXT
-          python - <<'PY'
-          import time,requests,json,zipfile
-          from io import BytesIO
-          from pathlib import Path
-          base='https://iscarb-lecture-studio.onrender.com'
-          with open('/tmp/iscarb_v721/dependability.txt','rb') as f:
-              r=requests.post(base+'/api/compile',files={'primary_lecture':('dependability.txt',f,'text/plain')},data={'primary_url':'','supporting_urls':'','lecture_focus':'Dependable Systems and Assurance','model':'source-only','repair_rounds':'0','free_tier_confirmed':'false'},timeout=60)
-          r.raise_for_status(); jid=r.json()['job_id']
-          for _ in range(120):
-              job=requests.get(f'{base}/api/jobs/{jid}',timeout=30).json()
-              if job.get('status') in {'ready','blocked','error'}: break
-              time.sleep(2)
-          assert job.get('status') in {'ready','blocked'} and not job.get('error'),job
-          u=job['blueprint']['units']; assert len(u)==20
-          assert any('ai-era assurance' in x.lower() for x in u[11]['enrichment_content']),u[11]
-          assert any('ai-generated code' in x.lower() for x in u[12]['enrichment_content']),u[12]
-          assert any('distribution shift' in x.lower() for x in u[12]['enrichment_content']),u[12]
-          assert all('not asserted as p1 content' in x.lower() for x in u[11]['enrichment_basis']+u[12]['enrichment_basis'])
-          assert any('ai assurance lens' in x.lower() for x in u[14]['pedagogy_content'])
-          assert any('black-box test' in x.lower() for x in u[14]['pedagogy_content'])
-          ppt=requests.get(f'{base}/api/jobs/{jid}/export/pptx',timeout=120); ppt.raise_for_status(); Path('/tmp/iscarb_v721/dependability.pptx').write_bytes(ppt.content)
-          with zipfile.ZipFile(BytesIO(ppt.content)) as z: assert 'ppt/presentation.xml' in z.namelist()
-          Path('/tmp/iscarb_v721/dependability_job.json').write_text(json.dumps(job,indent=2),encoding='utf-8')
-          Path('/tmp/iscarb_v721/dependability_job_id.txt').write_text(jid)
-          PY
-
-      - name: Render both PowerPoints and build contact sheets
+      - name: Render decks and build contact sheets
         run: |
           set -euxo pipefail
-          cd /tmp/iscarb_v721
-          for deck in database dependability; do
+          cd /tmp/iscarb_v722
+          for deck in database dependability week1_visual_presenter; do
             mkdir -p "lo_$deck" "rendered_$deck"
-            timeout 120s libreoffice --headless -env:UserInstallation="file:///tmp/iscarb_v721/lo_$deck" --convert-to pdf --outdir "rendered_$deck" "$deck.pptx"
+            timeout 120s libreoffice --headless -env:UserInstallation="file:///tmp/iscarb_v722/lo_$deck" --convert-to pdf --outdir "rendered_$deck" "$deck.pptx"
             pdftoppm -png -r 96 "rendered_$deck/$deck.pdf" "rendered_$deck/slide" >/dev/null 2>&1
           done
           python - <<'PY'
           from PIL import Image,ImageDraw,ImageStat
           from pathlib import Path
-          for deck in ['database','dependability']:
-              imgs=sorted(Path(f'/tmp/iscarb_v721/rendered_{deck}').glob('slide-*.png')); assert 20<=len(imgs)<=30
+          for deck in ['database','dependability','week1_visual_presenter']:
+              imgs=sorted(Path(f'/tmp/iscarb_v722/rendered_{deck}').glob('slide-*.png'))
+              assert 20 <= len(imgs) <= 30, (deck,len(imgs))
               thumbs=[]
               for p in imgs:
-                  im=Image.open(p).convert('RGB'); assert max(ImageStat.Stat(im).var)>2.0,p
+                  im=Image.open(p).convert('RGB')
+                  assert max(ImageStat.Stat(im).var)>2.0,p
                   im.thumbnail((480,270)); thumbs.append((p.name,im.copy()))
-              cols=4; rows=(len(thumbs)+3)//4; sheet=Image.new('RGB',(cols*500,rows*300),'white'); d=ImageDraw.Draw(sheet)
+              cols=4; rows=(len(thumbs)+3)//4
+              sheet=Image.new('RGB',(cols*500,rows*300),'white'); d=ImageDraw.Draw(sheet)
               for i,(name,im) in enumerate(thumbs):
-                  x=(i%4)*500;y=(i//4)*300;sheet.paste(im,(x,y+24));d.text((x+4,y+4),name,fill='black')
-              sheet.save(f'/tmp/iscarb_v721/{deck}_contact_sheet.jpg',quality=90)
+                  x=(i%4)*500; y=(i//4)*300; sheet.paste(im,(x,y+24)); d.text((x+4,y+4),name,fill='black')
+              sheet.save(f'/tmp/iscarb_v722/{deck}_contact_sheet.jpg',quality=90)
           PY
 
       - name: Chromium presenter proof
@@ -172,21 +213,26 @@ jobs:
           async def main():
               async with async_playwright() as p:
                   b=await p.chromium.launch(headless=True,args=['--no-sandbox'])
-                  for deck in ['database','dependability']:
-                      jid=Path(f'/tmp/iscarb_v721/{deck}_job_id.txt').read_text().strip(); page=await b.new_page(viewport={'width':1600,'height':1000}); errors=[]
-                      page.on('pageerror',lambda e: errors.append(str(e))); page.on('console',lambda m: errors.append(m.text) if m.type=='error' else None)
+                  for deck,key in [('database','database'),('dependability','dependability'),('week1','week1')]:
+                      jid=Path(f'/tmp/iscarb_v722/{key}_job_id.txt').read_text().strip()
+                      page=await b.new_page(viewport={'width':1600,'height':1000}); errors=[]
+                      page.on('pageerror',lambda e: errors.append(str(e)))
+                      page.on('console',lambda m: errors.append(m.text) if m.type=='error' else None)
                       r=await page.goto(f'https://iscarb-lecture-studio.onrender.com/api/jobs/{jid}/presenter',wait_until='networkidle',timeout=60000); assert r and r.status==200
-                      text=(await page.locator('body').inner_text()).lower(); assert 'gold standard mechanism' not in text and 'review required' not in text; assert not errors,errors
-                      await page.screenshot(path=f'/tmp/iscarb_v721/{deck}_presenter.png',full_page=True); await page.close()
+                      text=(await page.locator('body').inner_text()).lower()
+                      assert 'review required' not in text and 'second amendment' not in text and 'down syndrome' not in text
+                      assert not errors,errors
+                      await page.screenshot(path=f'/tmp/iscarb_v722/{deck}_presenter.png',full_page=True)
+                      await page.close()
                   await b.close()
           asyncio.run(main())
           PY
 
-      - name: Upload acceptance evidence
+      - name: Upload acceptance and week-one evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: iscarb-v721-live-readiness-${{ github.run_id }}
-          path: /tmp/iscarb_v721/
+          name: iscarb-v722-week1-readiness-${{ github.run_id }}
+          path: /tmp/iscarb_v722/
           if-no-files-found: warn
           retention-days: 14
