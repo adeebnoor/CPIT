@@ -21,6 +21,7 @@ from .patch_v711_hero import apply_v711_hero_patch
 from .patch_v716_contract import apply_v716_contract_patch
 from .patch_v717_source_intelligence import apply_v717_source_intelligence_patch
 from .patch_v718_opening_stake import apply_v718_opening_stake_patch
+from .patch_v720_clean_release import apply_v720_clean_release_patch
 
 apply_v671_patch(app)
 apply_v680_patch(app)
@@ -38,9 +39,10 @@ apply_v711_hero_patch(app)
 apply_v716_contract_patch(app)
 apply_v717_source_intelligence_patch(app)
 apply_v718_opening_stake_patch(app)
+apply_v720_clean_release_patch(app)
 
-PUBLIC_VERSION = "6.9.4"
-UI_RELEASE = "7.1.6"
+PUBLIC_VERSION = "7.2.0"
+UI_RELEASE = "7.2.0"
 ORIGINAL_HERO = "hero_user_original.png"
 ORIGINAL_HERO_SHA256 = "8967fa14fe910e5831531a6b74c64bcd650c965ad691697dd2d705d450b6e50d"
 WEB_HERO = "hero_user_web.jpg"
@@ -106,7 +108,7 @@ _V670_STYLE = r"""
 <style id="iscarb-v716-home-patch">
 :root{--iscarb-bg:#05070D;--iscarb-magenta:#FF258C;--iscarb-cyan:#2CDCFF;--iscarb-gold:#DCB56B;--iscarb-text:#F5F5F8;--iscarb-muted:#B7BDC8}
 .hero.shell{align-items:center;gap:clamp(28px,4vw,72px)}
-.heroArt{position:relative!important;aspect-ratio:16/9!important;min-height:0!important;border-radius:28px;overflow:hidden;isolation:isolate;display:block!important;background-color:#05070D!important;background-image:url('/static/hero_user_web.jpg?v=7.1.6')!important;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
+.heroArt{position:relative!important;aspect-ratio:16/9!important;min-height:0!important;border-radius:28px;overflow:hidden;isolation:isolate;display:block!important;background-color:#05070D!important;background-image:url('/static/hero_user_web.jpg?v=7.2.0')!important;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
 .heroArt>svg{display:none!important}
 .heroArt>.heroPhoto{display:none!important}
 .heroArt::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,13,.015),rgba(5,7,13,0) 50%,rgba(5,7,13,.015))}
@@ -124,19 +126,19 @@ html[data-lang="ar"] body{text-align:right}html[data-lang="ar"] .header nav,html
 def faculty_studio_v670_home():
     body = (Path(__file__).with_name("static") / "index_v440.html").read_text(encoding="utf-8")
     body = body.replace('<html lang="en" dir="ltr" data-theme="dark">', '<html lang="en" dir="ltr" data-theme="dark" data-lang="en">', 1)
-    body = body.replace("4.6 · Gate v15", "7.1.6 · IT-wide · Multi-source · Gate v15")
+    body = body.replace("4.6 · Gate v15", "7.2.0 · IT-wide · Multi-source · Gate v15")
     body = body.replace("Saudi Academic Engineering", "Saudi Engineering Learning System")
-    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.1.6")
-    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.1.6")
-    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.1.6")
+    body = body.replace("studio_v460.css?v=4.6.6", "studio_v460.css?v=7.2.0")
+    body = body.replace("site_v460.js?v=4.6.6", "site_v460.js?v=7.2.0")
+    body = body.replace("studio_v440.js?v=4.6.6", "studio_v440.js?v=7.2.0")
     body = body.replace(
         "</head>",
-        '<link rel="preload" as="image" href="/static/hero_user_web.jpg?v=7.1.6" type="image/jpeg" fetchpriority="high">\n'
+        '<link rel="preload" as="image" href="/static/hero_user_web.jpg?v=7.2.0" type="image/jpeg" fetchpriority="high">\n'
         + _V670_STYLE
-        + '\n<script src="/static/site_v671_fix.js?v=7.1.6" defer></script>'
-        + '\n<script src="/static/site_v700_generic.js?v=it-scope-v3" defer></script>'
-        + '\n<script src="/ui/site_v701_i18n_fixed.js?v=single-language-v2" defer></script>'
-        + '\n<script src="/static/site_v710_sources.js?v=clean-multisource-v1" defer></script>\n</head>',
+        + '\n<script src="/static/site_v671_fix.js?v=7.2.0" defer></script>'
+        + '\n<script src="/static/site_v700_generic.js?v=it-scope-v4" defer></script>'
+        + '\n<script src="/ui/site_v701_i18n_fixed.js?v=single-language-v3" defer></script>'
+        + '\n<script src="/static/site_v710_sources.js?v=clean-multisource-v2" defer></script>\n</head>',
         1,
     )
     return HTMLResponse(
@@ -150,6 +152,13 @@ def faculty_studio_v670_home():
             "X-ISCARB-Hero-Asset": WEB_HERO,
             "X-ISCARB-Hero-SHA256": WEB_HERO_SHA256,
             "X-ISCARB-Hero-Original-SHA256": ORIGINAL_HERO_SHA256,
-            "X-ISCARB-Home": "v7.1.6-generic-it-clean-multisource-single-language-optimized-original-hero-css-background-source-figures-first-gate-v15",
+            "X-ISCARB-Home": "v7.2-clean-it-wide-source-figures-first",
         },
     )
+
+
+# Register the final production home after the legacy-compatible route above.
+# It removes that route and serves the clean IT-wide surface plus a transformed
+# client bundle with the retired hard-coded CPIT source links physically absent.
+from .patch_v720_home_clean import apply_v720_home_clean_patch
+apply_v720_home_clean_patch(app, _STATIC_ROOT, WEB_HERO_SHA256, ORIGINAL_HERO_SHA256)
