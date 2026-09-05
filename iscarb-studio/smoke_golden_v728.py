@@ -15,6 +15,7 @@ EXPECTED_BUILDS = {
     "7.2.8-golden-v660-curriculum-baseline",
     "7.2.9-golden-v660-ztm",
     "7.2.9-golden-v660-editor-gates",
+    "7.3.0-golden-v660-universal-meta-gates",
 }
 assert os.getenv("ISCARB_BUILD_ID") in EXPECTED_BUILDS, os.getenv("ISCARB_BUILD_ID")
 
