@@ -24,6 +24,8 @@ RUN python smoke_editor_gates_v729.py
 RUN python smoke_universal_meta_v730.py
 # Projection legibility: no tiny rubric, no gate dumps, no sparse expansions.
 RUN python smoke_projection_v731.py
+# Native P1 figure prominence + visual cues + timebox range repair.
+RUN python smoke_native_figures_v732.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
