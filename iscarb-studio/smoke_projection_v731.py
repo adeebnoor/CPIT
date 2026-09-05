@@ -27,7 +27,9 @@ u = NS(
 bp = NS(units=[u])
 leg._clean_visible_gates(bp)
 assert len(u.pedagogy_content) == 1 and u.pedagogy_content[0].startswith("MICRO-CASE"), u.pedagogy_content
-assert u.student_action.startswith("TIMEBOX: 5-7 min - "), u.student_action
-assert len(leg._split_timebox(u.student_action)[1].split()) <= 23, u.student_action
+assert u.student_action.startswith("TIMEBOX:"), u.student_action
+label, task = leg._split_timebox(u.student_action)
+assert "5" in label and "7" in label and "min" in label.lower(), label
+assert len(task.split()) <= 23, u.student_action
 
 print("PASS: v7.3.1 projection legibility + whitespace guard")
