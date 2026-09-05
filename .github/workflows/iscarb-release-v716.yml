@@ -1,0 +1,42 @@
+name: ISCARB Release v716
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-release-v716.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version v7.1.6 and gate against automatic saved-job polling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          home=Path('iscarb-studio/app/home_v670.py')
+          s=home.read_text()
+          if 'UI_RELEASE = "7.1.5"' not in s: raise SystemExit('home is not at expected v7.1.5 baseline')
+          s=s.replace('7.1.5','7.1.6')
+          s=s.replace('iscarb-v715-home-patch','iscarb-v716-home-patch')
+          s=s.replace('v7.1.5-generic-it-clean-multisource-single-language-optimized-original-hero-css-background-source-figures-first-gate-v15','v7.1.6-stable-initial-load-generic-it-multisource-optimized-original-hero-source-figures-first-gate-v15')
+          home.write_text(s)
+
+          smoke=Path('iscarb-studio/smoke_prod.py')
+          t=smoke.read_text().replace('hero_user_web.jpg?v=7.1.5','hero_user_web.jpg?v=7.1.6').replace('assert "7.1.5" in html','assert "7.1.6" in html')
+          marker='    assert "site_v710_sources.js?v=clean-multisource-v1" in html, "Clean multi-source intake patch is missing"\n'
+          extra=("    studio_js = (APP / \"static\" / \"studio_v440.js\").read_text(encoding=\"utf-8\")\n"
+                 "    tail = studio_js[-1200:]\n"
+                 "    assert \"A previous lecture job is available. Reconnect only if you want to continue it.\" in tail, \"Saved-job resume is not explicit\"\n"
+                 "    assert \"setBusy(true);poll();\" not in tail, \"Initial page load still auto-polls a stale saved job\"\n")
+          if extra.strip() not in t:
+              if marker not in t: raise SystemExit('smoke insertion marker missing')
+              t=t.replace(marker,marker+extra,1)
+          smoke.write_text(t)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb-studio/app/home_v670.py iscarb-studio/smoke_prod.py
+          git commit -m 'Release v7.1.6 with stable initial load and explicit resume'
+          git push
