@@ -1,0 +1,49 @@
+name: ISCARB Isolate DOM Blocker v716
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-isolate-dom-blocker-v716.yml'
+  workflow_dispatch:
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Binary isolate defer script blocking DOMContentLoaded
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet playwright
+          python - <<'PY'
+          import asyncio,time,json
+          from playwright.async_api import async_playwright, TimeoutError as PWTimeout
+          BASE='https://iscarb-lecture-studio.onrender.com/'
+          scripts=['site_v460.js','studio_v440.js','site_v671_fix.js','site_v700_generic.js','site_v701_i18n.js','site_v710_sources.js']
+          async def test(block):
+              async with async_playwright() as p:
+                  b=await p.chromium.launch(headless=True,executable_path='/usr/bin/google-chrome',args=['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--disable-sync','--no-first-run'])
+                  page=await b.new_page()
+                  if block=='ALL':
+                      await page.route('**/*.js*',lambda route: route.abort())
+                  elif block!='NONE':
+                      await page.route('**/*'+block+'*',lambda route: route.abort())
+                  t=time.monotonic(); ok=True; err=''
+                  try:
+                      await page.goto(BASE,wait_until='domcontentloaded',timeout=8000)
+                  except Exception as e:
+                      ok=False;err=type(e).__name__+': '+str(e).splitlines()[0]
+                  dt=time.monotonic()-t
+                  state='unknown'
+                  try: state=await page.evaluate('document.readyState')
+                  except Exception: pass
+                  await b.close()
+                  print('CASE',json.dumps({'block':block,'dom_ok':ok,'seconds':round(dt,3),'state':state,'error':err}),flush=True)
+                  return ok
+          async def main():
+              results={}
+              for x in ['ALL','NONE']+scripts:
+                  results[x]=await test(x)
+              print('RESULTS',json.dumps(results),flush=True)
+              assert results['ALL'], 'Even blocking all JS did not release DOMContentLoaded'
+              offenders=[x for x in scripts if results[x]]
+              print('BLOCKING_CANDIDATES',offenders,flush=True)
+          asyncio.run(main())
+          PY
