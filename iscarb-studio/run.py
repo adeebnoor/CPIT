@@ -7,7 +7,7 @@ import uvicorn
 # Authoritative curriculum baseline: user-approved Golden v6.6 lecture model.
 os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>text-first")
-os.environ.setdefault("ISCARB_BUILD_ID", "7.3.1-golden-v660-clean-projection")
+os.environ.setdefault("ISCARB_BUILD_ID", "7.3.2-golden-v660-native-figures")
 
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
@@ -20,7 +20,7 @@ if not PRESENTER.exists():
 
 # GOLDEN MASTER LOCK — full-curriculum baseline.
 # Universal meta-gates apply to every course. Stricter domain profiles activate
-# only when relevant. Projection guard is styling/legibility only.
+# only when relevant. Projection/native-figure guards change presentation only.
 # ZTM visual experiments remain in the repository but are deliberately inactive.
 from app.home_v670 import app
 from app.patch_v725_golden_v660 import apply_v725_golden_v660_patch
@@ -30,6 +30,7 @@ from app.patch_v728_peer_review_decision_boxes import apply_v728_peer_review_dec
 from app.patch_v729_editor_gates import apply_v729_editor_gates_patch
 from app.patch_v730_universal_meta_gates import apply_v730_universal_meta_gates_patch
 from app.patch_v731_projection_legibility import apply_v731_projection_legibility_patch
+from app.patch_v732_native_figures_cues import apply_v732_native_figures_cues_patch
 
 apply_v725_golden_v660_patch(app)
 apply_v726_timebox_tasks_patch(app)
@@ -38,6 +39,7 @@ apply_v728_peer_review_decision_boxes_patch(app)
 apply_v729_editor_gates_patch(app)
 apply_v730_universal_meta_gates_patch(app)
 apply_v731_projection_legibility_patch(app)
+apply_v732_native_figures_cues_patch(app)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
