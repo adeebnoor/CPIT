@@ -5,18 +5,6 @@ from __future__ import annotations
 This layer does not widen P1's factual scope. It changes *how* the twenty fixed
 ISCARB jobs are enacted in class, and adds clearly labelled contemporary
 extensions only when the lecture context makes them pedagogically relevant.
-
-Rules:
-- Not every core unit becomes a live classroom task.
-- Think-Pair-Share is deliberately brief and sparse.
-- Only two units own deep in-class case time.
-- Artifact construction/review moves after class.
-- Contextual cases receive a micro-example before the full case.
-- Source-heavy teaching units carry a stable decision/reversal prompt.
-- Unit 19 keeps the 6x4 rubric, but gains a two-question peer-review card.
-- Dependability/reliability/safety/AI lectures receive an AI-era extension as
-  ENRICHMENT, never as P1 fact: probabilistic behavior, distribution shift,
-  AI-generated code verification, and explicit human assurance ownership.
 """
 
 import re
@@ -26,15 +14,17 @@ from . import start_v440 as base
 
 _PATCHED = False
 
+# Intentionally conservative. Generic words such as failure/risk/model are NOT
+# enough to inject an AI-era extension into an unrelated database/networking
+# lecture. The extension activates for dependability/assurance-critical or
+# explicitly AI/ML contexts.
 _AI_CONTEXT = re.compile(
-    r"\b(?:dependab\w*|reliab\w*|safety|security|assurance|verification|validation|"
-    r"formal methods?|fault|failure|risk|audit\w*|accountab\w*|artificial intelligence|"
-    r"machine learning|\bai\b|llm|model)\b",
+    r"\b(?:dependab\w*|reliab\w*|safety(?:-critical)?|security|assurance|formal methods?|"
+    r"fault[- ]toler\w*|mission[- ]critical|safety[- ]critical|artificial intelligence|"
+    r"machine learning|generative ai|\bai\b|\bllm\b|neural network|foundation model)\b",
     re.I,
 )
 
-# Deliberately small: a 90-minute lecture should not ask students to perform
-# twenty equally weighted activities.
 _TPS_UNITS = {5, 8, 10, 14, 15}
 _CORE_CASE_UNITS = {11, 12}
 _POST_CLASS_UNITS = {16, 17, 18, 19}
@@ -59,12 +49,10 @@ def _replace_prefixed(items, prefix: str, value: str) -> list[str]:
 
 
 def _set_activity_budget(bp) -> None:
-    units = list(getattr(bp, "units", []) or [])
-    for u in units:
+    for u in list(getattr(bp, "units", []) or []):
         n = int(getattr(u, "number", 0) or 0)
         if n in _TPS_UNITS:
             u.student_action = "THINK–PAIR–SHARE · 1 MIN — make one choice, compare with a partner, then state the evidence that would change it."
-            # Preserve technical teaching time; the activity itself is bounded.
             if getattr(u, "planned_minutes", 0) > 0:
                 u.planned_minutes = max(2, int(u.planned_minutes))
         elif n in _CORE_CASE_UNITS:
@@ -72,11 +60,9 @@ def _set_activity_budget(bp) -> None:
             u.planned_minutes = max(6, int(getattr(u, "planned_minutes", 0) or 0))
         elif n in _POST_CLASS_UNITS:
             u.student_action = "POST-CLASS ARTIFACT — complete or review the evidence artifact individually after class; submit a traceable decision and reversal condition."
-            # Keep only a short handoff in class.
             if getattr(u, "planned_minutes", 0) > 2:
                 u.planned_minutes = 2
         else:
-            # These remain teaching/checkpoint units, not twenty separate live tasks.
             u.student_action = "CHECKPOINT — follow the reasoning; respond only if the lecturer calls for a quick check."
 
 
@@ -84,10 +70,10 @@ def _add_case_scaffold(bp) -> None:
     units = list(getattr(bp, "units", []) or [])
     if len(units) < 11:
         return
-    u = units[10]  # Unit 11: contextual application
+    u = units[10]
     micro = (
-        "MICRO-EXAMPLE — Before the full local case, trace one small failure: a software/platform update changes a device or service behavior; "
-        "the engineer must check compatibility evidence, operational impact, and the condition that would invalidate deployment approval."
+        "MICRO-EXAMPLE — Before the full local case, trace one small change: a platform, library, device or service update invalidates a previously safe technical assumption. "
+        "Check the affected requirement, independent evidence, decision, and reversal condition."
     )
     u.pedagogy_content = _replace_prefixed(u.pedagogy_content, "MICRO-EXAMPLE", micro)
     u.pedagogy_content = _replace_prefixed(
@@ -98,9 +84,6 @@ def _add_case_scaffold(bp) -> None:
 
 
 def _add_decision_boxes(bp) -> None:
-    # Technical span is where SOURCE EXPANSION is most likely to occur. The
-    # renderer will carry this pedagogy with the unit/expansion, giving every
-    # dense source recovery a stable mental-model anchor.
     for u in list(getattr(bp, "units", []) or [])[5:15]:
         u.pedagogy_content = _replace_prefixed(
             u.pedagogy_content,
@@ -119,7 +102,6 @@ def _add_peer_review_card(bp) -> None:
         "PEER-REVIEW CARD",
         "PEER-REVIEW CARD — (1) Can another person independently inspect the evidence? (2) What variable or edge case would invalidate the claim?",
     )
-    # Do not turn the rubric itself into another live activity.
     u.student_action = "POST-CLASS ARTIFACT — use the full 6×4 rubric after class; in class use only the two-question peer-review card."
 
 
@@ -130,8 +112,6 @@ def _add_ai_era_dependability(bp) -> None:
     if len(units) < 15:
         return
 
-    # Unit 12: accountability / ownership. Contemporary statements are clearly
-    # marked as enrichment and therefore cannot masquerade as P1 claims.
     u12 = units[11]
     ai_accountability = (
         "AI-ERA ASSURANCE — AI may prepare code, tests, summaries or evidence, but assurance ownership remains human. "
@@ -142,7 +122,6 @@ def _add_ai_era_dependability(bp) -> None:
         u12.enrichment_basis.append("ISCARB contemporary extension — not asserted as P1 content")
     u12.contextual_enrichment = True
 
-    # Unit 13: contemporary practice.
     u13 = units[12]
     contemporary = [
         "AI-ERA SYSTEM BEHAVIOR — deterministic software assumptions are insufficient for probabilistic model components; test distributions and failure envelopes, not only nominal inputs.",
@@ -155,8 +134,6 @@ def _add_ai_era_dependability(bp) -> None:
             u13.enrichment_basis.append("ISCARB contemporary extension — not asserted as P1 content")
     u13.contextual_enrichment = True
 
-    # Unit 15 is already Critical AI Literacy in the 20-unit grammar. Make the
-    # distinction operational rather than treating AI as a clerical assistant.
     u15 = units[14]
     u15.pedagogy_content = _replace_prefixed(
         u15.pedagogy_content,
@@ -170,6 +147,16 @@ def _add_ai_era_dependability(bp) -> None:
     )
 
 
+def _clean_visual_metadata(bp) -> None:
+    for u in list(getattr(bp, "units", []) or []):
+        plan = getattr(u, "visual_plan", None)
+        if plan is None:
+            continue
+        role = str(getattr(plan, "visual_evidence_role", "") or "")
+        if "faculty review required before release" in role.lower():
+            plan.visual_evidence_role = "Draft visualization; inspect source alignment before any verified release."
+
+
 def _enhance(bp):
     if not getattr(bp, "units", None) or len(bp.units) != 20:
         return bp
@@ -178,6 +165,7 @@ def _enhance(bp):
     _add_decision_boxes(bp)
     _add_peer_review_card(bp)
     _add_ai_era_dependability(bp)
+    _clean_visual_metadata(bp)
     return bp
 
 
@@ -188,36 +176,42 @@ def apply_v721_pedagogy_ai_patch(app) -> None:
     _PATCHED = True
 
     previous_timebox = engine.apply_90_minute_timebox
-
     def timebox_v721(blueprint, profile, bundle):
         return _enhance(previous_timebox(blueprint, profile, bundle))
-
     engine.apply_90_minute_timebox = timebox_v721
     base.engine.apply_90_minute_timebox = timebox_v721
 
-    # Source-only drafts can already have passed through the previous wrapper
-    # before this patch is installed in unusual import orders; make the final
-    # source-draft hook idempotently enforce the same pedagogy.
     previous_draft = engine._source_preserving_draft
-
     def draft_v721(profile, bundle):
         return _enhance(previous_draft(profile, bundle))
-
     engine._source_preserving_draft = draft_v721
     base.engine._source_preserving_draft = draft_v721
 
     previous_health = base._health_v440
-
     def health():
         data = dict(previous_health())
+        # Retired implementation/history fields do not belong in the production
+        # faculty contract. Keep history in git, not in the live product surface.
+        for key in (
+            "cimt_reference_archive", "ready_example_source", "source_library_verified",
+            "verified_source_count", "public_experience", "design_language",
+            "fixed_task_footer", "hero_live_release", "faculty_experience",
+        ):
+            data.pop(key, None)
         data.update({
+            "version": "7.2.1",
             "release_ui": "7.2.1",
+            "pipeline": "iscarb-v7.2.1-clean-it-wide-cognitive-budget-ai-era",
             "cognitive_budget": "5 one-minute Think-Pair-Share + 2 core in-class cases + post-class artifact build/review",
+            "learner_action_labels": ["CHECKPOINT", "THINK-PAIR-SHARE", "CORE IN-CLASS CASE", "POST-CLASS ARTIFACT"],
             "micro_example_before_context_case": True,
             "source_expansion_decision_box": True,
             "peer_review_quick_card": "2 questions",
             "ai_era_dependability": True,
             "ai_extension_provenance": "enrichment-only unless supported by P1",
+            "approved_hero_asset": "hero_user_original.png",
+            "approved_hero_web_derivative": "hero_user_web.jpg",
+            "public_web_image_fallback": False,
         })
         return data
 
