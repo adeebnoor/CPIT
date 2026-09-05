@@ -68,24 +68,51 @@ if hashlib.sha256(_web_bytes).hexdigest() != WEB_HERO_SHA256:
 
 # Chromium can starve its event loop if a MutationObserver watches placeholder
 # attributes while the localization pass unconditionally writes the same value
-# back to those attributes. Serve the existing localization source with one
-# idempotence guard so we preserve the complete bilingual dictionary without a
-# second divergent copy of it.
+# back to those attributes. The active bundle is also cleaned here so retired
+# cleanup-era product copy is not shipped to faculty even as dormant dictionary
+# entries. Historical source files remain in git for reproducibility only.
 _I18N_SOURCE = _STATIC_ROOT / "site_v701_i18n.js"
 _I18N_BAD = """      const en=el.dataset.i18nPlaceholderEn;
       el.setAttribute('placeholder',lang==='ar' && PLACEHOLDER_AR[en] ? PLACEHOLDER_AR[en] : en);"""
 _I18N_FIXED = """      const en=el.dataset.i18nPlaceholderEn;
       const target=lang==='ar' && PLACEHOLDER_AR[en] ? PLACEHOLDER_AR[en] : en;
       if(el.getAttribute('placeholder')!==target) el.setAttribute('placeholder',target);"""
+_I18N_CLEAN_REPLACEMENTS = (
+    ("'About Us':'عن ISCARB','Sign In':'تسجيل الدخول',", "'About Us':'عن ISCARB',"),
+    (
+        "'ISCARB is not a CPIT-455 or Software Engineering template. Upload the lecture you actually teach; the source determines its concepts, mechanisms, examples, formulas and technical vocabulary.':'ISCARB ليس قالبًا لمقرر CPIT-455 ولا لهندسة البرمجيات. ارفع المحاضرة التي تدرّسها فعليًا؛ والمصدر نفسه يحدد المفاهيم والآليات والأمثلة والمعادلات والمصطلحات التقنية.',",
+        "'Upload the lecture you actually teach. The primary source defines its concepts, mechanisms, examples, formulas and technical vocabulary.':'ارفع المحاضرة التي تدرّسها فعليًا؛ المصدر الأساسي هو الذي يحدد المفاهيم والآليات والأمثلة والمعادلات والمصطلحات التقنية.',",
+    ),
+    ("'AUTO SOURCE ADAPTATION':'تكيّف تلقائي مع المصدر',", "'SOURCE-ADAPTIVE':'متكيّف مع المصدر',"),
+    ("'1 · Upload':'١ · ارفع','2 · ISCARB transforms':'٢ · يحوّل ISCARB','3 · Download':'٣ · نزّل',", "'1 · Upload':'١ · ارفع','2 · Transform':'٢ · حوّل','3 · Inspect & download':'٣ · راجع ونزّل',"),
+    (
+        "'No Software Engineering course selection is required. Leave IT area on Auto-detect for normal use.':'لا يلزم اختيار مقرر هندسة برمجيات. اترك مجال تقنية المعلومات على التعرف التلقائي في الاستخدام المعتاد.',",
+        "'Leave IT area on Auto-detect for normal use; add course context only when it helps the teaching level or emphasis.':'اترك مجال تقنية المعلومات على التعرّف التلقائي في الاستخدام المعتاد؛ وأضف سياق المقرر فقط عندما يفيد مستوى التدريس أو التركيز.',",
+    ),
+    (
+        "'Your content is secure and used only for academic enhancement.':'يُستخدم محتواك فقط لتحسين المحاضرة أكاديميًا.',",
+        "'Use only material you are authorized to process. Do not upload confidential or restricted content.':'استخدم فقط المواد المصرح لك بمعالجتها، ولا ترفع محتوى سريًا أو مقيّدًا.',",
+    ),
+)
 
 
 def _fixed_i18n_source() -> str:
     source = _I18N_SOURCE.read_text(encoding="utf-8")
-    if _I18N_FIXED in source:
-        return source
-    if _I18N_BAD not in source:
-        raise RuntimeError("ISCARB localization guard target changed unexpectedly")
-    return source.replace(_I18N_BAD, _I18N_FIXED, 1)
+    for old, new in _I18N_CLEAN_REPLACEMENTS:
+        source = source.replace(old, new)
+    if _I18N_FIXED not in source:
+        if _I18N_BAD not in source:
+            raise RuntimeError("ISCARB localization guard target changed unexpectedly")
+        source = source.replace(_I18N_BAD, _I18N_FIXED, 1)
+    for retired in (
+        "CPIT-455 or Software Engineering template",
+        "No Software Engineering course selection is required",
+        "Your content is secure and used only for academic enhancement",
+        "'Sign In':'تسجيل الدخول'",
+    ):
+        if retired in source:
+            raise RuntimeError("Retired production localization copy survived: " + retired)
+    return source
 
 
 # Validate the hot-path transformation at process startup rather than failing
