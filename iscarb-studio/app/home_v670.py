@@ -20,6 +20,7 @@ from .patch_v705_web_visuals import apply_v705_patch
 from .patch_v711_hero import apply_v711_hero_patch
 from .patch_v716_contract import apply_v716_contract_patch
 from .patch_v717_source_intelligence import apply_v717_source_intelligence_patch
+from .patch_v718_opening_stake import apply_v718_opening_stake_patch
 
 apply_v671_patch(app)
 apply_v680_patch(app)
@@ -36,6 +37,7 @@ apply_v705_patch(app)
 apply_v711_hero_patch(app)
 apply_v716_contract_patch(app)
 apply_v717_source_intelligence_patch(app)
+apply_v718_opening_stake_patch(app)
 
 PUBLIC_VERSION = "6.9.4"
 UI_RELEASE = "7.1.6"
