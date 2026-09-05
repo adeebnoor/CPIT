@@ -1,0 +1,53 @@
+name: ISCARB Resource Audit v715
+on:
+  push:
+    paths:
+      - '.github/workflows/iscarb-resource-audit-v715.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch every parser resource with hard timeouts
+        run: |
+          set -euxo pipefail
+          python -m pip install --quiet requests beautifulsoup4
+          python - <<'PY'
+          import requests,time,re
+          from bs4 import BeautifulSoup
+          from urllib.parse import urljoin
+          BASE='https://iscarb-lecture-studio.onrender.com/'
+          s=requests.Session();s.headers['User-Agent']='Mozilla/5.0 Chrome ISCARB resource audit'
+          t=time.monotonic();r=s.get(BASE,timeout=(5,10));print('DOC',r.status_code,len(r.content),round(time.monotonic()-t,3),r.headers.get('x-iscarb-ui'),flush=True)
+          soup=BeautifulSoup(r.text,'html.parser')
+          seen=[]
+          for tag,attr in [('link','href'),('script','src'),('img','src'),('iframe','src'),('video','src'),('audio','src'),('source','src')]:
+              for el in soup.find_all(tag):
+                  u=el.get(attr)
+                  if u and not u.startswith(('data:','javascript:','#','mailto:')):
+                      full=urljoin(BASE,u)
+                      if full not in [x[1] for x in seen]:seen.append((tag,full))
+          print('COUNT',len(seen),flush=True)
+          failures=[]
+          for tag,u in seen:
+              try:
+                  t=time.monotonic();rr=s.get(u,timeout=(5,10));dt=time.monotonic()-t
+                  print('OK',tag,rr.status_code,len(rr.content),round(dt,3),rr.headers.get('content-type'),u,flush=True)
+                  if rr.status_code>=400 or dt>5:failures.append((tag,u,rr.status_code,dt))
+              except Exception as e:
+                  print('ERR',tag,u,repr(e),flush=True);failures.append((tag,u,'EXC',repr(e)))
+          # Also discover CSS url(...) resources.
+          for _,u in list(seen):
+              if '.css' not in u:continue
+              try: css=s.get(u,timeout=(5,10)).text
+              except Exception:continue
+              for raw in re.findall(r'url\(["\']?([^"\')]+)',css):
+                  if raw.startswith(('data:','#')):continue
+                  full=urljoin(u,raw)
+                  try:
+                      t=time.monotonic();rr=s.get(full,timeout=(5,10));dt=time.monotonic()-t
+                      print('CSS_URL',rr.status_code,len(rr.content),round(dt,3),rr.headers.get('content-type'),full,flush=True)
+                      if rr.status_code>=400 or dt>5:failures.append(('css-url',full,rr.status_code,dt))
+                  except Exception as e:print('CSS_URL_ERR',full,repr(e),flush=True);failures.append(('css-url',full,'EXC',repr(e)))
+          print('FAILURES',failures,flush=True)
+          PY
