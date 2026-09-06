@@ -44,6 +44,16 @@ jobs:
              _site/iscarb-studio/app/static/hero_user_original.png
 
           python tools/sanitize_static_site.py _site
+
+          # Publish the exact CLEAN TESTED Wealth OS v27 bundle.
+          # The bundle is stored as text chunks so GitHub can version it safely.
+          cat wealth-os-v27.bundle.b64.* | base64 --decode > /tmp/wealth-os-v27.zip
+          unzip -t /tmp/wealth-os-v27.zip
+          rm -rf /tmp/wealth-os-v27 _site/wealth-os
+          mkdir -p /tmp/wealth-os-v27
+          unzip -q /tmp/wealth-os-v27.zip -d /tmp/wealth-os-v27
+          test -f /tmp/wealth-os-v27/wealth-os/index.html
+          cp -R /tmp/wealth-os-v27/wealth-os _site/wealth-os
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
