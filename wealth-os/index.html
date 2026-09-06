@@ -14,7 +14,7 @@
     <div class="brand-mark">W</div>
     <div class="login-kicker">WEALTH OS</div>
     <h1>لوحة التحكم المالية</h1>
-    <p>إدارة الصرف، الالتزامات، المداخيل، الاستثمارات والتقاعد من مكان واحد.</p>
+    <p>إدارة الصرف، الالتزامات، الإيرادات، الاستثمارات والتقاعد من مكان واحد.</p>
     <label class="field"><span>مفتاح الدخول</span><input id="loginKey" type="password" autocomplete="current-password" placeholder="أدخل مفتاح الدخول"></label>
     <button id="loginBtn" class="btn primary wide">دخول</button>
     <div id="loginError" class="error-text"></div>
@@ -27,7 +27,7 @@
     <nav id="sideNav" class="nav-list">
       <button class="active" data-tab="dashboard"><span>⌂</span>الرئيسية</button>
       <button data-tab="transactions"><span>⇄</span>العمليات</button>
-      <button data-tab="income"><span>↓</span>المداخيل</button>
+      <button data-tab="income"><span>↓</span>الإيرادات</button>
       <button data-tab="plan"><span>◉</span>الخطة</button>
       <button data-tab="investments"><span>↗</span>الاستثمارات</button>
       <button data-tab="wealth"><span>◆</span>الثروة والعقار</button>
@@ -43,7 +43,7 @@
   <main class="main">
     <header class="topbar">
       <div class="top-title"><strong id="pageTitle">الرئيسية</strong><small id="pageSubtitle">ملخص مالي واضح ومباشر</small></div>
-      <div class="global-search"><span>⌕</span><input id="globalSearch" placeholder="ابحث في العمليات والمداخيل والالتزامات والاستثمارات..."><div id="searchResults" class="search-results hidden"></div></div>
+      <div class="global-search"><span>⌕</span><input id="globalSearch" placeholder="ابحث في العمليات والإيرادات والالتزامات والاستثمارات..."><div id="searchResults" class="search-results hidden"></div></div>
       <div class="top-actions"><span id="sourceBadge" class="badge">v26</span><span id="integrityBadge" class="badge soft">فحص...</span><button id="refreshBtn" class="icon-btn" title="تحديث">↻</button></div>
     </header>
 
@@ -117,33 +117,33 @@
       </section>
 
       <section id="income" class="page">
-        <div class="page-head"><div><h1>المداخيل</h1><p>متى سيصل المال؟ وما الذي وصل فعلًا؟</p></div><button id="showAddIncome" class="btn primary">+ إضافة دخل</button></div>
-        <div class="summary-grid four"><div class="stat-card"><span>محصل هذا الشهر</span><b id="incomeCollectedMonth">—</b></div><div class="stat-card"><span>محصل إجماليًا</span><b id="incomeCollectedTotal">—</b></div><div class="stat-card warning"><span>مؤكد قادم</span><b id="incomeConfirmed">—</b></div><div class="stat-card muted"><span>متوقع فقط</span><b id="incomeExpected">—</b></div></div>
+        <div class="page-head"><div><h1>الإيرادات</h1><p>الراتب والإيرادات الأخرى: ما تم تحصيله، وما هو مؤكد، وما يزال متوقعًا، مع تواريخه.</p></div><button id="showAddIncome" class="btn primary">+ إضافة إيراد</button></div>
+        <div class="summary-grid four"><div class="stat-card"><span>الراتب الشهري الأساسي</span><b id="incomeSalary">—</b><small id="incomeSalaryDate">—</small></div><div class="stat-card"><span>محصل هذا الشهر</span><b id="incomeCollectedMonth">—</b><small id="incomeCollectedTotalNote">—</small></div><div class="stat-card warning"><span>مؤكد قادم</span><b id="incomeConfirmed">—</b><small>لا يُصرف قبل التحصيل</small></div><div class="stat-card muted"><span>متوقع فقط</span><b id="incomeExpected">—</b><small>مستبعد من السيناريو الأساسي</small></div></div>
         <div id="addIncomePanel" class="form-card hidden"><div class="form-grid"><label class="field"><span>الوصف</span><input id="incomeDescription"></label><label class="field"><span>المبلغ</span><input id="incomeAmount" inputmode="decimal"></label><label class="field"><span>التاريخ المتوقع</span><input id="incomeDate" type="date"></label><label class="field"><span>الحالة</span><select id="incomeCertainty"><option value="expected">متوقع</option><option value="confirmed">مؤكد</option></select></label></div><div class="form-actions"><button id="addIncomeBtn" class="btn primary">حفظ</button><button id="cancelAddIncome" class="btn">إلغاء</button></div></div>
-        <div class="section-title"><h2>خط زمني للمداخيل</h2><div class="toolbar small"><input id="incomeSearch" placeholder="بحث في المداخيل"><select id="incomeSort"><option value="date">حسب التاريخ</option><option value="amount_desc">الأعلى مبلغًا</option><option value="status">حسب الحالة</option></select></div></div>
+        <div class="section-title"><h2>جدول الإيرادات</h2><div class="toolbar small"><input id="incomeSearch" placeholder="بحث في الإيرادات"><select id="incomeSort"><option value="date">حسب التاريخ</option><option value="amount_desc">الأعلى مبلغًا</option><option value="status">حسب الحالة</option></select></div></div>
         <div class="table-card"><table><thead><tr><th>التاريخ</th><th>المصدر</th><th>المبلغ</th><th>الحالة</th><th>التحصيل الفعلي</th><th></th></tr></thead><tbody id="incomeRows"></tbody></table></div>
       </section>
 
       <section id="plan" class="page">
         <div class="page-head"><div><h1>الخطة</h1><p>الالتزامات المستقبلية وفجوة السيولة قبل وقوعها.</p></div></div>
-        <div class="summary-grid three"><div class="stat-card danger"><span>أكبر فجوة السيناريو الآمن</span><b id="fallbackGap">—</b><small id="fallbackMonth">—</small></div><div class="stat-card"><span>السيناريو الاستكشافي</span><b id="workingGap">—</b><small>لا يفتح صرفًا</small></div><div class="stat-card warning"><span>مداخيل متوقعة غير محصلة</span><b id="expectedTotal">—</b><small>لا تدخل السيناريو الآمن</small></div></div>
+        <div class="summary-grid three"><div class="stat-card danger"><span>أكبر فجوة FALLBACK</span><b id="fallbackGap">—</b><small id="fallbackMonth">—</small></div><div class="stat-card"><span>WORKING للمشاهدة</span><b id="workingGap">—</b><small>لا يفتح صرفًا</small></div><div class="stat-card warning"><span>مداخيل متوقعة غير محصلة</span><b id="expectedTotal">—</b><small>لا تدخل FALLBACK</small></div></div>
         <div class="section-title"><h2>الالتزامات القادمة</h2><div class="toolbar small"><input id="planSearch" placeholder="بحث"><select id="planSort"><option value="date">حسب التاريخ</option><option value="amount_desc">الأعلى مبلغًا</option><option value="amount_asc">الأقل مبلغًا</option></select></div></div>
         <div class="table-card"><table><thead><tr><th>التاريخ</th><th>البند</th><th>التصنيف</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody id="planRows"></tbody></table></div>
       </section>
 
       <section id="investments" class="page">
         <div class="page-head"><div><h1>الاستثمارات</h1><p>تفاصيل المحفظة، توزيع الأصول، المخاطر والسيولة.</p></div></div>
-        <div class="summary-grid four"><div class="stat-card"><span>إجمالي الاستثمارات المرصودة</span><b id="invObserved">—</b></div><div class="stat-card"><span>السائل لهدف التقاعد</span><b id="invLiquid">—</b></div><div class="stat-card"><span>بديل / مقيد</span><b id="invAlt">—</b></div><div class="stat-card muted"><span>مخصصات العائلة</span><b id="invFamily">—</b></div></div>
-        <div class="split-grid"><article class="card"><div class="card-title-row"><div><h3>توزيع الأصول</h3><small>حسب القيمة الحالية</small></div></div><div id="allocationBars" class="allocation-bars"></div></article><article class="card"><div class="card-title-row"><div><h3>قراءة المخاطر</h3><small>على المحفظة السائلة</small></div></div><div class="risk-meter"><div><span>عالي المخاطر</span><b id="highRiskPct">—</b></div><div class="meter"><i id="highRiskBar"></i></div><small>الحد المستهدف ≤ 10%</small></div></article></div>
-        <div class="section-title"><h2>المراكز الاستثمارية</h2><div class="toolbar small"><input id="investmentSearch" placeholder="بحث باسم الأصل أو المنصة"><select id="investmentSort"><option value="value_desc">الأعلى قيمة</option><option value="platform">حسب المنصة</option><option value="risk">حسب المخاطر</option></select></div></div>
-        <div class="table-card"><table><thead><tr><th>المنصة</th><th>الأصل</th><th>الفئة</th><th>القيمة الحالية</th><th>الربح/الخسارة</th><th>المخاطر</th><th>السيولة</th><th></th></tr></thead><tbody id="investmentRows"></tbody></table></div>
+        <div class="summary-grid four"><div class="stat-card"><span>إجمالي الاستثمارات المرصودة</span><b id="invObserved">—</b></div><div class="stat-card"><span>السائل لهدف التقاعد</span><b id="invLiquid">—</b></div><div class="stat-card muted"><span>بديل / مقيد</span><b id="invAlt">—</b></div><div class="stat-card muted"><span>مخصصات العائلة</span><b id="invFamily">—</b></div></div>
+        <div class="split-grid"><article class="card"><div class="card-title-row"><div><h3>توزيع الأصول</h3><small>حسب القيمة الحالية</small></div></div><div id="allocationBars" class="allocation-bars"></div></article><article class="card"><h3>إشارة المخاطر</h3><div class="risk-meter"><div><span>عالي المخاطر من السائل</span><b id="highRiskPct">—</b></div><div class="meter"><i id="highRiskBar"></i></div><small>الهدف التشغيلي: ≤10% قبل ضخ أموال جديدة في الأصول عالية المخاطر.</small></div></article></div>
+        <div class="section-title"><h2>المراكز الاستثمارية</h2><div class="toolbar small"><input id="investmentSearch" placeholder="بحث في المنصة أو الأصل"><select id="investmentSort"><option value="value_desc">الأعلى قيمة</option><option value="platform">حسب المنصة</option><option value="risk">حسب المخاطر</option></select></div></div>
+        <div class="table-card"><table><thead><tr><th>المنصة</th><th>الأصل</th><th>الفئة</th><th>القيمة الحالية</th><th>P/L</th><th>المخاطر</th><th>السيولة</th><th></th></tr></thead><tbody id="investmentRows"></tbody></table></div>
       </section>
 
       <section id="wealth" class="page">
-        <div class="page-head"><div><h1>الثروة والعقار</h1><p>القيمة الصافية للأصول العقارية والسيولة.</p></div></div>
-        <div class="summary-grid three"><div class="stat-card"><span>صافي الثروة الحالي</span><b id="netWorth">—</b></div><div class="stat-card"><span>إجمالي قيمة العقارات</span><b id="propertyGross">—</b></div><div class="stat-card"><span>صافي حقوق العقار</span><b id="propertyEquity">—</b></div></div>
-        <div class="section-title"><h2>الأصول العقارية</h2><div class="toolbar small"><input id="assetSearch" placeholder="بحث في العقارات"><select id="assetSort"><option value="net_desc">أعلى صافي قيمة</option><option value="value_desc">أعلى قيمة</option><option value="income_desc">أعلى دخل شهري</option></select></div></div>
-        <div class="table-card"><table><thead><tr><th>الأصل</th><th>القيمة</th><th>الالتزام</th><th>الصافي</th><th>الدخل الشهري</th></tr></thead><tbody id="assetRows"></tbody></table></div>
+        <div class="page-head"><div><h1>الثروة والعقار</h1><p>صافي القيمة، العقارات والتدفقات الإيجارية.</p></div></div>
+        <div class="summary-grid three"><div class="stat-card"><span>صافي الثروة الآن</span><b id="netWorth">—</b></div><div class="stat-card"><span>إجمالي قيمة العقار</span><b id="propertyGross">—</b></div><div class="stat-card"><span>حقوق الملكية العقارية</span><b id="propertyEquity">—</b></div></div>
+        <div class="section-title"><h2>العقارات</h2><div class="toolbar small"><input id="assetSearch" placeholder="بحث في العقارات"><select id="assetSort"><option value="net_desc">الأعلى صافيًا</option><option value="value_desc">الأعلى قيمة</option><option value="income_desc">الأعلى دخلًا</option></select></div></div>
+        <div class="table-card"><table><thead><tr><th>العقار</th><th>القيمة الحالية</th><th>الالتزام المتبقي</th><th>صافي الملكية</th><th>الدخل الشهري الصافي</th></tr></thead><tbody id="assetRows"></tbody></table></div>
       </section>
 
       <section id="retirement" class="page">
@@ -162,5 +162,6 @@
 <div id="investmentModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h3>تحديث قيمة الاستثمار</h3><button id="closeInvestmentModal" class="icon-btn">×</button></div><input type="hidden" id="editInvestmentId"><label class="field"><span>القيمة الحالية بالريال</span><input id="editInvestmentValue" inputmode="decimal"></label><button id="saveInvestment" class="btn primary wide">حفظ</button></div></div>
 <script src="./app.js?v=6"></script>
 <script src="./audit.js?v=1"></script>
+<script src="./revenue.js?v=1"></script>
 </body>
 </html>
