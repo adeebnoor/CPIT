@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>Wealth OS</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2a;--panel2:#102238;--line:#20364e;--text:#f6f8fb;--muted:#9db0c3;--green:#31d0aa;--yellow:#f5c451;--red:#ff6b6b;--blue:#65a9ff;--shadow:0 18px 48px rgba(0,0,0,.25);--r:22px}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:radial-gradient(circle at 10% -10%,#17365d 0,transparent 34%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:22px}.loginbox,.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}.loginbox{width:min(480px,100%);padding:28px}.brand{font-weight:900;font-size:28px;margin:8px 0}.muted{color:var(--muted);line-height:1.7}.badge{display:inline-block;border:1px solid #245f55;color:var(--green);padding:7px 10px;border-radius:999px;font-size:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}input,select{width:100%;padding:11px 12px;border-radius:12px;background:#071421;border:1px solid var(--line);color:#fff;outline:none}input:focus,select:focus{border-color:var(--blue)}.btn{border:1px solid var(--line);background:#0a1726;color:#fff;padding:10px 13px;border-radius:12px;cursor:pointer}.btn:hover{filter:brightness(1.08)}.primary{background:var(--blue);color:#07111f;font-weight:900}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.app{max-width:1240px;margin:auto;padding:18px 16px 70px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.head h1{margin:0;font-size:23px}.nav{display:flex;gap:7px;overflow:auto;padding-bottom:4px;margin-bottom:12px}.nav button{border:1px solid var(--line);background:#0a1726;color:#fff;padding:9px 12px;border-radius:12px;cursor:pointer;white-space:nowrap}.nav button.active{background:var(--blue);color:#07111f;font-weight:900}.section{display:none}.section.active{display:block}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:11px}.card{padding:17px}.kpi{grid-column:span 3}.kpi.big{grid-column:span 6}.lab{font-size:12px;color:var(--muted)}.val{font-size:28px;font-weight:900;margin-top:5px;direction:ltr;text-align:right}.red{color:var(--red)}.green{color:var(--green)}.yellow{color:var(--yellow)}.notice{padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:#0a1726;color:var(--muted);line-height:1.75;margin-bottom:12px}.notice.bad{border-color:#69373e;background:#24171b;color:#ffc2c2}.notice.ok{border-color:#265f55;background:#0b2521;color:#b9fff1}.title{display:flex;justify-content:space-between;align-items:center;margin:17px 0 9px}.title h2{font-size:18px;margin:0}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}th{color:var(--muted);font-weight:700}.form{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.progress{height:10px;background:#071421;border:1px solid var(--line);border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--green)}.foot{color:var(--muted);font-size:11px;text-align:center;margin-top:24px}.err{color:#ff9b9b;font-size:13px;margin-top:10px}.split{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.gmailLink{color:var(--blue);text-decoration:none;font-weight:800}
+@media(max-width:820px){.kpi,.kpi.big{grid-column:span 6}.form{grid-template-columns:1fr 1fr}}@media(max-width:540px){.kpi,.kpi.big{grid-column:span 12}.form{grid-template-columns:1fr}.app{padding:12px 10px 60px}.val{font-size:24px}.head{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="loginbox">
+    <span class="badge">v26 Canonical</span>
+    <div class="brand">Wealth OS</div>
+    <p class="muted">الواجهة اليومية لإدارة الصرف، الفيزا، الالتزامات، الثروة والتقاعد عند 50. المرجع المالي الوحيد هو آخر Excel v26.</p>
+    <div class="field"><label>مفتاح الدخول</label><input id="key" type="password" autocomplete="current-password" placeholder="مفتاح Wealth OS"></div>
+    <div class="actions"><button class="btn primary" style="width:100%" onclick="login()">دخول</button></div>
+    <div id="loginErr" class="err"></div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <div class="head">
+    <div><h1>Wealth OS</h1><div class="muted">Spend Control • Salary Day • Retire 50</div></div>
+    <div class="split"><span id="src" class="badge">v26</span><button class="btn" onclick="loadAll()">تحديث</button><a class="btn gmailLink" href="./gmail.html">ربط Gmail</a><button class="btn" onclick="logout()">خروج</button></div>
+  </div>
+  <div class="nav" id="nav">
+    <button class="active" data-tab="today">اليوم</button><button data-tab="tx">العمليات</button><button data-tab="plan">الخطة</button><button data-tab="wealth">الثروة</button><button data-tab="ret">التقاعد 50</button><button data-tab="settings">الإعدادات</button>
+  </div>
+
+  <section id="today" class="section active">
+    <div id="statusBox" class="notice"></div>
+    <div class="grid">
+      <div class="card kpi big"><div class="lab">المتاح الآمن للصرف الآن</div><div id="spend" class="val">—</div><div class="muted">هذا هو رقم الصرف، وليس رصيد البنك.</div></div>
+      <div class="card kpi"><div class="lab">الحالة</div><div id="status" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">الاستثمار الآن</div><div id="invest" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">رصيد البنك</div><div id="bank" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">Pay All</div><div id="payall" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">الدورة الجديدة</div><div id="cycle" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">HARD STOP</div><div id="hard" class="val">—</div></div>
+    </div>
+    <div class="title"><h2>يوم الراتب</h2></div>
+    <div class="grid">
+      <div class="card kpi"><div class="lab">الراتب</div><div id="salary" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">التشغيل الشهري</div><div id="oper" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">الفائض الأساسي</div><div id="resid" class="val">—</div></div>
+      <div class="card kpi"><div class="lab">هدف الالتزامات / شهر</div><div id="sink" class="val">—</div></div>
+    </div>
+  </section>
+
+  <section id="tx" class="section">
+    <div class="title"><h2>العمليات</h2><span id="unrev" class="muted"></span></div>
+    <div class="card"><div class="form">
+      <div class="field"><label>المبلغ</label><input id="ta" inputmode="decimal"></div>
+      <div class="field"><label>التاجر</label><input id="tm"></div>
+      <div class="field"><label>وسيلة الدفع</label><select id="tr"><option>Visa</option><option>Mada</option><option>Cash</option><option>Transfer</option></select></div>
+      <div class="field"><label>الفئة</label><select id="tc"><option value="">تصنيف تلقائي</option><option>Groceries</option><option>Fuel</option><option>Personal</option><option>Dining/Coffee</option><option>Bills</option><option>School</option><option>Car</option><option>Medical</option><option>Investment</option><option>Other</option></select></div>
+    </div><div class="actions"><button class="btn primary" onclick="addTx()">إضافة</button></div></div>
+    <div class="card scroll" style="margin-top:11px"><table><thead><tr><th>التاريخ</th><th>التاجر</th><th>المبلغ</th><th>الفئة</th><th>الوسيلة</th><th>مراجعة</th></tr></thead><tbody id="txrows"></tbody></table></div>
+  </section>
+
+  <section id="plan" class="section">
+    <div class="grid"><div class="card kpi big"><div class="lab">أكبر فجوة FALLBACK</div><div id="maxgap" class="val red">—</div><div id="gapmonth" class="muted"></div></div><div class="card kpi big"><div class="lab">WORKING — للمشاهدة فقط</div><div id="workgap" class="val yellow">—</div></div></div>
+    <div class="title"><h2>الالتزامات القادمة</h2></div><div class="card scroll"><table><thead><tr><th>التاريخ</th><th>البند</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody id="uprows"></tbody></table></div>
+    <div class="title"><h2>Expected — لا يُحسب حتى التحصيل</h2></div><div class="card scroll"><table><tbody id="exrows"></tbody></table></div>
+  </section>
+
+  <section id="wealth" class="section">
+    <div class="grid"><div class="card kpi big"><div class="lab">صافي الثروة الحالي</div><div id="nw" class="val">—</div></div><div class="card kpi big"><div class="lab">المحفظة السائلة</div><div id="liq" class="val">—</div></div></div>
+    <div class="card scroll" style="margin-top:11px"><table><thead><tr><th>الأصل</th><th>القيمة</th><th>الالتزام</th><th>الصافي</th><th>الدخل الشهري</th></tr></thead><tbody id="assets"></tbody></table></div>
+  </section>
+
+  <section id="ret" class="section">
+    <div class="grid"><div class="card kpi"><div class="lab">الهدف الشهري</div><div id="rtarget" class="val">—</div></div><div class="card kpi"><div class="lab">الدخل المستدام</div><div id="rincome" class="val">—</div></div><div class="card kpi"><div class="lab">التغطية</div><div id="rcov" class="val">—</div></div><div class="card kpi"><div class="lab">السائل المتوقع</div><div id="rliq" class="val">—</div></div><div class="card kpi big"><div class="lab">السائل المطلوب قبل البيت</div><div id="rreq" class="val">—</div></div><div class="card kpi big"><div class="lab">الفجوة</div><div id="rgap" class="val red">—</div></div></div>
+    <div class="card" style="margin-top:11px"><div class="lab">نسبة الإنجاز نحو رأس المال المطلوب</div><div class="progress" style="margin-top:9px"><div id="prog"></div></div><div id="ptext" class="muted" style="margin-top:7px"></div></div>
+  </section>
+
+  <section id="settings" class="section">
+    <div class="card"><div class="form">
+      <div class="field"><label>رصيد البنك</label><input id="sb" inputmode="decimal"></div><div class="field"><label>Pay All</label><input id="sp" inputmode="decimal"></div><div class="field"><label>الراتب</label><input id="ss" inputmode="decimal"></div><div class="field"><label>الأيام حتى الراتب</label><input id="sd" inputmode="numeric"></div><div class="field"><label>سددت الكشف القديم؟</label><select id="sps"><option value="false">لا</option><option value="true">نعم</option></select></div><div class="field"><label>السيناريو</label><select id="sc"><option>FALLBACK</option><option>WORKING</option></select></div>
+    </div><div class="actions"><button class="btn primary" onclick="save()">حفظ وإعادة الحساب</button><a class="btn gmailLink" href="./gmail.html">إعداد Gmail</a></div></div>
+    <div id="diag" class="notice" style="margin-top:11px">فحص v26…</div>
+  </section>
+  <div class="foot">Excel v26 هو المرجع المالي • البيانات تحفظ في Supabase • Expected لا يسمح بالصرف أو الاستثمار</div>
+</div>
+<script>
+const ROOT='https://hwuintdzmozamnmgtfly.supabase.co/functions/v1',LOGIN=ROOT+'/wealth-access-login',API=ROOT+'/wealth-api';
+let token=localStorage.getItem('wealth_session')||'',data=null;
+const money=n=>new Intl.NumberFormat('ar-SA',{maximumFractionDigits:2}).format(Number(n||0))+' ر.س';
+const pct=n=>(Number(n||0)*100).toFixed(1)+'%';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function set(id,v){const x=document.getElementById(id);if(x)x.textContent=v}
+async function req(path,opts={}){const h={'content-type':'application/json'};if(token)h.authorization='Bearer '+token;const r=await fetch(API+'/'+path,{...opts,headers:h});let x={};try{x=await r.json()}catch{}if(r.status===401){localStorage.removeItem('wealth_session');token='';showLogin('انتهت الجلسة');throw new Error('unauthorized')}if(!r.ok)throw new Error(x.error||'فشل الاتصال');return x}
+async function login(){const key=document.getElementById('key').value.trim();document.getElementById('loginErr').textContent='';if(!key){document.getElementById('loginErr').textContent='أدخل مفتاح الدخول';return}try{const r=await fetch(LOGIN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_key:key})}),x=await r.json();if(!r.ok)throw new Error(x.error||'فشل الدخول');token=x.token;localStorage.setItem('wealth_session',token);document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');await loadAll()}catch(e){document.getElementById('loginErr').textContent=e.message||String(e)}}
+function showLogin(m=''){document.getElementById('app').classList.add('hidden');document.getElementById('login').classList.remove('hidden');document.getElementById('loginErr').textContent=m}
+async function logout(){try{await req('logout',{method:'POST',body:'{}'})}catch{}localStorage.removeItem('wealth_session');token='';showLogin('تم تسجيل الخروج')}
+async function loadAll(){try{data=await req('dashboard');render();diagnostic()}catch(e){if(e.message!=='unauthorized')alert(e.message)}}
+function render(){const n=data.now,r=data.retirement,s=data.settings,w=data.wealth;set('spend',money(n.spend_allowed));set('status',n.status);set('invest',money(n.investment_allowed));set('bank',money(s.bank_balance));set('payall',money(s.visa_pay_all));set('cycle',money(n.new_cycle_balance));set('hard',money(n.hard_stop));set('salary',money(s.salary));set('oper',money(n.operating_total));set('resid',money(n.base_residual));set('sink',money(n.sinking_target_6m));const q=document.getElementById('status');q.className='val '+(n.status==='GREEN'?'green':n.status==='YELLOW'?'yellow':'red');const b=document.getElementById('statusBox');b.className='notice '+(n.status==='GREEN'?'ok':'bad');b.textContent=n.status==='GREEN'?'ضمن الخطة. لا ترفع مستوى الصرف لمجرد ارتفاع الرصيد.':'أساسيات فقط. المتاح الآمن هو '+money(n.spend_allowed)+' وليس رصيد الحساب.';set('maxgap',money(r.max_fallback_gap));set('gapmonth','أعلى ضغط: '+String(r.max_fallback_gap_month||'').slice(0,7));set('workgap',money(r.working_max_gap));set('nw',money(w.net_worth_now));set('liq',money(s.liquid_portfolio));set('rtarget',money(r.target_monthly));set('rincome',money(r.prehome_sustainable_income_monthly));set('rcov',pct(r.prehome_coverage));set('rliq',money(r.projected_liquid_at_50));set('rreq',money(r.required_prehome_liquid));set('rgap',money(r.gap_to_required_prehome));const p=Math.max(0,Math.min(100,Number(r.projected_liquid_at_50||0)/Math.max(1,Number(r.required_prehome_liquid||1))*100));document.getElementById('prog').style.width=p+'%';set('ptext',p.toFixed(1)+'% من رأس المال السائل المطلوب.');document.getElementById('sb').value=s.bank_balance;document.getElementById('sp').value=s.visa_pay_all;document.getElementById('ss').value=s.salary;document.getElementById('sd').value=s.days_to_salary;document.getElementById('sps').value=String(Boolean(s.visa_statement_paid));document.getElementById('sc').value=s.scenario_view||'FALLBACK';set('src','v26 • '+(s.scenario_view||'FALLBACK'));renderTx();renderPlan();renderAssets()}
+function renderTx(){const a=(data.transactions&&data.transactions.recent)||[];document.getElementById('txrows').innerHTML=a.map(t=>'<tr><td>'+esc(String(t.happened_at||'').slice(0,16).replace('T',' '))+'</td><td>'+esc(t.merchant||t.description)+'</td><td>'+money(t.amount)+'</td><td>'+esc(t.category||'Other')+'</td><td>'+esc(t.rail||'')+'</td><td>'+(t.reviewed?'✓':'<button class="btn" onclick="reviewTx(\''+t.id+'\')">اعتماد</button>')+'</td></tr>').join('')||'<tr><td colspan="6">لا توجد عمليات</td></tr>';set('unrev','غير مراجعة: '+((data.transactions&&data.transactions.unreviewed)||0))}
+function renderPlan(){const u=(data.pipeline&&data.pipeline.upcoming)||[],x=(data.pipeline&&data.pipeline.expected)||[];document.getElementById('uprows').innerHTML=u.map(a=>'<tr><td>'+esc(a.event_date||'—')+'</td><td>'+esc(a.description)+'</td><td>'+money(a.amount)+'</td><td>'+esc(a.recognition_status||a.certainty)+'</td></tr>').join('')||'<tr><td colspan="4">لا توجد</td></tr>';document.getElementById('exrows').innerHTML=x.map(a=>'<tr><td>'+esc(a.event_date||'—')+'</td><td>'+esc(a.description)+'</td><td>'+money(a.amount)+'</td><td>لا يُحسب حتى التحصيل</td></tr>').join('')||'<tr><td>لا توجد</td></tr>'}
+function renderAssets(){const a=(data.wealth&&data.wealth.assets)||[];document.getElementById('assets').innerHTML=a.map(x=>'<tr><td>'+esc(x.label||x.key)+'</td><td>'+money(x.current_value)+'</td><td>'+money(x.outstanding_obligation)+'</td><td>'+money(Number(x.current_value||0)-Number(x.outstanding_obligation||0))+'</td><td>'+money(x.monthly_net_income)+'</td></tr>').join('')}
+async function addTx(){const amount=Number(document.getElementById('ta').value),merchant=document.getElementById('tm').value.trim(),rail=document.getElementById('tr').value,category=document.getElementById('tc').value;if(!amount||amount<=0){alert('أدخل مبلغًا صحيحًا');return}await req('transactions',{method:'POST',body:JSON.stringify({amount,merchant,rail,category,reviewed:false})});document.getElementById('ta').value='';document.getElementById('tm').value='';await loadAll()}
+async function reviewTx(id){await req('transaction',{method:'PATCH',body:JSON.stringify({id,reviewed:true})});await loadAll()}
+async function save(){const z={bank_balance:Number(document.getElementById('sb').value),visa_pay_all:Number(document.getElementById('sp').value),salary:Number(document.getElementById('ss').value),days_to_salary:Number(document.getElementById('sd').value),visa_statement_paid:document.getElementById('sps').value==='true',scenario_view:document.getElementById('sc').value};await req('settings',{method:'PATCH',body:JSON.stringify(z)});await loadAll();alert('تم الحفظ وإعادة الحساب')}
+async function diagnostic(){try{const x=await req('diagnostic'),d=document.getElementById('diag');d.className='notice '+(x.ok?'ok':'bad');d.textContent=x.ok?'v26 Integrity: PASS — الموقع مطابق لآخر Excel.':'v26 Integrity: FAIL — توجد فروقات ويجب إصلاحها قبل الاعتماد.'}catch(e){set('diag','تعذر فحص v26: '+e.message)}}
+document.getElementById('nav').addEventListener('click',ev=>{const b=ev.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active')});
+if(token){document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');loadAll()}else showLogin();
+</script>
+</body>
+</html>
