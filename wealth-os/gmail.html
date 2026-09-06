@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>Wealth OS — ربط Gmail</title>
+<style>
+:root{--bg:#07111f;--p:#0d1b2a;--p2:#102238;--l:#20364e;--t:#f6f8fb;--m:#9db0c3;--g:#31d0aa;--r:#ff6b6b;--b:#65a9ff;--y:#f5c451}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% -10%,#17365d 0,transparent 35%),var(--bg);color:var(--t);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}.wrap{max-width:860px;margin:auto;padding:22px 16px 70px}.card{background:linear-gradient(180deg,var(--p2),var(--p));border:1px solid var(--l);border-radius:20px;padding:18px;margin-bottom:12px}.muted{color:var(--m);line-height:1.75}.ok{color:#b9fff1;border-color:#265f55;background:#0b2521}.bad{color:#ffc2c2;border-color:#69373e;background:#24171b}.hidden{display:none!important}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--m)}input,textarea{width:100%;box-sizing:border-box;background:#071421;border:1px solid var(--l);border-radius:12px;color:#fff;padding:11px;font:inherit}textarea{min-height:360px;direction:ltr;text-align:left;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.5}.btn{border:1px solid var(--l);background:#0a1726;color:#fff;padding:10px 13px;border-radius:11px;cursor:pointer;text-decoration:none;display:inline-block}.primary{background:var(--b);color:#07111f;font-weight:900}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.steps li{margin:8px 0;line-height:1.6}.badge{display:inline-block;border:1px solid #245f55;color:var(--g);padding:7px 10px;border-radius:999px;font-size:12px}.head{display:flex;justify-content:space-between;align-items:center;gap:12px}.warn{color:var(--y)}.err{color:#ff9b9b;font-size:13px;margin-top:10px}@media(max-width:600px){.head{align-items:flex-start;flex-direction:column}.btn{width:100%;text-align:center}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head"><div><span class="badge">Gmail → Wealth OS</span><h1>ربط تنبيهات الإنماء</h1></div><a class="btn" href="./">العودة للنظام</a></div>
+    <p class="muted">الربط مجاني ويستخدم Google Apps Script. السكربت يبحث فقط عن رسائل <b>alinma@alinma.com</b> ويرسلها إلى Wealth OS. لا يحذف البريد ولا يرسله ولا يغيّر الرسائل.</p>
+  </div>
+
+  <div id="login" class="card hidden">
+    <div class="field"><label>مفتاح دخول Wealth OS</label><input id="key" type="password" placeholder="مفتاح الدخول"></div>
+    <div class="actions"><button class="btn primary" onclick="login()">دخول</button></div><div id="err" class="err"></div>
+  </div>
+
+  <div id="setup" class="hidden">
+    <div id="status" class="card muted">جاري فحص الحالة…</div>
+    <div class="card">
+      <h2>التثبيت مرة واحدة فقط</h2>
+      <div class="actions"><button class="btn primary" onclick="generate()">1) إنشاء كود Gmail</button><a class="btn" href="https://script.google.com/" target="_blank" rel="noopener">2) فتح Google Apps Script</a><button class="btn" onclick="check()">فحص الربط</button></div>
+      <p class="muted">بعد إنشاء الكود: انسخه، الصقه في مشروع Apps Script فارغ، احفظه، ثم شغّل <b>installWealthOSTrigger</b> مرة واحدة ووافق على الصلاحيات. بعدها يعمل تلقائياً كل 5 دقائق.</p>
+    </div>
+    <div id="codeCard" class="card hidden"><h2>الكود الجاهز</h2><textarea id="code" readonly></textarea><div class="actions"><button class="btn primary" onclick="copyCode()">نسخ الكود</button></div><ol id="steps" class="steps"></ol></div>
+    <div class="card"><h3>ماذا يحدث بعد الربط؟</h3><p class="muted">العمليات الجديدة من الإنماء تدخل قاعدة البيانات تلقائياً، ويُمنع تكرار الرسالة نفسها. مشتريات Visa تزيد Pay All، عمليات Mada تحدّث رصيد البنك عندما تحتوي الرسالة على الرصيد، الدخل الوارد يحدّث الرصيد، وسداد البطاقة يُعامل كتحويل وليس مصروفاً جديداً. الرسائل الأقدم من نقطة تشغيل الربط لا تغيّر رصيدك الحالي.</p></div>
+  </div>
+</div>
+<script>
+const ROOT='https://hwuintdzmozamnmgtfly.supabase.co/functions/v1',LOGIN=ROOT+'/wealth-access-login',SETUP=ROOT+'/wealth-email-setup';let token=localStorage.getItem('wealth_session')||'';
+function show(){document.getElementById('login').classList.toggle('hidden',!!token);document.getElementById('setup').classList.toggle('hidden',!token);if(token)check()}
+async function login(){const key=document.getElementById('key').value.trim();document.getElementById('err').textContent='';try{const r=await fetch(LOGIN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_key:key})}),x=await r.json();if(!r.ok)throw new Error(x.error||'فشل الدخول');token=x.token;localStorage.setItem('wealth_session',token);show()}catch(e){document.getElementById('err').textContent=e.message||String(e)}}
+async function call(method){const r=await fetch(SETUP,{method,headers:{authorization:'Bearer '+token,'content-type':'application/json'}});const x=await r.json();if(r.status===401){localStorage.removeItem('wealth_session');token='';show();throw new Error('انتهت الجلسة')}if(!r.ok)throw new Error(x.error||'فشل الاتصال');return x}
+async function check(){try{const x=await call('GET'),b=document.getElementById('status');b.className='card '+(x.connected?'ok':'bad');b.innerHTML=x.connected?'<b>Gmail متصل ويزامن تلقائياً.</b><br>آخر مزامنة: '+String(x.last_sync||'')+'<br>الرسائل المخزنة: '+Number(x.message_count||0):'<b>Gmail غير متصل بعد.</b><br>'+String(x.note||'')+'<br>نفّذ خطوات التثبيت أدناه مرة واحدة.'}catch(e){document.getElementById('status').textContent=e.message}}
+async function generate(){try{const x=await call('POST');document.getElementById('code').value=x.script;document.getElementById('steps').innerHTML=(x.instructions||[]).map(s=>'<li>'+s+'</li>').join('');document.getElementById('codeCard').classList.remove('hidden')}catch(e){alert(e.message)}}
+async function copyCode(){try{await navigator.clipboard.writeText(document.getElementById('code').value);alert('تم نسخ الكود')}catch{document.getElementById('code').select();document.execCommand('copy');alert('تم نسخ الكود')}}
+show();
+</script>
+</body>
+</html>
