@@ -21,3 +21,10 @@ setTimeout(loadSafetyAudit,900);
 document.getElementById('refreshBtn')?.addEventListener('click',()=>setTimeout(loadSafetyAudit,450));
 document.getElementById('syncNowBtn')?.addEventListener('click',()=>setTimeout(loadSafetyAudit,450));
 setInterval(()=>{if(!document.hidden&&localStorage.getItem('wealth_session'))loadSafetyAudit()},120000);
+
+(function loadWealthExtensions(){
+  const styles=['./command-center.css?v=1','./revenue-viz.css?v=1'];
+  styles.forEach(h=>{if(!document.querySelector(`link[href="${h}"]`)){const l=document.createElement('link');l.rel='stylesheet';l.href=h;document.head.appendChild(l)}});
+  const scripts=['./command-center.js?v=1','./revenue-viz.js?v=1'];
+  let i=0;function next(){if(i>=scripts.length)return;const src=scripts[i++];if(document.querySelector(`script[src="${src}"]`)){next();return}const s=document.createElement('script');s.src=src;s.onload=next;s.onerror=next;document.body.appendChild(s)}next();
+})();
