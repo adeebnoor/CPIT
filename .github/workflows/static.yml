@@ -46,13 +46,25 @@ jobs:
           python tools/sanitize_static_site.py _site
 
           # Publish the exact CLEAN TESTED Wealth OS v27 bundle.
-          # The bundle is stored as text chunks so GitHub can version it safely.
+          # Verify the complete archive byte-for-byte before extracting it.
           cat wealth-os-v27.bundle.b64.* | base64 --decode > /tmp/wealth-os-v27.zip
-          unzip -t /tmp/wealth-os-v27.zip
+          echo "bb37fcc3972abe1fcf3a07943294da9c6b1f4ee96f41e76416f42798a25711a4  /tmp/wealth-os-v27.zip" | sha256sum -c -
           rm -rf /tmp/wealth-os-v27 _site/wealth-os
           mkdir -p /tmp/wealth-os-v27
-          unzip -q /tmp/wealth-os-v27.zip -d /tmp/wealth-os-v27
-          test -f /tmp/wealth-os-v27/wealth-os/index.html
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          archive = Path('/tmp/wealth-os-v27.zip')
+          target = Path('/tmp/wealth-os-v27')
+          with ZipFile(archive) as zf:
+              bad = zf.testzip()
+              if bad:
+                  raise SystemExit(f'Corrupt Wealth OS bundle member: {bad}')
+              zf.extractall(target)
+          if not (target / 'wealth-os' / 'index.html').is_file():
+              raise SystemExit('Wealth OS index.html missing after extraction')
+          PY
           cp -R /tmp/wealth-os-v27/wealth-os _site/wealth-os
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
