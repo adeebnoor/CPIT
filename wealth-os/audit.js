@@ -14,7 +14,7 @@ function renderSafetyAudit(x){const m=x.metrics||{};const overall=document.getEl
   const source=document.getElementById('sourceBadge');if(source&&typeof data!=='undefined'&&data?.settings){source.textContent='v26 · '+(data.settings.scenario_view==='FALLBACK'?'آمن':'استكشافي')}
   const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
   put('auditGap',auditMoney(m.max_fallback_gap));put('auditGapDate',m.max_gap_month?'ذروة الضغط '+String(m.max_gap_month).slice(0,7):'لا توجد فجوة');put('auditMonthlyClosure',auditMoney(m.additional_monthly_gap_closure));put('auditGrowth',new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format(m.liquid_growth_multiple||0)+'×');put('auditGrowthDetail',auditMoney(m.current_liquid)+' ← '+auditMoney(m.projected_liquid_at_50));put('auditRetirementCoverage',auditPct(m.retirement_coverage));put('auditRetirementIncome',auditMoney(m.retirement_income)+' من '+auditMoney(m.retirement_target));put('auditRisk',auditPct(m.high_risk_pct));
-  const verdict=document.getElementById('auditVerdict');if(verdict){const deficit=Number(m.max_fallback_gap||0);const cov=Number(m.retirement_coverage||0);verdict.className='audit-verdict '+(x.overall==='PASS'?'pass':x.overall==='ACTION_REQUIRED'?'action':'');verdict.textContent=deficit>0?`النظام يبني الثروة، لكنه لا يضمن صفر عجز بعد: توجد فجوة مؤكدة فقط قدرها ${auditMoney(deficit)}. لذلك يبقى الاستثمار الجديد محجوبًا، ويجب إغلاق هذه الفجوة بدخل/بيع أصل/إعادة جدولة مؤكدة قبل اعتبار الخطة آمنة بالكامل. تغطية التقاعد الحالية ${(cov*100).toFixed(1)}%.`:'لا توجد فجوة السيناريو الآمن حالياً، ويمكن للنظام توجيه الفائض إلى بناء الثروة مع استمرار حماية السيولة.'}
+  const verdict=document.getElementById('auditVerdict');if(verdict){const deficit=Number(m.max_fallback_gap||0);const cov=Number(m.retirement_coverage||0);verdict.className='audit-verdict '+(x.overall==='PASS'?'pass':x.overall==='ACTION_REQUIRED'?'action':'');verdict.textContent=deficit>0?`النظام يبني الثروة، لكنه لا يضمن صفر عجز بعد: توجد فجوة السيناريو الآمن قدرها ${auditMoney(deficit)}. لذلك يبقى الاستثمار الجديد محجوبًا، ويجب إغلاق هذه الفجوة بدخل/بيع أصل/إعادة جدولة مؤكدة قبل اعتبار الخطة آمنة بالكامل. تغطية التقاعد الحالية ${(cov*100).toFixed(1)}%.`:'لا توجد فجوة السيناريو الآمن حالياً، ويمكن للنظام توجيه الفائض إلى بناء الثروة مع استمرار حماية السيولة.'}
   const checks=document.getElementById('auditChecks');if(checks)checks.innerHTML=(x.checks||[]).map(c=>`<div class="audit-check"><div class="audit-check-head"><strong>${c.title}</strong><span class="audit-chip ${auditClass(c.status)}">${auditStatusAr(c.status)}</span></div><p>${c.detail}</p></div>`).join('');
 }
 setTimeout(loadSafetyAudit,900);
@@ -23,8 +23,8 @@ document.getElementById('syncNowBtn')?.addEventListener('click',()=>setTimeout(l
 setInterval(()=>{if(!document.hidden&&localStorage.getItem('wealth_session'))loadSafetyAudit()},120000);
 
 (function loadWealthExtensions(){
-  const styles=['./command-center.css?v=1','./revenue-viz.css?v=1'];
+  const styles=['./command-center.css?v=2','./revenue-viz.css?v=2','./v22-merge.css?v=1'];
   styles.forEach(h=>{if(!document.querySelector(`link[href="${h}"]`)){const l=document.createElement('link');l.rel='stylesheet';l.href=h;document.head.appendChild(l)}});
-  const scripts=['./command-center.js?v=1','./revenue-viz.js?v=1'];
+  const scripts=['./command-center.js?v=2','./revenue-viz.js?v=2','./v22-merge.js?v=1'];
   let i=0;function next(){if(i>=scripts.length)return;const src=scripts[i++];if(document.querySelector(`script[src="${src}"]`)){next();return}const s=document.createElement('script');s.src=src;s.onload=next;s.onerror=next;document.body.appendChild(s)}next();
 })();
