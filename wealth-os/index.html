@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f7fb">
 <title>Wealth OS</title>
-<link rel="stylesheet" href="./app.css?v=5">
+<link rel="stylesheet" href="./app.css?v=6">
+<link rel="stylesheet" href="./audit.css?v=1">
 </head>
 <body>
 <div id="loginView" class="login-screen">
@@ -61,7 +62,7 @@
             <div class="card-title-row"><h3>الحسابات</h3><button id="syncNowBtn" class="text-btn">تحديث</button></div>
             <div class="account-list">
               <div><span>رصيد البنك</span><b id="bankBalance">—</b></div>
-              <div><span>بطاقة Visa · Pay All</span><b id="payAll">—</b></div>
+              <div><span>بطاقة الفيزا · الإجمالي</span><b id="payAll">—</b></div>
               <div class="highlight"><span>المتاح الآمن للصرف</span><b id="safeSpend">—</b></div>
               <div><span>المحفظة السائلة</span><b id="liquidPortfolio">—</b></div>
             </div>
@@ -90,6 +91,22 @@
             <div class="retire-summary"><div class="progress-ring" id="retireRing"><div><b id="retireProgress">—</b><span>من المطلوب</span></div></div><div class="retire-copy"><span>الفجوة المتبقية</span><b id="retireGap">—</b><small id="retireIncomeText">—</small></div></div>
           </article>
         </div>
+
+        <div class="audit-heading">
+          <div><h2>فحص السلامة المالي</h2><p>تدقيق مستقل على البيانات، العجز، الاستثمار، المخاطر، ونمو الثروة.</p></div>
+          <span id="auditOverall" class="audit-overall loading">جارٍ الفحص</span>
+        </div>
+        <article class="card audit-card">
+          <div class="audit-summary">
+            <div><span>أكبر فجوة مؤكدة</span><b id="auditGap">—</b><small id="auditGapDate">—</small></div>
+            <div><span>الإغلاق الإضافي المطلوب شهريًا</span><b id="auditMonthlyClosure">—</b><small>فوق الخطة الحالية حتى شهر الفجوة</small></div>
+            <div><span>نمو المحفظة السائلة حتى 50</span><b id="auditGrowth">—</b><small id="auditGrowthDetail">—</small></div>
+            <div><span>تغطية دخل التقاعد</span><b id="auditRetirementCoverage">—</b><small id="auditRetirementIncome">—</small></div>
+            <div><span>المخاطر العالية من السائل</span><b id="auditRisk">—</b><small>الحد المستهدف ≤ 10%</small></div>
+          </div>
+          <div class="audit-verdict" id="auditVerdict">جارٍ تحليل النظام...</div>
+          <div id="auditChecks" class="audit-checks"></div>
+        </article>
       </section>
 
       <section id="transactions" class="page">
@@ -109,7 +126,7 @@
 
       <section id="plan" class="page">
         <div class="page-head"><div><h1>الخطة</h1><p>الالتزامات المستقبلية وفجوة السيولة قبل وقوعها.</p></div></div>
-        <div class="summary-grid three"><div class="stat-card danger"><span>أكبر فجوة FALLBACK</span><b id="fallbackGap">—</b><small id="fallbackMonth">—</small></div><div class="stat-card"><span>WORKING للمشاهدة</span><b id="workingGap">—</b><small>لا يفتح صرفًا</small></div><div class="stat-card warning"><span>مداخيل متوقعة غير محصلة</span><b id="expectedTotal">—</b><small>لا تدخل FALLBACK</small></div></div>
+        <div class="summary-grid three"><div class="stat-card danger"><span>أكبر فجوة السيناريو الآمن</span><b id="fallbackGap">—</b><small id="fallbackMonth">—</small></div><div class="stat-card"><span>السيناريو الاستكشافي</span><b id="workingGap">—</b><small>لا يفتح صرفًا</small></div><div class="stat-card warning"><span>مداخيل متوقعة غير محصلة</span><b id="expectedTotal">—</b><small>لا تدخل السيناريو الآمن</small></div></div>
         <div class="section-title"><h2>الالتزامات القادمة</h2><div class="toolbar small"><input id="planSearch" placeholder="بحث"><select id="planSort"><option value="date">حسب التاريخ</option><option value="amount_desc">الأعلى مبلغًا</option><option value="amount_asc">الأقل مبلغًا</option></select></div></div>
         <div class="table-card"><table><thead><tr><th>التاريخ</th><th>البند</th><th>التصنيف</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody id="planRows"></tbody></table></div>
       </section>
@@ -136,13 +153,14 @@
 
       <section id="settings" class="page">
         <div class="page-head"><div><h1>الإعدادات</h1><p>مدخلات التشغيل التي يسمح الموقع بتعديلها دون تغيير منطق v26.</p></div></div>
-        <div class="settings-grid"><article class="card"><h3>الوضع الحالي</h3><label class="field"><span>رصيد البنك</span><input id="setBank" inputmode="decimal"></label><label class="field"><span>Pay All</span><input id="setPayAll" inputmode="decimal"></label><label class="field"><span>الراتب</span><input id="setSalary" inputmode="decimal"></label><label class="field"><span>الأيام حتى الراتب</span><input id="setDays" inputmode="numeric"></label></article><article class="card"><h3>الضوابط</h3><label class="field"><span>هل سُدد الكشف القديم؟</span><select id="setStatement"><option value="false">لا</option><option value="true">نعم</option></select></label><label class="field"><span>السيناريو المرئي</span><select id="setScenario"><option>FALLBACK</option><option>WORKING</option></select></label><div id="diagBox" class="diagnostic">فحص التطابق...</div><button id="saveSettings" class="btn primary wide">حفظ وإعادة الحساب</button></article></div>
+        <div class="settings-grid"><article class="card"><h3>الوضع الحالي</h3><label class="field"><span>رصيد البنك</span><input id="setBank" inputmode="decimal"></label><label class="field"><span>إجمالي الفيزا</span><input id="setPayAll" inputmode="decimal"></label><label class="field"><span>الراتب</span><input id="setSalary" inputmode="decimal"></label><label class="field"><span>الأيام حتى الراتب</span><input id="setDays" inputmode="numeric"></label></article><article class="card"><h3>الضوابط</h3><label class="field"><span>هل سُدد الكشف القديم؟</span><select id="setStatement"><option value="false">لا</option><option value="true">نعم</option></select></label><label class="field"><span>السيناريو المرئي</span><select id="setScenario"><option value="FALLBACK">آمن</option><option value="WORKING">استكشافي</option></select></label><div id="diagBox" class="diagnostic">فحص التطابق...</div><button id="saveSettings" class="btn primary wide">حفظ وإعادة الحساب</button></article></div>
       </section>
     </div>
   </main>
 </div>
 
 <div id="investmentModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h3>تحديث قيمة الاستثمار</h3><button id="closeInvestmentModal" class="icon-btn">×</button></div><input type="hidden" id="editInvestmentId"><label class="field"><span>القيمة الحالية بالريال</span><input id="editInvestmentValue" inputmode="decimal"></label><button id="saveInvestment" class="btn primary wide">حفظ</button></div></div>
-<script src="./app.js?v=5"></script>
+<script src="./app.js?v=6"></script>
+<script src="./audit.js?v=1"></script>
 </body>
 </html>
