@@ -25,6 +25,6 @@ setInterval(()=>{if(!document.hidden&&localStorage.getItem('wealth_session'))loa
 (function loadWealthExtensions(){
   const styles=['./command-center.css?v=2','./revenue-viz.css?v=2','./v22-merge.css?v=1','./salary.css?v=2'];
   styles.forEach(h=>{if(!document.querySelector(`link[href="${h}"]`)){const l=document.createElement('link');l.rel='stylesheet';l.href=h;document.head.appendChild(l)}});
-  const scripts=['./command-center.js?v=3','./revenue-viz.js?v=2','./v22-merge.js?v=1'];
+  const scripts=['./command-center.js?v=3','./salary-guard.js?v=1','./revenue-viz.js?v=2','./v22-merge.js?v=1'];
   let i=0;function next(){if(i>=scripts.length)return;const src=scripts[i++];if(document.querySelector(`script[src="${src}"]`)){next();return}const s=document.createElement('script');s.src=src;s.onload=next;s.onerror=next;document.body.appendChild(s)}next();
 })();
