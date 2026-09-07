@@ -7,7 +7,7 @@ import uvicorn
 # Authoritative curriculum baseline: user-approved Golden v6.6 lecture model.
 os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>text-first")
-os.environ.setdefault("ISCARB_BUILD_ID", "7.3.7-instructional-director")
+os.environ.setdefault("ISCARB_BUILD_ID", "8.0.0-hybrid-visual-narrative")
 
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
@@ -36,6 +36,7 @@ from app.patch_v734_home_original_lock import apply_v734_home_original_lock_patc
 from app.patch_v735_figure_first_compact_kickoff import apply_v735_figure_first_compact_kickoff_patch
 from app.patch_v736_narrative_learning import apply_v736_narrative_learning_patch
 from app.patch_v737_instructional_director import apply_v737_instructional_director_patch
+from app.patch_v800_hybrid_visual_narrative import apply_v800_hybrid_visual_narrative_patch
 
 apply_v725_golden_v660_patch(app)
 apply_v726_timebox_tasks_patch(app)
@@ -50,6 +51,7 @@ apply_v734_home_original_lock_patch(app)
 apply_v735_figure_first_compact_kickoff_patch(app)
 apply_v736_narrative_learning_patch(app)
 apply_v737_instructional_director_patch(app)
+apply_v800_hybrid_visual_narrative_patch(app)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
