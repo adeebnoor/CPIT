@@ -30,6 +30,8 @@ RUN python smoke_native_figures_v732.py
 RUN python smoke_final_readability_v733.py
 # Engine-wide Instructional Director: A1-A4, B1-B3, C1-C3.
 RUN python smoke_instructional_director_v737.py
+# v8 Hybrid Visual-Narrative: source visual classification + mapping + interactive evidence.
+RUN python smoke_hybrid_visual_v800.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
