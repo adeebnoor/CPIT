@@ -9,6 +9,7 @@ assert os.getenv("ISCARB_BUILD_ID") in {
     "7.3.1-golden-v660-clean-projection",
     "7.3.2-golden-v660-native-figures",
     "7.3.6-narrative-learning-experience",
+    "7.3.7-instructional-director",
 }, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("projection_legibility_version") == "v7.3.1", health
@@ -19,7 +20,6 @@ assert "3+2" in health.get("projection_five_card_reflow", ""), health
 assert "adaptively" in health.get("projection_expansion_fill", ""), health
 assert "assessment layer" in health.get("projection_gate_visibility", ""), health
 
-# Long editor prose must never be dumped into learner-visible pedagogy.
 u = NS(
     pedagogy_content=[
         "EDITOR GATE - VERY LONG: this should stay in the assessment layer",
