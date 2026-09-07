@@ -5,9 +5,12 @@ from pathlib import Path
 import uvicorn
 
 # Authoritative curriculum baseline: user-approved Golden v6.6 lecture model.
+# The legacy uncontrolled public-image fallback remains disabled. v8.1 exposes a
+# separate licensed-search path with provenance, ranking and no-image fallback.
 os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
-os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>text-first")
-os.environ.setdefault("ISCARB_BUILD_ID", "8.0.0-hybrid-visual-narrative")
+os.environ.setdefault("ISCARB_ENABLE_PUBLIC_IMAGES", "1")
+os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>licensed-public>explicit-no-image")
+os.environ.setdefault("ISCARB_BUILD_ID", "8.1.0-public-visual-intelligence")
 
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
@@ -39,6 +42,8 @@ from app.patch_v737_instructional_director import apply_v737_instructional_direc
 from app.patch_v800_hybrid_visual_narrative import apply_v800_hybrid_visual_narrative_patch
 from app.patch_v800_visual_mapping_guard import apply_v800_visual_mapping_guard
 from app.visual_prompt_v800 import apply_v800_visual_prompt_patch
+from app.patch_v810_public_visual_intelligence import apply_v810_public_visual_intelligence_patch
+from app.visual_prompt_v810 import apply_v810_visual_prompt_patch
 
 apply_v725_golden_v660_patch(app)
 apply_v726_timebox_tasks_patch(app)
@@ -56,6 +61,12 @@ apply_v737_instructional_director_patch(app)
 apply_v800_hybrid_visual_narrative_patch(app)
 apply_v800_visual_mapping_guard()
 apply_v800_visual_prompt_patch()
+
+# Docker regression tests can boot the exact v8.0 surface before v8.1 is added.
+# Production never sets this flag.
+if os.getenv("ISCARB_DISABLE_V810_PATCH", "0") != "1":
+    apply_v810_public_visual_intelligence_patch(app)
+    apply_v810_visual_prompt_patch()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
