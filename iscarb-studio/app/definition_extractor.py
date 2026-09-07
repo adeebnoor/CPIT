@@ -17,11 +17,13 @@ from .storage import upload_path
 _PAGE_RE = re.compile(r"^--- Page\s+(\d+)\s+---$", re.I)
 _BULLET_RE = re.compile(r"^[\s\u2022\u25aa\u25cf\uf0b2\uf0a7\u00b7\-–—]+")
 _TERM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 /&+()'’.-]{1,62}$")
-_DEFINITION_STARTS = (
+_STRONG_DEFINITION_STARTS = (
     "the probability ", "the ability ", "the extent ", "a judgment ",
     "an assessment ", "reflects ", "refers to ", "is the ", "is a ",
-    "are approaches ", "are methods ", "provides ", "provide ", "keep ",
-    "a process ", "a system ", "the process ", "the system ",
+    "are approaches ", "are methods ", "a process ", "a system ",
+)
+_DEFINITION_STARTS = _STRONG_DEFINITION_STARTS + (
+    "provides ", "provide ", "keep ", "the process ", "the system ",
 )
 _TERM_VERBS = re.compile(r"\b(is|are|was|were|covers|fails|failed|should|has|have|can|will|may|must|means|depends|includes|include)\b", re.I)
 _CACHE: dict[str, tuple[float, list[dict[str, Any]]]] = {}
@@ -97,8 +99,16 @@ def _looks_like_definition(text: str) -> bool:
     return bool(re.search(r"\b(is|are|means|reflects|refers to|defined as|probability|judgment|ability|extent)\b", low))
 
 
+def _definition_strength(text: str) -> int:
+    low = text.lower().strip()
+    if low.startswith(_STRONG_DEFINITION_STARTS):
+        return 0
+    if low.startswith(("provides ", "provide ", "keep ")):
+        return 1
+    return 2
+
+
 def _join_definition(lines: list[str], start: int) -> str:
-    # A section heading followed by another short heading is not a definition.
     if start < len(lines) and _looks_like_term(lines[start]) and not _looks_like_definition(lines[start]):
         return ""
     parts: list[str] = []
@@ -142,7 +152,7 @@ def extract_definitions_from_text(
                 key = term.lower()
                 if _looks_like_term(term) and _looks_like_definition(definition) and key not in seen:
                     seen.add(key)
-                    found.append({"term": term, "definition": definition, "source_anchor": f"[P1] Page {page_no}", "page": page_no, "verbatim": True, "priority": _priority(term, wanted)})
+                    found.append({"term": term, "definition": definition, "source_anchor": f"[P1] Page {page_no}", "page": page_no, "verbatim": True, "strength": _definition_strength(definition), "priority": _priority(term, wanted)})
                 continue
 
             if not _looks_like_term(line) or i + 1 >= len(lines):
@@ -154,10 +164,12 @@ def extract_definitions_from_text(
             if key in seen:
                 continue
             seen.add(key)
-            found.append({"term": line, "definition": definition, "source_anchor": f"[P1] Page {page_no}", "page": page_no, "verbatim": True, "priority": _priority(line, wanted)})
+            found.append({"term": line, "definition": definition, "source_anchor": f"[P1] Page {page_no}", "page": page_no, "verbatim": True, "strength": _definition_strength(definition), "priority": _priority(line, wanted)})
 
-    found.sort(key=lambda item: (int(item.get("priority", 1)), int(item.get("page", 9999))))
-    return [{k: v for k, v in item.items() if k != "priority"} for item in found[: max(0, limit)]]
+    # Explicit source definitions outrank descriptive headings. Source-profile
+    # relevance breaks ties, then original source order is preserved.
+    found.sort(key=lambda item: (int(item.get("strength", 2)), int(item.get("priority", 1)), int(item.get("page", 9999))))
+    return [{k: v for k, v in item.items() if k not in {"priority", "strength"}} for item in found[: max(0, limit)]]
 
 
 def extract_job_definitions(job: Any, limit: int = 12) -> list[dict[str, Any]]:
