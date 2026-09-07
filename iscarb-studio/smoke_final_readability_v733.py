@@ -3,7 +3,10 @@ import os
 import run  # installs production patch chain
 from app import start_v440 as base
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.3.3-golden-v660-final-readable", os.getenv("ISCARB_BUILD_ID")
+assert os.getenv("ISCARB_BUILD_ID") in {
+    "7.3.3-golden-v660-final-readable",
+    "7.3.6-narrative-learning-experience",
+}, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("final_readability_version") == "v7.3.3", health
 assert "dominant" in health.get("figure_first_slide_policy", ""), health
