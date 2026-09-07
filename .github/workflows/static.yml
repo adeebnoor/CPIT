@@ -36,36 +36,38 @@ jobs:
           cp -R slides lectures _site/
 
           # Preserve the original Saudi heritage visual used by the ISCARB hero.
-          # The HTML references this exact repository path, so publish the same
-          # directory structure into the Pages artifact rather than replacing
-          # the visual with a generic asset.
           mkdir -p _site/iscarb-studio/app/static
           cp iscarb-studio/app/static/hero_user_original.png \
              _site/iscarb-studio/app/static/hero_user_original.png
 
           python tools/sanitize_static_site.py _site
 
-          # Publish the exact CLEAN TESTED Wealth OS v27 bundle.
-          # Verify the complete archive byte-for-byte before extracting it.
-          cat wealth-os-v27.bundle.b64.* | base64 --decode > /tmp/wealth-os-v27.zip
-          echo "bb37fcc3972abe1fcf3a07943294da9c6b1f4ee96f41e76416f42798a25711a4  /tmp/wealth-os-v27.zip" | sha256sum -c -
-          rm -rf /tmp/wealth-os-v27 _site/wealth-os
-          mkdir -p /tmp/wealth-os-v27
-          python - <<'PY'
-          from pathlib import Path
-          from zipfile import ZipFile
+          # Wealth OS v28 is published as one verified standalone HTML artifact.
+          # This prevents the old v27 bundle from silently replacing newer UI code.
+          rm -rf _site/wealth-os
+          mkdir -p _site/wealth-os
+          curl --fail --silent --show-error --location --retry 4 --retry-delay 2 \
+            'https://hwuintdzmozamnmgtfly.supabase.co/functions/v1/wealth-os-v28?pages-build=28' \
+            -o _site/wealth-os/index.html
 
-          archive = Path('/tmp/wealth-os-v27.zip')
-          target = Path('/tmp/wealth-os-v27')
-          with ZipFile(archive) as zf:
-              bad = zf.testzip()
-              if bad:
-                  raise SystemExit(f'Corrupt Wealth OS bundle member: {bad}')
-              zf.extractall(target)
-          if not (target / 'wealth-os' / 'index.html').is_file():
-              raise SystemExit('Wealth OS index.html missing after extraction')
-          PY
-          cp -R /tmp/wealth-os-v27/wealth-os _site/wealth-os
+          # Exact v28 artifact integrity check.
+          echo "b2315d8bfc3e913de5558283173610a2fac9c26de00a191a749d4bd81449d343  _site/wealth-os/index.html" | sha256sum -c -
+
+          # Deployment gates: salary must be a real page and plan must be the monthly sheet.
+          grep -q 'id="salary" class="page"' _site/wealth-os/index.html
+          grep -q 'id="dashboardSalary"' _site/wealth-os/index.html
+          grep -q 'id="salaryPageGross"' _site/wealth-os/index.html
+          grep -q 'id="planScenario"' _site/wealth-os/index.html
+          grep -q 'id="planMonthlyRows"' _site/wealth-os/index.html
+          grep -q 'wealth-plan-api' _site/wealth-os/index.html
+
+          # Guard against accidentally publishing the old v27 page again.
+          if grep -q '<input id="planSearch"' _site/wealth-os/index.html; then
+            echo 'ERROR: legacy v27 plan UI detected' >&2
+            exit 1
+          fi
+
+          test "$(wc -c < _site/wealth-os/index.html)" -eq 156539
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
