@@ -6,7 +6,10 @@ from app import source_visuals as sv
 from app import source_visuals_v42 as sv42
 from app import patch_v731_projection_legibility as leg
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.3.2-golden-v660-native-figures", os.getenv("ISCARB_BUILD_ID")
+assert os.getenv("ISCARB_BUILD_ID") in {
+    "7.3.2-golden-v660-native-figures",
+    "7.3.6-narrative-learning-experience",
+}, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("native_figure_prominence_version") == "v7.3.2", health
 assert "genuine cropped P1" in health.get("native_figure_policy", ""), health
