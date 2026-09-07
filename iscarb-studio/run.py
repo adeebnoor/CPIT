@@ -37,6 +37,7 @@ from app.patch_v735_figure_first_compact_kickoff import apply_v735_figure_first_
 from app.patch_v736_narrative_learning import apply_v736_narrative_learning_patch
 from app.patch_v737_instructional_director import apply_v737_instructional_director_patch
 from app.patch_v800_hybrid_visual_narrative import apply_v800_hybrid_visual_narrative_patch
+from app.patch_v800_visual_mapping_guard import apply_v800_visual_mapping_guard
 from app.visual_prompt_v800 import apply_v800_visual_prompt_patch
 
 apply_v725_golden_v660_patch(app)
@@ -53,6 +54,7 @@ apply_v735_figure_first_compact_kickoff_patch(app)
 apply_v736_narrative_learning_patch(app)
 apply_v737_instructional_director_patch(app)
 apply_v800_hybrid_visual_narrative_patch(app)
+apply_v800_visual_mapping_guard()
 apply_v800_visual_prompt_patch()
 
 if __name__ == "__main__":
