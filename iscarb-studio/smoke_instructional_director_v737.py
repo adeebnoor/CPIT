@@ -6,10 +6,10 @@ from app import start_v440 as base
 from app.definition_extractor import extract_definitions_from_text
 from app.patch_v737_instructional_director import STATIONS, TRANSITIONS, _split_timebox, _youify
 
-assert os.getenv("ISCARB_BUILD_ID") == "7.3.7-instructional-director", os.getenv("ISCARB_BUILD_ID")
+assert os.getenv("ISCARB_BUILD_ID") in {"7.3.7-instructional-director", "8.0.0-hybrid-visual-narrative"}, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
-assert health.get("build_id") == "7.3.7-instructional-director", health
-assert health.get("instructional_director_version") == "7.3.7", health
+assert health.get("build_id") in {"7.3.7-instructional-director", "8.0.0-hybrid-visual-narrative"}, health
+assert health.get("instructional_director_version") in {"7.3.7", "8.0.0"}, health
 assert "U00" in health.get("instructional_director_knowledge", ""), health
 assert "3-second" in health.get("instructional_director_knowledge", ""), health
 assert "20-unit" in health.get("knowledge_anchor_contract", ""), health
@@ -61,4 +61,4 @@ paths = {getattr(route, "path", "") for route in run.app.router.routes}
 assert "/learn/{job_id}" in paths
 assert "/api/learning/{job_id}/bootstrap" in paths
 
-print("PASS: v7.3.7 Instructional Director A1-A4 B1-B3 C1-C3 acceptance contract")
+print("PASS: Instructional Director A1-A4 B1-B3 C1-C3 contract preserved under current build")
