@@ -9,6 +9,7 @@ wrap inside tiny circles.
 """
 
 from pathlib import Path
+from pptx.enum.shapes import MSO_CONNECTOR
 
 from . import start_v440 as base
 from . import presenter_v67_prod as presenter
@@ -45,7 +46,7 @@ def _ppt_owner_flow(slide):
     y = 3.62
     x1, x2, x3 = 2.10, 5.80, 9.50
     for a, b in [(x1 + 1.28, x2 - .10), (x2 + 1.28, x3 - .10)]:
-        conn = slide.shapes.add_connector(presenter.MSO_CONNECTOR.STRAIGHT,
+        conn = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT,
                                           presenter.Inches(a), presenter.Inches(y),
                                           presenter.Inches(b), presenter.Inches(y))
         conn.line.color.rgb = presenter._rgb(presenter.TEXT); conn.line.width = presenter.Pt(1.7)
