@@ -23,6 +23,7 @@ _DEFINITION_STARTS = (
     "are approaches ", "are methods ", "provides ", "provide ", "keep ",
     "a process ", "a system ", "the process ", "the system ",
 )
+_TERM_VERBS = re.compile(r"\b(is|are|was|were|covers|fails|failed|should|has|have|can|will|may|must|means|depends|includes|include)\b", re.I)
 _CACHE: dict[str, tuple[float, list[dict[str, Any]]]] = {}
 
 
@@ -70,12 +71,19 @@ def _looks_like_term(line: str) -> bool:
     if not _TERM_RE.match(line):
         return False
     words = line.split()
-    if not 1 <= len(words) <= 7:
+    if not 1 <= len(words) <= 5:
         return False
     low = line.lower()
     if low.startswith(("chapter ", "page ", "key points", "topics covered")):
         return False
     if re.search(r"\d{1,2}/\d{1,2}/\d{2,4}", line):
+        return False
+    if line.endswith((".", ";", ":", ",")) or low.endswith((" of", " the", " and", " or", " to")):
+        return False
+    first_alpha = next((c for c in line if c.isalpha()), "")
+    if first_alpha and not first_alpha.isupper():
+        return False
+    if _TERM_VERBS.search(line):
         return False
     return True
 
@@ -91,11 +99,10 @@ def _looks_like_definition(text: str) -> bool:
 
 def _join_definition(lines: list[str], start: int) -> str:
     # A section heading followed by another short heading is not a definition.
-    # This prevents pairs such as "Principal properties → Availability …".
     if start < len(lines) and _looks_like_term(lines[start]) and not _looks_like_definition(lines[start]):
         return ""
     parts: list[str] = []
-    for idx in range(start, min(len(lines), start + 4)):
+    for idx in range(start, min(len(lines), start + 5)):
         part = lines[idx]
         if idx > start and _looks_like_term(part) and not part.endswith((".", ";", ":")):
             break
@@ -129,21 +136,13 @@ def extract_definitions_from_text(
 
     for page_no, lines in _pages(text):
         for i, line in enumerate(lines):
-            # Same-line dictionary forms: "Term: definition" or "Term — definition".
             same = re.match(r"^(.{2,60}?)(?:\s*[:—–]\s+)(.{20,620})$", line)
             if same:
                 term, definition = _clean_line(same.group(1)), _clean_line(same.group(2))
                 key = term.lower()
                 if _looks_like_term(term) and _looks_like_definition(definition) and key not in seen:
                     seen.add(key)
-                    found.append({
-                        "term": term,
-                        "definition": definition,
-                        "source_anchor": f"[P1] Page {page_no}",
-                        "page": page_no,
-                        "verbatim": True,
-                        "priority": _priority(term, wanted),
-                    })
+                    found.append({"term": term, "definition": definition, "source_anchor": f"[P1] Page {page_no}", "page": page_no, "verbatim": True, "priority": _priority(term, wanted)})
                 continue
 
             if not _looks_like_term(line) or i + 1 >= len(lines):
@@ -155,17 +154,8 @@ def extract_definitions_from_text(
             if key in seen:
                 continue
             seen.add(key)
-            found.append({
-                "term": line,
-                "definition": definition,
-                "source_anchor": f"[P1] Page {page_no}",
-                "page": page_no,
-                "verbatim": True,
-                "priority": _priority(line, wanted),
-            })
+            found.append({"term": line, "definition": definition, "source_anchor": f"[P1] Page {page_no}", "page": page_no, "verbatim": True, "priority": _priority(line, wanted)})
 
-    # Source-profile matches are promoted, while preserving source order inside
-    # each group. This makes the fixed glossary expose the chapter's core terms.
     found.sort(key=lambda item: (int(item.get("priority", 1)), int(item.get("page", 9999))))
     return [{k: v for k, v in item.items() if k != "priority"} for item in found[: max(0, limit)]]
 
