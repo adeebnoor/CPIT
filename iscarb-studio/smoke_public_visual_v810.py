@@ -91,7 +91,12 @@ for needle in ("public-visual/", "EXTERNAL LICENSED VISUAL", "source_footer", "C
     assert needle in js, needle
 for needle in ("externalHybridGrid", "publicCircle", "publicSourceFooter", "visualPin"):
     assert needle in css, needle
-for needle in ("metaphorical / technical / real-world / conceptual", "Never invent a license", "not P1 evidence", "no-image/icon fallback"):
+for needle in (
+    "metaphorical / technical / real-world / conceptual",
+    "Never invent a license",
+    "Never present a stock/public image as P1 evidence",
+    "no-image/icon fallback",
+):
     assert needle in PUBLIC_VISUAL_PROMPT_ADDENDUM, needle
 
 print("PASS: v8.1 licensed public visual intelligence: semantic briefs, 3-5 queries, 40/25/20/10/5 ranking, exact licensing, P1 priority, 50/50 UI, zoom, circle annotation, autosave, registry, admin settings")
