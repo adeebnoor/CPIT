@@ -18,6 +18,7 @@ from .definition_extractor import extract_job_definitions
 
 VERSION = "7.3.7"
 BUILD_ID = "7.3.7-instructional-director"
+_PREVIOUS_HEALTH = None
 
 STATIONS = [
     {"id": "crisis", "label": "Crisis", "units": [1]},
@@ -77,13 +78,9 @@ def _public_blueprint_v737(job) -> dict[str, Any]:
         timebox, task = _split_timebox(unit.get("student_action", ""), int(unit.get("planned_minutes") or 0))
         unit["task_text"] = _youify(task)
         unit["timebox"] = timebox
-        # Compatibility: consumers that still read student_action also receive
-        # the direct-address task, but the timer is separated for disclosure.
         unit["student_action"] = unit["task_text"]
         unit["transition"] = TRANSITIONS.get(number, "")
-        unit["crisis_anchor"] = (
-            f"Remember the opening crisis: {crisis}" if number in {6, 8, 10} and crisis else ""
-        )
+        unit["crisis_anchor"] = f"Remember the opening crisis: {crisis}" if number in {6, 8, 10} and crisis else ""
     return data
 
 
@@ -99,7 +96,8 @@ def _student_page_v737(job_id: str) -> str:
 
 
 def _health_v737() -> dict[str, Any]:
-    data = dict(base._health_v440())
+    previous = _PREVIOUS_HEALTH
+    data = dict(previous()) if previous is not None else {}
     data.update({
         "build_id": BUILD_ID,
         "instructional_director_version": VERSION,
@@ -112,12 +110,11 @@ def _health_v737() -> dict[str, Any]:
 
 
 def apply_v737_instructional_director_patch(app) -> None:
+    global _PREVIOUS_HEALTH
     if getattr(learning, "_V737_PATCHED", False):
         return
     learning._V737_PATCHED = True
 
-    # Preserve the v7.3.6 function once; all live routes resolve the patched
-    # globals at request time, so no duplicate API surface is needed.
     if not hasattr(learning, "_PUBLIC_BLUEPRINT_V736"):
         learning._PUBLIC_BLUEPRINT_V736 = learning._public_blueprint
     learning.VERSION = VERSION
@@ -127,8 +124,6 @@ def apply_v737_instructional_director_patch(app) -> None:
     learning._public_blueprint = _public_blueprint_v737
     learning._student_page = _student_page_v737
 
-    # Extend bootstrap with U00. Replacing just this route keeps the rest of the
-    # v7.3.6 persistence/security layer intact.
     app.router.routes[:] = [
         route for route in app.router.routes
         if getattr(route, "path", None) != "/api/learning/{job_id}/bootstrap"
@@ -168,5 +163,6 @@ def apply_v737_instructional_director_patch(app) -> None:
             },
         }
 
+    _PREVIOUS_HEALTH = base._health_v440
     base._health_v440 = _health_v737
     base.engine.health = _health_v737
