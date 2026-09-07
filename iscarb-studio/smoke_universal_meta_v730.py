@@ -11,6 +11,7 @@ assert os.getenv("ISCARB_BUILD_ID") in {
     "7.3.1-golden-v660-clean-projection",
     "7.3.2-golden-v660-native-figures",
     "7.3.6-narrative-learning-experience",
+    "7.3.7-instructional-director",
 }, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("universal_meta_gates_version") == "v7.3.0", health
