@@ -5,6 +5,9 @@ const JOBS = ['Professional crisis','Domain spine','Five measurable CLOs','Six H
 const PHASES = ['UNDERSTAND','PRACTISE','MASTER','DISTINGUISH'];
 let jobId = null, timer = null, failures = 0, busy = false, renderedStage = '';
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function instructorStorageKey(id){return 'iscarb.instructor.key.'+id;}
+function randomInstructorKey(){const bytes=new Uint8Array(24);crypto.getRandomValues(bytes);return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');}
+async function ensureInstructorKey(id){let key='';try{key=localStorage.getItem(instructorStorageKey(id))||''}catch{}if(!key)key=randomInstructorKey();try{await request('/api/instructor/'+encodeURIComponent(id)+'/claim',{method:'POST',body:JSON.stringify({key})});try{localStorage.setItem(instructorStorageKey(id),key)}catch{}return key}catch{return ''}}
 function setBusy(value) { busy = value; $('compileBtn').disabled = value; $('importBtn').disabled = value; $('model').disabled = value; $('compileBtn').innerHTML = value ? 'Preparing your lecture…' : ($('model').value==='source-only' ? 'Create free review draft <span>↗</span>' : 'Build & audit with free-tier AI <span>↗</span>'); }
 function modeSelection() {
   const offline=$('model').value==='source-only';
@@ -98,12 +101,13 @@ function render(job){
   const completed=['ready','blocked','error'].includes(job.status);
   $('manualWorkspace').hidden=!completed||!job.source_profile;
   $('authoringPrompt').href='/api/jobs/'+id+'/authoring-prompt';
-  $('outputAssets').innerHTML=`<div class="asset"><b>Visual Presenter</b><a target="_blank" rel="noopener noreferrer" href="/api/jobs/${id}/presenter">Preview ↗</a><a href="/api/jobs/${id}/export/pptx">PPTX</a><a href="/api/jobs/${id}/export/presenter-pdf">PDF</a></div><div class="asset"><b>Original source · all pages</b><a href="/api/jobs/${id}/export/source-pdf">Original PDF ↓</a><small>Keep the source alongside your teaching deck. Figures and examples are never removed from this file.</small></div><div class="asset"><b>Reading Pack</b><a href="/api/jobs/${id}/export/pdf">PDF ↓</a></div><div class="asset"><b>Instructor Guide</b><a href="/api/jobs/${id}/export/docx">DOCX ↓</a></div><div class="asset"><b>Student Pack</b><a href="/api/jobs/${id}/export/student">DOCX ↓</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON ↓</a></div>`;
+  $('outputAssets').innerHTML=`<div class="asset"><b>Learning Experience</b><a target="_blank" rel="noopener noreferrer" href="/learn/${id}">Launch student journey ↗</a><a id="instructorDashLink" target="_blank" rel="noopener noreferrer" href="#">Instructor dashboard · securing…</a><small>Prediction → falsification → evidence → bounded verdict · autosaved.</small></div><div class="asset"><b>Visual Presenter</b><a target="_blank" rel="noopener noreferrer" href="/api/jobs/${id}/presenter">Preview ↗</a><a href="/api/jobs/${id}/export/pptx">PPTX</a><a href="/api/jobs/${id}/export/presenter-pdf">PDF</a></div><div class="asset"><b>Original source · all pages</b><a href="/api/jobs/${id}/export/source-pdf">Original PDF ↓</a><small>Keep the source alongside your teaching deck. Figures and examples are never removed from this file.</small></div><div class="asset"><b>Reading Pack</b><a href="/api/jobs/${id}/export/pdf">PDF ↓</a></div><div class="asset"><b>Instructor Guide</b><a href="/api/jobs/${id}/export/docx">DOCX ↓</a></div><div class="asset"><b>Student Pack</b><a href="/api/jobs/${id}/export/student">DOCX ↓</a></div><div class="asset"><b>Blueprint</b><a href="/api/jobs/${id}/export/json">JSON ↓</a></div>`;
+  const dashLink=$('instructorDashLink');if(dashLink){ensureInstructorKey(jobId).then(key=>{if(key){dashLink.href='/instructor/'+id+'?key='+encodeURIComponent(key);dashLink.textContent='Instructor dashboard ↗'}else{dashLink.removeAttribute('href');dashLink.textContent='Instructor dashboard · access key unavailable'}});}
   if(!['ready','blocked','error'].includes(job.status)){
     $('resultSummary').textContent='Generation/audit is still running. Preview and download the saved REVIEW DRAFT now. Faculty and student packs become available when processing finishes.';
-    [...$('outputAssets').children].slice(2).forEach(el=>el.hidden=true);
+    [...$('outputAssets').children].slice(3).forEach(el=>el.hidden=true);
   }
-  if(!/\.pdf(?:[?#].*)?$/i.test(job.filename||'')) $('outputAssets').children[1].hidden=true;
+  if(!/\.pdf(?:[?#].*)?$/i.test(job.filename||'')) $('outputAssets').children[2].hidden=true;
   $('unitGrid').replaceChildren();
   for(let n=1;n<=20;n++){const unit=units.find(u=>u.number===n),state=unit?unitCheck(n,checks):'fail';const el=document.createElement('details');el.className='unit '+state;
     el.innerHTML=`<summary><span>${String(n).padStart(2,'0')} / ${PHASES[Math.floor((n-1)/5)]} · ${state==='unknown'?'NOT CHECKED':state.toUpperCase()}</span><strong>${escapeHTML(JOBS[n-1])}</strong></summary><div class="unitBody"><p><b>${escapeHTML(unit?.title||'Missing unit')}</b></p><p>${escapeHTML(unit?.engineering_question||'')}</p><p><b>Source:</b> ${escapeHTML(unit?.source_anchor||'Not recorded')}</p><p><b>Learner task:</b> ${escapeHTML(unit?.student_action||'Not recorded')}</p></div>`;$('unitGrid').appendChild(el);}
