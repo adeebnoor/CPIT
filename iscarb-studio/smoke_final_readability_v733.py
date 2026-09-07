@@ -6,6 +6,7 @@ from app import start_v440 as base
 assert os.getenv("ISCARB_BUILD_ID") in {
     "7.3.3-golden-v660-final-readable",
     "7.3.6-narrative-learning-experience",
+    "7.3.7-instructional-director",
 }, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("final_readability_version") == "v7.3.3", health
