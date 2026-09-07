@@ -61,8 +61,12 @@ apply_v737_instructional_director_patch(app)
 apply_v800_hybrid_visual_narrative_patch(app)
 apply_v800_visual_mapping_guard()
 apply_v800_visual_prompt_patch()
-apply_v810_public_visual_intelligence_patch(app)
-apply_v810_visual_prompt_patch()
+
+# Docker regression tests can boot the exact v8.0 surface before v8.1 is added.
+# Production never sets this flag.
+if os.getenv("ISCARB_DISABLE_V810_PATCH", "0") != "1":
+    apply_v810_public_visual_intelligence_patch(app)
+    apply_v810_visual_prompt_patch()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
