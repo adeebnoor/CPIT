@@ -1,0 +1,54 @@
+name: Package ISCARB project snapshot
+
+on:
+  push:
+    branches: [package-iscarb-snapshot]
+    paths:
+      - '.github/workflows/package-iscarb-project.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build edit-ready handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="ISCARB_PROJECT_LATEST"
+          mkdir -p "$ROOT/.github/workflows" "$ROOT/lectures"
+          cp -a iscarb-studio "$ROOT/"
+          cp index.html iscarb.html iscarb-students.html "$ROOT/"
+          if [ -d lectures/iscarb ]; then cp -a lectures/iscarb "$ROOT/lectures/"; fi
+          for f in .github/workflows/iscarb-*.yml .github/workflows/static.yml; do
+            [ -f "$f" ] && cp "$f" "$ROOT/.github/workflows/"
+          done
+          [ -f README.md ] && cp README.md "$ROOT/README_REPOSITORY.md" || true
+          printf '%s\n' "${GITHUB_SHA}" > "$ROOT/CURRENT_HEAD.txt"
+          cat > "$ROOT/EDIT_ME_FIRST.md" <<'EOF'
+          # ISCARB editable project snapshot
+
+          This package contains the current ISCARB engine, public website, lecture hub, approved lecture files, and relevant deployment workflows from the source repository snapshot.
+
+          Main edit points:
+          - `index.html` — public homepage
+          - `iscarb.html` — lecture hub
+          - `iscarb-students.html` — student showcase
+          - `iscarb-studio/app/` — engine and presentation logic
+          - `iscarb-studio/app/static/` — Studio UI and Saudi heritage visual assets
+          - `iscarb-studio/run.py` — active production patch chain
+          - `.github/workflows/` — ISCARB CI/deployment workflows
+
+          Current production build is controlled by `iscarb-studio/run.py`.
+          EOF
+          zip -qr ISCARB_PROJECT_LATEST_EDITABLE.zip "$ROOT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iscarb-project-latest-editable
+          path: ISCARB_PROJECT_LATEST_EDITABLE.zip
+          if-no-files-found: error
+          retention-days: 7
