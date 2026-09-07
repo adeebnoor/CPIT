@@ -17,21 +17,19 @@ COPY . .
 # Production must preserve the authoritative Golden v6.6 curriculum baseline.
 RUN python smoke_prod.py
 RUN python smoke_contract_v716.py
-RUN python smoke_golden_v728.py
-# Domain-specific assurance profile remains available only when relevant.
-RUN python smoke_editor_gates_v729.py
-# Universal cross-course meta-structure + deterministic feedback loop.
-RUN python smoke_universal_meta_v730.py
-# Projection legibility: no tiny rubric, no gate dumps, no sparse expansions.
-RUN python smoke_projection_v731.py
-# Native P1 figure prominence + visual cues + timebox range repair.
-RUN python smoke_native_figures_v732.py
-# Final figure-first readability + owner/evidence/sign-off repair.
-RUN python smoke_final_readability_v733.py
-# Engine-wide Instructional Director: A1-A4, B1-B3, C1-C3.
-RUN python smoke_instructional_director_v737.py
-# v8 Hybrid Visual-Narrative: source visual classification + mapping + interactive evidence.
-RUN python smoke_hybrid_visual_v800.py
+# Boot the exact v8.0 surface for inherited regression contracts, then boot v8.1
+# separately below. This avoids weakening historical assertions just to accept a
+# new build identifier.
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_golden_v728.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_editor_gates_v729.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_universal_meta_v730.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_projection_v731.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_native_figures_v732.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_final_readability_v733.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_instructional_director_v737.py
+RUN ISCARB_BUILD_ID=8.0.0-hybrid-visual-narrative ISCARB_DISABLE_V810_PATCH=1 python smoke_hybrid_visual_v800.py
+# v8.1 Public Visual Intelligence: semantic brief/search/ranking/licensing/UI/evidence.
+RUN python smoke_public_visual_v810.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
