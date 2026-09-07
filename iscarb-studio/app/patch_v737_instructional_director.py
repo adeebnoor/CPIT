@@ -53,16 +53,18 @@ def _split_timebox(text: str, fallback_minutes: int = 0) -> tuple[str, str]:
 
 
 def _youify(text: str) -> str:
-    """Make the task direct-address without changing its technical requirement."""
+    """Make every task direct-address without changing its technical requirement."""
     value = " ".join(str(text or "").split()).strip()
     if not value:
         return "You are the responsible engineer. State the decision you must make next."
     low = value.lower()
-    if low.startswith(("you ", "you’re ", "you're ", "as the ")):
+    if low.startswith("you are the responsible engineer."):
         return value
     if _IMPERATIVE_RE.match(value):
-        return "You are the responsible engineer. " + value[0].upper() + value[1:]
-    return "You are the responsible engineer. Your task now is to " + value[0].lower() + value[1:]
+        requirement = value[0].upper() + value[1:]
+    else:
+        requirement = value
+    return "You are the responsible engineer. " + requirement
 
 
 def _short_crisis(value: str, cap: int = 230) -> str:
@@ -137,7 +139,7 @@ def apply_v737_instructional_director_patch(app) -> None:
         job = learning._load_job(job_id)
         state = learning._load_state(job_id, sid)
         payload = state.get("payload") or {}
-        definitions = extract_job_definitions(job, limit=12)
+        definitions = extract_job_definitions(job, limit=20)
         return {
             "version": VERSION,
             "job_id": job_id,
