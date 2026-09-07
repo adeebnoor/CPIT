@@ -28,6 +28,8 @@ RUN python smoke_projection_v731.py
 RUN python smoke_native_figures_v732.py
 # Final figure-first readability + owner/evidence/sign-off repair.
 RUN python smoke_final_readability_v733.py
+# Engine-wide Instructional Director: A1-A4, B1-B3, C1-C3.
+RUN python smoke_instructional_director_v737.py
 
 RUN useradd --create-home --uid 10001 iscarb \
     && mkdir -p /app/data \
