@@ -10,6 +10,7 @@ assert os.getenv("ISCARB_BUILD_ID") in {
     "7.3.2-golden-v660-native-figures",
     "7.3.6-narrative-learning-experience",
     "7.3.7-instructional-director",
+    "8.0.0-hybrid-visual-narrative",
 }, os.getenv("ISCARB_BUILD_ID")
 health = dict(base._health_v440())
 assert health.get("assurance_profile_version") == "v7.2.9", health
