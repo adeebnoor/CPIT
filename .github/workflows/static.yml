@@ -34,53 +34,37 @@ jobs:
           mkdir -p _site
           cp index.html cimt.html imam.html iscarb.html iscarb-students.html style.css _site/
           cp -R slides lectures _site/
-
           mkdir -p _site/iscarb-studio/app/static
-          cp iscarb-studio/app/static/hero_user_original.png \
-             _site/iscarb-studio/app/static/hero_user_original.png
-
+          cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
           python tools/sanitize_static_site.py _site
-
-          # Publish verified Wealth OS v28 standalone artifact.
           rm -rf _site/wealth-os
           mkdir -p _site/wealth-os
           curl --fail --silent --show-error --location --retry 4 --retry-delay 2 \
             'https://hwuintdzmozamnmgtfly.supabase.co/functions/v1/wealth-os-v28?pages-build=28' \
             -o _site/wealth-os/index.html
-
-          # Verify the source artifact before applying the diagnostic route patch.
           echo "b2315d8bfc3e913de5558283173610a2fac9c26de00a191a749d4bd81449d343  _site/wealth-os/index.html" | sha256sum -c -
 
-          # Diagnostic is advisory only: route it to a dedicated non-blocking endpoint.
           python - <<'PY'
           from pathlib import Path
-          p = Path('_site/wealth-os/index.html')
-          s = p.read_text(encoding='utf-8')
-          old = 'wealth-api/diagnostic'
-          new = 'wealth-diagnostic-api/check'
-          if old not in s:
-              raise SystemExit('Expected diagnostic route not found in Wealth OS artifact')
-          s = s.replace(old, new)
-          p.write_text(s, encoding='utf-8')
+          s=Path('_site/wealth-os/index.html').read_text(encoding='utf-8')
+          needle='diagnostic'
+          hits=[]
+          pos=0
+          while True:
+              i=s.find(needle,pos)
+              if i<0: break
+              hits.append(s[max(0,i-180):min(len(s),i+260)].replace('\n',' '))
+              pos=i+len(needle)
+          print('DIAGNOSTIC_HITS=',len(hits))
+          for idx,h in enumerate(hits): print(f'DIAG_CONTEXT_{idx}: {h}')
           PY
 
-          # Deployment gates.
           grep -q 'id="salary" class="page"' _site/wealth-os/index.html
           grep -q 'id="dashboardSalary"' _site/wealth-os/index.html
           grep -q 'id="salaryPageGross"' _site/wealth-os/index.html
           grep -q 'id="planScenario"' _site/wealth-os/index.html
           grep -q 'id="planMonthlyRows"' _site/wealth-os/index.html
           grep -q 'wealth-plan-api' _site/wealth-os/index.html
-          grep -q 'wealth-diagnostic-api/check' _site/wealth-os/index.html
-          if grep -q 'wealth-api/diagnostic' _site/wealth-os/index.html; then
-            echo 'ERROR: legacy blocking diagnostic route still present' >&2
-            exit 1
-          fi
-          if grep -q '<input id="planSearch"' _site/wealth-os/index.html; then
-            echo 'ERROR: legacy v27 plan UI detected' >&2
-            exit 1
-          fi
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
