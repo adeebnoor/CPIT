@@ -44,27 +44,35 @@ jobs:
             -o _site/wealth-os/index.html
           echo "b2315d8bfc3e913de5558283173610a2fac9c26de00a191a749d4bd81449d343  _site/wealth-os/index.html" | sha256sum -c -
 
+          # Replace only the advisory diagnostic call. Everything else remains byte-identical to v28.
           python - <<'PY'
           from pathlib import Path
-          s=Path('_site/wealth-os/index.html').read_text(encoding='utf-8')
-          needle='diagnostic'
-          hits=[]
-          pos=0
-          while True:
-              i=s.find(needle,pos)
-              if i<0: break
-              hits.append(s[max(0,i-180):min(len(s),i+260)].replace('\n',' '))
-              pos=i+len(needle)
-          print('DIAGNOSTIC_HITS=',len(hits))
-          for idx,h in enumerate(hits): print(f'DIAG_CONTEXT_{idx}: {h}')
+          p=Path('_site/wealth-os/index.html')
+          s=p.read_text(encoding='utf-8')
+          old="const x=await api('diagnostic');"
+          new="const r=await fetch('https://hwuintdzmozamnmgtfly.supabase.co/functions/v1/wealth-diagnostic-api/check',{headers:{authorization:'Bearer '+token,'content-type':'application/json'}});const x=await r.json();"
+          if s.count(old)!=1:
+              raise SystemExit(f'Expected exactly one diagnostic call, found {s.count(old)}')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
           PY
 
+          # Deployment gates: core pages plus non-blocking diagnostic route.
           grep -q 'id="salary" class="page"' _site/wealth-os/index.html
           grep -q 'id="dashboardSalary"' _site/wealth-os/index.html
           grep -q 'id="salaryPageGross"' _site/wealth-os/index.html
           grep -q 'id="planScenario"' _site/wealth-os/index.html
           grep -q 'id="planMonthlyRows"' _site/wealth-os/index.html
           grep -q 'wealth-plan-api' _site/wealth-os/index.html
+          grep -q 'wealth-diagnostic-api/check' _site/wealth-os/index.html
+          if grep -q "const x=await api('diagnostic');" _site/wealth-os/index.html; then
+            echo 'ERROR: blocking diagnostic call still present' >&2
+            exit 1
+          fi
+          if grep -q '<input id="planSearch"' _site/wealth-os/index.html; then
+            echo 'ERROR: legacy v27 plan UI detected' >&2
+            exit 1
+          fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
