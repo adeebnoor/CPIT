@@ -4,7 +4,7 @@ from __future__ import annotations
 
 The extractor is deliberately conservative. It only returns text found in P1's
 local extracted corpus and never asks an LLM to invent or paraphrase a
-"definition".  If no defensible definition is found, the term is omitted.
+"definition". If no defensible definition is found, the term is omitted.
 """
 
 import re
@@ -90,6 +90,10 @@ def _looks_like_definition(text: str) -> bool:
 
 
 def _join_definition(lines: list[str], start: int) -> str:
+    # A section heading followed by another short heading is not a definition.
+    # This prevents pairs such as "Principal properties → Availability …".
+    if start < len(lines) and _looks_like_term(lines[start]) and not _looks_like_definition(lines[start]):
+        return ""
     parts: list[str] = []
     for idx in range(start, min(len(lines), start + 4)):
         part = lines[idx]
@@ -104,6 +108,15 @@ def _join_definition(lines: list[str], start: int) -> str:
     return " ".join(parts).strip()[:620]
 
 
+def _priority(term: str, wanted: list[str]) -> int:
+    low = term.lower()
+    for item in wanted:
+        w = item.lower()
+        if low == w or low in w or w in low:
+            return 0
+    return 1
+
+
 def extract_definitions_from_text(
     text: str,
     candidate_names: list[str] | None = None,
@@ -111,7 +124,6 @@ def extract_definitions_from_text(
 ) -> list[dict[str, Any]]:
     """Return source-verbatim term/definition pairs with page provenance."""
     wanted = [x.strip() for x in (candidate_names or []) if x and x.strip()]
-    wanted_low = {x.lower(): i for i, x in enumerate(wanted)}
     found: list[dict[str, Any]] = []
     seen: set[str] = set()
 
@@ -130,7 +142,7 @@ def extract_definitions_from_text(
                         "source_anchor": f"[P1] Page {page_no}",
                         "page": page_no,
                         "verbatim": True,
-                        "priority": 0 if key in wanted_low else 1,
+                        "priority": _priority(term, wanted),
                     })
                 continue
 
@@ -142,9 +154,6 @@ def extract_definitions_from_text(
             key = line.lower()
             if key in seen:
                 continue
-            # Prefer source-profile concepts but keep generic source definitions
-            # so definition-rich lectures still work when coverage labels are broad.
-            priority = 0 if key in wanted_low else 1
             seen.add(key)
             found.append({
                 "term": line,
@@ -152,11 +161,11 @@ def extract_definitions_from_text(
                 "source_anchor": f"[P1] Page {page_no}",
                 "page": page_no,
                 "verbatim": True,
-                "priority": priority,
+                "priority": _priority(line, wanted),
             })
 
     # Source-profile matches are promoted, while preserving source order inside
-    # each group.  This makes the fixed glossary expose the chapter's core terms.
+    # each group. This makes the fixed glossary expose the chapter's core terms.
     found.sort(key=lambda item: (int(item.get("priority", 1)), int(item.get("page", 9999))))
     return [{k: v for k, v in item.items() if k != "priority"} for item in found[: max(0, limit)]]
 
