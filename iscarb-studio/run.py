@@ -11,7 +11,7 @@ os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_ENABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>licensed-public>explicit-no-image")
 # Keep the runtime build id pinned for the v8.1 regression suite.  The public
-# academic contract is versioned independently by patch_v820_academic_contract.
+# academic contract and session-integrity layers are versioned independently.
 os.environ.setdefault("ISCARB_BUILD_ID", "8.1.0-public-visual-intelligence")
 
 ROOT = Path(__file__).resolve().parent
@@ -47,6 +47,7 @@ from app.visual_prompt_v800 import apply_v800_visual_prompt_patch
 from app.patch_v810_public_visual_intelligence import apply_v810_public_visual_intelligence_patch
 from app.visual_prompt_v810 import apply_v810_visual_prompt_patch
 from app.patch_v820_academic_contract import apply_v820_academic_contract_patch
+from app.patch_v821_session_integrity import apply_v821_session_integrity_patch
 
 apply_v725_golden_v660_patch(app)
 apply_v726_timebox_tasks_patch(app)
@@ -71,9 +72,10 @@ if os.getenv("ISCARB_DISABLE_V810_PATCH", "0") != "1":
     apply_v810_public_visual_intelligence_patch(app)
     apply_v810_visual_prompt_patch()
 
-# Academic reference contract is intentionally last: older UI/generator patches
-# may not redefine the public grammar after this point.
+# The academic contract owns the curriculum language; session integrity owns the
+# browser/server truthfulness after Render restarts. Both intentionally run last.
 apply_v820_academic_contract_patch(app)
+apply_v821_session_integrity_patch(app)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
