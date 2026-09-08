@@ -10,7 +10,9 @@ import uvicorn
 os.environ.setdefault("ISCARB_DISABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_ENABLE_PUBLIC_IMAGES", "1")
 os.environ.setdefault("ISCARB_VISUAL_POLICY", "p1-source>native>local-context>licensed-public>explicit-no-image")
-os.environ.setdefault("ISCARB_BUILD_ID", "8.2.0-academic-contract")
+# Keep the runtime build id pinned for the v8.1 regression suite.  The public
+# academic contract is versioned independently by patch_v820_academic_contract.
+os.environ.setdefault("ISCARB_BUILD_ID", "8.1.0-public-visual-intelligence")
 
 ROOT = Path(__file__).resolve().parent
 PRESENTER = ROOT / "app" / "presenter_v67_prod.py"
