@@ -1,29 +1,29 @@
-# ISCARB student lectures
+# ISCARB interactive lectures
 
-Upload only approved student-facing lecture PDFs to this folder. The public hub is [`/iscarb.html`](../../iscarb.html).
+Publish only approved student-facing interactive HTML lectures in this folder. The public hub is [`/iscarb.html`](../../iscarb.html).
 
-## Fixed semester filenames
+## Semester lecture filenames
 
-The ISCARB page is wired to these exact public filenames:
+The interactive lecture library uses stable, readable HTML filenames:
 
-- `CPIT455_KICKOFF_ISCARB_FINAL.pdf` — Sep 6 kickoff
-- `CPIT455_CH10_ISCARB_FINAL.pdf` — Sep 6 Dependable Systems
-- `CPIT455_CH11_ISCARB_FINAL.pdf` — Sep 13 Reliability
+- `Kickoff.html` — course kickoff
+- `Ch10-Dependable-Systems.html` — Dependable Systems
+- `Ch11-Reliability-Engineering.html` — Reliability Engineering
 - Sep 20 — no class
-- `CPIT455_CH12_ISCARB_FINAL.pdf` — Sep 27 Safety
-- `CPIT455_CH13_ISCARB_FINAL.pdf` — Oct 4 Security
-- `CPIT455_RESILIENCE_ISCARB_FINAL.pdf` — Oct 11 Resilience
+- `Ch12-Safety-Engineering.html` — Safety Engineering
+- `Ch13-Security-Engineering.html` — Security Engineering
+- `Resilience.html` — Resilience
 - Oct 18 — Midterm Exam & Project Review
-- `CPIT455_SOFTWARE_REUSE_ISCARB_FINAL.pdf` — Oct 25 Software Reuse
-- `CPIT455_CBSE_ISCARB_FINAL.pdf` — Nov 1 Component-Based Engineering
-- `CPIT455_DISTRIBUTED_ENGINEERING_ISCARB_FINAL.pdf` — Nov 8 Distributed Engineering
-- `CPIT455_SYSTEM_OF_SYSTEMS_ISCARB_FINAL.pdf` — Nov 15 System of Systems
+- `Software-Reuse.html` — Software Reuse
+- `Component-Based-Engineering.html` — Component-Based Engineering
+- `Distributed-Engineering.html` — Distributed Engineering
+- `System-of-Systems.html` — System of Systems
 - Dec 20 — Final Exam & Project Defense
 
-## Upload shortcut
+## Publishing rule
 
-https://github.com/adeebnoor/CPIT/upload/main/lectures/iscarb
+Each approved lecture is a self-contained interactive HTML experience. Static lecture PDFs are not part of the ISCARB lecture library.
 
-Use the exact filename for the corresponding schedule slot. Replacing an existing PDF with the same filename keeps the student link stable.
+Use the exact filename for the corresponding schedule slot. Replacing an existing HTML file with the same filename keeps the student link stable.
 
-Do not publish internal blueprints, editor-gate diagnostics, answer keys, or unfinished engine artifacts in this folder.
+Do not publish internal blueprints, editor-gate diagnostics, answer keys, model prompts, or unfinished engine artifacts in this folder.
