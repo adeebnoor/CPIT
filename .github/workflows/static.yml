@@ -37,42 +37,12 @@ jobs:
           mkdir -p _site/iscarb-studio/app/static
           cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
           python tools/sanitize_static_site.py _site
+
+          # Wealth OS has moved to its standalone Vercel project. Keep the
+          # repository redirect page in the Pages artifact instead of making
+          # the entire CPIT deployment depend on the retired Supabase v28 build.
           rm -rf _site/wealth-os
-          mkdir -p _site/wealth-os
-          curl --fail --silent --show-error --location --retry 4 --retry-delay 2 \
-            'https://hwuintdzmozamnmgtfly.supabase.co/functions/v1/wealth-os-v28?pages-build=28' \
-            -o _site/wealth-os/index.html
-          echo "b2315d8bfc3e913de5558283173610a2fac9c26de00a191a749d4bd81449d343  _site/wealth-os/index.html" | sha256sum -c -
-
-          # Replace only the advisory diagnostic call. Everything else remains byte-identical to v28.
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('_site/wealth-os/index.html')
-          s=p.read_text(encoding='utf-8')
-          old="const x=await api('diagnostic');"
-          new="const r=await fetch('https://hwuintdzmozamnmgtfly.supabase.co/functions/v1/wealth-diagnostic-api/check',{headers:{authorization:'Bearer '+token,'content-type':'application/json'}});const x=await r.json();"
-          if s.count(old)!=1:
-              raise SystemExit(f'Expected exactly one diagnostic call, found {s.count(old)}')
-          s=s.replace(old,new,1)
-          p.write_text(s,encoding='utf-8')
-          PY
-
-          # Deployment gates: core pages plus non-blocking diagnostic route.
-          grep -q 'id="salary" class="page"' _site/wealth-os/index.html
-          grep -q 'id="dashboardSalary"' _site/wealth-os/index.html
-          grep -q 'id="salaryPageGross"' _site/wealth-os/index.html
-          grep -q 'id="planScenario"' _site/wealth-os/index.html
-          grep -q 'id="planMonthlyRows"' _site/wealth-os/index.html
-          grep -q 'wealth-plan-api' _site/wealth-os/index.html
-          grep -q 'wealth-diagnostic-api/check' _site/wealth-os/index.html
-          if grep -q "const x=await api('diagnostic');" _site/wealth-os/index.html; then
-            echo 'ERROR: blocking diagnostic call still present' >&2
-            exit 1
-          fi
-          if grep -q '<input id="planSearch"' _site/wealth-os/index.html; then
-            echo 'ERROR: legacy v27 plan UI detected' >&2
-            exit 1
-          fi
+          cp -R wealth-os _site/wealth-os
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
