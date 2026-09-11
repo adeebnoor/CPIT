@@ -31,8 +31,23 @@ async function facultySmoke(path, label){
 
   const first = (await rich.locator('#stage .slide.on').innerText()).trim().slice(0,700);
   assert(first.length>20, `${label} rich split first slide renders substantive content`);
-  const unitCount = await rich.locator('body').evaluate(()=>Array.isArray(window.U)?window.U.length:0);
-  assert(unitCount>0 && unitCount<34, `${label} F1 split Faculty sequence loaded (${unitCount} units, not old 34-unit deck)`);
+
+  const facultySemantics = await rich.locator('body').evaluate(()=>{
+    const units = Array.isArray(window.U) ? window.U : [];
+    const all = JSON.stringify(units);
+    return {
+      count: units.length,
+      faculty: all.includes('FACULTY LANE'),
+      verbal: all.includes('verbal poll only'),
+      noWriting: all.includes('No writing'),
+      noCollect: all.includes('do not collect written work')
+    };
+  });
+  assert(facultySemantics.count>0, `${label} F1 Faculty sequence loaded (${facultySemantics.count} units)`);
+  assert(facultySemantics.faculty, `${label} F1 FACULTY LANE teaching cue loaded`);
+  assert(facultySemantics.verbal, `${label} F1 verbal in-class interaction loaded`);
+  assert(facultySemantics.noWriting, `${label} F1 no-writing in-class rule loaded`);
+  assert(facultySemantics.noCollect, `${label} F1 written collection removed from class`);
 
   const frameBox = await page.locator('#lecture').boundingBox();
   assert(Boolean(frameBox && frameBox.width>=380 && frameBox.height>=210), `${label} F2 portrait lecture uses full mobile width`);
