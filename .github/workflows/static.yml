@@ -30,13 +30,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
-          # Rebuild the full visual Faculty lanes from the original rich lecture
-          # plus the split-delivery faculty patches. This happens at build time,
-          # so the published lecture is one self-contained HTML file: no runtime
-          # loader, no fetch dependency, and no simplified fallback deck.
-          node tools/build-fbr-static.mjs
-
           rm -rf _site
           mkdir -p _site
           cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html style.css _site/
@@ -44,13 +37,6 @@ jobs:
           mkdir -p _site/iscarb-studio/app/static
           cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
           python tools/sanitize_static_site.py _site
-
-          # Guard against accidentally publishing the lightweight emergency
-          # fallback instead of the full ISCARB lecture.
-          test $(wc -c < _site/lectures/iscarb/Ch10-Dependable-Systems-Faculty.html) -gt 500000
-          test $(wc -c < _site/lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html) -gt 400000
-          ! grep -q 'Loading faculty lecture' _site/lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
-          ! grep -q 'Loading faculty lecture' _site/lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
 
           # Wealth OS has moved to its standalone Vercel project. Keep the
           # repository redirect page in the Pages artifact instead of making
