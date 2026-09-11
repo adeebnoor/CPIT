@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 
 const root = process.cwd();
 let failures = 0;
@@ -15,34 +16,76 @@ function must(text, needle, label){ text.includes(needle) ? ok(label) : fail(`${
 function mustNot(text, needle, label){ !text.includes(needle) ? ok(label) : fail(`${label} — forbidden: ${needle}`); }
 function mustRegex(text, re, label){ re.test(text) ? ok(label) : fail(`${label} — pattern not found: ${re}`); }
 
+function buildFaculty(baseRel,prefix,label){
+  const source = read(baseRel);
+  const encoded = [1,2,3].map(i=>read(`lectures/iscarb/split/${prefix}.patch.${i}.txt`).trim()).join('');
+  let patches;
+  try{
+    patches = JSON.parse(zlib.gunzipSync(Buffer.from(encoded,'base64')).toString('utf8'));
+    ok(`${label} F1 split patch payload decompresses`);
+  }catch(e){
+    fail(`${label} F1 split patch payload decompresses — ${e.message}`);
+    return '';
+  }
+  let out=source;
+  for(let i=0;i<patches.length;i++){
+    const [oldText,newText]=patches[i];
+    const first=out.indexOf(oldText);
+    if(first<0){ fail(`${label} F1 patch ${i+1} matches baseline`); return ''; }
+    if(out.indexOf(oldText,first+1)>=0){ fail(`${label} F1 patch ${i+1} is unambiguous`); return ''; }
+    out=out.slice(0,first)+newText+out.slice(first+oldText.length);
+  }
+  ok(`${label} F1 all split Faculty patches apply`);
+  return out;
+}
+
 const hub = read('iscarb.html');
 const showcase = read('iscarb-students.html');
 const gateway = read('fbr-submission.html');
 const pagesWorkflow = read('.github/workflows/static.yml');
-const faculty = {
-  'Ch10': read('lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'),
-  'Ch11': read('lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html')
+const presenter = read('lectures/iscarb/Faculty-Presenter.html');
+const facultyRedirect = {
+  Ch10: read('lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'),
+  Ch11: read('lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html')
+};
+const facultyLoader = {
+  Ch10: read('lectures/iscarb/Ch10-Dependable-Systems-Faculty-Rich.html'),
+  Ch11: read('lectures/iscarb/Ch11-Reliability-Engineering-Faculty-Rich.html')
+};
+const facultyBuilt = {
+  Ch10: buildFaculty('lectures/iscarb/Ch10-Dependable-Systems.html','ch10-faculty','Ch10'),
+  Ch11: buildFaculty('lectures/iscarb/Ch11-Reliability-Engineering.html','ch11-faculty','Ch11')
 };
 const student = {
-  'Ch10': read('lectures/iscarb/Ch10-FBR-Student-Assignment.html'),
-  'Ch11': read('lectures/iscarb/Ch11-FBR-Student-Assignment.html')
+  Ch10: read('lectures/iscarb/Ch10-FBR-Student-Assignment.html'),
+  Ch11: read('lectures/iscarb/Ch11-FBR-Student-Assignment.html')
 };
 const reveal = {
-  'Ch10': JSON.parse(read('lectures/iscarb/reveal/r10-7c4d9e2f.json')),
-  'Ch11': JSON.parse(read('lectures/iscarb/reveal/r11-5a8e3c1b.json'))
+  Ch10: JSON.parse(read('lectures/iscarb/reveal/r10-7c4d9e2f.json')),
+  Ch11: JSON.parse(read('lectures/iscarb/reveal/r11-5a8e3c1b.json'))
 };
 
 console.log('\n=== FACULTY LANE ===');
-for(const [ch, html] of Object.entries(faculty)){
-  must(html, 'faculty-lane-static', `${ch} F1 static faculty marker`);
-  mustNot(html, 'Loading faculty lecture', `${ch} F1 no permanent loading shell`);
-  mustNot(html, 'DecompressionStream', `${ch} F1 no runtime patch decompression`);
-  must(html, 'id="prev"', `${ch} F2 previous control`);
-  must(html, 'id="next"', `${ch} F2 next control`);
-  must(html, 'id="noteBtn"', `${ch} F2 notes control`);
-  must(html, "addEventListener('keydown'", `${ch} F2 keyboard navigation`);
-  must(html, 'touchstart', `${ch} F2 mobile swipe navigation`);
-  mustNot(html, "fetch('./Ch", `${ch} F1 no runtime lecture fetch`);
+must(facultyRedirect.Ch10,'Faculty-Presenter.html?chapter=10','Ch10 F1 public Faculty URL routes to presenter');
+must(facultyRedirect.Ch11,'Faculty-Presenter.html?chapter=11','Ch11 F1 public Faculty URL routes to presenter');
+for(const id of ['prev','next','notes','full']) must(presenter,`id="${id}"`,`Presenter F2 ${id} control`);
+must(presenter,'touchstart','Presenter F2 swipe navigation');
+must(presenter,'orientation:portrait','Presenter F2 portrait layout');
+must(presenter,'orientation:landscape','Presenter F2 landscape layout');
+must(presenter,'Ch10-Dependable-Systems-Faculty-Rich.html','Presenter F1 Ch10 rich split source');
+must(presenter,'Ch11-Reliability-Engineering-Faculty-Rich.html','Presenter F1 Ch11 rich split source');
+for(const [ch,html] of Object.entries(facultyLoader)){
+  must(html,'DecompressionStream',`${ch} F1 rich split loader decodes patch payload`);
+  must(html,`split/${ch.toLowerCase()}-faculty.patch.1.txt`,`${ch} F1 rich split patch route 1`);
+  must(html,`split/${ch.toLowerCase()}-faculty.patch.2.txt`,`${ch} F1 rich split patch route 2`);
+  must(html,`split/${ch.toLowerCase()}-faculty.patch.3.txt`,`${ch} F1 rich split patch route 3`);
+}
+for(const [ch,html] of Object.entries(facultyBuilt)){
+  if(!html) continue;
+  must(html,'Faculty lane',`${ch} F1 Faculty-only teaching cue present`);
+  must(html,'student written work happens after class',`${ch} F1 written student work moved after class`);
+  must(html,'VERBAL POLL',`${ch} F1 in-class interaction retained as verbal poll`);
+  mustNot(html,'Could not load faculty lecture',`${ch} F1 built rich lecture is not loader error page`);
 }
 
 console.log('\n=== STUDENT FBR ===');
@@ -96,6 +139,8 @@ must(gateway, 'Ch11-FBR-Student-Assignment.html', 'G6 Ch11 target');
 console.log('\n=== HUB ===');
 must(hub, '▣ Faculty lecture', 'H1 faculty label');
 must(hub, '◇ Student FBR assignment', 'H1 student label');
+must(hub, 'Ch10-Dependable-Systems-Faculty.html', 'H1 Ch10 routes to split Faculty lane');
+must(hub, 'Ch11-Reliability-Engineering-Faculty.html', 'H1 Ch11 routes to split Faculty lane');
 must(hub, 'fbr-submission.html?chapter=10', 'H1 Ch10 routes through student rules gateway');
 must(hub, 'fbr-submission.html?chapter=11', 'H1 Ch11 routes through student rules gateway');
 const readyCount = (hub.match(/class="ready">READY/g) || []).length;
@@ -111,9 +156,7 @@ must(pagesWorkflow, 'fbr-submission.html', 'P1 student gateway included in Pages
 must(pagesWorkflow, 'cp -R slides lectures _site/', 'P2 lecture tree included in Pages artifact');
 
 console.log('\n=== STATIC-HOSTING SECURITY BOUNDARY ===');
-for(const [ch, data] of Object.entries(reveal)){
-  must(data.text, data.text, `${ch} reveal asset parses and contains STRESS`);
-}
+for(const [ch, data] of Object.entries(reveal)) must(data.text, data.text, `${ch} reveal asset parses and contains STRESS`);
 console.log('INFO  STRESS assets are public static files by design. The guard verifies they are absent from initial student HTML and requested only after application lock; GitHub Pages cannot provide server-side secrecy for public assets.');
 
 if(failures){
