@@ -15,31 +15,44 @@ const reveals = {
 const browser = await chromium.launch({headless:true});
 
 async function facultySmoke(path, label){
-  const context = await browser.newContext({viewport:{width:390,height:844}});
+  const context = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const page = await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   await page.goto(BASE+path,{waitUntil:'domcontentloaded'});
-  await page.waitForSelector('#stage .slide.on');
-  assert(!(await page.locator('body').innerText()).includes('Loading faculty lecture'), `${label} F1 opens without loading shell`);
+  await page.waitForSelector('#lecture');
+  const rich = page.frameLocator('#lecture');
+  await rich.locator('#stage .slide.on').waitFor({timeout:30000});
 
-  const active = page.locator('#stage .slide.on');
-  const first = (await active.innerText()).trim().slice(0,600);
-  assert(first.length>20, `${label} rich first slide renders substantive content`);
+  assert((await page.url()).includes('Faculty-Presenter.html'), `${label} F1 redirect opens mobile presenter`);
+  assert(await page.locator('#prev').isVisible(), `${label} F2 previous mobile control visible`);
+  assert(await page.locator('#next').isVisible(), `${label} F2 next mobile control visible`);
+  assert(await page.locator('#notes').isVisible(), `${label} F2 notes mobile control visible`);
 
-  // Original ISCARB engine controls: N toggles notes; arrows navigate.
-  await page.keyboard.press('n');
-  await page.waitForTimeout(80);
-  assert(await page.locator('#notes.on').count()===1, `${label} F2 Notes overlay opens with original N shortcut`);
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(80);
-  const second = (await page.locator('#stage .slide.on').innerText()).trim().slice(0,600);
-  assert(first!==second, `${label} F2 ArrowRight changes slide`);
-  await page.keyboard.press('ArrowLeft');
-  await page.waitForTimeout(80);
-  const back = (await page.locator('#stage .slide.on').innerText()).trim().slice(0,600);
-  assert(back===first, `${label} F2 ArrowLeft returns to first slide`);
+  const first = (await rich.locator('#stage .slide.on').innerText()).trim().slice(0,700);
+  assert(first.length>20, `${label} rich split first slide renders substantive content`);
+  const unitCount = await rich.locator('body').evaluate(()=>Array.isArray(window.U)?window.U.length:0);
+  assert(unitCount>0 && unitCount<34, `${label} F1 split Faculty sequence loaded (${unitCount} units, not old 34-unit deck)`);
+
+  const frameBox = await page.locator('#lecture').boundingBox();
+  assert(Boolean(frameBox && frameBox.width>=380 && frameBox.height>=210), `${label} F2 portrait lecture uses full mobile width`);
+
+  await page.click('#next');
+  await page.waitForTimeout(120);
+  const second = (await rich.locator('#stage .slide.on').innerText()).trim().slice(0,700);
+  assert(first!==second, `${label} F2 mobile Next changes slide`);
+  await page.click('#prev');
+  await page.waitForTimeout(120);
+  const back = (await rich.locator('#stage .slide.on').innerText()).trim().slice(0,700);
+  assert(back===first, `${label} F2 mobile Previous returns to first slide`);
+
+  await page.click('#notes');
+  await page.waitForTimeout(120);
+  assert(await rich.locator('#notes.on').count()===1, `${label} F2 mobile Notes opens instructor overlay`);
+  await page.click('#notes');
+
+  const childBody = await rich.locator('body').innerText();
+  assert(!childBody.includes('Could not load faculty lecture'), `${label} F1 split Faculty loader completes without fetch/decompression error`);
   assert(errors.length===0, `${label} F3 no page JavaScript errors in Chromium`);
   await context.close();
 }
@@ -114,14 +127,14 @@ async function hubSmoke(){
   assert(await page.getByText('Coming soon · not active').count()>=1, 'Hub H3 inactive chapters are not links');
   assert((await page.locator('.strip').innerText()).includes('Publishing rule:'), 'Hub H4 publishing rule visible');
   const facultyHrefs = await page.locator('a.faculty').evaluateAll(xs => xs.map(x => x.getAttribute('href')));
-  assert(facultyHrefs.some(x=>x?.includes('Ch10-Dependable-Systems.html')), 'Hub Faculty Ch10 points to original rich lecture');
-  assert(facultyHrefs.some(x=>x?.includes('Ch11-Reliability-Engineering.html')), 'Hub Faculty Ch11 points to original rich lecture');
+  assert(facultyHrefs.some(x=>x?.includes('Ch10-Dependable-Systems-Faculty.html')), 'Hub Faculty Ch10 routes to split Faculty lane');
+  assert(facultyHrefs.some(x=>x?.includes('Ch11-Reliability-Engineering-Faculty.html')), 'Hub Faculty Ch11 routes to split Faculty lane');
   await context.close();
 }
 
 try{
-  await facultySmoke('/lectures/iscarb/Ch10-Dependable-Systems.html','Ch10 Faculty');
-  await facultySmoke('/lectures/iscarb/Ch11-Reliability-Engineering.html','Ch11 Faculty');
+  await facultySmoke('/lectures/iscarb/Ch10-Dependable-Systems-Faculty.html','Ch10 Faculty');
+  await facultySmoke('/lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html','Ch11 Faculty');
   await studentSmoke('/lectures/iscarb/Ch10-FBR-Student-Assignment.html','Ch10 Student',reveals.Ch10);
   await studentSmoke('/lectures/iscarb/Ch11-FBR-Student-Assignment.html','Ch11 Student',reveals.Ch11);
   await hubSmoke();
