@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08070C">
-<title>ISCARB Faculty Focus Presenter</title>
+<title>ISCARB In-Class Presenter</title>
 <style>
 :root{--bg:#08070C;--panel:#15121C;--line:#2C2534;--ink:#F5F0EA;--dim:#A99E95;--sand:#DDB27E;--mag:#F0189A;--teal:#4FC6CB}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;overflow:hidden}body{display:flex;flex-direction:column}
@@ -20,14 +20,14 @@ button{appearance:none;border:1px solid var(--line);border-radius:12px;backgroun
 </style>
 </head>
 <body>
-<div id="top"><div id="title">ISCARB · Faculty Focus</div><div class="topRight"><span id="status">Loading…</span><a id="studentTask" href="#">Student task</a></div></div>
-<div id="stageWrap"><iframe id="lecture" title="ISCARB Faculty Focus lecture" allow="fullscreen"></iframe><div id="portraitHint">Tap Present for landscape · اضغط Present للعرض الأفقي</div></div>
-<div id="controls" aria-label="Presentation controls"><button id="prev" aria-label="Previous faculty-focus slide">←</button><button id="notes" aria-label="Instructor notes">Notes</button><button id="next" aria-label="Next faculty-focus slide">→</button><button id="present" aria-label="Present full screen">Present</button></div>
+<div id="top"><div id="title">ISCARB · In-Class</div><div class="topRight"><span id="status">Loading…</span><a id="studentTask" href="#">After-Class</a></div></div>
+<div id="stageWrap"><iframe id="lecture" title="ISCARB In-Class lecture" allow="fullscreen"></iframe><div id="portraitHint">Tap Present for landscape · اضغط Present للعرض الأفقي</div></div>
+<div id="controls" aria-label="Presentation controls"><button id="prev" aria-label="Previous in-class slide">←</button><button id="notes" aria-label="Instructor notes">Notes</button><button id="next" aria-label="Next in-class slide">→</button><button id="present" aria-label="Present full screen">Present</button></div>
 <script>
 const q=new URLSearchParams(location.search),ch=q.get('chapter')==='11'?'11':'10';
 const cfg=ch==='11'
- ?{src:'Ch11-Reliability-Engineering.html?v=20260911-focus2',title:'Reliability Engineering · Faculty Focus',assignment:'Ch11-FBR-Student-Assignment.html'}
- :{src:'Ch10-Dependable-Systems.html?v=20260911-focus2',title:'Dependable Systems · Faculty Focus',assignment:'Ch10-FBR-Student-Assignment.html'};
+ ?{src:'Ch11-Reliability-Engineering.html?v=20260911-focus2',title:'Reliability Engineering · In-Class',assignment:'Ch11-FBR-Student-Assignment.html'}
+ :{src:'Ch10-Dependable-Systems.html?v=20260911-focus2',title:'Dependable Systems · In-Class',assignment:'Ch10-FBR-Student-Assignment.html'};
 const frame=document.getElementById('lecture'),status=document.getElementById('status');
 document.getElementById('title').textContent='ISCARB · '+cfg.title;document.getElementById('studentTask').href=cfg.assignment;frame.src=cfg.src;
 let wired=false,ready=false,focus=[],specialByIndex={};window.__facultyFocus=null;
