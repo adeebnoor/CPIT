@@ -1,0 +1,44 @@
+name: FBR Release Readiness
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'iscarb.html'
+      - 'iscarb-students.html'
+      - 'lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'
+      - 'lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html'
+      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/Ch11-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/reveal/**'
+      - 'tools/check-fbr-release.mjs'
+      - '.github/workflows/fbr-release-readiness.yml'
+  pull_request:
+    paths:
+      - 'iscarb.html'
+      - 'iscarb-students.html'
+      - 'lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'
+      - 'lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html'
+      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/Ch11-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/reveal/**'
+      - 'tools/check-fbr-release.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    name: F1–F4 · S1–S8 · R1–R3 · H1–H5
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run static release guard
+        run: node tools/check-fbr-release.mjs
