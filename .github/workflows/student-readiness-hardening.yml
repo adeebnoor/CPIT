@@ -1,3 +1,4 @@
+# one-off trigger
 name: One-off student readiness hardening
 on:
   push:
@@ -16,7 +17,6 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          # Entry page: quick start, operational details, FAQ, cache bust.
           p=Path('fbr-submission.html')
           s=p.read_text()
           quick='''<section class="card"><h2>Quick start · 4 steps</h2><ol><li>Open the weekly task only from the official After-Class link.</li><li>Read the worked example and acknowledge the learning contract.</li><li>Complete FIT → BOUND → ACT → EVIDENCE, then Commit Part A.</li><li>Read STRESS, complete the boundary check + REFIT, export PDF, and submit it through the course LMS.</li></ol><p><b>Expected time:</b> 25–40 minutes.</p><p><b>Official submission:</b> the course LMS only. Saving or exporting in this browser is <b>not</b> a submission.</p></section>\n'''
@@ -37,7 +37,6 @@ jobs:
               if s.count(gmarker)!=1: raise SystemExit('governance marker mismatch')
               s=s.replace(gmarker,faq+gmarker,1)
 
-          # Independent dynamic PDF filename rule; no dependency on internal variable names.
           if 'pdfFilenameRule_dynamic' not in s:
               inj='''<script id="pdfFilenameRule_dynamic">(()=>{const c=new URLSearchParams(location.search).get('chapter')==='11'?'11':'10';const e=document.getElementById('pdfFilenameRule');if(e)e.textContent='CPIT455_W'+c+'_STUDENTID_FBR.pdf';})();</script>\n'''
               if '</body>' not in s: raise SystemExit('body close missing')
@@ -46,7 +45,6 @@ jobs:
           s=s.replace('?v=20260912-studentux1','?v=20260912-ready1')
           p.write_text(s)
 
-          # Assignment pages: explicit LMS-only message, PDF filename hint and print-title filename.
           configs=[
               ('lectures/iscarb/Ch10-FBR-Student-Assignment.html','10'),
               ('lectures/iscarb/Ch11-FBR-Student-Assignment.html','11'),
@@ -75,7 +73,6 @@ jobs:
               s=s.replace("'Ready to export. Recommended LMS format: PDF.'","'Ready to export. Use Print / PDF, then submit that PDF through the LMS. Browser save is not submission.'")
               p.write_text(s)
 
-          # Hub: cache-bust the current entry page.
           p=Path('iscarb.html'); s=p.read_text()
           s=s.replace('fbr-submission.html?chapter=10"','fbr-submission.html?chapter=10&v=20260912-ready1"')
           s=s.replace('fbr-submission.html?chapter=11"','fbr-submission.html?chapter=11&v=20260912-ready1"')
