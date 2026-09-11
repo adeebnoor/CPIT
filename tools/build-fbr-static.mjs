@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 
+// Static publication builder: public split-delivery pages must not depend on runtime fetch.
 const root = process.cwd();
 const lec = path.join(root, 'lectures', 'iscarb');
 
