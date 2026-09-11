@@ -1,0 +1,7 @@
+{
+  "version": "2026-09-11-r1",
+  "chapter": "10",
+  "label": "B1 · STRESS — revealed after commitment",
+  "text": "A post-deployment dependency check shows that both RO trains rely on the same pressure transmitter used by the alarm logic. The two trains are physically separate, but the sensed condition that triggers protection is not independent.",
+  "principle": "The new fact may leave the underlying knowledge true while changing whether the current action is still fit for use."
+}
