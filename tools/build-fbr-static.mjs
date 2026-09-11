@@ -1,19 +1,23 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import zlib from 'node:zlib';
 
 // Static publication builder: public split-delivery pages must not depend on runtime fetch.
 const root = process.cwd();
-const lec = path.join(root, 'lectures', 'iscarb');
 
 function read(rel){ return fs.readFileSync(path.join(root, rel), 'utf8'); }
 function write(rel, txt){ fs.writeFileSync(path.join(root, rel), txt, 'utf8'); }
 
-function loadPatch(prefix){
+async function loadPatch(prefix){
+  // Use the same decode path that the original browser loader used. The split
+  // payloads were produced for atob + DecompressionStream; this avoids subtle
+  // differences in Node Buffer base64 handling across runner versions.
   const encoded = [1,2,3]
-    .map(i => read(`lectures/iscarb/split/${prefix}.patch.${i}.txt`).trim())
-    .join('');
-  const json = zlib.gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8');
+    .map(i => read(`lectures/iscarb/split/${prefix}.patch.${i}.txt`))
+    .join('')
+    .replace(/\s+/g,'');
+  const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const json = await new Response(stream).text();
   return JSON.parse(json);
 }
 
@@ -28,10 +32,10 @@ function applyPatches(source, patches, label){
   return out;
 }
 
-function buildFaculty(baseFile, outFile, patchPrefix, label){
+async function buildFaculty(baseFile, outFile, patchPrefix, label){
   const base = read(`lectures/iscarb/${baseFile}`);
-  const out = applyPatches(base, loadPatch(patchPrefix), label);
-  if(out.includes('DecompressionStream') || out.includes("fetch('./")){
+  const out = applyPatches(base, await loadPatch(patchPrefix), label);
+  if(out.includes('Loading faculty lecture') || out.includes('DecompressionStream') || out.includes("fetch('./Ch")){
     throw new Error(`${label}: generated faculty file still contains runtime split-loader code`);
   }
   write(`lectures/iscarb/${outFile}`, out);
@@ -61,6 +65,6 @@ function buildCh11Student(){
   console.log(`Ch11 student: wrote ${x.length} chars`);
 }
 
-buildFaculty('Ch10-Dependable-Systems.html','Ch10-Dependable-Systems-Faculty.html','ch10-faculty','Ch10 faculty');
-buildFaculty('Ch11-Reliability-Engineering.html','Ch11-Reliability-Engineering-Faculty.html','ch11-faculty','Ch11 faculty');
+await buildFaculty('Ch10-Dependable-Systems.html','Ch10-Dependable-Systems-Faculty.html','ch10-faculty','Ch10 faculty');
+await buildFaculty('Ch11-Reliability-Engineering.html','Ch11-Reliability-Engineering-Faculty.html','ch11-faculty','Ch11 faculty');
 buildCh11Student();
