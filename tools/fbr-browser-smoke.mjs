@@ -28,7 +28,8 @@ async function facultySmoke(path,label,chapter){
 
   assert(page.url().includes('Faculty-Presenter.html'),`${label} F1 alias opens Faculty Focus presenter`);
   for(const id of ['#prev','#notes','#next','#present']) assert(await page.locator(id).isVisible(),`${label} F2 ${id.slice(1)} mobile control visible`);
-  assert((await page.locator('#studentTask').getAttribute('href'))?.includes(`chapter=${chapter}`),`${label} Faculty header links to correct Student task`);
+  const taskHref=await page.locator('#studentTask').getAttribute('href');
+  assert(taskHref===`Ch${chapter}-FBR-Student-Assignment.html`,`${label} Faculty header links directly to Student FBR assignment`);
 
   const firstText=(await rich.locator('#stage .slide.on').innerText()).trim().slice(0,700);
   assert(firstText.length>20,`${label} rich original slide renders substantive content`);
@@ -38,11 +39,13 @@ async function facultySmoke(path,label,chapter){
   assert(info.rawCount>0,`${label} Faculty Focus sees original deck (${info.rawCount} raw slides)`);
   assert(info.indexes.length>1,`${label} Faculty Focus has usable teaching sequence`);
   assert(info.indexes.length<info.rawCount,`${label} heavy written/activity slides are filtered from Faculty sequence`);
+  assert(Object.values(info.special).includes('fit'),`${label} FIT moment remains in Faculty sequence`);
+  assert(Object.values(info.special).includes('stress'),`${label} STRESS/REFIT remains as spoken demonstration`);
 
   const barDisplay=await rich.locator('#bar').evaluate(el=>getComputedStyle(el).display);
   assert(barDisplay==='none',`${label} old in-class task/timer bar hidden in Faculty Focus`);
-  const visibleWritable=await rich.locator('#stage .slide.on textarea,#stage .slide.on select,#stage .slide.on input:not([type="hidden"]),#stage .slide.on [contenteditable="true"]').evaluateAll(xs=>xs.filter(x=>getComputedStyle(x).display!=='none'&&getComputedStyle(x).visibility!=='hidden').length);
-  assert(visibleWritable===0,`${label} no visible student-writing controls in current Faculty slide`);
+  const visibleWriting=await rich.locator('#stage .slide.on textarea,#stage .slide.on select,#stage .slide.on [contenteditable="true"],#stage .slide.on input[type="text"],#stage .slide.on input[type="search"],#stage .slide.on input[type="email"],#stage .slide.on input[type="number"],#stage .slide.on input[type="url"],#stage .slide.on input[type="tel"],#stage .slide.on input[type="date"],#stage .slide.on input[type="time"],#stage .slide.on input:not([type])').evaluateAll(xs=>xs.filter(x=>getComputedStyle(x).display!=='none'&&getComputedStyle(x).visibility!=='hidden').length);
+  assert(visibleWriting===0,`${label} no visible student-writing controls in current Faculty slide`);
 
   const frameBox=await page.locator('#lecture').boundingBox();
   assert(Boolean(frameBox&&frameBox.width>=380&&frameBox.height>=210),`${label} portrait lecture uses full mobile width`);
