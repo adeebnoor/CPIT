@@ -104,12 +104,15 @@ async function hubSmoke(){
   assert(await page.locator('.ready').count()===2, 'Hub H2 only Ch10/Ch11 marked READY');
   assert(await page.getByText('Coming soon · not active').count()>=1, 'Hub H3 inactive chapters are not links');
   assert((await page.locator('.strip').innerText()).includes('Publishing rule:'), 'Hub H4 publishing rule visible');
+  const facultyHrefs = await page.locator('a.faculty').evaluateAll(xs => xs.map(x => x.getAttribute('href')));
+  assert(facultyHrefs.some(x=>x?.includes('Ch10-Dependable-Systems.html')), 'Hub Faculty Ch10 points to original rich lecture');
+  assert(facultyHrefs.some(x=>x?.includes('Ch11-Reliability-Engineering.html')), 'Hub Faculty Ch11 points to original rich lecture');
   await context.close();
 }
 
 try{
-  await facultySmoke('/lectures/iscarb/Ch10-Dependable-Systems-Faculty.html','Ch10 Faculty');
-  await facultySmoke('/lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html','Ch11 Faculty');
+  await facultySmoke('/lectures/iscarb/Ch10-Dependable-Systems.html','Ch10 Faculty');
+  await facultySmoke('/lectures/iscarb/Ch11-Reliability-Engineering.html','Ch11 Faculty');
   await studentSmoke('/lectures/iscarb/Ch10-FBR-Student-Assignment.html','Ch10 Student',reveals.Ch10);
   await studentSmoke('/lectures/iscarb/Ch11-FBR-Student-Assignment.html','Ch11 Student',reveals.Ch11);
   await hubSmoke();
