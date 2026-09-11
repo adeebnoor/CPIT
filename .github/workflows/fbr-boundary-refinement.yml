@@ -31,8 +31,8 @@ jobs:
                  "document.querySelectorAll('input[name=boundaryState],input[name=refit]').forEach(x=>x.addEventListener('change',()=>{schedule();exportState()}));if(S.boundaryState){let q=document.querySelector('input[name=boundaryState][value=\"'+S.boundaryState+'\"]');if(q)q.checked=true}if(S.refit)"),
                 ("return{...meta(),partA:S.lockedPartA||aData(),stress:S.stress,refit:b.refit,refitwhy:b.refitwhy,revised:b.revised,commitId:S.commitId,lockAt:S.lockAt,revealedAt:S.revealedAt}",
                  "return{...meta(),partA:S.lockedPartA||aData(),stress:S.stress,boundaryState:b.boundaryState,refit:b.refit,refitwhy:b.refitwhy,revised:b.revised,commitId:S.commitId,lockAt:S.lockAt,revealedAt:S.revealedAt}"),
-                ("## STRESS\n${s}\n\n## REFIT — ${d.refit||''}",
-                 "## STRESS\n${s}\n\n## Boundary status — ${d.boundaryState||''}\n\n## REFIT — ${d.refit||''}"),
+                (r"## STRESS\n${s}\n\n## REFIT — ${d.refit||''}",
+                 r"## STRESS\n${s}\n\n## Boundary status — ${d.boundaryState||''}\n\n## REFIT — ${d.refit||''}"),
                 ('<h2>REFIT · ${esc(d.refit)}</h2>',
                  '<h2>Boundary status · ${esc(d.boundaryState||\'\')}</h2><h2>REFIT · ${esc(d.refit)}</h2>')
               ]
