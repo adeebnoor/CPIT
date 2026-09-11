@@ -26,8 +26,8 @@ button{appearance:none;border:1px solid var(--line);border-radius:12px;backgroun
 <script>
 const q=new URLSearchParams(location.search),ch=q.get('chapter')==='11'?'11':'10';
 const cfg=ch==='11'
- ?{src:'Ch11-Reliability-Engineering.html?v=20260911-focus2',title:'Reliability Engineering · In-Class',assignment:'Ch11-FBR-Student-Assignment.html'}
- :{src:'Ch10-Dependable-Systems.html?v=20260911-focus2',title:'Dependable Systems · In-Class',assignment:'Ch10-FBR-Student-Assignment.html'};
+ ?{src:'Ch11-Reliability-Engineering.html?v=20260911-focus2',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'}
+ :{src:'Ch10-Dependable-Systems.html?v=20260911-focus2',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'};
 const frame=document.getElementById('lecture'),status=document.getElementById('status');
 document.getElementById('title').textContent='ISCARB · '+cfg.title;document.getElementById('studentTask').href=cfg.assignment;frame.src=cfg.src;
 let wired=false,ready=false,focus=[],specialByIndex={};window.__facultyFocus=null;
