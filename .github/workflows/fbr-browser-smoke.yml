@@ -1,0 +1,44 @@
+name: FBR Browser Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'iscarb.html'
+      - 'lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'
+      - 'lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html'
+      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/Ch11-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/reveal/**'
+      - 'tools/fbr-browser-smoke.mjs'
+      - '.github/workflows/fbr-browser-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start static site
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 >/tmp/fbr-http.log 2>&1 &
+          echo $! > /tmp/fbr-http.pid
+          sleep 2
+      - name: Run browser smoke
+        env:
+          FBR_BASE_URL: http://127.0.0.1:8080
+        run: node tools/fbr-browser-smoke.mjs
