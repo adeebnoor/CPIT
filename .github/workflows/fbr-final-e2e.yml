@@ -1,0 +1,136 @@
+name: One-off final FBR end-to-end test
+on:
+  push:
+    paths:
+      - '.github/workflows/fbr-final-e2e.yml'
+permissions:
+  contents: read
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependency
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install puppeteer-core@24.16.0 >/dev/null 2>&1
+          which google-chrome || which chromium || which chromium-browser
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils >/dev/null
+      - name: Start local static site
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/fbr-http.log 2>&1 &
+          echo $! >/tmp/fbr-http.pid
+          sleep 2
+          curl -fsS http://127.0.0.1:8000/iscarb.html >/dev/null
+      - name: Run student journey and in-class tests
+        run: |
+          cat > /tmp/fbr-e2e.cjs <<'JS'
+          const puppeteer = require('puppeteer-core');
+          const fs = require('fs');
+          const cp = require('child_process');
+          function assert(x,msg){ if(!x) throw new Error(msg); }
+          async function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+          async function browserPath(){
+            for(const p of ['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser']) if(fs.existsSync(p)) return p;
+            throw new Error('No Chrome/Chromium executable found');
+          }
+          async function testChapter(browser,ch){
+            const page = await browser.newPage();
+            await page.setViewport({width:1440,height:1000});
+            const base='http://127.0.0.1:8000/';
+            await page.goto(base+'iscarb.html',{waitUntil:'domcontentloaded'});
+            const afterHref = await page.$eval(`a.student[href*="chapter=${ch}"]`,a=>a.getAttribute('href'));
+            assert(afterHref && afterHref.includes(`chapter=${ch}`),`Ch${ch}: After-Class link missing`);
+            await page.goto(base+afterHref,{waitUntil:'domcontentloaded'});
+            assert(await page.$eval('#openBtn',b=>b.disabled),`Ch${ch}: Open button should start disabled`);
+            await page.type('#sid',`E2E${ch}0001`);
+            await page.click('#ack');
+            assert(!(await page.$eval('#openBtn',b=>b.disabled)),`Ch${ch}: Open button did not enable after ID + acknowledgment`);
+            await Promise.all([
+              page.waitForNavigation({waitUntil:'domcontentloaded'}),
+              page.click('#openBtn')
+            ]);
+            assert(page.url().includes(`Ch${ch}-FBR-Student-Assignment.html`),`Ch${ch}: did not open assignment, got ${page.url()}`);
+            const sid = await page.$eval('#sid',e=>e.value);
+            assert(sid===`E2E${ch}0001`,`Ch${ch}: Student ID not carried into assignment`);
+            assert((await page.$eval('#partB',e=>e.innerText.trim()))==='',`Ch${ch}: STRESS/Part B visible before Commit`);
+            for(const [id,text] of [
+              ['fit','This mechanism is fit for the stated professional use because it directly governs the decision and its consequences.'],
+              ['bound','This decision remains fit only while the observable operating conditions remain within the stated limits; reopen it when that condition changes.'],
+              ['act','Issue a concrete professional action with an accountable owner, a defined operating condition, and an explicit review trigger.'],
+              ['evidence','Use timestamped logs, measurements, test results, and an accountable owner record as inspectable evidence for this decision.']
+            ]){ await page.type('#'+id,text); }
+            await page.click('#lock');
+            await page.waitForSelector('input[name=boundaryState]',{timeout:8000});
+            const locked = await page.$$eval('#fit,#bound,#act,#evidence',els=>els.every(e=>e.readOnly));
+            assert(locked,`Ch${ch}: Part A fields are not read-only after Commit`);
+            const controlsLocked = await page.$$eval('#lock,#save,#clear',els=>els.every(e=>e.disabled));
+            assert(controlsLocked,`Ch${ch}: Commit/Save/Clear controls not disabled after Commit`);
+            const stressText = await page.$eval('#partB .stress',e=>e.innerText.trim());
+            assert(stressText.length>30,`Ch${ch}: STRESS did not appear after Commit`);
+            const preExportDisabled = await page.$$eval('#pdf,#download,#copy',els=>els.every(e=>e.disabled));
+            assert(preExportDisabled,`Ch${ch}: export enabled before REFIT completion`);
+            await page.click('input[name=boundaryState][value="CROSSED"]');
+            await page.click('input[name=refit][value="REVISE"]');
+            await page.type('#refitwhy','The new evidence changes the applicability condition I committed, so the original action must be revised rather than changed merely because new information appeared.');
+            await page.type('#revised','Revise the professional artifact to address the changed boundary, preserve traceable evidence, and define the next review trigger and accountable owner.');
+            await wait(700);
+            const postExportEnabled = await page.$$eval('#pdf,#download,#copy',els=>els.every(e=>!e.disabled));
+            assert(postExportEnabled,`Ch${ch}: export did not enable after complete boundary check + REFIT`);
+            await page.evaluate(()=>{ printSheet(); });
+            const printText = await page.$eval('#print',e=>e.innerText);
+            for(const token of ['FIT','BOUND','ACT','EVIDENCE','STRESS','Boundary status','REFIT','Final Artifact']) assert(printText.includes(token),`Ch${ch}: print sheet missing ${token}`);
+            const pdf=`/tmp/CPIT455_W${ch}_E2E${ch}0001_FBR.pdf`;
+            await page.emulateMediaType('print');
+            await page.pdf({path:pdf,format:'A4',printBackground:true,preferCSSPageSize:false,margin:{top:'10mm',right:'10mm',bottom:'10mm',left:'10mm'}});
+            assert(fs.existsSync(pdf) && fs.statSync(pdf).size>10000,`Ch${ch}: PDF missing or unexpectedly small`);
+            cp.execFileSync('pdftotext',[pdf,pdf+'.txt']);
+            const txt=fs.readFileSync(pdf+'.txt','utf8');
+            for(const token of ['FIT','BOUND','ACT','EVIDENCE','STRESS','Boundary status','REFIT','Final Artifact']) assert(txt.includes(token),`Ch${ch}: exported PDF text missing ${token}`);
+            const info=cp.execFileSync('pdfinfo',[pdf],{encoding:'utf8'});
+            const pages=(info.match(/^Pages:\s+(\d+)/m)||[])[1];
+            assert(Number(pages)>=1 && Number(pages)<=4,`Ch${ch}: unexpected PDF page count ${pages}`);
+            console.log(`PASS Ch${ch} After-Class: gate -> commit lock -> STRESS -> export gate -> PDF (${pages} page(s), ${fs.statSync(pdf).size} bytes)`);
+            await page.close();
+          }
+          async function testInClass(browser,ch){
+            const page=await browser.newPage();
+            await page.setViewport({width:1920,height:1080});
+            const base='http://127.0.0.1:8000/';
+            await page.goto(base+'iscarb.html',{waitUntil:'domcontentloaded'});
+            const href=await page.$eval(`article[data-n="${ch}"] a.faculty`,a=>a.getAttribute('href'));
+            assert(href,`Ch${ch}: In-Class link missing`);
+            await page.goto(base+href,{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>location.pathname.endsWith('/Faculty-Presenter.html'),{timeout:5000});
+            await wait(1000);
+            assert(page.url().includes(`chapter=${ch}`),`Ch${ch}: presenter chapter query missing`);
+            const text=(await page.evaluate(()=>document.body.innerText)).trim();
+            assert(text.length>100,`Ch${ch}: presenter rendered almost no content`);
+            const hasChapter = text.toLowerCase().includes(ch==='10'?'dependable':'reliability');
+            assert(hasChapter,`Ch${ch}: presenter content does not identify expected chapter`);
+            console.log(`PASS Ch${ch} In-Class: hub link -> direct Faculty-Presenter render`);
+            await page.close();
+          }
+          (async()=>{
+            const executablePath=await browserPath();
+            const browser=await puppeteer.launch({headless:true,executablePath,args:['--no-sandbox','--disable-setuid-sandbox']});
+            try{
+              await testChapter(browser,'10');
+              await testChapter(browser,'11');
+              await testInClass(browser,'10');
+              await testInClass(browser,'11');
+              console.log('ALL FINAL E2E TESTS PASSED');
+            } finally { await browser.close(); }
+          })().catch(e=>{console.error('E2E FAILURE:',e.stack||e);process.exit(1)});
+          JS
+          node /tmp/fbr-e2e.cjs
+      - name: Show PDF summaries
+        if: always()
+        run: |
+          for f in /tmp/CPIT455_W*_FBR.pdf; do
+            [ -f "$f" ] || continue
+            echo "--- $f ---"
+            pdfinfo "$f" | grep -E 'Pages|Page size|File size' || true
+          done
