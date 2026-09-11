@@ -17,6 +17,8 @@ function mustRegex(text, re, label){ re.test(text) ? ok(label) : fail(`${label} 
 
 const hub = read('iscarb.html');
 const showcase = read('iscarb-students.html');
+const gateway = read('fbr-submission.html');
+const pagesWorkflow = read('.github/workflows/static.yml');
 const faculty = {
   'Ch10': read('lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'),
   'Ch11': read('lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html')
@@ -39,7 +41,7 @@ for(const [ch, html] of Object.entries(faculty)){
   must(html, 'id="next"', `${ch} F2 next control`);
   must(html, 'id="noteBtn"', `${ch} F2 notes control`);
   must(html, "addEventListener('keydown'", `${ch} F2 keyboard navigation`);
-  must(html, "touchstart", `${ch} F2 mobile swipe navigation`);
+  must(html, 'touchstart', `${ch} F2 mobile swipe navigation`);
   mustNot(html, "fetch('./Ch", `${ch} F1 no runtime lecture fetch`);
 }
 
@@ -79,9 +81,23 @@ for(const [ch, html] of Object.entries(student)){
   mustNot(html, 'answer key', `${ch} R3 no answer-key text`);
 }
 
+console.log('\n=== STUDENT SUBMISSION GATEWAY ===');
+must(gateway, 'OFFICIAL STUDENT SUBMISSION RULES', 'G1 official rules heading');
+must(gateway, 'No “I did not know” exception.', 'G1 no-excuse notice');
+must(gateway, 'Weekly grading · 4 points', 'G2 grading policy');
+must(gateway, 'AI / LLM policy', 'G3 AI policy');
+must(gateway, '60–120 second micro-viva', 'G4 oral verification policy');
+must(gateway, 'id="sid"', 'G5 Student ID required');
+must(gateway, 'id="ack"', 'G5 acknowledgment checkbox');
+must(gateway, 'id="openBtn" disabled', 'G5 assignment button gated');
+must(gateway, 'Ch10-FBR-Student-Assignment.html', 'G6 Ch10 target');
+must(gateway, 'Ch11-FBR-Student-Assignment.html', 'G6 Ch11 target');
+
 console.log('\n=== HUB ===');
 must(hub, '▣ Faculty lecture', 'H1 faculty label');
 must(hub, '◇ Student FBR assignment', 'H1 student label');
+must(hub, 'fbr-submission.html?chapter=10', 'H1 Ch10 routes through student rules gateway');
+must(hub, 'fbr-submission.html?chapter=11', 'H1 Ch11 routes through student rules gateway');
 const readyCount = (hub.match(/class="ready">READY/g) || []).length;
 readyCount === 2 ? ok('H2 READY badges only on Ch10/Ch11') : fail(`H2 expected 2 READY badges, found ${readyCount}`);
 must(hub, 'Coming soon · not active', 'H3 inactive coming-soon state');
@@ -89,6 +105,10 @@ must(hub, '<strong>Publishing rule:</strong> approved faculty presentation lanes
 must(hub, 'href="iscarb-students.html"', 'H5 showcase link');
 must(showcase, 'No approved student PDFs yet', 'H5 showcase empty-state status');
 must(showcase, 'No student PDF has been approved for public display yet.', 'H5 showcase clear empty message');
+
+console.log('\n=== GITHUB PAGES PUBLICATION ===');
+must(pagesWorkflow, 'fbr-submission.html', 'P1 student gateway included in Pages artifact');
+must(pagesWorkflow, 'cp -R slides lectures _site/', 'P2 lecture tree included in Pages artifact');
 
 console.log('\n=== STATIC-HOSTING SECURITY BOUNDARY ===');
 for(const [ch, data] of Object.entries(reveal)){
