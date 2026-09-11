@@ -65,6 +65,8 @@
       const area=slide.querySelector('.area');if(area)area.innerHTML=w.T(w.rBlocks(u.blocks));
       slide.dataset.vprogramming='1';
     }
+    /* The bridge already teaches safer language subsets and static analysis.
+       Cite the exact source family so the coverage ledger is evidence-derived. */
     const bi=w.U.findIndex(x=>x&&x.k==='B01');
     if(bi>=0){
       const bu=w.U[bi];
@@ -74,6 +76,10 @@
       if(bc&&!bc.querySelector('.src')){const s=d.createElement('div');s.className='src';s.textContent='P1 · s.62–65';bc.appendChild(s)}
     }
     if(w.LECTURE?.coverage?.sections?.[4]) delete w.LECTURE.coverage.sections[4].why;
+    const ci=w.U.findIndex(x=>x&&x.k==='C01');
+    if(ci>=0){
+      w.U[ci].notes='Ninety seconds. The ledger is computed from citations. Section 5 is now taught through the dependable-programming source expansion and the build bridge; any remaining magenta slides are still honest reading gaps, not hidden omissions.';
+    }
     if(typeof w.renderCoverage==='function') w.renderCoverage();
     w.__ch11ProgrammingPatch=true;
   }
