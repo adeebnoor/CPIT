@@ -18,7 +18,7 @@ function mustRegex(text, re, label){ re.test(text) ? ok(label) : fail(`${label} 
 
 function buildFaculty(baseRel,prefix,label){
   const source = read(baseRel);
-  const encoded = [1,2,3].map(i=>read(`lectures/iscarb/split/${prefix}.patch.${i}.txt`).trim()).join('');
+  const encoded = [1,2,3].map(i=>read(`lectures/iscarb/split/${prefix}.patch.${i}.txt`)).join('').replace(/\s+/g,'');
   let patches;
   try{
     patches = JSON.parse(zlib.gunzipSync(Buffer.from(encoded,'base64')).toString('utf8'));
@@ -76,15 +76,18 @@ must(presenter,'Ch10-Dependable-Systems-Faculty-Rich.html','Presenter F1 Ch10 ri
 must(presenter,'Ch11-Reliability-Engineering-Faculty-Rich.html','Presenter F1 Ch11 rich split source');
 for(const [ch,html] of Object.entries(facultyLoader)){
   must(html,'DecompressionStream',`${ch} F1 rich split loader decodes patch payload`);
+  must(html,'.replace(/\\s+/g',`${ch} F1 loader normalizes wrapped base64`);
   must(html,`split/${ch.toLowerCase()}-faculty.patch.1.txt`,`${ch} F1 rich split patch route 1`);
   must(html,`split/${ch.toLowerCase()}-faculty.patch.2.txt`,`${ch} F1 rich split patch route 2`);
   must(html,`split/${ch.toLowerCase()}-faculty.patch.3.txt`,`${ch} F1 rich split patch route 3`);
 }
 for(const [ch,html] of Object.entries(facultyBuilt)){
   if(!html) continue;
-  must(html,'Faculty lane',`${ch} F1 Faculty-only teaching cue present`);
-  must(html,'student written work happens after class',`${ch} F1 written student work moved after class`);
-  must(html,'VERBAL POLL',`${ch} F1 in-class interaction retained as verbal poll`);
+  must(html,'FACULTY LANE',`${ch} F1 Faculty-only teaching cue present`);
+  must(html,'verbal poll only',`${ch} F1 in-class interaction is verbal`);
+  must(html,'No writing',`${ch} F1 no in-class written task`);
+  must(html,'do not collect written work',`${ch} F1 written collection removed from class`);
+  must(html,'after class',`${ch} F1 after-class student work cue present`);
   mustNot(html,'Could not load faculty lecture',`${ch} F1 built rich lecture is not loader error page`);
 }
 
