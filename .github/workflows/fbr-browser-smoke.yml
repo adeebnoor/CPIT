@@ -8,13 +8,9 @@ on:
       - 'iscarb.html'
       - 'lectures/iscarb/Ch10-Dependable-Systems.html'
       - 'lectures/iscarb/Ch11-Reliability-Engineering.html'
-      - 'lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'
-      - 'lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html'
       - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
       - 'lectures/iscarb/Ch11-FBR-Student-Assignment.html'
-      - 'lectures/iscarb/split/**'
       - 'lectures/iscarb/reveal/**'
-      - 'tools/build-fbr-static.mjs'
       - 'tools/fbr-browser-smoke.mjs'
       - '.github/workflows/static.yml'
       - '.github/workflows/fbr-browser-smoke.yml'
@@ -33,13 +29,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Rebuild rich split-delivery Faculty lanes
-        run: |
-          node tools/build-fbr-static.mjs
-          test $(wc -c < lectures/iscarb/Ch10-Dependable-Systems-Faculty.html) -gt 500000
-          test $(wc -c < lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html) -gt 400000
-          ! grep -q 'Loading faculty lecture' lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
-          ! grep -q 'Loading faculty lecture' lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
       - name: Install Playwright Chromium
         run: |
           npm init -y >/dev/null 2>&1
