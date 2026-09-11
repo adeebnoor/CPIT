@@ -1,0 +1,7 @@
+{
+  "version": "2026-09-11-r1",
+  "chapter": "11",
+  "label": "B1 · STRESS — revealed after commitment",
+  "text": "After the clause is drafted, the vendor changes the definition of “available” so that degraded mode counts as available. The numerical target can remain 99.9%, but the operational meaning of the number has changed.",
+  "principle": "Do not change the clause merely because something changed. Decide whether this change crosses the applicability boundary you stated."
+}
