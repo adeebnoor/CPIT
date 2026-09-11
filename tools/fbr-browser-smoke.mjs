@@ -22,15 +22,24 @@ async function facultySmoke(path, label){
   await page.goto(BASE+path,{waitUntil:'domcontentloaded'});
   await page.waitForSelector('#stage .slide.on');
   assert(!(await page.locator('body').innerText()).includes('Loading faculty lecture'), `${label} F1 opens without loading shell`);
-  const first = await page.locator('.slide.on h1').innerText();
-  await page.click('#noteBtn');
-  const notesVisible = await page.locator('.slide.on .notes.show').count();
-  assert(notesVisible===1, `${label} F2 Notes toggles`);
-  await page.click('#next');
-  const second = await page.locator('.slide.on h1').innerText();
-  assert(first!==second, `${label} F2 Next navigation changes slide`);
-  await page.click('#prev');
-  assert((await page.locator('.slide.on h1').innerText())===first, `${label} F2 Previous navigation returns slide`);
+
+  const active = page.locator('#stage .slide.on');
+  const first = (await active.innerText()).trim().slice(0,600);
+  assert(first.length>20, `${label} rich first slide renders substantive content`);
+
+  // Original ISCARB engine controls: N toggles notes; arrows navigate.
+  await page.keyboard.press('n');
+  await page.waitForTimeout(80);
+  assert(await page.locator('#notes.on').count()===1, `${label} F2 Notes overlay opens with original N shortcut`);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(80);
+  const second = (await page.locator('#stage .slide.on').innerText()).trim().slice(0,600);
+  assert(first!==second, `${label} F2 ArrowRight changes slide`);
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(80);
+  const back = (await page.locator('#stage .slide.on').innerText()).trim().slice(0,600);
+  assert(back===first, `${label} F2 ArrowLeft returns to first slide`);
   assert(errors.length===0, `${label} F3 no page JavaScript errors in Chromium`);
   await context.close();
 }
