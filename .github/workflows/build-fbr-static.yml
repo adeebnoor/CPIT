@@ -1,0 +1,55 @@
+name: Build FBR static split-delivery pages
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/build-fbr-static.mjs'
+      - 'lectures/iscarb/Ch10-Dependable-Systems.html'
+      - 'lectures/iscarb/Ch11-Reliability-Engineering.html'
+      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/split/ch10-faculty.patch.*.txt'
+      - 'lectures/iscarb/split/ch11-faculty.patch.*.txt'
+      - '.github/workflows/build-fbr-static.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate self-contained public pages
+        run: node tools/build-fbr-static.mjs
+
+      - name: Verify no runtime split loaders remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -q "DecompressionStream" lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
+          ! grep -q "DecompressionStream" lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
+          ! grep -q "fetch('./Ch10-FBR-Student-Assignment.html" lectures/iscarb/Ch11-FBR-Student-Assignment.html
+          grep -q "meta name=\"fbr-delivery\" content=\"faculty-lane\"" lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
+          grep -q "meta name=\"fbr-delivery\" content=\"faculty-lane\"" lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
+
+      - name: Commit generated pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add \
+            lectures/iscarb/Ch10-Dependable-Systems-Faculty.html \
+            lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html \
+            lectures/iscarb/Ch11-FBR-Student-Assignment.html
+          if git diff --cached --quiet; then
+            echo "Generated pages already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Build self-contained FBR split-delivery pages"
+          git push
