@@ -26,7 +26,7 @@ jobs:
           curl -fsS http://127.0.0.1:8000/iscarb.html >/dev/null
       - name: Run student journey and in-class tests
         run: |
-          cat > /tmp/fbr-e2e.cjs <<'JS'
+          cat > fbr-e2e.cjs <<'JS'
           const puppeteer = require('puppeteer-core');
           const fs = require('fs');
           const cp = require('child_process');
@@ -125,7 +125,7 @@ jobs:
             } finally { await browser.close(); }
           })().catch(e=>{console.error('E2E FAILURE:',e.stack||e);process.exit(1)});
           JS
-          node /tmp/fbr-e2e.cjs
+          node fbr-e2e.cjs
       - name: Show PDF summaries
         if: always()
         run: |
