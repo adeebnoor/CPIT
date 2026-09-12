@@ -48,16 +48,20 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 /* ================= SLIDE FRAME ================= */
 .slide{position:absolute;inset:0 0 78px;padding:22px 36px 8px;display:none;flex-direction:column}
 .slide.on{display:flex}
-.top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:flex-start;gap:16px}
+.top>div:first-child{min-width:0}
 .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .count{font-size:11px;color:var(--dim2);font-variant-numeric:tabular-nums;letter-spacing:.06em}
 .pill{display:inline-block;border:1.5px solid;border-radius:9px;padding:7px 19px;margin-top:13px;
   font-size:12.5px;font-weight:700;letter-spacing:.03em;width:fit-content}
-h1{font-family:var(--disp);font-weight:700;font-size:35px;line-height:1.1;margin:12px 0 0;
-  letter-spacing:-.015em;text-wrap:balance;max-width:26ch}
-.sub{font-size:15.5px;color:var(--dim);margin:8px 0 0;max-width:88ch;line-height:1.38}
+h1{font-family:var(--disp);font-weight:700;font-size:33px;line-height:1.08;margin:12px 0 0;
+  letter-spacing:-.015em;text-wrap:balance;max-width:22ch}
+.sub{font-size:15px;color:var(--dim);margin:8px 0 0;max-width:74ch;line-height:1.36}
+.badge,.count{margin-top:2px}
+.badge{max-width:252px}
+/* sub patched above for tighter top area */
 .area{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;justify-content:safe center;
-  gap:9px;padding:6px 0 4px;overflow:hidden}
+  gap:10px;padding:6px 0 4px;overflow:hidden}
 
 /* ================= CARDS ================= */
 .grid{display:grid;gap:13px}
@@ -175,6 +179,26 @@ h1{font-family:var(--disp);font-weight:700;font-size:35px;line-height:1.1;margin
 [dir="rtl"] .qz-hint{border-right-color:var(--violet)}
 [dir="rtl"] #notes .nb{border-left:0;border-right:2px solid var(--sand);padding-left:0;padding-right:16px}
 [dir="rtl"] .qz-o,[dir="rtl"] .layer{text-align:right}
+
+/* final classroom projection refinements */
+.slide[data-k="R06"] h1{font-size:44px;max-width:18ch}
+.slide[data-k="R06"] .sub{font-size:19px;max-width:58ch}
+.slide[data-k="R06"] .area{justify-content:center;gap:18px}
+.slide[data-k="R06"] .card{min-height:150px;justify-content:center;padding:20px 18px}
+.slide[data-k="R06"] .card .lab{font-size:14px}.slide[data-k="R06"] .card .txt{font-size:18px;line-height:1.35}
+.slide[data-k="R06"] .principle{font-size:22px}
+.slide[data-k="J02"] h1{font-size:31px;max-width:25ch}.slide[data-k="J02"] .sub{max-width:66ch}
+.slide[data-k="R15"] h1,.slide[data-k="R16"] h1,.slide[data-k="R20"] h1{max-width:19ch}
+.transfer-svg,.workload-svg{width:100%;height:auto;display:block}
+.routeviz{display:grid;grid-template-columns:auto 44px auto 44px auto 44px auto 44px auto;align-items:center;justify-content:center;gap:0;margin:2px auto 8px;width:min(1100px,100%)}
+.route-node{min-width:142px;border:1.5px solid var(--line);border-radius:14px;background:var(--panel);padding:15px 14px;text-align:center}
+.route-node .rk{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--dim2)}
+.route-node .rt{font-family:var(--disp);font-size:16px;font-weight:700;margin-top:5px}
+.route-node.active{border-color:var(--violet);box-shadow:0 0 20px -10px var(--violet)}
+.route-node.support{border-color:var(--mag);box-shadow:0 0 20px -10px var(--mag)}
+.route-arrow{font-size:26px;color:var(--sand);text-align:center}
+.route-note{text-align:center;font-size:13px;color:var(--dim);margin:4px 0 2px}
+
 /* ---- print: a handout, and the route to a PDF ---- */
 @media print{
   body{background:#fff;color:#111;overflow:visible}
@@ -226,7 +250,7 @@ h1{font-family:var(--disp);font-weight:700;font-size:35px;line-height:1.1;margin
 .c-sand{border-color:var(--sand)} .c-sand .lab{color:var(--sand)}
 .c-violet{border-color:var(--violet)} .c-violet .lab{color:var(--violet)}
 .c-green{border-color:var(--green)} .c-green .lab{color:var(--green)}
-.rowcard{display:grid;grid-template-columns:136px 1fr;gap:16px;align-items:center;padding:11px 16px}
+.rowcard{display:grid;grid-template-columns:88px 1fr;gap:14px;align-items:center;padding:11px 16px}
 .rowcard .lab{text-align:right}
 .chain{gap:30px}
 .chain>.card{position:relative}
@@ -398,8 +422,8 @@ textarea.inp[readonly]{color:var(--dim);border-style:dashed;cursor:not-allowed;b
 .qz-hint b{color:var(--violet)}
 .figwrap img{display:block;max-height:318px;width:auto;max-width:100%;height:auto;border-radius:5px}
 .figcap{font-size:10.5px;color:var(--sand);letter-spacing:.07em;font-weight:600;margin-top:7px;text-transform:uppercase}
-.splitfig{display:grid;grid-template-columns:1.02fr .98fr;gap:24px;align-items:center;min-height:0}
-.splitfig>*{min-height:0}
+.splitfig{display:grid;grid-template-columns:1.02fr .98fr;gap:18px;align-items:center;min-height:0}
+.splitfig>*{min-height:0;min-width:0}
 .splitfig .card{padding:9px 13px;gap:5px}
 .splitfig .card:has(.lead){gap:3px}
 .splitfig .card .txt{font-size:13.4px;line-height:1.38}
@@ -958,17 +982,18 @@ var LECTURE={
  {k:'R03',rule:'RULE 03 - Observable outcomes',phase:'UNDERSTAND / OUTCOMES',accent:'teal',
   learn:'Say which outcome a piece of their own work is evidence for.',
   title:'Five outcomes you must prove',
-  sub:'Every outcome ends in evidence, not recognition — and every one of these is something you will do to the plant in the next seventy minutes.',
-  blocks:[{t:'rows',items:[
-   {c:'teal',lab:'1',txt:'Explain dependability as trust across availability, reliability, safety, security and resilience.'},
-   {c:'teal',lab:'2',txt:'Trace a failure across technical and sociotechnical layers.'},
-   {c:'teal',lab:'3',txt:'Compare redundancy, diversity, process and formal-method options, and name the trade-off.'},
-   {c:'mag',lab:'4',txt:'Build a bounded verdict with inspectable evidence.'},
-   {c:'teal',lab:'5',txt:'Defend the verdict when a constraint changes.'}]}],
+  sub:'Do not memorize five headings. Produce evidence for five outcomes — and remember that Outcome 4 is the center of the hour.',
+  blocks:[
+   {t:'cards',cols:3,items:[
+    {c:'teal',lab:'1 · EXPLAIN',lead:'Trust across five properties',txt:'Explain dependability as trust across availability, reliability, safety, security and resilience.'},
+    {c:'teal',lab:'2 · TRACE',lead:'Follow failure across layers',txt:'Trace a failure across technical and sociotechnical layers.'},
+    {c:'teal',lab:'3 · COMPARE',lead:'Choose between options',txt:'Compare redundancy, diversity, process and formal-method options, and name the trade-off.'},
+    {c:'mag',lab:'4 · BUILD',lead:'Create a bounded verdict',txt:'Build a bounded verdict with inspectable evidence.'},
+    {c:'teal',lab:'5 · DEFEND',lead:'Stay coherent when the constraint changes',txt:'Defend the verdict when a constraint changes.'}]},
+   {t:'wide',c:'mag',lab:'THE PIVOT',lead:'Outcome 4 is the artifact outcome.',txt:'Everything else feeds the same object: a defendable decision with evidence, counter-evidence, uncertainty and ownership visible.'}],
   timebox:'60-90 sec',
-  hueOk:'One accent, and magenta on outcome 4 alone — the artifact every other outcome feeds. Colouring all five differently made them read as five unrelated topics.',
   task:'Choose the outcome you expect to find hardest tonight and state why.',
-  notes:'Sixty seconds. Outcome 5 is the one nobody picks and the one the live defense will punish. Say so.'},
+  notes:'Sixty seconds. Outcome 4 is the pivot because it is where the chapter stops being definitions and becomes engineering. Outcome 5 is the one nobody picks and the live defense will punish. Say both explicitly.'},
 
  {k:'J01',rule:'JAHIZIAH - National knowledge unit',phase:'UNDERSTAND / OUTCOMES',accent:'teal',
   learn:'Name the national knowledge unit this chapter serves, and which of its outcomes this hour closes.',
@@ -982,20 +1007,20 @@ var LECTURE={
  {k:'R04',rule:'RULE 04 - Engineer, not note-taker',phase:'UNDERSTAND / CAPABILITIES',accent:'teal',
   learn:'Distinguish analysing a failure from evidencing a judgment about it.',
   title:'Six engineering capabilities',
-  sub:'Your grade follows the quality of your reasoning and evidence, not your recall.',
+  sub:'These are the six actions this lecture keeps asking you to perform. Your grade follows the quality of these actions, not recall alone.',
   blocks:[
    {t:'svg',kind:'capabilities'},
-   {t:'cards',cols:6,items:[
-    {c:'teal',lab:'',txt:'Separate hardware, software and operational failure.',src:'Rule 05 · X02'},
-    {c:'mag',lab:'',txt:'Accept, revise or reject the upgrade.',src:'Rule 20'},
-    {c:'sand',lab:'',txt:'Name an artifact, not an intention.',src:'Rule 07 · 09'},
-    {c:'violet',lab:'',txt:'Trace the failure up the sociotechnical stack.',src:'X03'},
-    {c:'mag',lab:'',txt:'Known, unknown, monitored.',src:'Rule 10'},
-    {c:'green',lab:'',txt:'A city drinks what you sign.',src:'Rule 12'}]}],
+   {t:'cards',cols:3,items:[
+    {c:'teal',lab:'ANALYZE',txt:'Separate hardware, software and operational failure.',src:'Rule 05 · X02'},
+    {c:'mag',lab:'JUDGE',txt:'Accept, revise or reject the upgrade.',src:'Rule 20'},
+    {c:'sand',lab:'EVIDENCE',txt:'Name an artifact, not an intention.',src:'Rule 07 · 09'},
+    {c:'violet',lab:'SYSTEM',txt:'Trace the failure up the sociotechnical stack.',src:'X03'},
+    {c:'mag',lab:'RISK',txt:'Known, unknown, monitored.',src:'Rule 10'},
+    {c:'green',lab:'ETHICS',txt:'A city drinks what you sign.',src:'Rule 12'}]},
+   {t:'principle',txt:'An attractive answer fails first at evidence: if nobody can inspect it, nobody should trust it.'}],
   timebox:'60-90 sec',
-  hueOk:'The six cards colour-match the six circles on the rail directly above them, so the eye pairs each card with its capability. Recolouring them breaks the pairing, which is the only reason the diagram is there.',
   task:'Which capability fails first when a team trusts an attractive answer without evidence?',
-  notes:'The room usually says ANALYZE. The better answer is EVIDENCE — an attractive answer fails not because nobody analysed it but because nobody made it inspectable. Do not give the answer; let two students argue it for thirty seconds.'},
+  notes:'The room usually says ANALYZE. The better answer is EVIDENCE — an attractive answer fails not because nobody analysed it but because nobody made it inspectable. Let two students argue it for thirty seconds.'},
 
  {k:'R05',rule:'RULE 05 - Prediction gate',phase:'UNDERSTAND / PREDICT',accent:'teal',golden:true,
   learn:'Expose an assumption before terminology hides it: predict, bound the answer, derive it, and name the principle used.',
@@ -1074,19 +1099,19 @@ var LECTURE={
   sub:'Failures originate across layers, and the properties are not independent.',
   blocks:[
    {t:'cards',cols:3,items:[
-    {c:'teal',lab:'HARDWARE FAILURE',lead:'Built wrong, or worn out.',txt:'Hardware fails because of design and manufacturing errors, or because components have reached the end of their natural life.',src:'P1 · p.5'},
-    {c:'teal',lab:'SOFTWARE FAILURE',lead:'Specified, designed or written wrong.',txt:'Software fails due to errors in its specification, design or implementation.',src:'P1 · p.5'},
-    {c:'mag',lab:'OPERATIONAL FAILURE',lead:'People make mistakes — now the <b>largest single cause</b>.',txt:'Human operators make mistakes. Now perhaps the largest single cause of system failures in socio-technical systems.',src:'P1 · p.5'}]},
+    {c:'teal',lab:'HARDWARE',lead:'Built wrong, or worn out.',txt:'Design, manufacturing, or end-of-life failure.',src:'P1 · p.5'},
+    {c:'teal',lab:'SOFTWARE',lead:'Specified, designed or written wrong.',txt:'Specification, design, or implementation error.',src:'P1 · p.5'},
+    {c:'mag',lab:'OPERATIONAL',lead:'People make mistakes — often under system pressure.',txt:'Operational error is a major cause in socio-technical systems.',src:'P1 · p.5'}]},
    {t:'cards',cols:2,items:[
-    {c:'teal',lab:'THE OTHER PROPERTIES',lead:'Three more: repairable, adaptable, forgiving of a mistake.',txt:'<b>Repairability</b> — can it be repaired after failure. <b>Maintainability</b> — can it be adapted to new requirements. <b>Error tolerance</b> — can user input errors be avoided and tolerated.',src:'P1 · p.10'},
-    {c:'teal',lab:'THE DEPENDENCIES',lead:'None stands alone: break one, you break the others.',txt:'Safe operation depends on the system being available and operating reliably. Data corrupted by an attack makes a system unreliable. Denial of service makes it unavailable. A virus destroys confidence in reliability and safety.',src:'P1 · p.11'}]},
-   {t:'wide',c:'sand',lab:'CLASSIFY TONIGHT&rsquo;S FAILURE',
-    picker:{g:'cause',options:['Hardware','Software','Operational','Mixed']},
-    field:{id:'cause_defeat',core:false,rows:2,ph:'The log or observation that would defeat this classification — and whether it exists'}},
-   {t:'principle',c:'mag',txt:'The operator who silenced the alarm is not a discipline problem. Under error tolerance it is a design finding.'}],
+    {c:'sand',lab:'MORE PROPERTIES',lead:'Repairability · maintainability · error tolerance',txt:'Can it be repaired, adapted, and protected from user-input mistakes?',src:'P1 · p.10'},
+    {c:'violet',lab:'DEPENDENCIES',lead:'None stands alone.',txt:'Availability, reliability, safety and security can fail together because one event changes more than one property.',src:'P1 · p.11'}]},
+   {t:'wide',c:'sand',lab:'CLASSIFY TONIGHT’S FAILURE',picker:{g:'cause',options:['Hardware','Software','Operational','Mixed']},field:{id:'cause_defeat',core:false,rows:1,ph:'What log or observation would defeat your classification?'}},
+   {t:'principle',c:'mag',txt:'The operator who silenced the alarm is not the end of the investigation. It is evidence about the system design.'}],
   timebox:'2 min',
-  task:'Classify tonight&rsquo;s failure as hardware, software, operational or mixed — then name the log that would defeat your classification.',
-  notes:'Most of the room will say Software because a software upgrade happened. The source says operational error is now perhaps the largest single cause. Do not correct anyone — ask which log separates the two, and whether it exists. Usually it does not, and that absence is the real finding.'},
+  task:'Classify tonight’s failure, then name the log that would prove your classification wrong.',
+  notes:'Most of the room will say software because a software upgrade happened. Push them to separate cause from context, then ask which log would distinguish the alternatives.'},
+
+ /* The words students swap
 
  /* The words students swap for one another, side by side. Placed straight after
     X02 because that is the slide where the swap first costs them an answer.
@@ -1355,113 +1380,80 @@ var LECTURE={
  {k:'R11',rule:'RULE 11 - Micro-case -> local case',phase:'MASTER / TRANSFER',accent:'sand',
   learn:'Reuse one mechanism-evidence-boundary chain in a different domain, and say what transfers and what breaks.',
   title:'Scaffold first, then transfer',
-  sub:'Use the same mechanism-evidence-boundary chain twice — and the second time in a different domain.',
+  sub:'Prove you learned a capability, not just one pump story.',
   blocks:[
+   {t:'svg',kind:'transfer'},
    {t:'cards',cols:2,items:[
-    {c:'teal',lab:'MICRO-CASE — ISCARB SCAFFOLD',txt:'Two redundant pumps are fed by one pressure transmitter on one loop. The backup switches automatically when the transmitter reports overpressure. What assumption fails, and what makes the two paths genuinely independent?',
-     field:{id:'micro',core:false,rows:3,ph:'The failed assumption, and the independence you would need'}},
-    {c:'mag',lab:'TRANSFER — THE WEEK 01 HOSPITAL CASE',txt:'Medical-device software passes all its tests, but organisational sign-off is weak. Run the same chain: which sociotechnical layer blocks approval, and does your desalination reasoning survive the change of domain?',
-     field:{id:'transfer',core:false,rows:3,ph:'The blocking layer, and what transfers or breaks between the two domains'}}]},
-   {t:'wide',c:'violet',tag:'{{flag}} &nbsp;{{localTag}}',lab:'WHY BOTH CASES ARE LOCAL',
-    lead:'The evidence has a named destination — and that is what takes &ldquo;accept the failure cost&rdquo; off the menu.',
-    txt:'Desalination and hospital software are both regulated public services in {{country}}. {{accreditor}} links the field to {{bodies}}. That makes dependability a national-professional competence, not a generic topic. <b>Local-context gate:</b> the context must change the decision, not only the wording.'},
-   {t:'principle',txt:'Mechanism -&gt; Evidence -&gt; Decision boundary'}],
+    {c:'teal',lab:'1 · MICRO-CASE',lead:'Shared pressure transmitter',txt:'Two redundant pumps share one pressure transmitter. What assumption fails, and what would make the paths genuinely independent?'},
+    {c:'mag',lab:'2 · TRANSFER',lead:'Week 01 hospital case',txt:'The software passes its tests but organisational sign-off is weak. Which layer blocks approval, and what part of your reasoning still transfers?'}]},
+   {t:'wide',c:'violet',lab:'3 · LOCAL PROFESSIONAL JUDGMENT',lead:'Name where the evidence goes and who owns the decision.',txt:'In {{country}}, the professional context changes the evidence destination — not the engineering mechanism.'}],
   timebox:'1 min + 3 min',
-  task:'Solve the micro-case, then reuse the same reasoning chain on the Week 01 hospital case, and name which of {{bodiesShort}} receives your evidence.'+' <b style="color:var(--mag)">You are the responsible engineer.</b>',
-  notes:'Four minutes, the longest block. Deliberately a different domain from tonight&rsquo;s crisis: a student who can only reason about pumps has learned a case, not a capability. The hospital case is the one they met in the kickoff, so the mechanism is familiar and only the transfer is new. Grade the transfer argument, not the answer.'},
+  task:'Solve the micro-case, transfer the same reasoning chain to the hospital case, then name the evidence owner.',
+  notes:'The diagram is the point: scaffold, transfer, own. If the mechanism survives the domain change, they learned a capability. If only the wording survives, they learned the case.'},
 
  {k:'R12',rule:'RULE 12 - Owner, evidence, sign-off',phase:'MASTER / ACCOUNTABILITY',accent:'sand',golden:true,
   learn:'Separate the engineer who claims, the engineer who verifies and the authority who signs.',
   title:'A dependable answer names who owns what',
-  sub:'No owner means the assurance claim cannot be audited.',
+  sub:'Three roles. If one person silently performs all three, that is an assurance finding.',
   blocks:[
    {t:'svg',kind:'accountability'},
    {t:'cards',cols:3,items:[
-    {c:'teal',lab:'',field:{id:'a_owner',core:false,rows:2,ph:'Who decides?',
-     ex:'<i>Hospital case, for shape:</i> Decides &mdash; the ward clinical lead. Verifies &mdash; the biomedical engineer who ran the bench test. Signs &mdash; the head of medical devices. <b>Three names, three roles, and none of them the same person.</b> If your three collapse into one, that is your finding, not your mistake.'}},
-    {c:'sand',lab:'',field:{id:'a_evidence',core:false,rows:2,ph:'Who verifies?'}},
-    {c:'mag',lab:'',field:{id:'a_signoff',core:false,rows:2,ph:'Who signs?'}}]},
-   {t:'cards',cols:2,items:[
-    {c:'teal',lab:'REGULATED SYSTEMS',lead:'Someone outside your organisation has to be convinced before it runs.',txt:'Many critical systems must be approved by an external regulator before going into service — nuclear systems, air traffic control, medical devices. Development has to create the evidence that convinces the regulator the system is dependable, safe and secure.',src:'P1 · p.24'},
-    {c:'teal',lab:'THE COST OF PROOF',lead:'The paperwork can cost as much as the system.',txt:'Regulation applies to the sociotechnical system as a whole, not simply the software. It can be as expensive to develop the documentation for certification as it is to develop the system itself.',src:'P1 · p.25'}]},
-   /* Naming an owner without protecting them is how incidents stop being
-      reported: if being named is how the organisation decides who is at fault,
-      the rational response is to avoid being named, and within a year the
-      near-misses stop reaching you. Rule 14 says blaming the operator ends the
-      investigation — the rule that DEMANDS a name is where that sentence has to
-      be said again, or the two units quietly contradict each other. It is one
-      line rather than a card because the slide is already full, and the
-      instructor notes carry the argument. */
-   {t:'principle',txt:'Human sign-off is an engineering control, not administrative decoration &mdash; and a name is for finding the decision, never for finding someone to blame.'}],
+    {c:'teal',lab:'OWNER',field:{id:'a_owner',core:false,rows:1,ph:'Who decides?'}},
+    {c:'sand',lab:'EVIDENCE OWNER',field:{id:'a_evidence',core:false,rows:1,ph:'Who verifies the evidence?'}},
+    {c:'mag',lab:'SIGN-OFF',field:{id:'a_signoff',core:false,rows:1,ph:'Who accepts the residual risk?'}}]},
+   {t:'wide',c:'violet',lab:'WHY THIS MATTERS',lead:'Regulated systems require evidence that can convince someone outside the team.',txt:'Ownership makes a decision traceable. It is for finding the reasoning and responsibility — not for finding someone to blame.',src:'P1 · pp.24–25'},
+   {t:'principle',txt:'Human sign-off is an engineering control, not administrative decoration.'}],
   timebox:'2 min',
-  task:'Name the decision owner, evidence owner and sign-off point for tonight — three different people.',
-  notes:'Students routinely name three roles that are the same person. That is the finding &mdash; say it out loud. Separation between the engineer who claims, the engineer who verifies and the authority who signs is the cheapest dependability control in the chapter. <b>Then spend thirty seconds on the second half of the principle line, because a rule that demands a name is dangerous without it.</b> Ownership and blame are opposites and teams confuse them constantly. If being named is how the organisation decides who is at fault, then the rational move is to avoid being named &mdash; and within a year nobody reports the near-misses that would have shown you the failure while it was still cheap. The name answers <i>whose decision was this, and where is the reasoning recorded</i>; when it goes wrong the question is what let a reasonable person decide that, not who to replace. This is exactly the Rule 14 sentence about the operator, turned on the engineer, and if you skip it you have taught the room to hide.'},
+  task:'Name the decision owner, evidence owner and sign-off point for tonight — three different roles.',
+  notes:'Separation is the control. If all three collapse into one person, that is the finding. Also state explicitly that accountability and blame are not the same thing.'},
 
  {k:'R13',rule:'RULE 13 - Breaking variable',phase:'MASTER / STRESS TEST',accent:'sand',
   learn:'Name the variable whose change would reverse their own verdict.',
-  title:'What change would break your solution?',
-  sub:'A robust answer exposes the variable that can reverse it.',
+  title:'Stress-test your verdict',
+  sub:'A robust answer exposes the variable that can reverse it, rather than pretending it survives everything.',
   blocks:[
-   {t:'cards',cols:4,items:[
-    {c:'sand',lab:'STAFFING',txt:'One qualified reviewer instead of three; the night shift runs with a trainee.'},
-    {c:'sand',lab:'DEADLINE',txt:'The production window closes tonight; reverting costs a full day of supply.'},
-    {c:'sand',lab:'DATA',txt:'The commissioning test data turns out to be from a different firmware baseline.'},
-    {c:'sand',lab:'REGULATION',txt:'The regulator requires new evidence before the plant can run unattended.'}]},
-   {t:'raw',html:'<div class="picker" data-pick="breaker"><button class="pick" data-v="Staffing" aria-pressed="false">Staffing</button><button class="pick" data-v="Deadline" aria-pressed="false">Deadline</button><button class="pick" data-v="Data" aria-pressed="false">Data</button><button class="pick" data-v="Regulation" aria-pressed="false">Regulation</button></div>'},
-   {t:'pair',id:'r13',t1:'30 sec',t2:'60 sec',t3:'30 sec',
-    think:'Pick your variable and decide, silently, whether your verdict survives it.',
-    pair:'Swap variables with your neighbour and argue <i>their</i> variable against <i>your</i> verdict.',
-    share:'Hands up: whose verdict survived all four? That room is the one to question.'},
-   {t:'principle',c:'mag',txt:'If the verdict never changes, you probably have not named the real variable.'},
-   /* Distributed retrieval. This item comes from the same five-item pool the
-      readiness check uses at the end — asked here instead of there, roughly
-      fifteen minutes after the shared-transmitter case was taught, which is the
-      gap that makes retrieval work at all. Answering it here IS answering it
-      there: the state is shared, so the hour gains spacing without gaining a
-      question, and the final block is four items rather than five. */
-   {t:'recall',i:0}],
+   {t:'cards',cols:2,items:[
+    {c:'sand',lab:'STAFFING',lead:'People changed',txt:'One qualified reviewer instead of three; the night shift runs with a trainee.'},
+    {c:'sand',lab:'DEADLINE',lead:'Time pressure changed',txt:'The production window closes tonight; reverting costs a full day of supply.'},
+    {c:'sand',lab:'DATA',lead:'Evidence quality changed',txt:'The commissioning tests omitted the hot-weather condition that matches tonight.'},
+    {c:'sand',lab:'SCOPE',lead:'System boundary changed',txt:'The same controller also feeds a second plant not mentioned in the original file.'}]},
+   {t:'wide',c:'mag',lab:'YOUR STRESS TEST',lead:'Pick the one variable that would really reverse your decision.',picker:{g:'breaker',options:['Staffing','Deadline','Data','Scope']},field:{id:'breaker',core:false,rows:2,ph:'Why this variable would reverse your verdict, and exactly where the failure would enter'}},
+   {t:'principle',txt:'If the verdict never changes, you probably have not named the real variable.'}],
   timebox:'2 min',
-  task:'Pick one variable and state exactly how it would reverse your current verdict — then answer the question underneath from memory.',
-  notes:'Any student whose verdict survives all four has either designed something remarkable or has not committed to a verdict — almost always the second. This is the rehearsal for the live defense at Rule 17.'},
+  task:'Choose the variable most likely to reverse your verdict, and explain exactly where it acts.',
+  notes:'The variable matters more than the answer. Reward the student who can show where the new constraint enters the reasoning chain and reverses the verdict.'},
 
  {k:'R14',rule:'RULE 14 - Practitioner workload',phase:'MASTER / PRACTICE',accent:'sand',
   learn:'Name a workload cost their design creates for a practitioner, and the design change that reduces it.',
   title:'Engineering changes human work',
-  sub:'A safe design can still fail operationally if it creates unsustainable workload.',
+  sub:'A technically safe design can still fail if it moves more work onto a person than attention can support.',
   blocks:[
-   {t:'cards',cols:4,items:[
-    {c:'teal',lab:'DOCUMENTATION BURDEN',lead:'Who writes and maintains all of it?',txt:'What must be produced, reviewed and maintained? Certification documentation can cost as much as the system itself.',src:'P1 · p.25'},
-    {c:'sand',lab:'REVIEW WORKLOAD',txt:'Who validates evidence, exceptions and changes — and do they have the hours the process assumes?'},
-    {c:'mag',lab:'DELIVERY SPEED',txt:'What schedule pressure is the team absorbing, and what does it push them to skip?'},
-    /* This unit already asks the three questions AI changed most, and until now
-       it asked them as if nothing had changed. The card does not celebrate the
-       tool or condemn it — it applies the unit's own rule to it: a change in how
-       work is produced is a change in workload, and workload is a design input. */
-    {c:'violet',lab:'WHO WRITES IT NOW',lead:'Generated work moves the load; it does not remove it.',txt:'Writing hours fall, reviewing hours rise &mdash; on the same people, now reviewing more that they did not write. Volume against attention: the silenced alarm again.'}]},
-   {t:'wide',c:'mag',lab:'TONIGHT, THIS IS THE MECHANISM — NOT A FOOTNOTE',
-    lead:'Blaming the operator ends the investigation. Workload as a design input continues it.',txt:'The operator silenced a repeating alarm at shift handover in order to read the log. That is alarm load, shift timing and cognitive load acting as a system variable. The source calls operational error perhaps the largest single cause of failure in socio-technical systems (p.5), and offers error tolerance as the design response (p.10). Blaming the operator ends the investigation; treating workload as a design input continues it.',
-    field:{id:'workload',core:false,rows:2,ph:'One workload cost your design creates, and the concrete design change that reduces it',
-     ex:'<i>Shape only:</i> &ldquo;My design adds a signed exception form per deviation. With generated drafts the team now files four times as many, so the reviewer becomes the bottleneck. Design change: exceptions below a stated risk band get a standing pre-approval, and the reviewer sees a weekly batch instead of a queue.&rdquo;'}},
+   {t:'svg',kind:'workload'},
+   {t:'cards',cols:3,items:[
+    {c:'teal',lab:'DOCUMENTATION',lead:'More output to create and maintain.',txt:'Certification evidence has a real production cost.',src:'P1 · p.25'},
+    {c:'sand',lab:'REVIEW',lead:'More evidence to validate.',txt:'The reviewer can become the bottleneck even when generation gets faster.'},
+    {c:'mag',lab:'ATTENTION',lead:'More alarms, exceptions and decisions.',txt:'The operator who silenced the alarm is a system-design signal, not the end of the investigation.'}]},
    {t:'principle',txt:'Trade-offs include people, process, evidence and time — not only code.'}],
   timebox:'90 sec',
-  task:'Name one workload cost your preferred design creates for a real practitioner, and the design change that reduces it.',
-  notes:'The rule with no equivalent in the textbook, and where ISCARB differs from a standard software-engineering lecture. Do not let it become a wellbeing aside: the test is whether a student names a concrete design change &mdash; alarm rationalisation, a handover protocol, a second pair of eyes on the night shift. If they only express sympathy, push again. <b>The violet card is the one to spend time on.</b> Every student in the room is already using generated code, and almost none of them has been asked what it did to the review load rather than to the writing load. Two things to say. First, the honest framing: the tool did not remove the work, it moved it &mdash; from writing, which is visible and estimated, to reviewing, which is neither. Second, connect it to the crisis: the operator silenced the alarm because there were too many alarms for the attention available, and a reviewer who approves without reading is the same failure with a keyboard. If a student answers &ldquo;it just makes us faster&rdquo;, ask who reviews the faster output and how many hours they have.'},
+  task:'Name one workload cost your design creates, and the concrete change that reduces it.',
+  notes:'Keep this as an engineering slide, not a wellbeing aside. The key move is to identify where work moved and how the design should change because of it.'},
 
  {k:'R15',rule:'RULE 15 - AI assist + human sign-off',phase:'MASTER / AI',accent:'sand',
   learn:'Run a permissibility gate on a real AI output, tell re-derivation from testability, and accept the verdict.',
-  title:'AI prepares evidence; humans own assurance',
-  sub:'AI is permitted for preparation, never for unowned approval.',
-  badge:{c:'mag',t:'AI MOMENT',s:'assist, not assurance'},
+  title:'AI in the assurance chain',
+  sub:'AI may prepare evidence. A human must still own review, approval and assurance.',
   blocks:[
    {t:'figure',img:'ai',h:172,cap:'dependable systems in the AI era',srcName:'Course deck &middot; CPIT-455 Class 2',right:[
     {t:'cards',cols:1,items:[
-     {c:'teal',lab:'AI MAY PREPARE',txt:'Draft tests, summaries, log triage, anomaly probes, candidate code, evidence structures — for human review.'},
-     {c:'sand',lab:'AI MUST NOT OWN',txt:'Certification, approval, risk acceptance, or final assurance. Nor may it be the only witness to its own output.'},
+     {c:'teal',lab:'AI MAY PREPARE',txt:'Draft tests, summaries, log triage, anomaly probes, candidate code and evidence structures — for human review.'},
+     {c:'sand',lab:'AI MUST NOT OWN',txt:'Certification, approval, risk acceptance or final assurance. Nor may it be the only witness to its own output.'},
      {c:'mag',lab:'HUMAN SIGN-OFF',txt:'A named person reviews and decides accept, revise or reject — and is accountable for it.'}]}]},
    {t:'aigate'}],
   timebox:'90 sec',
   task:'Run the gate on the way you actually used AI this week — on a real output, not a hypothetical.'+' <b style="color:var(--mag)">You are the responsible engineer.</b>',
-  notes:'The gate is the rule, not the three cards above it — make every student run it on something they really did this week, not on a hypothetical. <b>The two middle questions are the whole slide.</b> Re-deriving and testing are different acts, and a generative output almost never survives the first and very often survives the second &mdash; which is why the gate has a third verdict. Yes / no / yes / yes returns <i>permitted, conditionally: the test is the evidence, not the output</i>, and that sentence is the one to write on the board. It means the artifact you file is the test you ran and what it showed, never the prompt or the answer. A student who cannot say which of the two middle questions their own use passed has not yet understood what they filed. The remaining trap is yes / no / no: an output that becomes evidence and is neither re-derivable nor testable is exactly the unverifiable claim this course exists to refuse. Note what is deliberately absent: vendor benchmark numbers. If a student cites an accuracy figure or a mean-time-to-repair, ask which study. That is the break-even discipline from X04 applied to AI, and if you let it slide the session&rsquo;s whole argument about evidence collapses in its final ten minutes.'},
+  notes:'The gate is the rule. Re-deriving and testing are different acts, and most generative outputs survive the second rather than the first. The sentence to write on the board is: the test is the evidence, not the output.'},
+
+ /* ---------------- DISTINGUISH ---------------- */
 
  /* ---------------- DISTINGUISH ---------------- */
  {k:'R16',rule:'RULE 16 - Grade the decision',phase:'DISTINGUISH / ASSESSMENT',accent:'teal',
@@ -1551,45 +1543,46 @@ var LECTURE={
 
  {k:'J02',rule:'JAHIZIAH - Knowledge unit check',phase:'DISTINGUISH / READINESS',accent:'teal',
   learn:'Answer knowledge-unit items unaided, and use a wrong answer to locate the unit to reread.',
-  title:'Five items in the national format',
-  sub:'Retrieval, not revision. Answer before you look at anything &mdash; a wrong answer here names the unit you should reread.',
+  title:'ETEC IT 2025 · Standards-aligned practice',
+  sub:'Five course-written practice items aligned to national outcome categories. Use misses to decide what to reread — not to predict your future score.',
   badge:{c:'',t:'PRACTICE ONLY',s:'course-written · not real test items'},
   blocks:[{t:'jahtest'}],
   timebox:'4 min',
   task:'Answer all five, then read the explanation on the ones you missed.',
-  notes:'Four minutes, individually and in silence &mdash; this is retrieval practice and it only works unaided. Two disciplines to hold: say once, clearly, that these are course-written practice items and not real test questions, and do not let students treat the score as a prediction. The teaching value is in the misses: each item names its knowledge-unit outcome, so a wrong answer points at a specific unit to reread rather than at a vague weakness. Items 3 and 4 are the ones the department mapped to this course as uncovered, so watch those two in particular &mdash; if the room fails them, Rule 10 did not land and the gap is still open.'},
+  notes:'Four minutes, individually and in silence. The teaching value is in the misses: each item names an outcome, so a wrong answer points at a specific unit to reread.'},
+
+ /* The unit that makes "we lost nothing" checkable rather than remembered. It
 
  /* The unit that makes "we lost nothing" checkable rather than remembered. It
     renders no authored list: the ledger is computed from the page cited on every
     card in this file, and the uncited-page line needs no metadata at all. */
- {k:'C01',rule:'SOURCE LEDGER - what this hour reached',phase:'DISTINGUISH / SCOPE',accent:'sand',
-  learn:'Say which parts of the source this hour reached and which it did not, from the citations rather than from memory.',
-  title:'What we covered, and what we did not',
-  sub:'Counted from the page you saw cited on every card tonight &mdash; not from a list somebody maintained by hand.',
-  badge:{c:'',t:'SCOPE',s:'read from citations'},
-  cut:true,
+ {k:'C01',rule:'SOURCE BOUNDARY - what this hour reached',phase:'DISTINGUISH / SCOPE',accent:'sand',
+  learn:'Say what today established and what later chapters or directed reading must deepen.',
+  title:'What we covered — and what comes next',
+  sub:'This is the boundary of today’s lesson, not an apology for what the chapter still contains.',
   blocks:[
-   {t:'coverage'},
-   {t:'principle',txt:'A chapter you did not finish is a fact. A chapter you did not finish and nobody noticed is a defect.'}],
-  timebox:'90 sec',
-  task:'Note the magenta pages. Those are the ones to read before Saturday &mdash; nobody taught them to you tonight.',
-  say:'Here is every page of the chapter, and here is exactly which ones this hour actually touched.',
-  notes:'Ninety seconds, and it is the most honest slide in the deck &mdash; put it up deliberately rather than skipping past it. Two things to say. First, the ledger is <i>computed</i>: it reads the page citation off every card in the file, so it cannot flatter the lecture and it changes the moment the lecture changes. Second, the magenta line is pages, not topics: the engine can tell you a page was never reached, and it deliberately does not guess what is on it &mdash; naming a concept nobody cited would be exactly the unsupported claim this course refuses. Section 3 shows as <i>touched</i> rather than <i>taught</i> because only X04 reaches it; say that out loud, because a student who wants the cost argument in depth now knows where to go. If you are behind, this is the third cut point &mdash; but then say the sentence aloud instead: the chapter is bigger than the hour, and here is the part you owe yourself.'},
+   {t:'cards',cols:2,items:[
+    {c:'green',lab:'COVERED TODAY',lead:'The professional decision spine',txt:'• Five dependability properties<br>• Measured probabilities vs argued judgments<br>• Redundancy vs diversity<br>• Evidence before sign-off<br>• Human judgment and accountability<br>• Stress and refit as professional checks'},
+    {c:'sand',lab:'NOT IN DEPTH TODAY',lead:'What later work deepens',txt:'• Reliability mathematics and availability modelling<br>• Formal safety cases and SIL reasoning<br>• Full reliability engineering methods in Chapter 11<br>• Full safety engineering methods in Chapter 12'}]},
+   {t:'wide',c:'violet',lab:'AFTER CLASS',lead:'Apply FIT → BOUND → ACT → EVIDENCE → STRESS → REFIT.',txt:'Use the After-Class FBR task to turn today’s concepts into one inspectable engineering judgment.'},
+   {t:'principle',txt:'The chapter is larger than the hour. Today’s job was to build the decision spine.'}],
+  timebox:'60 sec',
+  task:'Say one thing you can now defend, and one topic you know belongs to the next layer of study.',
+  notes:'This replaces the old “covered / not covered” wording. The purpose is to make the instructional boundary explicit. Detailed page-level coverage remains available in the source ledger logic, but the live slide should tell students what they can do now and what comes next.'},
 
- {k:'R20',rule:'RULE 20 - Take-home decision',phase:'DISTINGUISH / READINESS',accent:'teal',golden:true,
-  learn:'Read their own readiness off the artifact they produced, and name the next piece of work.',
-  title:'Are you ready to engineer?',
-  sub:'The four gates are your judgment. The five rows are not — they read the evidence you produced, and they sort it the way {{accreditor}} sorts learning outcomes: knowledge, skill, value.',
-  badge:{c:'',t:'READINESS CHECK',s:'click each gate you can honestly pass'},
+ {k:'R20',rule:'RULE 20 - Course readiness gate',phase:'DISTINGUISH / READINESS',accent:'teal',golden:true,
+  learn:'Read readiness from visible evidence rather than confidence.',
+  title:'Ready for After-Class?',
+  sub:'This is the course readiness gate. The ETEC-aligned practice was the previous standards check; this one asks whether your own evidence is ready to carry forward.',
   blocks:[
    {t:'gates'},
    {t:'clomap'},
-   {t:'principle',txt:'A decision is not ready until evidence, counter-evidence, uncertainty, and ownership are visible.'},
-   {t:'wide',c:'sand',lab:'TAKE-HOME DECISION',
-    field:{id:'takehome',core:false,rows:1,ph:'In this chapter, engineering means ... (use evidence and ownership)'}}],
-  timebox:'3 min',
-  task:'Close the gap on one unsupported outcome, pass the gates you can honestly pass, then write: &ldquo;In this chapter, engineering means ...&rdquo;'+' <b style="color:var(--mag)">You are the responsible engineer.</b>',
-  notes:'The domain tags are deliberate. {{accreditorLong}} runs the national standardized exams — <b>{{testName}}</b> — which assess graduates of computer science, software engineering, information systems and information technology on exactly three categories of learning outcome: {{domainWords}}. Say clearly that this slide is <i>aligned</i> to those three domains and is not the exam itself; the exam is national, sat near graduation, and does not decide pass or fail. What it does mean is that the values column — the one most courses cannot evidence at all — is the one your decision card fills tonight. Two different instruments, and students confuse them: the four gates are self-assessed judgment, the five outcome rows are read from the artifact and cannot be talked up. Point at a red row and ask what is missing — the answer is always a specific empty box, which is why this is a teaching instrument rather than a score. A gate, not a summary. A student who cannot pass all four gates has not failed the session — they have an accurate reading of their own evidence, which is the entire point. Say that explicitly, otherwise the honest students feel punished and start guessing.'},
+   {t:'principle',txt:'Ready means: evidence visible, a way to be wrong, and an owner who can defend the decision.'}],
+  timebox:'2 min',
+  task:'Pass only the gates your artifact genuinely supports, then carry the unresolved one into After-Class.',
+  notes:'Keep the distinction explicit: J02 is standards-aligned retrieval practice; Rule 20 is a course readiness gate based on the student’s own artifact. Do not turn either into a predicted exam score.'},
+
+ /* Drawn from the showIf
 
  /* Drawn from the showIf conditions in this file, so it is the real branch
     structure rather than a diagram of one. Three readers: the student sees their
@@ -1597,14 +1590,16 @@ var LECTURE={
     and a reviewer gets adaptivity as a mechanism instead of a word. */
  {k:'P01',rule:'YOUR ROUTE - how your answers shaped the hour',phase:'DISTINGUISH / REFLECTION',accent:'violet',
   learn:'Explain how their own answers changed which slides they saw.',
-  title:'The session you actually took',
-  sub:'This hour had forks in it. Which side you came down was decided by what you wrote, not by the clock.',
+  title:'Your learning route this session',
+  sub:'This slide is not a score. It is a reflection map showing which route your own answers opened, where you needed support, and what to reread next.',
   blocks:[
+   {t:'wide',c:'violet',lab:'HOW TO READ IT',lead:'Scaffolds are not penalties.',txt:'If you landed on a scaffold or helper slide, that means the system detected a learning need and gave you support. That unit is worth rereading — not hiding.'},
    {t:'pathmap'},
    {t:'principle',txt:'The scaffold you needed is a unit worth rereading. It is not a deduction, and nobody else can see it.'}],
   timebox:'60 sec',
-  task:'Look at the arm you are on, and at the four counts. One of them names your next piece of reading.',
-  notes:'Sixty seconds, and do not turn it into a scoreboard &mdash; say explicitly that the counts are private to their browser and that you cannot see them. Three uses, and they are worth naming to the room because students rarely meet software that adapts honestly. For the student: their own writing opened or closed a slide, which is why the empty DERIVE box mattered. For you after class: ask for a show of hands on how many met the scaffold, and you have a live reading of whether Rule 05 landed &mdash; more useful than any exit poll. For the department: this is what &ldquo;adaptive&rdquo; means when it is a mechanism in the file rather than a sentence in a report, and the diagram is generated from the conditions themselves, so it cannot describe a branch that does not exist.'},
+  task:'Read your route, note where you needed support, and decide which one unit you will revisit before the assignment.',
+  notes:'Sixty seconds. The point is metacognition, not analytics. A student who needed a scaffold discovered where help was needed, which is more useful than pretending everyone took the same route.'},
+
 
  {k:'END',phase:'ISCARB / CHAPTER 10 COMPLETE',
   task:'Copy your decision card with C before you leave the room.',
@@ -1754,6 +1749,43 @@ var SVG={};
        '<text x="'+x+'" y="169" text-anchor="middle" fill="var(--dim)" font-family="Inter,sans-serif" font-size="11.5">'+ACC[j][1]+'</text>';
   }
   SVG.accountability=a+'</svg>';
+
+  SVG.transfer='<svg class="transfer-svg" viewBox="0 0 980 220" role="img" aria-label="Scaffold, transfer, local judgment">'+
+    '<defs><marker id="trA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="var(--sand)"></path></marker></defs>'+
+    '<rect x="40" y="58" width="240" height="104" rx="18" fill="var(--panel)" stroke="var(--teal)" stroke-width="2"></rect>'+
+    '<rect x="370" y="58" width="240" height="104" rx="18" fill="var(--panel)" stroke="var(--mag)" stroke-width="2"></rect>'+
+    '<rect x="700" y="58" width="240" height="104" rx="18" fill="var(--panel)" stroke="var(--violet)" stroke-width="2"></rect>'+
+    '<line x1="280" y1="110" x2="365" y2="110" stroke="var(--sand)" stroke-width="2" marker-end="url(#trA)"></line>'+
+    '<line x1="610" y1="110" x2="695" y2="110" stroke="var(--sand)" stroke-width="2" marker-end="url(#trA)"></line>'+
+    '<text x="160" y="92" text-anchor="middle" fill="var(--teal)" font-family="Inter" font-size="15" font-weight="700">1 · SCAFFOLD</text>'+
+    '<text x="160" y="120" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="20" font-weight="700">Small visible case</text>'+
+    '<text x="160" y="144" text-anchor="middle" fill="var(--dim)" font-family="Inter" font-size="13">Expose the mechanism</text>'+
+    '<text x="490" y="92" text-anchor="middle" fill="var(--mag)" font-family="Inter" font-size="15" font-weight="700">2 · TRANSFER</text>'+
+    '<text x="490" y="120" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="20" font-weight="700">New domain</text>'+
+    '<text x="490" y="144" text-anchor="middle" fill="var(--dim)" font-family="Inter" font-size="13">Keep what survives</text>'+
+    '<text x="820" y="92" text-anchor="middle" fill="var(--violet)" font-family="Inter" font-size="15" font-weight="700">3 · OWN</text>'+
+    '<text x="820" y="120" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="20" font-weight="700">Local judgment</text>'+
+    '<text x="820" y="144" text-anchor="middle" fill="var(--dim)" font-family="Inter" font-size="13">Name evidence + owner</text>'+
+    '<text x="490" y="202" text-anchor="middle" fill="var(--sand)" font-family="Inter" font-size="15" font-weight="700">Mechanism → Evidence → Decision boundary</text></svg>';
+
+  SVG.workload='<svg class="workload-svg" viewBox="0 0 980 210" role="img" aria-label="Workload moves through a dependable process">'+
+    '<defs><marker id="wlA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="var(--sand)"></path></marker></defs>'+
+    '<rect x="40" y="55" width="200" height="96" rx="18" fill="var(--panel)" stroke="var(--teal)" stroke-width="2"></rect>'+
+    '<rect x="300" y="55" width="200" height="96" rx="18" fill="var(--panel)" stroke="var(--violet)" stroke-width="2"></rect>'+
+    '<rect x="560" y="55" width="200" height="96" rx="18" fill="var(--panel)" stroke="var(--mag)" stroke-width="2"></rect>'+
+    '<rect x="820" y="55" width="120" height="96" rx="18" fill="var(--panel)" stroke="var(--green)" stroke-width="2"></rect>'+
+    '<line x1="240" y1="103" x2="295" y2="103" stroke="var(--sand)" stroke-width="2" marker-end="url(#wlA)"></line>'+
+    '<line x1="500" y1="103" x2="555" y2="103" stroke="var(--sand)" stroke-width="2" marker-end="url(#wlA)"></line>'+
+    '<line x1="760" y1="103" x2="815" y2="103" stroke="var(--sand)" stroke-width="2" marker-end="url(#wlA)"></line>'+
+    '<text x="140" y="89" text-anchor="middle" fill="var(--teal)" font-family="Inter" font-size="14" font-weight="700">WRITE / GENERATE</text>'+
+    '<text x="140" y="117" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="18" font-weight="700">Output grows</text>'+
+    '<text x="400" y="89" text-anchor="middle" fill="var(--violet)" font-family="Inter" font-size="14" font-weight="700">REVIEW</text>'+
+    '<text x="400" y="117" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="18" font-weight="700">Attention becomes scarce</text>'+
+    '<text x="660" y="89" text-anchor="middle" fill="var(--mag)" font-family="Inter" font-size="14" font-weight="700">VERIFY</text>'+
+    '<text x="660" y="117" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="18" font-weight="700">Evidence bottleneck</text>'+
+    '<text x="880" y="89" text-anchor="middle" fill="var(--green)" font-family="Inter" font-size="14" font-weight="700">SIGN</text>'+
+    '<text x="880" y="117" text-anchor="middle" fill="var(--ink)" font-family="Poppins" font-size="18" font-weight="700">Human owns it</text>'+
+    '<text x="490" y="192" text-anchor="middle" fill="var(--sand)" font-family="Inter" font-size="15" font-weight="700">Automation moves work; dependable design makes the new bottleneck visible.</text></svg>';
 })();
 
 /* ---------- block renderer ---------- */
@@ -2303,44 +2335,35 @@ function renderProgress(){
 }
 function renderPath(){
   var ws=document.querySelectorAll('[data-pm]'); if(!ws.length) return;
-  var F=forks(), h='';
-  if(!F.length) h='<div class="pmnote">This lecture has no conditional units: every student takes the same route.</div>';
-  for(var i=0;i<F.length;i++){
-    var f=F[i], cond=f.names.join(', ');
-    var need = f.mode==='thin' ? cond+' under '+f.min+' characters'
-             : f.mode==='empty' ? cond+' still empty' : cond+' answered';
-    var met = f.mode==='filled' ? !f.shown : f.shown;   /* is the student on the helper arm? */
-    h+='<div class="fork"><div class="at">'+(f.from?f.from.k:'start')+'<span>fork</span></div><div class="arms">'+
-       '<div class="arm" data-took="'+(met?1:0)+'"><span class="b">&#9500;</span>'+
-       '<span>'+need+' &rarr; the '+(f.unit.rule&&/HELPER|SCAFFOLD/i.test(f.unit.rule)?'scaffold':'extra')+' slide'+
-       (met?' <em>&mdash; you are on this arm</em>':'')+'</span>'+
-       '<span class="to">'+f.unit.k+(f.join?' &rarr; '+f.join.k:'')+'</span></div>'+
-       '<div class="arm" data-took="'+(met?0:1)+'"><span class="b">&#9492;</span>'+
-       '<span>otherwise, straight on'+(met?'':' <em>&mdash; you are on this arm</em>')+'</span>'+
-       '<span class="to">'+(f.join?f.join.k:'&mdash;')+'</span></div>'+
-       '</div></div>';
-  }
-  /* what actually happened, counted from state */
+  var F=forks(), help=0;
+  for(var g=0;g<F.length;g++) if(S.seen&&S.seen[F[g].unit.k]) help++;
   var seen=0, tot=0;
   for(var u=0;u<LECTURE.units.length;u++){
     if(LECTURE.units[u].k==='TITLE'||LECTURE.units[u].k==='END') continue;
     tot++; if(S.seen&&S.seen[LECTURE.units[u].k]) seen++;
   }
-  var help=0; for(var g=0;g<F.length;g++) if(S.seen&&S.seen[F[g].unit.k]) help++;
   var sig=0; for(var s2 in (S.sign||{})) if(S.sign[s2]) sig++;
   var aided=0, QT=LECTURE.jahtest;
   if(QT) for(var q=0;q<QT.items.length;q++){
     var c2=S.quiz?S.quiz[q]:undefined;
     if(c2!==undefined&&c2!==null&&(S.tries&&S.tries[q]||[]).length) aided++;
   }
-  h+='<div class="pmfoot">'+
-     '<div class="pmf"><div class="n">'+seen+'/'+tot+'</div><div class="l">units reached</div></div>'+
-     '<div class="pmf"><div class="n">'+help+'</div><div class="l">scaffolds you needed</div></div>'+
-     '<div class="pmf"><div class="n">'+sig+'</div><div class="l">commitments signed</div></div>'+
-     '<div class="pmf"><div class="n">'+aided+'</div><div class="l">answers after a hint</div></div>'+
-     '</div><div class="pmnote">None of this is a mark. It is the route your own answers opened, and a scaffold you needed is a unit worth rereading &mdash; not a deduction.</div>';
+  var h='<div class="routeviz">'+
+    '<div class="route-node active"><div class="rk">START</div><div class="rt">Crisis</div></div><div class="route-arrow">→</div>'+
+    '<div class="route-node active"><div class="rk">R05</div><div class="rt">Commit a prediction</div></div><div class="route-arrow">→</div>'+
+    '<div class="route-node '+(help?'support':'active')+'"><div class="rk">'+(help?'SCAFFOLD USED':'MAIN ROUTE')+'</div><div class="rt">'+(help?'Support when needed':'Straight through')+'</div></div><div class="route-arrow">→</div>'+
+    '<div class="route-node active"><div class="rk">REVEAL + EVIDENCE</div><div class="rt">Compare and test</div></div><div class="route-arrow">→</div>'+
+    '<div class="route-node active"><div class="rk">VERDICT</div><div class="rt">Defend + refit</div></div></div>'+
+    '<div class="route-note">Your answers changed whether support appeared. That route is a learning trace, not a grade.</div>'+
+    '<div class="pmfoot">'+
+      '<div class="pmf"><div class="n">'+seen+'/'+tot+'</div><div class="l">units reached</div></div>'+
+      '<div class="pmf"><div class="n">'+help+'</div><div class="l">scaffolds used</div></div>'+
+      '<div class="pmf"><div class="n">'+sig+'</div><div class="l">commitments signed</div></div>'+
+      '<div class="pmf"><div class="n">'+aided+'</div><div class="l">answers after a hint</div></div>'+
+    '</div><div class="pmnote">If support appeared, that unit is worth revisiting. It is not a deduction, and nobody else can see it.</div>';
   for(var w=0;w<ws.length;w++) ws[w].innerHTML=T(h);
 }
+
 /* ---------- confusable terms, side by side ------------------------------
    Every subject has a set of words students swap for one another, and the swap
    is invisible until it produces a wrong answer. A comparison table is the
@@ -2504,7 +2527,7 @@ function phaseColor(p){
     /* the glossary runs per slide, so a term is marked once where the student
        meets it rather than on every card that happens to repeat the word */
     h+='<section class="slide'+(u.golden?' golden':'')+'" data-i="'+i+'"'+
-       ' role="group" aria-roledescription="unit" aria-label="'+
+       ' data-k="'+u.k+'" role="group" aria-roledescription="unit" aria-label="'+
        strip(T((u.rule?u.rule+': ':'')+(u.title||LECTURE.title)))+'">'+
        head+'<div class="area">'+glossify(body)+'</div></section>';
   }
