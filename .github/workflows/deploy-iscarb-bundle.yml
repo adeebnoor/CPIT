@@ -1,0 +1,94 @@
+name: Deploy ISCARB lecture bundle
+
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-iscarb-bundle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download deployment bundle
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SHARE='https://firestorage.ai/ja/f/dKI0mTGsDUyS'
+          mkdir -p /tmp/iscarb
+          curl -A 'Mozilla/5.0' -LfsS "$SHARE" -o /tmp/iscarb/share.html
+          file /tmp/iscarb/share.html || true
+          if unzip -t /tmp/iscarb/share.html >/dev/null 2>&1; then
+            mv /tmp/iscarb/share.html /tmp/iscarb/bundle.zip
+          else
+            python - <<'PY'
+          import re, html, pathlib, urllib.parse, requests
+          share='https://firestorage.ai/ja/f/dKI0mTGsDUyS'
+          text=pathlib.Path('/tmp/iscarb/share.html').read_text(errors='ignore')
+          candidates=[]
+          # href/src and JSON-embedded URLs
+          for raw in re.findall(r'''(?:href|src)=["']([^"']+)["']|https?://[^"'<>\\\s]+''', text):
+              if isinstance(raw, tuple): raw=''.join(raw)
+              if raw: candidates.append(html.unescape(raw))
+          candidates += re.findall(r'''["']([^"']*(?:download|file|asset)[^"']*)["']''', text, flags=re.I)
+          seen=[]
+          for u in candidates:
+              u=html.unescape(u).replace('\\u0026','&').replace('\\/','/')
+              if not u or u.startswith(('javascript:','#')): continue
+              u=urllib.parse.urljoin(share,u)
+              if u not in seen: seen.append(u)
+          print('Candidate URLs:', *seen, sep='\n')
+          sess=requests.Session(); sess.headers['User-Agent']='Mozilla/5.0'
+          for u in seen:
+              if not any(k in u.lower() for k in ['download','zip','file','asset','storage']):
+                  continue
+              try:
+                  r=sess.get(u,timeout=30,allow_redirects=True)
+                  p=pathlib.Path('/tmp/iscarb/candidate.bin'); p.write_bytes(r.content)
+                  if r.content[:4]==b'PK\x03\x04':
+                      pathlib.Path('/tmp/iscarb/bundle.zip').write_bytes(r.content)
+                      print('ZIP FOUND',u,r.url,len(r.content)); break
+              except Exception as e: print('candidate failed',u,e)
+          if not pathlib.Path('/tmp/iscarb/bundle.zip').exists():
+              # Expose enough HTML for diagnostics if provider uses JS/API.
+              print(text[:20000])
+              raise SystemExit('Could not resolve ZIP download from share page')
+          PY
+          fi
+          unzip -t /tmp/iscarb/bundle.zip
+      - name: Install final In-Class lectures
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf /tmp/iscarb/extract && mkdir -p /tmp/iscarb/extract
+          unzip -q /tmp/iscarb/bundle.zip -d /tmp/iscarb/extract
+          mkdir -p lectures/iscarb
+          cp /tmp/iscarb/extract/InClass-Presenter.html lectures/iscarb/InClass-Presenter.html
+          cp /tmp/iscarb/extract/Ch10-Dependable-Systems-Final100.html lectures/iscarb/Ch10-Dependable-Systems-Final100.html
+          cp /tmp/iscarb/extract/Ch11-Reliability-Engineering-Final100.html lectures/iscarb/Ch11-Reliability-Engineering-Final100.html
+          cp /tmp/iscarb/extract/Ch12-Safety-Engineering.html lectures/iscarb/Ch12-Safety-Engineering.html
+          cp /tmp/iscarb/extract/Ch13-Security-Engineering.html lectures/iscarb/Ch13-Security-Engineering.html
+          cp /tmp/iscarb/extract/Ch14-Resilience-Engineering.html lectures/iscarb/Ch14-Resilience-Engineering.html
+          cp /tmp/iscarb/extract/Ch15-Software-Reuse.html lectures/iscarb/Ch15-Software-Reuse.html
+          cp /tmp/iscarb/extract/Ch16-Component-Based-Software-Engineering.html lectures/iscarb/Ch16-Component-Based-Software-Engineering.html
+          cp /tmp/iscarb/extract/Ch17-Distributed-Software-Engineering.html lectures/iscarb/Ch17-Distributed-Software-Engineering.html
+          cp /tmp/iscarb/extract/Ch20-Systems-of-Systems.html lectures/iscarb/Ch20-Systems-of-Systems.html
+          cp /tmp/iscarb/extract/iscarb.html iscarb.html
+          grep -q 'chapter=20' iscarb.html
+          grep -q 'Ch20-Systems-of-Systems.html' lectures/iscarb/InClass-Presenter.html
+      - name: Commit deployment
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add iscarb.html lectures/iscarb/InClass-Presenter.html lectures/iscarb/Ch10-Dependable-Systems-Final100.html lectures/iscarb/Ch11-Reliability-Engineering-Final100.html lectures/iscarb/Ch12-Safety-Engineering.html lectures/iscarb/Ch13-Security-Engineering.html lectures/iscarb/Ch14-Resilience-Engineering.html lectures/iscarb/Ch15-Software-Reuse.html lectures/iscarb/Ch16-Component-Based-Software-Engineering.html lectures/iscarb/Ch17-Distributed-Software-Engineering.html lectures/iscarb/Ch20-Systems-of-Systems.html
+          git diff --cached --stat
+          git commit -m 'Publish ISCARB In-Class Chapters 10-17 and 20' || exit 0
+          git push origin HEAD:main
