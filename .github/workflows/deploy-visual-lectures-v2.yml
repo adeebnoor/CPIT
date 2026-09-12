@@ -16,16 +16,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Restore visual lecture files
+      - name: Build visual lecture files
         run: |
-          python - <<'PY'
-          import base64, io, lzma, tarfile
-          from pathlib import Path
-          raw = base64.b64decode(Path('.tmp/visual_lectures_12_20.tar.xz.b64').read_text())
-          data = lzma.decompress(raw)
-          with tarfile.open(fileobj=io.BytesIO(data), mode='r:') as tf:
-              tf.extractall('lectures/iscarb')
-          PY
+          cat .tmp/build_visual_part00.py .tmp/build_visual_part01.py .tmp/build_visual_part02.py .tmp/build_visual_part03.py > /tmp/build_visual_lectures.py
+          python /tmp/build_visual_lectures.py
       - name: Commit visual lectures
         run: |
           git config user.name "Prof. Adeeb Noor"
