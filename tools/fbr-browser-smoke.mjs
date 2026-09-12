@@ -65,24 +65,33 @@ async function facultySmoke(path,label,chapter){
   await context.close();
 }
 
-async function studentSmoke(path,label,reveal){
+async function enterAssignment(page,chapter){
+  await page.goto(BASE+`/fbr-submission.html?chapter=${chapter}`,{waitUntil:'domcontentloaded'});
+  await page.fill('#sid','TEST-001');
+  await page.check('#ack');
+  await page.click('#openBtn');
+  await page.waitForURL(new RegExp(`Ch${chapter}-FBR-Student-Assignment\\.html`),{timeout:15000});
+  await page.waitForSelector('#fit');
+}
+
+async function studentSmoke(chapter,label,reveal){
   const context=await browser.newContext({viewport:{width:390,height:844}});
   let page=await context.newPage();
   const requested=[]; const errors=[];
   page.on('request',r=>requested.push(r.url()));
   page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto(BASE+path,{waitUntil:'domcontentloaded'});
+  await enterAssignment(page,chapter);
+  assert((await page.inputValue('#sid'))==='TEST-001',`${label} gateway passes Student ID into assignment`);
   assert(!(await page.locator('body').innerText()).includes(reveal.text),`${label} S3 STRESS absent before lock`);
   assert(!requested.some(u=>u.includes('/reveal/')),`${label} S3 no reveal network request before lock`);
 
   await page.fill('#student','Release Test Student');
-  await page.fill('#sid','TEST-001');
   await page.fill('#section','CI');
   await page.fill('#fit','This engineering mechanism is fit because the decision and stated operating context require this specific evidence-based choice.');
   await page.fill('#bound','This decision remains fit only while the stated operating conditions and evidence assumptions remain observable and unchanged.');
   await page.fill('#act','Issue a measurable professional engineering artifact with an explicit owner, trigger, and acceptance condition for this use.');
   await page.fill('#evidence','Use signed logs, representative measurements, an observation window, and an accountable evidence owner to defend the action.');
-  await page.click('#save'); await page.waitForTimeout(100);
+  await page.click('#save'); await page.waitForTimeout(120);
   const savedFit=await page.inputValue('#fit');
   await page.close();
 
@@ -90,31 +99,35 @@ async function studentSmoke(path,label,reveal){
   const reopenedRequests=[]; const reopenedErrors=[];
   page.on('request',r=>reopenedRequests.push(r.url()));
   page.on('pageerror',e=>reopenedErrors.push(String(e)));
-  await page.goto(BASE+path,{waitUntil:'domcontentloaded'});
-  assert((await page.inputValue('#fit'))===savedFit,`${label} S1 local data survives tab close/reopen`);
-  assert(!reopenedRequests.some(u=>u.includes('/reveal/')),`${label} S3 reopened unlocked page still does not request STRESS`);
+  await enterAssignment(page,chapter);
+  assert((await page.inputValue('#fit'))===savedFit,`${label} S1 local data survives tab close/re-entry`);
+  assert(!reopenedRequests.some(u=>u.includes('/reveal/')),`${label} S3 re-entered unlocked page still does not request STRESS`);
 
   await page.click('#lock');
   await page.waitForSelector('.card.stress');
   assert(await page.locator('#fit').getAttribute('readonly')!==null,`${label} S2 FIT is read-only after lock`);
   assert(await page.locator('#bound').getAttribute('readonly')!==null,`${label} S2 BOUND is read-only after lock`);
-  assert((await page.locator('#lockBanner').innerText()).includes('PART A LOCKED'),`${label} S2 visible locked state`);
+  assert((await page.locator('#lockBanner').innerText()).includes('PART A COMMITTED'),`${label} S2 visible committed state`);
   assert((await page.locator('.card.stress').innerText()).includes(reveal.text),`${label} S3 STRESS appears after lock`);
   assert(reopenedRequests.some(u=>u.includes('/reveal/')),`${label} S3 reveal asset requested only after lock`);
 
-  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem(CONFIG.key)));
+  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem(KEY)));
   assert(Boolean(stored?.lockedPartA?.fit),`${label} S2 locked Part A snapshot persisted`);
   assert(Boolean(stored?.lockAt),`${label} S5 lock timestamp persisted`);
 
+  assert(await page.locator('#pdf').isDisabled(),`${label} S4 PDF export disabled before REFIT is complete`);
+  await page.check('input[name=boundaryState][value="CROSSED"]');
   await page.check('input[name=refit][value="REVISE"]');
   await page.fill('#refitwhy','The changed condition crosses the applicability boundary, so the original action must be revised rather than merely restated.');
   await page.fill('#revised','Revise the professional artifact so that its metric, evidence, trigger, and accountable owner match the changed condition.');
-  await page.click('#save');
+  await page.waitForTimeout(100);
+  assert(!(await page.locator('#pdf').isDisabled()),`${label} S4 PDF export enabled only after complete REFIT`);
+
   const markdown=await page.evaluate(()=>md());
-  for(const section of ['## FIT','## BOUND','## ACT','## EVIDENCE','## STRESS','## REFIT']) assert(markdown.includes(section),`${label} S4 export contains ${section.replace('## ','')}`);
+  for(const section of ['## FIT','## BOUND','## ACT','## EVIDENCE','## STRESS','## Boundary status','## REFIT']) assert(markdown.includes(section),`${label} S4 export contains ${section.replace('## ','')}`);
   assert(markdown.includes('TEST-001'),`${label} S6 export contains Student ID`);
   await page.evaluate(()=>buildPrintSheet());
-  const printText=await page.locator('#printSheet').innerText();
+  const printText=await page.locator('#print').innerText();
   assert(printText.includes('TEST-001')&&printText.includes('FIT')&&printText.includes('REFIT'),`${label} S8 print/PDF surface is complete`);
   assert([...errors,...reopenedErrors].length===0,`${label} no page JavaScript errors in Chromium`);
   await context.close();
@@ -136,8 +149,8 @@ async function hubSmoke(){
 try{
   await facultySmoke('/lectures/iscarb/Ch10-Dependable-Systems-Faculty.html','Ch10 Faculty','10');
   await facultySmoke('/lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html','Ch11 Faculty','11');
-  await studentSmoke('/lectures/iscarb/Ch10-FBR-Student-Assignment.html','Ch10 Student',reveals.Ch10);
-  await studentSmoke('/lectures/iscarb/Ch11-FBR-Student-Assignment.html','Ch11 Student',reveals.Ch11);
+  await studentSmoke('10','Ch10 Student',reveals.Ch10);
+  await studentSmoke('11','Ch11 Student',reveals.Ch11);
   await hubSmoke();
 } finally { await browser.close(); }
 if(failures.length){console.error(`\nFBR BROWSER SMOKE: FAIL (${failures.length})`);failures.forEach(x=>console.error(' - '+x));process.exit(1)}
