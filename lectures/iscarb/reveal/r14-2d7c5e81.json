@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "Dependency review shows that the primary dispatch service and the backup server both depend on the same central identity provider. The identity provider is now unavailable. Ambulance radios and locally cached crew assignments are still working.",
+  "principle": "A backup that shares a critical dependency may not provide resilience. Refit around the critical service, not around preserving the original architecture."
+}

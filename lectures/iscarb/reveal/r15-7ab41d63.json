@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "The preferred commercial signing service announces that the current API will be deprecated in 12 months. Migration to the new API is possible, but requires a new adapter and retesting. The vendor will continue security updates, but will not provide source code or long-term compatibility guarantees.",
+  "principle": "Reuse transfers some development work into dependency and lifecycle risk. Re-evaluate the decision boundary, not just the initial delivery deadline."
+}

@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "During a national event, the hospital-capacity system changes the meaning of “available bed” from “staffed and ready now” to “expected within 60 minutes,” while keeping the same field name. At the same time, the traffic-control system becomes unreachable by the central orchestrator but continues publishing local traffic feeds. Neither system is under your authority to modify immediately.",
+  "principle": "In an SoS, meaning and control can change independently. Refit the decision across semantics, governance, and incomplete authority — not by assuming you can command the constituent systems."
+}

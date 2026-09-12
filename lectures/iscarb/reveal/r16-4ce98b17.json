@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "Detailed documentation reveals that the component’s “timestamp” is ingestion time, not sensor measurement time. During a network interruption it can cache readings for up to five minutes and later return them through the same interface without marking them as delayed.",
+  "principle": "Interfaces can match while meanings do not. Refit the composition decision around semantics and explicit context dependencies."
+}

@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "The sensor vendor now confirms that after a reconnect, a stale-but-plausible glucose value can persist for up to 45 seconds. The current self-test checks electrical connectivity but does not check freshness. A separate timestamp source exists, but the release does not yet use it.",
+  "principle": "STRESS changes a safety assumption, not merely a test result. Re-examine whether your stated boundary still protects against the hazard."
+}

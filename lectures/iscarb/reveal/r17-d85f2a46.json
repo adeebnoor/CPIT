@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "During a regional network partition, both regions continue accepting submissions. Replication is asynchronous, and the current identifier service can generate the same submission ID in both regions. No submission has yet been lost, but reconciliation is not deterministic.",
+  "principle": "Availability during partition can create a consistency problem. Refit the architecture against the boundary you committed for state, identity, and failure management."
+}

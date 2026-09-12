@@ -1,0 +1,5 @@
+{
+  "label": "B1 · STRESS",
+  "text": "A red-team test finds that when a collaborator’s role is revoked, an already-issued session token can continue to access the dataset for up to 20 minutes. The revocation event is logged immediately, and no evidence of data exfiltration has been found.",
+  "principle": "A logged event is not the same as prevented loss. Re-examine whether the control still protects the asset within the boundary you committed."
+}
