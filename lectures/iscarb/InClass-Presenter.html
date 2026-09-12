@@ -1,4 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08070C"><title>ISCARB In-Class Presenter</title>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08070C"><title>ISCARB In-Class Presenter</title>
 <style>
 :root{--bg:#08070C;--panel:#15121C;--line:#2C2534;--ink:#F5F0EA;--dim:#A99E95;--sand:#DDB27E;--mag:#F0189A;--teal:#4FC6CB}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;overflow:hidden}body{display:flex;flex-direction:column}
@@ -16,10 +17,10 @@ button{appearance:none;border:1px solid var(--line);border-radius:12px;backgroun
 <div id="stageWrap"><iframe id="lecture" title="ISCARB In-Class lecture" allow="fullscreen"></iframe><div id="portraitHint">Tap Present for landscape · اضغط Present للعرض الأفقي</div></div>
 <div id="controls" aria-label="Presentation controls"><button id="prev" aria-label="Previous in-class slide">←</button><button id="notes" aria-label="Instructor notes">Notes</button><button id="next" aria-label="Next in-class slide">→</button><button id="present" aria-label="Present full screen">Present</button></div>
 <script src="inclass-visual-v2.js?v=20260912-visual3"></script>
-<script src="inclass-visual-v4.js?v=20260912-visual4"></script>
+<script src="inclass-visual-v4.js?v=20260912-visual5"></script>
 <script>
 const q=new URLSearchParams(location.search),ch=q.get('chapter')==='11'?'11':'10';
-const cfg=ch==='11'?{src:'Ch11-Reliability-Engineering.html?v=20260912-visual4',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'}:{src:'Ch10-Dependable-Systems.html?v=20260912-visual4',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'};
+const cfg=ch==='11'?{src:'Ch11-Reliability-Engineering.html?v=20260912-visual5',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'}:{src:'Ch10-Dependable-Systems.html?v=20260912-visual5',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'};
 const frame=document.getElementById('lecture'),status=document.getElementById('status');document.getElementById('title').textContent='ISCARB · '+cfg.title;document.getElementById('studentTask').href=cfg.assignment;frame.src=cfg.src;
 let wired=false,ready=false,focus=[],specialByIndex={},enhanced=false;window.__facultyFocus=null;
 function cw(){try{return frame.contentWindow}catch(e){return null}}
