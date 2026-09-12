@@ -74,7 +74,7 @@ async function studentSmoke(ch){
   assert(req2.some(u=>u.includes('/reveal/')),`Ch${ch} reveal requested only after Commit`);
   assert(await page.getByRole('button',{name:/reset/i}).count()===0,`Ch${ch} no reset after Commit`);
   assert(await page.locator('#pdf').isDisabled(),`Ch${ch} export disabled before REFIT completion`);
-  await page.check('input[name=boundaryState][value="PRESSURED"]'); await page.check('input[name=refit][value="REVISE"]');
+  await page.check('input[name=boundaryState][value="CROSSED"]'); await page.check('input[name=refit][value="REVISE"]');
   await page.fill('#refitwhy',txt); await page.fill('#revised',txt); await page.waitForTimeout(100);
   assert(!(await page.locator('#pdf').isDisabled()),`Ch${ch} PDF enabled after complete REFIT`);
   assert(!(await page.locator('#download').isDisabled()),`Ch${ch} evidence export enabled after complete REFIT`);
