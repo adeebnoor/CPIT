@@ -28,8 +28,8 @@
 <script>
 const q=new URLSearchParams(location.search);const ch=q.get('chapter')==='11'?'11':'10';
 const cfg={
- '10':{week:'10',title:'Chapter 10 · Dependable Systems',target:'lectures/iscarb/Ch10-FBR-Student-Assignment.html?v=20260912-ready1'},
- '11':{week:'11',title:'Chapter 11 · Reliability Engineering',target:'lectures/iscarb/Ch11-FBR-Student-Assignment.html?v=20260912-ready1'}
+ '10':{week:'10',title:'Chapter 10 · Dependable Systems',target:'lectures/iscarb/Ch10-FBR-Student-Assignment.html?v=20260912-release1'},
+ '11':{week:'11',title:'Chapter 11 · Reliability Engineering',target:'lectures/iscarb/Ch11-FBR-Student-Assignment.html?v=20260912-release1'}
 }[ch];
 const sid=document.getElementById('sid'),ack=document.getElementById('ack'),btn=document.getElementById('openBtn'),msg=document.getElementById('msg');
 document.getElementById('chapterTitle').textContent=cfg.title+' · submission workflow';
