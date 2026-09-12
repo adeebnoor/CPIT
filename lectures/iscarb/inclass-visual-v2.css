@@ -1,111 +1,182 @@
-/* ISCARB In-Class Visual Layer v2
-   Purpose: preserve lecture content, remove dashboard/card monotony, and use the
-   16:9 canvas as a teaching surface rather than a form container. */
-:root{--v2-rail:rgba(221,178,126,.32);--v2-soft:rgba(245,240,234,.055)}
+/* ISCARB In-Class Visual Layer v3
+   Goals: projector-safe typography, no clipped teaching text, less card monotony,
+   concept-first slides, explicit AI-learning impact, and a visible readiness check. */
+:root{
+  --v2-rail:rgba(221,178,126,.34);
+  --v2-soft:rgba(245,240,234,.05);
+  --v2-ink:#F5F0EA;
+}
 
-/* Use the canvas. The presenter owns navigation, so the engine's bottom bar is redundant. */
+/* ---------- CANVAS / TYPOGRAPHY ---------- */
 #bar{display:none!important}
-.slide{inset:0!important;padding:26px 44px 24px!important}
-.area{justify-content:flex-start!important;gap:15px!important;padding:16px 0 0!important;overflow:hidden!important}
-h1{font-size:38px!important;line-height:1.06!important;max-width:31ch!important;margin-top:10px!important}
-.sub{font-size:16px!important;line-height:1.42!important;max-width:104ch!important;margin-top:7px!important}
-.pill{margin-top:10px!important;padding:6px 15px!important}
+.slide{inset:0!important;padding:28px 48px 30px!important}
+.area{
+  justify-content:flex-start!important;
+  gap:16px!important;
+  padding:16px 0 0!important;
+  overflow:visible!important;
+  min-height:0!important;
+}
+h1{font-size:41px!important;line-height:1.04!important;max-width:31ch!important;margin-top:10px!important;letter-spacing:-.02em!important}
+.sub{font-size:17px!important;line-height:1.38!important;max-width:96ch!important;margin-top:8px!important;color:#BFB5AC!important}
+.pill{margin-top:10px!important;padding:6px 15px!important;font-size:12.7px!important}
 .grid{gap:16px!important}
+.principle{font-size:19px!important;line-height:1.3!important;padding:10px 16px!important}
 
-/* Static information is no longer boxed by default. Interactive work still is. */
+/* Source detail belongs in Notes during live teaching. Keep only the teaching lead. */
+.card .txt.src2,.foldbar{display:none!important}
+.card .txt.fold{-webkit-line-clamp:unset!important;display:block!important;overflow:visible!important}
+.card .txt.fold::after{display:none!important}
+.src{font-size:10px!important;opacity:.72!important}
+
+/* ---------- STATIC CONTENT: PANELS, NOT DASHBOARD CARDS ---------- */
 .card:not(:has(textarea)):not(:has(.picker)):not(:has(button)):not(.rowcard){
-  background:linear-gradient(90deg,var(--v2-soft),rgba(245,240,234,.012));
-  border:0!important;border-inline-start:3px solid var(--line)!important;border-radius:2px 14px 14px 2px!important;
-  box-shadow:none!important;padding:17px 19px!important;min-height:104px;justify-content:center
+  background:linear-gradient(90deg,var(--v2-soft),rgba(245,240,234,.01));
+  border:0!important;
+  border-inline-start:3px solid var(--line)!important;
+  border-radius:2px 16px 16px 2px!important;
+  box-shadow:none!important;
+  padding:18px 20px!important;
+  min-height:96px;
+  justify-content:center
 }
 .card.c-teal:not(:has(textarea)):not(:has(.picker)):not(:has(button)){border-inline-start-color:var(--teal)!important}
 .card.c-mag:not(:has(textarea)):not(:has(.picker)):not(:has(button)){border-inline-start-color:var(--mag)!important}
 .card.c-sand:not(:has(textarea)):not(:has(.picker)):not(:has(button)){border-inline-start-color:var(--sand)!important}
 .card.c-violet:not(:has(textarea)):not(:has(.picker)):not(:has(button)){border-inline-start-color:var(--violet)!important}
 .card.c-green:not(:has(textarea)):not(:has(.picker)):not(:has(button)){border-inline-start-color:var(--green)!important}
-.card .lab{text-align:left!important;font-size:11.5px!important}
-.card .lead{font-size:16px!important;line-height:1.34!important}
-.card .txt{font-size:15.4px!important;line-height:1.42!important}
-.card .txt.src2{font-size:12.5px!important}
+.card .lab{text-align:left!important;font-size:12.3px!important;line-height:1.2!important}
+.card .lead{font-size:17.2px!important;line-height:1.28!important;font-weight:650!important}
+.card .txt{font-size:16px!important;line-height:1.34!important}
+.card .txt.sm{font-size:15px!important;line-height:1.34!important}
 .rowcard{background:transparent!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;padding:13px 4px!important;grid-template-columns:170px 1fr!important}
-.rowcard .lab{text-align:left!important;font-size:11.5px!important}
-.rowcard .txt{font-size:15.2px!important}
+.rowcard .lab{text-align:left!important;font-size:12px!important}
+.rowcard .txt{font-size:15.8px!important}
 
-/* Sparse slides should grow content instead of floating in a sea of empty pixels. */
+/* Sparse content should use the canvas. */
 .area[data-vdensity="sparse"]{justify-content:stretch!important}
-.area[data-vdensity="sparse"]>.grid,.area[data-vdensity="sparse"]>.splitfig,.area[data-vdensity="sparse"]>.vflow{flex:1;align-items:stretch}
-.area[data-vdensity="sparse"] .card{min-height:132px}
-.area[data-vdensity="sparse"] .principle{font-size:20px!important;margin-top:auto;margin-bottom:auto}
+.area[data-vdensity="sparse"]>.grid,.area[data-vdensity="sparse"]>.splitfig,.area[data-vdensity="sparse"]>.vflow,
+.area[data-vdensity="sparse"]>.vduo,.area[data-vdensity="sparse"]>.vquestions{flex:1;align-items:stretch}
+.area[data-vdensity="sparse"] .card{min-height:126px}
+.area[data-vdensity="sparse"] .principle{font-size:21px!important;margin-top:auto;margin-bottom:auto}
 
-/* Source figures are the visual, not an accessory beside the visual. */
-.splitfig{grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr)!important;gap:22px!important;align-items:center!important}
-.figwrap{min-height:210px!important;padding:10px!important}
-.figwrap img{max-height:360px!important;max-width:100%!important}
-.svgwrap svg{max-height:168px!important}
+/* ---------- FIGURE + CONCEPT ---------- */
+.splitfig{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr)!important;gap:24px!important;align-items:center!important;min-height:0!important}
+.figwrap{min-height:210px!important;padding:8px!important}
+.figwrap img{max-height:365px!important;max-width:100%!important}
+.svgwrap svg{max-height:176px!important}
+.splitfig .card{padding:14px 16px!important;min-height:78px!important}
+.splitfig .card .lab{font-size:11.8px!important}
+.splitfig .card .lead{font-size:16.2px!important;line-height:1.25!important}
+.splitfig .card .txt{font-size:15.2px!important;line-height:1.3!important}
 
-/* Five-step engineering flow: a route, not five dashboard cards. */
-.vflow{position:relative;display:grid;grid-template-columns:repeat(var(--vn,5),1fr);gap:12px;align-items:start;
-  padding:24px 10px 8px;min-height:250px}
-.vflow::before{content:"";position:absolute;left:8%;right:8%;top:71px;height:2px;
-  background:linear-gradient(90deg,var(--mag),var(--teal),var(--sand),var(--violet),var(--green));opacity:.72}
+/* When a figure has many ideas beside it, show them as a concept map instead of a stack. */
+.vconcepts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:center}
+.vconcept{padding:12px 14px;border-inline-start:3px solid var(--vc);background:linear-gradient(90deg,var(--v2-soft),transparent);min-height:88px}
+.vconcept .vc-lab{font-size:11.2px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--vc)}
+.vconcept .vc-lead{font-size:15.7px;line-height:1.28;font-weight:650;margin-top:4px;color:var(--ink)}
+.vconcept[data-c="mag"]{--vc:var(--mag)}.vconcept[data-c="teal"]{--vc:var(--teal)}.vconcept[data-c="sand"]{--vc:var(--sand)}
+.vconcept[data-c="violet"]{--vc:var(--violet)}.vconcept[data-c="green"]{--vc:var(--green)}
+
+/* ---------- CRISIS: TWO IDEAS, FULL CANVAS ---------- */
+.vduo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:stretch;min-height:360px;padding-top:8px}
+.vduo-item{position:relative;padding:34px 30px 30px;border-top:4px solid var(--vc);background:linear-gradient(180deg,rgba(245,240,234,.04),transparent 78%);display:flex;flex-direction:column;justify-content:center}
+.vduo-num{font-family:var(--disp);font-size:68px;line-height:1;color:var(--vc);opacity:.2;font-weight:700;position:absolute;right:22px;top:18px}
+.vduo-lab{font-size:12px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--vc)}
+.vduo-text{font-family:var(--disp);font-size:25px;line-height:1.22;font-weight:650;max-width:28ch;margin-top:12px}
+.vduo-item[data-c="teal"]{--vc:var(--teal)}.vduo-item[data-c="mag"]{--vc:var(--mag)}.vduo-item[data-c="sand"]{--vc:var(--sand)}
+.vduo-item[data-c="violet"]{--vc:var(--violet)}.vduo-item[data-c="green"]{--vc:var(--green)}
+
+/* ---------- THREE QUESTIONS: A REASONING ROUTE ---------- */
+.vquestions{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;align-items:center;min-height:340px;padding:20px 12px}
+.vquestions::before{content:"";position:absolute;left:14%;right:14%;top:85px;height:2px;background:linear-gradient(90deg,var(--teal),var(--sand),var(--mag));opacity:.6}
+.vq{position:relative;text-align:center;z-index:2}
+.vq-n{width:112px;height:112px;margin:0 auto 18px;border-radius:50%;border:2px solid var(--vc);background:#0b0910;display:flex;align-items:center;justify-content:center;font:700 38px/1 var(--disp);color:var(--vc);box-shadow:0 0 36px -18px var(--vc)}
+.vq-l{font-size:11.5px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--vc)}
+.vq-t{font-family:var(--disp);font-size:19px;line-height:1.27;font-weight:620;margin:8px auto 0;max-width:24ch}
+.vq[data-c="teal"]{--vc:var(--teal)}.vq[data-c="sand"]{--vc:var(--sand)}.vq[data-c="mag"]{--vc:var(--mag)}.vq[data-c="violet"]{--vc:var(--violet)}.vq[data-c="green"]{--vc:var(--green)}
+
+/* ---------- FIVE-STEP ENGINEERING FLOW ---------- */
+.vflow{position:relative;display:grid;grid-template-columns:repeat(var(--vn,5),1fr);gap:12px;align-items:start;padding:24px 10px 8px;min-height:250px}
+.vflow::before{content:"";position:absolute;left:8%;right:8%;top:71px;height:2px;background:linear-gradient(90deg,var(--mag),var(--teal),var(--sand),var(--violet),var(--green));opacity:.72}
 .vstep{position:relative;text-align:center;padding:0 9px;min-width:0}
-.vnode{width:94px;height:94px;margin:0 auto 17px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:#0d0a12;border:2px solid var(--vc);box-shadow:0 0 34px -17px var(--vc);position:relative;z-index:2}
+.vnode{width:94px;height:94px;margin:0 auto 17px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0d0a12;border:2px solid var(--vc);box-shadow:0 0 34px -17px var(--vc);position:relative;z-index:2}
 .vnode span{font-family:var(--disp);font-size:26px;font-weight:700;color:var(--vc);letter-spacing:-.02em}
 .vlab{font-family:var(--disp);font-size:13px;font-weight:700;letter-spacing:.07em;color:var(--vc);text-transform:uppercase}
-.vtxt{font-size:13.8px;line-height:1.38;color:var(--dim);margin:7px auto 0;max-width:20ch}
-.vstep[data-c="mag"]{--vc:var(--mag)}.vstep[data-c="teal"]{--vc:var(--teal)}.vstep[data-c="sand"]{--vc:var(--sand)}
-.vstep[data-c="violet"]{--vc:var(--violet)}.vstep[data-c="green"]{--vc:var(--green)}
-.vflow.compact{min-height:205px;padding-top:12px}.vflow.compact::before{top:52px}.vflow.compact .vnode{width:72px;height:72px;margin-bottom:12px}.vflow.compact .vnode span{font-size:20px}.vflow.compact .vtxt{font-size:12.8px}
+.vtxt{font-size:14.3px;line-height:1.34;color:#BFB5AC;margin:7px auto 0;max-width:19ch}
+.vstep[data-c="mag"]{--vc:var(--mag)}.vstep[data-c="teal"]{--vc:var(--teal)}.vstep[data-c="sand"]{--vc:var(--sand)}.vstep[data-c="violet"]{--vc:var(--violet)}.vstep[data-c="green"]{--vc:var(--green)}
+.vflow.compact{min-height:205px;padding-top:12px}.vflow.compact::before{top:52px}.vflow.compact .vnode{width:72px;height:72px;margin-bottom:12px}.vflow.compact .vnode span{font-size:20px}.vflow.compact .vtxt{font-size:13px}
 
-/* Dependable-programming visual: eight guardrails around one engineering idea. */
-.practice-map{display:grid;grid-template-columns:230px 1fr;gap:24px;align-items:stretch;min-height:385px}
-.practice-core{border-inline-end:1px solid var(--v2-rail);padding:18px 24px 18px 4px;display:flex;flex-direction:column;justify-content:center}
+/* ---------- AI LEARNING EFFECT ---------- */
+.ai-learning{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch;padding-top:8px}
+.ai-lane{border-top:4px solid var(--vc);padding:22px 20px;background:linear-gradient(180deg,rgba(245,240,234,.045),transparent);min-height:190px}
+.ai-lane .ai-k{font-size:11px;font-weight:850;letter-spacing:.09em;text-transform:uppercase;color:var(--vc)}
+.ai-lane .ai-big{font-family:var(--disp);font-size:22px;line-height:1.16;font-weight:680;margin-top:9px}
+.ai-lane .ai-small{font-size:15px;line-height:1.4;color:#BFB5AC;margin-top:11px}
+.ai-lane[data-c="teal"]{--vc:var(--teal)}.ai-lane[data-c="sand"]{--vc:var(--sand)}.ai-lane[data-c="mag"]{--vc:var(--mag)}
+.ai-check{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;border-top:1px solid var(--v2-rail);padding-top:18px;margin-top:2px}
+.ai-check .ai-tag{font-size:11px;font-weight:850;letter-spacing:.1em;color:var(--sand);text-transform:uppercase}
+.ai-check .ai-line{font-family:var(--disp);font-size:20px;line-height:1.3;color:var(--ink)}
+.ai-check .ai-line b{color:var(--sand)}
+
+/* ---------- READINESS TEST ---------- */
+.ready-shell{display:grid;grid-template-columns:250px 1fr;gap:28px;align-items:stretch;min-height:365px;padding-top:6px}
+.ready-score{border-inline-end:1px solid var(--v2-rail);padding:20px 28px 20px 2px;display:flex;flex-direction:column;justify-content:center}
+.ready-score .rs-k{font-size:11px;font-weight:850;letter-spacing:.11em;text-transform:uppercase;color:var(--teal)}
+.ready-score .rs-n{font:700 78px/1 var(--disp);margin-top:10px;color:var(--ink)}
+.ready-score .rs-n span{color:var(--teal)}
+.ready-score .rs-state{font-family:var(--disp);font-size:19px;line-height:1.2;font-weight:650;margin-top:10px;color:var(--sand)}
+.ready-score .rs-help{font-size:13.8px;line-height:1.4;color:#BFB5AC;margin-top:10px}
+.ready-gates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-content:center}
+.ready-gate{appearance:none!important;text-align:left!important;display:block!important;min-height:142px!important;border:1.5px solid var(--line)!important;border-radius:14px!important;background:rgba(245,240,234,.025)!important;padding:18px!important;color:var(--ink)!important;cursor:pointer!important}
+.ready-gate:hover{border-color:var(--teal)!important}.ready-gate[aria-pressed="true"]{border-color:var(--green)!important;background:rgba(79,191,139,.08)!important;box-shadow:0 0 26px -18px var(--green)!important}
+.ready-gate .rg-k{font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+.ready-gate[aria-pressed="true"] .rg-k{color:var(--green)}
+.ready-gate .rg-q{font-family:var(--disp);font-size:17px;line-height:1.24;font-weight:640;margin-top:7px}
+.ready-gate .rg-h{font-size:12.8px;line-height:1.35;color:var(--dim);margin-top:8px}
+
+/* ---------- DEPENDABLE PROGRAMMING ---------- */
+.practice-map{display:grid;grid-template-columns:225px 1fr;gap:22px;align-items:stretch;min-height:375px}
+.practice-core{border-inline-end:1px solid var(--v2-rail);padding:18px 22px 18px 4px;display:flex;flex-direction:column;justify-content:center}
 .practice-core .pc-k{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--sand);text-transform:uppercase}
 .practice-core .pc-big{font-family:var(--disp);font-size:29px;line-height:1.08;font-weight:700;margin-top:10px;color:var(--ink)}
-.practice-core .pc-sub{font-size:13.5px;line-height:1.45;color:var(--dim);margin-top:11px}
-.practice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 22px;align-content:center}
-.practice-item{display:grid;grid-template-columns:42px 1fr;gap:11px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.practice-core .pc-sub{font-size:13.5px;line-height:1.42;color:var(--dim);margin-top:11px}
+.practice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 20px;align-content:center}
+.practice-item{display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:start;padding:9px 0;border-bottom:1px solid var(--line)}
 .practice-item:nth-last-child(-n+2){border-bottom:0}
 .practice-item .pn{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--pc);line-height:1.2}
-.practice-item .pt{font-size:13.6px;font-weight:700;line-height:1.25;color:var(--ink)}
-.practice-item .px{font-size:11.7px;line-height:1.35;color:var(--dim);margin-top:3px}
-.practice-item .ps{font-size:9.5px;color:var(--dim2);margin-top:3px;letter-spacing:.03em}
+.practice-item .pt{font-size:13.7px;font-weight:700;line-height:1.25;color:var(--ink)}
+.practice-item .px{font-size:11.8px;line-height:1.32;color:var(--dim);margin-top:3px}
+.practice-item .ps{display:none}
 .practice-item:nth-child(5n+1){--pc:var(--mag)}.practice-item:nth-child(5n+2){--pc:var(--teal)}.practice-item:nth-child(5n+3){--pc:var(--sand)}.practice-item:nth-child(5n+4){--pc:var(--violet)}.practice-item:nth-child(5n+5){--pc:var(--green)}
-.practice-transfer{grid-column:1/-1;border-top:1px solid var(--v2-rail);padding-top:10px;margin-top:6px;font-size:12.6px;color:var(--sand);text-align:center}
+.practice-transfer{grid-column:1/-1;border-top:1px solid var(--v2-rail);padding-top:10px;margin-top:5px;font-size:12.7px;color:var(--sand);text-align:center}
 
-/* Path reflection becomes a route map, not a dashboard. */
-.pm{gap:11px!important;position:relative;padding:4px 0}
-.fork{border:0!important;background:transparent!important;border-radius:0!important;padding:10px 0 10px 26px!important;
-  grid-template-columns:110px 1fr!important;position:relative}
-.fork::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(var(--sand),rgba(221,178,126,.12))}
-.fork::after{content:"";position:absolute;left:2px;top:24px;width:14px;height:14px;border-radius:50%;background:var(--sand);box-shadow:0 0 18px -4px var(--sand)}
-.fork .at{font-size:15px!important}.fork .at span{font-size:9px!important}
-.arms{gap:7px!important}.arm{font-size:13.1px!important;grid-template-columns:18px 1fr auto!important}
-.arm .to{background:transparent!important;border-radius:999px!important;padding:3px 10px!important}
-.pmfoot{border-top:1px solid var(--line);padding-top:13px;margin-top:3px;gap:0!important}
-.pmf{border:0!important;background:transparent!important;border-radius:0!important;padding:5px 12px!important;border-inline-end:1px solid var(--line)!important}
-.pmf:last-child{border-inline-end:0!important}.pmf .n{font-size:29px!important}.pmf .l{font-size:9px!important}
-.pmnote{font-size:11.2px!important;margin-top:5px}
+/* ---------- PATH REFLECTION ---------- */
+.pm{gap:10px!important;position:relative;padding:4px 0}.fork{border:0!important;background:transparent!important;border-radius:0!important;padding:9px 0 9px 26px!important;grid-template-columns:110px 1fr!important;position:relative}
+.fork::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(var(--sand),rgba(221,178,126,.12))}.fork::after{content:"";position:absolute;left:2px;top:23px;width:14px;height:14px;border-radius:50%;background:var(--sand);box-shadow:0 0 18px -4px var(--sand)}
+.fork .at{font-size:15px!important}.fork .at span{font-size:9px!important}.arms{gap:6px!important}.arm{font-size:13.2px!important;grid-template-columns:18px 1fr auto!important}.arm .to{background:transparent!important;border-radius:999px!important;padding:3px 10px!important}
+.pmfoot{border-top:1px solid var(--line);padding-top:12px;margin-top:2px;gap:0!important}.pmf{border:0!important;background:transparent!important;border-radius:0!important;padding:5px 12px!important;border-inline-end:1px solid var(--line)!important}.pmf:last-child{border-inline-end:0!important}.pmf .n{font-size:28px!important}.pmf .l{font-size:9px!important}.pmnote{font-size:11.2px!important;margin-top:4px}
 
-/* The source ledger is a ledger; keep structure but remove the card-stack feel. */
-.cvr{background:transparent!important;border-width:0 0 1px!important;border-radius:0!important;padding:8px 5px!important;grid-template-columns:54px 1fr 150px 106px!important}
-.cvr[data-s="taught"],.cvr[data-s="touched"],.cvr[data-s="open"]{box-shadow:none!important}
-.cov{gap:0!important}
+/* ---------- LEDGER / TABLES ---------- */
+.cvr{background:transparent!important;border-width:0 0 1px!important;border-radius:0!important;padding:7px 5px!important;grid-template-columns:54px 1fr 150px 106px!important}.cvr[data-s="taught"],.cvr[data-s="touched"],.cvr[data-s="open"]{box-shadow:none!important}.cov{gap:0!important}
+.cmp{border-collapse:collapse!important;border-spacing:0!important}.cmp td{background:transparent!important;border-width:0 0 1px!important;border-color:var(--line)!important;border-radius:0!important;padding:9px 13px!important}.cmp th{padding:0 13px 7px!important}
 
-/* Comparison tables read like tables, not nested cards. */
-.cmp{border-collapse:collapse!important;border-spacing:0!important}
-.cmp td{background:transparent!important;border-width:0 0 1px!important;border-color:var(--line)!important;border-radius:0!important;padding:9px 13px!important}
-.cmp th{padding:0 13px 7px!important}
+/* ---------- CLOSING ---------- */
+.slide[data-vend="1"] .grid.g5{display:none!important}.slide[data-vend="1"] .area{justify-content:center!important}.slide[data-vend="1"] h2{font-size:50px!important}
 
-/* Closing: keep the five colours but present a compact route. */
-.slide[data-vend="1"] .grid.g5{display:none!important}
-.slide[data-vend="1"] .area{justify-content:center!important}
-.slide[data-vend="1"] h2{font-size:50px!important}
-
-/* Mobile projector / phone landscape: preserve the visual hierarchy. */
+/* Avoid browser clipping on unusual aspect ratios: shrink hierarchy, never crop text. */
+@media (max-height:720px){
+  .slide{padding-top:20px!important;padding-bottom:22px!important}
+  h1{font-size:36px!important}.sub{font-size:15px!important}.area{gap:11px!important;padding-top:10px!important}
+  .card .lead{font-size:15.8px!important}.card .txt{font-size:14.7px!important}.principle{font-size:17px!important}
+  .vduo{min-height:300px}.vduo-text{font-size:21px}.vquestions{min-height:290px}.vq-n{width:92px;height:92px;font-size:32px}.vquestions::before{top:75px}.vq-t{font-size:17px}
+  .ready-shell{min-height:320px}.ready-gate{min-height:118px!important}.ready-gate .rg-q{font-size:15.5px}.ready-gate .rg-h{font-size:11.7px}.ready-score .rs-n{font-size:64px}
+  .ai-lane{min-height:165px;padding:17px}.ai-lane .ai-big{font-size:19px}.ai-lane .ai-small{font-size:13.6px}.ai-check .ai-line{font-size:17.5px}
+}
 @media (max-width:980px){
-  .slide{padding:18px 26px 18px!important}h1{font-size:32px!important}.sub{font-size:14px!important}
+  .slide{padding:18px 27px 18px!important}h1{font-size:32px!important}.sub{font-size:14px!important}
+  .card .lead{font-size:14.6px!important}.card .txt{font-size:13.8px!important}
   .practice-map{grid-template-columns:180px 1fr;gap:16px}.practice-core .pc-big{font-size:24px}.practice-item .pt{font-size:12.4px}.practice-item .px{font-size:10.8px}
   .vnode{width:78px;height:78px}.vflow::before{top:63px}.vtxt{font-size:12.4px}
+  .ready-shell{grid-template-columns:190px 1fr;gap:18px}.ready-score .rs-n{font-size:58px}.ready-gate{min-height:112px!important;padding:13px!important}.ready-gate .rg-q{font-size:14px}.ready-gate .rg-h{font-size:11px}
 }
