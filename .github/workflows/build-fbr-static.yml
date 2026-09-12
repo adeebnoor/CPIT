@@ -1,23 +1,17 @@
-name: Build FBR static split-delivery pages
+name: Release reviewed Chapter 10
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'tools/build-fbr-static.mjs'
-      - 'lectures/iscarb/Ch10-Dependable-Systems.html'
-      - 'lectures/iscarb/Ch11-Reliability-Engineering.html'
-      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
-      - 'lectures/iscarb/split/ch10-faculty.patch.*.txt'
-      - 'lectures/iscarb/split/ch11-faculty.patch.*.txt'
-      - '.github/ch10-final-patch-part-*.txt'
+      - '.github/ch10-final-patch-part-6.txt'
       - '.github/workflows/build-fbr-static.yml'
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,89 +19,107 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Reconstruct and apply reviewed Chapter 10 patch
+      - name: Apply exact reviewed Chapter 10 patch
         shell: bash
         run: |
           set -euo pipefail
-          echo "Baseline blob: $(git hash-object lectures/iscarb/Ch10-Dependable-Systems.html)"
+          test "$(git hash-object lectures/iscarb/Ch10-Dependable-Systems.html)" = "dd21c194cbde453eb2e438aa9ca66bff7565f2d4"
           cat .github/ch10-final-patch-part-{1,2,3,4,5,6}.txt | tr -d '\r\n' > /tmp/ch10.patch.xz.b64
-          echo "Payload bytes: $(wc -c < /tmp/ch10.patch.xz.b64)"
+          test "$(wc -c < /tmp/ch10.patch.xz.b64 | tr -d ' ')" = "22280"
           base64 -d /tmp/ch10.patch.xz.b64 | xz -d > /tmp/ch10.patch
-          echo "Patch bytes: $(wc -c < /tmp/ch10.patch)"
+          test "$(wc -c < /tmp/ch10.patch | tr -d ' ')" = "56586"
           git apply --check /tmp/ch10.patch
           git apply /tmp/ch10.patch
-          echo "Applied Chapter 10 blob: $(git hash-object lectures/iscarb/Ch10-Dependable-Systems.html)"
+          test "$(git hash-object lectures/iscarb/Ch10-Dependable-Systems.html)" = "85c9517759dc5ad9ceb433913d225e65e1ba4e27"
 
-      - name: Point presenter to visual6
+      - name: Point presenter to reviewed lecture
         shell: python
         run: |
           from pathlib import Path
           import re
           p=Path('lectures/iscarb/InClass-Presenter.html')
           s=p.read_text(encoding='utf-8')
-          s2,n=re.subn(r'Ch10-Dependable-Systems\.html\?v=20260912-visual\d+', 'Ch10-Dependable-Systems.html?v=20260912-visual6', s)
+          s2,n=re.subn(r'Ch10-Dependable-Systems\.html\?v=20260912-visual\d+', 'Ch10-Dependable-Systems.html?v=20260913-final100', s)
           if n != 1:
               raise SystemExit(f'Expected exactly one Ch10 presenter URL, found {n}')
           p.write_text(s2,encoding='utf-8')
 
-      - name: Validate reviewed lecture source
+      - name: Validate exact classroom fixes
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq "title:'Five outcomes you must prove'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'Six engineering capabilities'" lectures/iscarb/Ch10-Dependable-Systems.html
+          grep -Fq "title:'Scaffold first, then transfer'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'Stress-test your verdict'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'AI in the assurance chain'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'ETEC IT 2025 · Standards-aligned practice'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'What we covered — and what comes next'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'Ready for After-Class?'" lectures/iscarb/Ch10-Dependable-Systems.html
           grep -Fq "title:'Your learning route this session'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "Ch10-Dependable-Systems.html?v=20260912-visual6" lectures/iscarb/InClass-Presenter.html
+          grep -Fq "Ch10-Dependable-Systems.html?v=20260913-final100" lectures/iscarb/InClass-Presenter.html
           python - <<'PY'
           from pathlib import Path
           import re
           s=Path('lectures/iscarb/Ch10-Dependable-Systems.html').read_text(encoding='utf-8')
           blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S|re.I)
-          if not blocks: raise SystemExit('No inline script found')
           Path('/tmp/ch10-inline.js').write_text('\n'.join(blocks),encoding='utf-8')
           PY
           node --check /tmp/ch10-inline.js
 
-      - name: Generate self-contained public pages
-        run: node tools/build-fbr-static.mjs
-
-      - name: Verify generated pages
+      - name: Restore stable build workflow and commit reviewed release
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -q "DecompressionStream" lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
-          ! grep -q "DecompressionStream" lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
-          ! grep -q "fetch('./Ch10-FBR-Student-Assignment.html" lectures/iscarb/Ch11-FBR-Student-Assignment.html
-          grep -q 'meta name="fbr-delivery" content="faculty-lane"' lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
-          grep -q 'meta name="fbr-delivery" content="faculty-lane"' lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
+          cat > .github/workflows/build-fbr-static.yml <<'YAML'
+          name: Build FBR static split-delivery pages
 
-      - name: Commit final reviewed Chapter 10 release and clean temporary files
-        shell: bash
-        run: |
-          set -euo pipefail
-          git show a5544e0e4e96e2c290b16bd237aba7acc69f7ad5:.github/workflows/build-fbr-static.yml > .github/workflows/build-fbr-static.yml
+          on:
+            workflow_dispatch:
+            push:
+              paths:
+                - 'tools/build-fbr-static.mjs'
+                - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+                - 'lectures/iscarb/split/ch10-faculty.patch.*.txt'
+                - 'lectures/iscarb/split/ch11-faculty.patch.*.txt'
+
+          permissions:
+            contents: write
+
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Checkout
+                  uses: actions/checkout@v4
+                  with:
+                    fetch-depth: 0
+                - name: Generate self-contained public pages
+                  run: node tools/build-fbr-static.mjs
+                - name: Verify no runtime split loaders remain
+                  shell: bash
+                  run: |
+                    set -euo pipefail
+                    ! grep -q "DecompressionStream" lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
+                    ! grep -q "DecompressionStream" lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
+                    ! grep -q "fetch('./Ch10-FBR-Student-Assignment.html" lectures/iscarb/Ch11-FBR-Student-Assignment.html
+                    grep -q 'meta name="fbr-delivery" content="faculty-lane"' lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
+                    grep -q 'meta name="fbr-delivery" content="faculty-lane"' lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
+                - name: Commit generated pages
+                  shell: bash
+                  run: |
+                    set -euo pipefail
+                    git add lectures/iscarb/Ch10-Dependable-Systems-Faculty.html lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html lectures/iscarb/Ch11-FBR-Student-Assignment.html
+                    if git diff --cached --quiet; then exit 0; fi
+                    git config user.name "github-actions[bot]"
+                    git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                    git commit -m "Build self-contained FBR split-delivery pages"
+                    git push
+          YAML
           rm -f .github/workflows/apply-ch10-final-reviewed.yml
           rm -f .github/ch10-final-patch-part-{1,2,3,4,5,6}.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A \
-            lectures/iscarb/Ch10-Dependable-Systems.html \
-            lectures/iscarb/InClass-Presenter.html \
-            lectures/iscarb/Ch10-Dependable-Systems-Faculty.html \
-            lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html \
-            lectures/iscarb/Ch11-FBR-Student-Assignment.html \
-            .github/workflows/build-fbr-static.yml \
-            .github/workflows/apply-ch10-final-reviewed.yml \
-            .github/ch10-final-patch-part-1.txt \
-            .github/ch10-final-patch-part-2.txt \
-            .github/ch10-final-patch-part-3.txt \
-            .github/ch10-final-patch-part-4.txt \
-            .github/ch10-final-patch-part-5.txt \
-            .github/ch10-final-patch-part-6.txt
-          git commit -m "Polish Chapter 10 classroom lecture"
+          git add -A lectures/iscarb/Ch10-Dependable-Systems.html lectures/iscarb/InClass-Presenter.html .github/workflows/build-fbr-static.yml .github/workflows/apply-ch10-final-reviewed.yml .github/ch10-final-patch-part-1.txt .github/ch10-final-patch-part-2.txt .github/ch10-final-patch-part-3.txt .github/ch10-final-patch-part-4.txt .github/ch10-final-patch-part-5.txt .github/ch10-final-patch-part-6.txt
+          git commit -m "Release final reviewed Chapter 10 classroom lecture"
           git push origin HEAD:main
