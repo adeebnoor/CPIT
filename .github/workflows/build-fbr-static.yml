@@ -10,6 +10,7 @@ on:
       - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
       - 'lectures/iscarb/split/ch10-faculty.patch.*.txt'
       - 'lectures/iscarb/split/ch11-faculty.patch.*.txt'
+      - '.github/ch10-final-patch-part-*.txt'
       - '.github/workflows/build-fbr-static.yml'
 
 permissions:
