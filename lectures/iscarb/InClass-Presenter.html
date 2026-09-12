@@ -20,7 +20,7 @@ button{appearance:none;border:1px solid var(--line);border-radius:12px;backgroun
 <script src="inclass-visual-v4.js?v=20260912-visual5"></script>
 <script>
 const q=new URLSearchParams(location.search),ch=q.get('chapter')==='11'?'11':'10';
-const cfg=ch==='11'?{src:'Ch11-Reliability-Engineering.html?v=20260912-visual5',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'}:{src:'Ch10-Dependable-Systems.html?v=20260912-visual5',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'};
+const cfg=ch==='11'?{src:'Ch11-Reliability-Engineering.html?v=20260912-visual5',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'}:{src:'Ch10-Dependable-Systems.html?v=20260913-final100',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'};
 const frame=document.getElementById('lecture'),status=document.getElementById('status');document.getElementById('title').textContent='ISCARB · '+cfg.title;document.getElementById('studentTask').href=cfg.assignment;frame.src=cfg.src;
 let wired=false,ready=false,focus=[],specialByIndex={},enhanced=false;window.__facultyFocus=null;
 function cw(){try{return frame.contentWindow}catch(e){return null}}
