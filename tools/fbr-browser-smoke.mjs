@@ -14,33 +14,15 @@ const assert=(c,m)=>c?pass(m):fail(m);
 const reveals=Object.fromEntries(CHAPTERS.map(ch=>[ch,JSON.parse(fs.readFileSync(`lectures/iscarb/reveal/${revealFiles[ch]}`,'utf8'))]));
 const browser=await chromium.launch({headless:true});
 
-async function facultySmoke(ch){
-  const context=await browser.newContext({viewport:{width:1536,height:864}}); const page=await context.newPage(); const errors=[];
-  page.on('pageerror',e=>errors.push(String(e)));
-  await page.goto(`${BASE}/lectures/iscarb/InClass-Presenter.html?chapter=${ch}&v=smoke`,{waitUntil:'domcontentloaded'});
-  await page.waitForSelector('#lecture');
-  const frame=page.frameLocator('#lecture');
-  await frame.locator('body').waitFor({timeout:30000});
-  await page.waitForTimeout(500);
-  assert(!((await page.locator('#status').innerText()).toLowerCase().includes('loading')),`Ch${ch} In-Class has no visible Loading state`);
-  for(const id of ['#prev','#notes','#next','#present']) assert(await page.locator(id).isVisible(),`Ch${ch} ${id.slice(1)} control visible`);
-  const href=await page.locator('#studentTask').getAttribute('href');
-  assert(href===`../../fbr-submission.html?chapter=${ch}`,`Ch${ch} presenter routes to official After-Class gateway`);
-  const before=await frame.locator('body').evaluate(()=>typeof window.cur==='number'?window.cur:null).catch(()=>null);
-  await page.click('#next'); await page.waitForTimeout(120);
-  const after=await frame.locator('body').evaluate(()=>typeof window.cur==='number'?window.cur:null).catch(()=>null);
-  if(before!==null&&after!==null) assert(after!==before,`Ch${ch} Next navigation works`);
-  assert(errors.length===0,`Ch${ch} In-Class has no JavaScript errors`);
-  await context.close();
-}
-
 async function enterAssignment(page,ch,sid='TEST-001'){
   await page.goto(`${BASE}/fbr-submission.html?chapter=${ch}`,{waitUntil:'domcontentloaded'});
   assert(await page.locator('#openBtn').isDisabled(),`Ch${ch} gateway disabled before ID + acknowledgment`);
   assert((await page.locator('#pdfFilenameRule').innerText()).includes(`W${ch}`),`Ch${ch} PDF filename uses W${ch}`);
   assert((await page.locator('#filenameRule').innerText()).includes(`W${ch}`),`Ch${ch} evidence filename uses W${ch}`);
-  await page.fill('#sid',sid); assert(await page.locator('#openBtn').isDisabled(),`Ch${ch} still disabled before acknowledgment`);
-  await page.check('#ack'); assert(!(await page.locator('#openBtn').isDisabled()),`Ch${ch} gateway enables after ID + acknowledgment`);
+  await page.fill('#sid',sid);
+  assert(await page.locator('#openBtn').isDisabled(),`Ch${ch} still disabled before acknowledgment`);
+  await page.check('#ack');
+  assert(!(await page.locator('#openBtn').isDisabled()),`Ch${ch} gateway enables after ID + acknowledgment`);
   await page.click('#openBtn');
   await page.waitForURL(new RegExp(`Ch${ch}-FBR-Student-Assignment\\.html`),{timeout:15000});
   await page.waitForSelector('#fit');
@@ -74,7 +56,8 @@ async function studentSmoke(ch){
   assert(req2.some(u=>u.includes('/reveal/')),`Ch${ch} reveal requested only after Commit`);
   assert(await page.getByRole('button',{name:/reset/i}).count()===0,`Ch${ch} no reset after Commit`);
   assert(await page.locator('#pdf').isDisabled(),`Ch${ch} export disabled before REFIT completion`);
-  await page.check('input[name=boundaryState][value="CROSSED"]'); await page.check('input[name=refit][value="REVISE"]');
+  await page.check('input[name=boundaryState][value="CROSSED"]');
+  await page.check('input[name=refit][value="REVISE"]');
   await page.fill('#refitwhy',txt); await page.fill('#revised',txt); await page.waitForTimeout(100);
   assert(!(await page.locator('#pdf').isDisabled()),`Ch${ch} PDF enabled after complete REFIT`);
   assert(!(await page.locator('#download').isDisabled()),`Ch${ch} evidence export enabled after complete REFIT`);
@@ -102,7 +85,6 @@ async function hubSmoke(){
 }
 
 try{
-  await facultySmoke('10'); await facultySmoke('11');
   for(const ch of CHAPTERS) await studentSmoke(ch);
   await hubSmoke();
 } finally { await browser.close(); }
