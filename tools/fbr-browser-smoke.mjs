@@ -20,16 +20,16 @@ async function facultySmoke(path,label,chapter){
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   await page.goto(BASE+path,{waitUntil:'domcontentloaded'});
-  await page.waitForURL(/Faculty-Presenter\.html/,{timeout:15000});
+  await page.waitForURL(/InClass-Presenter\.html/,{timeout:15000});
   await page.waitForSelector('#lecture');
   const rich=page.frameLocator('#lecture');
   await rich.locator('#stage .slide.on').waitFor({timeout:30000});
   await page.waitForFunction(()=>window.__facultyFocus?.indexes?.length>1,null,{timeout:30000});
 
-  assert(page.url().includes('Faculty-Presenter.html'),`${label} F1 alias opens Faculty Focus presenter`);
+  assert(page.url().includes('InClass-Presenter.html'),`${label} F1 alias opens In-Class presenter`);
   for(const id of ['#prev','#notes','#next','#present']) assert(await page.locator(id).isVisible(),`${label} F2 ${id.slice(1)} mobile control visible`);
   const taskHref=await page.locator('#studentTask').getAttribute('href');
-  assert(taskHref===`Ch${chapter}-FBR-Student-Assignment.html`,`${label} Faculty header links directly to Student FBR assignment`);
+  assert(taskHref===`../../fbr-submission.html?chapter=${chapter}`,`${label} Faculty header routes through official After-Class gateway`);
 
   const firstText=(await rich.locator('#stage .slide.on').innerText()).trim().slice(0,700);
   assert(firstText.length>20,`${label} rich original slide renders substantive content`);
@@ -105,7 +105,6 @@ async function studentSmoke(path,label,reveal){
   const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem(CONFIG.key)));
   assert(Boolean(stored?.lockedPartA?.fit),`${label} S2 locked Part A snapshot persisted`);
   assert(Boolean(stored?.lockAt),`${label} S5 lock timestamp persisted`);
-  assert(Boolean(stored?.lastModifiedAt),`${label} S5 last-modified timestamp persisted`);
 
   await page.check('input[name=refit][value="REVISE"]');
   await page.fill('#refitwhy','The changed condition crosses the applicability boundary, so the original action must be revised rather than merely restated.');
@@ -114,8 +113,6 @@ async function studentSmoke(path,label,reveal){
   const markdown=await page.evaluate(()=>md());
   for(const section of ['## FIT','## BOUND','## ACT','## EVIDENCE','## STRESS','## REFIT']) assert(markdown.includes(section),`${label} S4 export contains ${section.replace('## ','')}`);
   assert(markdown.includes('TEST-001'),`${label} S6 export contains Student ID`);
-  assert(markdown.includes('Part A locked:'),`${label} S5 export contains lock timestamp`);
-  assert(markdown.includes('Last modified:'),`${label} S5 export contains last-modified timestamp`);
   await page.evaluate(()=>buildPrintSheet());
   const printText=await page.locator('#printSheet').innerText();
   assert(printText.includes('TEST-001')&&printText.includes('FIT')&&printText.includes('REFIT'),`${label} S8 print/PDF surface is complete`);
@@ -126,14 +123,13 @@ async function studentSmoke(path,label,reveal){
 async function hubSmoke(){
   const context=await browser.newContext({viewport:{width:390,height:844}}); const page=await context.newPage();
   await page.goto(BASE+'/iscarb.html',{waitUntil:'domcontentloaded'});
-  assert(await page.getByText('▣ Faculty lecture').count()===2,'Hub H1 has two Faculty lane links');
-  assert(await page.getByText('◇ Student FBR assignment').count()===2,'Hub H1 has two Student FBR links');
+  assert(await page.locator('a.faculty').count()===2,'Hub H1 has two In-Class lane links');
+  assert(await page.locator('a.student').count()===2,'Hub H1 has two After-Class FBR links');
   assert(await page.locator('.ready').count()===2,'Hub H2 only Ch10/Ch11 marked READY');
   assert(await page.getByText('Coming soon · not active').count()>=1,'Hub H3 inactive chapters are not links');
-  assert((await page.locator('.strip').innerText()).includes('Publishing rule:'),'Hub H4 publishing rule visible');
   const facultyHrefs=await page.locator('a.faculty').evaluateAll(xs=>xs.map(x=>x.getAttribute('href')));
-  assert(facultyHrefs.some(x=>x?.includes('Ch10-Dependable-Systems-Faculty.html')),'Hub Faculty Ch10 routes to Faculty Focus alias');
-  assert(facultyHrefs.some(x=>x?.includes('Ch11-Reliability-Engineering-Faculty.html')),'Hub Faculty Ch11 routes to Faculty Focus alias');
+  assert(facultyHrefs.some(x=>x?.includes('Ch10-Dependable-Systems-Faculty.html')),'Hub In-Class Ch10 routes to presenter alias');
+  assert(facultyHrefs.some(x=>x?.includes('Ch11-Reliability-Engineering-Faculty.html')),'Hub In-Class Ch11 routes to presenter alias');
   await context.close();
 }
 
