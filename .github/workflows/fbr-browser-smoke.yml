@@ -5,20 +5,12 @@ on:
   push:
     branches: [main]
     paths:
+      - 'fbr-submission.html'
       - 'iscarb.html'
-      - 'lectures/iscarb/Ch10-Dependable-Systems.html'
-      - 'lectures/iscarb/Ch11-Reliability-Engineering.html'
-      - 'lectures/iscarb/Ch10-Dependable-Systems-Faculty.html'
-      - 'lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html'
-      - 'lectures/iscarb/Ch10-Dependable-Systems-Faculty-Rich.html'
-      - 'lectures/iscarb/Ch11-Reliability-Engineering-Faculty-Rich.html'
-      - 'lectures/iscarb/Faculty-Presenter.html'
-      - 'lectures/iscarb/split/**'
-      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
-      - 'lectures/iscarb/Ch11-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/InClass-Presenter.html'
+      - 'lectures/iscarb/Ch*-FBR-Student-Assignment.html'
       - 'lectures/iscarb/reveal/**'
       - 'tools/fbr-browser-smoke.mjs'
-      - '.github/workflows/static.yml'
       - '.github/workflows/fbr-browser-smoke.yml'
 
 permissions:
@@ -27,7 +19,7 @@ permissions:
 jobs:
   chromium-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
