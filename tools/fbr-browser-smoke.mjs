@@ -126,7 +126,7 @@ async function studentSmoke(chapter,label,reveal){
   const markdown=await page.evaluate(()=>md());
   for(const section of ['## FIT','## BOUND','## ACT','## EVIDENCE','## STRESS','## Boundary status','## REFIT']) assert(markdown.includes(section),`${label} S4 export contains ${section.replace('## ','')}`);
   assert(markdown.includes('TEST-001'),`${label} S6 export contains Student ID`);
-  await page.evaluate(()=>buildPrintSheet());
+  await page.evaluate(()=>printSheet());
   const printText=await page.locator('#print').innerText();
   assert(printText.includes('TEST-001')&&printText.includes('FIT')&&printText.includes('REFIT'),`${label} S8 print/PDF surface is complete`);
   assert([...errors,...reopenedErrors].length===0,`${label} no page JavaScript errors in Chromium`);
