@@ -18,8 +18,14 @@ jobs:
           fetch-depth: 0
       - name: Restore visual lecture files
         run: |
-          base64 -d .tmp/visual_lectures_12_20.tar.xz.b64 > /tmp/lectures.tar.xz
-          tar -xJf /tmp/lectures.tar.xz -C lectures/iscarb
+          python - <<'PY'
+          import base64, io, lzma, tarfile
+          from pathlib import Path
+          raw = base64.b64decode(Path('.tmp/visual_lectures_12_20.tar.xz.b64').read_text())
+          data = lzma.decompress(raw)
+          with tarfile.open(fileobj=io.BytesIO(data), mode='r:') as tf:
+              tf.extractall('lectures/iscarb')
+          PY
       - name: Commit visual lectures
         run: |
           git config user.name "Prof. Adeeb Noor"
