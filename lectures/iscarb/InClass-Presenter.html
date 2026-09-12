@@ -19,8 +19,19 @@ button{appearance:none;border:1px solid var(--line);border-radius:12px;backgroun
 <script src="inclass-visual-v2.js?v=20260912-visual3"></script>
 <script src="inclass-visual-v4.js?v=20260912-visual5"></script>
 <script>
-const q=new URLSearchParams(location.search),ch=q.get('chapter')==='11'?'11':'10';
-const cfg=ch==='11'?{src:'Ch11-Reliability-Engineering.html?v=20260912-visual5',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'}:{src:'Ch10-Dependable-Systems.html?v=20260913-final100',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'};
+const q=new URLSearchParams(location.search),ch=q.get('chapter')||'10';
+const MAP={
+ '10':{src:'Ch10-Dependable-Systems-Final100.html?v=20260913-final100',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'},
+ '11':{src:'Ch11-Reliability-Engineering-Final100.html?v=20260913-final100',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'},
+ '12':{src:'Ch12-Safety-Engineering.html?v=20260913-final100',title:'Safety Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=12'},
+ '13':{src:'Ch13-Security-Engineering.html?v=20260913-final100',title:'Security Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=13'},
+ '14':{src:'Ch14-Resilience-Engineering.html?v=20260913-final100',title:'Resilience Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=14'},
+ '15':{src:'Ch15-Software-Reuse.html?v=20260913-final100',title:'Software Reuse · In-Class',assignment:'../../fbr-submission.html?chapter=15'},
+ '16':{src:'Ch16-Component-Based-Software-Engineering.html?v=20260913-final100',title:'Component-Based Software Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=16'},
+ '17':{src:'Ch17-Distributed-Software-Engineering.html?v=20260913-final100',title:'Distributed Software Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=17'},
+ '20':{src:'Ch20-Systems-of-Systems.html?v=20260913-final100',title:'Systems of Systems · In-Class',assignment:'../../fbr-submission.html?chapter=20'}
+};
+const cfg=MAP[ch]||MAP['10'];
 const frame=document.getElementById('lecture'),status=document.getElementById('status');document.getElementById('title').textContent='ISCARB · '+cfg.title;document.getElementById('studentTask').href=cfg.assignment;frame.src=cfg.src;
 let wired=false,ready=false,focus=[],specialByIndex={},enhanced=false;window.__facultyFocus=null;
 function cw(){try{return frame.contentWindow}catch(e){return null}}
@@ -29,7 +40,7 @@ function classify(slide,u){const all=combined(slide,u);if(/CRISIS|HOOK/.test(all
 function hasWriting(slide){return !!slide?.querySelector('textarea,[contenteditable="true"],select,input[type="text"],input[type="search"],input[type="email"],input[type="number"],input[type="url"],input[type="tel"],input[type="date"],input[type="time"],input:not([type])')}
 function heavy(slide,u){const all=combined(slide,u);return hasWriting(slide)||/WORKSHOP|DECISION CARD|RUBRIC|READINESS|CAPABILITY LADDER|PORTFOLIO EVIDENCE|EVIDENCE CHECKLIST/.test(all)}
 function cueFor(t){return t==='crisis'?'VERBAL ONLY · 1–2 MIN':t==='fit'?'VERBAL FIT JUDGMENT · 2–3 MIN':t==='stress'?'SPOKEN REFIT DEMO · NO SUBMISSION':t==='assignment'?'LAUNCH ONLY · WRITTEN WORK AFTER CLASS':''}
-function enhance(){if(enhanced)return true;try{if(ch==='10'){enhanced=true;return true}if(!window.ISCARBVisualV2?.apply(frame,ch))return false;if(!window.ISCARBVisualV4?.apply(frame,ch))return false;enhanced=true;return true}catch(e){status.textContent='Visual layer error';return false}}
+function enhance(){enhanced=true;return true}
 function buildFocus(){const w=cw(),d=w?.document;if(!w||!d||!Array.isArray(w.U))return false;enhance();const slides=[...d.querySelectorAll('#stage .slide')];if(!slides.length)return false;focus=[];specialByIndex={};slides.forEach((s,i)=>{const u=w.U[i],type=classify(s,u);if(type)specialByIndex[i]=type;const force=['R13','R15','J02','R20'].includes(u?.k);const keep=i===0||i===slides.length-1||force||!!type||!heavy(s,u);if(keep)focus.push(i)});if(focus.length<2)focus=slides.map((_,i)=>i);
  let style=d.getElementById('facultyFocusStyle');if(!style){style=d.createElement('style');style.id='facultyFocusStyle';d.head.appendChild(style)}style.textContent='textarea,[contenteditable="true"],select,input[type="text"],input[type="search"],input[type="email"],input[type="number"],input[type="url"],input[type="tel"],input[type="date"],input[type="time"],input:not([type]){display:none!important}.faculty-focus-cue{position:absolute;top:19px;right:36px;z-index:30;padding:7px 10px;border:1px solid rgba(221,178,126,.72);border-radius:999px;background:rgba(8,7,12,.88);color:#F0D6AE;font:800 10px/1.1 Inter,Arial,sans-serif;letter-spacing:.055em;text-transform:uppercase;box-shadow:0 6px 22px rgba(0,0,0,.24)}';
  d.body.dataset.facultyFocus='true';Object.entries(specialByIndex).forEach(([k,t])=>{const s=slides[+k];if(!s||s.querySelector('.faculty-focus-cue'))return;const e=d.createElement('div');e.className='faculty-focus-cue';e.textContent=cueFor(t);s.appendChild(e)});window.__facultyFocus={indexes:[...focus],rawCount:slides.length,special:{...specialByIndex},chapter:ch};return true}
