@@ -27,6 +27,7 @@ async function facultySmoke(path,label,chapter){
   await page.waitForFunction(()=>window.__facultyFocus?.indexes?.length>1,null,{timeout:30000});
 
   assert(page.url().includes('InClass-Presenter.html'),`${label} F1 direct In-Class presenter opens`);
+  assert(!((await page.locator('#status').innerText()).toLowerCase().includes('loading')),`${label} F1 presenter shows no visible Loading state`);
   for(const id of ['#prev','#notes','#next','#present']) assert(await page.locator(id).isVisible(),`${label} F2 ${id.slice(1)} mobile control visible`);
   const taskHref=await page.locator('#studentTask').getAttribute('href');
   assert(taskHref===`../../fbr-submission.html?chapter=${chapter}`,`${label} presenter routes through official After-Class gateway`);
@@ -75,6 +76,7 @@ async function facultyDesktopSmoke(path,label){
   const rich=page.frameLocator('#lecture');
   await rich.locator('#stage .slide.on').waitFor({timeout:30000});
   await page.waitForFunction(()=>window.__facultyFocus?.indexes?.length>1,null,{timeout:30000});
+  assert(!((await page.locator('#status').innerText()).toLowerCase().includes('loading')),`${label} desktop presenter shows no visible Loading state`);
   const box=await page.locator('#lecture').boundingBox();
   assert(Boolean(box&&box.width>=1450&&box.height>=700),`${label} desktop classroom viewport uses large projection surface`);
   const before=await rich.locator('body').evaluate(()=>window.cur);
