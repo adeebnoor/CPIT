@@ -1,16 +1,19 @@
-name: Release reviewed Chapter 10
+name: Build FBR static split-delivery pages
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - '.github/workflows/build-fbr-static.yml'
+      - 'tools/build-fbr-static.mjs'
+      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/split/ch10-faculty.patch.*.txt'
+      - 'lectures/iscarb/split/ch11-faculty.patch.*.txt'
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,60 +21,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply exact reviewed Chapter 10 patch
+      - name: Generate self-contained public pages
+        run: node tools/build-fbr-static.mjs
+
+      - name: Verify no runtime split loaders remain
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object lectures/iscarb/Ch10-Dependable-Systems.html)" = "dd21c194cbde453eb2e438aa9ca66bff7565f2d4"
-          cat .github/ch10-final-patch-part-{1,2,3,4,5,6}.txt | tr -d '\r\n' > /tmp/ch10.patch.xz.b64
-          test "$(wc -c < /tmp/ch10.patch.xz.b64 | tr -d ' ')" = "22280"
-          base64 -d /tmp/ch10.patch.xz.b64 | xz -d > /tmp/ch10.patch
-          test "$(wc -c < /tmp/ch10.patch | tr -d ' ')" = "56586"
-          git apply --check /tmp/ch10.patch
-          git apply /tmp/ch10.patch
-          test "$(git hash-object lectures/iscarb/Ch10-Dependable-Systems.html)" = "85c9517759dc5ad9ceb433913d225e65e1ba4e27"
+          ! grep -q "DecompressionStream" lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
+          ! grep -q "DecompressionStream" lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
+          ! grep -q "fetch('./Ch10-FBR-Student-Assignment.html" lectures/iscarb/Ch11-FBR-Student-Assignment.html
+          grep -q 'meta name="fbr-delivery" content="faculty-lane"' lectures/iscarb/Ch10-Dependable-Systems-Faculty.html
+          grep -q 'meta name="fbr-delivery" content="faculty-lane"' lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html
 
-      - name: Point presenter to final lecture
-        shell: python
-        run: |
-          from pathlib import Path
-          import re
-          p=Path('lectures/iscarb/InClass-Presenter.html')
-          s=p.read_text(encoding='utf-8')
-          s2,n=re.subn(r'Ch10-Dependable-Systems\.html\?v=[^\"\']+', 'Ch10-Dependable-Systems.html?v=20260913-final100', s, count=1)
-          if n != 1:
-              raise SystemExit(f'Expected one Ch10 presenter URL, found {n}')
-          p.write_text(s2, encoding='utf-8')
-
-      - name: Validate classroom fixes
+      - name: Commit generated pages
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq "title:'Five outcomes you must prove'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'Six engineering capabilities'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'Scaffold first, then transfer'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'Stress-test your verdict'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'AI in the assurance chain'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'ETEC IT 2025 · Standards-aligned practice'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'What we covered — and what comes next'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'Ready for After-Class?'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "title:'Your learning route this session'" lectures/iscarb/Ch10-Dependable-Systems.html
-          grep -Fq "Ch10-Dependable-Systems.html?v=20260913-final100" lectures/iscarb/InClass-Presenter.html
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          s=Path('lectures/iscarb/Ch10-Dependable-Systems.html').read_text(encoding='utf-8')
-          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', s, re.S|re.I)
-          Path('/tmp/ch10-inline.js').write_text('\n'.join(blocks), encoding='utf-8')
-          PY
-          node --check /tmp/ch10-inline.js
-
-      - name: Commit final Chapter 10 lecture
-        shell: bash
-        run: |
-          set -euo pipefail
+          git add \
+            lectures/iscarb/Ch10-Dependable-Systems-Faculty.html \
+            lectures/iscarb/Ch11-Reliability-Engineering-Faculty.html \
+            lectures/iscarb/Ch11-FBR-Student-Assignment.html
+          if git diff --cached --quiet; then
+            echo "Generated pages already current."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lectures/iscarb/Ch10-Dependable-Systems.html lectures/iscarb/InClass-Presenter.html
-          git commit -m "Release final reviewed Chapter 10 classroom lecture"
-          git push origin HEAD:main
+          git commit -m "Build self-contained FBR split-delivery pages"
+          git push
