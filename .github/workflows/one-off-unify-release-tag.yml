@@ -1,0 +1,36 @@
+name: One-off unify release tag
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  unify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Unify After-Class cache-buster tag
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('fbr-submission.html')
+          s=p.read_text(encoding='utf-8')
+          old='20260912-ready1'
+          new='20260912-release1'
+          n=s.count(old)
+          if n != 2:
+              raise SystemExit(f'Expected 2 occurrences of {old}, found {n}')
+          p.write_text(s.replace(old,new),encoding='utf-8')
+          PY
+          grep -q 'Ch10-FBR-Student-Assignment.html?v=20260912-release1' fbr-submission.html
+          grep -q 'Ch11-FBR-Student-Assignment.html?v=20260912-release1' fbr-submission.html
+      - name: Commit change
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fbr-submission.html
+          git commit -m 'Unify After-Class release tags' || exit 0
+          git push
