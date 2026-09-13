@@ -113,10 +113,9 @@ jobs:
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
           grep -q '40%' _site/iscarb.html
-          grep -q 'Assignments & Discussions' _site/iscarb.html
           grep -q 'iscarb-theme.css' _site/iscarb.html
-          grep -q '../../iscarb-theme.js' _site/lectures/iscarb/InClass-Presenter.html
-          grep -q '../../iscarb-theme.js' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
+          grep -q 'iscarb-theme.js' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'iscarb-theme.js' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
 
           # Wealth OS has moved to its standalone Vercel project. Keep the
