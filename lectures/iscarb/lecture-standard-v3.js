@@ -58,13 +58,13 @@ const DATA={
  caption:'Adapted from Sommerville Ch.17: client–server layers, distributed patterns and SaaS'
 },
 '20':{
- sections:['System complexity','SoS classification','Reductionism & complex systems','SoS engineering','SoS architecture'],
+ sections:['System complexity','Systems of systems classification','Reductionism & complex systems','Systems of systems engineering','Systems of systems architecture'],
  concepts:['Operational independence','Managerial independence','Emergent behavior','Evolution across constituent systems'],
- mechanism:['Classify the SoS/control reality','Identify stakeholders & interfaces','Design governance + architecture','Monitor emergence & evolution'],
+ mechanism:['Classify the systems-of-systems control reality','Identify stakeholders & interfaces','Design governance + architecture','Monitor emergence & evolution'],
  map:['Constituent systems','Independent owners','Shared interfaces/data','Cross-system governance'],
  trade:['More central control → less constituent autonomy','More coupling → more emergent risk','More standardization → slower independent evolution'],
  evidence:['Interface conformance','Cross-system traces','Change/governance records','Failure exercises & stakeholder acceptance'],
- caption:'Adapted from Sommerville Ch.20: complexity, classification, SoS engineering and architecture'
+ caption:'Adapted from Sommerville Ch.20: complexity, classification, systems of systems engineering and architecture'
 }};
 const D=DATA[ch];
 const slides=[...document.querySelectorAll('#stage .slide')];
