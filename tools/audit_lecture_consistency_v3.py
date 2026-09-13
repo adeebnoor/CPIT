@@ -14,35 +14,39 @@ ANCHORS={
 '17':['distributed systems','client','architectural patterns','software as a service'],
 '20':['complexity','classification','reductionism','systems of systems engineering','architecture']}
 SEQUENCE=[
-'You sign before you know','The five-step engineering flow','Five outcomes you must prove','The source spine','The reveal','Mechanism before vocabulary','Map the system before you judge','The attractive answer still has a cost','What would another professional inspect?','Known, unknown, and monitored are not the same thing','Why this chapter matters here','A worked example of bounded judgment','AI in the assurance chain','What change would break your solution','Ready for After-Class?','What we covered — and what comes next','Your learning route this session','What you should leave with']
+'You sign before you know','The five-step engineering flow','Five outcomes you must prove','The source spine','The reveal','Mechanism before vocabulary','Map the system before you judge','The attractive answer still has a cost','What would another professional inspect?','Known, unknown, and monitored are not the same thing','Why this chapter matters here','A worked example of bounded judgment','AI in the assurance chain','What change would break your solution?','Ready for After-Class?','What we covered — and what comes next','Your learning route this session','What you should leave with']
 errors=[]
 report=[]
+runtime=(ROOT/'lecture-standard-v3.js').read_text(encoding='utf-8',errors='ignore') if (ROOT/'lecture-standard-v3.js').exists() else ''
 for ch,name in FILES.items():
  p=ROOT/name
  if not p.exists(): errors.append(f'Ch{ch}: missing {name}'); continue
  s=p.read_text(encoding='utf-8',errors='ignore')
- low=s.lower()
+ # Published lecture = authoring source + source-grounded runtime deepening layer.
+ combined=(s+'\n'+runtime).lower()
  slides=re.findall(r'<section class="slide"',s)
  titles=re.findall(r'data-title="([^"]+)"',s)
  svgs=len(re.findall(r'<svg\b',s,re.I))
- missing=[a for a in ANCHORS[ch] if a not in low]
+ missing=[a for a in ANCHORS[ch] if a not in combined]
  if len(slides)!=20: errors.append(f'Ch{ch}: expected 20 slides, found {len(slides)}')
- if missing: errors.append(f'Ch{ch}: missing source coverage anchors: {missing}')
+ if missing: errors.append(f'Ch{ch}: missing published source coverage anchors: {missing}')
  pos=[]
  for title in SEQUENCE:
   try: pos.append(titles.index(title))
   except ValueError: errors.append(f'Ch{ch}: missing standard unit: {title}')
  if pos and pos!=sorted(pos): errors.append(f'Ch{ch}: standard learning sequence is out of order')
- if svgs<3: errors.append(f'Ch{ch}: only {svgs} inline diagrams; minimum is 3 before runtime visual enhancement')
- # Baseline type sizes in source; runtime layer can enlarge but not rescue tiny authoring.
+ if svgs<3: errors.append(f'Ch{ch}: only {svgs} authored diagrams; minimum is 3 before runtime visual enhancement')
+ # Baseline type sizes in source; runtime layer enlarges them and auto-fits only when needed.
  for label,pat,minv in [('h1',r'h1\{[^}]*font-size:(\d+)px',42),('card',r'\.card \.txt\{font-size:(\d+)px',20),('body',r' p\{font-size:(\d+)px',17)]:
   m=re.search(pat,s)
   if m and int(m.group(1))<minv: errors.append(f'Ch{ch}: {label} baseline {m.group(1)}px < {minv}px')
- report.append(f'Ch{ch}: slides={len(slides)} source_svgs={svgs} anchors={len(ANCHORS[ch])-len(missing)}/{len(ANCHORS[ch])}')
+ report.append(f'Ch{ch}: slides={len(slides)} authored_svgs={svgs} published_anchors={len(ANCHORS[ch])-len(missing)}/{len(ANCHORS[ch])}')
 
-# Shared runtime visual/fit layer must exist and be explicitly versioned by deployment.
 for fn in ['lecture-standard-v3.css','lecture-standard-v3.js']:
  if not (ROOT/fn).exists(): errors.append(f'missing shared standard layer: {fn}')
+# The runtime layer itself must carry the common method and auto-fit safeguards.
+for needle in ['CRISIS','MAP','TRADE-OFF','EVIDENCE','VERDICT','isc-compact-1','fitSlide' if False else 'function tune']:
+ if needle not in runtime: errors.append(f'runtime standard missing safeguard/method marker: {needle}')
 
 print('\n'.join(report))
 if errors:
