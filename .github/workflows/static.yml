@@ -37,8 +37,6 @@ jobs:
           mkdir -p _site/iscarb-studio/app/static
           cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
 
-          # Keep the public grading model synchronized even if some source pages
-          # have already been updated. Replacements are intentionally idempotent.
           python - <<'PY'
           from pathlib import Path
 
@@ -50,35 +48,19 @@ jobs:
                   return True
               return False
 
-          replace_if_present('_site/iscarb.html',
-              '.quick{display:grid;grid-template-columns:repeat(4,1fr);',
-              '.quick{display:grid;grid-template-columns:repeat(3,1fr);')
-          replace_if_present('_site/iscarb.html',
-              '<div class="q"><b>30%</b><span>Midterm</span></div><div class="q"><b>30%</b><span>Final</span></div><div class="q"><b>20%</b><span>Assignments & Lab</span></div><div class="q"><b>20%</b><span>Group Project</span></div>',
-              '<div class="q"><b>30%</b><span>Midterm Exam</span></div><div class="q"><b>30%</b><span>Final Exam</span></div><div class="q"><b>40%</b><span>Assignments & Discussions · 36 + 4</span></div>')
+          replace_if_present('_site/iscarb.html', '.quick{display:grid;grid-template-columns:repeat(4,1fr);', '.quick{display:grid;grid-template-columns:repeat(3,1fr);')
+          replace_if_present('_site/iscarb.html', '<div class="q"><b>30%</b><span>Midterm</span></div><div class="q"><b>30%</b><span>Final</span></div><div class="q"><b>20%</b><span>Assignments & Lab</span></div><div class="q"><b>20%</b><span>Group Project</span></div>', '<div class="q"><b>30%</b><span>Midterm Exam</span></div><div class="q"><b>30%</b><span>Final Exam</span></div><div class="q"><b>40%</b><span>Assignments & Discussions · 36 + 4</span></div>')
 
-          replace_if_present('_site/course-resources.html',
-              '.weights{display:grid;grid-template-columns:repeat(4,1fr);',
-              '.weights{display:grid;grid-template-columns:repeat(3,1fr);')
-          replace_if_present('_site/course-resources.html',
-              '<div class="weights"><div class="weight"><b>30%</b><span>Midterm</span></div><div class="weight"><b>30%</b><span>Final</span></div><div class="weight"><b>20%</b><span>Assignments & Lab</span></div><div class="weight"><b>20%</b><span>Group Project</span></div></div>',
-              '<div class="weights"><div class="weight"><b>30%</b><span>Midterm Exam</span></div><div class="weight"><b>30%</b><span>Final Exam</span></div><div class="weight"><b>40%</b><span>Assignments & Discussions</span></div></div><div class="card" style="margin-top:10px"><h3>40% continuous assessment breakdown</h3><p><b>36 points:</b> 9 weekly assignments × 4 points each.<br><b>4 points:</b> participation and discussions.</p></div>')
-          replace_if_present('_site/course-resources.html',
-              'Current-semester weights are taken from the Fall 2026/27 KICKOFF deck. The LMS is the operational authority for deadlines and any later announced change.',
-              'Current instructor-approved distribution: 30% Midterm Exam, 30% Final Exam, and 40% Assignments & Discussions (36 points from nine 4-point assignments + 4 participation points). This supersedes the earlier assessment percentages shown in the supplied KICKOFF deck. The LMS remains the operational authority for deadlines.')
-          replace_if_present('_site/course-resources.html',
-              'the supplied syllabus PDF is labelled Fall 2024, while the supplied KICKOFF deck is Fall 2026/27. The current-semester assessment weights, roadmap and logistics shown here therefore come from the KICKOFF source; the official CLO wording and course coverage come from the syllabus source.',
-              'the supplied syllabus PDF is labelled Fall 2024, while the supplied KICKOFF deck is Fall 2026/27. CLO wording and course coverage come from the syllabus; the roadmap and logistics come from KICKOFF. The grading distribution shown on this page follows the instructor-approved current model and supersedes the older KICKOFF percentages.')
+          replace_if_present('_site/course-resources.html', '.weights{display:grid;grid-template-columns:repeat(4,1fr);', '.weights{display:grid;grid-template-columns:repeat(3,1fr);')
+          replace_if_present('_site/course-resources.html', '<div class="weights"><div class="weight"><b>30%</b><span>Midterm</span></div><div class="weight"><b>30%</b><span>Final</span></div><div class="weight"><b>20%</b><span>Assignments & Lab</span></div><div class="weight"><b>20%</b><span>Group Project</span></div></div>', '<div class="weights"><div class="weight"><b>30%</b><span>Midterm Exam</span></div><div class="weight"><b>30%</b><span>Final Exam</span></div><div class="weight"><b>40%</b><span>Assignments & Discussions</span></div></div><div class="card" style="margin-top:10px"><h3>40% continuous assessment breakdown</h3><p><b>36 points:</b> 9 weekly assignments × 4 points each.<br><b>4 points:</b> participation and discussions.</p></div>')
+          replace_if_present('_site/course-resources.html', 'Current-semester weights are taken from the Fall 2026/27 KICKOFF deck. The LMS is the operational authority for deadlines and any later announced change.', 'Current instructor-approved distribution: 30% Midterm Exam, 30% Final Exam, and 40% Assignments & Discussions (36 points from nine 4-point assignments + 4 participation points). This supersedes the earlier assessment percentages shown in the supplied KICKOFF deck. The LMS remains the operational authority for deadlines.')
+          replace_if_present('_site/course-resources.html', 'the supplied syllabus PDF is labelled Fall 2024, while the supplied KICKOFF deck is Fall 2026/27. The current-semester assessment weights, roadmap and logistics shown here therefore come from the KICKOFF source; the official CLO wording and course coverage come from the syllabus source.', 'the supplied syllabus PDF is labelled Fall 2024, while the supplied KICKOFF deck is Fall 2026/27. CLO wording and course coverage come from the syllabus; the roadmap and logistics come from KICKOFF. The grading distribution shown on this page follows the instructor-approved current model and supersedes the older KICKOFF percentages.')
 
-          replace_if_present('_site/student-guide.html',
-              '<div class="grid2"><article class="card"><h3>Assignments & Lab · 20%</h3><p>ISCARB Decision Cards and related lab evidence sit inside the current 20% Assignments & Lab component.</p></article><article class="card"><h3>Group Project · 20%</h3><p>The project culminates in a live Engineering Defense where a constraint may change and the team must re-run its reasoning rather than recite a fixed presentation.</p></article></div>',
-              '<div class="grid2"><article class="card"><h3>Midterm Exam · 30%</h3><p>Assesses engineering decisions under course constraints.</p></article><article class="card"><h3>Final Exam · 30%</h3><p>Assesses advanced reasoning and bounded engineering judgment.</p></article><article class="card"><h3>Assignments & Discussions · 40%</h3><p><b>36 points:</b> nine weekly FBR assignments × 4 points. <b>4 points:</b> participation and discussions.</p></article></div>')
+          replace_if_present('_site/student-guide.html', '<div class="grid2"><article class="card"><h3>Assignments & Lab · 20%</h3><p>ISCARB Decision Cards and related lab evidence sit inside the current 20% Assignments & Lab component.</p></article><article class="card"><h3>Group Project · 20%</h3><p>The project culminates in a live Engineering Defense where a constraint may change and the team must re-run its reasoning rather than recite a fixed presentation.</p></article></div>', '<div class="grid2"><article class="card"><h3>Midterm Exam · 30%</h3><p>Assesses engineering decisions under course constraints.</p></article><article class="card"><h3>Final Exam · 30%</h3><p>Assesses advanced reasoning and bounded engineering judgment.</p></article><article class="card"><h3>Assignments & Discussions · 40%</h3><p><b>36 points:</b> nine weekly FBR assignments × 4 points. <b>4 points:</b> participation and discussions.</p></article></div>')
           PY
 
           python tools/sanitize_static_site.py _site
 
-          # Static lecture pages (Ch12+) use show(idx), while the shared presenter
-          # expects go(cur) + U. Bridge the two APIs without changing lecture content.
           python - <<'PY'
           from pathlib import Path
 
@@ -111,26 +93,32 @@ jobs:
                   s=s.replace('</body>',shim+'</body>',1)
                   p.write_text(s,encoding='utf-8')
 
-          # Bust the iframe cache for static-engine chapters so students receive
-          # the bridged lecture immediately after deployment.
           p=Path('_site/lectures/iscarb/InClass-Presenter.html')
           s=p.read_text(encoding='utf-8')
-          for ch in ('12','13','14','15','16','17','20'):
-              s=s.replace(f"Ch{ch}-",f"Ch{ch}-",1)  # no-op keeps transform explicit
-          s=s.replace('?v=20260913-visual', '?v=20260913-navfix2')
+          s=s.replace('?v=20260913-visual', '?v=20260913-navfix3')
+          p.write_text(s,encoding='utf-8')
+
+          # Force fresh presenter URLs from the Lecture Hub as well.
+          p=Path('_site/iscarb.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('InClass-Presenter.html?chapter=10&v=20260913-visual','InClass-Presenter.html?chapter=10&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=11&v=20260913-visual','InClass-Presenter.html?chapter=11&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=12&v=20260913-visual','InClass-Presenter.html?chapter=12&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=13&v=20260913-visual','InClass-Presenter.html?chapter=13&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=14&v=20260913-visual','InClass-Presenter.html?chapter=14&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=15&v=20260913-visual','InClass-Presenter.html?chapter=15&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=16&v=20260913-visual','InClass-Presenter.html?chapter=16&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=17&v=20260913-visual','InClass-Presenter.html?chapter=17&v=20260913-navfix3')
+          s=s.replace('InClass-Presenter.html?chapter=20&v=20260913-visual','InClass-Presenter.html?chapter=20&v=20260913-navfix3')
           p.write_text(s,encoding='utf-8')
           PY
 
-          # Apply the shared ISCARB identity to course/learning pages only.
-          # index.html intentionally remains self-contained because it already has
-          # its own hero artwork and layout; injecting the shared runtime there can
-          # duplicate/crop the hero through stale browser/CDN cache.
           python - <<'PY'
           from pathlib import Path
           import os
 
           root = Path('_site')
-          version = '20260913-navfix2'
+          version = '20260913-navfix3'
           for p in root.rglob('*.html'):
               if p == root / 'index.html':
                   continue
@@ -141,20 +129,13 @@ jobs:
               js = prefix + f'iscarb-theme.js?v={version}'
               if 'iscarb-theme.css' not in s:
                   tag = f'<link rel="stylesheet" href="{css}">'
-                  if '</head>' in s:
-                      s = s.replace('</head>', tag + '</head>', 1)
-                  else:
-                      s = tag + s
+                  s = s.replace('</head>', tag + '</head>', 1) if '</head>' in s else tag + s
               if 'iscarb-theme.js' not in s:
                   tag = f'<script src="{js}" defer></script>'
-                  if '</body>' in s:
-                      s = s.replace('</body>', tag + '</body>', 1)
-                  else:
-                      s += tag
+                  s = s.replace('</body>', tag + '</body>', 1) if '</body>' in s else s + tag
               p.write_text(s, encoding='utf-8')
           PY
 
-          # Fail deployment if the public theme/navigation layer or static bridge is incomplete.
           test -f _site/student-guide.html
           test -f _site/course-resources.html
           test -f _site/methodology.html
@@ -162,18 +143,16 @@ jobs:
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
           grep -q '40%' _site/iscarb.html
-          grep -q 'iscarb-theme.css?v=20260913-navfix2' _site/iscarb.html
-          grep -q 'iscarb-theme.js?v=20260913-navfix2' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'iscarb-theme.css?v=20260913-navfix3' _site/iscarb.html
+          grep -q 'iscarb-theme.js?v=20260913-navfix3' _site/lectures/iscarb/InClass-Presenter.html
           grep -q '__ISCARB_STATIC_BRIDGE__' _site/lectures/iscarb/Ch12-Safety-Engineering.html
-          grep -q '20260913-navfix2' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'chapter=12&v=20260913-navfix3' _site/iscarb.html
+          grep -q '20260913-navfix3' _site/lectures/iscarb/InClass-Presenter.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
           ! grep -q 'iscarb-theme.css' _site/index.html
           ! grep -q 'iscarb-theme.js' _site/index.html
           grep -q 'methodology.html' _site/index.html
 
-          # Wealth OS has moved to its standalone Vercel project. Keep the
-          # repository redirect page in the Pages artifact instead of making
-          # the entire CPIT deployment depend on the retired Supabase v28 build.
           rm -rf _site/wealth-os
           cp -R wealth-os _site/wealth-os
       - name: Upload artifact
