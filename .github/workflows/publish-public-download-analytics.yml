@@ -1,0 +1,84 @@
+name: Publish public download analytics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-public-download-analytics.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Open downloads to public emails and surface aggregate analytics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          # 1) Download gateway: allow any valid email, while KAU remains classified separately server-side.
+          p=Path('download.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('<h1>University email registration</h1><div class="sub">Enter your KAU university email once. This browser will remember it for future course downloads.</div>',
+            '<h1>Email registration</h1><div class="sub">KAU students and staff can use their university email. Public visitors can use any valid email address. This browser will remember it for future course downloads.</div>')
+          s=s.replace('<label for="email">KAU university email</label><input id="email" type="email" inputmode="email" autocomplete="email" placeholder="student@stu.kau.edu.sa">',
+            '<label for="email">Email address</label><input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">')
+          s=s.replace('By continuing, you agree that the course records your university email, chapter, resource type, and download time for course administration and participation analytics. No password, IP address, or device fingerprint is collected.',
+            'By continuing, you agree that the site records your email, chapter, resource type, and download time for usage analytics. Public statistics are aggregate only — individual email addresses are never displayed publicly. No password, IP address, or device fingerprint is collected.')
+          s=re.sub(r"function valid\(v\)\{return /\^\[a-z0-9\._%\+\-\]\+@\(stu\\\.\)\?kau\\\.edu\\\.sa\$/i\.test\(v\.trim\(\)\)\}",
+                   "function valid(v){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i.test(v.trim())&&v.trim().length<=254}",s)
+          s=s.replace("msg.textContent=e.message==='kau_email_required'?'Use your KAU university email (@stu.kau.edu.sa or @kau.edu.sa).':'Could not record the download. Check your connection and try again.'",
+                      "msg.textContent=e.message==='valid_email_required'?'Enter a valid email address.':'Could not record the download. Check your connection and try again.'")
+          s=s.replace("if(!valid(v)){msg.textContent='Use your KAU university email (@stu.kau.edu.sa or @kau.edu.sa).';return}",
+                      "if(!valid(v)){msg.textContent='Enter a valid email address.';return}")
+          p.write_text(s,encoding='utf-8')
+
+          # 2) Hub: public analytics is visible on the course site itself.
+          p=Path('iscarb.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('<nav><a href="index.html">Home</a><a href="#lectures">Lectures</a></nav>',
+                      '<nav><a href="index.html">Home</a><a href="#lectures">Lectures</a><a href="download-stats.html">Download Stats</a></nav>')
+          extra_css='''.analytics{margin-top:28px;border:1px solid rgba(52,211,153,.28);background:rgba(52,211,153,.045);border-radius:20px;padding:20px}.analyticsTop{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap}.analyticsTop h3{margin:0;font-size:22px}.analyticsTop a{color:#bdf2d7;text-decoration:none;font-size:11px;font-weight:900}.analyticsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-top:14px}.metric{border:1px solid var(--line);border-radius:13px;background:rgba(16,23,37,.82);padding:13px}.metric b{display:block;font-size:25px;color:var(--gold);line-height:1}.metric span{display:block;margin-top:6px;color:var(--muted);font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:900}.analyticsNote{color:var(--muted);font-size:10px;margin-top:10px;line-height:1.5}'''
+          if '.analytics{' not in s:
+              s=s.replace('.foot{border-top:1px solid var(--line);',extra_css+'.foot{border-top:1px solid var(--line);')
+          analytics='''<section class="analytics" id="download-analytics"><div class="analyticsTop"><div><div class="label">LIVE PUBLIC METRICS</div><h3>Download Analytics</h3></div><a href="download-stats.html">View chapter breakdown →</a></div><div class="analyticsGrid"><div class="metric"><b id="mTotal">—</b><span>Total downloads</span></div><div class="metric"><b id="mUnique">—</b><span>Unique users</span></div><div class="metric"><b id="mLecture">—</b><span>Lectures</span></div><div class="metric"><b id="mAssignment">—</b><span>Assignments</span></div><div class="metric"><b id="mKau">—</b><span>KAU users</span></div><div class="metric"><b id="mPublic">—</b><span>Public users</span></div></div><div class="analyticsNote">Aggregate counts only. Individual email addresses are never displayed publicly. Public visitors may download with any valid email address.</div></section>'''
+          if 'id="download-analytics"' not in s:
+              s=s.replace('</section><div class="foot">ISCARB · CPIT-455 · King Abdulaziz University</div>',analytics+'</section><div class="foot">ISCARB · CPIT-455 · King Abdulaziz University</div>')
+          analytics_js="""<script>(async()=>{const A='https://xcirpzxpcpbxpowjbpiq.supabase.co/functions/v1/cpit455-download-stats';try{const r=await fetch(A,{cache:'no-store'}),d=await r.json();if(!r.ok||!d.ok)return;const m={mTotal:'total_downloads',mUnique:'unique_downloaders',mLecture:'lecture_downloads',mAssignment:'assignment_downloads',mKau:'kau_unique_downloaders',mPublic:'public_unique_downloaders'};for(const [id,k] of Object.entries(m)){const e=document.getElementById(id);if(e)e.textContent=d[k]??0}}catch(e){}})();</script>"""
+          if 'cpit455-download-stats' not in s:
+              s=s.replace('</body></html>',analytics_js+'</body></html>')
+          p.write_text(s,encoding='utf-8')
+
+          # 3) Ensure GitHub Pages publishes both gateway and analytics page.
+          p=Path('.github/workflows/static.yml')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html style.css _site/',
+                      'cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html download-stats.html style.css _site/')
+          p.write_text(s,encoding='utf-8')
+
+          # Hard validation.
+          d=Path('download.html').read_text(encoding='utf-8')
+          h=Path('iscarb.html').read_text(encoding='utf-8')
+          w=Path('.github/workflows/static.yml').read_text(encoding='utf-8')
+          assert 'Public visitors can use any valid email address' in d
+          assert 'name@example.com' in d
+          assert 'download-stats.html' in h and 'id="download-analytics"' in h
+          assert 'download-stats.html' in w
+          print('VALIDATION PASS: public email downloads + public aggregate analytics wired')
+          PY
+      - name: Commit public download analytics
+        run: |
+          git config user.name "Prof. Adeeb Noor"
+          git config user.email "adeebnoor@users.noreply.github.com"
+          git add download.html iscarb.html .github/workflows/static.yml
+          if git diff --cached --quiet; then
+            echo "Public download analytics already wired"
+          else
+            git commit -m "Open downloads to public emails and publish aggregate analytics"
+            git push origin HEAD:main
+          fi
