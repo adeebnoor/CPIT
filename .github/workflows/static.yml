@@ -24,15 +24,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Audit ISCARB curriculum and progression
+        run: python tools/audit_iscarb_release.py
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Build public Pages artifact
         shell: bash
         run: |
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html download-stats.html student-guide.html course-resources.html methodology.html style.css iscarb-theme.css iscarb-theme.js _site/
+          cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html download-stats.html student-guide.html course-resources.html methodology.html style.css iscarb-theme.css iscarb-theme.js fbr-progression-v1.js _site/
           cp -R slides lectures _site/
           mkdir -p _site/iscarb-studio/app/static
           cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
@@ -41,65 +46,49 @@ jobs:
 
           python - <<'PY'
           from pathlib import Path
-
-          version='20260913-navfix4'
-
-          # Bridge static lecture engines (Ch12+) to the Presenter API used by Ch10/11.
-          targets=[
-            'lectures/iscarb/Ch12-Safety-Engineering.html',
-            'lectures/iscarb/Ch13-Security-Engineering.html',
-            'lectures/iscarb/Ch14-Resilience-Engineering.html',
-            'lectures/iscarb/Ch15-Software-Reuse.html',
-            'lectures/iscarb/Ch16-Component-Based-Software-Engineering.html',
-            'lectures/iscarb/Ch17-Distributed-Software-Engineering.html',
-            'lectures/iscarb/Ch20-Systems-of-Systems.html',
-          ]
-          shim=r'''<script id="iscarb-static-presenter-bridge">
-          (()=>{try{
-            if(typeof show!=='function') return;
-            const ss=[...document.querySelectorAll('#stage .slide')];
-            if(!Array.isArray(window.U)) window.U=ss.map((s,i)=>({k:'STATIC-'+String(i+1).padStart(2,'0'),title:s.dataset.title||('Slide '+(i+1))}));
-            if(typeof window.go!=='function') window.go=(i)=>show(i);
-            try{Object.defineProperty(window,'cur',{configurable:true,get:()=>idx,set:v=>{idx=v;}})}catch(e){window.cur=0}
-            if(typeof window.tog!=='function') window.tog=(name)=>{if(name==='notes')document.getElementById('notes')?.click()};
-            window.__ISCARB_STATIC_BRIDGE__=true;
-          }catch(e){console.error('ISCARB static presenter bridge',e)}})();
-          </script>'''
-          for rel in targets:
-              p=Path('_site')/rel
-              if not p.exists():
-                  continue
-              s=p.read_text(encoding='utf-8')
-              if '__ISCARB_STATIC_BRIDGE__' not in s:
-                  s=s.replace('</body>',shim+'</body>',1)
-                  p.write_text(s,encoding='utf-8')
-
-          # Force every presenter iframe to fetch the bridged lecture version.
-          p=Path('_site/lectures/iscarb/InClass-Presenter.html')
-          s=p.read_text(encoding='utf-8')
-          s=s.replace('?v=20260913-visual',f'?v={version}')
-          p.write_text(s,encoding='utf-8')
-
-          # Force fresh Presenter URLs from the Lecture Hub itself.
-          p=Path('_site/iscarb.html')
-          s=p.read_text(encoding='utf-8')
-          for ch in ('10','11','12','13','14','15','16','17','20'):
-              old=f'lectures/iscarb/InClass-Presenter.html?chapter={ch}'
-              new=f'{old}&v={version}'
-              if new not in s:
-                  s=s.replace(old,new)
-          p.write_text(s,encoding='utf-8')
-          PY
-
-          # Apply shared ISCARB identity to course/learning pages only.
-          python - <<'PY'
-          from pathlib import Path
-          import os
+          import os,re
 
           root=Path('_site')
-          version='20260913-navfix4'
+          version='20260913-master2'
+
+          # Presenter: Ch10/11 remain frozen. Ch12–17/20 use the single Chapter-10 master engine directly.
+          p=root/'lectures/iscarb/InClass-Presenter.html'
+          s=p.read_text(encoding='utf-8')
+          for ch in ('10','11'):
+              s=re.sub(rf"(chapter={ch}[^'\"]*?v=)[^&'\"]+",rf"\g<1>{version}",s)
+          for ch in ('12','13','14','15','16','17','20'):
+              pat=rf"('{ch}':\{{src:)'[^']+'"
+              rep=rf"\1'Master-Lecture-v2.html?chapter={ch}&v={version}'"
+              s=re.sub(pat,rep,s)
+          p.write_text(s,encoding='utf-8')
+
+          # Force fresh Presenter URLs from the Lecture Hub.
+          p=root/'iscarb.html'
+          s=p.read_text(encoding='utf-8')
+          for ch in ('10','11','12','13','14','15','16','17','20'):
+              s=re.sub(rf"lectures/iscarb/InClass-Presenter\.html\?chapter={ch}(?:&v=[^\"']+)?",f"lectures/iscarb/InClass-Presenter.html?chapter={ch}&v={version}",s)
+          p.write_text(s,encoding='utf-8')
+
+          # Make concept coverage + challenge escalation visible on the After-Class gate and all nine FBR assignments.
+          targets=[root/'fbr-submission.html']+sorted((root/'lectures/iscarb').glob('Ch*-FBR-Student-Assignment.html'))
+          for p in targets:
+              s=p.read_text(encoding='utf-8')
+              rel=os.path.relpath(root,p.parent).replace('\\','/')
+              prefix='' if rel=='.' else rel.rstrip('/')+'/'
+              tag=f'<script src="{prefix}fbr-progression-v1.js?v={version}" defer></script>'
+              if 'fbr-progression-v1.js' not in s:
+                  s=s.replace('</body>',tag+'</body>',1) if '</body>' in s else s+tag
+              p.write_text(s,encoding='utf-8')
+
+          # Shared website identity. Never inject generic page-theme CSS/JS into raw lecture decks/master;
+          # those use the frozen Chapter-10 presentation grammar. Presenter and FBR pages still get navigation identity.
           for p in root.rglob('*.html'):
-              if p == root/'index.html':
+              relp=p.relative_to(root).as_posix()
+              if relp=='index.html':
+                  continue
+              if relp=='lectures/iscarb/Master-Lecture-v2.html':
+                  continue
+              if relp.startswith('lectures/iscarb/Ch') and 'FBR-Student-Assignment' not in relp:
                   continue
               s=p.read_text(encoding='utf-8')
               rel=os.path.relpath(root,p.parent).replace('\\','/')
@@ -115,27 +104,38 @@ jobs:
               p.write_text(s,encoding='utf-8')
           PY
 
-          # Deployment gates.
+          # Deployment gates: lecture engine, source diagrams, FBR progression and home isolation.
           test -f _site/student-guide.html
           test -f _site/course-resources.html
           test -f _site/methodology.html
           test -f _site/iscarb-theme.css
           test -f _site/iscarb-theme.js
+          test -f _site/fbr-progression-v1.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
+          test -f _site/lectures/iscarb/Master-Lecture-v2.html
+          test -f _site/lectures/iscarb/lecture-master-v2.css
+          test -f _site/lectures/iscarb/lecture-master-v2.js
+          test -f _site/lectures/iscarb/lecture-content-master2.js
+          test -f _site/lectures/iscarb/lecture-diagrams-v1.js
           grep -q '40%' _site/iscarb.html
-          grep -q '__ISCARB_STATIC_BRIDGE__' _site/lectures/iscarb/Ch12-Safety-Engineering.html
-          grep -q 'chapter=12&v=20260913-navfix4' _site/iscarb.html
-          grep -q '20260913-navfix4' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'Master-Lecture-v2.html?chapter=12' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'Master-Lecture-v2.html?chapter=20' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'fbr-progression-v1.js' _site/fbr-submission.html
+          grep -q 'fbr-progression-v1.js' _site/lectures/iscarb/Ch20-FBR-Student-Assignment.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
           ! grep -q 'iscarb-theme.css' _site/index.html
           ! grep -q 'iscarb-theme.js' _site/index.html
+          ! grep -q 'iscarb-theme.css' _site/lectures/iscarb/Master-Lecture-v2.html
+          ! grep -q 'iscarb-theme.js' _site/lectures/iscarb/Master-Lecture-v2.html
 
           rm -rf _site/wealth-os
           cp -R wealth-os _site/wealth-os
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
