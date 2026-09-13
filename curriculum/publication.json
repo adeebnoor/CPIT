@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "release": "20260913-instructor-reset",
+  "status": "Other lectures and all assignments are withdrawn pending instructor reconstruction.",
+  "automatic_generation": false,
+  "lectures": [
+    {
+      "chapter": 10,
+      "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
+      "source_filename": "Ch10-Dependable-Systems_WORLDCLASS_v7(1).html",
+      "source_sha256": "42b7cb815b26ca529685839dc765caba472cf8df90a33a63b22b45e418c9aabd",
+      "embedded_image_sha256": [
+        "b4e6ea2ee985ab8dee85e8eb70406ad2fb8c536d88477de16cb44b3d3ad80174",
+        "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+        "4722f736cab4578bb85b03a48ebb414f1d78c8e5c9a7b989c83c51e52fdbb9f1",
+        "a1ffedcc093ebb8b91a39ce22071f44baf4c78455936fede24f76a157d237b1e",
+        "c677eb91c9e866e33570f4954e27e0b3d23e3c088c2a87d85a050e145c435e52",
+        "3cf6df630045c7cd967094ddfca4e09b1df241d7006ebaa46c96821014a65c61",
+        "19b368063c70b825564bec5be35c4e4bd7bbc5e05445ae02465fdde2749e76c5",
+        "b59e0ed440b5d930a77fc528b13d9f0b119797bb1b4d224fd401618bd5f2abe1"
+      ]
+    }
+  ],
+  "assignments": [],
+  "iscarb_public_files": [
+    "lectures/iscarb/Ch10-Dependable-Systems.html",
+    "lectures/iscarb/InClass-Presenter.html",
+    "lectures/iscarb/Faculty-Presenter.html",
+    "lectures/iscarb/README.md"
+  ]
+}

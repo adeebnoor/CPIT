@@ -1,6 +1,8 @@
-// Compatibility entry point. Every chapter is authored independently; never
-// synthesize Chapter 11 by replacing words in the Chapter 10 assignment.
+// Legacy command kept safe: validate; never regenerate withdrawn assignments.
 import {spawnSync} from 'node:child_process';
-const result=spawnSync('python',['tools/build_classroom.py'],{stdio:'inherit'});
-if(result.error)throw result.error;
-process.exit(result.status??1);
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const result = spawnSync('python', ['tools/build_classroom.py'], {cwd: root, stdio: 'inherit'});
+if (result.error) throw result.error;
+process.exit(result.status ?? 1);

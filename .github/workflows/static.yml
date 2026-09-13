@@ -19,9 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Check chapter content, answers and generated parity
+      - name: Check approved lecture, preserved figures and withdrawn content
         run: python tools/audit_classroom.py
-      - name: Check assessed assignment integrity
+      - name: Check publication catalog and script syntax
         run: node tools/check-fbr-release.mjs
       - name: Setup Pages
         uses: actions/configure-pages@v5

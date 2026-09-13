@@ -1,0 +1,6 @@
+(()=>{'use strict';
+const prefs={get(key){try{return localStorage.getItem(key)}catch{return null}},set(key,value){try{localStorage.setItem(key,value);return true}catch{return false}}};
+const theme=document.getElementById('themeBtn');const apply=t=>{document.documentElement.dataset.theme=t;if(theme){theme.textContent=t==='dark'?'Light mode':'Dark mode';theme.setAttribute('aria-label','Switch to '+(t==='dark'?'light':'dark')+' mode')}};
+apply(prefs.get('iscarb-theme')==='light'?'light':'dark');theme?.addEventListener('click',()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';apply(t);prefs.set('iscarb-theme',t)});
+const check=document.getElementById('reviewed'),status=document.getElementById('reviewStatus');if(check){const key='iscarb-ch10-v7-reviewed';check.checked=prefs.get(key)==='1';const render=()=>{status.textContent=check.checked?'Marked as reviewed on this device.':'Your review status stays on this device.'};render();check.addEventListener('change',()=>{if(prefs.set(key,check.checked?'1':'0'))render();else status.textContent='Browser storage is unavailable. This mark will reset when the page closes.'})}
+})();

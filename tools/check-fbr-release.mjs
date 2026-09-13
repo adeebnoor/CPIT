@@ -1,26 +1,33 @@
+// Compatibility release gate: only explicitly approved Chapter 10 is published.
 import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
-const read=p=>fs.readFileSync(p,'utf8');
-const chapters=[10,11,12,13,14,15,16,17,20];
-const files=fs.readdirSync('lectures/iscarb');
-for(const ch of chapters){
- const source=read(`lectures/iscarb/Ch${ch}-FBR-Student-Assignment.html`);
- const revealPath=source.match(/reveal:'([^']+)'/)[1];
- const reveal=JSON.parse(read('lectures/iscarb/'+revealPath));
- assert(reveal.text?.length>0,`Ch${ch} STRESS file`);
- assert(!source.includes(reveal.text),`Ch${ch} initial HTML must not expose assessed STRESS`);
- for(const marker of ['lockedPartA','readOnly=true','lockAt=now()','pagehide','Print / PDF','## FIT','## BOUND','## ACT','## EVIDENCE','## STRESS','## REFIT','assignment-learning-path','warmup-answer'])assert(source.includes(marker),`Ch${ch} missing ${marker}`);
- assert(source.includes(`keyBase:'fbr:cpit455:ch${ch}:prod:v4'`),'Preserve existing saved attempts');
- assert(!/navigator\.sendBeacon|new WebSocket|new XMLHttpRequest|gtag\(/.test(source),'No new answer telemetry');
- const lectureFile=files.find(p=>p.startsWith(`Ch${ch}-`)&&!/FBR|Faculty|Final100/.test(p)&&p.endsWith('.html'));
- const lecture=read('lectures/iscarb/'+lectureFile);
- assert(lecture.includes('data-iscarb-lesson="6"'),`Ch${ch} uses shared classroom`);
- for(const code of [...lecture.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]))new Function(code);
- for(const id of ['prev','next','mode','font','hide-answers','outline-button'])assert(lecture.includes(`id="${id}"`),`Ch${ch} ${id}`);
- console.log(`PASS Ch${ch}: committed assessment, hidden STRESS, stable storage identity, complete classroom and valid JavaScript`);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const release = JSON.parse(read('curriculum/publication.json'));
+assert.equal(release.automatic_generation, false, 'Automatic generation remains disabled');
+assert.deepEqual(release.assignments, [], 'No assignment is released');
+assert.deepEqual(release.lectures.map(item => item.chapter), [10], 'Only Chapter 10 is released');
+const pages = [...release.iscarb_public_files.filter(file => file.endsWith('.html')),
+  'iscarb.html', 'download.html', 'fbr-submission.html', 'student-guide.html', 'course-resources.html'];
+let scripts = 0;
+for (const file of pages) {
+  const html = read(file);
+  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    if (/\btype\s*=\s*["'](?:application\/ld\+json|application\/json)["']/i.test(match[1])) continue;
+    if (!match[2].trim()) continue;
+    new Function(match[2]);
+    scripts++;
+  }
 }
-const gateway=read('fbr-submission.html');
-for(const needle of ['id="sid"','id="ack"','id="openBtn" disabled','Evaluation rubric · 4 points'])assert(gateway.includes(needle),'Gateway: '+needle);
-for(const ch of chapters)assert(read('iscarb.html').includes(`fbr-submission.html?chapter=${ch}`),`Hub assignment ${ch}`);
+for (const file of ['iscarb-hub.js']) {
+  new Function(read(file));
+  scripts++;
+}
+const gateway = read('fbr-submission.html');
+assert(!/Ch\d+-FBR-Student-Assignment\.html/i.test(gateway), 'Withdrawn gateway cannot open an assignment');
+const lecture = read(release.lectures[0].path);
+for (const id of ['prevBtn', 'nextBtn']) assert(lecture.includes(`id="${id}"`), `Lecture navigation: ${id}`);
 assert(read('.github/workflows/static.yml').includes('tools/build_public_site.py'));
-console.log('FBR release readiness PASS. Assessed STRESS is public static data; the interaction test checks request ordering.');
+console.log(`PASS: release catalog, ${scripts} valid scripts, standalone navigation, no active assignment gateway.`);
