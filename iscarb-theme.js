@@ -3,9 +3,17 @@
   const root=script?.src?new URL('.',script.src):new URL('./',location.href);
   const atRoot=(name)=>new URL(name,root).href;
   const path=location.pathname.toLowerCase();
-  const isHub=/\/iscarb\.html$/.test(path);
+  const file=(path.split('/').pop()||'').toLowerCase();
+  const isHome=file===''||file==='index.html';
+  const isHub=file==='iscarb.html';
+  const isPresenter=/inclass-presenter\.html$|faculty-presenter\.html$/i.test(path);
+  const isFbr=/fbr-submission\.html$|fbr-student-assignment\.html$/i.test(path);
+  const isLearningDetail=isPresenter||isFbr;
 
   function addHeroTheme(){
+    // The CPIT landing page already has its own carefully composed camel/fortress
+    // hero. Re-theming that hero duplicates the image and breaks its layout.
+    if(isHome) return;
     const hero=document.querySelector('.hero');
     if(hero) hero.classList.add('iscarb-themed-hero');
   }
@@ -24,7 +32,9 @@
   }
 
   function addHubButton(){
-    if(isHub||document.querySelector('.iscarb-hub-btn')) return;
+    // Sticky return navigation is useful inside lecture/FBR workspaces only.
+    // Do not place it on top-level public pages or the landing page.
+    if(!isLearningDetail||isHub||isHome||document.querySelector('.iscarb-hub-btn')) return;
     const a=document.createElement('a');
     a.className='iscarb-hub-btn';
     a.href=atRoot('iscarb.html');
@@ -34,14 +44,18 @@
   }
 
   function addSaveBadge(){
+    // Only FBR pages expose the draft save state.
+    if(!isFbr) return;
     const saved=document.getElementById('saved');
     const storage=document.getElementById('storage');
     if(!saved&&!storage) return;
+    const existing=document.querySelector('.iscarb-save-badge');
+    if(existing) return;
     const badge=document.createElement('span');
     badge.className='iscarb-save-badge';
     badge.setAttribute('role','status');
     badge.setAttribute('aria-live','polite');
-    badge.textContent='Draft saved locally';
+    badge.textContent='Local draft enabled';
     (saved||storage).insertAdjacentElement('afterend',badge);
 
     const update=()=>{
@@ -50,7 +64,7 @@
       if(txt.includes('unavailable')||txt.includes('could not')){
         badge.textContent='Local save unavailable';
         badge.classList.add('warn');
-      }else if(txt.includes('unsaved')){
+      }else if(txt.includes('unsaved')||txt.includes('saving')){
         badge.textContent='Saving locally…';
         badge.classList.add('saving');
       }else if(txt.includes('saved')){
@@ -66,11 +80,17 @@
   }
 
   function addA11yHint(){
-    const presenter=/inclass-presenter\.html$|faculty-presenter\.html$/i.test(path);
-    if(!presenter) return;
+    if(!isPresenter) return;
     document.documentElement.setAttribute('data-iscarb-presenter','1');
   }
 
-  function boot(){addHeroTheme();addMethodologyNav();addHubButton();addSaveBadge();addA11yHint()}
+  function boot(){
+    document.documentElement.toggleAttribute('data-iscarb-home',isHome);
+    addHeroTheme();
+    addMethodologyNav();
+    addHubButton();
+    addSaveBadge();
+    addA11yHint();
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
