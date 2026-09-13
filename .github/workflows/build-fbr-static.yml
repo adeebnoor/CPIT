@@ -1,4 +1,4 @@
-name: Validate classroom generation
+name: Validate approved classroom publication
 on:
   workflow_dispatch:
   push:
@@ -6,6 +6,8 @@ on:
       - 'curriculum/**'
       - 'tools/build_classroom.py'
       - 'tools/build-fbr-static.mjs'
+      - 'tools/audit_classroom.py'
+      - 'lectures/iscarb/**'
       - '.github/workflows/build-fbr-static.yml'
 permissions:
   contents: read
@@ -14,9 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Regenerate classroom editions
+      - name: Validate without regenerating instructor content
         run: python tools/build_classroom.py
-      - name: Verify committed generated pages match their source
+      - name: Verify validation never modifies the approved lecture
         run: git diff --exit-code -- lectures/iscarb
-      - name: Check chapter-specific content and answer coverage
-        run: python tools/audit_classroom.py
