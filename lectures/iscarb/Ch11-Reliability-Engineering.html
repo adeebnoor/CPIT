@@ -3004,3 +3004,12 @@ renderMarks(); renderCoach(); renderPair(); renderSign(); renderLevels();
 renderCoverage(); renderPath(); renderProgress(); syncAll(); go(0);
 setZoom(ZOOM);
 </script>
+
+<style id="lectureDownloadStyle">
+#lectureDownloadBtn{position:fixed;right:18px;bottom:88px;z-index:99999;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid rgba(221,178,126,.72);border-radius:11px;background:rgba(12,10,17,.94);color:#F0D6AE;text-decoration:none;font:800 11px/1 Inter,Arial,sans-serif;letter-spacing:.03em;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+#lectureDownloadBtn:hover{border-color:#DDB27E;color:#fff}
+@media(max-width:700px){#lectureDownloadBtn{right:10px;bottom:84px;padding:8px 10px;font-size:10px}}
+@media print{#lectureDownloadBtn{display:none!important}}
+</style>
+
+<a id="lectureDownloadBtn" href="Ch11-Reliability-Engineering.html" download="CPIT455_Ch11_Lecture.html" aria-label="Download Chapter 11 lecture">↓ Download Lecture</a>
