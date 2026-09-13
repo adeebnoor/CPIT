@@ -77,26 +77,31 @@ jobs:
 
           python tools/sanitize_static_site.py _site
 
-          # Apply one shared ISCARB identity to every public HTML page. Relative
-          # paths are computed per page so this also works for nested lecture/FBR files.
+          # Apply the shared ISCARB identity to course/learning pages only.
+          # index.html intentionally remains self-contained because it already has
+          # its own hero artwork and layout; injecting the shared runtime there can
+          # duplicate/crop the hero through stale browser/CDN cache.
           python - <<'PY'
           from pathlib import Path
           import os
 
           root = Path('_site')
+          version = '20260913-homefix2'
           for p in root.rglob('*.html'):
+              if p == root / 'index.html':
+                  continue
               s = p.read_text(encoding='utf-8')
               rel = os.path.relpath(root, p.parent).replace('\\','/')
               prefix = '' if rel == '.' else rel.rstrip('/') + '/'
-              css = prefix + 'iscarb-theme.css'
-              js = prefix + 'iscarb-theme.js'
-              if css not in s:
+              css = prefix + f'iscarb-theme.css?v={version}'
+              js = prefix + f'iscarb-theme.js?v={version}'
+              if 'iscarb-theme.css' not in s:
                   tag = f'<link rel="stylesheet" href="{css}">'
                   if '</head>' in s:
                       s = s.replace('</head>', tag + '</head>', 1)
                   else:
                       s = tag + s
-              if js not in s:
+              if 'iscarb-theme.js' not in s:
                   tag = f'<script src="{js}" defer></script>'
                   if '</body>' in s:
                       s = s.replace('</body>', tag + '</body>', 1)
@@ -113,10 +118,13 @@ jobs:
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
           grep -q '40%' _site/iscarb.html
-          grep -q 'iscarb-theme.css' _site/iscarb.html
-          grep -q 'iscarb-theme.js' _site/lectures/iscarb/InClass-Presenter.html
-          grep -q 'iscarb-theme.js' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
+          grep -q 'iscarb-theme.css?v=20260913-homefix2' _site/iscarb.html
+          grep -q 'iscarb-theme.js?v=20260913-homefix2' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'iscarb-theme.js?v=20260913-homefix2' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
+          ! grep -q 'iscarb-theme.css' _site/index.html
+          ! grep -q 'iscarb-theme.js' _site/index.html
+          grep -q 'methodology.html' _site/index.html
 
           # Wealth OS has moved to its standalone Vercel project. Keep the
           # repository redirect page in the Pages artifact instead of making
