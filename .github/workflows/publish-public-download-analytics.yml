@@ -19,7 +19,6 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
 
           # 1) Download gateway: allow any valid email, while KAU remains classified separately server-side.
           p=Path('download.html')
@@ -30,8 +29,9 @@ jobs:
             '<label for="email">Email address</label><input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">')
           s=s.replace('By continuing, you agree that the course records your university email, chapter, resource type, and download time for course administration and participation analytics. No password, IP address, or device fingerprint is collected.',
             'By continuing, you agree that the site records your email, chapter, resource type, and download time for usage analytics. Public statistics are aggregate only — individual email addresses are never displayed publicly. No password, IP address, or device fingerprint is collected.')
-          s=re.sub(r"function valid\(v\)\{return /\^\[a-z0-9\._%\+\-\]\+@\(stu\\\.\)\?kau\\\.edu\\\.sa\$/i\.test\(v\.trim\(\)\)\}",
-                   "function valid(v){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i.test(v.trim())&&v.trim().length<=254}",s)
+          old=r"function valid(v){return /^[a-z0-9._%+-]+@(stu\.)?kau\.edu\.sa$/i.test(v.trim())}"
+          new=r"function valid(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v.trim())&&v.trim().length<=254}"
+          s=s.replace(old,new)
           s=s.replace("msg.textContent=e.message==='kau_email_required'?'Use your KAU university email (@stu.kau.edu.sa or @kau.edu.sa).':'Could not record the download. Check your connection and try again.'",
                       "msg.textContent=e.message==='valid_email_required'?'Enter a valid email address.':'Could not record the download. Check your connection and try again.'")
           s=s.replace("if(!valid(v)){msg.textContent='Use your KAU university email (@stu.kau.edu.sa or @kau.edu.sa).';return}",
@@ -67,7 +67,9 @@ jobs:
           w=Path('.github/workflows/static.yml').read_text(encoding='utf-8')
           assert 'Public visitors can use any valid email address' in d
           assert 'name@example.com' in d
+          assert 'function valid(v){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i.test(v.trim())&&v.trim().length<=254}' in d
           assert 'download-stats.html' in h and 'id="download-analytics"' in h
+          assert 'cpit455-download-stats' in h
           assert 'download-stats.html' in w
           print('VALIDATION PASS: public email downloads + public aggregate analytics wired')
           PY
