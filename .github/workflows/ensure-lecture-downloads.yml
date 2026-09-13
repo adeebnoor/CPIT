@@ -1,0 +1,75 @@
+name: Ensure lecture downloads
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ensure-lecture-downloads.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Add download control to every active lecture
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          files = {
+            'lectures/iscarb/Ch10-Dependable-Systems.html': ('10','CPIT455_Ch10_Lecture.html'),
+            'lectures/iscarb/Ch11-Reliability-Engineering.html': ('11','CPIT455_Ch11_Lecture.html'),
+            'lectures/iscarb/Ch12-Safety-Engineering.html': ('12','CPIT455_Ch12_Lecture.html'),
+            'lectures/iscarb/Ch13-Security-Engineering.html': ('13','CPIT455_Ch13_Lecture.html'),
+            'lectures/iscarb/Ch14-Resilience-Engineering.html': ('14','CPIT455_Ch14_Lecture.html'),
+            'lectures/iscarb/Ch15-Software-Reuse.html': ('15','CPIT455_Ch15_Lecture.html'),
+            'lectures/iscarb/Ch16-Component-Based-Software-Engineering.html': ('16','CPIT455_Ch16_Lecture.html'),
+            'lectures/iscarb/Ch17-Distributed-Software-Engineering.html': ('17','CPIT455_Ch17_Lecture.html'),
+            'lectures/iscarb/Ch20-Systems-of-Systems.html': ('20','CPIT455_Ch20_Lecture.html'),
+          }
+
+          style = '''\n<style id="lectureDownloadStyle">\n#lectureDownloadBtn{position:fixed;right:18px;bottom:88px;z-index:99999;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid rgba(221,178,126,.72);border-radius:11px;background:rgba(12,10,17,.94);color:#F0D6AE;text-decoration:none;font:800 11px/1 Inter,Arial,sans-serif;letter-spacing:.03em;box-shadow:0 8px 24px rgba(0,0,0,.28)}\n#lectureDownloadBtn:hover{border-color:#DDB27E;color:#fff}\n@media(max-width:700px){#lectureDownloadBtn{right:10px;bottom:84px;padding:8px 10px;font-size:10px}}\n@media print{#lectureDownloadBtn{display:none!important}}\n</style>\n'''
+
+          changed = []
+          for path,(ch,filename) in files.items():
+              p=Path(path)
+              if not p.exists():
+                  raise SystemExit(f'Missing lecture file: {path}')
+              text=p.read_text(encoding='utf-8')
+              if 'id="lectureDownloadBtn"' in text:
+                  print(f'OK already: {path}')
+                  continue
+              link = f'''\n<a id="lectureDownloadBtn" href="{p.name}" download="{filename}" aria-label="Download Chapter {ch} lecture">↓ Download Lecture</a>\n'''
+              inject = style + link
+              if '</body>' in text:
+                  text=text.replace('</body>', inject+'</body>',1)
+              else:
+                  text += inject
+              p.write_text(text,encoding='utf-8')
+              changed.append(path)
+              print(f'PATCHED: {path}')
+
+          # hard validation: every active lecture must contain a download control
+          missing=[]
+          for path in files:
+              if 'id="lectureDownloadBtn"' not in Path(path).read_text(encoding='utf-8'):
+                  missing.append(path)
+          if missing:
+              raise SystemExit('Download control missing after patch: '+', '.join(missing))
+          print('VALIDATION PASS: download control present in all 9 active lectures')
+          PY
+      - name: Commit verified lecture downloads
+        run: |
+          git config user.name "Prof. Adeeb Noor"
+          git config user.email "adeebnoor@users.noreply.github.com"
+          git add lectures/iscarb/Ch10-Dependable-Systems.html lectures/iscarb/Ch11-Reliability-Engineering.html lectures/iscarb/Ch12-Safety-Engineering.html lectures/iscarb/Ch13-Security-Engineering.html lectures/iscarb/Ch14-Resilience-Engineering.html lectures/iscarb/Ch15-Software-Reuse.html lectures/iscarb/Ch16-Component-Based-Software-Engineering.html lectures/iscarb/Ch17-Distributed-Software-Engineering.html lectures/iscarb/Ch20-Systems-of-Systems.html
+          if git diff --cached --quiet; then
+            echo "All lecture downloads already present"
+          else
+            git commit -m "Ensure download control inside every active lecture"
+            git push origin HEAD:main
+          fi
