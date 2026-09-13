@@ -80,7 +80,7 @@ async function hubSmoke(){
     assert(await page.locator(`a.in[href*="chapter=${ch}"]`).count()===1,`Hub Ch${ch} In-Class link present`);
     assert(await page.locator(`a.after[href="fbr-submission.html?chapter=${ch}"]`).count()===1,`Hub Ch${ch} After-Class link present`);
   }
-  assert((await page.locator('body').innerText()).includes('professional judgment'),'Hub preserves split-delivery message');
+  assert((await page.locator('body').innerText()).includes('bounded professional decision'),'Hub preserves split-delivery message');
   await context.close();
 }
 
