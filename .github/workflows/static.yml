@@ -77,6 +77,50 @@ jobs:
 
           python tools/sanitize_static_site.py _site
 
+          # Static lecture pages (Ch12+) use show(idx), while the shared presenter
+          # expects go(cur) + U. Bridge the two APIs without changing lecture content.
+          python - <<'PY'
+          from pathlib import Path
+
+          targets = [
+              'lectures/iscarb/Ch12-Safety-Engineering.html',
+              'lectures/iscarb/Ch13-Security-Engineering.html',
+              'lectures/iscarb/Ch14-Resilience-Engineering.html',
+              'lectures/iscarb/Ch15-Software-Reuse.html',
+              'lectures/iscarb/Ch16-Component-Based-Software-Engineering.html',
+              'lectures/iscarb/Ch17-Distributed-Software-Engineering.html',
+              'lectures/iscarb/Ch20-Systems-of-Systems.html',
+          ]
+          shim = r'''<script id="iscarb-static-presenter-bridge">
+          (()=>{try{
+            if(typeof show!=='function') return;
+            const ss=[...document.querySelectorAll('#stage .slide')];
+            if(!Array.isArray(window.U)) window.U=ss.map((s,i)=>({k:'STATIC-'+String(i+1).padStart(2,'0'),title:s.dataset.title||('Slide '+(i+1))}));
+            if(typeof window.go!=='function') window.go=(i)=>show(i);
+            try{Object.defineProperty(window,'cur',{configurable:true,get:()=>idx,set:v=>{idx=v;}})}catch(e){window.cur=0}
+            if(typeof window.tog!=='function') window.tog=(name)=>{if(name==='notes')document.getElementById('notes')?.click()};
+            window.__ISCARB_STATIC_BRIDGE__=true;
+          }catch(e){console.error('ISCARB static presenter bridge',e)}})();
+          </script>'''
+          for rel in targets:
+              p=Path('_site')/rel
+              if not p.exists():
+                  continue
+              s=p.read_text(encoding='utf-8')
+              if '__ISCARB_STATIC_BRIDGE__' not in s:
+                  s=s.replace('</body>',shim+'</body>',1)
+                  p.write_text(s,encoding='utf-8')
+
+          # Bust the iframe cache for static-engine chapters so students receive
+          # the bridged lecture immediately after deployment.
+          p=Path('_site/lectures/iscarb/InClass-Presenter.html')
+          s=p.read_text(encoding='utf-8')
+          for ch in ('12','13','14','15','16','17','20'):
+              s=s.replace(f"Ch{ch}-",f"Ch{ch}-",1)  # no-op keeps transform explicit
+          s=s.replace('?v=20260913-visual', '?v=20260913-navfix2')
+          p.write_text(s,encoding='utf-8')
+          PY
+
           # Apply the shared ISCARB identity to course/learning pages only.
           # index.html intentionally remains self-contained because it already has
           # its own hero artwork and layout; injecting the shared runtime there can
@@ -86,7 +130,7 @@ jobs:
           import os
 
           root = Path('_site')
-          version = '20260913-lecture3fix1'
+          version = '20260913-navfix2'
           for p in root.rglob('*.html'):
               if p == root / 'index.html':
                   continue
@@ -110,7 +154,7 @@ jobs:
               p.write_text(s, encoding='utf-8')
           PY
 
-          # Fail deployment if the public theme/navigation layer is incomplete.
+          # Fail deployment if the public theme/navigation layer or static bridge is incomplete.
           test -f _site/student-guide.html
           test -f _site/course-resources.html
           test -f _site/methodology.html
@@ -118,9 +162,10 @@ jobs:
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
           grep -q '40%' _site/iscarb.html
-          grep -q 'iscarb-theme.css?v=20260913-lecture3fix1' _site/iscarb.html
-          grep -q 'iscarb-theme.js?v=20260913-lecture3fix1' _site/lectures/iscarb/InClass-Presenter.html
-          grep -q 'iscarb-theme.js?v=20260913-lecture3fix1' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
+          grep -q 'iscarb-theme.css?v=20260913-navfix2' _site/iscarb.html
+          grep -q 'iscarb-theme.js?v=20260913-navfix2' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q '__ISCARB_STATIC_BRIDGE__' _site/lectures/iscarb/Ch12-Safety-Engineering.html
+          grep -q '20260913-navfix2' _site/lectures/iscarb/InClass-Presenter.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
           ! grep -q 'iscarb-theme.css' _site/index.html
           ! grep -q 'iscarb-theme.js' _site/index.html
