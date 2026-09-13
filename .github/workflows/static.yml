@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Audit lecture coverage and consistency
+        run: python tools/audit_lecture_consistency_v3.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build public Pages artifact
@@ -42,9 +44,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          version='20260913-navfix4'
-
-          # Bridge static lecture engines (Ch12+) to the Presenter API used by Ch10/11.
+          version='20260913-standard3'
           targets=[
             'lectures/iscarb/Ch12-Safety-Engineering.html',
             'lectures/iscarb/Ch13-Security-Engineering.html',
@@ -68,38 +68,48 @@ jobs:
           for rel in targets:
               p=Path('_site')/rel
               if not p.exists():
-                  continue
+                  raise SystemExit(f'missing lecture target: {rel}')
               s=p.read_text(encoding='utf-8')
+              # Dedicated lecture standard: large typography, source-grounded visual deepening,
+              # auto-fit and common CRISIS→MAP→TRADE-OFF→EVIDENCE→VERDICT phase grammar.
+              if 'lecture-standard-v3.css' not in s:
+                  s=s.replace('</head>',f'<link rel="stylesheet" href="lecture-standard-v3.css?v={version}"></head>',1)
+              if 'lecture-standard-v3.js' not in s:
+                  s=s.replace('</body>',f'<script src="lecture-standard-v3.js?v={version}"></script></body>',1)
               if '__ISCARB_STATIC_BRIDGE__' not in s:
                   s=s.replace('</body>',shim+'</body>',1)
-                  p.write_text(s,encoding='utf-8')
+              p.write_text(s,encoding='utf-8')
 
-          # Force every presenter iframe to fetch the bridged lecture version.
+          # Force fresh Presenter URLs while keeping Ch10 and Ch11 untouched as the reference lectures.
           p=Path('_site/lectures/iscarb/InClass-Presenter.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('?v=20260913-visual',f'?v={version}')
+          s=s.replace('?v=20260913-visual',f'?v={version}').replace('?v=20260913-navfix4',f'?v={version}')
           p.write_text(s,encoding='utf-8')
 
-          # Force fresh Presenter URLs from the Lecture Hub itself.
           p=Path('_site/iscarb.html')
           s=p.read_text(encoding='utf-8')
+          import re
           for ch in ('10','11','12','13','14','15','16','17','20'):
-              old=f'lectures/iscarb/InClass-Presenter.html?chapter={ch}'
-              new=f'{old}&v={version}'
-              if new not in s:
-                  s=s.replace(old,new)
+              base=f'lectures/iscarb/InClass-Presenter.html?chapter={ch}'
+              s=re.sub(re.escape(base)+r'(?:&v=[^"&]+)?',base+f'&v={version}',s)
           p.write_text(s,encoding='utf-8')
           PY
 
-          # Apply shared ISCARB identity to course/learning pages only.
+          # Apply the shared website identity to course/learning pages, but never to the actual lecture canvases.
           python - <<'PY'
           from pathlib import Path
           import os
 
           root=Path('_site')
-          version='20260913-navfix4'
+          version='20260913-standard3'
+          lecture_canvases={
+            'Ch10-Dependable-Systems.html','Ch11-Reliability-Engineering.html',
+            'Ch12-Safety-Engineering.html','Ch13-Security-Engineering.html','Ch14-Resilience-Engineering.html',
+            'Ch15-Software-Reuse.html','Ch16-Component-Based-Software-Engineering.html',
+            'Ch17-Distributed-Software-Engineering.html','Ch20-Systems-of-Systems.html'
+          }
           for p in root.rglob('*.html'):
-              if p == root/'index.html':
+              if p == root/'index.html' or p.name in lecture_canvases:
                   continue
               s=p.read_text(encoding='utf-8')
               rel=os.path.relpath(root,p.parent).replace('\\','/')
@@ -122,13 +132,18 @@ jobs:
           test -f _site/iscarb-theme.css
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
+          test -f _site/lectures/iscarb/lecture-standard-v3.css
+          test -f _site/lectures/iscarb/lecture-standard-v3.js
           grep -q '40%' _site/iscarb.html
           grep -q '__ISCARB_STATIC_BRIDGE__' _site/lectures/iscarb/Ch12-Safety-Engineering.html
-          grep -q 'chapter=12&v=20260913-navfix4' _site/iscarb.html
-          grep -q '20260913-navfix4' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'lecture-standard-v3.css' _site/lectures/iscarb/Ch13-Security-Engineering.html
+          grep -q 'lecture-standard-v3.js' _site/lectures/iscarb/Ch20-Systems-of-Systems.html
+          grep -q 'chapter=12&v=20260913-standard3' _site/iscarb.html
+          grep -q '20260913-standard3' _site/lectures/iscarb/InClass-Presenter.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
           ! grep -q 'iscarb-theme.css' _site/index.html
           ! grep -q 'iscarb-theme.js' _site/index.html
+          ! grep -q 'iscarb-theme.css' _site/lectures/iscarb/Ch13-Security-Engineering.html
 
           rm -rf _site/wealth-os
           cp -R wealth-os _site/wealth-os
