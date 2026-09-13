@@ -107,4 +107,13 @@ function fit(){const s=document.getElementById('stage'),sh=document.getElementBy
 function show(i){idx=(i+slides.length)%slides.length; slides.forEach((s,n)=>s.classList.toggle('on',n===idx)); rail.forEach((x,n)=>x.classList.toggle('on',n<=idx)); slides.forEach((s,n)=>s.querySelector('.count').textContent=`${n+1}/${slides.length}`); document.title=slides[idx].dataset.title+' · Chapter 16 · Component-Based Software Engineering';}
 addEventListener('resize',fit); fit(); show(0); document.getElementById('prev').onclick=()=>show(idx-1); document.getElementById('next').onclick=()=>show(idx+1); document.getElementById('present').onclick=()=>document.documentElement.requestFullscreen?.(); document.getElementById('notes').onclick=()=>alert('Use this lecture in-class. After-Class reasoning happens separately.');
 addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)) show(idx+1); if(['ArrowLeft','PageUp'].includes(e.key)) show(idx-1); if(e.key==='Home') show(0); if(e.key==='End') show(slides.length-1);});
-</script></body></html>
+</script>
+<style id="lectureDownloadStyle">
+#lectureDownloadBtn{position:fixed;right:18px;bottom:88px;z-index:99999;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid rgba(221,178,126,.72);border-radius:11px;background:rgba(12,10,17,.94);color:#F0D6AE;text-decoration:none;font:800 11px/1 Inter,Arial,sans-serif;letter-spacing:.03em;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+#lectureDownloadBtn:hover{border-color:#DDB27E;color:#fff}
+@media(max-width:700px){#lectureDownloadBtn{right:10px;bottom:84px;padding:8px 10px;font-size:10px}}
+@media print{#lectureDownloadBtn{display:none!important}}
+</style>
+
+<a id="lectureDownloadBtn" href="Ch16-Component-Based-Software-Engineering.html" download="CPIT455_Ch16_Lecture.html" aria-label="Download Chapter 16 lecture">↓ Download Lecture</a>
+</body></html>
