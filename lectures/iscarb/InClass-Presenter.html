@@ -21,15 +21,15 @@ button{appearance:none;border:1px solid var(--line);border-radius:12px;backgroun
 <script>
 const q=new URLSearchParams(location.search),ch=q.get('chapter')||'10';
 const MAP={
- '10':{src:'Ch10-Dependable-Systems-Final100.html?v=20260913-final100',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'},
- '11':{src:'Ch11-Reliability-Engineering-Final100.html?v=20260913-final100',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'},
- '12':{src:'Ch12-Safety-Engineering.html?v=20260913-final100',title:'Safety Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=12'},
- '13':{src:'Ch13-Security-Engineering.html?v=20260913-final100',title:'Security Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=13'},
- '14':{src:'Ch14-Resilience-Engineering.html?v=20260913-final100',title:'Resilience Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=14'},
- '15':{src:'Ch15-Software-Reuse.html?v=20260913-final100',title:'Software Reuse · In-Class',assignment:'../../fbr-submission.html?chapter=15'},
- '16':{src:'Ch16-Component-Based-Software-Engineering.html?v=20260913-final100',title:'Component-Based Software Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=16'},
- '17':{src:'Ch17-Distributed-Software-Engineering.html?v=20260913-final100',title:'Distributed Software Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=17'},
- '20':{src:'Ch20-Systems-of-Systems.html?v=20260913-final100',title:'Systems of Systems · In-Class',assignment:'../../fbr-submission.html?chapter=20'}
+ '10':{src:'Ch10-Dependable-Systems.html?v=20260913-visual',title:'Dependable Systems · In-Class',assignment:'../../fbr-submission.html?chapter=10'},
+ '11':{src:'Ch11-Reliability-Engineering.html?v=20260913-visual',title:'Reliability Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=11'},
+ '12':{src:'Ch12-Safety-Engineering.html?v=20260913-visual',title:'Safety Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=12'},
+ '13':{src:'Ch13-Security-Engineering.html?v=20260913-visual',title:'Security Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=13'},
+ '14':{src:'Ch14-Resilience-Engineering.html?v=20260913-visual',title:'Resilience Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=14'},
+ '15':{src:'Ch15-Software-Reuse.html?v=20260913-visual',title:'Software Reuse · In-Class',assignment:'../../fbr-submission.html?chapter=15'},
+ '16':{src:'Ch16-Component-Based-Software-Engineering.html?v=20260913-visual',title:'Component-Based Software Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=16'},
+ '17':{src:'Ch17-Distributed-Software-Engineering.html?v=20260913-visual',title:'Distributed Software Engineering · In-Class',assignment:'../../fbr-submission.html?chapter=17'},
+ '20':{src:'Ch20-Systems-of-Systems.html?v=20260913-visual',title:'Systems of Systems · In-Class',assignment:'../../fbr-submission.html?chapter=20'}
 };
 const cfg=MAP[ch]||MAP['10'];
 const frame=document.getElementById('lecture'),status=document.getElementById('status');document.getElementById('title').textContent='ISCARB · '+cfg.title;document.getElementById('studentTask').href=cfg.assignment;frame.src=cfg.src;
