@@ -10,3 +10,8 @@ html[data-theme="light"] .hero.iscarb-themed-hero::after{background-image:linear
 .iscarb-methodology-nav{color:var(--iscarb-gold)!important}
 @media(max-width:860px){.hero.iscarb-themed-hero{padding-right:inherit!important;padding-top:210px!important;min-height:0}.hero.iscarb-themed-hero::after{top:0;left:0;right:0;width:100%;height:190px;bottom:auto;border-left:0;border-bottom:1px solid rgba(220,181,107,.22);background-image:linear-gradient(180deg,rgba(5,7,13,.04),rgba(5,7,13,.82)),var(--iscarb-theme-img);background-size:cover;background-position:center 66%}.iscarb-hub-btn{top:8px;left:8px;width:146px;min-height:48px;padding-left:54px;background-size:100% 100%,82px 48px;font-size:10px}}
 @media print{.iscarb-hub-btn,.iscarb-save-badge{display:none!important}.hero.iscarb-themed-hero{padding-right:0!important}.hero.iscarb-themed-hero::after{display:none!important}}
+
+/* Keep navigation in document flow on forms; never cover a heading or input. */
+.iscarb-hub-btn.iscarb-inline-hub{position:relative;top:auto;left:auto;margin:16px auto 0;z-index:auto;width:200px;font-size:14px}.iscarb-inline-hub small{font-size:12px}.iscarb-save-badge{font-size:13px;line-height:1.4;white-space:normal}
+/* The hub keeps the original artwork behind a dedicated, non-overlapping column. */
+body:has(#assignment-progression) .hero.iscarb-themed-hero{padding:32px 43% 32px 32px!important;min-height:0}body:has(#assignment-progression) .hero.iscarb-themed-hero::after{width:40%}@media(max-width:860px){body:has(#assignment-progression) .hero.iscarb-themed-hero{padding:24px!important}body:has(#assignment-progression) .hero.iscarb-themed-hero::after{display:none}}

@@ -1,20 +1,15 @@
-# Deploy only the public static archive to GitHub Pages.
 name: Deploy static content to Pages
-
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: "pages"
   cancel-in-progress: true
-
 jobs:
   deploy:
     environment:
@@ -24,129 +19,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Audit lecture coverage and consistency
-        run: python tools/audit_lecture_consistency_v3.py
+      - name: Check chapter content, answers and generated parity
+        run: python tools/audit_classroom.py
+      - name: Check assessed assignment integrity
+        run: node tools/check-fbr-release.mjs
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Build public Pages artifact
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf _site
-          mkdir -p _site
-          cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html download-stats.html student-guide.html course-resources.html methodology.html style.css iscarb-theme.css iscarb-theme.js _site/
-          cp -R slides lectures _site/
-          mkdir -p _site/iscarb-studio/app/static
-          cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
-
-          python tools/sanitize_static_site.py _site
-
-          python - <<'PY'
-          from pathlib import Path
-
-          version='20260913-standard3'
-          targets=[
-            'lectures/iscarb/Ch12-Safety-Engineering.html',
-            'lectures/iscarb/Ch13-Security-Engineering.html',
-            'lectures/iscarb/Ch14-Resilience-Engineering.html',
-            'lectures/iscarb/Ch15-Software-Reuse.html',
-            'lectures/iscarb/Ch16-Component-Based-Software-Engineering.html',
-            'lectures/iscarb/Ch17-Distributed-Software-Engineering.html',
-            'lectures/iscarb/Ch20-Systems-of-Systems.html',
-          ]
-          shim=r'''<script id="iscarb-static-presenter-bridge">
-          (()=>{try{
-            if(typeof show!=='function') return;
-            const ss=[...document.querySelectorAll('#stage .slide')];
-            if(!Array.isArray(window.U)) window.U=ss.map((s,i)=>({k:'STATIC-'+String(i+1).padStart(2,'0'),title:s.dataset.title||('Slide '+(i+1))}));
-            if(typeof window.go!=='function') window.go=(i)=>show(i);
-            try{Object.defineProperty(window,'cur',{configurable:true,get:()=>idx,set:v=>{idx=v;}})}catch(e){window.cur=0}
-            if(typeof window.tog!=='function') window.tog=(name)=>{if(name==='notes')document.getElementById('notes')?.click()};
-            window.__ISCARB_STATIC_BRIDGE__=true;
-          }catch(e){console.error('ISCARB static presenter bridge',e)}})();
-          </script>'''
-          for rel in targets:
-              p=Path('_site')/rel
-              if not p.exists():
-                  raise SystemExit(f'missing lecture target: {rel}')
-              s=p.read_text(encoding='utf-8')
-              # Dedicated lecture standard: large typography, source-grounded visual deepening,
-              # auto-fit and common CRISIS→MAP→TRADE-OFF→EVIDENCE→VERDICT phase grammar.
-              if 'lecture-standard-v3.css' not in s:
-                  s=s.replace('</head>',f'<link rel="stylesheet" href="lecture-standard-v3.css?v={version}"></head>',1)
-              if 'lecture-standard-v3.js' not in s:
-                  s=s.replace('</body>',f'<script src="lecture-standard-v3.js?v={version}"></script></body>',1)
-              if '__ISCARB_STATIC_BRIDGE__' not in s:
-                  s=s.replace('</body>',shim+'</body>',1)
-              p.write_text(s,encoding='utf-8')
-
-          # Force fresh Presenter URLs while keeping Ch10 and Ch11 untouched as the reference lectures.
-          p=Path('_site/lectures/iscarb/InClass-Presenter.html')
-          s=p.read_text(encoding='utf-8')
-          s=s.replace('?v=20260913-visual',f'?v={version}').replace('?v=20260913-navfix4',f'?v={version}')
-          p.write_text(s,encoding='utf-8')
-
-          p=Path('_site/iscarb.html')
-          s=p.read_text(encoding='utf-8')
-          import re
-          for ch in ('10','11','12','13','14','15','16','17','20'):
-              base=f'lectures/iscarb/InClass-Presenter.html?chapter={ch}'
-              s=re.sub(re.escape(base)+r'(?:&v=[^"&]+)?',base+f'&v={version}',s)
-          p.write_text(s,encoding='utf-8')
-          PY
-
-          # Apply the shared website identity to course/learning pages, but never to the actual lecture canvases.
-          python - <<'PY'
-          from pathlib import Path
-          import os
-
-          root=Path('_site')
-          version='20260913-standard3'
-          lecture_canvases={
-            'Ch10-Dependable-Systems.html','Ch11-Reliability-Engineering.html',
-            'Ch12-Safety-Engineering.html','Ch13-Security-Engineering.html','Ch14-Resilience-Engineering.html',
-            'Ch15-Software-Reuse.html','Ch16-Component-Based-Software-Engineering.html',
-            'Ch17-Distributed-Software-Engineering.html','Ch20-Systems-of-Systems.html'
-          }
-          for p in root.rglob('*.html'):
-              if p == root/'index.html' or p.name in lecture_canvases:
-                  continue
-              s=p.read_text(encoding='utf-8')
-              rel=os.path.relpath(root,p.parent).replace('\\','/')
-              prefix='' if rel=='.' else rel.rstrip('/')+'/'
-              css=prefix+f'iscarb-theme.css?v={version}'
-              js=prefix+f'iscarb-theme.js?v={version}'
-              if 'iscarb-theme.css' not in s:
-                  tag=f'<link rel="stylesheet" href="{css}">'
-                  s=s.replace('</head>',tag+'</head>',1) if '</head>' in s else tag+s
-              if 'iscarb-theme.js' not in s:
-                  tag=f'<script src="{js}" defer></script>'
-                  s=s.replace('</body>',tag+'</body>',1) if '</body>' in s else s+tag
-              p.write_text(s,encoding='utf-8')
-          PY
-
-          # Deployment gates.
-          test -f _site/student-guide.html
-          test -f _site/course-resources.html
-          test -f _site/methodology.html
-          test -f _site/iscarb-theme.css
-          test -f _site/iscarb-theme.js
-          test -f _site/iscarb-studio/app/static/hero_user_original.png
-          test -f _site/lectures/iscarb/lecture-standard-v3.css
-          test -f _site/lectures/iscarb/lecture-standard-v3.js
-          grep -q '40%' _site/iscarb.html
-          grep -q '__ISCARB_STATIC_BRIDGE__' _site/lectures/iscarb/Ch12-Safety-Engineering.html
-          grep -q 'lecture-standard-v3.css' _site/lectures/iscarb/Ch13-Security-Engineering.html
-          grep -q 'lecture-standard-v3.js' _site/lectures/iscarb/Ch20-Systems-of-Systems.html
-          grep -q 'chapter=12&v=20260913-standard3' _site/iscarb.html
-          grep -q '20260913-standard3' _site/lectures/iscarb/InClass-Presenter.html
-          grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
-          ! grep -q 'iscarb-theme.css' _site/index.html
-          ! grep -q 'iscarb-theme.js' _site/index.html
-          ! grep -q 'iscarb-theme.css' _site/lectures/iscarb/Ch13-Security-Engineering.html
-
-          rm -rf _site/wealth-os
-          cp -R wealth-os _site/wealth-os
+      - name: Stage the validated public site
+        run: python tools/build_public_site.py
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

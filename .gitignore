@@ -18,3 +18,6 @@ iscarb-studio/.env
 Thumbs.db
 .vscode/
 .idea/
+
+# Public staging and local review artifacts
+_site/
