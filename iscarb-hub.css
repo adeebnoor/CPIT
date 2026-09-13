@@ -6,3 +6,5 @@ html[data-theme="light"]{color-scheme:light;--bg:#faf8fc;--panel:#fff;--ink:#211
 @media(max-width:420px){.actions{align-items:stretch}.actions .btn{flex:1 1 100%}h1{font-size:2.15rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @media print{header,footer,.actions,.theme,.check,.skip{display:none}body{background:#fff;color:#000}.wrap{width:100%}.lesson,.panel,.notice,details{background:#fff;border-color:#888;break-inside:avoid}.muted,.intro,small,.notice p,.ey,.meta{color:#333}details{display:block}.cols{grid-template-columns:1fr}a{color:#000}}
+
+input.entry-input{width:100%;padding:.8rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:inherit}

@@ -5,7 +5,7 @@ from sanitize_static_site import main as sanitize
 from audit_classroom import audit, publication
 ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
-VERSION='20260913-instructor-reset'
+VERSION='20260913-ch10-assignment-v5'
 PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-students.html','fbr-submission.html','download.html','download-stats.html','student-guide.html','course-resources.html','methodology.html','style.css','iscarb-theme.css','iscarb-theme.js','iscarb-hub.css','iscarb-hub.js']
 def main():
     errors=audit(ROOT)
@@ -41,9 +41,9 @@ def main():
     published={p.relative_to(DEST).as_posix() for p in (DEST/'lectures/iscarb').rglob('*') if p.is_file()}
     if published!=set(publication()['iscarb_public_files']):
         raise SystemExit('The staged ISCARB directory does not match its explicit publication allowlist.')
-    for item in publication()['lectures']:
+    for item in publication()['lectures']+publication()['assignments']:
         name=item['path']
         if (ROOT/name).read_bytes()!=(DEST/name).read_bytes():
             raise SystemExit(f'Staging changed the approved standalone lecture: {name}')
-    print('Public site staged: only approved Chapter 10, identical to validated source.')
+    print('Public site staged: approved Chapter 10 and reviewed assignment, identical to validated source.')
 if __name__=='__main__':main()

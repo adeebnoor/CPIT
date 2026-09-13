@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "release": "20260913-instructor-reset",
-  "status": "Other lectures and all assignments are withdrawn pending instructor reconstruction.",
+  "release": "20260913-ch10-assignment-v5",
+  "status": "Chapter 10 lecture and reviewed assignment are published. Other lectures and assignments remain withdrawn.",
   "automatic_generation": false,
   "lectures": [
     {
@@ -21,11 +21,21 @@
       ]
     }
   ],
-  "assignments": [],
+  "assignments": [
+    {
+      "chapter": 10,
+      "path": "lectures/iscarb/Ch10-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r10-v5.json",
+      "edition": "reviewed-v5",
+      "points": 4
+    }
+  ],
   "iscarb_public_files": [
     "lectures/iscarb/Ch10-Dependable-Systems.html",
     "lectures/iscarb/InClass-Presenter.html",
     "lectures/iscarb/Faculty-Presenter.html",
-    "lectures/iscarb/README.md"
+    "lectures/iscarb/README.md",
+    "lectures/iscarb/Ch10-FBR-Student-Assignment.html",
+    "lectures/iscarb/reveal/r10-v5.json"
   ]
 }

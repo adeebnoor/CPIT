@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const release = JSON.parse(read('curriculum/publication.json'));
 assert.equal(release.automatic_generation, false, 'Automatic generation remains disabled');
-assert.deepEqual(release.assignments, [], 'No assignment is released');
+assert.deepEqual(release.assignments.map(item => item.chapter), [10], 'Only the reviewed Chapter 10 assignment is released');
 assert.deepEqual(release.lectures.map(item => item.chapter), [10], 'Only Chapter 10 is released');
 const pages = [...release.iscarb_public_files.filter(file => file.endsWith('.html')),
   'iscarb.html', 'download.html', 'fbr-submission.html', 'student-guide.html', 'course-resources.html'];
@@ -26,8 +26,9 @@ for (const file of ['iscarb-hub.js']) {
   scripts++;
 }
 const gateway = read('fbr-submission.html');
-assert(!/Ch\d+-FBR-Student-Assignment\.html/i.test(gateway), 'Withdrawn gateway cannot open an assignment');
+assert(gateway.includes('Ch10-FBR-Student-Assignment.html'), 'Gateway opens the approved assignment');
+assert(gateway.includes('fbr:access:ch10:v4'), 'Gateway preserves the established session identity');
 const lecture = read(release.lectures[0].path);
 for (const id of ['prevBtn', 'nextBtn']) assert(lecture.includes(`id="${id}"`), `Lecture navigation: ${id}`);
 assert(read('.github/workflows/static.yml').includes('tools/build_public_site.py'));
-console.log(`PASS: release catalog, ${scripts} valid scripts, standalone navigation, no active assignment gateway.`);
+console.log(`PASS: release catalog, ${scripts} valid scripts, standalone navigation, reviewed Chapter 10 assignment gateway.`);
