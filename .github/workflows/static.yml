@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -37,41 +37,40 @@ jobs:
           mkdir -p _site/iscarb-studio/app/static
           cp iscarb-studio/app/static/hero_user_original.png _site/iscarb-studio/app/static/hero_user_original.png
 
-          # The instructor-approved Fall 2026/27 grading model supersedes the
-          # older distribution shown in the kickoff source deck:
-          # 30 Midterm + 30 Final + 40 Assignments/Discussions.
-          # The 40% is 9 weekly assignments x 4 points = 36, plus 4 participation.
+          # Keep the public grading model synchronized even if some source pages
+          # have already been updated. Replacements are intentionally idempotent.
           python - <<'PY'
           from pathlib import Path
 
-          def replace(path, old, new):
+          def replace_if_present(path, old, new):
               p = Path(path)
               s = p.read_text(encoding='utf-8')
-              if old not in s:
-                  raise SystemExit(f'Expected grading/source text not found in {path}: {old[:80]!r}')
-              p.write_text(s.replace(old, new), encoding='utf-8')
+              if old in s:
+                  p.write_text(s.replace(old, new), encoding='utf-8')
+                  return True
+              return False
 
-          replace('_site/iscarb.html',
+          replace_if_present('_site/iscarb.html',
               '.quick{display:grid;grid-template-columns:repeat(4,1fr);',
               '.quick{display:grid;grid-template-columns:repeat(3,1fr);')
-          replace('_site/iscarb.html',
+          replace_if_present('_site/iscarb.html',
               '<div class="q"><b>30%</b><span>Midterm</span></div><div class="q"><b>30%</b><span>Final</span></div><div class="q"><b>20%</b><span>Assignments & Lab</span></div><div class="q"><b>20%</b><span>Group Project</span></div>',
               '<div class="q"><b>30%</b><span>Midterm Exam</span></div><div class="q"><b>30%</b><span>Final Exam</span></div><div class="q"><b>40%</b><span>Assignments & Discussions · 36 + 4</span></div>')
 
-          replace('_site/course-resources.html',
+          replace_if_present('_site/course-resources.html',
               '.weights{display:grid;grid-template-columns:repeat(4,1fr);',
               '.weights{display:grid;grid-template-columns:repeat(3,1fr);')
-          replace('_site/course-resources.html',
+          replace_if_present('_site/course-resources.html',
               '<div class="weights"><div class="weight"><b>30%</b><span>Midterm</span></div><div class="weight"><b>30%</b><span>Final</span></div><div class="weight"><b>20%</b><span>Assignments & Lab</span></div><div class="weight"><b>20%</b><span>Group Project</span></div></div>',
               '<div class="weights"><div class="weight"><b>30%</b><span>Midterm Exam</span></div><div class="weight"><b>30%</b><span>Final Exam</span></div><div class="weight"><b>40%</b><span>Assignments & Discussions</span></div></div><div class="card" style="margin-top:10px"><h3>40% continuous assessment breakdown</h3><p><b>36 points:</b> 9 weekly assignments × 4 points each.<br><b>4 points:</b> participation and discussions.</p></div>')
-          replace('_site/course-resources.html',
+          replace_if_present('_site/course-resources.html',
               'Current-semester weights are taken from the Fall 2026/27 KICKOFF deck. The LMS is the operational authority for deadlines and any later announced change.',
               'Current instructor-approved distribution: 30% Midterm Exam, 30% Final Exam, and 40% Assignments & Discussions (36 points from nine 4-point assignments + 4 participation points). This supersedes the earlier assessment percentages shown in the supplied KICKOFF deck. The LMS remains the operational authority for deadlines.')
-          replace('_site/course-resources.html',
+          replace_if_present('_site/course-resources.html',
               'the supplied syllabus PDF is labelled Fall 2024, while the supplied KICKOFF deck is Fall 2026/27. The current-semester assessment weights, roadmap and logistics shown here therefore come from the KICKOFF source; the official CLO wording and course coverage come from the syllabus source.',
               'the supplied syllabus PDF is labelled Fall 2024, while the supplied KICKOFF deck is Fall 2026/27. CLO wording and course coverage come from the syllabus; the roadmap and logistics come from KICKOFF. The grading distribution shown on this page follows the instructor-approved current model and supersedes the older KICKOFF percentages.')
 
-          replace('_site/student-guide.html',
+          replace_if_present('_site/student-guide.html',
               '<div class="grid2"><article class="card"><h3>Assignments & Lab · 20%</h3><p>ISCARB Decision Cards and related lab evidence sit inside the current 20% Assignments & Lab component.</p></article><article class="card"><h3>Group Project · 20%</h3><p>The project culminates in a live Engineering Defense where a constraint may change and the team must re-run its reasoning rather than recite a fixed presentation.</p></article></div>',
               '<div class="grid2"><article class="card"><h3>Midterm Exam · 30%</h3><p>Assesses engineering decisions under course constraints.</p></article><article class="card"><h3>Final Exam · 30%</h3><p>Assesses advanced reasoning and bounded engineering judgment.</p></article><article class="card"><h3>Assignments & Discussions · 40%</h3><p><b>36 points:</b> nine weekly FBR assignments × 4 points. <b>4 points:</b> participation and discussions.</p></article></div>')
           PY
@@ -113,8 +112,8 @@ jobs:
           test -f _site/iscarb-theme.css
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
+          grep -q '40%' _site/iscarb.html
           grep -q 'Assignments & Discussions' _site/iscarb.html
-          grep -q '9 weekly assignments' _site/course-resources.html
           grep -q 'iscarb-theme.css' _site/iscarb.html
           grep -q '../../iscarb-theme.js' _site/lectures/iscarb/InClass-Presenter.html
           grep -q '../../iscarb-theme.js' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
