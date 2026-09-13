@@ -1,0 +1,7 @@
+{
+  "version": "2026-09-reviewed-v5",
+  "chapter": "10",
+  "label": "STRESS \u00b7 one dependency, unequal access",
+  "text": "At 11:40, the sign-in service becomes unavailable. A dependency check confirms that both application servers use this same sign-in service, so switching application servers does not restore new sign-ins. Students with existing sessions can still submit registrations and retrieve confirmation. Students who are not signed in cannot enter the portal. Restoration before 12:00 is unconfirmed, and the registrar has not yet approved an alternative submission route or deadline extension.",
+  "principle": "A functioning application server does not by itself establish that the complete service remains available. Reassess your committed boundary and operating plan using the new evidence."
+}

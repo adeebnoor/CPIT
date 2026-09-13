@@ -19,7 +19,7 @@ CURRENT_PAGES = ["iscarb.html", "student-guide.html", "course-resources.html",
                  "download.html", "fbr-submission.html", "index.html", "404.html"]
 WITHDRAWN_ROUTE = re.compile(
     r"Ch(?:11|12|13|14|15|16|17|20)-[^\s\"'<>]*\.html|"
-    r"Ch10-(?:FBR-Student-Assignment|Dependable-Systems-(?:Faculty(?:-Rich)?|Final100))\.html",
+    r"Ch10-Dependable-Systems-(?:Faculty(?:-Rich)?|Final100)\.html",
     re.I,
 )
 
@@ -54,8 +54,13 @@ def audit(root=ROOT):
     errors = []
     if spec.get("automatic_generation") is not False:
         errors.append("Automatic generation must stay disabled during the instructor reset.")
-    if spec.get("assignments") != [] or [x.get("chapter") for x in spec.get("lectures", [])] != [10]:
-        return errors + ["This release authorizes only Chapter 10 and no assignments."]
+    if [x.get("chapter") for x in spec.get("assignments", [])] != [10] or [x.get("chapter") for x in spec.get("lectures", [])] != [10]:
+        return errors + ["This release authorizes only Chapter 10 and its reviewed assignment."]
+    assignment = spec["assignments"][0]
+    if assignment.get("path") != "lectures/iscarb/Ch10-FBR-Student-Assignment.html" or assignment.get("stress_path") != "lectures/iscarb/reveal/r10-v5.json":
+        return errors + ["Unexpected assignment or reveal path."]
+    if assignment.get("points") != 4 or assignment.get("edition") != "reviewed-v5":
+        errors.append("The reviewed assignment must preserve the four-point rubric and version identity.")
     lecture = spec["lectures"][0]
     path = root / lecture["path"]
     if not path.is_file():
@@ -86,11 +91,34 @@ def audit(root=ROOT):
         if old.relative_to(root).as_posix() not in allowed:
             errors.append(f"Withdrawn lecture/assignment remains: {old.relative_to(root)}")
     for name in ("reveal", "split"):
-        if any(p.is_file() for p in (directory / name).rglob("*")):
-            errors.append(f"Withdrawn assignment or lecture payload remains: lectures/iscarb/{name}")
+        for payload in (directory / name).rglob("*"):
+            if payload.is_file() and payload.relative_to(root).as_posix() not in allowed:
+                errors.append(f"Withdrawn assignment or lecture payload remains: {payload.relative_to(root)}")
     for name in allowed:
         if not (root / name).is_file():
             errors.append(f"Missing approved public file: {name}")
+    assessment_path = root / assignment["path"]
+    stress_path = root / assignment["stress_path"]
+    if assessment_path.is_file():
+        assessment = assessment_path.read_text(encoding="utf-8")
+        assessment_page = Page(); assessment_page.feed(assessment)
+        if not assessment_page.standalone:
+            errors.append("Assignment must retain its standalone styling.")
+        if len(assessment_page.ids) != len(set(assessment_page.ids)):
+            errors.append("Assignment has duplicate static IDs.")
+        if "fbr:cpit455:ch10:reviewed:v5" not in assessment or "fbr:cpit455:ch10:prod:v4" not in assessment:
+            errors.append("Assignment must isolate revised work and preserve legacy drafts.")
+        if "reveal/r10-v5.json" not in assessment:
+            errors.append("Assignment references the wrong revised STRESS payload.")
+        if stress_path.is_file():
+            try:
+                stress = json.loads(stress_path.read_text(encoding="utf-8"))
+                if str(stress.get("chapter")) != "10" or not stress.get("text"):
+                    errors.append("Invalid Chapter 10 STRESS payload.")
+                if stress.get("text") and stress["text"] in assessment:
+                    errors.append("STRESS must not be included in the initial assignment HTML.")
+            except ValueError:
+                errors.append("Invalid STRESS JSON.")
     pages = CURRENT_PAGES + [name for name in allowed if name.endswith(".html")]
     for name in pages:
         page = root / name
@@ -119,7 +147,7 @@ def main():
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print("PASS: approved standalone Chapter 10, eight preserved images, current links, no withdrawn lessons or assignments.")
+    print("PASS: approved standalone Chapter 10, eight preserved images, reviewed assignment, current links and no other lessons or assignments.")
     return 0
 
 if __name__ == "__main__":
