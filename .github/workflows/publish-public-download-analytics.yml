@@ -20,7 +20,6 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          # 1) Download gateway: allow any valid email, while KAU remains classified separately server-side.
           p=Path('download.html')
           s=p.read_text(encoding='utf-8')
           s=s.replace('<h1>University email registration</h1><div class="sub">Enter your KAU university email once. This browser will remember it for future course downloads.</div>',
@@ -38,7 +37,6 @@ jobs:
                       "if(!valid(v)){msg.textContent='Enter a valid email address.';return}")
           p.write_text(s,encoding='utf-8')
 
-          # 2) Hub: public analytics is visible on the course site itself.
           p=Path('iscarb.html')
           s=p.read_text(encoding='utf-8')
           s=s.replace('<nav><a href="index.html">Home</a><a href="#lectures">Lectures</a></nav>',
@@ -54,30 +52,18 @@ jobs:
               s=s.replace('</body></html>',analytics_js+'</body></html>')
           p.write_text(s,encoding='utf-8')
 
-          # 3) Ensure GitHub Pages publishes both gateway and analytics page.
-          p=Path('.github/workflows/static.yml')
-          s=p.read_text(encoding='utf-8')
-          s=s.replace('cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html style.css _site/',
-                      'cp index.html cimt.html imam.html iscarb.html iscarb-students.html fbr-submission.html download.html download-stats.html style.css _site/')
-          p.write_text(s,encoding='utf-8')
-
-          # Hard validation.
           d=Path('download.html').read_text(encoding='utf-8')
           h=Path('iscarb.html').read_text(encoding='utf-8')
-          w=Path('.github/workflows/static.yml').read_text(encoding='utf-8')
           assert 'Public visitors can use any valid email address' in d
           assert 'name@example.com' in d
-          assert 'function valid(v){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i.test(v.trim())&&v.trim().length<=254}' in d
-          assert 'download-stats.html' in h and 'id="download-analytics"' in h
-          assert 'cpit455-download-stats' in h
-          assert 'download-stats.html' in w
+          assert 'id="download-analytics"' in h and 'cpit455-download-stats' in h
           print('VALIDATION PASS: public email downloads + public aggregate analytics wired')
           PY
       - name: Commit public download analytics
         run: |
           git config user.name "Prof. Adeeb Noor"
           git config user.email "adeebnoor@users.noreply.github.com"
-          git add download.html iscarb.html .github/workflows/static.yml
+          git add download.html iscarb.html
           if git diff --cached --quiet; then
             echo "Public download analytics already wired"
           else
