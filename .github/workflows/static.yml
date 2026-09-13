@@ -86,7 +86,7 @@ jobs:
           import os
 
           root = Path('_site')
-          version = '20260913-homefix2'
+          version = '20260913-lecture3fix1'
           for p in root.rglob('*.html'):
               if p == root / 'index.html':
                   continue
@@ -118,9 +118,9 @@ jobs:
           test -f _site/iscarb-theme.js
           test -f _site/iscarb-studio/app/static/hero_user_original.png
           grep -q '40%' _site/iscarb.html
-          grep -q 'iscarb-theme.css?v=20260913-homefix2' _site/iscarb.html
-          grep -q 'iscarb-theme.js?v=20260913-homefix2' _site/lectures/iscarb/InClass-Presenter.html
-          grep -q 'iscarb-theme.js?v=20260913-homefix2' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
+          grep -q 'iscarb-theme.css?v=20260913-lecture3fix1' _site/iscarb.html
+          grep -q 'iscarb-theme.js?v=20260913-lecture3fix1' _site/lectures/iscarb/InClass-Presenter.html
+          grep -q 'iscarb-theme.js?v=20260913-lecture3fix1' _site/lectures/iscarb/Ch10-FBR-Student-Assignment.html
           grep -q 'Interactive System for Case-based Analysis' _site/methodology.html
           ! grep -q 'iscarb-theme.css' _site/index.html
           ! grep -q 'iscarb-theme.js' _site/index.html
