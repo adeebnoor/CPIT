@@ -40,7 +40,7 @@
     a.href=atRoot('iscarb.html');
     a.setAttribute('aria-label','Back to ISCARB lecture hub');
     a.innerHTML='<span>⌂ Back to Hub<small>ISCARB · CPIT-455</small></span>';
-    document.body.appendChild(a);
+    if(isFbr){a.classList.add("iscarb-inline-hub");document.body.prepend(a)}else{document.body.appendChild(a)}
   }
 
   function addSaveBadge(){
