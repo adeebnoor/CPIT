@@ -1,23 +1,21 @@
 {
   "schema_version": 1,
-  "release": "20260913-ch10-assignment-v5",
-  "status": "Chapter 10 lecture and reviewed assignment are published. Other lectures and assignments remain withdrawn.",
+  "release": "20260916-ch10-lecture-2026-noor-assignment-v5",
+  "status": "Chapter 10 supplied 2026 lecture and reviewed assignment are published. Other lectures and assignments remain withdrawn.",
   "automatic_generation": false,
   "lectures": [
     {
       "chapter": 10,
       "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
-      "source_filename": "Ch10-Dependable-Systems_WORLDCLASS_v7(1).html",
-      "source_sha256": "42b7cb815b26ca529685839dc765caba472cf8df90a33a63b22b45e418c9aabd",
+      "source_filename": "Ch10-Dependable-Systems_2026_NooR.html",
+      "source_sha256": "fbe2d01ae329c3c0827b8ac4ae55e06b6aba4fe13f9487f7a7343f2e51be1ca9",
       "embedded_image_sha256": [
-        "b4e6ea2ee985ab8dee85e8eb70406ad2fb8c536d88477de16cb44b3d3ad80174",
         "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
-        "4722f736cab4578bb85b03a48ebb414f1d78c8e5c9a7b989c83c51e52fdbb9f1",
-        "a1ffedcc093ebb8b91a39ce22071f44baf4c78455936fede24f76a157d237b1e",
-        "c677eb91c9e866e33570f4954e27e0b3d23e3c088c2a87d85a050e145c435e52",
-        "3cf6df630045c7cd967094ddfca4e09b1df241d7006ebaa46c96821014a65c61",
-        "19b368063c70b825564bec5be35c4e4bd7bbc5e05445ae02465fdde2749e76c5",
-        "b59e0ed440b5d930a77fc528b13d9f0b119797bb1b4d224fd401618bd5f2abe1"
+        "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+        "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+        "9ff87bacd455ed272fb7aa19b6c2aedb7dec849a6f73249ae0c89fe84fddce5d",
+        "ac6d8befd3cee4d4c9c1548854097db9948cf87bdf19cf01272b8a629dfd8255",
+        "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02"
       ]
     }
   ],
