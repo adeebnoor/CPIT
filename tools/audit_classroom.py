@@ -65,11 +65,11 @@ def audit(root=ROOT):
     path = root / lecture["path"]
     if not path.is_file():
         return errors + [f"Missing approved lecture: {lecture['path']}"]
+    if hashlib.sha256(path.read_bytes()).hexdigest() != lecture.get("source_sha256"):
+        errors.append("Chapter 10 does not match the authorized uploaded source.")
     source = path.read_text(encoding="utf-8")
     parsed = Page()
     parsed.feed(source)
-    if not parsed.standalone:
-        errors.append("Chapter 10 must retain its standalone marker and own design.")
     if len(parsed.ids) != len(set(parsed.ids)):
         errors.append("Chapter 10 has duplicate static element IDs.")
     if any(not url.startswith("data:") for url in parsed.dependencies):
@@ -82,7 +82,7 @@ def audit(root=ROOT):
         images = re.findall(r"data:image/(?:png|jpe?g|webp);base64,([A-Za-z0-9+/=]+)", source)
         hashes = [hashlib.sha256(base64.b64decode(img, validate=True)).hexdigest() for img in images]
         if sorted(hashes) != sorted(lecture["embedded_image_sha256"]):
-            errors.append("The eight images from the approved attachment were changed or removed.")
+            errors.append("Embedded images from the authorized attachment were changed or removed.")
     except (ValueError, TypeError) as exc:
         errors.append(f"Invalid embedded image: {exc}")
     directory = root / "lectures/iscarb"
@@ -147,7 +147,7 @@ def main():
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print("PASS: approved standalone Chapter 10, eight preserved images, reviewed assignment, current links and no other lessons or assignments.")
+    print("PASS: authorized Chapter 10 source, preserved embedded images, reviewed assignment, current links and no other lessons or assignments.")
     return 0
 
 if __name__ == "__main__":
