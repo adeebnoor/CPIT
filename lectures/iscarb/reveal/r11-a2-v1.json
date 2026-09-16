@@ -1,0 +1,7 @@
+{
+  "chapter": "11",
+  "version": "2026-09-assignment2-v1",
+  "label": "STRESS · the test profile was not the registration peak",
+  "text": "After you committed Part A, the test lead provides the missing operational-profile detail. The 20,000-transaction reliability test was dominated by low-risk repeat-payment flows. Only 3% of the transactions exercised the external authentication path, but the registration-week forecast expects about 35% of payment authorizations to use that path. No separate ROCOF result is available for that path.",
+  "principle": "A reliability rate supports only the conditions represented by its operational profile. A nominal pass against the aggregate target does not automatically support a materially different usage mix."
+}
