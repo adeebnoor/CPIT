@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "release": "20260916-ch10-lecture-2026-noor-assignment-v5",
-  "status": "Chapter 10 supplied 2026 lecture and reviewed assignment are published. Other lectures and assignments remain withdrawn.",
+  "release": "20260917-ch10-ch11-assignment2-v1",
+  "status": "Chapters 10 and 11 are published with reviewed progressive assignments. Later chapters remain withdrawn.",
   "automatic_generation": false,
   "lectures": [
     {
@@ -17,6 +17,22 @@
         "ac6d8befd3cee4d4c9c1548854097db9948cf87bdf19cf01272b8a629dfd8255",
         "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02"
       ]
+    },
+    {
+      "chapter": 11,
+      "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
+      "source_filename": "Ch11-Reliability-Engineering_2026_MATCH_CH10.html",
+      "source_sha256": "343fb1719b9ad21b7b540368bb83392267c5f6ffb80f6105fd18f3bcf156727a",
+      "embedded_image_sha256": [
+        "d02584c5bbfb976d0304bb1d86a7626e77a24e7a54d297516a8c26f6a34d6fb1",
+        "22411188fb53692284994060a60c554684d867f38b063cdf4f8d9efe7315b953",
+        "ea5417566663279bc81dc27e49439efdef7464297ae24c46d4d67a2bf04d6fc3",
+        "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+        "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+        "9ff87bacd455ed272fb7aa19b6c2aedb7dec849a6f73249ae0c89fe84fddce5d",
+        "ac6d8befd3cee4d4c9c1548854097db9948cf87bdf19cf01272b8a629dfd8255",
+        "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02"
+      ]
     }
   ],
   "assignments": [
@@ -25,15 +41,31 @@
       "path": "lectures/iscarb/Ch10-FBR-Student-Assignment.html",
       "stress_path": "lectures/iscarb/reveal/r10-v5.json",
       "edition": "reviewed-v5",
+      "version": "2026-09-reviewed-v5",
+      "storage_key": "fbr:cpit455:ch10:reviewed:v5",
+      "access_key": "fbr:access:ch10:v4",
       "points": 4
+    },
+    {
+      "chapter": 11,
+      "path": "lectures/iscarb/Ch11-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r11-a2-v1.json",
+      "edition": "assignment2-v1",
+      "version": "2026-09-assignment2-v1",
+      "storage_key": "fbr:cpit455:ch11:a2:v1",
+      "access_key": "fbr:access:ch11:a2:v1",
+      "points": 5
     }
   ],
   "iscarb_public_files": [
     "lectures/iscarb/Ch10-Dependable-Systems.html",
+    "lectures/iscarb/Ch11-Reliability-Engineering.html",
     "lectures/iscarb/InClass-Presenter.html",
     "lectures/iscarb/Faculty-Presenter.html",
     "lectures/iscarb/README.md",
     "lectures/iscarb/Ch10-FBR-Student-Assignment.html",
-    "lectures/iscarb/reveal/r10-v5.json"
+    "lectures/iscarb/Ch11-FBR-Student-Assignment.html",
+    "lectures/iscarb/reveal/r10-v5.json",
+    "lectures/iscarb/reveal/r11-a2-v1.json"
   ]
 }
