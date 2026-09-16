@@ -1,0 +1,73 @@
+name: Update Chapter 10 lecture once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/_tmp_update_ch10_once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update-lecture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download, verify, and install attached lecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          API='https://api.firestorage.ai/dev/file'
+          SHARE='61hlT7EwBkCo'
+          ZIP_NAME='Ch10-Dependable-Systems_2026_NooR.zip'
+          HTML_NAME='Ch10-Dependable-Systems_2026_NooR.html'
+          TARGET='lectures/iscarb/Ch10-Dependable-Systems.html'
+          EXPECTED_HTML_SHA='fbe2d01ae329c3c0827b8ac4ae55e06b6aba4fe13f9487f7a7343f2e51be1ca9'
+
+          curl -fsSL "$API/shares/$SHARE/files?maxResults=1000" -o /tmp/files.json
+          FILE_ID=$(python3 - <<'PY'
+import json
+with open('/tmp/files.json', encoding='utf-8') as f:
+    data=json.load(f)
+name='Ch10-Dependable-Systems_2026_NooR.zip'
+for item in data.get('files', []):
+    if item.get('fileName') == name:
+        print(item['fileId'])
+        break
+else:
+    raise SystemExit(f'{name} not found in temporary share')
+PY
+          )
+
+          curl -fsSL -X POST "$API/shares/$SHARE/files/$FILE_ID/download" -o /tmp/download.json
+          DOWNLOAD_URL=$(python3 - <<'PY'
+import json
+with open('/tmp/download.json', encoding='utf-8') as f:
+    print(json.load(f)['downloadUrl'])
+PY
+          )
+          curl -fL "$DOWNLOAD_URL" -o /tmp/ch10.zip
+          unzip -p /tmp/ch10.zip "$HTML_NAME" > "$TARGET.new"
+          ACTUAL_HTML_SHA=$(sha256sum "$TARGET.new" | awk '{print $1}')
+          test "$ACTUAL_HTML_SHA" = "$EXPECTED_HTML_SHA"
+          test -s "$TARGET.new"
+          grep -q "var LECTURE=" "$TARGET.new"
+          grep -q "title:'Dependable Systems'" "$TARGET.new"
+          mv "$TARGET.new" "$TARGET"
+
+      - name: Commit lecture and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lectures/iscarb/Ch10-Dependable-Systems.html
+          git rm .github/workflows/_tmp_update_ch10_once.yml
+          git diff --cached --check
+          git commit -m 'Replace Chapter 10 lecture with 2026 Noor version'
+          git push origin HEAD:main
