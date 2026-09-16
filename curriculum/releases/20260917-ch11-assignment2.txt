@@ -1,0 +1,7 @@
+ISCARB release: Chapter 11 · Reliability Engineering + Assignment 2
+Date: 2026-09-17
+Lecture source: Ch11-Reliability-Engineering_2026_MATCH_CH10.html
+Assignment progression: Assignment 1 + one additional scored MEASURE step
+Assignment points: 5
+Release commit: 3c487d1b6461d9f8656bd59a9a12832bdb9e4fb2
+Purpose: human-authored release marker and GitHub Pages deployment trigger.
