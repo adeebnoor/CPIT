@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "jsdom": "^30.1.0"
+  },
+  "private": true,
+  "scripts": {
+    "test": "node check-path.cjs && node check-assignments.cjs && node check-hub.cjs"
+  }
+}

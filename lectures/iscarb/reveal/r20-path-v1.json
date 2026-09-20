@@ -1,0 +1,6 @@
+{
+  "chapter": "20",
+  "version": "2026-09-ch20-path-v1",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "The transport owner changes its update interval from every minute to every 20 minutes, without changing the API shape. Security still reports current incidents. The pilot owner cannot require transport to revert. Explain how the shared dashboard should change its claims and acceptance decision."
+}

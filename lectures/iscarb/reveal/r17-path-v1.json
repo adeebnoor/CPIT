@@ -1,0 +1,6 @@
+{
+  "chapter": "17",
+  "version": "2026-09-ch17-path-v1",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "A failover drill shows that the deduplication record is stored only in the application service\u2019s memory. After the service restarts, a retry can create another database reservation even when the same request identifier is reused. Revise the scope of your earlier mechanism."
+}

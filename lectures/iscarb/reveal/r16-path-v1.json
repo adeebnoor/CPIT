@@ -1,0 +1,6 @@
+{
+  "chapter": "16",
+  "version": "2026-09-ch16-path-v1",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "A new trace shows that, if a room is already reserved, the component returns the existing reservation identifier without indicating a conflict. The brief did not document this behavior. No second reservation was created. Explain the effect on your postcondition and on what a successful return means."
+}

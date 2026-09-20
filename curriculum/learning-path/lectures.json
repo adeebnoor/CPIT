@@ -1,0 +1,951 @@
+[
+  {
+    "chapter": 10,
+    "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
+    "source_filename": "Ch10-Dependable-Systems_SIMPLE_ISCARB_COMPLETE (1).html",
+    "source_sha256": "877357c5780680c6cc7200c8c4aa3a71a0c5fbab3e2cbeecdbffbd2200064ab3",
+    "original_html_sha256": "04f909d7851350c410cc965aa27d773054ef08df117bd177917061e44dc61f3b",
+    "original_source_sha256": "c8fdf195e6b82198d08642cb35e03c358d9c124a46a7082be19a93055dc84598",
+    "source_download": "lectures/iscarb/sources/Ch10-Original.pdf",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917"
+    ],
+    "source_slide_count": 47,
+    "classroom_units": 16,
+    "original_embedded_images_preserved": 3,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "X03",
+      "CHECK1",
+      "R08",
+      "X04",
+      "X05",
+      "R18",
+      "CHECK2",
+      "X06",
+      "X07",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Dependability and failure",
+        "start": 3,
+        "end": 6,
+        "units": [
+          "X01",
+          "X02"
+        ]
+      },
+      {
+        "title": "Dependability properties",
+        "start": 7,
+        "end": 13,
+        "units": [
+          "X01",
+          "X07"
+        ]
+      },
+      {
+        "title": "Cost and criticality",
+        "start": 14,
+        "end": 18,
+        "units": [
+          "X04"
+        ]
+      },
+      {
+        "title": "Sociotechnical systems and regulation",
+        "start": 19,
+        "end": 25,
+        "units": [
+          "X03"
+        ]
+      },
+      {
+        "title": "Redundancy and diversity",
+        "start": 26,
+        "end": 31,
+        "units": [
+          "X02A",
+          "R08"
+        ]
+      },
+      {
+        "title": "Dependable processes",
+        "start": 32,
+        "end": 39,
+        "units": [
+          "X05",
+          "R18"
+        ]
+      },
+      {
+        "title": "Formal methods",
+        "start": 40,
+        "end": 47,
+        "units": [
+          "X06"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 11,
+    "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
+    "source_filename": "Ch11-Reliability-Engineering_ISCARB_COMPLETE.html",
+    "source_sha256": "94fbad9e4531ccd1c60f557f2abb4b28fc1d1aa19bab796492cdd530310e78ec",
+    "original_html_sha256": "bc0f6b9e6df336d49b0af5823cba7b7ace5028974010de3de78109b998768482",
+    "original_source_sha256": "cb49685b2b914e57ea423e1e73f73025735e150ca5bf38e3500bad914f0f86ff",
+    "source_download": "lectures/iscarb/sources/Ch11-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "1930d3737eaa87f5f28780164b2da761f46c1bcd0cba090305bcc4dffefb5e43",
+      "83e71a8411c91b84a40817138d9fd6c5fde82880a6308165c02ded0d0172d902",
+      "439fc54aee701cd3d5f29e0e32f3439ffe70bb87c979645ce329f4f9f65db202",
+      "4001b502c55eb3d74a88286c976e4438948f84033cbe02c3268d1d3f791c1b33",
+      "736e9ca21af0db72402047b5238c21d82e6f3b6094ea7c24907fadbad0040aec",
+      "2ead10acd304ad39e02494f4b5eb967efe7a1ef12bd5691801921f2d971641c3",
+      "46287eaa97c8fa4192f648509b135fb53188907cdf612f0d4761684f464dce4d",
+      "5dfd4e6c705bfcaf443829deb5519aebe2db7c011a7d6436935a7779a6fe5f1a",
+      "b1b8bc5f80982baa9cdcd22aeb59290548e2379dbc73a40919f00a1145d7c6a6",
+      "df89395219fb3ec7bcd8230e855992f6a19f3254d02875b961890bdacd547904",
+      "0b5586367ac984a34b038810fcf77081000022470c75fe221d214197b838ffcc"
+    ],
+    "source_slide_count": 81,
+    "classroom_units": 19,
+    "original_embedded_images_preserved": 14,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X03",
+      "X04",
+      "CHECK1",
+      "X05",
+      "X06",
+      "X02A",
+      "R09",
+      "CHECK2",
+      "B01",
+      "R08",
+      "R18",
+      "X09",
+      "X10",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Faults, failures and management",
+        "start": 3,
+        "end": 8,
+        "units": [
+          "X01",
+          "X02"
+        ]
+      },
+      {
+        "title": "Reliability, availability and perception",
+        "start": 9,
+        "end": 16,
+        "units": [
+          "X03"
+        ]
+      },
+      {
+        "title": "Metrics and quantitative requirements",
+        "start": 17,
+        "end": 30,
+        "units": [
+          "X04",
+          "X05",
+          "X06"
+        ]
+      },
+      {
+        "title": "Functional reliability requirements",
+        "start": 31,
+        "end": 32,
+        "units": [
+          "X02A"
+        ]
+      },
+      {
+        "title": "Fault-tolerant architectures and diversity",
+        "start": 33,
+        "end": 52,
+        "units": [
+          "R09",
+          "B01",
+          "R08"
+        ]
+      },
+      {
+        "title": "Dependable programming",
+        "start": 53,
+        "end": 69,
+        "units": [
+          "R18"
+        ]
+      },
+      {
+        "title": "Measurement and operational profiles",
+        "start": 70,
+        "end": 81,
+        "units": [
+          "X09",
+          "X10"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 12,
+    "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
+    "source_filename": "Ch12-Safety-Engineering_ISCARB_COMPLETE.html",
+    "source_sha256": "2b49f22a04c0fd05799d832aa32f26d0803c7bc38504ea8254aab725dc666b03",
+    "original_html_sha256": "4670366197e435bbbcd9ecac76c878e4484f5f9d7b49d17f72420a25ce933326",
+    "original_source_sha256": "678e38b4a06a1e84f9e391ae56573c9afae56ad074aa5292afb402dc0900e65b",
+    "source_download": "lectures/iscarb/sources/Ch12-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "62fc9035beb3e6fd3a2663da32bc594f13db8de73e5f3ae74a9f22251b39bc92",
+      "3421e0acd3f7d7c880a6487f887f0f733ab327e83c25ee6e23e8ef2baea0ff01",
+      "e3f528dd3c44af94b2f568a60cac6272ddea152630b9d8e422445e1d880cc8e5",
+      "7df5eac7ad160f75414a81a6c0a91df3e2a5445f98c6cbdd8e2e8494a019eb5d",
+      "855998eccad122b3c4784fbe304c8574e4dc8a788bad7288d8b1b9ef1f991cd5",
+      "e8bc0cb8845159bb0b33dad475ee72fc1ef8e0af064f635f51d2d37e2b612635"
+    ],
+    "source_slide_count": 70,
+    "classroom_units": 19,
+    "original_embedded_images_preserved": 9,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "X03",
+      "CHECK1",
+      "X04",
+      "X05",
+      "X06",
+      "X09",
+      "CHECK2",
+      "R09",
+      "R18",
+      "D12",
+      "B01",
+      "X10",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Safety, criticality and accidents",
+        "start": 3,
+        "end": 14,
+        "units": [
+          "X01",
+          "X02",
+          "X02A"
+        ]
+      },
+      {
+        "title": "Hazard-driven requirements and risk",
+        "start": 15,
+        "end": 24,
+        "units": [
+          "X03",
+          "X04"
+        ]
+      },
+      {
+        "title": "Fault trees and risk reduction",
+        "start": 25,
+        "end": 32,
+        "units": [
+          "X05",
+          "X06"
+        ]
+      },
+      {
+        "title": "Safety processes, logs and reviews",
+        "start": 33,
+        "end": 43,
+        "units": [
+          "X09",
+          "R09"
+        ]
+      },
+      {
+        "title": "Formal methods and static analysis",
+        "start": 44,
+        "end": 53,
+        "units": [
+          "R18",
+          "D12"
+        ]
+      },
+      {
+        "title": "Safety cases and structured arguments",
+        "start": 54,
+        "end": 70,
+        "units": [
+          "B01",
+          "X10"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 13,
+    "path": "lectures/iscarb/Ch13-Security-Engineering.html",
+    "source_filename": "Ch13-Security-Engineering_ISCARB_COMPLETE.html",
+    "source_sha256": "10af3bf8909358a12cc11adbe79db1fe73f90debb820261e2068b138e014fbcb",
+    "original_html_sha256": "4f9136bd2b60891e1237a62ef3bb0057b4dd330ba42ad5eb77a369ace121798d",
+    "original_source_sha256": "40c1a34341193cdf4b5a10d4c0e57ae7049f6e54616538acd6bfb0e748d338ba",
+    "source_download": "lectures/iscarb/sources/Ch13-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "c281fd6044088c5fc7ab1c6c7eeae32cdb554bc037331a8931fe88b58f5e99b1",
+      "42471cd2f387b9b6a1dbaf07828fe61ef1205688089cd941eb1d700b9a615fc1",
+      "3004a5b08b27401f2ea0566a8194c4eb70636c18ed356b9ca70bac1ac63a3b07",
+      "6d94c747a6361012ab98e45eb906448049713a277701ed2d8c06760f003546cc",
+      "e0147e95e5b185899d21499b888591c77bf6c29ea5817587d849f565b73e339b",
+      "63043ae9bc401e6e5924f57b5f6be463c4cd676b8f827533ae95c59579ca39aa",
+      "c469e1289c907afc27c41354b78a64413f3fff05a4dcf7556238e6252e8857c8",
+      "21292a8c946062a4da6a3b82fc59b352a8ff0a62ad4b85aebea0fb90c068f9e8"
+    ],
+    "source_slide_count": 72,
+    "classroom_units": 18,
+    "original_embedded_images_preserved": 11,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "X03",
+      "CHECK1",
+      "X04",
+      "X05",
+      "X06",
+      "R11",
+      "CHECK2",
+      "R09",
+      "B01",
+      "X09",
+      "R18",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Security concepts, levels and threats",
+        "start": 3,
+        "end": 19,
+        "units": [
+          "X01",
+          "X02",
+          "X02A"
+        ]
+      },
+      {
+        "title": "Policies and risk assessment",
+        "start": 20,
+        "end": 28,
+        "units": [
+          "X03",
+          "X04"
+        ]
+      },
+      {
+        "title": "Requirements and misuse cases",
+        "start": 29,
+        "end": 43,
+        "units": [
+          "X05",
+          "X06"
+        ]
+      },
+      {
+        "title": "Secure design and architecture",
+        "start": 44,
+        "end": 63,
+        "units": [
+          "R11",
+          "R09",
+          "B01"
+        ]
+      },
+      {
+        "title": "Programming, testing and assurance",
+        "start": 64,
+        "end": 72,
+        "units": [
+          "X09",
+          "R18"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 14,
+    "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
+    "source_filename": "Ch14-Resilience-Engineering_ISCARB_COMPLETE.html",
+    "source_sha256": "71555deb249a529688fa415b1f2d3f9a021348b5639f14bf0d4740b4892ab109",
+    "original_html_sha256": "3168d7bde54fbc4863b4e4223c25660155a4a4b699c461cfb85acb0897b5147a",
+    "original_source_sha256": "2dc67b0e36511f5cb5ae83ae27a71eb23a1c9b0c13e17875e2b91131f00d47b8",
+    "source_download": "lectures/iscarb/sources/Ch14-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "16a0f6456c57084980980bcc4c38b5480570f7917e1c65504d36d40ae530b94d",
+      "ca462bf14ae229c78adf8c480f197f304da118c3c7f288c08b1c1ab2419fd087",
+      "f082d48c0c892cff62eafb02b2820ef4351ddb558cabb9c197011dee9884eb3b",
+      "5ac273afec2f9a16f70eec6372255db6f7a4d19160ba07e581bfbb46abcc0bd0",
+      "56c2be7bfc996dd9c6a9c3a4146187d49c992967eeaa0a516e8ca5ed115caf42",
+      "fd384ab70c090c88483e10c26d63270a98c79ccbfa163515d32b5d2a854fee99",
+      "34af5f8485dd7c6e0faf384f12d87db75b49cc2646c41bffc2ccdb499abd4375",
+      "bc241e31aa930d987b061adf8cc504683959522aad8423b26013eb1d5bb97ad1",
+      "6e0ebc9195f92ac24fce5e8e3ab0055cd583008ff8e7934a5aa93085c77ea8bb",
+      "c2229a1d4226e9e6d4bf9c2ce43a7baa24e6e1c227173a5354c4257d5c3af390"
+    ],
+    "source_slide_count": 63,
+    "classroom_units": 17,
+    "original_embedded_images_preserved": 13,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "X03",
+      "CHECK1",
+      "X04",
+      "X05",
+      "D14",
+      "X06",
+      "CHECK2",
+      "R18",
+      "B01",
+      "R09",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Resilience, cybersecurity and planning",
+        "start": 3,
+        "end": 17,
+        "units": [
+          "X01",
+          "X02",
+          "X02A"
+        ]
+      },
+      {
+        "title": "Sociotechnical and organizational resilience",
+        "start": 18,
+        "end": 27,
+        "units": [
+          "X03"
+        ]
+      },
+      {
+        "title": "Defensive layers and operational processes",
+        "start": 28,
+        "end": 41,
+        "units": [
+          "X04",
+          "X05",
+          "D14"
+        ]
+      },
+      {
+        "title": "Survivability analysis",
+        "start": 42,
+        "end": 49,
+        "units": [
+          "X06"
+        ]
+      },
+      {
+        "title": "Critical service and resilient architecture",
+        "start": 50,
+        "end": 63,
+        "units": [
+          "R18",
+          "B01",
+          "R09"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 15,
+    "path": "lectures/iscarb/Ch15-Software-Reuse.html",
+    "source_filename": "Ch15-Software-Reuse_ISCARB_COMPLETE.html",
+    "source_sha256": "17298eda5d7e559d3afbc2573605989771e7b1a656bcc6cfd5f295757f4aa4bc",
+    "original_html_sha256": "8cf30f3a261e51cb8b5099a776abdbf0fb57d47b5a5670c72fbd9c9289379fbd",
+    "original_source_sha256": "8332889e7b835934637e81028f130a62d4a010b3a8c81fde240d86336f4fdbaf",
+    "source_download": "lectures/iscarb/sources/Ch15-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "c0bb96c1572c4e7b2eebc35aea2a1fdec58ae2ad4a2c848e823e3ed0c9809872",
+      "a9758d42b58b61ab304b7134ef464a9791a450bc1b12d23e1f2096f0898ba0cb",
+      "f57538bc503351a939728768c9110d39c4b027096f47b60a19d08a1bc6cb5273",
+      "fea0ad89b97a3492353776be5aea349a0a7e69c6b711df61e9a1b7f761476d73",
+      "7ad78a597b78886dce7dd07e4ed9e42202ceffeaafaf8d4e1db50ae8f1d0e895",
+      "2fca06bdee1ba5f5052e9664c742e66624397250f4d1f18de1c0757a483bf5ae",
+      "d54935b32d14f91891a0d2c5dadf78f12a8b137b6a724f0c3d632237dee31fb0",
+      "c4cb0e4e2c3e960d3ac280612b382e3ca3b1460edb27f6549bdb2b1eb97d2b6b",
+      "7e06c30e25ad961a84c3887a0ca61ccad7a13c46a4d0120dc0bbb55eed13bbf1",
+      "3fef704d8d84dd04f7d574046fc3fae9bbc1e45df3da36d7f4eb8df8bdd60e91",
+      "87683e7a3fcd3641c5b18fecc5c3d9d9b56ad0f3213179aade8a1daebc894be3"
+    ],
+    "source_slide_count": 58,
+    "classroom_units": 16,
+    "original_embedded_images_preserved": 14,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "D15",
+      "CHECK1",
+      "X03",
+      "X04",
+      "X05",
+      "X06",
+      "CHECK2",
+      "R18",
+      "R09",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Reuse benefits, problems and planning",
+        "start": 3,
+        "end": 15,
+        "units": [
+          "X01",
+          "X02",
+          "X02A",
+          "D15"
+        ]
+      },
+      {
+        "title": "Frameworks, MVC and inversion of control",
+        "start": 16,
+        "end": 25,
+        "units": [
+          "X03"
+        ]
+      },
+      {
+        "title": "Product lines and configuration",
+        "start": 26,
+        "end": 40,
+        "units": [
+          "X04",
+          "X05",
+          "D15"
+        ]
+      },
+      {
+        "title": "Application reuse, ERP and integration",
+        "start": 41,
+        "end": 58,
+        "units": [
+          "X06",
+          "R18",
+          "R09"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 16,
+    "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
+    "source_filename": "Ch16-Component-Based-SE_ISCARB_COMPLETE.html",
+    "source_sha256": "bdf1a6a8819ba2ef774d0861ba07429e98d202cea20e50031c34625c2fbfc087",
+    "original_html_sha256": "f7365d63ad1fa17b10a8991b56c451bb86c8db31f7bb27d5c5e3d63211dfa031",
+    "original_source_sha256": "ad0dfed50bbbdfba1b1e1201b75d889e4213dfeb3780fe48752129acbca4fe63",
+    "source_download": "lectures/iscarb/sources/Ch16-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "6a4a7ae477bad9fa78c5a29460d69532f3eb30808efc6a10da146a1af6410b88",
+      "5a6fd0e4581228c3378fcaf16500a957023769f23dae48cc796efbae61ac41eb",
+      "acd2fa717aea514a963d58eab876b4bb610b64e192e6e72e4211b3eaab43b06c",
+      "655ca33c2c431092359deb370186a8097a8937fa142ef2617cd73077f960e386",
+      "267c35ba26f02115f05fa873610aa754e2759844892563fbdd110741b7167a7c",
+      "336b7a7881505be56b88ea9e72a5c0f07be283c5e2f7dae3ab5d2f3cdac36bdf",
+      "72824b67fc27ffd76d399a4fd48a816b49158e8b19d474bd281eb2500bb5f08a",
+      "2039319212ce1e2a554c400732117a3e95e63495baea6decafa4c8b59f3ef4a8",
+      "4822c711ecae18f27456f44a8243ac78e6cc481f980485eca8d33ae3a37bbf05",
+      "b8feb8a84c04a27ebd6741ee3e5311fb8e4d725d1306c6cefac0a760a233b5a0",
+      "ea978931e1f01d9460dfa31bc1cb4c12a97c7be81a7b49d084bcdaf2d8e8a211",
+      "1ee3d9d0236ec7576ae1c6a289565d83c31da162266096e8b7b8c4be85565e7f"
+    ],
+    "source_slide_count": 59,
+    "classroom_units": 17,
+    "original_embedded_images_preserved": 15,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02A",
+      "X03",
+      "X04",
+      "CHECK1",
+      "X05",
+      "X06",
+      "R08",
+      "B01",
+      "CHECK2",
+      "R09",
+      "D16",
+      "D16B",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Components, standards and interfaces",
+        "start": 3,
+        "end": 17,
+        "units": [
+          "X01",
+          "X02A",
+          "X03"
+        ]
+      },
+      {
+        "title": "Component models and middleware",
+        "start": 18,
+        "end": 22,
+        "units": [
+          "X04"
+        ]
+      },
+      {
+        "title": "Development for reuse",
+        "start": 23,
+        "end": 33,
+        "units": [
+          "X05",
+          "X06"
+        ]
+      },
+      {
+        "title": "Development with reuse and validation",
+        "start": 34,
+        "end": 39,
+        "units": [
+          "X05",
+          "R08"
+        ]
+      },
+      {
+        "title": "Composition, glue and adapters",
+        "start": 40,
+        "end": 50,
+        "units": [
+          "B01",
+          "R09"
+        ]
+      },
+      {
+        "title": "Interface semantics, OCL and trade-offs",
+        "start": 51,
+        "end": 59,
+        "units": [
+          "D16",
+          "D16B"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 17,
+    "path": "lectures/iscarb/Ch17-Distributed-SE.html",
+    "source_filename": "Ch17-Distributed-SE_ISCARB_COMPLETE.html",
+    "source_sha256": "5f0f8bf0c6b480c73ba9c30e53a6b8308f3d9c4d3c16a1681603c555c74d12f6",
+    "original_html_sha256": "49b108d3ac4ebf3a93a49c0938fb9d3357739b54ed9788e88941a134399fcce7",
+    "original_source_sha256": "22d40ab99fd0e7cb8934e4c034660865aca547dc505ac3de5c24ade68e6f1d83",
+    "source_download": "lectures/iscarb/sources/Ch17-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "317be56625de18e7de5f739a01b1271ecc600e8424977383ca87b8c7064cbd34",
+      "94ee2b0be0e93e22df23c8128f1215a3a16ba2415e7043e8e0031a9a171e62ba",
+      "1c615d574ed7c84a5bd660821f9eae10aee87df337867607845a6d9536e0f9f5",
+      "92986990490507265130980d6b8d1c1a04a8b19b2d33e620bc139025aacabee4",
+      "25bb8ef67da14bc8ab19d44c9a7de5973da53a62cfd0d63d20d7f638db7edd0c",
+      "2a4ca8c9aed47835e1819bdd91d04419af89ea9840b20dbeca90412461733e06",
+      "73ca56a3ff0e557687d706e3c83dd985af081dd01bae0167bcf8e889ff194e09",
+      "25511b06c754d8155efa3a4a592f467e2f72778254086f9059e09f777afbbf48",
+      "31c786b1d6045a6fcce6ada25b925050d02eee98fa3eb5662a4e4505bcd28cb4"
+    ],
+    "source_slide_count": 66,
+    "classroom_units": 18,
+    "original_embedded_images_preserved": 12,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "X03",
+      "CHECK1",
+      "X04",
+      "X05",
+      "X06",
+      "R09",
+      "CHECK2",
+      "B01",
+      "X07",
+      "X09",
+      "X10",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "Characteristics and design issues",
+        "start": 3,
+        "end": 14,
+        "units": [
+          "X01",
+          "X02",
+          "X02A"
+        ]
+      },
+      {
+        "title": "Interaction models and middleware",
+        "start": 15,
+        "end": 22,
+        "units": [
+          "X03",
+          "X04"
+        ]
+      },
+      {
+        "title": "Client-server and layering",
+        "start": 23,
+        "end": 28,
+        "units": [
+          "X05",
+          "R09"
+        ]
+      },
+      {
+        "title": "Architectural patterns",
+        "start": 29,
+        "end": 52,
+        "units": [
+          "X06",
+          "B01",
+          "X07"
+        ]
+      },
+      {
+        "title": "SaaS, SOA and multi-tenancy",
+        "start": 53,
+        "end": 66,
+        "units": [
+          "X09",
+          "X10"
+        ]
+      }
+    ]
+  },
+  {
+    "chapter": 20,
+    "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
+    "source_filename": "Ch20-Systems-of-Systems_ISCARB_COMPLETE.html",
+    "source_sha256": "c60e21f64e175c927db5c22a18fd62716aae87d615050cff2bf643c13235e03f",
+    "original_html_sha256": "a2c8611773098f6762d0e586055ab2f30983b45e84aab0a98c632deab9890479",
+    "original_source_sha256": "ff167dec130867b6e95d2118511fcf504c3a1db35590890d65af6e3b4994e21d",
+    "source_download": "lectures/iscarb/sources/Ch20-Original.pptx",
+    "embedded_image_sha256": [
+      "9aec8723d3bdd8718fbe4941b065b4b222179fae59890ac4a099bfc5a15b8fad",
+      "5ef595665188e2b6d297e1dd105ad5df2f27419ed3a4a216173a4af1c81c7692",
+      "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917",
+      "09d19e989499209f4697861d3132bfff891fad2f11c3c188e606ddbc0950549d",
+      "cc11430e2482e8ab7402b6a800dc72dcde4921ba8ea596dd16f1d7e87f034f1a",
+      "a19c188bb406ead3c684e410dab85c880d0464bf5e584e7d45a4df203f57501d",
+      "9dd47ad69147bc4e5e1ce2d3a15f3e3f0968bd9e7ee566995e0ca13d7c0d6f14",
+      "6f43909f3370e740000b7b0780c0d1eae6fead6c9aa7d9eeb70ec37e8ee08f18",
+      "e6e451bd15d8674470532dbafe4cfc0ec2a611c76a3ec6bf14880e52442ceaf1",
+      "b83804ee6ccbfdb0a44bc4aa0511953252c1437855092c8d849bed37861ab357",
+      "1c08c1faae4be113ab17e8f1b62acb25fbb139e1212b7037d1424bc4a7d5cc8f",
+      "3ee6a1792825a363694cba29357a285ef24490ec959a4cd529b7f1660ec8fd80",
+      "aafbde3e7bf09b87ae1f2c02ffba1a021cec99c8ef132c9d733a3b42cf456b79"
+    ],
+    "source_slide_count": 63,
+    "classroom_units": 16,
+    "original_embedded_images_preserved": 13,
+    "core_keys": [
+      "TITLE",
+      "START",
+      "X01",
+      "X02",
+      "X02A",
+      "X03",
+      "CHECK1",
+      "X04",
+      "X05",
+      "X06",
+      "X09",
+      "CHECK2",
+      "X10",
+      "X08",
+      "APPLY",
+      "END"
+    ],
+    "source_groups": [
+      {
+        "title": "Opening and source outline",
+        "start": 1,
+        "end": 2,
+        "units": [
+          "START"
+        ]
+      },
+      {
+        "title": "SoS characteristics and complexity",
+        "start": 3,
+        "end": 14,
+        "units": [
+          "X01",
+          "X02"
+        ]
+      },
+      {
+        "title": "Classification and reductionism",
+        "start": 15,
+        "end": 26,
+        "units": [
+          "X02A",
+          "X03"
+        ]
+      },
+      {
+        "title": "Engineering, interfaces and deployment",
+        "start": 27,
+        "end": 39,
+        "units": [
+          "X04",
+          "X05"
+        ]
+      },
+      {
+        "title": "Testing and architecture principles",
+        "start": 40,
+        "end": 47,
+        "units": [
+          "X06",
+          "X09",
+          "X10"
+        ]
+      },
+      {
+        "title": "Data feeds, containers and trading",
+        "start": 48,
+        "end": 63,
+        "units": [
+          "X08"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "chapter": "14",
+  "version": "2026-09-ch14-path-v1",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "The outage rehearsal reveals that the desk device and backup server both require the same central sign-in service, which is also unavailable. The local pickup list is present but authorized staff cannot open it. No bypass is authorized. Revisit the shared dependency and the claimed fallback."
+}

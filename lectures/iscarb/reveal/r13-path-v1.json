@@ -1,0 +1,6 @@
+{
+  "chapter": "13",
+  "version": "2026-09-ch13-path-v1",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "A reviewer now provides a trace showing that the preview endpoint rejects a cross-user request, but the bulk export endpoint checks only whether the requester is logged in. The trace uses synthetic student accounts. Explain the implication for the scope of the original security claim."
+}

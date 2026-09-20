@@ -1,0 +1,79 @@
+[
+  {
+    "chapter": 12,
+    "path": "lectures/iscarb/Ch12-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r12-path-v1.json",
+    "edition": "chapter12-path-v1",
+    "version": "2026-09-ch12-path-v1",
+    "storage_key": "fbr:cpit455:ch12:path:v1",
+    "access_key": "fbr:access:ch12:path:v1",
+    "points": 5,
+    "artifact": "Hazard \u2192 requirement \u2192 verification"
+  },
+  {
+    "chapter": 13,
+    "path": "lectures/iscarb/Ch13-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r13-path-v1.json",
+    "edition": "chapter13-path-v1",
+    "version": "2026-09-ch13-path-v1",
+    "storage_key": "fbr:cpit455:ch13:path:v1",
+    "access_key": "fbr:access:ch13:path:v1",
+    "points": 5,
+    "artifact": "Threat \u2192 control \u2192 negative test"
+  },
+  {
+    "chapter": 14,
+    "path": "lectures/iscarb/Ch14-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r14-path-v1.json",
+    "edition": "chapter14-path-v1",
+    "version": "2026-09-ch14-path-v1",
+    "storage_key": "fbr:cpit455:ch14:path:v1",
+    "access_key": "fbr:access:ch14:path:v1",
+    "points": 5,
+    "artifact": "Critical service \u2192 degraded mode \u2192 recovery check"
+  },
+  {
+    "chapter": 15,
+    "path": "lectures/iscarb/Ch15-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r15-path-v1.json",
+    "edition": "chapter15-path-v1",
+    "version": "2026-09-ch15-path-v1",
+    "storage_key": "fbr:cpit455:ch15:path:v1",
+    "access_key": "fbr:access:ch15:path:v1",
+    "points": 5,
+    "artifact": "Options \u2192 constraints \u2192 justified choice"
+  },
+  {
+    "chapter": 16,
+    "path": "lectures/iscarb/Ch16-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r16-path-v1.json",
+    "edition": "chapter16-path-v1",
+    "version": "2026-09-ch16-path-v1",
+    "storage_key": "fbr:cpit455:ch16:path:v1",
+    "access_key": "fbr:access:ch16:path:v1",
+    "points": 5,
+    "artifact": "Interface \u2192 semantics \u2192 adapter and tests"
+  },
+  {
+    "chapter": 17,
+    "path": "lectures/iscarb/Ch17-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r17-path-v1.json",
+    "edition": "chapter17-path-v1",
+    "version": "2026-09-ch17-path-v1",
+    "storage_key": "fbr:cpit455:ch17:path:v1",
+    "access_key": "fbr:access:ch17:path:v1",
+    "points": 5,
+    "artifact": "Architecture \u2192 failure sequence \u2192 recovery evidence"
+  },
+  {
+    "chapter": 20,
+    "path": "lectures/iscarb/Ch20-FBR-Student-Assignment.html",
+    "stress_path": "lectures/iscarb/reveal/r20-path-v1.json",
+    "edition": "chapter20-path-v1",
+    "version": "2026-09-ch20-path-v1",
+    "storage_key": "fbr:cpit455:ch20:path:v1",
+    "access_key": "fbr:access:ch20:path:v1",
+    "points": 5,
+    "artifact": "Governance \u2192 interfaces \u2192 staged acceptance"
+  }
+]
