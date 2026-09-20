@@ -13,6 +13,7 @@ def main():
     if DEST.exists(): shutil.rmtree(DEST)
     DEST.mkdir()
     for name in PUBLIC: shutil.copy2(ROOT/name,DEST/name)
+    shutil.copy2(ROOT/'iSCARB-Teaching-Template.md',DEST/'iSCARB-Teaching-Template.md')
     for name in ['slides','lectures/cimt','lectures/himma','wealth-os']:
         if (ROOT/name).exists(): shutil.copytree(ROOT/name,DEST/name)
     for name in spec['iscarb_public_files']:

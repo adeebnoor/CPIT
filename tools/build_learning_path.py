@@ -11,7 +11,8 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('pathspec',ROOT/'curriculum/learning-path/spec.py');mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
 CHAPTERS,ADDITIONS=mod.CHAPTERS,mod.ADDITIONS
 study_spec=importlib.util.spec_from_file_location('studyspec',ROOT/'curriculum/learning-path/study.py');study_mod=importlib.util.module_from_spec(study_spec);study_spec.loader.exec_module(study_mod)
-BUILD='20260921-mastery-v2'
+visual_spec=importlib.util.spec_from_file_location('visualspec',ROOT/'curriculum/learning-path/visual_story.py');visual_mod=importlib.util.module_from_spec(visual_spec);visual_spec.loader.exec_module(visual_mod)
+BUILD='20260921-visual-v3'
 def clean(x):return BeautifulSoup(str(x),'html.parser').get_text(' ',strip=True)
 def esc(x):return html.escape(str(x),quote=True)
 def textwalk(x):
@@ -72,6 +73,16 @@ def repair_figures(n,L):
   20:{'X03':('ch20_reality','slide 25 · system-of-systems reality'),'X04':('ch20_soseng','slide 29 · SoS engineering'),'X05':('ch20_serviceiface','slide 34 · service interfaces'),'X06':('ch20_ilearn','slide 38 · staged iLearn deployment')}
  }
  for u in L['units']:
+  if n==11 and u['k']=='X06':
+   for b in u.get('blocks',[]):
+    if b.get('t')=='cards':
+     for item in b.get('items',[]):
+      if item.get('lab')=='THE TWO THRESHOLDS':
+       item['txt']='The source example distinguishes <b>transient failures</b>, recoverable by user action, with an illustrative POFOD target of 0.002, from <b>permanent failures</b>, requiring manufacturer intervention, with a target below 0.00002. These are probabilities per demand, not sample-size prescriptions. Any conversion to failures per year also needs a stated demand frequency.'
+    if b.get('lab')=='WHAT THE SPEC OBLIGES YOU TO MEASURE':
+     b['lead']='Count the relevant failures and demands under a representative operational profile.'
+     b['txt']='Report the failure definition, observed failures, number of demands and uncertainty. An estimate such as 1 failure in 500 demands is not proof that the underlying POFOD meets 0.002. Choose the test size using the target, confidence requirement and statistical assumptions. Test duration alone, or fault injection alone, does not establish operational POFOD. See <a href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm">NIST: confidence intervals for proportions</a>.'
+   u['notes']='Distinguish a target probability, its observed estimate and confidence in that estimate. A probability per demand cannot be converted to an annual frequency without demand exposure. Ask what the supplied test record can and cannot support.'
   for b in u.get('blocks',[]):
    if b.get('t')=='figure' and b.get('native')=='props' and n!=10:
     b['srcName']='Chapter 10 recap · course redraw';b['cap']='Five dependability properties; not a figure from this chapter'
@@ -94,13 +105,17 @@ def repair_figures(n,L):
    x=x.replace('Multiple competing standards killed CBSE’s promise of universal reuse. Service-oriented SE is replacing it.','The source describes competing component standards and service-oriented alternatives. Compare their integration assumptions; these historical examples do not establish current market adoption.')
    x=x.replace('Services are based around standards, so there are no communication problems.','Services use shared communication standards, but interoperability, semantics and failures still require validation.')
    x=x.replace('It is impossible for components developed using different approaches to work together.','Components from different models may require bridging, wrappers or adapters rather than direct composition.')
+   x=x.replace('A pattern is not a guarantee. Multi-tier scales &mdash; and it adds a single point of failure at each tier.','A pattern is not a guarantee. A required tier can become a single point of failure if it lacks an effective redundant or degraded-service path.')
+   x=x.replace('A layer-to-tier mapping is a single point of failure until proven otherwise.','Inspect each required tier for redundancy, recovery and shared dependencies; the mapping alone does not establish fault tolerance.')
+   x=x.replace('A pattern is a hypothesis about how the system will fail. Multi-tier hypothesizes &ldquo;one tier at a time&rdquo; &mdash; and breaks when one tier takes everything down.','An architectural pattern organizes responsibilities. Analyze its actual deployment to find bottlenecks, common dependencies and recovery paths.')
+   x=x.replace('Complex to design; standardized middleware never accepted.','Complex to design; middleware compatibility and lifecycle support must be checked.')
    return x
   return x
  L.update(fix(L))
 
 def build(base):
  catalog=[];audit=[]
- css=(ROOT/'curriculum/learning-path/reader.css').read_text()+'\n'+(ROOT/'curriculum/learning-path/study.css').read_text();runtime=(ROOT/'curriculum/learning-path/reader.js').read_text()+'\n'+(ROOT/'curriculum/learning-path/study.js').read_text()
+ css=(ROOT/'curriculum/learning-path/reader.css').read_text()+'\n'+(ROOT/'curriculum/learning-path/study.css').read_text()+'\n'+(ROOT/'curriculum/learning-path/visual-stage.css').read_text();runtime=(ROOT/'curriculum/learning-path/reader.js').read_text()+'\n'+(ROOT/'curriculum/learning-path/study.js').read_text()+'\n'+(ROOT/'curriculum/learning-path/visual-stage.js').read_text()
  for ai,(n,c) in enumerate(CHAPTERS.items(),1):
   source=next(p for p in base.glob(f'Ch{n} *') if p.suffix in ['.pptx','.pdf']);src_html=next(base.glob(f'Ch{n}-*.html'));markup=src_html.read_text()
   soup=BeautifulSoup(markup,'html.parser');script=soup.find_all('script')[0].string
@@ -207,6 +222,7 @@ def build(base):
   ordered=[by[k] for k in corekeys]+[by['READING'],by['PREP'],by['C01']]+[by[k] for k in studykeys]+[u for k,u in by.items() if k not in corekeys+studykeys+['C01','READING','PREP']]
   L['units']=ordered;L['mainUnits']=corekeys;L['appendixUnits']=[u['k'] for u in ordered if u['route']!='core']
   for u in ordered:u['appendix']=u['route']!='core'
+  visual_mod.attach(L)
   # Remove copied administrative claims from all retained toolkit text.
   data=json.dumps(L,ensure_ascii=False).replace('before Assignment 1','before the chapter assignment').replace('this is what Assignment 1 asks for','reusable practice artifact').replace('CLO1','LO1').replace('CLO2','LO2').replace('CLO3','LO3').replace('CLO4','LO4').replace('CLO5','LO5')
   data=data.replace('</script','<\\/script')
