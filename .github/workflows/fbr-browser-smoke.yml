@@ -26,7 +26,7 @@ permissions:
 jobs:
   course-interactions:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,6 +40,8 @@ jobs:
         run: node tools/check-assignment-v5.cjs
       - name: Check all nine learning paths and complete source ledgers
         run: node tools/learning-path-tests/check-path.cjs
+      - name: Check visual pagination interactions and offline recovery
+        run: node tools/learning-path-tests/check-visual.cjs
       - name: Check progressive assignments and chapter-specific exports
         run: node tools/learning-path-tests/check-assignments.cjs
       - name: Check executable contract and retry teaching models
