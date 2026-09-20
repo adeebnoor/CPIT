@@ -10,7 +10,8 @@ from pypdf import PdfReader
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('pathspec',ROOT/'curriculum/learning-path/spec.py');mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
 CHAPTERS,ADDITIONS=mod.CHAPTERS,mod.ADDITIONS
-BUILD='20260921-learning-path-v1'
+study_spec=importlib.util.spec_from_file_location('studyspec',ROOT/'curriculum/learning-path/study.py');study_mod=importlib.util.module_from_spec(study_spec);study_spec.loader.exec_module(study_mod)
+BUILD='20260921-mastery-v2'
 def clean(x):return BeautifulSoup(str(x),'html.parser').get_text(' ',strip=True)
 def esc(x):return html.escape(str(x),quote=True)
 def textwalk(x):
@@ -99,7 +100,7 @@ def repair_figures(n,L):
 
 def build(base):
  catalog=[];audit=[]
- css=(ROOT/'curriculum/learning-path/reader.css').read_text();runtime=(ROOT/'curriculum/learning-path/reader.js').read_text()
+ css=(ROOT/'curriculum/learning-path/reader.css').read_text()+'\n'+(ROOT/'curriculum/learning-path/study.css').read_text();runtime=(ROOT/'curriculum/learning-path/reader.js').read_text()+'\n'+(ROOT/'curriculum/learning-path/study.js').read_text()
  for ai,(n,c) in enumerate(CHAPTERS.items(),1):
   source=next(p for p in base.glob(f'Ch{n} *') if p.suffix in ['.pptx','.pdf']);src_html=next(base.glob(f'Ch{n}-*.html'));markup=src_html.read_text()
   soup=BeautifulSoup(markup,'html.parser');script=soup.find_all('script')[0].string
@@ -114,6 +115,7 @@ def build(base):
    if k in by:by[k]['title']=t
   destsource=f'lectures/iscarb/sources/Ch{n}-Original{source.suffix}';shutil.copy2(source,ROOT/destsource)
   L['path']=dict(chapter=n,assignment=ai,exit=c['exit'],sourceFile='sources/Ch'+str(n)+'-Original'+source.suffix,build=BUILD)
+  L['study']=study_mod.STUDY[n]
   L['course']=f'CPIT-455 / CHAPTER {n}';L['title']=c['title'];L['titleLead']=c['title'];L['titleAccent']=''
   L['tagline']=c['challenge']+' Learn the source concepts, try three short interactions, then apply them in a separate assignment.'
   L['sourceMap']=f'Supplied original Chapter {n} · {count} source slides · complete source ledger in Source review'
@@ -162,10 +164,12 @@ def build(base):
   case=by['R01'];goals=[]
   for b in by.get('R02R03',{}).get('blocks',[]):
    if b.get('t')=='rows':goals=[clean(x.get('txt','')) for x in b.get('items',[])][:5]
-  if len(goals)!=5:goals=c['exit']
+  goals=c['exit']
   case_text=case.get('sub','');decision=next((i.get('txt','') for b in case.get('blocks',[]) for i in b.get('items',[]) if 'DECISION' in i.get('lab','')),'')
   sessions='two teaching blocks of about 60–75 minutes' if c['weeks']==2 else 'one teaching block of about 75–90 minutes'
   intro=f'<div class="lp-callout"><p><b>Today’s artifact:</b> {esc(c["artifact"])}.</p><p><b>Fictional teaching case:</b> {case_text}</p><p>{decision}</p></div><h2 style="font:700 25px/1.4 system-ui">Five chapter learning objectives</h2><ol class="lp-outcomes">'+''.join('<li>'+g+'</li>' for g in goals)+'</ol>'+f'<p style="font:17px/1.6 system-ui"><b>Pacing suggestion:</b> {sessions}, plus 20–30 minutes of targeted source review. These are planning estimates, not an official timetable. Pause after Check 2 if teaching in two blocks. If time runs out, finish the remaining source topics in the next block; they stay required.</p><div class="lp-actions"><button class="lp-btn" data-jump="C01">See the source-to-lesson map</button></div>'
+  intro=intro.replace('plus 20–30 minutes of targeted source review','plus the named required reading and a five-question preparation check (initial planning estimate: 15–25 minutes total; report your actual time)')
+  intro+='<div class="lp-actions"><button class="lp-btn" data-jump="READING">Required self-study: exact pages and task</button><button class="lp-btn" data-jump="PREP">Five-objective preparation check</button></div><p class="lp-study-note">Complete this preparation before starting the chapter assignment and before the next chapter discussion. Blackboard supplies the calendar date. The five objectives, classroom concepts and named self-study are in chapter assessment scope; the optional toolkit is enrichment unless explicitly assigned. Do not repeat a completed submission under this new edition unless instructed.</p>'
   by['START']=rawunit('START','Your route through this chapter',intro);by['TITLE'].update(route='core',appendix=False)
   for idx,(q,a) in enumerate(c['checks'],1):by['CHECK'+str(idx)]=dict(k='CHECK'+str(idx),title='Check '+str(idx)+' · recall before revealing',phase='CHECK',route='core',blocks=[dict(t='wide',c='sand',lab='60-SECOND PAUSE',txt=q)],task='Think individually for 30 seconds, compare with a partner, then reveal the explanation.',answer=a,timebox='60 sec',appendix=False)
   # One concise decision practice keeps the methodology in the teaching route.
@@ -190,7 +194,17 @@ def build(base):
    rows.append('<tr><td>'+esc(title)+'</td><td>'+str(a)+'–'+str(b)+'</td><td>'+links+'</td><td><button class="lp-btn" data-jump="'+key+'">Read source</button></td></tr>')
   if covered!=set(range(1,count+1)):raise ValueError(f'Source coverage incomplete: {n}: '+str(set(range(1,count+1))-covered))
   by['C01']=rawunit('C01','Source coverage and study checklist',f'<div class="lp-callout"><p><b>{count} supplied slides indexed.</b> Every original topic has a classroom location and a source review location. This map records material availability, not time actually taught or student mastery.</p><p>Five chapter objectives connect to supplied syllabus CLO '+', '.join(map(str,c['clo']))+'. Original concepts remain required even when detailed examples are completed after class.</p></div><div class="lp-tablewrap"><table class="lp-table"><thead><tr><th>Original topic</th><th>Source slides</th><th>Classroom location</th><th>Full source</th></tr></thead><tbody>'+''.join(rows)+'</tbody></table></div>',route='study')
-  ordered=[by[k] for k in corekeys]+[by['C01']]+[by[k] for k in studykeys]+[u for k,u in by.items() if k not in corekeys+studykeys+['C01']]
+  reading=study_mod.STUDY[n];required='<div class="lp-callout"><p><b>Required self-study · before the assignment and next chapter discussion.</b> Read the two selections below, attempt the five-question check, and use one assigned source slide to support the assignment artifact. Blackboard provides the calendar deadline.</p><p><b>Time budget:</b> initially 15–25 minutes including the check; record actual time. These replace unfocused source browsing. The original source ledger remains available for clarification and unfinished classroom topics.</p></div>'
+  for title,a,b in reading['readings']:
+   required+='<div class="lp-reading-row"><h3>'+esc(title)+'</h3><p>Original source slides '+str(a)+'–'+str(b)+'</p><div class="lp-actions">'+''.join('<button class="lp-btn" data-source-slide="'+str(p)+'">Slide '+str(p)+'</button>' for p in range(a,b+1))+'</div></div>'
+  required+='<p class="lp-study-note"><b>Observable work:</b> identify the source slide and explain how its concept changes or supports your artifact. A citation or a checked box alone is insufficient. In the next class, be ready to explain a related example in your own words.</p><p class="lp-study-note"><b>Assessment scope:</b> all five chapter objectives, the classroom route and these named selections. Full source examples support this scope; archived administrative/title slides and optional toolkit activities are not extra assessed requirements. The instructor must announce any further assigned source topic in Blackboard before assessing it.</p><div class="lp-actions"><button class="lp-btn" data-jump="PREP">Attempt the five-objective check</button><button class="lp-btn" data-jump="C01">Full source map</button></div>'
+  by['READING']=rawunit('READING','Required self-study · pages, purpose and deadline',required,route='study')
+  quiz='<p class="lp-study-note">One question per chapter objective, in the same order as the five objectives. Attempt all five before opening feedback. Retry after reviewing an error. This public practice is not a secure test; the instructor uses a changed example during class.</p><form id="prepQuiz" class="lp-prep">'
+  for qi,(q,options,answer,why) in enumerate(reading['quiz']):
+   quiz+='<fieldset><legend>LO '+str(qi+1)+' · '+esc(q)+'</legend>'+''.join('<label><input type="radio" name="prep-'+str(qi)+'" value="'+str(oi)+'">'+esc(opt)+'</label>' for oi,opt in enumerate(options))+'<p hidden data-prep-feedback id="prep-feedback-'+str(qi)+'" class="prep-feedback"></p></fieldset>'
+  quiz+='<button type="button" class="lp-btn" id="checkPrep">Check my five answers</button><div id="prepStatus" role="status" aria-live="polite">Attempt first. Feedback is initially hidden.</div></form>'
+  by['PREP']=rawunit('PREP','Check all five objectives',quiz,route='study')
+  ordered=[by[k] for k in corekeys]+[by['READING'],by['PREP'],by['C01']]+[by[k] for k in studykeys]+[u for k,u in by.items() if k not in corekeys+studykeys+['C01','READING','PREP']]
   L['units']=ordered;L['mainUnits']=corekeys;L['appendixUnits']=[u['k'] for u in ordered if u['route']!='core']
   for u in ordered:u['appendix']=u['route']!='core'
   # Remove copied administrative claims from all retained toolkit text.

@@ -4,6 +4,6 @@
   },
   "private": true,
   "scripts": {
-    "test": "node check-path.cjs && node check-assignments.cjs && node check-hub.cjs"
+    "test": "node check-path.cjs && node check-assignments.cjs && node check-hub.cjs && node check-labs.cjs"
   }
 }

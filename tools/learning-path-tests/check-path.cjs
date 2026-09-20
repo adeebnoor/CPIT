@@ -15,11 +15,15 @@ for(const c of catalog){
   const ck=w.U.findIndex(u=>u.k==='CHECK1');w.go(ck,true);let b=d.querySelector('.slide.on [data-answer-toggle]');assert(b);let box=d.querySelector('.slide.on [data-answer-box]');assert(box.hidden);b.click();assert(!box.hidden);b.click();assert(box.hidden);
   d.querySelector('[data-route-tab="toolkit"]').click();assert.equal(w.U[w.cur].k,'R07');
   d.querySelector('[data-route-tab="core"]').click();assert.equal(w.U[w.cur].k,'START');
+  d.querySelector('[data-route-tab="study"]').click();assert.equal(w.U[w.cur].k,'READING');
+  const page=d.querySelector('.slide.on [data-source-slide]');const sourceId=page.dataset.sourceSlide;page.click();assert(d.getElementById('source-slide-'+sourceId).open);assert.equal(w.U[w.cur].route,'study');
+  w.go(w.U.findIndex(u=>u.k==='PREP'),true);assert.equal(d.querySelectorAll('#prepQuiz fieldset').length,5);d.getElementById('checkPrep').click();assert(d.getElementById('prepStatus').textContent.includes('Attempt all five'));assert([...d.querySelectorAll('[data-prep-feedback]')].every(x=>x.hidden));
+  w.eval('LECTURE.study.quiz').forEach((q,i)=>{const el=d.querySelector('input[name="prep-'+i+'"][value="'+q[2]+'"]');el.checked=true;el.dispatchEvent(new w.Event('change',{bubbles:true}));});d.getElementById('checkPrep').click();assert(d.getElementById('prepStatus').textContent.includes('5 / 5'));assert([...d.querySelectorAll('[data-prep-feedback]')].every(x=>!x.hidden));assert(w.localStorage.getItem(w.eval('KEY')+'-preparation-v2').includes('firstAttempt'));
   w.go(w.U.findIndex(u=>u.k==='APPLY'),true);let f=d.querySelector('[data-f="path_claim"]');f.value='Restrict the release until the stated operating condition has been verified.';f.dispatchEvent(new w.Event('input',{bubbles:true}));assert(w.S.f.path_claim.includes('Restrict'));assert(w.caseText().includes('Restrict'));
   w.fillOver();assert(d.getElementById('oG').textContent.includes('Required source review'));
   const unresolved=d.getElementById('deck').innerHTML.match(/\{\{[^}]+\}\}/g)||[];assert.equal(unresolved.length,0,unresolved.join(' '));
   const bad=[...d.querySelectorAll('img')].filter(i=>!i.getAttribute('src')||/undefined/.test(i.getAttribute('src')));assert.equal(bad.length,0);
-  console.log('PASS CH'+c.chapter+' · navigation, source ledger, hidden answers, saved practice, export, topic links');
+  console.log('PASS CH'+c.chapter+' · navigation, source ledger, assigned reading, preparation feedback, saved practice and export');
   dom.window.close();
  }catch(e){failed=true;console.log('FAIL CH'+c.chapter,e.stack);if(w)w.close();}
 }
