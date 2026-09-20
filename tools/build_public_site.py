@@ -38,5 +38,5 @@ def main():
     for item in spec['lectures']+spec['assignments']:
         name=item['path']
         if (ROOT/name).read_bytes()!=(DEST/name).read_bytes(): raise SystemExit(f'Staging changed approved standalone content: {name}')
-    print('Public site staged: Chapters 10 and 11 with reviewed progressive assignments, identical to validated sources.')
+    print('Public site staged: Nine chapters with progressive assignments and complete source ledgers, identical to validated sources.')
 if __name__=='__main__': main()

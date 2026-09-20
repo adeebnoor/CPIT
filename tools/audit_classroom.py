@@ -10,7 +10,6 @@ CATALOG = ROOT / "curriculum/publication.json"
 CURRENT_PAGES = ["iscarb.html", "student-guide.html", "course-resources.html",
                  "download.html", "fbr-submission.html", "index.html", "404.html"]
 WITHDRAWN_ROUTE = re.compile(
-    r"Ch(?:12|13|14|15|16|17|20)-[^\s\"'<>]*\.html|"
     r"Ch10-Dependable-Systems-(?:Faculty(?:-Rich)?|Final100)\.html",
     re.I,
 )
@@ -36,8 +35,9 @@ def audit(root=ROOT):
         errors.append("Automatic generation must stay disabled for reviewed ISCARB releases.")
     lecture_chapters=[x.get("chapter") for x in spec.get("lectures", [])]
     assignment_chapters=[x.get("chapter") for x in spec.get("assignments", [])]
-    if lecture_chapters != [10,11] or assignment_chapters != [10,11]:
-        errors.append("This release must authorize Chapters 10 and 11, each with one reviewed assignment.")
+    expected = [10,11,12,13,14,15,16,17,20]
+    if lecture_chapters != expected or assignment_chapters != expected:
+        errors.append("The authorized nine-chapter release requires one lecture and assignment per supplied chapter.")
     allowed=set(spec.get("iscarb_public_files", []))
     # Immutable lectures: exact bytes and embedded figures are audited.
     for lecture in spec.get("lectures", []):
@@ -107,6 +107,6 @@ def audit(root=ROOT):
 def main():
     errors=audit(Path(sys.argv[1]) if len(sys.argv)>1 else ROOT)
     if errors: print("\n".join(errors),file=sys.stderr); return 1
-    print("PASS: Chapters 10 and 11, progressive assignments, reveal payloads, exact lecture bytes, and current links are valid.")
+    print("PASS: Nine chapters, progressive assignments, reveal payloads, exact lecture bytes, and current links are valid.")
     return 0
 if __name__=="__main__": raise SystemExit(main())

@@ -31,7 +31,13 @@ jobs:
           node-version: '24'
       - name: Install DOM test environment
         run: npm install --no-save --package-lock=false jsdom@30.0.1
-      - name: Check current course interactions and withdrawn routes
+      - name: Check current course interactions and invalid routes
         run: node tools/check-course-interactions.cjs
       - name: Check reviewed assignment commitment, recovery and exports
         run: node tools/check-assignment-v5.cjs
+      - name: Check all nine learning paths and complete source ledgers
+        run: node tools/learning-path-tests/check-path.cjs
+      - name: Check progressive assignments and chapter-specific exports
+        run: node tools/learning-path-tests/check-assignments.cjs
+      - name: Check nine-chapter hub and gateways
+        run: node tools/learning-path-tests/check-hub.cjs
