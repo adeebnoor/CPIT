@@ -1,0 +1,6 @@
+{
+  "chapter": "16",
+  "version": "2026-09-ch16-mastery-v2",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "A trace outside the small duration-test model shows that an already-reserved room returns its existing reservation identifier without signaling a conflict. No second reservation was created. The brief did not document this behavior. Explain why your executed duration tests do or do not address this observation, and revise the success postcondition or request a documented contract."
+}

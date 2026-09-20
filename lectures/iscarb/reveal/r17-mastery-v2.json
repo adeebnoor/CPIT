@@ -1,0 +1,6 @@
+{
+  "chapter": "17",
+  "version": "2026-09-ch17-mastery-v2",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "A separate reviewed failover trace now shows that request identifiers and their outcomes are stored atomically with reservations in persistent storage. Replaying the same identifier after restart returns the existing outcome without a second reservation. This evidence covers a single booking store; it does not cover external payment side effects. Compare it with your simulator results and state whether retaining a bounded retry policy is justified."
+}

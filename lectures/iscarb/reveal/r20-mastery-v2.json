@@ -1,0 +1,6 @@
+{
+  "chapter": "20",
+  "version": "2026-09-ch20-mastery-v2",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "Transport changes location updates from every minute to every 20 minutes without changing the API shape. Security observations remain current. The pilot owner cannot force transport to revert, and facilities still benefits from current security incidents even without transport locations. Decide whether to retain, narrow or replace the shared claim, and identify what remains useful."
+}

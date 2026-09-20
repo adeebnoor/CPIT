@@ -9,6 +9,9 @@ on:
       - 'iscarb-hub.*'
       - 'student-guide.html'
       - 'course-resources.html'
+      - 'instructor-guide.html'
+      - 'curriculum/learning-path/**'
+      - 'tools/learning-path-tests/**'
       - 'download.html'
       - 'fbr-submission.html'
       - 'lectures/iscarb/**'
@@ -39,5 +42,7 @@ jobs:
         run: node tools/learning-path-tests/check-path.cjs
       - name: Check progressive assignments and chapter-specific exports
         run: node tools/learning-path-tests/check-assignments.cjs
+      - name: Check executable contract and retry teaching models
+        run: node tools/learning-path-tests/check-labs.cjs
       - name: Check nine-chapter hub and gateways
         run: node tools/learning-path-tests/check-hub.cjs

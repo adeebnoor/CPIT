@@ -1,0 +1,9 @@
+.lp-prep fieldset{border:1px solid var(--line,#555);border-radius:12px;padding:18px;margin:18px 0;min-width:0}
+.lp-prep legend{font-weight:750;font-size:19px;padding:0 8px;white-space:normal}
+.lp-prep label{display:flex;gap:12px;align-items:flex-start;padding:9px;cursor:pointer;font:18px/1.55 system-ui}
+.lp-prep input[type=radio]{width:20px;min-width:20px;height:20px;margin:4px 0}
+.lp-prep .prep-feedback{font:18px/1.6 system-ui;padding:14px;border-left:4px solid #b6e85b;background:rgba(150,180,70,.08)}
+.lp-reading-row{padding:16px 0;border-bottom:1px solid var(--line,#555)}
+.lp-reading-row h3{font:750 21px/1.4 system-ui;margin:0 0 8px}
+.lp-study-note{font:17px/1.65 system-ui;max-width:90ch}
+#prepStatus{font:18px/1.6 system-ui;padding:16px 0}

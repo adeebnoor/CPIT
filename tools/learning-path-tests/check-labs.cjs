@@ -1,0 +1,7 @@
+const assert=require('assert/strict'),lab=require('../../curriculum/learning-path/labs.js');
+const duration=[{name:'fraction',durationMinutes:0.5,expectedStatus:'accepted',expectedSeconds:30},{name:'upper',durationMinutes:120,expectedStatus:'accepted',expectedSeconds:7200},{name:'over',durationMinutes:120.1,expectedStatus:'rejected',expectedSeconds:null},{name:'string',durationMinutes:'5',expectedStatus:'rejected',expectedSeconds:null}];
+assert.deepEqual(lab.run(16,'corrected',lab.casesFrom(JSON.stringify(duration),16)).map(x=>x.passed),[true,true,true,true]);assert.deepEqual(lab.run(16,'baseline',duration).map(x=>x.passed),[false,false,false,true]);
+const retry=[{name:'restart',events:['send:a','lose-response','restart','retry:a'],expectedReservations:1},{name:'new id',events:['send:b','lose-response','retry:c'],expectedReservations:2},{name:'no restart',events:['send:d','retry:d'],expectedReservations:1}];
+assert.deepEqual(lab.run(17,'baseline',lab.casesFrom(JSON.stringify(retry),17)).map(x=>x.actual.reservations),[2,2,1]);assert.deepEqual(lab.run(17,'corrected',retry).map(x=>x.actual.reservations),[1,2,1]);
+assert.throws(()=>lab.casesFrom('not json',16));assert.throws(()=>lab.casesFrom('[{"name":"x","events":["restart","retry:x"],"expectedReservations":1}]',17));assert.throws(()=>lab.casesFrom(JSON.stringify([{...duration[0],name:'same'},{...duration[1],name:'same'},duration[2]]),16));
+console.log('PASS executable teaching models · unit conversion, boundaries, invalid types, response loss, restart, durable identity and input validation');

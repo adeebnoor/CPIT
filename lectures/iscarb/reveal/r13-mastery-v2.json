@@ -1,0 +1,6 @@
+{
+  "chapter": "13",
+  "version": "2026-09-ch13-mastery-v2",
+  "label": "STRESS \u00b7 new evidence",
+  "text": "A reviewer supplies synthetic-account tests of both preview and bulk-export endpoints. Cross-user requests are rejected server-side on both paths; allowed requests succeed. The report identifies the tested release and roles, but does not include a review of sensitive information in logs. Explain which concern is resolved, which remains, and whether your original action should be retained, relaxed or narrowed."
+}

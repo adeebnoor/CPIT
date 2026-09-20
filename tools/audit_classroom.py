@@ -7,7 +7,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "curriculum/publication.json"
-CURRENT_PAGES = ["iscarb.html", "student-guide.html", "course-resources.html",
+CURRENT_PAGES = ["iscarb.html", "student-guide.html", "course-resources.html", "instructor-guide.html",
                  "download.html", "fbr-submission.html", "index.html", "404.html"]
 WITHDRAWN_ROUTE = re.compile(
     r"Ch10-Dependable-Systems-(?:Faculty(?:-Rich)?|Final100)\.html",
@@ -76,7 +76,9 @@ def audit(root=ROOT):
         if len(page.ids)!=len(set(page.ids)): errors.append(f"Chapter {ch} assignment has duplicate static IDs.")
         for token in (assignment.get("storage_key"),assignment.get("access_key"),assignment.get("stress_path").split("lectures/iscarb/")[-1],assignment.get("version")):
             if token and token not in a: errors.append(f"Chapter {ch} assignment is missing required identity token: {token}")
-        if ch==10 and "fbr:cpit455:ch10:prod:v4" not in a: errors.append("Chapter 10 must preserve legacy draft recovery.")
+        if ch==10:
+            previous=root/assignment.get('previous_path',assignment['path'])
+            if not previous.is_file() or "fbr:cpit455:ch10:prod:v4" not in previous.read_text(): errors.append("Chapter 10 must preserve legacy draft recovery through the previous edition.")
         if ch==11:
             if assignment.get("points")!=5 or "MEASURE · 1 POINT" not in a or "20,000" not in a:
                 errors.append("Assignment 2 must preserve the five-point progressive rubric and measurement step.")
