@@ -32,6 +32,8 @@ def apply(root):
     s='\n'.join(lines)+'\n'
     s=once(s,"s.id==='TITLE'?'A decision you can explain':s.title", "s.id==='TITLE'?'A decision you can explain':s.id==='MAP'?'Chapter mind map':s.title")
     s=once(s,"jumpButton('START','Start the case')", "jumpButton('MAP','See the chapter map →')")
+    s=once(s,"jumpButton('MAP','See the five objectives')", "button('Five objectives','OBJECTIVES')")
+    s=once(s,"<span>${esc(s.title)}</span></button>","<span>${esc(s.id==='MAP'?'Chapter mind map':s.title)}</span></button>")
     s=once(s,"${D.slides[index].title}`;save();}", "${D.slides[index].title}`;updateMapLocation();save();}")
     s=once(s,"function tools(){modal(","function legacyTools(){modal(")
     s=once(s,'TOOLS:tools,CARD:card', 'TOOLS:studyTools,OBJECTIVES:mapObjectives,CARD:card')
@@ -93,6 +95,10 @@ def apply(root):
         assert seen=={name,RUNTIME,CSS}
         with zipfile.ZipFile(io.BytesIO(dest.getvalue())) as z:assert z.testzip() is None
         write(pn,dest.getvalue())
+    # Preserve the assertion, but update the intentionally changed entry contract.
+    test_name='tools/check-course-interactions.cjs'
+    test=(root/test_name).read_text()
+    write(test_name,once(test,'Ch10-Dependable-Systems.html#START','Ch10-Dependable-Systems.html#TITLE'))
     for name in changed:
         if name in pub['delivery_asset_sha256']:pub['delivery_asset_sha256'][name]=sha((root/name).read_bytes())
     pub['mindmap_version']=VERSION
