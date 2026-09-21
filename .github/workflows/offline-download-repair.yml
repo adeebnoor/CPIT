@@ -1,88 +1,76 @@
-name: Repair iSCARB offline download links
+name: Verify iSCARB offline downloads
 on:
   push:
     paths: ['.github/workflows/offline-download-repair.yml']
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
-  group: iscarb-offline-download-repair
-  cancel-in-progress: false
+  group: iscarb-offline-live-check
+  cancel-in-progress: true
 jobs:
-  repair:
+  verify:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Correct the nine verified mislabeled download links
+      - name: Verify source and assignment integrity
+        run: python tools/audit_classroom.py
+      - name: Wait for the corrected download links on the public course
         run: |
           mkdir -p test-results/offline-downloads
           python - <<'PY'
+          import hashlib,time,urllib.request,json
           from pathlib import Path
-          import re,json,subprocess
-          hub=Path('iscarb.html')
-          assert subprocess.check_output(['git','hash-object','iscarb.html'],text=True).strip()=='3295c8c1e584d82cba50fb9626abb82962efdbac','Hub changed; review before applying patch'
-          before=hub.read_text(encoding='utf-8')
-          pattern=r'<a class="text-link" download="" href="lectures/iscarb/(Ch([0-9]+)-[^"/]+\.html)">Offline ZIP ↓</a>'
-          matches=list(re.finditer(pattern,before))
-          assert [int(m[2]) for m in matches]==[10,11,12,13,14,15,16,17,20]
-          def corrected(m):
-              ch=m[2]
-              return '<a class="text-link" download="Ch'+ch+'-iSCARB.zip" href="lectures/iscarb/packages/Ch'+ch+'-iSCARB.zip">Offline ZIP ↓</a>'
-          after,count=re.subn(pattern,corrected,before)
-          assert count==9
-          hub.write_text(after,encoding='utf-8')
-          guide=Path('student-guide.html');s=guide.read_text(encoding='utf-8')
-          old='extract it, and keep its runtime, asset and source folders together.'
-          new='extract it completely, then open <b>START-HERE.html</b> in Chrome, Edge or Firefox on your computer. Keep its runtime, asset and source folders together; do not open the lecture from inside the compressed ZIP.'
-          assert s.count(old)==1
-          guide.write_text(s.replace(old,new),encoding='utf-8')
-          test=Path('tools/check_offline_downloads.py');s=test.read_text()
-          old='await Promise.all(imgs.map(i => i.decode().catch(() => {})));'
-          new="imgs.forEach(i => { i.loading = 'eager'; });\n      await Promise.all(imgs.map(i => i.decode().catch(() => {})));"
-          assert s.count(old)==1
-          test.write_text(s.replace(old,new))
-          Path('test-results/offline-downloads/diagnosis.json').write_text(json.dumps({'cause':'Nine hub links labeled Offline ZIP pointed to HTML shells, not archive files.','incorrect_targets':[m[1] for m in matches],'corrected_links':count,'archives_modified':False,'lecture_and_assignment_content_modified':False},indent=2))
+          expected={name:hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in ['iscarb.html','student-guide.html']}
+          records=[]
+          for attempt in range(30):
+              records=[]
+              for name,digest in expected.items():
+                  try:
+                      req=urllib.request.Request('https://adeebnoor.github.io/CPIT/'+name+'?verify-offline='+str(int(time.time())),headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:data=r.read()
+                      actual=hashlib.sha256(data).hexdigest()
+                      records.append({'file':name,'expected':digest,'actual':actual,'match':actual==digest})
+                  except Exception as e:records.append({'file':name,'match':False,'error':str(e)})
+              if all(x['match'] for x in records):break
+              time.sleep(5)
+          assert all(x['match'] for x in records),records
+          Path('test-results/offline-downloads/live-hub-verification.json').write_text(json.dumps(records,indent=2))
           PY
-      - name: Preserve source and assignment release checks
-        run: |
-          python tools/audit_classroom.py
-          node tools/check-fbr-release.mjs
-          python tools/build_public_site.py
-      - name: Install isolated offline test browser
+      - name: Install clean test browser
         run: |
           python -m pip install playwright
           python -m playwright install --with-deps chromium
-      - name: Click every corrected download, unzip, and open in a file-origin offline browser
-        run: |
-          python -m http.server 8765 --directory _site > /tmp/offline-test-server.log 2>&1 &
-          sleep 2
-          set -o pipefail
-          COURSE_BASE_URL=http://127.0.0.1:8765/ python -u tools/check_offline_downloads.py 2>&1 | tee test-results/offline-downloads/staging.log
-      - name: Stage the narrowly scoped fix only after verification
+      - name: Exercise public download buttons, then the extracted local files with networking disabled
+        env:
+          COURSE_BASE_URL: https://adeebnoor.github.io/CPIT/
         run: |
           python - <<'PY'
-          import subprocess
-          changed=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
-          assert changed=={'iscarb.html','student-guide.html','tools/check_offline_downloads.py'},changed
+          from pathlib import Path
+          p=Path('tools/check_offline_downloads.py');s=p.read_text()
+          old="await page.evaluate('iscarb.go(3)')\n    await page.screenshot"
+          new="await page.evaluate('iscarb.go(3)')\n    await loaded_images(page)\n    await page.wait_for_timeout(150)\n    await page.screenshot"
+          assert old in s
+          p.write_text(s.replace(old,new))
           PY
-          git switch -c fix/iscarb-offline-downloads-20260921
-          git add iscarb.html student-guide.html tools/check_offline_downloads.py
-          git config user.name 'Prof. Adeeb Noor'
-          git config user.email 'adeebnoor@users.noreply.github.com'
-          git commit -m 'Fix all nine Offline ZIP links and validate extracted local chapters with networking disabled'
-          git push origin HEAD:refs/heads/fix/iscarb-offline-downloads-20260921
-          git rev-parse HEAD > test-results/offline-downloads/REVIEWED_COMMIT.txt
-      - name: Retain download and offline execution evidence
+          set -o pipefail
+          python -u tools/check_offline_downloads.py 2>&1 | tee test-results/offline-downloads/live.log
+          git rev-parse HEAD > test-results/offline-downloads/VERIFIED_COMMIT.txt
+      - name: Preserve live download and offline browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: offline-download-repair-proof
+          name: iscarb-live-offline-download-proof
           path: test-results/offline-downloads/
           retention-days: 14
