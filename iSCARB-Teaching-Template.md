@@ -97,3 +97,25 @@ Disclose AI assistance and require human checking of the final reasoning.
 
 Course examples: https://adeebnoor.github.io/CPIT/iscarb.html
 Teaching guide: https://adeebnoor.github.io/CPIT/instructor-guide.html
+
+
+## Reviewed classroom release: 20260921-classroom-v3
+
+Use exactly 20 main classroom slides, five local measurable objectives, and the three
+visible practice stations. Station 1 records claim/evidence; Station 2 adds mechanism,
+warrant and uncertainty; Station 3 revises after a changed constraint and records
+counter-evidence and responsibility. All stations develop one artifact. The existing
+assessed FBR case remains separate, with confirmed commitment before STRESS.
+
+WHAT IT MEANS: 3–4 short labelled points. Keep comparison tables, formulas, qualifiers
+and original figures; provide a full explanation and exact required source review.
+A source reviewed after class is not thereby optional. Use the original source for
+framing; label contemporary qualifications and course-created examples.
+
+Preserve the canonical rule titles and order in the actual lecture data. In particular:
+07 architecture, 16 portfolio launch, 17 constraint mutation, 18 evidence policy,
+19 four-level capability rubric, 20 bounded assurance/professional decision.
+
+Do not infer attainment from citation counts, clicks, field length or filled boxes.
+Do not invent NCAAA/Jaheziah codes, exam weights, marks, dates or operational test data.
+Load large sources on demand and keep the shared runtime/assets with offline packages.

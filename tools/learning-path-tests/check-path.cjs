@@ -1,30 +1,19 @@
-const fs=require('fs'),path=require('path'),assert=require('assert/strict');const {JSDOM,VirtualConsole}=require('jsdom');const root=path.resolve(__dirname,'../..');
-const catalog=JSON.parse(fs.readFileSync(path.join(root,'curriculum/learning-path/lectures.json')));
-let failed=false;
-for(const c of catalog){
- const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(!/Not implemented: (HTMLCanvasElement|window.scrollTo)/.test(e.message))errors.push(e.message)});
- let w;try{
-  const dom=new JSDOM(fs.readFileSync(path.join(root,c.path),'utf8'),{url:'https://adeebnoor.github.io/CPIT/'+c.path,runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.matchMedia=()=>({matches:false,addListener(){}});w.ResizeObserver=class{observe(){}disconnect(){}};w.scrollTo=()=>{};}});w=dom.window;const d=w.document;
-  assert.equal(errors.length,0,errors.join('\n'));assert.equal(w.U.length,d.querySelectorAll('.slide').length);assert(w.U.length>40);
-  const main=w.U.filter(u=>u.route==='core');assert.equal(main.length,c.classroom_units);assert(main.length<=20);
-  const sources=[...d.querySelectorAll('[id^="source-slide-"]')];assert.equal(sources.length,c.source_slide_count);assert.equal(new Set(sources.map(x=>x.id)).size,sources.length);
-  d.querySelector('[data-jump="START"]').click();assert.equal(w.U[w.cur].k,'START');
-  for(let i=2;i<main.length;i++){d.getElementById('nextBtn').click();assert.equal(w.U[w.cur].k,main[i].k)}
-  assert.equal(w.U[w.cur].k,'END');assert.equal(d.getElementById('nextBtn').disabled,true);assert(d.querySelector('.slide.on').textContent.includes('Before the assignment'));
-  d.querySelector('.slide.on [data-jump="C01"]').click();assert.equal(w.U[w.cur].k,'C01');d.getElementById('nextBtn').click();assert.equal(w.U[w.cur].route,'study');
-  const ck=w.U.findIndex(u=>u.k==='CHECK1');w.go(ck,true);let b=d.querySelector('.slide.on [data-answer-toggle]');assert(b);let box=d.querySelector('.slide.on [data-answer-box]');assert(box.hidden);b.click();assert(!box.hidden);b.click();assert(box.hidden);
-  d.querySelector('[data-route-tab="toolkit"]').click();assert.equal(w.U[w.cur].k,'R07');
-  d.querySelector('[data-route-tab="core"]').click();assert.equal(w.U[w.cur].k,'START');
-  d.querySelector('[data-route-tab="study"]').click();assert.equal(w.U[w.cur].k,'READING');
-  const page=d.querySelector('.slide.on [data-source-slide]');const sourceId=page.dataset.sourceSlide;page.click();assert(d.getElementById('source-slide-'+sourceId).open);assert.equal(w.U[w.cur].route,'study');
-  w.go(w.U.findIndex(u=>u.k==='PREP'),true);assert.equal(d.querySelectorAll('#prepQuiz fieldset').length,5);d.getElementById('checkPrep').click();assert(d.getElementById('prepStatus').textContent.includes('Attempt all five'));assert([...d.querySelectorAll('[data-prep-feedback]')].every(x=>x.hidden));
-  w.eval('LECTURE.study.quiz').forEach((q,i)=>{const el=d.querySelector('input[name="prep-'+i+'"][value="'+q[2]+'"]');el.checked=true;el.dispatchEvent(new w.Event('change',{bubbles:true}));});d.getElementById('checkPrep').click();assert(d.getElementById('prepStatus').textContent.includes('5 / 5'));assert([...d.querySelectorAll('[data-prep-feedback]')].every(x=>!x.hidden));assert(w.localStorage.getItem(w.eval('KEY')+'-preparation-v2').includes('firstAttempt'));
-  w.go(w.U.findIndex(u=>u.k==='APPLY'),true);let f=d.querySelector('[data-f="path_claim"]');f.value='Restrict the release until the stated operating condition has been verified.';f.dispatchEvent(new w.Event('input',{bubbles:true}));assert(w.S.f.path_claim.includes('Restrict'));assert(w.caseText().includes('Restrict'));
-  w.fillOver();assert(d.getElementById('oG').textContent.includes('Required source review'));
-  const unresolved=d.getElementById('deck').innerHTML.match(/\{\{[^}]+\}\}/g)||[];assert.equal(unresolved.length,0,unresolved.join(' '));
-  const bad=[...d.querySelectorAll('img')].filter(i=>!i.getAttribute('src')||/undefined/.test(i.getAttribute('src')));assert.equal(bad.length,0);
-  console.log('PASS CH'+c.chapter+' · navigation, source ledger, assigned reading, preparation feedback, saved practice and export');
-  dom.window.close();
- }catch(e){failed=true;console.log('FAIL CH'+c.chapter,e.stack);if(w)w.close();}
-}
-process.exitCode=failed?1:0;
+const assert=require('node:assert/strict'),fs=require('fs'),path=require('path');
+const {root,read,load,put}=require('./classroom-harness.cjs');
+const pub=JSON.parse(read('curriculum/publication.json'));
+let sourceTotal=0;
+for(const c of pub.lectures){const x=load(c);try{
+ assert.deepEqual(x.errors,[]);assert(x.api,'Runtime initializes');const D=x.api.data;
+ assert.equal(D.chapter,c.chapter);assert.equal(D.slides.length,20);assert.equal(D.objectives.length,5);assert.equal(D.quiz.length,5);assert.equal(D.stations.length,3);
+ for(let i=0;i<20;i++){x.api.go(i);assert.equal(x.api.getIndex(),i);assert(x.d.querySelector('h1').textContent.trim());assert.equal(x.d.querySelectorAll('.counter').length,1);const ids=[...x.d.querySelectorAll('[id]')].map(e=>e.id);assert.equal(ids.length,new Set(ids).size);}
+ x.d.getElementById('nextBtn').click();assert.equal(x.api.getIndex(),19);x.api.go(0);assert(x.d.getElementById('prevBtn').disabled);
+ for(const st of D.stations){x.api.startStation(st.no);assert(x.d.getElementById('timer-start'));assert(x.d.querySelector('.station-steps').textContent.includes('PAIR'));x.d.getElementById('hintBtn').click();assert(x.d.getElementById('coach').textContent.includes(st.hint));for(const f of st.fields)put(x,f,'A source-backed draft for '+f);}
+ x.api.open('CARD');assert.equal(x.d.querySelector('[data-field="claim"]').value,'A source-backed draft for claim');assert.match(x.d.getElementById('progress').textContent,/not mastery/);
+ const study=read(c.study_path);const ids=[...study.matchAll(/id="source-slide-(\d+)"/g)].map(m=>+m[1]);assert.equal(new Set(ids).size,c.source_slide_count);for(let i=1;i<=c.source_slide_count;i++)assert(ids.includes(i));sourceTotal+=c.source_slide_count;
+ for(const r of D.readings){const ns=r.range.match(/\d+/g).map(Number);assert(ns.every(n=>n>=1&&n<=c.source_slide_count));}
+ for(const g of D.groups)for(const k of g.units)assert(D.slides.some(s=>s.id===k));
+ x.api.open('RULES');assert.equal(x.d.querySelectorAll('[data-rule]').length,20);assert.equal(D.rules[18].title,'Four-level capability rubric');assert.equal(D.rules[15].title,'Portfolio task launch');
+ for(const r of D.rules)for(const k of r.targets){x.api.open(k);assert(!x.d.getElementById('modal-body').textContent.includes('This earlier unit'));x.api.closeModal();}
+ assert.equal(x.w.localStorage.getItem('assignment-draft-sentinel'),'unchanged');assert.deepEqual(x.errors,[]);console.log('PASS CH'+c.chapter+' · 20 slides, five objectives, three visible stations, exact source ledger and canonical rule links');
+ }finally{x.dom.window.close();}}
+assert.equal(sourceTotal,579);console.log('PASS 579 original source slides remain accessible in separate on-demand ledgers');

@@ -1,66 +1,16 @@
-/* DOM interaction checks. JSDOM has no layout engine: these checks intentionally
- * do not claim to verify visual fit, CSS fragmentation or real-device rendering. */
-const fs=require('fs'),path=require('path'),assert=require('assert/strict');
-const {JSDOM,VirtualConsole}=require('jsdom');
-const root=path.resolve(__dirname,'../..');
-const catalog=JSON.parse(fs.readFileSync(path.join(root,'curriculum/learning-path/lectures.json')));
-function boot(html,pathname){
- const errors=[],files=[],vc=new VirtualConsole();
- vc.on('jsdomError',e=>{if(!/Not implemented: (HTMLCanvasElement|window.scrollTo)/.test(e.message))errors.push(e.message)});
- const dom=new JSDOM(html,{url:'https://adeebnoor.github.io/CPIT/'+pathname,runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
-  w.matchMedia=()=>({matches:false,addListener(){}});w.ResizeObserver=class{observe(){}disconnect(){}};w.scrollTo=()=>{};
-  w.Blob=class{constructor(parts,options){this.parts=parts;this.type=options.type}};
-  w.URL.createObjectURL=b=>{files.push(b);return 'blob:test'};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
- }});return {dom,w:dom.window,d:dom.window.document,errors,files};
-}
-for(const c of catalog){
- const html=fs.readFileSync(path.join(root,c.path),'utf8');
- const x=boot(html,c.path),{w,d}=x;const L=w.eval('LECTURE'),api=w.ISCARB_PAGES;
- assert(api);assert.equal(x.errors.length,0,x.errors.join('\n'));
- const baselineHtml=html.replace(/\/\* Paginated visual presentation[\s\S]*?<\/script>/,'</script>');
- const baseline=boot(baselineHtml,c.path);
- // Every original field and source text survives moving the existing DOM nodes.
- const fields=doc=>[...doc.querySelectorAll('#deck [data-f]')].map(f=>f.dataset.f).sort();
- assert.deepEqual(fields(d),fields(baseline.d));
- for(const source of baseline.d.querySelectorAll('.lp-source-section')){
-  assert.equal(d.getElementById(source.id).querySelector('.lp-source-text').textContent,source.querySelector('.lp-source-text').textContent);
- }
- const images=doc=>new Set([...doc.querySelectorAll('#deck img')].map(i=>i.getAttribute('src')));
- for(const src of images(baseline.d))assert(images(d).has(src),'Lost source image');
- for(const [key,spec] of Object.entries(L.visualStory.units)){
-  const index=w.U.findIndex(u=>u.k===key);assert(index>=0);w.go(index,true);
-  assert.equal(api.current().mode,'overview');
-  const summary=d.querySelector('.slide.on [data-view=overview]');
-  assert(summary.querySelector('img,svg,.v3-diagram'),'Missing meaningful visual '+key);
-  assert(summary.textContent.includes(spec.takeaway));assert(spec.takeaway.split(/\s+/).length<=28,'Overlong takeaway '+key);
-  d.querySelector('.slide.on .v3-mode').click();assert.equal(api.current().mode,'details');
-  assert(!d.querySelector('.slide.on [data-view=explanation]').hidden);
- }
- // Controlled dimensions test navigation semantics, not CSS layout.
- const first=w.U.findIndex(u=>u.k==='X01');w.go(first,true);api.explain();
- const win=d.querySelector('.slide.on .v3-window'),flow=win.querySelector('[data-view=explanation]');
- Object.defineProperty(win,'clientWidth',{value:800,configurable:true});
- Object.defineProperty(flow,'scrollWidth',{value:2480,configurable:true});api.refresh();
- assert.equal(api.current().pages,3);
- d.getElementById('nextBtn').click();assert.equal(w.cur,first);assert.equal(api.current().page,1);
- d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'PageDown',bubbles:true}));assert.equal(api.current().page,2);
- d.getElementById('nextBtn').click();assert.notEqual(w.cur,first);
- d.getElementById('prevBtn').click();assert.equal(w.cur,first);assert.equal(api.current().page,2);
- api.goPage(99);assert.equal(api.current().page,2);api.goPage(-2);assert.equal(api.current().page,0);
- // Opening and rebuilding a dialog must keep its real export controls.
- w.openOv('case');assert(d.querySelector('.lp-top').inert);assert(d.querySelector('#case #cDown'));
- w.closeOv('case');w.openOv('case');assert.equal(d.querySelectorAll('#case #cDown').length,1);w.closeOv('case');
- assert.equal(d.querySelector('.lp-top').inert,false);
- w.go(w.U.findIndex(u=>u.k==='APPLY'),true);
- const field=d.querySelector('[data-f=path_claim]');field.value='Retain the decision only while its tested assumption holds.';field.dispatchEvent(new w.Event('input',{bubbles:true}));
- w.downloadLecture();const downloaded=x.files.find(b=>b.type.startsWith('text/html'));assert(downloaded);
- const reopened=boot(downloaded.parts.join(''),c.path);
- assert.equal(reopened.errors.length,0,reopened.errors.join('\n'));
- assert.equal(reopened.d.querySelectorAll('.lp-top').length,1,'Duplicated navigation in offline export');
- assert.equal(reopened.d.querySelectorAll('#cDown').length,1);
- assert(reopened.w.S.f.path_claim.includes('tested assumption'));
- assert.equal(reopened.d.querySelectorAll('.slide').length,w.U.length);
- reopened.dom.window.close();baseline.dom.window.close();x.dom.window.close();
- console.log('PASS CH'+c.chapter+' · concise visual summaries, retained sources/fields, page navigation, dialogs and offline re-open');
-}
-console.log('DOM checks only; real browser layout and device checks remain separate.');
+// Functional source, reveal and recovery checks. Real visual tests are separate.
+const assert=require('node:assert/strict');const {root,read,load,put}=require('./classroom-harness.cjs');
+const pub=JSON.parse(read('curriculum/publication.json'));
+(async()=>{for(const c of pub.lectures){const x=load(c);try{
+ const D=x.api.data;
+ for(const s of D.slides){x.api.go(D.slides.indexOf(s));assert(x.d.getElementById('modal').hidden);if(!['TITLE','START','MAP','END'].includes(s.id)){assert(x.d.querySelectorAll('.points li').length>0||x.d.querySelector('.table-main,.two-approaches'),'Concept screen must contain its points or technical comparison table');assert(!x.d.querySelector('#chapter-main .model-answer'));x.api.full(s.id);assert(!x.d.getElementById('modal').hidden);assert.match(x.d.getElementById('modal-title').textContent,/Full explanation/);x.api.closeModal();x.api.answer(s.id);assert(x.d.getElementById('modal-body').textContent.includes(s.answer||'A defensible response'));x.api.closeModal();}}
+ x.api.open('QUIZ');x.d.getElementById('quiz-check').click();assert.match(x.d.getElementById('quiz-feedback').textContent,/Choose/);
+ for(let i=0;i<5;i++){x.d.querySelector('[data-quiz="'+i+'"]').click();let r=x.d.querySelector('input[name="quiz"][value="'+D.quiz[i].answer+'"]');r.checked=true;r.dispatchEvent(new x.w.Event('change',{bubbles:true}));x.d.getElementById('quiz-check').click();assert.match(x.d.getElementById('quiz-feedback').textContent,/Correct for/);}
+ x.api.open('CARD');put(x,'claim','Boundary <script>window.bad=true</script>');assert(!x.w.bad);put(x,'counter','One inspectable observation changes the decision');
+ const backup=JSON.parse(JSON.stringify(x.api.pack()));assert.equal(x.api.sanitize(backup).state.fields.claim,backup.state.fields.claim);assert.throws(()=>x.api.sanitize({...backup,chapter:999}));assert.throws(()=>x.api.sanitize({...backup,state:{fields:{claim:42}}}));assert.throws(()=>x.api.sanitize({...backup,state:{fields:JSON.parse('{"__proto__":"x"}')}}));
+ const saved=Object.fromEntries(Array.from({length:x.w.localStorage.length},(_,i)=>{let k=x.w.localStorage.key(i);return[k,x.w.localStorage.getItem(k)]}));const y=load(c,{saved});assert.equal(y.api.getState().fields.claim,backup.state.fields.claim);assert.equal(Object.keys(y.api.getState().quiz).length,5);assert.deepEqual(y.errors,[]);y.dom.window.close();
+ assert.match(x.api.aiVerdict({0:'yes',1:'no',2:'no',3:'yes'}),/Not permitted/);assert.match(x.api.aiVerdict({0:'yes',1:'no',2:'yes',3:'yes'}),/Conditionally/);assert.match(x.api.aiVerdict({0:'yes',1:'yes',3:'no'}),/Not permitted/);
+ if(c.chapter===11){x.api.open('CALCULATOR');assert.match(x.d.getElementById('calc-result').textContent,/0.002 per demand/);assert.match(x.d.getElementById('calc-result').textContent,/99.9%/);x.d.getElementById('calc-events').value='0';x.api.compute();assert.match(x.d.getElementById('calc-result').textContent,/not estimable/);x.d.getElementById('calc-demands').value='';x.api.compute();assert.match(x.d.getElementById('calc-result').textContent,/blank is not zero/);}
+ const b=load(c,{blockStorage:true});b.api.open('CARD');assert.match(b.d.querySelector('[data-save-status]').textContent,/unavailable/);put(b,'claim','Export even when storage is unavailable');assert.equal(b.api.pack().state.fields.claim,'Export even when storage is unavailable');assert.deepEqual(b.errors,[]);b.dom.window.close();
+ assert.deepEqual(x.errors,[]);console.log('PASS CH'+c.chapter+' · separate explanations/answers, five attempts, escaped text, round-trip/reload, AI gate and storage failure');
+ }finally{x.dom.window.close();}}})().catch(e=>{console.error(e);process.exitCode=1});

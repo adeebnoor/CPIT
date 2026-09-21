@@ -13,13 +13,15 @@
       "7b77c34e6cb8ac78829d5bae9addbf2300b9cfcfa6f3a41f086904dc6dada917"
     ],
     "source_slide_count": 47,
-    "classroom_units": 16,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 3,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
+      "X07",
       "X02A",
       "X03",
       "CHECK1",
@@ -29,8 +31,10 @@
       "R18",
       "CHECK2",
       "X06",
-      "X07",
+      "X06A",
+      "X06B",
       "APPLY",
+      "CHALLENGE",
       "END"
     ],
     "source_groups": [
@@ -102,7 +106,8 @@
           "X06"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 11,
@@ -129,28 +134,29 @@
       "0b5586367ac984a34b038810fcf77081000022470c75fe221d214197b838ffcc"
     ],
     "source_slide_count": 81,
-    "classroom_units": 19,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 14,
     "core_keys": [
       "TITLE",
-      "START",
-      "X01",
-      "X02",
-      "X03",
-      "X04",
-      "CHECK1",
-      "X05",
-      "X06",
-      "X02A",
-      "R09",
-      "CHECK2",
-      "B01",
-      "R08",
-      "R18",
-      "X09",
-      "X10",
-      "APPLY",
-      "END"
+      "MAP",
+      "FAULT",
+      "MANAGE",
+      "RELAV",
+      "METRICS",
+      "AVAIL",
+      "REQ",
+      "PROTECT",
+      "SELFCHECK",
+      "VOTE",
+      "DIVERSITY",
+      "CODE1",
+      "CODE2",
+      "MEASURE",
+      "PROFILE",
+      "LIMITS",
+      "CHECK",
+      "DECIDE",
+      "REVISE"
     ],
     "source_groups": [
       {
@@ -223,7 +229,8 @@
           "X10"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 12,
@@ -245,11 +252,12 @@
       "e8bc0cb8845159bb0b33dad475ee72fc1ef8e0af064f635f51d2d37e2b612635"
     ],
     "source_slide_count": 70,
-    "classroom_units": 19,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 9,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
       "X02A",
@@ -332,7 +340,8 @@
           "X10"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 13,
@@ -356,11 +365,12 @@
       "21292a8c946062a4da6a3b82fc59b352a8ff0a62ad4b85aebea0fb90c068f9e8"
     ],
     "source_slide_count": 72,
-    "classroom_units": 18,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 11,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
       "X02A",
@@ -372,6 +382,7 @@
       "R11",
       "CHECK2",
       "R09",
+      "DESIGN2",
       "B01",
       "X09",
       "R18",
@@ -434,7 +445,8 @@
           "R18"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 14,
@@ -460,19 +472,22 @@
       "c2229a1d4226e9e6d4bf9c2ce43a7baa24e6e1c227173a5354c4257d5c3af390"
     ],
     "source_slide_count": 63,
-    "classroom_units": 17,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 13,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
       "X02A",
+      "RECOVERYPLAN",
       "X03",
       "CHECK1",
       "X04",
       "X05",
       "D14",
+      "EMERGENCY",
       "X06",
       "CHECK2",
       "R18",
@@ -536,7 +551,8 @@
           "R09"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 15,
@@ -563,23 +579,27 @@
       "87683e7a3fcd3641c5b18fecc5c3d9d9b56ad0f3213179aade8a1daebc894be3"
     ],
     "source_slide_count": 58,
-    "classroom_units": 16,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 14,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
       "X02A",
       "D15",
       "CHECK1",
       "X03",
+      "IOC",
       "X04",
       "X05",
+      "CONFIG",
       "X06",
       "CHECK2",
       "R18",
       "R09",
+      "LIFECYCLE",
       "APPLY",
       "END"
     ],
@@ -631,7 +651,8 @@
           "R09"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 16,
@@ -659,18 +680,21 @@
       "1ee3d9d0236ec7576ae1c6a289565d83c31da162266096e8b7b8c4be85565e7f"
     ],
     "source_slide_count": 59,
-    "classroom_units": 17,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 15,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02A",
       "X03",
       "X04",
+      "MIDDLEWARE",
       "CHECK1",
       "X05",
       "X06",
+      "VALIDATE",
       "R08",
       "B01",
       "CHECK2",
@@ -743,7 +767,8 @@
           "D16B"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 17,
@@ -768,20 +793,22 @@
       "31c786b1d6045a6fcce6ada25b925050d02eee98fa3eb5662a4e4505bcd28cb4"
     ],
     "source_slide_count": 66,
-    "classroom_units": 18,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 12,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
+      "SCALE",
       "X02A",
       "X03",
       "CHECK1",
       "X04",
       "X05",
-      "X06",
       "R09",
+      "X06",
       "CHECK2",
       "B01",
       "X07",
@@ -846,7 +873,8 @@
           "X10"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   },
   {
     "chapter": 20,
@@ -872,11 +900,12 @@
       "aafbde3e7bf09b87ae1f2c02ffba1a021cec99c8ef132c9d733a3b42cf456b79"
     ],
     "source_slide_count": 63,
-    "classroom_units": 16,
+    "classroom_units": 20,
     "original_embedded_images_preserved": 13,
     "core_keys": [
       "TITLE",
       "START",
+      "MAP",
       "X01",
       "X02",
       "X02A",
@@ -884,11 +913,14 @@
       "CHECK1",
       "X04",
       "X05",
+      "DEPLOY",
       "X06",
-      "X09",
       "CHECK2",
+      "X09",
       "X10",
       "X08",
+      "CONTAINER",
+      "TRADING",
       "APPLY",
       "END"
     ],
@@ -946,6 +978,7 @@
           "X08"
         ]
       }
-    ]
+    ],
+    "release": "20260921-classroom-v3"
   }
 ]

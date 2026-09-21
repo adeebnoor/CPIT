@@ -22,7 +22,7 @@ for (const file of pages) {
     scripts++;
   }
 }
-for (const file of ['iscarb-hub.js']) {
+for (const file of ['iscarb-hub.js', 'lectures/iscarb/runtime/classroom-v3.js']) {
   new Function(read(file));
   scripts++;
 }
