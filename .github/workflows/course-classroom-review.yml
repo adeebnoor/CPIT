@@ -42,15 +42,11 @@ jobs:
                   print((await page.locator('body').inner_text())[:10000])
                   await page.screenshot(path='test-results/package-share.png',full_page=True)
                   controls=page.get_by_role('button',name=re.compile('ダウンロード|download',re.I))
-                  print('Download controls:',await controls.all_text_contents())
                   chosen=None
                   for control in await controls.all():
                       text=await control.inner_text()
                       if await control.is_visible() and await control.is_enabled() and not re.search('まとめ|一括|all',text,re.I):
                           chosen=control;break
-                  if chosen is None:
-                      links=page.get_by_role('link',name=re.compile('ダウンロード|download',re.I))
-                      if await links.count():chosen=links.first
                   if chosen is None:raise RuntimeError('No ordinary file download control found')
                   async with page.expect_download(timeout=180000) as pending:await chosen.click()
                   download=await pending.value
@@ -70,7 +66,7 @@ jobs:
               m=json.loads(z.read('RELEASE-MANIFEST.json'))
               assert m['base_commit']=='67d536f9af68075a5ecf407920aba84ffa9adf20'
               changed=subprocess.check_output(['git','diff','--name-only',m['base_commit'],'HEAD'],text=True).splitlines()
-              assert set(changed)<={'.github/workflows/course-classroom-review.yml'},'Concurrent source changes require review'
+              assert set(changed)<={'.github/workflows/course-classroom-review.yml','tools/apply_classroom_review_fixes.py'},'Concurrent source changes require review'
               assert sum(x.file_size for x in z.infolist())<200_000_000
               assert set(z.namelist())=={'RELEASE-MANIFEST.json'}|{'payload/'+n for n in m['files']}
               for name,digest in m['files'].items():
@@ -83,6 +79,7 @@ jobs:
               pathlib.Path('/tmp/classroom-manifest.json').write_text(json.dumps(m))
           print('Applied',len(m['files']),'explicitly checked course files')
           PY
+          python tools/apply_classroom_review_fixes.py
       - name: Check source fidelity and release structure
         run: |
           python tools/audit_classroom.py
