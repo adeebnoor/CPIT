@@ -39,7 +39,17 @@ def audit(root=ROOT):
     if lecture_chapters != expected or assignment_chapters != expected:
         errors.append("The authorized nine-chapter release requires one lecture and assignment per supplied chapter.")
     allowed=set(spec.get("iscarb_public_files", []))
-    # Immutable lectures: exact bytes and embedded figures are audited.
+    # Shared assets are explicitly allowlisted and hashed. Externalization does not
+    # remove the immutable-byte or source-figure fidelity checks.
+    asset_hashes=spec.get("delivery_asset_sha256", {})
+    for name, digest in asset_hashes.items():
+        ap=(root/name).resolve()
+        if not ap.is_relative_to(root.resolve()) or name not in allowed:
+            errors.append(f"Unapproved delivery asset: {name}")
+        elif not ap.is_file() or hashlib.sha256(ap.read_bytes()).hexdigest()!=digest:
+            errors.append(f"Delivery asset is missing or changed: {name}")
+    # Immutable lectures: exact bytes, local dependencies and original figures.
+
     for lecture in spec.get("lectures", []):
         ch=lecture.get("chapter"); path=root/lecture["path"]
         if not path.is_file(): errors.append(f"Missing approved lecture: {lecture['path']}"); continue
@@ -47,7 +57,50 @@ def audit(root=ROOT):
             errors.append(f"Chapter {ch} lecture does not match its authorized reviewed source.")
         source=path.read_text(encoding="utf-8"); parsed=Page(); parsed.feed(source)
         if len(parsed.ids)!=len(set(parsed.ids)): errors.append(f"Chapter {ch} lecture has duplicate static element IDs.")
-        if any(not url.startswith("data:") for url in parsed.dependencies): errors.append(f"Chapter {ch} lecture has a non-embedded runtime dependency.")
+        for url in parsed.dependencies:
+            if url.startswith("data:"): continue
+            u=urlsplit(url)
+            ap=(path.parent/unquote(u.path)).resolve()
+            if u.scheme or u.netloc or not ap.is_relative_to(root.resolve()):
+                errors.append(f"Chapter {ch} unapproved runtime dependency: {url}"); continue
+            name=ap.relative_to(root.resolve()).as_posix()
+            if name not in asset_hashes or name not in allowed:
+                errors.append(f"Chapter {ch} runtime dependency lacks an approved hash: {url}")
+        try:
+            match=re.search(r'<script id="lecture-data" type="application/json">([\s\S]*?)</script>', source)
+            if not match: raise ValueError("Missing explicit lecture-data")
+            data=json.loads(match.group(1)); keys=[v['id'] for v in data['slides']]
+            if len(keys)!=20 or len(set(keys))!=20 or keys!=lecture['core_keys']:
+                errors.append(f"Chapter {ch} must expose exactly 20 unique reviewed classroom slides.")
+            if len(data['objectives'])!=5 or len(data['quiz'])!=5:
+                errors.append(f"Chapter {ch} needs five objectives and five formative items.")
+            if [v['no'] for v in data['stations']]!=[1,2,3] or any(v['at'] not in keys for v in data['stations']):
+                errors.append(f"Chapter {ch} must have three reachable classroom stations.")
+            if [v['no'] for v in data['rules']]!=list(range(1,21)):
+                errors.append(f"Chapter {ch} canonical rule numbering is incomplete.")
+            tools={'UNITS','READING','COVERAGE','RULES','TOOLS','CARD','HSTACK','PREDICT','BRIDGE','MONITOR','LOCAL','PRACTICE','WELLBEING','AI','EVIDENCE','RUBRIC','READINESS','PORTFOLIO','QUIZ','CALCULATOR','HELP','NOTES'}
+            if any(k not in keys and k not in tools for v in data['rules'] for k in v['targets']):
+                errors.append(f"Chapter {ch} contains an unreachable canonical-rule target.")
+            if any(k not in keys for g in data['groups'] for k in g['units']):
+                errors.append(f"Chapter {ch} source coverage points to a missing classroom unit.")
+            study=(root/lecture['study_path']).read_text(encoding='utf-8')
+            source_ids={int(n) for n in re.findall(r'id="source-slide-(\d+)"',study)}
+            if source_ids!=set(range(1,lecture['source_slide_count']+1)):
+                errors.append(f"Chapter {ch} original source ledger has a gap.")
+            for v in data['slides']+[{'figure':data['brand']}]:
+                if not v.get('figure'): continue
+                ip=(path.parent/v['figure']).resolve()
+                if not ip.is_relative_to(root.resolve()) or ip.relative_to(root.resolve()).as_posix() not in asset_hashes:
+                    errors.append(f"Chapter {ch} source image not integrity checked: {v['figure']}")
+            previous=root/lecture['previous_lecture_path']
+            if hashlib.sha256(previous.read_bytes()).hexdigest()!=lecture['previous_lecture_sha256']:
+                errors.append(f"Chapter {ch} previous lecture draft-recovery page changed.")
+            images=re.findall(r"data:image/(?:png|jpe?g|webp);base64,([A-Za-z0-9+/=]+)",previous.read_text(encoding='utf-8'))
+            preserved=[hashlib.sha256(base64.b64decode(v,validate=True)).hexdigest() for v in images]
+            if sorted(preserved)!=sorted(lecture['preserved_embedded_image_sha256']):
+                errors.append(f"Chapter {ch} original embedded source images were removed or modified.")
+        except (KeyError,ValueError,OSError,TypeError) as exc:
+            errors.append(f"Chapter {ch} reviewed data or source integrity error: {exc}")
         if re.search(r"(?:kaspersky-labs|gc\.kis\.|file:///|C:/Users/)",source,re.I): errors.append(f"Chapter {ch} contains an injected browser resource or local path.")
         if re.search(r"@import\b|url\(\s*['\"]?(?:https?:)?//",source,re.I): errors.append(f"Chapter {ch} CSS depends on a remote resource.")
         try:
@@ -109,6 +162,6 @@ def audit(root=ROOT):
 def main():
     errors=audit(Path(sys.argv[1]) if len(sys.argv)>1 else ROOT)
     if errors: print("\n".join(errors),file=sys.stderr); return 1
-    print("PASS: Nine chapters, progressive assignments, reveal payloads, exact lecture bytes, and current links are valid.")
+    print("PASS: Nine chapters, progressive assignments, reveal payloads, exact lecture/source/asset bytes, 20/5/3 classroom structure, and current links are valid.")
     return 0
 if __name__=="__main__": raise SystemExit(main())

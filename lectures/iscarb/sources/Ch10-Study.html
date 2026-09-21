@@ -1,0 +1,404 @@
+<!doctype html><html lang="en" data-iscarb-standalone="1"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ch10 · complete source review</title><style>body{margin:0;background:#08070c;color:#f5f0ea;font:18px/1.65 system-ui}main{max-width:1080px;margin:auto;padding:28px 22px}a{color:#79d9da}h1,h2,h3{color:#ddb27e;line-height:1.25}nav{display:flex;gap:18px;flex-wrap:wrap}details{border:1px solid #494050;border-radius:10px;margin:14px 0;padding:15px;background:#15121c}summary{cursor:pointer;color:#79d9da;font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:16px/1.6 system-ui}section{scroll-margin-top:20px}.callout{border-left:3px solid #ff80cb;padding:14px;background:#15121c}img{max-width:100%;height:auto;background:white}button{font:inherit;padding:8px;border-radius:7px}figure{margin:20px 0}.gallery{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure a{display:block}table{border-collapse:collapse}td,th{padding:10px;border:1px solid #494050}label,input{font:inherit}input{padding:10px;width:100%;box-sizing:border-box;background:#15121c;color:#f5f0ea;border:1px solid #494050;border-radius:8px}@media(max-width:700px){.gallery{grid-template-columns:1fr}main{padding:20px 14px}pre{font-size:16px}}</style></head><body><main><nav><a href="../Ch10-Dependable-Systems.html">← Classroom lecture</a><a href="../../../iscarb.html">Course hub</a><a href="../sources/Ch10-Original.pdf">Original source pack</a></nav><h1>Chapter 10 · Dependable Systems<br>Source review</h1><p class="callout">The original source text, examples, tables and caveats remain available. Source slide numbers and textbook PDF pages are different references. Historical assertions stay attributed to this edition; this page is not a current legal, medical, regulatory or product guide. Classroom activities are labelled separately.</p><h2>Required selections</h2><ul><li>Redundancy, diversity and shared causes: original slides 26–31</li><li>Formal methods and their scope: original slides 40–43</li></ul><p>Apply one named source concept to the chapter artifact and explain its effect. Finish any uncompleted core topic here; material does not become optional merely because it is reviewed after class. Assignment dates and marks remain in Blackboard.</p><nav><a href="#source-slide-1">Original slides · 47</a><a href="#gallery">Preserved source illustrations</a></nav><h2>Original source-slide ledger</h2><label>Find in source text<input id="filter" type="search" placeholder="Type a source term"></label><details id="source-slide-1" class="source"><summary>Slide 1 · Chapter 10 – Dependable systems</summary><pre>30/10/2014 Chapter 10 Dependable Systems 1</pre></details><details id="source-slide-2" class="source"><summary>Slide 2 · Topics covered</summary><pre>Topics covered
+ Dependability properties
+ Sociotechnical systems
+ Redundancy and diversity
+ Dependable processes
+ Formal methods and dependability
+30/10/2014 Chapter 10 Dependable Systems 2</pre></details><details id="source-slide-3" class="source"><summary>Slide 3 · System dependability</summary><pre>System dependability
+ For many computer-based systems, the most important 
+system property is the dependability of the system.
+ The dependability of a system reflects the user’s degree 
+of trust in that system. It reflects the extent of the user’s 
+confidence that it will operate as users expect and that it 
+will not ‘fail’ in normal use.
+ Dependability covers the related systems attributes of 
+reliability, availability and security. These are all inter-
+dependent.
+3Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-4" class="source"><summary>Slide 4 · Importance of dependability</summary><pre>Importance of dependability
+ System failures may have widespread effects with large 
+numbers of people affected by the failure.
+ Systems that are not dependable and are unreliable, 
+unsafe or insecure may be rejected by their users.
+ The costs of system failure may be very high if the failure 
+leads to economic losses or physical damage.
+ Undependable systems may cause information loss with 
+a high consequent recovery cost.
+4Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-5" class="source"><summary>Slide 5 · Causes of failure</summary><pre>Causes of failure
+ Hardware failure
+▪ Hardware fails because of design and manufacturing errors or 
+because components have reached the end of their natural life.
+ Software failure
+▪ Software fails due to errors in its specification, design or 
+implementation.
+ Operational failure
+▪ Human operators make mistakes. Now perhaps the largest 
+single cause of system failures in socio-technical systems.
+5Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-6" class="source"><summary>Slide 6 · Dependability properties</summary><pre>Dependability properties
+30/10/2014 Chapter 10 Dependable Systems 6</pre></details><details id="source-slide-7" class="source"><summary>Slide 7 · The principal dependability properties</summary><pre>The principal dependability properties
+30/10/2014 Chapter 10 Dependable Systems 7</pre></details><details id="source-slide-8" class="source"><summary>Slide 8 · Principal properties</summary><pre>Principal properties
+ Availability
+▪ The probability that the system will be up and running and able 
+to deliver useful services to users.
+ Reliability
+▪ The probability that the system will correctly deliver services as 
+expected by users.
+ Safety
+▪ A judgment of how likely it is that the system will cause damage 
+to people or its environment.
+8Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-9" class="source"><summary>Slide 9 · Principal properties</summary><pre>Principal properties
+ Security
+▪ A judgment of how likely it is that the system can resist 
+accidental or deliberate intrusions.
+ Resilience
+▪ A judgment of how well a system can maintain the continuity of 
+its critical services in the presence of disruptive events such as 
+equipment failure and cyberattacks.
+30/10/2014 Chapter 10 Dependable Systems 9</pre></details><details id="source-slide-10" class="source"><summary>Slide 10 · Other dependability properties</summary><pre>Other dependability properties
+ Repairability
+▪ Reflects the extent to which the system can be repaired in the 
+event of a failure
+ Maintainability
+▪ Reflects the extent to which the system can be adapted to new 
+requirements;
+ Error tolerance
+▪ Reflects the extent to which user input errors can be avoided 
+and tolerated.
+10Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-11" class="source"><summary>Slide 11 · Dependability attribute dependencies</summary><pre>Dependability attribute dependencies
+ Safe system operation depends on the system being 
+available and operating reliably.
+ A system may be unreliable because its data has been 
+corrupted by an external attack.
+ Denial of service attacks on a system are intended to 
+make it unavailable.
+ If a system is infected with a virus, you cannot be 
+confident in its reliability or safety.</pre></details><details id="source-slide-12" class="source"><summary>Slide 12 · Dependability achievement</summary><pre>Dependability achievement
+ Avoid the introduction of accidental errors when 
+developing the system.
+ Design V &amp; V processes that are effective in discovering 
+residual errors in the system.
+ Design systems to be fault tolerant so that they can 
+continue in operation when faults occur
+ Design protection mechanisms that guard against 
+external attacks.</pre></details><details id="source-slide-13" class="source"><summary>Slide 13 · Dependability achievement</summary><pre>Dependability achievement
+ Configure the system correctly for its operating 
+environment.
+ Include system capabilities to recognise and resist 
+cyberattacks.
+ Include recovery mechanisms to help restore normal 
+system service after a failure.
+30/10/2014 Chapter 10 Dependable Systems 13</pre></details><details id="source-slide-14" class="source"><summary>Slide 14 · Dependability costs</summary><pre>Dependability costs
+ Dependability costs tend to increase exponentially as 
+increasing levels of dependability are required.
+ There are two reasons for this
+▪ The use of more expensive development techniques and 
+hardware that are required to achieve the higher levels of 
+dependability.
+▪ The increased testing and system validation that is required to 
+convince the system client and regulators that the required levels 
+of dependability have been achieved.
+14Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-15" class="source"><summary>Slide 15 · Cost/dependability curve</summary><pre>Cost/dependability curve
+30/10/2014 Chapter 10 Dependable Systems 15</pre></details><details id="source-slide-16" class="source"><summary>Slide 16 · Dependability economics</summary><pre>Dependability economics
+ Because of very high costs of dependability 
+achievement, it may be more cost effective to accept 
+untrustworthy systems and pay for failure costs
+ However, this depends on social and political factors. A 
+reputation for products  that can’t be trusted may lose 
+future business
+ Depends on system type - for business systems in 
+particular, modest levels of dependability may be 
+adequate
+16Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-17" class="source"><summary>Slide 17 · Sociotechnical systems</summary><pre>Sociotechnical systems
+30/10/2014 Chapter 10 Dependable Systems 17</pre></details><details id="source-slide-18" class="source"><summary>Slide 18 · Systems and software</summary><pre>Systems and software
+ Software engineering is not an isolated activity but is part 
+of a broader systems engineering process.
+ Software systems are therefore not isolated systems but 
+are essential components of broader systems that have 
+a human, social or organizational purpose.
+ Example
+▪ The wilderness weather system is part of broader weather 
+recording and forecasting systems
+▪ These include hardware and software, forecasting processes, 
+system users, the organizations that depend on weather 
+forecasts, etc.</pre></details><details id="source-slide-19" class="source"><summary>Slide 19 · The sociotechnical systems stack</summary><pre>The sociotechnical systems stack
+30/10/2014 Chapter 10 Dependable Systems 19</pre></details><details id="source-slide-20" class="source"><summary>Slide 20 · Layers in the STS stack</summary><pre>Layers in the STS stack
+ Equipment
+▪ Hardware devices, some of which may be computers. Most 
+devices will include an embedded system of some kind.
+ Operating system
+▪ Provides a set of common facilities for higher levels in the 
+system.
+ Communications and data management
+▪ Middleware that provides access to remote systems and 
+databases.
+ Application systems
+▪ Specific functionality to meet some organization requirements.</pre></details><details id="source-slide-21" class="source"><summary>Slide 21 · Layers in the STS stack</summary><pre>Layers in the STS stack
+ Business processes
+▪ A set of processes involving people and computer systems that 
+support the activities of the business.
+ Organizations
+▪ Higher level strategic business activities that affect the operation 
+of the system.
+ Society
+▪ Laws, regulation and culture that affect the operation of the 
+system.</pre></details><details id="source-slide-22" class="source"><summary>Slide 22 · Holistic system design</summary><pre>Holistic system design
+ There are interactions and dependencies between the 
+layers in a system and changes at one level ripple 
+through the other levels
+▪ Example: Change in regulations (society) leads to changes in 
+business processes and application software.
+ For dependability, a systems perspective is essential
+▪ Contain software failures within the enclosing layers of the STS 
+stack.
+▪ Understand how faults and failures in adjacent layers may affect 
+the software in a system.</pre></details><details id="source-slide-23" class="source"><summary>Slide 23 · Regulation and compliance</summary><pre>Regulation and compliance
+ The general model of economic organization that is now 
+almost universal in the world is that privately owned 
+companies offer goods and services and make a profit 
+on these. 
+ To ensure the safety of their citizens, most governments 
+regulate (limit the freedom of) privately owned 
+companies so that they must follow certain standards to 
+ensure that their products are safe and secure. 
+30/10/2014 Chapter 10 Dependable Systems 23</pre></details><details id="source-slide-24" class="source"><summary>Slide 24 · Regulated systems</summary><pre>Regulated systems
+ Many critical systems are regulated systems, which 
+means that their use must be approved by an external 
+regulator before the systems go into service. 
+▪ Nuclear systems
+▪ Air traffic control systems
+▪ Medical devices
+ A safety and dependability case has to be approved by 
+the regulator. Therefore, critical systems development 
+has to create the evidence to convince a regulator that 
+the system is dependable, safe and secure.</pre></details><details id="source-slide-25" class="source"><summary>Slide 25 · Safety regulation</summary><pre>Safety regulation
+ Regulation and compliance (following the rules) applies 
+to the sociotechnical system as a whole and not simply 
+the software element of that system. 
+ Safety-related systems may have to be certified as safe 
+by the regulator.
+ To achieve certification, companies that are developing 
+safety-critical systems have to produce an extensive 
+safety case that shows that rules and regulations have 
+been followed. 
+ It can be as expensive develop the documentation for 
+certification as it is to develop the system itself. 
+30/10/2014 Chapter 10 Dependable Systems 25</pre></details><details id="source-slide-26" class="source"><summary>Slide 26 · Redundancy and diversity</summary><pre>Redundancy and diversity
+30/10/2014 Chapter 10 Dependable Systems 26</pre></details><details id="source-slide-27" class="source"><summary>Slide 27 · Redundancy and diversity</summary><pre>Redundancy and diversity
+ Redundancy
+▪ Keep more than a single version of critical components so that if 
+one fails then a backup is available.
+ Diversity
+▪ Provide the same functionality in different ways in different 
+components so that they will not fail in the same way. 
+ Redundant and diverse components should be 
+independent so that they will not suffer from ‘common-
+mode’ failures
+▪ For example, components implemented in different programming 
+languages means that a compiler fault will not affect all of them.
+27Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-28" class="source"><summary>Slide 28 · Diversity and redundancy examples</summary><pre>Diversity and redundancy examples
+ Redundancy. Where availability is critical (e.g. in e-
+commerce systems), companies normally keep backup 
+servers and switch to these automatically if failure 
+occurs.
+ Diversity. To provide resilience against external attacks, 
+different servers may be implemented using different 
+operating systems (e.g. Windows and Linux)
+28Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-29" class="source"><summary>Slide 29 · Process diversity and redundancy</summary><pre>Process diversity and redundancy
+ Process activities, such as validation, should not depend 
+on a single approach, such as testing, to validate the 
+system.
+ Redundant and diverse process activities are important 
+especially for verification and validation.
+ Multiple, different process activities the complement 
+each other and allow for cross-checking help to avoid 
+process errors, which may lead to errors in the software.</pre></details><details id="source-slide-30" class="source"><summary>Slide 30 · Problems with redundancy and diversity</summary><pre>Problems with redundancy and diversity
+ Adding diversity and redundancy to a system increases 
+the system complexity.
+ This can increase the chances of error because of 
+unanticipated interactions and dependencies between 
+the redundant system components.
+ Some engineers therefore advocate simplicity and 
+extensive V &amp; V as a more effective route to software 
+dependability.
+ Airbus FCS architecture is redundant/diverse; Boeing 
+777 FCS architecture has no software diversity
+30/10/2014 Chapter 10 Dependable Systems 30</pre></details><details id="source-slide-31" class="source"><summary>Slide 31 · Dependable processes</summary><pre>Dependable processes
+30/10/2014 Chapter 10 Dependable Systems 31</pre></details><details id="source-slide-32" class="source"><summary>Slide 32 · Dependable processes</summary><pre>Dependable processes
+ To ensure a minimal number of software faults, it is 
+important to have a well-defined, repeatable software 
+process.
+ A well-defined repeatable process is one that does not 
+depend entirely on individual skills; rather can be 
+enacted by different people.
+ Regulators use information about the process to check if 
+good software engineering practice has been used.
+ For fault detection, it is clear that the process activities 
+should include significant effort devoted to verification 
+and validation.
+32Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-33" class="source"><summary>Slide 33 · Dependable process characteristics</summary><pre>Dependable process characteristics
+ Explicitly defined 
+▪ A process that has a defined process model that is used to drive 
+the software production process. Data must be collected during 
+the process that proves that the development team has followed 
+the process as defined in the process model.
+ Repeatable
+▪ A process that does not rely on individual interpretation and 
+judgment. The process can be repeated across projects and with 
+different team members, irrespective of who is involved in the 
+development. 
+30/10/2014 Chapter 10 Dependable Systems 33</pre></details><details id="source-slide-34" class="source"><summary>Slide 34 · Attributes of dependable processes</summary><pre>Attributes of dependable processes 
+Process characteristic Description
+Auditable The process should be understandable by people apart 
+from process participants, who can check that process 
+standards are being followed and make suggestions for 
+process improvement.
+Diverse The process should include redundant and diverse 
+verification and validation activities.
+Documentable The process should have a defined process model that 
+sets out the activities in the process and the 
+documentation that is to be produced during these 
+activities.
+Robust The process should be able to recover from failures of 
+individual process activities.
+Standardized A comprehensive set of software development 
+standards covering software production and 
+documentation should be available.
+34Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-35" class="source"><summary>Slide 35 · Dependable process activities</summary><pre>Dependable process activities
+ Requirements reviews to check that the requirements 
+are, as far as possible, complete and consistent.
+ Requirements management to ensure that changes to 
+the requirements are controlled and that the impact of 
+proposed requirements changes is understood.
+ Formal specification, where a mathematical model of the 
+software is created and analyzed. 
+ System modeling, where the software design is explicitly 
+documented as a set of graphical models, and the links 
+between the requirements and these models are 
+documented. 
+30/10/2014 Chapter 10 Dependable Systems 35</pre></details><details id="source-slide-36" class="source"><summary>Slide 36 · Dependable process activities</summary><pre>Dependable process activities
+ Design and program inspections, where the different 
+descriptions of the system are inspected and checked by 
+different people. 
+ Static analysis, where automated checks are carried out 
+on the source code of the program. 
+ Test planning and management, where a comprehensive 
+set of system tests is designed. 
+▪ The testing process has to be carefully managed to demonstrate 
+that these tests provide coverage of the system requirements 
+and have been correctly applied in the testing process.
+30/10/2014 Chapter 10 Dependable Systems 36</pre></details><details id="source-slide-37" class="source"><summary>Slide 37 · Dependable processes and agility</summary><pre>Dependable processes and agility
+ Dependable software often requires certification so both 
+process and product documentation has to be produced.
+ Up-front requirements analysis is also essential to 
+discover requirements and requirements conflicts that 
+may compromise the safety and security of the system. 
+ These conflict with the general approach in agile 
+development of co-development of the requirements and 
+the system and minimizing documentation. 
+30/10/2014 Chapter 10 Dependable Systems 37</pre></details><details id="source-slide-38" class="source"><summary>Slide 38 · Dependable processes and agility</summary><pre>Dependable processes and agility
+ An agile process may be defined that incorporates 
+techniques such as iterative development, test-first 
+development and user involvement in the development 
+team.  
+ So long as the team follows that process and documents 
+their actions, agile methods can be used. 
+ However, additional documentation and planning is 
+essential so ‘pure agile’ is impractical for dependable 
+systems engineering.
+30/10/2014 Chapter 10 Dependable Systems 38</pre></details><details id="source-slide-39" class="source"><summary>Slide 39 · Formal methods and dependability</summary><pre>Formal methods and dependability
+30/10/2014 Chapter 10 Dependable Systems 39</pre></details><details id="source-slide-40" class="source"><summary>Slide 40 · Formal specification</summary><pre>Formal specification
+ Formal methods are approaches to software 
+development that are based on mathematical 
+representation and analysis of software.
+ Formal methods include
+▪ Formal specification;
+▪ Specification analysis and proof;
+▪ Transformational development;
+▪ Program verification.
+ Formal methods significantly reduce some types of 
+programming errors and can be cost-effective for 
+dependable systems engineering.
+40Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-41" class="source"><summary>Slide 41 · Formal approaches</summary><pre>Formal approaches
+ Verification-based approaches
+▪ Different representations of a software system such as a 
+specification and a program implementing that specification are 
+proved to be equivalent. 
+▪ This demonstrates the absence of implementation errors.
+ Refinement-based approaches
+▪ A representation of a system is systematically transformed into 
+another, lower-level represention e.g. a specification is 
+transformed automatically into an implementation.
+▪ This means that, if the transformation is correct, the 
+representations are equivalent.
+30/10/2014 Chapter 10 Dependable Systems 41</pre></details><details id="source-slide-42" class="source"><summary>Slide 42 · Use of formal methods</summary><pre>Use of formal methods
+ The principal benefits of formal methods are in reducing 
+the number of faults in systems.
+ Consequently, their main area of applicability is in 
+dependable systems engineering. There have been 
+several successful projects where formal methods have 
+been used in this area.
+ In this area, the use of formal methods is most likely to 
+be cost-effective because high system failure costs must 
+be avoided. 
+42Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-43" class="source"><summary>Slide 43 · Classes of error</summary><pre>Classes of error
+ Specification and design errors and omissions. 
+▪ Developing and analysing a formal model of the software may 
+reveal errors and omissions in the software requirements. If the 
+model is generated automatically or systematically from source 
+code, analysis using model checking can find undesirable states 
+that may occur such as deadlock in a concurrent system.
+ Inconsistences between a specification and a program. 
+▪ If a refinement method is used, mistakes made by developers 
+that make the software inconsistent with the specification are 
+avoided. Program proving discovers inconsistencies between a 
+program and its specification.
+30/10/2014 Chapter 10 Dependable Systems 43</pre></details><details id="source-slide-44" class="source"><summary>Slide 44 · Benefits of formal specification</summary><pre>Benefits of formal specification
+ Developing a formal specification requires the system 
+requirements to be analyzed in detail. This helps to detect 
+problems, inconsistencies and incompleteness in the 
+requirements.
+ As the specification is expressed in a formal language, it can 
+be automatically analyzed to discover inconsistencies and 
+incompleteness.
+ If you use a formal method such as the B method, you can 
+transform the formal specification into a ‘correct’ program.
+ Program testing costs may be reduced if the program is 
+formally verified against its specification.
+44Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-45" class="source"><summary>Slide 45 · Acceptance of formal methods</summary><pre>Acceptance of formal methods
+ Formal methods have had limited impact on practical 
+software development:
+▪ Problem owners cannot understand a formal specification and so 
+cannot assess if it is an accurate representation of their 
+requirements.
+▪ It is easy to assess the costs of developing a formal specification 
+but harder to assess the benefits. Managers may therefore be 
+unwilling to invest in formal methods.
+▪ Software engineers are  unfamiliar with this approach and are 
+therefore reluctant to propose the use of FM.
+▪ Formal methods are still hard to scale up to large systems.
+▪ Formal specification is not really compatible with agile 
+development methods.
+45Chapter 10 Dependable Systems30/10/2014</pre></details><details id="source-slide-46" class="source"><summary>Slide 46 · Key points</summary><pre>Key points
+ System dependability is important because failure of 
+critical systems can lead to economic losses, information 
+loss, physical damage or threats to human life.  
+ The dependability of a computer system is a system 
+property that reflects the user’s degree of trust in the 
+system. The most important dimensions of dependability 
+are availability, reliability, safety, security and resilience.
+ Sociotechnical systems include computer hardware, 
+software and people, and are situated within an 
+organization. They are designed to support 
+organizational or business goals and objectives.
+30/10/2014 Chapter 10 Dependable Systems 46</pre></details><details id="source-slide-47" class="source"><summary>Slide 47 · Key points</summary><pre>Key points
+ The use of a dependable, repeatable process is 
+essential if faults in a system are to be minimized. The 
+process should include verification and validation 
+activities at all stages, from requirements definition 
+through to system implementation.
+ The use of redundancy and diversity in hardware, 
+software processes and software systems is essential to 
+the development of dependable systems.
+ Formal methods, where a formal model of a system is 
+used as a basis for development help reduce the number 
+of specification and implementation errors in a system. 
+30/10/2014 Chapter 10 Dependable Systems 47</pre></details><h2 id="gallery">Preserved original source illustrations</h2><p>Select a figure to inspect it at its original size. The original PDF/PPTX retains its full layout and vector diagrams.</p><div class="gallery"><figure><a href="../assets/v3/ch10-props.svg" target="_blank" rel="noopener"><img src="../assets/v3/ch10-props.svg" loading="lazy" alt="props"></a><figcaption>props</figcaption></figure><figure><a href="../assets/v3/ch10-layers.svg" target="_blank" rel="noopener"><img src="../assets/v3/ch10-layers.svg" loading="lazy" alt="layers"></a><figcaption>layers</figcaption></figure><figure><a href="../assets/v3/ch10-rd.svg" target="_blank" rel="noopener"><img src="../assets/v3/ch10-rd.svg" loading="lazy" alt="rd"></a><figcaption>rd</figcaption></figure><figure><a href="../assets/v3/7b77c34e6cb8ac78.png" target="_blank" rel="noopener"><img src="../assets/v3/7b77c34e6cb8ac78.png" loading="lazy" alt="cost_dependability"></a><figcaption>cost dependability</figcaption></figure></div><script>document.querySelector('#filter').addEventListener('input',function(){var q=this.value.toLowerCase();document.querySelectorAll('details.source').forEach(function(d){d.hidden=!!q&&!d.textContent.toLowerCase().includes(q);});});function focusHash(){var e=document.getElementById(location.hash.slice(1));if(e){e.hidden=false;if(e.tagName==='DETAILS')e.open=true;requestAnimationFrame(function(){e.scrollIntoView({block:'start'});});}}window.addEventListener('hashchange',focusHash);focusHash();</script></main></body></html>

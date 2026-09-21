@@ -1,0 +1,51 @@
+{
+  "release": "20260921-classroom-v3",
+  "baseline_commit": "9129704e63a2e7d88fbfe4ff60713e16483fe179",
+  "chapters": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    20
+  ],
+  "classroom_slides": 180,
+  "objectives_per_chapter": 5,
+  "stations_per_chapter": 3,
+  "source_slide_count": 579,
+  "book_pdf_pages": 242,
+  "local_render_checks": {
+    "slide_layout_checks": 720,
+    "errors": []
+  },
+  "limitations": [
+    "Local set_content browser checks do not establish live-origin storage, network fetching or deployment. Separate HTTP browser tests are required.",
+    "Official program/national alignment is not supplied or certified.",
+    "Source availability, self-reports, draft completeness and graded attainment remain distinct."
+  ],
+  "assignment_preservation": {
+    "cases": "unchanged",
+    "points": [
+      4,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "scripts": "byte-identical to baseline",
+    "storage_and_version_keys": "unchanged",
+    "stress_payloads": "unchanged and separate from Part A"
+  },
+  "review_corrections": [
+    "Resolve legacy START entry through explicit chapter aliases.",
+    "Check source comparison tables directly rather than requiring duplicate bullets.",
+    "Exercise existing hub anchors in the real-origin test."
+  ]
+}
