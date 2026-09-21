@@ -119,3 +119,12 @@ Preserve the canonical rule titles and order in the actual lecture data. In part
 Do not infer attainment from citation counts, clicks, field length or filled boxes.
 Do not invent NCAAA/Jaheziah codes, exam weights, marks, dates or operational test data.
 Load large sources on demand and keep the shared runtime/assets with offline packages.
+
+
+## Opening organizer: page 2
+- Keep the cover first, then move the existing MAP to second. Do not remove a subject slide.
+- Author five concise concept branches with relationship verbs, source-derived terms and real lesson targets.
+- Under the map, state instructor/student roles for in-class practice, exact required review and the existing assignment artifact.
+- Retain the five full objectives and source outline through the map.
+- Keep Chapter map, Slides and Study & tools as the main controls; disclose additional tools when relevant.
+- Test the cover-to-map route, branch targets, mobile reflow, keyboard input and newly extracted offline ZIPs.
