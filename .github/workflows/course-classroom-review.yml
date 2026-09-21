@@ -1,7 +1,7 @@
 name: Review nine-chapter classroom release
 on:
   push:
-    paths: ['.github/workflows/course-classroom-review.yml']
+    paths: ['.github/workflows/course-classroom-review.yml', 'tools/apply_classroom_review_fixes.py']
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -88,18 +89,22 @@ jobs:
       - name: Run preserved assignment, gateway and classroom checks
         run: |
           npm install --no-save --package-lock=false jsdom@30.0.1
-          node tools/check-course-interactions.cjs
-          node tools/check-assignment-v5.cjs
-          node tools/learning-path-tests/check-path.cjs
-          node tools/learning-path-tests/check-visual.cjs
-          node tools/learning-path-tests/check-assignments.cjs
-          node tools/learning-path-tests/check-labs.cjs
-          node tools/learning-path-tests/check-hub.cjs
+          set -o pipefail
+          {
+            node tools/check-course-interactions.cjs
+            node tools/check-assignment-v5.cjs
+            node tools/learning-path-tests/check-path.cjs
+            node tools/learning-path-tests/check-visual.cjs
+            node tools/learning-path-tests/check-assignments.cjs
+            node tools/learning-path-tests/check-labs.cjs
+            node tools/learning-path-tests/check-hub.cjs
+          } 2>&1 | tee test-results/dom-review.log
       - name: Verify the staged release with real HTTP and Chromium
         run: |
           python -m http.server 8765 --directory _site > /tmp/course-http.log 2>&1 &
           sleep 2
-          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/classroom-v3-tests/check-classroom-http.py
+          set -o pipefail
+          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/classroom-v3-tests/check-classroom-http.py 2>&1 | tee test-results/http-review.log
       - name: Commit only after all checks pass, without changing the live branch
         run: |
           git switch -c iscarb-classroom-reviewed-20260921
@@ -124,3 +129,11 @@ jobs:
           path: test-results/
           if-no-files-found: warn
           retention-days: 7
+      - name: Retain isolated DOM tools for a failed review
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: classroom-dom-diagnostics
+          path: node_modules/
+          if-no-files-found: ignore
+          retention-days: 1
