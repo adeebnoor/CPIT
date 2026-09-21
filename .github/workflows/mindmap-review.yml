@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: 57c792e6508e345177acc0da964f3d89aee3d17b
       - name: Export the exact reviewed course baseline
         run: |
           mkdir -p /tmp/mindmap-review
-          git archive --format=tar 57c792e6508e345177acc0da964f3d89aee3d17b > /tmp/mindmap-review/baseline.tar
-          echo 57c792e6508e345177acc0da964f3d89aee3d17b > /tmp/mindmap-review/BASE_COMMIT.txt
+          git archive --format=tar HEAD > /tmp/mindmap-review/baseline.tar
+          git rev-parse HEAD > /tmp/mindmap-review/BASE_COMMIT.txt
       - uses: actions/upload-artifact@v4
         with:
           name: mindmap-baseline
