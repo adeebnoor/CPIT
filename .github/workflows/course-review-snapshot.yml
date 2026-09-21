@@ -1,0 +1,25 @@
+name: Course review source snapshot
+on:
+  push:
+    paths: ['.github/workflows/course-review-snapshot.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package the course release controls for review
+        run: |
+          mkdir -p /tmp/course-review
+          cp -a curriculum tools /tmp/course-review/
+          mkdir -p /tmp/course-review/.github
+          cp -a .github/workflows /tmp/course-review/.github/
+          git rev-parse HEAD > /tmp/course-review/BASE_COMMIT.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: course-review-controls
+          path: /tmp/course-review/
+          include-hidden-files: true
+          retention-days: 3
