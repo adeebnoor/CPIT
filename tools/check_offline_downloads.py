@@ -16,6 +16,7 @@ CHAPTERS = [10, 11, 12, 13, 14, 15, 16, 17, 20]
 
 async def loaded_images(page):
     await page.locator('img').evaluate_all('''async imgs => {
+      imgs.forEach(i => { i.loading = 'eager'; });
       await Promise.all(imgs.map(i => i.decode().catch(() => {})));
     }''')
     broken = await page.locator('img').evaluate_all('(imgs)=>imgs.filter(i=>!i.complete||!i.naturalWidth).map(i=>i.src)')
