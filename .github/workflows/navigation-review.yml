@@ -1,0 +1,135 @@
+name: iSCARB navigation review and live verification
+on:
+  push:
+    branches: [iscarb-navigation-20260921]
+    paths: ['.github/workflows/navigation-review.yml', 'tools/apply_navigation_v1.py', 'tools/check_navigation_v1.py']
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: iscarb-navigation-${{ github.event_name }}
+  cancel-in-progress: false
+jobs:
+  review:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/iscarb-navigation-20260921'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify baseline and apply only navigation edits
+        run: |
+          python tools/audit_classroom.py
+          python tools/apply_navigation_v1.py
+          node --check lectures/iscarb/runtime/classroom-v3.js
+          python tools/audit_classroom.py
+          node tools/check-fbr-release.mjs
+          python tools/build_public_site.py
+      - name: Install browser
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Run real downloads, keyboard/mouse and offline regression checks
+        run: |
+          mkdir -p test-results/navigation
+          set -o pipefail
+          python -u tools/check_navigation_v1.py --root _site 2>&1 | tee test-results/navigation/run.log
+      - name: Commit the exact tested edits to the review branch only
+        run: |
+          python - <<'PY'
+          import json,hashlib,pathlib,subprocess
+          m=json.loads(pathlib.Path('navigation-change-manifest.json').read_text())
+          assert m['navigation_version']=='20260921-navigation-v1'
+          changed=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
+          assert set(changed)==set(m['changed']),changed
+          for name,digest in m['changed'].items():
+              assert hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()==digest,name
+          subprocess.run(['git','add','--',*m['changed']],check=True)
+          PY
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          git commit -m 'Enable safe click, Enter and Backspace navigation in all nine chapters and offline ZIPs'
+          git push origin HEAD:refs/heads/iscarb-navigation-20260921
+          git rev-parse HEAD > test-results/navigation/REVIEWED_COMMIT.txt
+          cp navigation-change-manifest.json test-results/navigation/
+      - name: Retain review proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navigation-staging-proof
+          path: |
+            test-results/navigation/*.json
+            test-results/navigation/*.txt
+            test-results/navigation/*.png
+            test-results/navigation/*.log
+          retention-days: 7
+  live:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify the current live release bytes before testing
+        run: |
+          python tools/audit_classroom.py
+          mkdir -p test-results/navigation
+          python - <<'PY'
+          import hashlib,json,pathlib,time,urllib.request
+          pub=json.loads(pathlib.Path('curriculum/publication.json').read_text())
+          names=[x['path'] for x in pub['lectures']]+['lectures/iscarb/runtime/classroom-v3.js','lectures/iscarb/runtime/classroom-v3.css','student-guide.html']
+          assert 'Navigation v1' in pathlib.Path(names[-3]).read_text()
+          for attempt in range(24):
+              records=[]
+              for name in names:
+                  expected=hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()
+                  try:
+                      req=urllib.request.Request('https://adeebnoor.github.io/CPIT/'+name+'?nav-verify='+str(int(time.time())),headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:data=r.read()
+                      actual=hashlib.sha256(data).hexdigest()
+                      records.append({'path':name,'expected':expected,'actual':actual,'match':expected==actual})
+                  except Exception as e:records.append({'path':name,'match':False,'error':str(e)})
+              if all(x['match'] for x in records):break
+              time.sleep(5)
+          pathlib.Path('test-results/navigation/live-byte-proof.json').write_text(json.dumps(records,indent=2))
+          assert all(x['match'] for x in records),records
+          PY
+      - name: Install isolated browser
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Test published navigation and newly downloaded offline packages
+        env:
+          COURSE_BASE_URL: https://adeebnoor.github.io/CPIT/
+        run: |
+          set -o pipefail
+          python -u tools/check_navigation_v1.py 2>&1 | tee test-results/navigation/run.log
+          git rev-parse HEAD > test-results/navigation/VERIFIED_COMMIT.txt
+      - name: Retain live proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navigation-live-proof
+          path: |
+            test-results/navigation/*.json
+            test-results/navigation/*.txt
+            test-results/navigation/*.png
+            test-results/navigation/*.log
+          retention-days: 14
