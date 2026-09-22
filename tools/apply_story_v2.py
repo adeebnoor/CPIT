@@ -59,6 +59,8 @@ def apply(root):
         ch=c['chapter'];name=c['path'];before=(root/name).read_text()
         d=json.loads(DATA.search(before).group(2))
         if ch==11:
+            for group in c.get('source_groups',[]):
+                group['units']=[u for u in group.get('units',[]) if u not in {'CHECK','DECIDE'}]
             keep=[x for x in d['slides'] if x['id'] not in {'CHECK','DECIDE'}]
             title=next(x for x in keep if x['id']=='TITLE');map_slide=next(x for x in keep if x['id']=='MAP')
             body=[x for x in keep if x['id'] not in {'TITLE','MAP'}]
