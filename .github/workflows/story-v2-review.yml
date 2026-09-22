@@ -116,8 +116,10 @@ jobs:
           python tools/audit_classroom.py
           python - <<'PY'
           import json,pathlib,hashlib,urllib.request,time
-          m=json.loads(pathlib.Path('curriculum/story-v2-review.json').read_text())
-          names={n:h for n,h in m['changed'].items() if n.endswith(('.html','.js','.css')) and not n.startswith('tools/')}
+          pub=json.loads(pathlib.Path('curriculum/publication.json').read_text())
+          names={c['path']:c['source_sha256'] for c in pub['lectures']}
+          for n in ['lectures/iscarb/runtime/classroom-v3.js','lectures/iscarb/runtime/classroom-v3.css']:
+              names[n]=pub['delivery_asset_sha256'][n]
           records=[]
           for attempt in range(30):
               records=[]
