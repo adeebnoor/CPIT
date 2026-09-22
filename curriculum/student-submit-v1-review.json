@@ -1,0 +1,44 @@
+{
+  "version": "20260922-student-submit-v1",
+  "assessment_contracts": {
+    "10": {
+      "path": "lectures/iscarb/Ch10-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r10-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch10-mastery-v2",
+      "storage_key": "fbr:cpit455:ch10:mastery:v2",
+      "access_key": "fbr:access:ch10:v4",
+      "points": 4
+    },
+    "11": {
+      "path": "lectures/iscarb/Ch11-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r11-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch11-mastery-v2",
+      "storage_key": "fbr:cpit455:ch11:mastery:v2",
+      "access_key": "fbr:access:ch11:a2:v1",
+      "points": 5
+    }
+  },
+  "stress_sha256": {
+    "10": "3e20f2b704ab21213a5b3e736a3e6bcf4491a219c210ff5c941820153102a7d2",
+    "11": "846c5f3ea4eb257c75fbcacdb6340290c996dc595f272806aaf9fbdeb8a05d46"
+  },
+  "assignment_sha256": {
+    "10": "a3c50fba7163c6e61fcb651f345cd08a85a113dab5146cb2a269f56e5f03e220",
+    "11": "e51be6090c2429fcb2b3f6f30b33585413fb16fce980d60447461d5a4047169c"
+  },
+  "runtime_sha256": "b8658514256497a010d2916502d4d98816b4bcbb207e634e1be5828d34883b0c",
+  "offline_packages": {
+    "10": "e3b200f29da2db2521bd9bda85762f1005e537e89de8e0b69b59d22ec2af5364",
+    "11": "71868c56f7d56269809bab3ad41267d1be5fdb1d3a44d4bdd69948cc126c3032",
+    "12": "f1863fb32dc902b3f7b5644c488203cec9861dfe421d3284fcf57e307f9ba456",
+    "13": "c15fd6818aeb1d695b9dddfdc0d9bc79462234d6854c9ebe6e5111cb6c2c7f01",
+    "14": "8783a44a0fec6b028fc4362cbdbe5cc3f93b2218821d2c7faec87341fc7cfe0d",
+    "15": "72a4d302a33712ac0cf6add8791fa98ca5b97244c6feb74d47e09a22752ee28b",
+    "16": "e7594e711d56873ce6177e9b88ab3ae69a71618b26dfff2dad7d8999523210aa",
+    "17": "211b1a3afa7631e88ecd83338aa2a29db7c18fe394b6b1c3c9efad07566f648d",
+    "20": "d2cfb58ea2c7fe501975e1a4da7fa80a37ff1eb831596c569c0ec66745fcafd6"
+  },
+  "guarantee": "Assignment 1/2 storage keys, access keys, editions, versions, raw points and hidden STRESS files are unchanged."
+}
