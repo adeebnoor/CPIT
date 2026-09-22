@@ -37,7 +37,8 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
   return{id:null,count:false};
  }
  async function load(){
-  const v=identity();
+  const automated=!!navigator.webdriver;
+  const v=automated?{id:null,count:false}:identity();
   try{
    const options=v.count?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitor_id:v.id,path:'/CPIT/iscarb.html'})}:{method:'GET'};
    const r=await fetch(endpoint,options),d=await r.json();
