@@ -12,3 +12,43 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
  const render=()=>{const checks=[...document.querySelectorAll('.review-check')];if(!checks.length)return;const n=checks.filter(x=>x.checked).length;const t=document.getElementById('courseProgress'),bar=document.getElementById('courseProgressBar');if(t)t.textContent=n+' / '+chapters.length;if(bar)bar.value=n;const next=checks.find(x=>!x.checked),link=document.getElementById('continueCourse');if(next&&link){const lesson=next.closest('.lesson'),a=lesson.querySelector('.actions a');link.href=a.href;link.textContent=n?'Continue with Chapter '+next.dataset.reviewChapter:'Start Chapter 10'}else if(link){link.href='course-resources.html#outcomes';link.textContent='Review course outcomes'}};
  document.querySelectorAll('.review-check').forEach(x=>x.addEventListener('change',render));render();
 })();
+
+// Approximate unique-browser counter for the public iSCARB hub.
+// The backend stores only a random browser UUID, the fixed hub path, and first-seen time.
+(function(){
+ const out=document.getElementById('visitorCount'),wrap=document.getElementById('visitorStat');
+ if(!out)return;
+ const endpoint='https://xcirpzxpcpbxpowjbpiq.supabase.co/functions/v1/iscarb-visitor-counter';
+ const key='iscarb-hub-visitor-id-v1';
+ const uuidRe=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+ function uuid(){
+  if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+  const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
+  return [...b].map((x,i)=>([4,6,8,10].includes(i)?'-':'')+x.toString(16).padStart(2,'0')).join('');
+ }
+ function identity(){
+  try{
+   let id=localStorage.getItem(key);
+   if(uuidRe.test(id||''))return{id,count:true};
+   id=uuid();
+   localStorage.setItem(key,id);
+   if(localStorage.getItem(key)===id)return{id,count:true};
+  }catch{}
+  return{id:null,count:false};
+ }
+ async function load(){
+  const v=identity();
+  try{
+   const options=v.count?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitor_id:v.id,path:'/CPIT/iscarb.html'})}:{method:'GET'};
+   const r=await fetch(endpoint,options),d=await r.json();
+   if(!r.ok||!d.ok||!Number.isFinite(Number(d.visitors)))throw Error('counter');
+   out.textContent=Number(d.visitors).toLocaleString('en-US');
+   if(wrap)wrap.title='Approximate unique browsers visiting this course hub. No name, email or IP is stored by the iSCARB counter.';
+  }catch{
+   out.textContent='—';
+   if(wrap)wrap.title='Visitor count temporarily unavailable.';
+  }
+ }
+ load();
+})();
+
