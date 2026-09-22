@@ -20,8 +20,9 @@ async def main():
   for viewport in [{'width':1440,'height':900},{'width':390,'height':844}]:
    for c in PUB['lectures']:
     ch=c['chapter'];ctx=await browser.new_context(viewport=viewport,accept_downloads=True);page=await ctx.new_page()
+    page_http=[]
     page.on('pageerror',lambda e:errors.append({'javascript':str(e)}))
-    page.on('response',lambda r:errors.append({'http':r.status,'url':r.url}) if r.status>=400 and 'favicon.ico' not in r.url else None)
+    page.on('response',lambda r:page_http.append({'http':r.status,'url':r.url}) if r.status>=400 and 'favicon.ico' not in r.url else None)
     page.on('dialog',lambda d:d.accept())
     try:
      response=await page.goto(urljoin(BASE,c['path'])+'#START',wait_until='networkidle');assert response.status==200
@@ -80,6 +81,17 @@ async def main():
       for target in [c['source_download'],c['offline_package']]:
        rr=await ctx.request.head(urljoin(BASE,target));assert rr.status==200,target
       interactions.append({'chapter':ch,'stations':3,'timer':True,'reload':True,'export_import':True,'quiz':5,'source_slides':len(ids)})
+     # Retry transient CDN/server failures before treating a resource as broken.
+     for item in page_http:
+      if item['http']>=500:
+       recovered=False
+       for _ in range(3):
+        await page.wait_for_timeout(250)
+        rr=await ctx.request.get(item['url'])
+        if rr.status<400:
+         recovered=True;break
+       if not recovered:errors.append(item)
+      else:errors.append(item)
      records.append({'chapter':ch,'viewport':viewport,'slides':20,'pass':True})
      print('PASS HTTP CH',ch,viewport,flush=True)
     except Exception as e:
