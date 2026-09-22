@@ -1,0 +1,68 @@
+{
+  "version": "20260922-story-v2",
+  "chapters": {
+    "10": [
+      "Which dependability property is threatened by the recurring alarms and failover?",
+      "Is the signal a real pressure event, an internal error, or a visible service failure?",
+      "Would redundancy and diversity really separate the sensing paths?",
+      "What process evidence would justify continuing the plant?",
+      "What can a model prove—and what still needs real sensor and operational evidence?"
+    ],
+    "11": [
+      "Is the gateway ready to serve, correct over time, or both?",
+      "Which metric and exposure unit can support the proposed release claim?",
+      "Do two identical servers protect against the failure mechanism that matters?",
+      "Which programming safeguards prevent, contain, or recover from faults?",
+      "Does the 10% external-traffic test profile represent the wider release?"
+    ],
+    "12": [
+      "Can software meet its specification and still create an unsafe situation?",
+      "What hazard could repeated actuation create, and how serious is it?",
+      "Which requirement prevents or limits that hazard?",
+      "What evidence would show the protection works?",
+      "Does the safety argument cover cumulative commands and loss of sensing?"
+    ],
+    "13": [
+      "Which asset or security property is at risk when another team’s record is requested?",
+      "Who owns the security policy and risk decision?",
+      "What requirement should forbid cross-team access?",
+      "Where must authorization be enforced—not merely hidden in the interface?",
+      "Which negative test demonstrates the boundary, and what remains untested?"
+    ],
+    "14": [
+      "Which critical service is actually unavailable even though the backup server is running?",
+      "Where are we in recognition → resistance → recovery → reinstatement?",
+      "Which shared identity dependency creates a cyber-resilience soft spot?",
+      "What can operators do when normal procedures are insufficient?",
+      "What architecture and recovery evidence restores usable service, not just servers?"
+    ],
+    "15": [
+      "What should be reused: a complete product, application, component, or concept?",
+      "Does the appointment product still fit schedule, lifetime, team, criticality, domain, and platform?",
+      "Could a framework provide reusable structure without forcing the wrong workflow?",
+      "Would a product line or configuration handle waiting periods and linked appointments?",
+      "Configure, integrate, wrap, or replace—and how does supplier interface evolution change the choice?"
+    ],
+    "16": [
+      "Which provided or required interface must state the temperature meaning?",
+      "Can the component model and middleware help interoperability without defining the unit?",
+      "Should we adapt an existing component or change the requirements?",
+      "Where should the Fahrenheit↔Celsius adapter sit in the composition?",
+      "Which contract and test establish semantic compatibility, including invalid inputs?"
+    ],
+    "17": [
+      "What does a timeout tell us—and what does it not tell us—about remote execution?",
+      "How should procedural or message interaction handle a lost response?",
+      "Which client/server layer owns retry, state, and user feedback?",
+      "Which distributed architecture best contains duplicate or uncertain operations?",
+      "How do remote ownership and service delivery affect evidence for retries and commits?"
+    ],
+    "20": [
+      "Which participants remain independently useful and independently managed?",
+      "What authority does the dashboard owner actually have over each feed?",
+      "Why can local correctness fail to guarantee the shared dashboard promise?",
+      "How do owners coordinate interfaces, staged changes, and cross-system tests?",
+      "Which architecture pattern can keep service useful when a feed slows or changes?"
+    ]
+  }
+}
