@@ -1,0 +1,170 @@
+name: Final student submission review
+on:
+  push:
+    branches: [iscarb-final-student-submit-20260922]
+    paths:
+      - '.github/workflows/student-submit-v1-review.yml'
+      - 'lectures/iscarb/runtime/classroom-v3.js'
+      - 'lectures/iscarb/Ch10-FBR-Student-Assignment.html'
+      - 'lectures/iscarb/Ch11-FBR-Student-Assignment.html'
+      - 'tools/apply_student_submit_v1.py'
+      - 'tools/check_student_submission_v1.py'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: student-submit-v1-\${{ github.event_name }}-\${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  review:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/iscarb-final-student-submit-20260922'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check the bounded review diff
+        run: |
+          python - <<'PY'
+          import subprocess
+          base='3591559930fbc505ea93019474f6784066b968c9'
+          changed=subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines()
+          allowed={
+            '.github/workflows/student-submit-v1-review.yml',
+            'lectures/iscarb/runtime/classroom-v3.js',
+            'lectures/iscarb/Ch10-FBR-Student-Assignment.html',
+            'lectures/iscarb/Ch11-FBR-Student-Assignment.html',
+            'tools/apply_student_submit_v1.py',
+            'tools/check_student_submission_v1.py'
+          }
+          assert set(changed)<=allowed,('Unexpected changes before review',changed)
+          PY
+      - name: Rebuild offline packages and declared hashes
+        run: |
+          python tools/apply_student_submit_v1.py
+          python tools/audit_classroom.py
+          node tools/check-fbr-release.mjs
+          python tools/build_public_site.py
+      - name: Install isolated QA tools
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          npm install --no-save --package-lock=false jsdom@30.0.1
+      - name: Run existing assignment and course protections
+        run: |
+          mkdir -p test-results/student-submit-v1
+          set -o pipefail
+          {
+            node tools/check-course-interactions.cjs
+            node tools/check-assignment-v5.cjs
+            node tools/learning-path-tests/check-path.cjs
+            node tools/learning-path-tests/check-visual.cjs
+            node tools/learning-path-tests/check-assignments.cjs
+            node tools/learning-path-tests/check-labs.cjs
+            node tools/learning-path-tests/check-hub.cjs
+          } 2>&1 | tee test-results/student-submit-v1/existing-tests.log
+      - name: Test Assignment 1 and 2 as a student
+        run: |
+          python -m http.server 8765 --directory _site >/tmp/student-submit-http.log 2>&1 &
+          sleep 2
+          set -o pipefail
+          python tools/check_student_submission_v1.py --base http://127.0.0.1:8765/ 2>&1 | tee test-results/student-submit-v1/student-flow.log
+          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/check_story_v2.py 2>&1 | tee test-results/student-submit-v1/story-regression.log
+          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/check_navigation_v1.py 2>&1 | tee test-results/student-submit-v1/navigation-regression.log
+      - name: Commit only the generated release files after all tests pass
+        run: |
+          python - <<'PY'
+          import json,pathlib,subprocess,hashlib
+          m=json.loads(pathlib.Path('curriculum/student-submit-v1-review.json').read_text())
+          # Assessment identity and hidden STRESS were asserted by the finalizer.
+          generated=['curriculum/publication.json','curriculum/student-submit-v1-review.json']
+          generated += [f'lectures/iscarb/packages/Ch{ch}-iSCARB.zip' for ch in [10,11,12,13,14,15,16,17,20]]
+          subprocess.run(['git','add','--',
+            'lectures/iscarb/runtime/classroom-v3.js',
+            'lectures/iscarb/Ch10-FBR-Student-Assignment.html',
+            'lectures/iscarb/Ch11-FBR-Student-Assignment.html',
+            'tools/apply_student_submit_v1.py','tools/check_student_submission_v1.py',
+            '.github/workflows/student-submit-v1-review.yml',
+            *generated],check=True)
+          PY
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          git commit -m 'Finalize student-facing iSCARB journey and Assignment 1/2 submission guidance' || true
+          git push origin HEAD:refs/heads/iscarb-final-student-submit-20260922
+          git rev-parse HEAD > test-results/student-submit-v1/REVIEWED_COMMIT.txt
+      - name: Preserve staging proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-submit-v1-staging-proof
+          path: |
+            test-results/student-submit-v1/
+            curriculum/student-submit-v1-review.json
+          retention-days: 14
+  live:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify final release is the intended one
+        run: |
+          python tools/audit_classroom.py
+          python - <<'PY'
+          import json,pathlib,hashlib,urllib.request,time
+          pub=json.loads(pathlib.Path('curriculum/publication.json').read_text())
+          assert pub.get('student_submission_version')=='20260922-student-submit-v1'
+          names=['lectures/iscarb/runtime/classroom-v3.js',
+                 'lectures/iscarb/Ch10-FBR-Student-Assignment.html',
+                 'lectures/iscarb/Ch11-FBR-Student-Assignment.html']
+          expected={n:pub['delivery_asset_sha256'].get(n) for n in names}
+          # Assignments may not be declared in older manifests; compare to reviewed manifest when needed.
+          review=json.loads(pathlib.Path('curriculum/student-submit-v1-review.json').read_text())
+          expected[names[1]]=review['assignment_sha256']['10']
+          expected[names[2]]=review['assignment_sha256']['11']
+          for attempt in range(30):
+            bad=[]
+            for n,d in expected.items():
+              req=urllib.request.Request('https://adeebnoor.github.io/CPIT/'+n+'?student-v1='+str(int(time.time())),headers={'Cache-Control':'no-cache'})
+              try:
+                with urllib.request.urlopen(req,timeout=20) as r:data=r.read()
+                if hashlib.sha256(data).hexdigest()!=d:bad.append(n)
+              except Exception as e:bad.append(n+':'+str(e))
+            if not bad:break
+            print('Waiting for Pages:',bad,flush=True);time.sleep(8)
+          assert not bad,bad
+          PY
+      - name: Install clean browser
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Re-run student submission journey on the public site
+        run: |
+          mkdir -p test-results/student-submit-v1-live
+          set -o pipefail
+          python tools/check_student_submission_v1.py --base https://adeebnoor.github.io/CPIT/ --output test-results/student-submit-v1-live 2>&1 | tee test-results/student-submit-v1-live/live.log
+      - name: Preserve live proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-submit-v1-live-proof
+          path: test-results/student-submit-v1-live/
+          retention-days: 14
