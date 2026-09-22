@@ -1,0 +1,154 @@
+name: iSCARB story-led classroom review
+on:
+  push:
+    branches: [iscarb-story-audit-20260922]
+    paths:
+      - '.github/workflows/story-v2-review.yml'
+      - 'tools/story-v2/**'
+      - 'tools/apply_story_v2.py'
+      - 'tools/check_story_v2.py'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: story-v2-\${{ github.event_name }}-\${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  review:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/iscarb-story-audit-20260922'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply the bounded story-led revision
+        run: |
+          python - <<'PY'
+          import subprocess
+          changed=subprocess.check_output(['git','diff','--name-only','684b7c9869d680e61b3b2f7da3d5de7835653502','HEAD'],text=True).splitlines()
+          allowed={'.github/workflows/story-v2-review.yml','tools/story-v2/story.json','tools/story-v2/render.js','tools/story-v2/layout.css','tools/apply_story_v2.py','tools/check_story_v2.py'}
+          assert set(changed)<=allowed,('Concurrent source changes require review',changed)
+          PY
+          python tools/apply_story_v2.py
+          python tools/audit_classroom.py
+          node tools/check-fbr-release.mjs
+          python tools/build_public_site.py
+      - name: Install isolated QA tools
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          npm install --no-save --package-lock=false jsdom@30.0.1
+      - name: Preserve assignments, navigation and source behavior
+        run: |
+          mkdir -p test-results/story-v2
+          set -o pipefail
+          {
+            node tools/check-course-interactions.cjs
+            node tools/check-assignment-v5.cjs
+            node tools/learning-path-tests/check-path.cjs
+            node tools/learning-path-tests/check-visual.cjs
+            node tools/learning-path-tests/check-assignments.cjs
+            node tools/learning-path-tests/check-labs.cjs
+            node tools/learning-path-tests/check-hub.cjs
+          } 2>&1 | tee test-results/story-v2/existing-tests.log
+      - name: Test all nine stories, maps, endings, duplicates and offline ZIPs
+        run: |
+          python -m http.server 8765 --directory _site >/tmp/story-v2-http.log 2>&1 &
+          sleep 2
+          set -o pipefail
+          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/check_story_v2.py 2>&1 | tee test-results/story-v2/story.log
+          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/check_navigation_v1.py 2>&1 | tee test-results/story-v2/navigation.log
+          COURSE_BASE_URL=http://127.0.0.1:8765/ python tools/classroom-v3-tests/check-classroom-http.py 2>&1 | tee test-results/story-v2/classroom.log
+      - name: Commit only the files that passed every gate
+        run: |
+          python - <<'PY'
+          import json,pathlib,hashlib,subprocess
+          m=json.loads(pathlib.Path('story-v2-change-manifest.json').read_text())
+          for name,digest in m['changed'].items():
+              assert hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()==digest,name
+          for name,digest in m['preserved_assessments'].items():
+              assert hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()==digest,name
+          review=pathlib.Path('curriculum/story-v2-review.json')
+          review.write_text(json.dumps(m,indent=2)+'\n')
+          subprocess.run(['git','add','--',*m['changed'],str(review)],check=True)
+          PY
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          git commit -m 'Unify nine chapters around one story, clearer maps, explicit endings and duplicate-free flow'
+          git push origin HEAD:refs/heads/iscarb-story-audit-20260922
+          git rev-parse HEAD > test-results/story-v2/REVIEWED_COMMIT.txt
+      - name: Preserve review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-v2-staging-proof
+          path: |
+            test-results/story-v2/
+            curriculum/story-v2-review.json
+          retention-days: 14
+  live:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Wait for exact published story-led bytes
+        run: |
+          mkdir -p test-results/story-v2
+          python tools/audit_classroom.py
+          python - <<'PY'
+          import json,pathlib,hashlib,urllib.request,time
+          m=json.loads(pathlib.Path('curriculum/story-v2-review.json').read_text())
+          names={n:h for n,h in m['changed'].items() if n.endswith(('.html','.js','.css')) and not n.startswith('tools/')}
+          records=[]
+          for attempt in range(30):
+              records=[]
+              for name,digest in names.items():
+                  try:
+                      req=urllib.request.Request('https://adeebnoor.github.io/CPIT/'+name+'?story-v2='+str(int(time.time())),headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:data=r.read()
+                      actual=hashlib.sha256(data).hexdigest()
+                      records.append({'file':name,'expected':digest,'actual':actual,'match':actual==digest})
+                  except Exception as e:records.append({'file':name,'match':False,'error':str(e)})
+              if all(x['match'] for x in records):break
+              print('Waiting for Pages:',[x['file'] for x in records if not x['match']],flush=True);time.sleep(8)
+          assert all(x['match'] for x in records),records
+          pathlib.Path('test-results/story-v2/live-bytes.json').write_text(json.dumps(records,indent=2))
+          PY
+      - name: Install clean browser
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Re-run the complete student path on the public site
+        env:
+          COURSE_BASE_URL: https://adeebnoor.github.io/CPIT/
+        run: |
+          set -o pipefail
+          python tools/check_story_v2.py 2>&1 | tee test-results/story-v2/live-story.log
+          python tools/check_navigation_v1.py 2>&1 | tee test-results/story-v2/live-navigation.log
+          git rev-parse HEAD > test-results/story-v2/VERIFIED_COMMIT.txt
+      - name: Preserve live proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-v2-live-proof
+          path: test-results/story-v2/
+          retention-days: 14
