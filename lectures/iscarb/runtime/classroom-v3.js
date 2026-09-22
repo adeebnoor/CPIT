@@ -25,13 +25,13 @@ function visual(s){if(s.rows)return table(s);if(s.visual?.rows)return table(s.vi
 if(s.figure)return `<button class="figure-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Enlarge figure: ${esc(s.title)}"><img src="${esc(s.figure)}" alt="${esc(s.caption||s.title)}" decoding="async"></button><p class="caption">${esc(s.caption||'Original source figure · select to enlarge')}</p>`;
 let ns=s.nodes?.length?s.nodes:(s.bullets||[]).slice(0,3).map(p=>[p[0],'']);return `<div class="concepts ${s.flow?'flow':''}">${ns.map(n=>`<div class="concept"><b>${esc(n[0])}</b>${n[1]?`<span>${esc(n[1])}</span>`:''}</div>`).join('')}</div>`;}
 function render(){const s=D.slides[index],stop=D.stations.find(x=>x.at===s.id);$('#chapter-main').className='chapter-main'+(s.fullTable?' full-table':'');
-$('#chapter-main').innerHTML=`<div class="heading"><div><p class="ey">${esc(stationMode?'CLASSROOM STATION':s.phase||'LEARN')} · CHAPTER ${D.chapter}</p><h1>${esc(s.id==='TITLE'?'A decision you can explain':s.id==='MAP'?'Chapter mind map':s.title)}</h1></div><span class="counter">${index+1} / ${D.slides.length}</span></div>`;
+$('#chapter-main').innerHTML=`<div class="heading"><div><p class="ey">${esc(stationMode?'CLASSROOM STATION':s.phase||'LEARN')} · CHAPTER ${D.chapter}</p><h1>${esc(s.id==='TITLE'?'A decision you can explain':s.id==='MAP'?'Chapter mind map':s.id==='START'?'The story we will solve':s.id==='END'?'Chapter complete':s.title)}</h1></div><span class="counter">${index+1} / ${D.slides.length}</span></div>`;
 if(stationMode&&stop){renderStation(stop);updateNav();return;}
 if(s.id==='TITLE'){$('#chapter-main').insertAdjacentHTML('beforeend',`<div class="hero"><div><p class="ey">iSCARB · CPIT-455</p><h2>${esc(D.title)}</h2><p>${esc(D.case.headline)}</p><div class="route-tags"><span>SEE</span><span>EXPLAIN</span><span>TEST</span><span>DECIDE</span></div><p class="small">Professor Adeeb Noor · King Abdulaziz University<br>20 classroom slides · five objectives · one evolving artifact</p><div class="actions">${jumpButton('MAP','See the chapter map →')}${button('Resume draft','CARD')}</div></div><img src="${esc(D.brand)}" alt="Approved iSCARB visual identity"></div><p class="scope-note">Classroom and named source review are required. Tools support the same work; they are not 20 extra assignments.</p>`);}
 else if(s.id==='MAP'){renderMindMap();}
-else if(s.id==='START'){$('#chapter-main').insertAdjacentHTML('beforeend',`<p class="takeaway">${esc(D.case.headline)}</p><div class="body-grid"><div class="case-box"><p class="case-label">Fictional teaching case · not operational advice</p><p>${esc(D.case.text)}</p></div><div class="meaning"><h2>THE DECISION</h2>${points([['Initial view',D.case.question],['Evidence','Separate supplied facts, derived values and missing tests.'],['Return','Revise the same decision when the constraint changes.']])}</div></div><div class="question"><p class="question-text"><b>FIRST RESPONSE</b>State a tentative answer; do not invent measurements.</p><div class="actions">${button('Record initial view','PREDICT','primary')}${button('Five objectives','OBJECTIVES')}</div></div>`);}
-else if(s.id==='END'){$('#chapter-main').insertAdjacentHTML('beforeend',`<p class="takeaway">One coherent artifact—not a collection of disconnected answers.</p><div class="body-grid"><div class="concepts"><div class="concept"><b>1 · Explain</b><span>Use the chapter concepts and the exact required source.</span></div><div class="concept"><b>2 · Defend</b><span>Keep the claim, evidence, limits and changed decision together.</span></div><div class="concept"><b>3 · Transfer</b><span>Apply the method to the separate assessed case.</span></div></div><div class="meaning"><h2>BEFORE THE ASSIGNMENT</h2>${points([['Source','Finish the named source review; a citation alone is not explanation.'],['Practice','Check all five objectives and explain a changed example.'],['Backup','Export your classroom card; Blackboard remains the submission system.']])}</div></div><div class="question"><div class="actions">${button('Required reading','READING','primary')}${button('Five-objective practice','QUIZ')}${button('Card / export','CARD')}<a href="../../fbr-submission.html?chapter=${D.chapter}">Open Assignment ${D.assignment}</a></div><p class="small">Do not resubmit an already completed assignment merely because the lecture interface changed.</p></div>`);}
-else{$('#chapter-main').insertAdjacentHTML('beforeend',`<p class="takeaway">${esc(s.takeaway||s.title)}</p><div class="body-grid"><div class="visual">${visual(s)}</div><div class="meaning"><h2>WHAT IT MEANS</h2>${points(s.bullets)}</div></div><div class="question"><p class="question-text"><b>APPLY THE IDEA</b>${esc(s.question||'Explain the concept using the teaching case.')}</p><div class="actions"><div class="buttons"><button data-full="${esc(s.id)}">Full explanation</button><button data-answer="${esc(s.id)}">Model answer</button>${stop?`<button class="primary" id="stationBtn">Station ${stop.no} · build the card</button>`:''}</div><span class="source-line">${esc(ref(s))} · ${sourceLink(s)}</span></div></div>`);}
+else if(s.id==='START'){renderStory();}
+else if(s.id==='END'){renderClosing();}
+else{$('#chapter-main').insertAdjacentHTML('beforeend',`${storyThread(s)}<p class="takeaway">${esc(s.takeaway||s.title)}</p><div class="body-grid"><div class="visual">${visual(s)}</div><div class="meaning"><h2>WHAT IT MEANS</h2>${points(s.bullets)}</div></div><div class="question"><p class="question-text"><b>BACK TO THE STORY</b>${esc(s.question||'Explain the concept using the teaching case.')}</p><div class="actions"><div class="buttons"><button data-full="${esc(s.id)}">Full explanation</button><button data-answer="${esc(s.id)}">Model answer</button>${stop?`<button class="primary" id="stationBtn">Station ${stop.no} · build the card</button>`:''}</div><span class="source-line">${esc(ref(s))} · ${sourceLink(s)}</span></div></div>`);}
 updateNav();}
 function updateNav(){$('#prevBtn').disabled=index===0;$('#nextBtn').disabled=index===D.slides.length-1;$('#progress').innerHTML=`${new Set(state.seen).size} / ${D.slides.length} visited · not mastery<span class="nav-shortcuts">Enter → · Backspace ←</span>`;$('#live').textContent=`Slide ${index+1} of ${D.slides.length}: ${D.slides[index].title}`;updateMapLocation();save();}
 function go(n,history=true){if(!Number.isInteger(n)||n<0||n>=D.slides.length)return;pauseTimer();stationMode=false;index=n;if(!state.seen.includes(D.slides[index].id))state.seen.push(D.slides[index].id);render();if(history)try{window.history.replaceState(null,'','#'+D.slides[index].id);}catch(e){}if(matchMedia('(max-width:1000px)').matches)window.scrollTo(0,0);}
@@ -71,11 +71,76 @@ function notes(){const s=D.slides[index];modal('Instructor notes · '+s.title,`<
 function help(){modal('Navigation, sources and saving',`<p>Start at the cover, then the Chapter mind map on slide 2. Use Chapter map to return, Slides to jump, and Study &amp; tools for required review, your card, methodology and display settings.</p><table><tr><th>Enter / Backspace</th><td>Next / previous classroom slide. On a focused button or link, Enter activates that control.</td></tr><tr><th>Mouse click / Shift + click</th><td>Next / previous on non-interactive slide content in desktop presentation mode. Dragging to select text does not navigate.</td></tr><tr><th>← / →</th><td>Previous / next classroom slide.</td></tr><tr><th>Home / End</th><td>First / final slide.</td></tr><tr><th>O / C / N</th><td>Slide index / decision card / instructor notes.</td></tr><tr><th>Escape</th><td>Close a dialog; typing fields do not trigger navigation.</td></tr></table><p>Desktop uses presentation layout; reading mode and smaller screens reflow content. Sources open separately on demand. Keep the accompanying runtime/assets folders when using an offline ZIP.</p><p>Classroom drafts are local. Export JSON to restore them, or Markdown to read them. The assessed assignment preserves its own identity, draft storage and commitment rules.</p><div class="actions">${button('Source coverage','COVERAGE')}${button('Export card','CARD')}</div>`);}
 // Mind-map v1: source concepts and student workflow are distinct layers.
 // This is an authored learning organizer, not an original textbook figure.
+// Story v2: simpler concept path, one persistent case thread, and an explicit close.
+function storyBranch(s){
+ return D.roadmap?.branches?.find(x=>(x.units||[]).includes(s.id));
+}
+function storyThread(s){
+ if(['TITLE','MAP','START','END'].includes(s.id))return '';
+ const b=storyBranch(s),lens=b?.caseLens||D.case.question;
+ return `<div class="case-thread"><span>CASE THREAD</span><b>${esc(b?.label||D.case.headline)}</b><em>${esc(lens)}</em></div>`;
+}
 function renderMindMap(){
- const r=D.roadmap, next=D.slides[2].id;
+ const r=D.roadmap;
  $('#chapter-main').classList.add('mindmap-page');
- const wires='<svg class="mind-wires" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"><path d="M374 135 C342 135 350 50 310 50"/><path d="M374 165 C342 165 350 250 310 250"/><path d="M626 120 C652 120 650 50 690 50"/><path d="M626 150 L690 150"/><path d="M626 180 C652 180 650 250 690 250"/></svg>';
- $('#chapter-main').insertAdjacentHTML('beforeend',`<div class="mindmap-board" aria-label="Chapter concepts and their relationships">${wires}<div class="mind-centre"><span class="mind-kicker">CHAPTER ${D.chapter} · THE BIG QUESTION</span><h2>${esc(r.question)}</h2><span class="mind-chapter">${esc(D.title)}</span></div>${r.branches.map((b,i)=>`<button class="mind-branch branch-${i+1}" data-jump="${esc(b.target)}" aria-label="${esc(b.label)}: ${esc(b.verb)}. Open the related lesson."><span class="mind-verb">${i+1} · ${esc(b.verb)}</span><strong>${esc(b.label)}</strong><span class="mind-detail">${esc(b.detail)}</span></button>`).join('')}</div><p class="mind-link"><b>HOW THE IDEAS CONNECT</b> ${esc(r.connection)}</p><div class="student-roadmap" aria-label="Instructor and student roles"><section class="road-stage"><h3><span>01</span> In class</h3><p><b>Instructor:</b> Explain and guide three stations.</p><p><b>You:</b> ${esc(r.inClass)}</p><p class="road-result">Keep one evolving practice card.</p></section><section class="road-stage"><h3><span>02</span> Required review</h3><p><b>Instructor:</b> Specify source reading.</p><p><b>You:</b> Source slides ${D.readings.map(x=>esc(x.range)).join(' + ')}; then five practice questions.</p><p class="road-result">Explain the idea before checking the answer.</p></section><section class="road-stage"><h3><span>03</span> Assignment ${D.assignment}</h3><p><b>Instructor:</b> Review with the published rubric.</p><p><b>You:</b> ${esc(r.deliverable)}</p><p class="road-result">New case → commit → STRESS → REFIT → Blackboard.</p></section></div><div class="map-bottom"><p><b>REQUIRED:</b> Class + named review + assignment. Other tools support the work; no extra tasks unless assigned.</p><div class="actions"><button data-open="OBJECTIVES">Five objectives</button>${jumpButton(next,'Start learning →')}</div></div>`);
+ $('#chapter-main').insertAdjacentHTML('beforeend',`
+ <div class="map-question">
+   <span>CHAPTER ${D.chapter} · BIG QUESTION</span>
+   <h2>${esc(r.question)}</h2>
+   <p>${esc(D.case.headline)}</p>
+ </div>
+ <div class="concept-path" aria-label="Five connected chapter concepts">
+   ${r.branches.map((b,i)=>`<button class="map-step" data-jump="${esc(b.target)}" aria-label="${esc(b.label)}. Open the related lesson.">
+      <span class="step-number">${i+1}</span>
+      <span class="step-verb">${esc(b.verb)}</span>
+      <strong>${esc(b.label)}</strong>
+      <span class="step-detail">${esc(b.detail)}</span>
+      <span class="step-case"><i>In our story</i>${esc(b.caseLens||'Use this concept to narrow the decision.')}</span>
+   </button>`).join('')}
+ </div>
+ <p class="mind-link"><b>WHY THIS ORDER</b> ${esc(r.connection)}</p>
+ <div class="student-roadmap" aria-label="What happens in class and after class">
+   <section class="road-stage"><h3><span>01</span> In class</h3><p><b>Instructor:</b> Explain the mechanism and guide three short stations.</p><p><b>You:</b> ${esc(r.inClass)}</p><p class="road-result">One evolving practice card—not several reports.</p></section>
+   <section class="road-stage"><h3><span>02</span> Required review</h3><p><b>Instructor:</b> Name the exact source selections.</p><p><b>You:</b> Review source slides ${D.readings.map(x=>esc(x.range)).join(' + ')} and complete the five-objective practice.</p><p class="road-result">Fix misunderstandings before the assignment.</p></section>
+   <section class="road-stage"><h3><span>03</span> Assignment ${D.assignment}</h3><p><b>Instructor:</b> Review using the published rubric.</p><p><b>You:</b> ${esc(r.deliverable)}</p><p class="road-result">New case → commit → STRESS → REFIT → Blackboard.</p></section>
+ </div>
+ <div class="map-bottom"><p><b>REQUIRED:</b> class + named review + assignment. Other tools support the same work unless explicitly assigned.</p><div class="actions">${jumpButton('START','Start the story →')}</div></div>`);
+}
+function renderStory(){
+ const r=D.roadmap;
+ $('#chapter-main').classList.add('story-page');
+ $('#chapter-main').insertAdjacentHTML('beforeend',`
+ <div class="story-head"><span>OUR STORY · FICTIONAL TEACHING CASE</span><h2>${esc(D.case.headline)}</h2><p>Keep this same case in mind as every concept is introduced.</p></div>
+ <div class="story-grid">
+   <section><h3>1 · Situation</h3><p>${esc(D.case.text)}</p></section>
+   <section><h3>2 · Your decision</h3><p>${esc(D.case.question)}</p></section>
+   <section><h3>3 · Evidence rule</h3><p>Use supplied facts and transparent calculations. Keep missing tests and unknowns visible; do not invent measurements.</p></section>
+ </div>
+ <div class="story-route" aria-label="How the story will be revisited">
+   ${r.branches.map((b,i)=>`<span><b>${i+1}</b>${esc(b.label)}</span>`).join('')}
+ </div>
+ <div class="story-note"><b>One story, five lenses.</b> Each main slide will show a CASE THREAD that tells you which part of this decision the concept helps you answer. The changed constraint is revealed later—do not guess it now.</div>
+ <div class="actions story-action">${jumpButton(r.branches[0].target,'Start learning →')}</div>`);
+}
+function renderClosing(){
+ const r=D.roadmap;
+ $('#chapter-main').classList.add('end-page');
+ $('#chapter-main').insertAdjacentHTML('beforeend',`
+ <div class="end-hero">
+  <div class="end-copy">
+   <p class="ey">CHAPTER ${D.chapter} · COMPLETE</p>
+   <h2>${esc(D.title)}</h2>
+   <p class="end-success">You should now be able to: <b>${esc(r.success)}</b></p>
+   <div class="end-required">
+    <section><span>1</span><div><b>Required review</b><p>${D.readings.map(x=>esc(x.title)+' · '+esc(x.range)).join(' | ')}</p></div></section>
+    <section><span>2</span><div><b>Check yourself</b><p>Complete the five-objective practice and correct any misunderstanding before the assignment.</p></div></section>
+    <section><span>3</span><div><b>Assignment ${D.assignment}</b><p>${esc(r.deliverable)} Submit through Blackboard according to the announced deadline.</p></div></section>
+   </div>
+   <p class="end-boundary">The lecture has ended. The toolkit is support—not extra required content unless your instructor assigns it.</p>
+   <div class="actions">${button('Open required review','READING','primary')}<a href="../../fbr-submission.html?chapter=${D.chapter}">Open Assignment ${D.assignment}</a></div>
+  </div>
+  <img src="${esc(D.brand)}" alt="Approved iSCARB visual identity">
+ </div>`);
 }
 function mapObjectives(){
  modal('Five chapter objectives · source outline',`<div class="callout">The mind map groups the existing source concepts for learning. It does not replace the five objectives, original sections or assigned source review.</div><ol class="objective-list">${D.objectives.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><h3>Original chapter spine</h3><ul>${D.sections.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><h3>Check your understanding</h3><p>${esc(D.roadmap.success)}</p><h3>Our fictional classroom case</h3><p>${esc(D.case.text)}</p><p><b>${esc(D.case.question)}</b></p><div class="actions">${jumpButton('MAP','Back to chapter map')}${button('Five-objective practice','QUIZ')}</div>`);

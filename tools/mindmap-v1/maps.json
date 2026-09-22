@@ -1,11 +1,632 @@
 {
-"10":{"question":"When is trust in a system justified?","connection":"Properties define the promise; failure mechanisms guide controls; process evidence and formal methods bound the claim.","inClass":"Distinguish properties; trace failure; justify a control.","deliverable":"A dependability claim with evidence and limits.","success":"Explain why the evidence supports this particular claim.","branches":[{"verb":"Define the promise","label":"Dependability properties","detail":"Five properties · cost and criticality","target":"X01","units":["X01","X04"]},{"verb":"Explain what can go wrong","label":"Failure in context","detail":"Fault → error → failure · people and process","target":"X07","units":["X02","X07","X03","CHECK1"]},{"verb":"Limit failure","label":"Protection mechanisms","detail":"Avoid / detect / tolerate · redundancy and diversity","target":"X02A","units":["X02A","R08"]},{"verb":"Build inspectable evidence","label":"Dependable processes","detail":"Process properties · accountable development","target":"X05","units":["X05","R18","CHECK2"]},{"verb":"State what is proved","label":"Formal methods","detail":"Verification / refinement · model assumptions","target":"X06","units":["X06","X06A","X06B","APPLY","CHALLENGE"]}]},
-"11":{"question":"How can reliability be specified, built and measured?","connection":"Define the service → specify a measurable target → design and program for it → test under a representative usage profile.","inClass":"Choose a metric; compare designs; interpret evidence.","deliverable":"A reliability measure, calculation and interpretation.","success":"Explain the denominator, units and operating-profile limits.","branches":[{"verb":"Define the service","label":"Availability and reliability","detail":"Correct results · service uptime · failure mechanisms","target":"RELAV","units":["FAULT","MANAGE","RELAV"]},{"verb":"Specify the target","label":"Reliability requirements","detail":"POFOD / ROCOF / MTTF / AVAIL · functional controls","target":"METRICS","units":["METRICS","AVAIL","REQ"]},{"verb":"Design for faults","label":"Fault-tolerant architectures","detail":"Protection · self-monitoring · N-version","target":"PROTECT","units":["PROTECT","SELFCHECK","VOTE","DIVERSITY"]},{"verb":"Implement the safeguards","label":"Programming for reliability","detail":"Eight guidelines · prevent, contain and recover","target":"CODE1","units":["CODE1","CODE2"]},{"verb":"Test the claim","label":"Reliability measurement","detail":"Statistical testing · operational profiles · limits","target":"MEASURE","units":["MEASURE","PROFILE","LIMITS","CHECK","DECIDE","REVISE"]}]},
-"12":{"question":"What supports a bounded claim that a system is safe?","connection":"Identify what can cause harm → analyze its causes → derive protective requirements → assemble and challenge the evidence.","inClass":"Trace a hazard to a requirement and a verification method.","deliverable":"A hazard → requirement → verification trace.","success":"Distinguish a proposed check from evidence actually obtained.","branches":[{"verb":"Understand the consequences","label":"Safety-critical systems","detail":"Safety ≠ reliability · primary / secondary","target":"X01","units":["X01","X02"]},{"verb":"Identify and analyze","label":"Hazards and risk","detail":"Accident vs hazard · risk regions · fault trees","target":"X02A","units":["X02A","CHECK1","X04","X05"]},{"verb":"Reduce the risk","label":"Safety requirements","detail":"Avoidance · detection/removal · damage limitation","target":"X03","units":["X03","X06"]},{"verb":"Create the evidence","label":"Safety engineering processes","detail":"Hazard log · verification · static analysis","target":"X09","units":["X09","CHECK2","R09","R18","D12"]},{"verb":"Justify with limits","label":"Safety cases","detail":"Claim · argument · evidence · critical paths","target":"B01","units":["B01","X10","APPLY"]}]},
-"13":{"question":"How does a security risk become a testable protection claim?","connection":"Assets and policy establish the need; risks shape requirements; design supplies controls; negative tests challenge their scope.","inClass":"Connect an asset and threat to a control and negative test.","deliverable":"A misuse case and an authorized negative-test plan.","success":"Explain which threat the control addresses—and which it does not.","branches":[{"verb":"Know what is at stake","label":"Security and dependability","detail":"Confidentiality · integrity · availability","target":"X01","units":["X01","X02","X02A"]},{"verb":"Set goals and responsibility","label":"Security and organizations","detail":"Policy · assets · lifecycle risk assessment","target":"X03","units":["X03","CHECK1","X04"]},{"verb":"Specify unwanted behavior","label":"Security requirements","detail":"Testable obligations · misuse cases","target":"X05","units":["X05","X06"]},{"verb":"Enforce the boundary","label":"Secure systems design","detail":"Layered protection · guidelines · secure programming","target":"R09","units":["R11","CHECK2","R09","DESIGN2","B01","X09"]},{"verb":"Challenge the control","label":"Security testing and assurance","detail":"Authorized negative tests · coverage limits","target":"R18","units":["R18","APPLY"]}]},
-"14":{"question":"How can critical services continue through disruption?","connection":"Critical services set priorities; the four Rs organize the response; people, defenses and survivability analysis make recovery usable.","inClass":"Identify dependencies; compare degraded and recovered service.","deliverable":"A critical-service recovery and reinstatement plan.","success":"Explain what service users regain, not only which server restarts.","branches":[{"verb":"Choose what must continue","label":"Critical services","detail":"Resilience vs reliability · continuity priorities","target":"X01","units":["X01","R18"]},{"verb":"Organize the response","label":"The four Rs","detail":"Recognition · resistance · recovery · reinstatement","target":"X02","units":["X02","RECOVERYPLAN"]},{"verb":"Protect organizational assets","label":"Cybersecurity","detail":"Assets · threats · cyber-resilience planning","target":"X02A","units":["X02A","R09"]},{"verb":"Enable people to adapt","label":"Sociotechnical resilience","detail":"Operators · layered defenses · emergency authority","target":"X03","units":["X03","CHECK1","X04","X05","D14","EMERGENCY"]},{"verb":"Design and check continuity","label":"Resilient systems design","detail":"Survivability analysis · softspots · recovery design","target":"X06","units":["X06","CHECK2","B01","APPLY"]}]},
-"15":{"question":"Which reuse approach fits the requirements and lifetime?","connection":"Planning constraints guide the choice of reusable structure, product family or complete application; integration must still be checked.","inClass":"Compare reuse routes against workflow and lifecycle constraints.","deliverable":"An options comparison and justified reuse choice.","success":"Explain both the fit and the cost of adapting what you inherit.","branches":[{"verb":"Survey what can be reused","label":"The reuse landscape","detail":"Functions → components → applications → systems","target":"X01","units":["X01","X02A"]},{"verb":"Choose under constraints","label":"Benefits, costs and planning","detail":"Six planning factors · support and lifetime","target":"D15","units":["X02","D15","CHECK1","LIFECYCLE"]},{"verb":"Extend reusable architecture","label":"Application frameworks","detail":"MVC · inheritance · inversion of control","target":"X03","units":["X03","IOC"]},{"verb":"Manage commonality and variation","label":"Software product lines","detail":"Shared core · specialization · configuration","target":"X04","units":["X04","X05","CONFIG"]},{"verb":"Configure or integrate","label":"Application system reuse","detail":"COTS solutions / integration · ERP · wrapping","target":"X06","units":["X06","CHECK2","R18","R09","APPLY"]}]},
-"16":{"question":"When do reusable components really fit together?","connection":"Interfaces state obligations; models supply shared support; CBSE finds or creates components; composition must preserve meaning.","inClass":"Read contracts; diagnose a mismatch; justify an adapter.","deliverable":"An interface contract and duration-adapter test log.","success":"Explain expected vs actual behavior, including invalid inputs.","branches":[{"verb":"Specify the boundary","label":"Components and interfaces","detail":"Five characteristics · provides / requires","target":"X01","units":["X01","X02A","X03","CHECK1"]},{"verb":"Support interoperability","label":"Component models","detail":"Standards · middleware · common services","target":"X04","units":["X04","MIDDLEWARE"]},{"verb":"Develop for or with reuse","label":"CBSE processes","detail":"Generalize · discover · select · validate","target":"X05","units":["X05","X06","VALIDATE","R08"]},{"verb":"Connect the behavior","label":"Component composition","detail":"Sequential · hierarchical · additive · adapters","target":"B01","units":["B01","CHECK2","R09"]},{"verb":"Check semantic obligations","label":"Contracts and composition limits","detail":"OCL pre/postconditions · emergent properties","target":"D16","units":["D16","D16B","APPLY"]}]},
-"17":{"question":"How should a distributed system behave when a reply is lost?","connection":"Network constraints shape communication; layers allocate work; architecture patterns organize it; SaaS changes delivery and responsibility.","inClass":"Trace a remote interaction and compare architectural choices.","deliverable":"A lost-response trace and deduplication test log.","success":"Distinguish no reply from no execution; explain retry assumptions.","branches":[{"verb":"Identify distributed constraints","label":"Distributed systems","detail":"Six design issues · scaling · failure management","target":"X01","units":["X01","X02","SCALE","X02A"]},{"verb":"Connect independent participants","label":"Interaction and middleware","detail":"RPC / messages · heterogeneous systems","target":"X03","units":["X03","CHECK1","X04"]},{"verb":"Allocate the work","label":"Client–server computing","detail":"Client/server roles · layers vs tiers","target":"X05","units":["X05","R09","X07"]},{"verb":"Choose a structure","label":"Architectural patterns","detail":"Five source patterns · quality trade-offs","target":"X06","units":["X06","CHECK2","B01"]},{"verb":"Deliver remotely","label":"Software as a service","detail":"Configuration · multi-tenancy · scaling","target":"X09","units":["X09","X10","APPLY"]}]},
-"20":{"question":"What can independent system owners promise together?","connection":"Independence creates complexity; classification exposes authority; engineering and architecture coordinate useful, bounded cooperation.","inClass":"Map owners, interactions and staged service commitments.","deliverable":"An authority map and staged acceptance plan.","success":"Explain what remains outside the shared decision-maker’s control.","branches":[{"verb":"Understand the relationships","label":"System complexity","detail":"Technical · managerial · governance","target":"X02","units":["X01","X02"]},{"verb":"Locate authority","label":"SoS classification","detail":"Organizational · federated · coalition","target":"X02A","units":["X02A","CHECK1"]},{"verb":"Question the assumptions","label":"Reductionism and complex systems","detail":"Independence · emergence · limits of decomposition","target":"X03","units":["X03"]},{"verb":"Coordinate change","label":"Systems of systems engineering","detail":"Interfaces · staged deployment · cross-system tests","target":"X04","units":["X04","X05","DEPLOY","X06","CHECK2"]},{"verb":"Structure cooperation","label":"Systems of systems architecture","detail":"Data feeds · virtual container · trading","target":"X09","units":["X09","X10","X08","CONTAINER","TRADING","APPLY"]}]}
+  "10": {
+    "question": "When is trust in a system justified?",
+    "connection": "Properties define the promise; failure mechanisms guide controls; process evidence and formal methods bound the claim.",
+    "inClass": "Distinguish properties; trace failure; justify a control.",
+    "deliverable": "A dependability claim with evidence and limits.",
+    "success": "Explain why the evidence supports this particular claim.",
+    "branches": [
+      {
+        "verb": "Define the promise",
+        "label": "Dependability properties",
+        "detail": "Five properties · cost and criticality",
+        "target": "X01",
+        "units": [
+          "X01",
+          "X04"
+        ],
+        "caseLens": "Which dependability property is threatened by the recurring alarms and failover?"
+      },
+      {
+        "verb": "Explain what can go wrong",
+        "label": "Failure in context",
+        "detail": "Fault → error → failure · people and process",
+        "target": "X07",
+        "units": [
+          "X02",
+          "X07",
+          "X03",
+          "CHECK1"
+        ],
+        "caseLens": "Is the signal a real pressure event, an internal error, or a visible service failure?"
+      },
+      {
+        "verb": "Limit failure",
+        "label": "Protection mechanisms",
+        "detail": "Avoid / detect / tolerate · redundancy and diversity",
+        "target": "X02A",
+        "units": [
+          "X02A",
+          "R08"
+        ],
+        "caseLens": "Would redundancy and diversity really separate the sensing paths?"
+      },
+      {
+        "verb": "Build inspectable evidence",
+        "label": "Dependable processes",
+        "detail": "Process properties · accountable development",
+        "target": "X05",
+        "units": [
+          "X05",
+          "R18",
+          "CHECK2"
+        ],
+        "caseLens": "What process evidence would justify continuing the plant?"
+      },
+      {
+        "verb": "State what is proved",
+        "label": "Formal methods",
+        "detail": "Verification / refinement · model assumptions",
+        "target": "X06",
+        "units": [
+          "X06",
+          "X06A",
+          "X06B",
+          "APPLY",
+          "CHALLENGE"
+        ],
+        "caseLens": "What can a model prove—and what still needs real sensor and operational evidence?"
+      }
+    ]
+  },
+  "11": {
+    "question": "How can reliability be specified, built and measured?",
+    "connection": "Define the service → specify a measurable target → design and program for it → test under a representative usage profile.",
+    "inClass": "Choose a metric; compare designs; interpret evidence.",
+    "deliverable": "A reliability measure, calculation and interpretation.",
+    "success": "Explain the denominator, units and operating-profile limits.",
+    "branches": [
+      {
+        "verb": "Define the service",
+        "label": "Availability and reliability",
+        "detail": "Correct results · service uptime · failure mechanisms",
+        "target": "RELAV",
+        "units": [
+          "FAULT",
+          "MANAGE",
+          "RELAV"
+        ],
+        "caseLens": "Is the gateway ready to serve, correct over time, or both?"
+      },
+      {
+        "verb": "Specify the target",
+        "label": "Reliability requirements",
+        "detail": "POFOD / ROCOF / MTTF / AVAIL · functional controls",
+        "target": "METRICS",
+        "units": [
+          "METRICS",
+          "AVAIL",
+          "REQ"
+        ],
+        "caseLens": "Which metric and exposure unit can support the proposed release claim?"
+      },
+      {
+        "verb": "Design for faults",
+        "label": "Fault-tolerant architectures",
+        "detail": "Protection · self-monitoring · N-version",
+        "target": "PROTECT",
+        "units": [
+          "PROTECT",
+          "SELFCHECK",
+          "VOTE",
+          "DIVERSITY"
+        ],
+        "caseLens": "Do two identical servers protect against the failure mechanism that matters?"
+      },
+      {
+        "verb": "Implement the safeguards",
+        "label": "Programming for reliability",
+        "detail": "Eight guidelines · prevent, contain and recover",
+        "target": "CODE1",
+        "units": [
+          "CODE1",
+          "CODE2"
+        ],
+        "caseLens": "Which programming safeguards prevent, contain, or recover from faults?"
+      },
+      {
+        "verb": "Test the claim",
+        "label": "Reliability measurement",
+        "detail": "Statistical testing · operational profiles · limits",
+        "target": "MEASURE",
+        "units": [
+          "MEASURE",
+          "PROFILE",
+          "LIMITS",
+          "REVISE"
+        ],
+        "caseLens": "Does the 10% external-traffic test profile represent the wider release?"
+      }
+    ]
+  },
+  "12": {
+    "question": "What supports a bounded claim that a system is safe?",
+    "connection": "Identify what can cause harm → analyze its causes → derive protective requirements → assemble and challenge the evidence.",
+    "inClass": "Trace a hazard to a requirement and a verification method.",
+    "deliverable": "A hazard → requirement → verification trace.",
+    "success": "Distinguish a proposed check from evidence actually obtained.",
+    "branches": [
+      {
+        "verb": "Understand the consequences",
+        "label": "Safety-critical systems",
+        "detail": "Safety ≠ reliability · primary / secondary",
+        "target": "X01",
+        "units": [
+          "X01",
+          "X02"
+        ],
+        "caseLens": "Can software meet its specification and still create an unsafe situation?"
+      },
+      {
+        "verb": "Identify and analyze",
+        "label": "Hazards and risk",
+        "detail": "Accident vs hazard · risk regions · fault trees",
+        "target": "X02A",
+        "units": [
+          "X02A",
+          "CHECK1",
+          "X04",
+          "X05"
+        ],
+        "caseLens": "What hazard could repeated actuation create, and how serious is it?"
+      },
+      {
+        "verb": "Reduce the risk",
+        "label": "Safety requirements",
+        "detail": "Avoidance · detection/removal · damage limitation",
+        "target": "X03",
+        "units": [
+          "X03",
+          "X06"
+        ],
+        "caseLens": "Which requirement prevents or limits that hazard?"
+      },
+      {
+        "verb": "Create the evidence",
+        "label": "Safety engineering processes",
+        "detail": "Hazard log · verification · static analysis",
+        "target": "X09",
+        "units": [
+          "X09",
+          "CHECK2",
+          "R09",
+          "R18",
+          "D12"
+        ],
+        "caseLens": "What evidence would show the protection works?"
+      },
+      {
+        "verb": "Justify with limits",
+        "label": "Safety cases",
+        "detail": "Claim · argument · evidence · critical paths",
+        "target": "B01",
+        "units": [
+          "B01",
+          "X10",
+          "APPLY"
+        ],
+        "caseLens": "Does the safety argument cover cumulative commands and loss of sensing?"
+      }
+    ]
+  },
+  "13": {
+    "question": "How does a security risk become a testable protection claim?",
+    "connection": "Assets and policy establish the need; risks shape requirements; design supplies controls; negative tests challenge their scope.",
+    "inClass": "Connect an asset and threat to a control and negative test.",
+    "deliverable": "A misuse case and an authorized negative-test plan.",
+    "success": "Explain which threat the control addresses—and which it does not.",
+    "branches": [
+      {
+        "verb": "Know what is at stake",
+        "label": "Security and dependability",
+        "detail": "Confidentiality · integrity · availability",
+        "target": "X01",
+        "units": [
+          "X01",
+          "X02",
+          "X02A"
+        ],
+        "caseLens": "Which asset or security property is at risk when another team’s record is requested?"
+      },
+      {
+        "verb": "Set goals and responsibility",
+        "label": "Security and organizations",
+        "detail": "Policy · assets · lifecycle risk assessment",
+        "target": "X03",
+        "units": [
+          "X03",
+          "CHECK1",
+          "X04"
+        ],
+        "caseLens": "Who owns the security policy and risk decision?"
+      },
+      {
+        "verb": "Specify unwanted behavior",
+        "label": "Security requirements",
+        "detail": "Testable obligations · misuse cases",
+        "target": "X05",
+        "units": [
+          "X05",
+          "X06"
+        ],
+        "caseLens": "What requirement should forbid cross-team access?"
+      },
+      {
+        "verb": "Enforce the boundary",
+        "label": "Secure systems design",
+        "detail": "Layered protection · guidelines · secure programming",
+        "target": "R09",
+        "units": [
+          "R11",
+          "CHECK2",
+          "R09",
+          "DESIGN2",
+          "B01",
+          "X09"
+        ],
+        "caseLens": "Where must authorization be enforced—not merely hidden in the interface?"
+      },
+      {
+        "verb": "Challenge the control",
+        "label": "Security testing and assurance",
+        "detail": "Authorized negative tests · coverage limits",
+        "target": "R18",
+        "units": [
+          "R18",
+          "APPLY"
+        ],
+        "caseLens": "Which negative test demonstrates the boundary, and what remains untested?"
+      }
+    ]
+  },
+  "14": {
+    "question": "How can critical services continue through disruption?",
+    "connection": "Critical services set priorities; the four Rs organize the response; people, defenses and survivability analysis make recovery usable.",
+    "inClass": "Identify dependencies; compare degraded and recovered service.",
+    "deliverable": "A critical-service recovery and reinstatement plan.",
+    "success": "Explain what service users regain, not only which server restarts.",
+    "branches": [
+      {
+        "verb": "Choose what must continue",
+        "label": "Critical services",
+        "detail": "Resilience vs reliability · continuity priorities",
+        "target": "X01",
+        "units": [
+          "X01",
+          "R18"
+        ],
+        "caseLens": "Which critical service is actually unavailable even though the backup server is running?"
+      },
+      {
+        "verb": "Organize the response",
+        "label": "The four Rs",
+        "detail": "Recognition · resistance · recovery · reinstatement",
+        "target": "X02",
+        "units": [
+          "X02",
+          "RECOVERYPLAN"
+        ],
+        "caseLens": "Where are we in recognition → resistance → recovery → reinstatement?"
+      },
+      {
+        "verb": "Protect organizational assets",
+        "label": "Cybersecurity",
+        "detail": "Assets · threats · cyber-resilience planning",
+        "target": "X02A",
+        "units": [
+          "X02A",
+          "R09"
+        ],
+        "caseLens": "Which shared identity dependency creates a cyber-resilience soft spot?"
+      },
+      {
+        "verb": "Enable people to adapt",
+        "label": "Sociotechnical resilience",
+        "detail": "Operators · layered defenses · emergency authority",
+        "target": "X03",
+        "units": [
+          "X03",
+          "CHECK1",
+          "X04",
+          "X05",
+          "D14",
+          "EMERGENCY"
+        ],
+        "caseLens": "What can operators do when normal procedures are insufficient?"
+      },
+      {
+        "verb": "Design and check continuity",
+        "label": "Resilient systems design",
+        "detail": "Survivability analysis · softspots · recovery design",
+        "target": "X06",
+        "units": [
+          "X06",
+          "CHECK2",
+          "B01",
+          "APPLY"
+        ],
+        "caseLens": "What architecture and recovery evidence restores usable service, not just servers?"
+      }
+    ]
+  },
+  "15": {
+    "question": "Which reuse approach fits the requirements and lifetime?",
+    "connection": "Planning constraints guide the choice of reusable structure, product family or complete application; integration must still be checked.",
+    "inClass": "Compare reuse routes against workflow and lifecycle constraints.",
+    "deliverable": "An options comparison and justified reuse choice.",
+    "success": "Explain both the fit and the cost of adapting what you inherit.",
+    "branches": [
+      {
+        "verb": "Survey what can be reused",
+        "label": "The reuse landscape",
+        "detail": "Functions → components → applications → systems",
+        "target": "X01",
+        "units": [
+          "X01",
+          "X02A"
+        ],
+        "caseLens": "What should be reused: a complete product, application, component, or concept?"
+      },
+      {
+        "verb": "Choose under constraints",
+        "label": "Benefits, costs and planning",
+        "detail": "Six planning factors · support and lifetime",
+        "target": "D15",
+        "units": [
+          "X02",
+          "D15",
+          "CHECK1",
+          "LIFECYCLE"
+        ],
+        "caseLens": "Does the appointment product still fit schedule, lifetime, team, criticality, domain, and platform?"
+      },
+      {
+        "verb": "Extend reusable architecture",
+        "label": "Application frameworks",
+        "detail": "MVC · inheritance · inversion of control",
+        "target": "X03",
+        "units": [
+          "X03",
+          "IOC"
+        ],
+        "caseLens": "Could a framework provide reusable structure without forcing the wrong workflow?"
+      },
+      {
+        "verb": "Manage commonality and variation",
+        "label": "Software product lines",
+        "detail": "Shared core · specialization · configuration",
+        "target": "X04",
+        "units": [
+          "X04",
+          "X05",
+          "CONFIG"
+        ],
+        "caseLens": "Would a product line or configuration handle waiting periods and linked appointments?"
+      },
+      {
+        "verb": "Configure or integrate",
+        "label": "Application system reuse",
+        "detail": "COTS solutions / integration · ERP · wrapping",
+        "target": "X06",
+        "units": [
+          "X06",
+          "CHECK2",
+          "R18",
+          "R09",
+          "APPLY"
+        ],
+        "caseLens": "Configure, integrate, wrap, or replace—and how does supplier interface evolution change the choice?"
+      }
+    ]
+  },
+  "16": {
+    "question": "When do reusable components really fit together?",
+    "connection": "Interfaces state obligations; models supply shared support; CBSE finds or creates components; composition must preserve meaning.",
+    "inClass": "Read contracts; diagnose a mismatch; justify an adapter.",
+    "deliverable": "An interface contract and duration-adapter test log.",
+    "success": "Explain expected vs actual behavior, including invalid inputs.",
+    "branches": [
+      {
+        "verb": "Specify the boundary",
+        "label": "Components and interfaces",
+        "detail": "Five characteristics · provides / requires",
+        "target": "X01",
+        "units": [
+          "X01",
+          "X02A",
+          "X03",
+          "CHECK1"
+        ],
+        "caseLens": "Which provided or required interface must state the temperature meaning?"
+      },
+      {
+        "verb": "Support interoperability",
+        "label": "Component models",
+        "detail": "Standards · middleware · common services",
+        "target": "X04",
+        "units": [
+          "X04",
+          "MIDDLEWARE"
+        ],
+        "caseLens": "Can the component model and middleware help interoperability without defining the unit?"
+      },
+      {
+        "verb": "Develop for or with reuse",
+        "label": "CBSE processes",
+        "detail": "Generalize · discover · select · validate",
+        "target": "X05",
+        "units": [
+          "X05",
+          "X06",
+          "VALIDATE",
+          "R08"
+        ],
+        "caseLens": "Should we adapt an existing component or change the requirements?"
+      },
+      {
+        "verb": "Connect the behavior",
+        "label": "Component composition",
+        "detail": "Sequential · hierarchical · additive · adapters",
+        "target": "B01",
+        "units": [
+          "B01",
+          "CHECK2",
+          "R09"
+        ],
+        "caseLens": "Where should the Fahrenheit↔Celsius adapter sit in the composition?"
+      },
+      {
+        "verb": "Check semantic obligations",
+        "label": "Contracts and composition limits",
+        "detail": "OCL pre/postconditions · emergent properties",
+        "target": "D16",
+        "units": [
+          "D16",
+          "D16B",
+          "APPLY"
+        ],
+        "caseLens": "Which contract and test establish semantic compatibility, including invalid inputs?"
+      }
+    ]
+  },
+  "17": {
+    "question": "How should a distributed system behave when a reply is lost?",
+    "connection": "Network constraints shape communication; layers allocate work; architecture patterns organize it; SaaS changes delivery and responsibility.",
+    "inClass": "Trace a remote interaction and compare architectural choices.",
+    "deliverable": "A lost-response trace and deduplication test log.",
+    "success": "Distinguish no reply from no execution; explain retry assumptions.",
+    "branches": [
+      {
+        "verb": "Identify distributed constraints",
+        "label": "Distributed systems",
+        "detail": "Six design issues · scaling · failure management",
+        "target": "X01",
+        "units": [
+          "X01",
+          "X02",
+          "SCALE",
+          "X02A"
+        ],
+        "caseLens": "What does a timeout tell us—and what does it not tell us—about remote execution?"
+      },
+      {
+        "verb": "Connect independent participants",
+        "label": "Interaction and middleware",
+        "detail": "RPC / messages · heterogeneous systems",
+        "target": "X03",
+        "units": [
+          "X03",
+          "CHECK1",
+          "X04"
+        ],
+        "caseLens": "How should procedural or message interaction handle a lost response?"
+      },
+      {
+        "verb": "Allocate the work",
+        "label": "Client–server computing",
+        "detail": "Client/server roles · layers vs tiers",
+        "target": "X05",
+        "units": [
+          "X05",
+          "R09",
+          "X07"
+        ],
+        "caseLens": "Which client/server layer owns retry, state, and user feedback?"
+      },
+      {
+        "verb": "Choose a structure",
+        "label": "Architectural patterns",
+        "detail": "Five source patterns · quality trade-offs",
+        "target": "X06",
+        "units": [
+          "X06",
+          "CHECK2",
+          "B01"
+        ],
+        "caseLens": "Which distributed architecture best contains duplicate or uncertain operations?"
+      },
+      {
+        "verb": "Deliver remotely",
+        "label": "Software as a service",
+        "detail": "Configuration · multi-tenancy · scaling",
+        "target": "X09",
+        "units": [
+          "X09",
+          "X10",
+          "APPLY"
+        ],
+        "caseLens": "How do remote ownership and service delivery affect evidence for retries and commits?"
+      }
+    ]
+  },
+  "20": {
+    "question": "What can independent system owners promise together?",
+    "connection": "Independence creates complexity; classification exposes authority; engineering and architecture coordinate useful, bounded cooperation.",
+    "inClass": "Map owners, interactions and staged service commitments.",
+    "deliverable": "An authority map and staged acceptance plan.",
+    "success": "Explain what remains outside the shared decision-maker’s control.",
+    "branches": [
+      {
+        "verb": "Understand the relationships",
+        "label": "System complexity",
+        "detail": "Technical · managerial · governance",
+        "target": "X02",
+        "units": [
+          "X01",
+          "X02"
+        ],
+        "caseLens": "Which participants remain independently useful and independently managed?"
+      },
+      {
+        "verb": "Locate authority",
+        "label": "SoS classification",
+        "detail": "Organizational · federated · coalition",
+        "target": "X02A",
+        "units": [
+          "X02A",
+          "CHECK1"
+        ],
+        "caseLens": "What authority does the dashboard owner actually have over each feed?"
+      },
+      {
+        "verb": "Question the assumptions",
+        "label": "Reductionism and complex systems",
+        "detail": "Independence · emergence · limits of decomposition",
+        "target": "X03",
+        "units": [
+          "X03"
+        ],
+        "caseLens": "Why can local correctness fail to guarantee the shared dashboard promise?"
+      },
+      {
+        "verb": "Coordinate change",
+        "label": "Systems of systems engineering",
+        "detail": "Interfaces · staged deployment · cross-system tests",
+        "target": "X04",
+        "units": [
+          "X04",
+          "X05",
+          "DEPLOY",
+          "X06",
+          "CHECK2"
+        ],
+        "caseLens": "How do owners coordinate interfaces, staged changes, and cross-system tests?"
+      },
+      {
+        "verb": "Structure cooperation",
+        "label": "Systems of systems architecture",
+        "detail": "Data feeds · virtual container · trading",
+        "target": "X09",
+        "units": [
+          "X09",
+          "X10",
+          "X08",
+          "CONTAINER",
+          "TRADING",
+          "APPLY"
+        ],
+        "caseLens": "Which architecture pattern can keep service useful when a feed slows or changes?"
+      }
+    ]
+  }
 }
