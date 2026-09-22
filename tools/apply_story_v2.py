@@ -102,6 +102,7 @@ def apply(root):
         pn=f'lectures/iscarb/packages/Ch{ch}-iSCARB.zip';buf=io.BytesIO();seen=set()
         with zipfile.ZipFile(root/pn) as src,zipfile.ZipFile(buf,'w',zipfile.ZIP_DEFLATED) as z:
             for info in src.infolist():
+                b=src.read(info.filename)
                 if info.filename==name:
                     b=(root/name).read_bytes().replace(b'href="../../',b'href="https://adeebnoor.github.io/CPIT/');seen.add(name)
                 elif info.filename==RUNTIME:
