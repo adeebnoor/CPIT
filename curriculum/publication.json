@@ -1612,7 +1612,7 @@
   ],
   "delivery": "Local, integrity-checked shared runtime and on-demand source assets; offline chapter ZIPs preserve the same folder structure.",
   "delivery_asset_sha256": {
-    "lectures/iscarb/runtime/classroom-v3.js": "8a7e20207bc0b1e140ee85416ea207ebe7239c0d31ab06f73c132d1dca16afed",
+    "lectures/iscarb/runtime/classroom-v3.js": "b8658514256497a010d2916502d4d98816b4bcbb207e634e1be5828d34883b0c",
     "lectures/iscarb/runtime/classroom-v3.css": "3a2cef45f94a2432defa5a0a961d06569826a978944580f4fc4ea00b4cf22984",
     "lectures/iscarb/assets/v3/21292a8c946062a4.jpg": "21292a8c946062a4da6a3b82fc59b352a8ff0a62ad4b85aebea0fb90c068f9e8",
     "lectures/iscarb/assets/v3/ch10-props.svg": "849b5f44594f66b097648206f6d5be4a2043faf5d07958145caaa3253febe537",
@@ -1737,15 +1737,15 @@
     "lectures/iscarb/sources/Ch17-Study.html": "2997d713f66d2742ea35f0cd830163f317c0bc85c66dc7d2a770f217b629dc8e",
     "lectures/iscarb/sources/Ch11-Textbook.pdf": "921bb43e2599d40c30a302b2211ccf29cb48145ba5befd88435a4562c90115e5",
     "lectures/iscarb/sources/Ch14-Textbook.pdf": "1707c8f398d9fcd77e699f7354beda52aeb997dabda5d7134c2d580e53106083",
-    "lectures/iscarb/packages/Ch10-iSCARB.zip": "da9e27f57aaa4470331ecf0ad6f797724c7abd90221dfa126d1acff11bc1d989",
-    "lectures/iscarb/packages/Ch17-iSCARB.zip": "9e7277010b1633428e1b6e544d4e1ad5999463b88f5dd6f9f5cf8058ad32f9f4",
-    "lectures/iscarb/packages/Ch16-iSCARB.zip": "c28f5c1a910cf2df3be977df5472df8b5a73e0cef388698739aca64a49db2863",
-    "lectures/iscarb/packages/Ch13-iSCARB.zip": "29e3fe057c41c525514e348c4be1be06db5dd13b0937358536d44ece474fb951",
-    "lectures/iscarb/packages/Ch15-iSCARB.zip": "13b86e48514846fb7520d44c08e2ec7e5b456a85778d02b0a10062ba98072e18",
-    "lectures/iscarb/packages/Ch11-iSCARB.zip": "d3886a0a2987c86e1cfe8d8231620742f83e6f811f02d44cf56e6064aeea0c67",
-    "lectures/iscarb/packages/Ch20-iSCARB.zip": "230a4849c08960c4ac4974ac5bdd621eb31ddd30b16f609f5d328d3a617b9a85",
-    "lectures/iscarb/packages/Ch12-iSCARB.zip": "e941ad96bcb3ec5d59c6e8d075e514e5d9378da6cabc9b2cb87d305a41366ce5",
-    "lectures/iscarb/packages/Ch14-iSCARB.zip": "62b9389c2ec9945369afba3298ae079cc281aa2a42c21d9fd749c3a626083a9f",
+    "lectures/iscarb/packages/Ch10-iSCARB.zip": "e3b200f29da2db2521bd9bda85762f1005e537e89de8e0b69b59d22ec2af5364",
+    "lectures/iscarb/packages/Ch17-iSCARB.zip": "211b1a3afa7631e88ecd83338aa2a29db7c18fe394b6b1c3c9efad07566f648d",
+    "lectures/iscarb/packages/Ch16-iSCARB.zip": "e7594e711d56873ce6177e9b88ab3ae69a71618b26dfff2dad7d8999523210aa",
+    "lectures/iscarb/packages/Ch13-iSCARB.zip": "c15fd6818aeb1d695b9dddfdc0d9bc79462234d6854c9ebe6e5111cb6c2c7f01",
+    "lectures/iscarb/packages/Ch15-iSCARB.zip": "72a4d302a33712ac0cf6add8791fa98ca5b97244c6feb74d47e09a22752ee28b",
+    "lectures/iscarb/packages/Ch11-iSCARB.zip": "71868c56f7d56269809bab3ad41267d1be5fdb1d3a44d4bdd69948cc126c3032",
+    "lectures/iscarb/packages/Ch20-iSCARB.zip": "d2cfb58ea2c7fe501975e1a4da7fa80a37ff1eb831596c569c0ec66745fcafd6",
+    "lectures/iscarb/packages/Ch12-iSCARB.zip": "f1863fb32dc902b3f7b5644c488203cec9861dfe421d3284fcf57e307f9ba456",
+    "lectures/iscarb/packages/Ch14-iSCARB.zip": "8783a44a0fec6b028fc4362cbdbe5cc3f93b2218821d2c7faec87341fc7cfe0d",
     "lectures/iscarb/Ch10-Dependable-Systems.html": "b9d202af552d1fcf502a7cc731e80472b9f638d52058a9188ab4f1ed88565630",
     "lectures/iscarb/Ch11-Reliability-Engineering.html": "2f419849aba599dfd5cc9ee75d3d6dcb2b0a09642e340e8d2d586c4330441cf4",
     "lectures/iscarb/Ch12-Safety-Engineering.html": "b799c2f900fed7a473952875d95a0cf7133d424df851038483582e41530a43f8",
@@ -1757,5 +1757,6 @@
     "lectures/iscarb/Ch20-Systems-of-Systems.html": "e1a65f6d39bb9634efaef9e0f212fc0e7de2a34706f7bb81fed03d679b5964ae"
   },
   "mindmap_version": "20260922-story-v2",
-  "story_version": "20260922-story-v2"
+  "story_version": "20260922-story-v2",
+  "student_submission_version": "20260922-student-submit-v1"
 }
