@@ -11,17 +11,39 @@
 <style>
 .example-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:18px 0}.example-flow div{border:1px solid var(--line);border-radius:12px;padding:14px}.example-flow b{display:block;font-size:1.3rem}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.score{white-space:nowrap;font-weight:800}.good-answer{border-left:4px solid #79d9da;padding-left:14px}.bad-answer{border-left:4px solid #ff98a5;padding-left:14px}.codebox{overflow:auto;max-height:430px;background:#0a0d15;border:1px solid var(--line);border-radius:12px;padding:16px;font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.warning-box{border:1px solid #ff98a5;border-radius:14px;padding:16px}.submit-chain{font-size:1.05rem;font-weight:700}.rubric-table td,.rubric-table th{vertical-align:top}
 @media(max-width:800px){.example-flow,.answer-grid{grid-template-columns:1fr}.example-flow{gap:8px}}
+
+.assignment-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.assignment-links a{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--p,rgba(255,255,255,.03))}
+.assignment-links a:hover{border-color:#79d9da}
+.assignment-links b{color:inherit}.assignment-links span{font-size:.9rem;opacity:.78}
+@media(max-width:850px){.assignment-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.assignment-links{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header><div class="wrap top"><a class="brand" href="iscarb.html">iSCARB<span>CPIT-455 / King Abdulaziz University</span></a><nav aria-label="Course navigation"><a href="iscarb.html">Learning path</a><a href="student-guide.html">How to study</a><a href="course-resources.html">Course &amp; sources</a><a class="nav-priority nav-ai" href="ai-assignment-example.html">AI-only assignments · one grading artifact</a><a class="nav-priority nav-qeeem" href="https://qeeem.com/" rel="noopener" target="_blank">Qeeem · Required evaluation</a><button class="theme" id="themeBtn" type="button">Light mode</button></nav></div></header>
+<header><div class="wrap top"><a class="brand" href="iscarb.html">iSCARB<span>CPIT-455 / King Abdulaziz University</span></a><nav aria-label="Course navigation"><a href="iscarb.html">Learning path</a><a href="student-guide.html">How to study</a><a href="course-resources.html">Course &amp; sources</a><a class="nav-priority nav-ai" href="ai-assignment-example.html">How to complete and submit an assignment</a><a class="nav-priority nav-qeeem" href="https://qeeem.com/" rel="noopener" target="_blank">Qeeem · Required evaluation</a><button class="theme" id="themeBtn" type="button">Light mode</button></nav></div></header>
 <main class="wrap" id="main">
 <section class="course-intro"><div aria-label="AI-first iSCARB course identity" class="ai-identity"><span aria-hidden="true" class="ai-orb">AI</span><span class="ai-copy"><b>AI-FIRST · iSCARB</b><span>Engineering judgment for AI-containing systems</span></span></div>
 <p class="ey">STUDENT WORKED EXAMPLE · PRACTICE ONLY</p>
-<h1>How to complete and submit<br/><em>an AI assignment.</em></h1>
-<p class="intro">This page shows the full journey once, using a fictional practice case that is different from every assessed case. Read it before your first submission.</p>
+<h1>How to complete and submit <em>an assignment</em></h1>
+<p class="intro">Follow the complete worked example once, then open the assignment you need from the links below.</p>
 <div class="actions"><a class="btn" href="fbr-submission.html?chapter=10">Open Assignment 1</a><a class="text-link" download="" href="ai-assignment-example.json">Download example JSON ↓</a></div>
+</section><section class="panel" id="all-assignments">
+<p class="ey">ALL ASSIGNMENTS · DIRECT LINKS</p>
+<h2>Choose your assignment</h2>
+<p>Open the correct assignment for your chapter. Each page contains the worked example, rubric, Commit → STRESS → REFIT flow, and Blackboard JSON download.</p>
+<div class="assignment-links">
+<a href="fbr-submission.html?chapter=10"><b>Assignment 1 · Ch 10</b><span>AI Dependability</span></a>
+<a href="fbr-submission.html?chapter=11"><b>Assignment 2 · Ch 11</b><span>AI Reliability</span></a>
+<a href="fbr-submission.html?chapter=12"><b>Assignment 3 · Ch 12</b><span>AI Safety</span></a>
+<a href="fbr-submission.html?chapter=13"><b>Assignment 4 · Ch 13</b><span>AI Security</span></a>
+<a href="fbr-submission.html?chapter=14"><b>Assignment 5 · Ch 14</b><span>AI Resilience</span></a>
+<a href="fbr-submission.html?chapter=15"><b>Assignment 6 · Ch 15</b><span>AI Reuse</span></a>
+<a href="fbr-submission.html?chapter=16"><b>Assignment 7 · Ch 16</b><span>AI Component Contract</span></a>
+<a href="fbr-submission.html?chapter=17"><b>Assignment 8 · Ch 17</b><span>AI Distributed Service</span></a>
+<a href="fbr-submission.html?chapter=20"><b>Assignment 9 · Ch 20</b><span>AI Systems-of-Systems</span></a>
+</div>
 </section>
 <section class="warning-box"><h2>Do not submit this example</h2><p>The practice JSON is deliberately marked <b>example-only</b> and will not pass the real submission validator. Your assessed answers must be your own engineering judgment for the case shown in your assignment.</p></section>
 <section class="panel"><p class="ey">THE WHOLE PROCESS</p><h2>Five steps. One official file.</h2>
