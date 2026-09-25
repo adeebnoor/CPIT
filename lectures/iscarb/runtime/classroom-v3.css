@@ -120,3 +120,87 @@
  .end-hero{grid-template-columns:1fr;padding:22px}.end-copy>h2{font-size:38px}.end-hero>img{max-height:220px;order:-1}.end-required p{font-size:14px}
 }
 @media print{.map-step:not(:last-child)::after{display:none}.case-thread{border-color:#aaa}.end-hero{display:block}.end-hero>img{max-width:220px}}
+
+/* AI lens (20260924-ailens-v1): optional; appears only when a chapter supplies lens fields */
+.ai-lens{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:start;padding:7px 11px;border:1px solid rgba(182,163,255,.38);border-radius:9px;background:rgba(182,163,255,.06);font-size:13px;line-height:1.38}
+.ai-lens>span{font-size:10px;font-weight:900;letter-spacing:.07em;color:var(--violet);padding-top:2px;white-space:nowrap}
+.ai-lens>em{font-style:normal;color:var(--ink);min-width:0}
+.story-lens{border-left:3px solid var(--violet);padding:9px 13px;background:var(--panel);font-size:14px;line-height:1.42;color:var(--ink)}
+.story-lens b{display:block;color:var(--violet);font-size:11px;font-weight:800;letter-spacing:.08em;margin-bottom:3px}
+.step-lens{display:block;font-size:12px;line-height:1.3;color:var(--violet);margin-top:5px}
+.obj-lens{display:block;color:var(--violet);font-size:13px;margin-top:3px}
+@media print{.ai-lens,.story-lens{border-color:#6556C4;background:#fff;color:#000}.ai-lens>span,.story-lens b,.step-lens,.obj-lens{color:#4b3fa0}}
+
+/* Optional section banner (course-added AI segment) */
+.ai-banner{position:relative;margin:0;height:104px;border-radius:12px;overflow:hidden;border:1px solid rgba(182,163,255,.45);box-shadow:0 0 28px rgba(255,128,203,.12)}
+.ai-banner img{width:100%;height:100%;object-fit:cover;object-position:center 47%;display:block}
+.ai-banner figcaption{position:absolute;left:0;top:0;bottom:0;max-width:56%;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 16px;background:linear-gradient(90deg,rgba(8,7,12,.92) 0%,rgba(8,7,12,.78) 70%,rgba(8,7,12,0) 100%);font-size:13.5px;line-height:1.35;color:var(--ink)}
+.ai-banner figcaption span{font-size:10px;font-weight:900;letter-spacing:.08em;color:var(--violet)}
+@media(max-width:1000px){.ai-banner{height:auto}.ai-banner img{height:120px}.ai-banner figcaption{position:static;max-width:none;background:var(--panel)}}
+@media print{.ai-banner{box-shadow:none}}
+
+/* Optional slide skin: GenAI. Applies only to slides that set skin:"genai", only in night mode.
+   The iSCARB top bar, footer and all other slides keep the course identity. */
+body:not(.day) .chapter-main.skin-genai{--bg:#050b1c;--panel:rgba(11,22,50,.86);--line:#23426f;--ink:#eef4ff;--dim:#a9b9d8;--gold:#8fe1ff;--teal:#4fe3ff;--pink:#ff4fd8;--violet:#b690ff;
+ position:relative;isolation:isolate;color:var(--ink);background:
+ radial-gradient(ellipse at 6% 8%,rgba(255,79,216,.16),transparent 40%),
+ radial-gradient(ellipse at 96% 92%,rgba(79,227,255,.13),transparent 44%),
+ radial-gradient(circle at 20px 30px,rgba(143,225,255,.38) 1px,transparent 1.6px) 0 0/140px 120px,
+ radial-gradient(circle at 90px 80px,rgba(255,79,216,.34) 1.2px,transparent 2px) 0 0/190px 170px,
+ #050b1c}
+body:not(.day) .chapter-main.skin-genai::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url(../assets/v3/genai-banner.jpg) left center/cover no-repeat;opacity:.09;-webkit-mask-image:linear-gradient(90deg,#000 0,transparent 48%);mask-image:linear-gradient(90deg,#000 0,transparent 48%)}
+body:not(.day) .chapter-main.skin-genai .heading h1{text-shadow:0 0 22px rgba(79,227,255,.30)}
+body:not(.day) .chapter-main.skin-genai .takeaway{text-shadow:0 0 14px rgba(143,225,255,.28)}
+body:not(.day) .chapter-main.skin-genai .meaning,body:not(.day) .chapter-main.skin-genai .table-main{box-shadow:0 0 0 1px rgba(79,227,255,.07),0 12px 30px rgba(0,0,0,.35),0 0 26px rgba(79,227,255,.05)}
+body:not(.day) .chapter-main.skin-genai .meaning{background:linear-gradient(180deg,rgba(79,227,255,.07),rgba(11,22,50,.86) 40%)}
+body:not(.day) .chapter-main.skin-genai .case-thread{border-color:rgba(79,227,255,.35);background:rgba(79,227,255,.06)}
+body:not(.day) .chapter-main.skin-genai .ai-banner{border-color:rgba(255,79,216,.45)}
+@media(prefers-reduced-motion:no-preference){body:not(.day) .chapter-main.skin-genai{animation:genaiDrift 60s linear infinite}}
+@keyframes genaiDrift{from{background-position:0 0,0 0,0 0,0 0,0 0}to{background-position:0 0,0 0,140px 120px,-190px 170px,0 0}}
+@media print{.chapter-main.skin-genai::before{display:none}}
+
+/* Small AI marker for prompts that involve the AI component (keeps slide identity) */
+.ai-tag{display:inline-block;font-style:normal;font-size:10px;font-weight:900;letter-spacing:.08em;line-height:1;padding:3px 7px;margin-left:8px;border-radius:999px;vertical-align:middle;color:#050b1c;background:linear-gradient(90deg,#4fe3ff,#ff4fd8);box-shadow:0 0 10px rgba(255,79,216,.25)}
+.takeaway .ai-tag{font-size:11px;position:relative;top:-2px}
+@media print{.ai-tag{box-shadow:none;background:#ddd;color:#000}}
+
+/* Optional instructor disclosure on the closing slide */
+.end-disclosure{margin:2px 0 0;font-size:12.5px;line-height:1.35;color:var(--dim);border-left:3px solid var(--violet);padding:1px 0 1px 10px}
+.end-disclosure b{color:var(--ink)}
+/* ===== GenAI edition v11: hook, tool tiles, AI challenge ===== */
+.hero-hook{display:flex;gap:10px;align-items:flex-start;margin:14px 0 6px!important;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,79,216,.45);background:linear-gradient(100deg,rgba(79,227,255,.10),rgba(255,79,216,.10));font-size:clamp(17px,1.6vw,21px)!important;font-weight:600;line-height:1.35;color:var(--ink);max-width:640px}
+.hero-hook .ai-tag{margin:3px 0 0;flex:none}
+.ai-cta{border-color:rgba(255,79,216,.6)!important;background:linear-gradient(90deg,rgba(79,227,255,.16),rgba(255,79,216,.16))!important}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.tile{display:flex;gap:12px;align-items:center;text-align:left;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);text-decoration:none;cursor:pointer;transition:border-color .15s,transform .15s}
+.tile:hover{border-color:var(--teal);transform:translateY(-1px)}
+.tile .ti{flex:none;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:rgba(113,213,216,.12);color:var(--teal)}
+.tile .ti svg{width:22px;height:22px}
+.tile .tt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .tt b{font-size:15.5px}.tile .tt small{font-size:12.5px;color:var(--dim);line-height:1.3}
+.grp-req .tile .ti{background:rgba(221,178,126,.14);color:var(--gold)}
+.grp-src .tile .ti{background:rgba(182,163,255,.14);color:var(--violet)}
+.tile-req{border-color:rgba(221,178,126,.55)}
+.grp h3{display:flex;align-items:center;gap:9px}
+.grp h3 span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--line);color:var(--ink)}
+.tile-feature{width:100%;margin:0 0 16px;padding:16px 18px;border-color:rgba(255,79,216,.55);background:linear-gradient(100deg,rgba(79,227,255,.12),rgba(255,79,216,.12)),var(--panel)}
+.tile-feature .ti{width:46px;height:46px;background:linear-gradient(135deg,#4fe3ff,#ff4fd8);color:#050b1c}
+.tile-feature .tt em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--pink);text-transform:uppercase}
+.tile-feature .tt b{font-size:18px}.tile-feature .go{margin-left:auto;font-weight:700;color:var(--teal);white-space:nowrap}
+.aix-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}.aix-head b{font-size:19px}
+.aix-badge{font-size:12px;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.aix-case{border:1px solid rgba(79,227,255,.35);border-radius:12px;padding:12px 16px;background:rgba(79,227,255,.05);margin-bottom:12px}
+.aix-case h3{margin:0 0 6px}.aix-case ul{margin:6px 0}.aix-q{margin:8px 0 0}
+.aix-steps{display:flex;gap:6px;list-style:none;padding:0;margin:0 0 12px;counter-reset:s;flex-wrap:wrap}
+.aix-steps li{counter-increment:s;padding:5px 12px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--dim)}
+.aix-steps li::before{content:counter(s) " · "}
+.aix-steps li.on{border-color:var(--teal);color:var(--teal)}.aix-steps li.done{border-color:var(--green,#83d7a8);color:var(--green,#83d7a8)}
+.field.locked textarea{opacity:.7}
+.aix-stress{border:2px solid #ff8a7a;background:rgba(255,138,122,.08);border-radius:12px;padding:10px 16px;margin:12px 0}
+.aix-stress h3{margin:0 0 4px;color:#ff8a7a}
+.aix-verdict{display:flex;gap:8px;margin:8px 0 12px}
+.aix-verdict button[aria-pressed="true"]{border-color:var(--teal);background:rgba(113,213,216,.16)}
+@media print{.tile-feature,.hero-hook{background:#fff}}
+
+/* CS2023 alignment table */
+.align td:first-child{white-space:nowrap}.align small{color:var(--dim)}

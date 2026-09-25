@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "release": "20260921-classroom-v3",
-  "status": "Nine reviewed 20-slide learning paths, three visible classroom stations per chapter, original source ledgers and preserved assessed assignments.",
+  "release": "20260926-genai-v12",
+  "status": "Nine reviewed 20-slide GenAI learning paths with embedded AI challenges, CS2023 alignment, three visible classroom stations per chapter, original source ledgers and preserved assessed assignments.",
   "automatic_generation": false,
   "lectures": [
     {
       "chapter": 10,
       "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
       "source_filename": "Ch10-Dependable-Systems_SIMPLE_ISCARB_COMPLETE (1).html",
-      "source_sha256": "b9d202af552d1fcf502a7cc731e80472b9f638d52058a9188ab4f1ed88565630",
+      "source_sha256": "7d2c8cff26b774737f0b2ac45b47472036a4abf8e796b337905a965ba0ccc7f9",
       "original_html_sha256": "04f909d7851350c410cc965aa27d773054ef08df117bd177917061e44dc61f3b",
       "original_source_sha256": "c8fdf195e6b82198d08642cb35e03c358d9c124a46a7082be19a93055dc84598",
       "source_download": "lectures/iscarb/sources/Ch10-Original.pdf",
@@ -127,7 +127,7 @@
       "chapter": 11,
       "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
       "source_filename": "Ch11-Reliability-Engineering_ISCARB_COMPLETE.html",
-      "source_sha256": "2f419849aba599dfd5cc9ee75d3d6dcb2b0a09642e340e8d2d586c4330441cf4",
+      "source_sha256": "5c4d356eec3319f8c048e7560613b962a07bb78883ae92c42d018e2ae073886d",
       "original_html_sha256": "bc0f6b9e6df336d49b0af5823cba7b7ace5028974010de3de78109b998768482",
       "original_source_sha256": "cb49685b2b914e57ea423e1e73f73025735e150ca5bf38e3500bad914f0f86ff",
       "source_download": "lectures/iscarb/sources/Ch11-Original.pptx",
@@ -150,10 +150,10 @@
         "VOTE",
         "DIVERSITY",
         "CODE1",
-        "CODE2",
         "MEASURE",
         "PROFILE",
         "LIMITS",
+        "AISYS",
         "REVISE",
         "END"
       ],
@@ -218,8 +218,7 @@
           "start": 53,
           "end": 69,
           "units": [
-            "CODE1",
-            "CODE2"
+            "CODE1"
           ]
         },
         {
@@ -262,7 +261,7 @@
       "chapter": 12,
       "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
       "source_filename": "Ch12-Safety-Engineering_ISCARB_COMPLETE.html",
-      "source_sha256": "b799c2f900fed7a473952875d95a0cf7133d424df851038483582e41530a43f8",
+      "source_sha256": "9d46bab33b9a0247b131eb71a9344a01c43c7438fd3946051d7f562931277b21",
       "original_html_sha256": "4670366197e435bbbcd9ecac76c878e4484f5f9d7b49d17f72420a25ce933326",
       "original_source_sha256": "678e38b4a06a1e84f9e391ae56573c9afae56ad074aa5292afb402dc0900e65b",
       "source_download": "lectures/iscarb/sources/Ch12-Original.pptx",
@@ -284,11 +283,11 @@
         "X06",
         "X09",
         "CHECK2",
-        "R09",
         "R18",
         "D12",
         "B01",
         "X10",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -338,8 +337,7 @@
           "end": 43,
           "units": [
             "X09",
-            "CHECK2",
-            "R09"
+            "CHECK2"
           ]
         },
         {
@@ -383,7 +381,7 @@
       "chapter": 13,
       "path": "lectures/iscarb/Ch13-Security-Engineering.html",
       "source_filename": "Ch13-Security-Engineering_ISCARB_COMPLETE.html",
-      "source_sha256": "1c81961d74b80ea9dd8de40878f331d0126e9d0dc22dbc4163d317cfe306721e",
+      "source_sha256": "70ef3b300e4dae9a6057f7bcdbcc8b54d816112a322bba55b0b73d2d62120bf6",
       "original_html_sha256": "4f9136bd2b60891e1237a62ef3bb0057b4dd330ba42ad5eb77a369ace121798d",
       "original_source_sha256": "40c1a34341193cdf4b5a10d4c0e57ae7049f6e54616538acd6bfb0e748d338ba",
       "source_download": "lectures/iscarb/sources/Ch13-Original.pptx",
@@ -406,10 +404,10 @@
         "R11",
         "CHECK2",
         "R09",
-        "DESIGN2",
         "B01",
         "X09",
         "R18",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -461,7 +459,6 @@
             "R11",
             "CHECK2",
             "R09",
-            "DESIGN2",
             "B01"
           ]
         },
@@ -499,7 +496,7 @@
       "chapter": 14,
       "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
       "source_filename": "Ch14-Resilience-Engineering_ISCARB_COMPLETE.html",
-      "source_sha256": "8ae9ab9c93b69ae5c93bb22934901966f68ac19c6a114dec33a3cfb958f21542",
+      "source_sha256": "be6538dfb606f17f850ce7c962e87dbef734397b1f15a0b1a3222db9dc9fbaf8",
       "original_html_sha256": "3168d7bde54fbc4863b4e4223c25660155a4a4b699c461cfb85acb0897b5147a",
       "original_source_sha256": "2dc67b0e36511f5cb5ae83ae27a71eb23a1c9b0c13e17875e2b91131f00d47b8",
       "source_download": "lectures/iscarb/sources/Ch14-Original.pptx",
@@ -514,7 +511,6 @@
         "X01",
         "X02",
         "X02A",
-        "RECOVERYPLAN",
         "X03",
         "CHECK1",
         "X04",
@@ -526,6 +522,7 @@
         "R18",
         "B01",
         "R09",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -546,7 +543,6 @@
             "X01",
             "X02",
             "X02A",
-            "RECOVERYPLAN",
             "CHECK1",
             "EMERGENCY"
           ]
@@ -585,7 +581,7 @@
           "start": 50,
           "end": 63,
           "units": [
-            "RECOVERYPLAN",
+            "X02A",
             "R18",
             "B01",
             "R09"
@@ -618,7 +614,7 @@
       "chapter": 15,
       "path": "lectures/iscarb/Ch15-Software-Reuse.html",
       "source_filename": "Ch15-Software-Reuse_ISCARB_COMPLETE.html",
-      "source_sha256": "f6f13d6a98f38ab021ad0f1612a62122f8ccc13497de8da80a81e461d6e00922",
+      "source_sha256": "05234dbf4a3b821fe392d9cd7bf421a989d21a862c819a6618a8fa571de24161",
       "original_html_sha256": "8cf30f3a261e51cb8b5099a776abdbf0fb57d47b5a5670c72fbd9c9289379fbd",
       "original_source_sha256": "8332889e7b835934637e81028f130a62d4a010b3a8c81fde240d86336f4fdbaf",
       "source_download": "lectures/iscarb/sources/Ch15-Original.pptx",
@@ -644,7 +640,7 @@
         "CHECK2",
         "R18",
         "R09",
-        "LIFECYCLE",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -698,8 +694,7 @@
             "X06",
             "CHECK2",
             "R18",
-            "R09",
-            "LIFECYCLE"
+            "R09"
           ]
         }
       ],
@@ -730,7 +725,7 @@
       "chapter": 16,
       "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
       "source_filename": "Ch16-Component-Based-SE_ISCARB_COMPLETE.html",
-      "source_sha256": "e0cc2b34142a6b1c5399de5b52b0fb8039b5034e45272c6319dff953ba0d7287",
+      "source_sha256": "0877767a3bb38b7fc904d671bbe65ba1af9f1416d0f829bc7982976930ff2373",
       "original_html_sha256": "f7365d63ad1fa17b10a8991b56c451bb86c8db31f7bb27d5c5e3d63211dfa031",
       "original_source_sha256": "ad0dfed50bbbdfba1b1e1201b75d889e4213dfeb3780fe48752129acbca4fe63",
       "source_download": "lectures/iscarb/sources/Ch16-Original.pptx",
@@ -751,12 +746,12 @@
         "X05",
         "X06",
         "VALIDATE",
-        "R08",
         "B01",
         "CHECK2",
         "R09",
         "D16",
         "D16B",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -805,8 +800,7 @@
           "end": 39,
           "units": [
             "X05",
-            "VALIDATE",
-            "R08"
+            "VALIDATE"
           ]
         },
         {
@@ -857,7 +851,7 @@
       "chapter": 17,
       "path": "lectures/iscarb/Ch17-Distributed-SE.html",
       "source_filename": "Ch17-Distributed-SE_ISCARB_COMPLETE.html",
-      "source_sha256": "6a20679b602416b8b2aa413ff470a07624b3b53ca72b40202cc3dc7010f4e739",
+      "source_sha256": "9d391f7ebdce0cd194081f74a48e66a4a9b40dfaa3599ba8beddafffa8cdfbd5",
       "original_html_sha256": "49b108d3ac4ebf3a93a49c0938fb9d3357739b54ed9788e88941a134399fcce7",
       "original_source_sha256": "22d40ab99fd0e7cb8934e4c034660865aca547dc505ac3de5c24ade68e6f1d83",
       "source_download": "lectures/iscarb/sources/Ch17-Original.pptx",
@@ -877,13 +871,13 @@
         "CHECK1",
         "X04",
         "X05",
-        "R09",
         "X06",
         "CHECK2",
         "B01",
         "X07",
         "X09",
         "X10",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -925,7 +919,6 @@
           "end": 28,
           "units": [
             "X05",
-            "R09",
             "CHECK2"
           ]
         },
@@ -975,7 +968,7 @@
       "chapter": 20,
       "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
       "source_filename": "Ch20-Systems-of-Systems_ISCARB_COMPLETE.html",
-      "source_sha256": "e1a65f6d39bb9634efaef9e0f212fc0e7de2a34706f7bb81fed03d679b5964ae",
+      "source_sha256": "63df0d6e673f827222f95c27bf823d31631c35365885410245e1e6b0071f28e1",
       "original_html_sha256": "a2c8611773098f6762d0e586055ab2f30983b45e84aab0a98c632deab9890479",
       "original_source_sha256": "ff167dec130867b6e95d2118511fcf504c3a1db35590890d65af6e3b4994e21d",
       "source_download": "lectures/iscarb/sources/Ch20-Original.pptx",
@@ -998,10 +991,10 @@
         "X06",
         "CHECK2",
         "X09",
-        "X10",
         "X08",
         "CONTAINER",
         "TRADING",
+        "AISYS",
         "APPLY",
         "END"
       ],
@@ -1052,8 +1045,7 @@
           "units": [
             "X06",
             "CHECK2",
-            "X09",
-            "X10"
+            "X09"
           ]
         },
         {
@@ -1437,6 +1429,8 @@
     "lectures/iscarb/assets/v3/f57538bc503351a9.jpg",
     "lectures/iscarb/assets/v3/fd384ab70c090c88.jpg",
     "lectures/iscarb/assets/v3/fea0ad89b97a3492.jpg",
+    "lectures/iscarb/assets/v3/ch14-cyberplan-combined.jpg",
+    "lectures/iscarb/assets/v3/genai-banner.jpg",
     "lectures/iscarb/packages/Ch10-iSCARB.zip",
     "lectures/iscarb/packages/Ch11-iSCARB.zip",
     "lectures/iscarb/packages/Ch12-iSCARB.zip",
@@ -1612,8 +1606,10 @@
   ],
   "delivery": "Local, integrity-checked shared runtime and on-demand source assets; offline chapter ZIPs preserve the same folder structure.",
   "delivery_asset_sha256": {
-    "lectures/iscarb/runtime/classroom-v3.js": "b8658514256497a010d2916502d4d98816b4bcbb207e634e1be5828d34883b0c",
-    "lectures/iscarb/runtime/classroom-v3.css": "3a2cef45f94a2432defa5a0a961d06569826a978944580f4fc4ea00b4cf22984",
+    "lectures/iscarb/runtime/classroom-v3.js": "45efe732b2b9fea37d6729fd4808c3dc102fc10999c99c696dcb7f5b0dddb147",
+    "lectures/iscarb/runtime/classroom-v3.css": "56417e16e20be0357885677f68be365aaf564795517e2ca3e22266c0325e6ccd",
+    "lectures/iscarb/assets/v3/ch14-cyberplan-combined.jpg": "24569c89e9f240063fd99e3293bda2dbbb1c5d114dbd792bea68e0bd120eaeb2",
+    "lectures/iscarb/assets/v3/genai-banner.jpg": "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02",
     "lectures/iscarb/assets/v3/21292a8c946062a4.jpg": "21292a8c946062a4da6a3b82fc59b352a8ff0a62ad4b85aebea0fb90c068f9e8",
     "lectures/iscarb/assets/v3/ch10-props.svg": "849b5f44594f66b097648206f6d5be4a2043faf5d07958145caaa3253febe537",
     "lectures/iscarb/assets/v3/439fc54aee701cd3.jpg": "439fc54aee701cd3d5f29e0e32f3439ffe70bb87c979645ce329f4f9f65db202",
@@ -1737,24 +1733,24 @@
     "lectures/iscarb/sources/Ch17-Study.html": "2997d713f66d2742ea35f0cd830163f317c0bc85c66dc7d2a770f217b629dc8e",
     "lectures/iscarb/sources/Ch11-Textbook.pdf": "921bb43e2599d40c30a302b2211ccf29cb48145ba5befd88435a4562c90115e5",
     "lectures/iscarb/sources/Ch14-Textbook.pdf": "1707c8f398d9fcd77e699f7354beda52aeb997dabda5d7134c2d580e53106083",
-    "lectures/iscarb/packages/Ch10-iSCARB.zip": "e3b200f29da2db2521bd9bda85762f1005e537e89de8e0b69b59d22ec2af5364",
-    "lectures/iscarb/packages/Ch17-iSCARB.zip": "211b1a3afa7631e88ecd83338aa2a29db7c18fe394b6b1c3c9efad07566f648d",
-    "lectures/iscarb/packages/Ch16-iSCARB.zip": "e7594e711d56873ce6177e9b88ab3ae69a71618b26dfff2dad7d8999523210aa",
-    "lectures/iscarb/packages/Ch13-iSCARB.zip": "c15fd6818aeb1d695b9dddfdc0d9bc79462234d6854c9ebe6e5111cb6c2c7f01",
-    "lectures/iscarb/packages/Ch15-iSCARB.zip": "72a4d302a33712ac0cf6add8791fa98ca5b97244c6feb74d47e09a22752ee28b",
-    "lectures/iscarb/packages/Ch11-iSCARB.zip": "71868c56f7d56269809bab3ad41267d1be5fdb1d3a44d4bdd69948cc126c3032",
-    "lectures/iscarb/packages/Ch20-iSCARB.zip": "d2cfb58ea2c7fe501975e1a4da7fa80a37ff1eb831596c569c0ec66745fcafd6",
-    "lectures/iscarb/packages/Ch12-iSCARB.zip": "f1863fb32dc902b3f7b5644c488203cec9861dfe421d3284fcf57e307f9ba456",
-    "lectures/iscarb/packages/Ch14-iSCARB.zip": "8783a44a0fec6b028fc4362cbdbe5cc3f93b2218821d2c7faec87341fc7cfe0d",
-    "lectures/iscarb/Ch10-Dependable-Systems.html": "b9d202af552d1fcf502a7cc731e80472b9f638d52058a9188ab4f1ed88565630",
-    "lectures/iscarb/Ch11-Reliability-Engineering.html": "2f419849aba599dfd5cc9ee75d3d6dcb2b0a09642e340e8d2d586c4330441cf4",
-    "lectures/iscarb/Ch12-Safety-Engineering.html": "b799c2f900fed7a473952875d95a0cf7133d424df851038483582e41530a43f8",
-    "lectures/iscarb/Ch13-Security-Engineering.html": "1c81961d74b80ea9dd8de40878f331d0126e9d0dc22dbc4163d317cfe306721e",
-    "lectures/iscarb/Ch14-Resilience-Engineering.html": "8ae9ab9c93b69ae5c93bb22934901966f68ac19c6a114dec33a3cfb958f21542",
-    "lectures/iscarb/Ch15-Software-Reuse.html": "f6f13d6a98f38ab021ad0f1612a62122f8ccc13497de8da80a81e461d6e00922",
-    "lectures/iscarb/Ch16-Component-Based-SE.html": "e0cc2b34142a6b1c5399de5b52b0fb8039b5034e45272c6319dff953ba0d7287",
-    "lectures/iscarb/Ch17-Distributed-SE.html": "6a20679b602416b8b2aa413ff470a07624b3b53ca72b40202cc3dc7010f4e739",
-    "lectures/iscarb/Ch20-Systems-of-Systems.html": "e1a65f6d39bb9634efaef9e0f212fc0e7de2a34706f7bb81fed03d679b5964ae"
+    "lectures/iscarb/packages/Ch10-iSCARB.zip": "cf41145d2cc1536a2477617fd3b3933691cdc49898e0497eceb441d39cca4f8d",
+    "lectures/iscarb/packages/Ch17-iSCARB.zip": "f4fe5335a6dcef8bdfcd913e5b6c497bc80d9912eec33488624c2a1b3319610e",
+    "lectures/iscarb/packages/Ch16-iSCARB.zip": "2ccaafcc193b66b406daa1f7750ecf17d4d9e001cc82787b5970ddcb14574c7f",
+    "lectures/iscarb/packages/Ch13-iSCARB.zip": "10baec4d1894d1fb10f44d3660ac60ea619f0a4bcd805f74866ba1fb292284a1",
+    "lectures/iscarb/packages/Ch15-iSCARB.zip": "9318d6ef97ddc088157572617481753a25734c663fc483a067652ce5a5bb016a",
+    "lectures/iscarb/packages/Ch11-iSCARB.zip": "2db38434a8099cc6d70ac04f473b15736777a0aded031f75c41cebf63335a165",
+    "lectures/iscarb/packages/Ch20-iSCARB.zip": "fd763338560d7ae772cbe3d302bd5ac46c48305541be90a6cd2e3a399938c069",
+    "lectures/iscarb/packages/Ch12-iSCARB.zip": "960dc0c6d47e6507d31339f8bf2865edbb6b4d3c1dcf4946315b750c8333b836",
+    "lectures/iscarb/packages/Ch14-iSCARB.zip": "94b3ccacc298eeb34ece123537c7ce872cc2d72c4faa718e4842f118d89e13e7",
+    "lectures/iscarb/Ch10-Dependable-Systems.html": "7d2c8cff26b774737f0b2ac45b47472036a4abf8e796b337905a965ba0ccc7f9",
+    "lectures/iscarb/Ch11-Reliability-Engineering.html": "5c4d356eec3319f8c048e7560613b962a07bb78883ae92c42d018e2ae073886d",
+    "lectures/iscarb/Ch12-Safety-Engineering.html": "9d46bab33b9a0247b131eb71a9344a01c43c7438fd3946051d7f562931277b21",
+    "lectures/iscarb/Ch13-Security-Engineering.html": "70ef3b300e4dae9a6057f7bcdbcc8b54d816112a322bba55b0b73d2d62120bf6",
+    "lectures/iscarb/Ch14-Resilience-Engineering.html": "be6538dfb606f17f850ce7c962e87dbef734397b1f15a0b1a3222db9dc9fbaf8",
+    "lectures/iscarb/Ch15-Software-Reuse.html": "05234dbf4a3b821fe392d9cd7bf421a989d21a862c819a6618a8fa571de24161",
+    "lectures/iscarb/Ch16-Component-Based-SE.html": "0877767a3bb38b7fc904d671bbe65ba1af9f1416d0f829bc7982976930ff2373",
+    "lectures/iscarb/Ch17-Distributed-SE.html": "9d391f7ebdce0cd194081f74a48e66a4a9b40dfaa3599ba8beddafffa8cdfbd5",
+    "lectures/iscarb/Ch20-Systems-of-Systems.html": "63df0d6e673f827222f95c27bf823d31631c35365885410245e1e6b0071f28e1"
   },
   "mindmap_version": "20260922-story-v2",
   "story_version": "20260922-story-v2",
