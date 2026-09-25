@@ -173,6 +173,5 @@ const beforeCopyFinal=copyFinal;copyFinal=async function(){if(valB())return;pres
 const beforeValB=valB;valB=function(){const issue=beforeValB();if(issue)return issue;const d=bData();if((d.feedbackNote.trim()&&!d.revisionNote.trim())||(!d.feedbackNote.trim()&&d.revisionNote.trim()))return'For a revised submission, record both the feedback received and the change/recheck. Leave both blank for the first submission.';return'';};
 
 boot();
-StudyLab.mount(16);
 
 </script></body></html>

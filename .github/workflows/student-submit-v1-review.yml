@@ -131,19 +131,15 @@ jobs:
           python - <<'PY'
           import json,pathlib,hashlib,urllib.request,time
           pub=json.loads(pathlib.Path('curriculum/publication.json').read_text())
-          assert pub.get('student_submission_version')=='20260922-student-submit-v1'
-          names=['lectures/iscarb/runtime/classroom-v3.js',
-                 'lectures/iscarb/Ch10-FBR-Student-Assignment.html',
-                 'lectures/iscarb/Ch11-FBR-Student-Assignment.html']
+          assert pub.get('student_submission_version')=='20260925-ai-only-v3'
+          assert pub.get('assignment_release')=='20260925-ai-only-v3'
+          names=['lectures/iscarb/runtime/classroom-v3.js']+[a['path'] for a in pub['assignments']]
           expected={n:pub['delivery_asset_sha256'].get(n) for n in names}
-          # Assignments may not be declared in older manifests; compare to reviewed manifest when needed.
-          review=json.loads(pathlib.Path('curriculum/student-submit-v1-review.json').read_text())
-          expected[names[1]]=review['assignment_sha256']['10']
-          expected[names[2]]=review['assignment_sha256']['11']
+          assert all(expected.values()),expected
           for attempt in range(30):
             bad=[]
             for n,d in expected.items():
-              req=urllib.request.Request('https://adeebnoor.github.io/CPIT/'+n+'?student-v1='+str(int(time.time())),headers={'Cache-Control':'no-cache'})
+              req=urllib.request.Request('https://adeebnoor.github.io/CPIT/'+n+'?ai-v3='+str(int(time.time())),headers={'Cache-Control':'no-cache'})
               try:
                 with urllib.request.urlopen(req,timeout=20) as r:data=r.read()
                 if hashlib.sha256(data).hexdigest()!=d:bad.append(n)
