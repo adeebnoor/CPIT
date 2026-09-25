@@ -109,7 +109,7 @@ async def main():
     for k in ['fit','measure','bound','act','evidence','technical']:
      if await page.locator('#'+k).count():await page.locator('#'+k).fill('QA technical reasoning with a defined mechanism, an inspectable artifact and an explicit limit. Not student work.')
     await page.locator('#sourceUse').fill('Slide '+str(c['reading_pages'][0])+' explains the relevant mechanism and its assumptions. This source concept supports a bounded claim in the artifact.')
-    if c['chapter'] in [16,17]:
+    if c.get('practical'):
      cases=([{'name':'normal','durationMinutes':30,'expectedStatus':'accepted','expectedSeconds':1800},{'name':'upper','durationMinutes':120,'expectedStatus':'accepted','expectedSeconds':7200},{'name':'invalid','durationMinutes':0,'expectedStatus':'rejected','expectedSeconds':None}] if c['chapter']==16 else [{'name':'restart same identity','events':['send:a','lose-response','restart','retry:a'],'expectedReservations':1},{'name':'different identity','events':['send:b','lose-response','retry:c'],'expectedReservations':2}])
      await page.locator('#labPrediction').fill('QA: baseline may violate the stated expectation; corrected model should meet it within its limited scope.')
      await page.locator('#labCases').fill(json.dumps(cases));await page.locator('[data-lab-mode="baseline"]').click();await page.locator('[data-lab-mode="corrected"]').click()
