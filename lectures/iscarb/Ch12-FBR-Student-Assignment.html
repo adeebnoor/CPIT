@@ -13,6 +13,7 @@
 @media print{.screen,.skip{display:none!important}.print{display:block!important}body{background:white;color:#111;font:12pt/1.45 system-ui}.w{max-width:none;padding:0}.box{white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #bbb;padding:9px;margin:5px 0 13px}h1{font-size:21pt}h2{font-size:15pt;break-after:avoid}.print-meta{font-size:10pt;color:#333}.draft-stamp{font-size:15pt;font-weight:800;border:2px solid #333;padding:10px}}
 
 .measure{border-color:var(--pink)}.measure .lab{color:var(--pink)}
+.ai-course-mark{display:inline-flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 13px 8px 8px;border:1px solid rgba(121,217,218,.55);border-radius:999px;background:linear-gradient(135deg,rgba(121,217,218,.12),rgba(182,170,255,.10))}.ai-course-mark .ai-orb{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--teal),var(--violet));color:#071014;font-weight:900}.ai-course-mark b{display:block;letter-spacing:.09em;font-size:13px}.ai-course-mark small{display:block;color:var(--dim);font-size:13px}.qeeem-note{border-color:var(--teal)}
 </style>
 </head>
 <body>
@@ -20,7 +21,7 @@
 <main class="w">
 <div class="screen">
 <nav aria-label="Course navigation" class="nav"><a class="linkbtn" href="../../iscarb.html">← Course hub</a><a class="linkbtn" href="Ch12-Safety-Engineering.html">Open Chapter 12 lecture</a></nav>
-<header class="top">
+<header class="top"><div class="ai-course-mark"><span aria-hidden="true" class="ai-orb">AI</span><span><b>AI-FIRST · iSCARB</b><small>Engineering judgment for AI-containing systems</small></span></div>
 <p class="ey">AFTER-CLASS · CHAPTER 12 · AI-ONLY</p>
 <h1>AI Safety: write the missing control</h1>
 <p class="sub">This assignment is only about an AI-containing system. Use the chapter mechanism to make a bounded engineering decision; polished AI text without inspectable reasoning earns no credit.</p>
@@ -85,7 +86,7 @@ Reviewer/owner: ..."></textarea></section>
 <footer class="foot"><p>Privacy: work stays in this browser until you download it. Blackboard is the official submission/identity record. The required grading artifact is the final JSON file.</p><nav aria-label="End of assignment" class="nav"><a href="../../iscarb.html">Course hub</a><a href="Ch12-Safety-Engineering.html">Chapter 12 lecture</a></nav></footer>
 </div>
 <div class="print" id="print"></div>
-</main>
+<section class="card qeeem-note" id="qeeem-evaluation"><p class="ey">COURSE EVALUATION · قيّم تجربتك</p><h2>Evaluate professionally and honestly</h2><p>After experiencing the course, please share a credible evaluation on <a href="https://qeeem.com/" rel="noopener" target="_blank">Qeeem</a>. Evaluate the educational experience, not the person. Be truthful, respectful and specific. Your evaluation has no effect on your grade.</p></section></main>
 <script>
 'use strict';
 const C={"chapter":"12","title":"Safety Engineering","version":"2026-09-ch12-ai-v3","scenarioTitle":"AI Safety: write the missing control · AI teaching simulation","keyBase":"fbr:cpit455:ch12:ai:v3","access":"fbr:access:ch12:path:v1","reveal":"reveal/r12-ai-v3.json"};
