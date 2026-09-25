@@ -89,7 +89,7 @@ for ch,d in DATA.items():
         <p><b>Stronger answer:</b> {d["example_strong"]}</p>
         <p><b>Why stronger:</b> it names the mechanism, boundary, evidence and human responsibility. Do not copy it: your assessed scenario is different.</p>''')
 
-    checklist=next((x for x in soup.select("section.card") if "THIS WEEK · SUBMISSION CHECKLIST" in x.get_text()),None)
+    checklist=next((x for x in soup.select("section.card") if "THIS WEEK · SUBMISSION CHECKLIST" in x.get_text() or (x.find("h2") and x.find("h2").get_text(" ",strip=True)=="Before you start")),None)
     if checklist:
         set_inner(checklist,f'''<p class="ey">ONE SUBMISSION · BLACKBOARD</p><h2>What you submit</h2><ol>
         <li>Read the {maxp}-point rubric and the example above.</li>
