@@ -23,6 +23,7 @@ for ch in (16,17):
     sc=soup.find_all("script")[-1]; js=sc.string or sc.get_text()
     js=re.sub(r'const A=\[[^\]]*\],M=', 'const A=["fit","measure","bound","act","evidence","sourceUse","technical"],M=', js, count=1)
     js=re.sub(r'const V2_CONFIG=(\{.*?\});',lambda x:x.group(0).replace('"lab": true','"lab": false'),js,count=1)
+    js=re.sub(r'\nStudyLab\.mount\([^\n]+\);?', '', js)
     js=js.replace("The executable log replaces prose about hypothetical test execution. ","")
     js=js.replace("Use your executed test log above. Explain one observed difference between models and one limit of the model; revise an incorrect prediction explicitly. The log replaces prose about tests you might run.","")
     sc.string=js
