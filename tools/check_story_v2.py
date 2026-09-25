@@ -76,9 +76,14 @@ async def check_page(browser,url,ch,mode,out):
     for i,s in enumerate(d['slides']):
         if s['id'] in SPECIAL:continue
         await page.evaluate(f'iscarb.go({i})')
-        assert await page.locator('.case-thread').count()==1,(ch,s['id'])
-        text=await page.locator('.case-thread').inner_text()
-        assert 'CASE THREAD' in text
+        if s.get('banner'):
+            assert await page.locator('.ai-banner').count()==1,(ch,s['id'])
+            text=await page.locator('.ai-banner').inner_text()
+            assert 'AI SEGMENT' in text,(ch,s['id'])
+        else:
+            assert await page.locator('.case-thread').count()==1,(ch,s['id'])
+            text=await page.locator('.case-thread').inner_text()
+            assert 'CASE THREAD' in text,(ch,s['id'])
         assert not await no_overflow(page),(ch,s['id'])
 
     # The ending is unmistakable and tells the learner exactly what remains.
