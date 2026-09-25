@@ -16,3 +16,4 @@ input?.addEventListener('change',async()=>{const file=input.files?.[0];if(!file)
  say('Restored '+n+' saved items. Reloading…');setTimeout(()=>location.reload(),500);
 }catch{say('This is not a valid CPIT-455 progress backup.')}finally{input.value=''}});
 })();
+if(!document.querySelector('link[href*=student-ux.css]')){const l=document.createElement('link');l.rel='stylesheet';l.href='student-ux.css?v=20260925';document.head.appendChild(l);}

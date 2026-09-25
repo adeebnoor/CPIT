@@ -67,3 +67,5 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
  load();
 })();
 
+
+import('./student-ux.js?v=20260925').catch(()=>{});
