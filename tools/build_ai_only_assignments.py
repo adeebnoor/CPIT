@@ -33,8 +33,13 @@ for ch,d in DATA.items():
     soup=BeautifulSoup(path.read_text(encoding="utf-8"),"html.parser")
     soup.html["data-assessment-edition"]="ai-v3"
     soup.title.string=f"Assignment {a_no} · Chapter {ch} · AI-only engineering task"
+    style=soup.find("style")
+    if style and ".ai-course-mark{" not in style.string:
+        style.string += """\n.ai-course-mark{display:inline-flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 13px 8px 8px;border:1px solid rgba(121,217,218,.55);border-radius:999px;background:linear-gradient(135deg,rgba(121,217,218,.12),rgba(182,170,255,.10))}.ai-course-mark .ai-orb{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--teal),var(--violet));color:#071014;font-weight:900}.ai-course-mark b{display:block;letter-spacing:.09em;font-size:13px}.ai-course-mark small{display:block;color:var(--dim);font-size:13px}.qeeem-note{border-color:var(--teal)}"""
     header=soup.select_one("header.top")
     header.select_one(".ey").string=f"AFTER-CLASS · CHAPTER {ch} · AI-ONLY"
+    ai_mark=BeautifulSoup('''<div class="ai-course-mark"><span class="ai-orb" aria-hidden="true">AI</span><span><b>AI-FIRST · iSCARB</b><small>Engineering judgment for AI-containing systems</small></span></div>''',"html.parser").div
+    header.insert(0,ai_mark)
     header.h1.string=d["title"]
     header.select_one(".sub").string="This assignment is only about an AI-containing system. Use the chapter mechanism to make a bounded engineering decision; polished AI text without inspectable reasoning earns no credit."
     chips=header.select(".chip")
@@ -181,6 +186,8 @@ function downloadJSON(){
     script.string=js
     foot=soup.select_one("footer.foot p")
     if foot: foot.string="Privacy: work stays in this browser until you download it. Blackboard is the official submission/identity record. The required grading artifact is the final JSON file."
+    qeeem=BeautifulSoup('''<section class="card qeeem-note" id="qeeem-evaluation"><p class="ey">COURSE EVALUATION · قيّم تجربتك</p><h2>Evaluate professionally and honestly</h2><p>After experiencing the course, please share a credible evaluation on <a href="https://qeeem.com/" target="_blank" rel="noopener">Qeeem</a>. Evaluate the educational experience, not the person. Be truthful, respectful and specific. Your evaluation has no effect on your grade.</p></section>''',"html.parser").section
+    soup.main.append(qeeem)
     path.write_text(str(soup),encoding="utf-8")
     reveal=R/f"lectures/iscarb/reveal/r{ch}-ai-v3.json"
     reveal.write_text(json.dumps({"chapter":str(ch),"version":c["version"],"label":"STRESS · new AI evidence","text":d["stress"],"principle":d["refit"]},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
