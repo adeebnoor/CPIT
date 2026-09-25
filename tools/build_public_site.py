@@ -6,7 +6,7 @@ from audit_classroom import audit, publication
 ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
 VERSION=publication()['release']
-PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-students.html','fbr-submission.html','download.html','download-stats.html','student-guide.html','course-resources.html','instructor-guide.html','methodology.html','ai-assignment-example.html','ai-assignment-example.json','style.css','iscarb-theme.css','iscarb-theme.js','iscarb-hub.css','iscarb-hub.js','assets/fcit-kau-logo.png']
+PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-students.html','fbr-submission.html','download.html','download-stats.html','student-guide.html','course-resources.html','instructor-guide.html','methodology.html','ai-assignment-example.html','ai-assignment-example.json','style.css','iscarb-theme.css','iscarb-theme.js','iscarb-hub.css','iscarb-hub.js','assets/fcit-kau-logo.png','student-ux.css','student-ux.js','chapter-search.js']
 def main():
     spec=publication(); errors=audit(ROOT)
     if errors: raise SystemExit('\n'.join(errors))
