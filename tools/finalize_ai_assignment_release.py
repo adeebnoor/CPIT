@@ -30,6 +30,27 @@ for ch in (16,17):
     p.write_text(str(soup),encoding="utf-8")
     ass[ch]["practical"]=False
 
+# Make the required Blackboard artifact visible before Part A on every current assignment.
+for ch,d in D.items():
+    p=R/f"lectures/iscarb/Ch{ch}-FBR-Student-Assignment.html"
+    soup=BeautifulSoup(p.read_text(encoding="utf-8"),"html.parser")
+    target=None
+    for sec in soup.select("section.card"):
+        h2=sec.find("h2")
+        ey=sec.select_one(".ey")
+        if (h2 and h2.get_text(" ",strip=True) in ("Before you start","What you submit")) or (ey and "ONE SUBMISSION" in ey.get_text()):
+            target=sec; break
+    if target:
+        target.clear()
+        frag=BeautifulSoup(f'''<p class="ey">ONE SUBMISSION · BLACKBOARD</p><h2>Submit one Blackboard JSON</h2>
+        <ol><li>Read the {d["max_points"]}-point rubric and worked example before answering.</li>
+        <li>Complete Part A, commit it, then finish STRESS → REFIT and human review.</li>
+        <li>Click <b>Download Blackboard JSON</b>. This .json file is the required grading artifact.</li>
+        <li>Upload that single JSON file to the Blackboard assignment and verify the Blackboard receipt.</li></ol>
+        <p class="hint">PDF and Markdown are optional personal copies unless the instructor asks for them. Do not submit screenshots or an AI chat transcript.</p>''',"html.parser")
+        for node in list(frag.contents): target.append(node)
+    p.write_text(str(soup),encoding="utf-8")
+
 # Canonical gateway manifest.
 gateway={}
 for ch,d in D.items():
@@ -175,7 +196,11 @@ for ch in D:
     t=t.replace('href="../../iscarb.html"','href="../../../iscarb.html"')
     t=re.sub(r'href="(Ch\d+-[^\"]+\.html(?:#[^\"]*)?)"',r'href="../\1"',t)
     t=re.sub(r'href="previous/([^\"]+)"',r'href="../previous/\1"',t)
-    t=t.replace("fetch(C.reveal", "fetch(C.reveal.startsWith('../')?C.reveal:'../'+C.reveal")
+    prefix="C.reveal.startsWith('../')?C.reveal:'../'+"
+    while prefix+prefix in t:
+        t=t.replace(prefix+prefix,prefix)
+    if "fetch("+prefix not in t:
+        t=t.replace("fetch(C.reveal", "fetch("+prefix+"C.reveal")
     ap.write_text(t,encoding="utf-8")
 
 # Publication allowlist: publish current AI STRESS plus the immediately previous assignment pages for recovery.
