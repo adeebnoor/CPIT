@@ -9,10 +9,11 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
 // Course-level progress is a local review mark, never a mastery score.
 (function(){
  const chapters=[10,11,12,13,14,15,16,17,20],evalKey='iscarb-qeeem-evaluation-complete',openedKey='iscarb-qeeem-opened';
+ const safeGet=k=>{try{return localStorage.getItem(k)}catch{return null}},safeSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch{return false}};
  const evalBox=document.getElementById('qeeemComplete'),evalStatus=document.getElementById('qeeemStatus'),label=document.getElementById('courseProgressLabel'),qeeemLinks=[document.getElementById('openQeeem'),document.getElementById('topQeeem')].filter(Boolean);
- const unlockEval=()=>{prefs.set(openedKey,'1');if(evalBox)evalBox.disabled=false;if(evalStatus&&!evalBox?.checked)evalStatus.textContent='Qeeem opened. Complete the evaluation, then confirm below.'};
+ const unlockEval=()=>{safeSet(openedKey,'1');if(evalBox)evalBox.disabled=false;if(evalStatus&&!evalBox?.checked)evalStatus.textContent='Qeeem opened. Complete the evaluation, then confirm below.'};
  qeeemLinks.forEach(a=>a.addEventListener('click',unlockEval));
- if(evalBox){evalBox.checked=prefs.get(evalKey)==='1';evalBox.disabled=prefs.get(openedKey)!=='1'&&!evalBox.checked;}
+ if(evalBox){evalBox.checked=safeGet(evalKey)==='1';evalBox.disabled=safeGet(openedKey)!=='1'&&!evalBox.checked;}
  const render=()=>{const checks=[...document.querySelectorAll('.review-check')];if(!checks.length)return;const n=checks.filter(x=>x.checked).length,evaluated=evalBox?.checked===true;const t=document.getElementById('courseProgress'),bar=document.getElementById('courseProgressBar'),next=checks.find(x=>!x.checked),link=document.getElementById('continueCourse');if(bar)bar.value=n;
   if(t)t.textContent=n<chapters.length?n+' / '+chapters.length:(evaluated?'Course complete':'9 / 9 · evaluation required');
   if(label)label.textContent=n<chapters.length?'chapters reviewed · evaluation required to finish':(evaluated?'all chapters reviewed · evaluation completed':'all chapters reviewed · complete Qeeem evaluation to finish');
@@ -22,7 +23,7 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
   else if(link){link.href='course-resources.html#outcomes';link.textContent='Course complete · Review outcomes'}
  };
  document.querySelectorAll('.review-check').forEach(x=>x.addEventListener('change',render));
- evalBox?.addEventListener('change',()=>{prefs.set(evalKey,evalBox.checked?'1':'0');render()});
+ evalBox?.addEventListener('change',()=>{safeSet(evalKey,evalBox.checked?'1':'0');render()});
  render();
 })();
 
