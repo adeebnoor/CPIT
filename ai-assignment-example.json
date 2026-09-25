@@ -1,0 +1,49 @@
+{
+  "schema": "cpit455-ai-v3-example",
+  "example_only": true,
+  "course": "CPIT-455",
+  "assignment": 0,
+  "chapter": 0,
+  "max_score": 4,
+  "version": "practice-example-v1",
+  "paper": {
+    "title": "iSCARB AI-containing systems paper",
+    "url": "https://zenodo.org/records/22964248"
+  },
+  "student": {
+    "name": "Practice Student",
+    "id": "EXAMPLE-ONLY",
+    "section": "PRACTICE"
+  },
+  "submitted_at": "2026-09-25T00:00:00+03:00",
+  "commit": {
+    "id": "EXAMPLE-COMMIT",
+    "locked_at": "2026-09-25T00:00:00+03:00",
+    "stress_revealed_at": "2026-09-25T00:01:00+03:00"
+  },
+  "scenario": {
+    "title": "Practice campus Wi-Fi assistant",
+    "text": "Practice only; not an assessed case."
+  },
+  "partA": {
+    "fit": "Shared model, prompt and retrieval create a common AI dependency.",
+    "bound": "Advisory-only for practice-v3 and ordinary daytime incidents; model/retrieval/profile changes reopen the decision.",
+    "act": "ADVISORY-ONLY under duty engineer control.",
+    "evidence": "Daytime test is observed; peak, contradiction and AI-outage tests remain proposed.",
+    "sourceUse": "Practice source connection.",
+    "technical": "Independent control must not rely on the model being correct."
+  },
+  "stress": {
+    "label": "PRACTICE STRESS",
+    "text": "Two operators receive contradictory recommendations after a retrieval refresh."
+  },
+  "boundaryState": "CROSSED",
+  "refit": "REVISE",
+  "refitwhy": "The retrieval change invalidates the original evidence boundary.",
+  "finalDecision": "Keep direct control disabled and suspend advisory use until versioned regression evidence is reviewed.",
+  "aiUse": "Practice example only.",
+  "humanReview": {
+    "name": "Practice Student",
+    "attested": true
+  }
+}
