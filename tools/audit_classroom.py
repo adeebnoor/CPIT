@@ -29,6 +29,12 @@ class Page(HTMLParser):
 
 def publication(): return json.loads(CATALOG.read_text(encoding="utf-8"))
 
+TEXT_EXT={'.html','.htm','.js','.css','.json','.md','.txt','.py','.yml','.yaml','.cjs','.mjs'}
+def canonical_sha(path):
+    p=Path(path); b=p.read_bytes()
+    if p.suffix.lower() in TEXT_EXT: b=b.replace(b'\r\n',b'\n')
+    return hashlib.sha256(b).hexdigest()
+
 def audit(root=ROOT):
     root=Path(root); spec=publication(); errors=[]
     if spec.get("automatic_generation") is not False:
@@ -46,7 +52,7 @@ def audit(root=ROOT):
         ap=(root/name).resolve()
         if not ap.is_relative_to(root.resolve()) or name not in allowed:
             errors.append(f"Unapproved delivery asset: {name}")
-        elif not ap.is_file() or hashlib.sha256(ap.read_bytes()).hexdigest()!=digest:
+        elif not ap.is_file() or canonical_sha(ap)!=digest:
             errors.append(f"Delivery asset is missing or changed: {name}")
     # Immutable lectures: exact bytes, local dependencies and original figures.
 
@@ -93,7 +99,7 @@ def audit(root=ROOT):
                 if not ip.is_relative_to(root.resolve()) or ip.relative_to(root.resolve()).as_posix() not in asset_hashes:
                     errors.append(f"Chapter {ch} source image not integrity checked: {v['figure']}")
             previous=root/lecture['previous_lecture_path']
-            if hashlib.sha256(previous.read_bytes()).hexdigest()!=lecture['previous_lecture_sha256']:
+            if canonical_sha(previous)!=lecture['previous_lecture_sha256']:
                 errors.append(f"Chapter {ch} previous lecture draft-recovery page changed.")
             images=re.findall(r"data:image/(?:png|jpe?g|webp);base64,([A-Za-z0-9+/=]+)",previous.read_text(encoding='utf-8'))
             preserved=[hashlib.sha256(base64.b64decode(v,validate=True)).hexdigest() for v in images]
@@ -129,12 +135,13 @@ def audit(root=ROOT):
         if len(page.ids)!=len(set(page.ids)): errors.append(f"Chapter {ch} assignment has duplicate static IDs.")
         for token in (assignment.get("storage_key"),assignment.get("access_key"),assignment.get("stress_path").split("lectures/iscarb/")[-1],assignment.get("version")):
             if token and token not in a: errors.append(f"Chapter {ch} assignment is missing required identity token: {token}")
-        if ch==10:
-            previous=root/assignment.get('previous_path',assignment['path'])
-            if not previous.is_file() or "fbr:cpit455:ch10:prod:v4" not in previous.read_text(): errors.append("Chapter 10 must preserve legacy draft recovery through the previous edition.")
-        if ch==11:
-            if assignment.get("points")!=5 or "MEASURE · 1 POINT" not in a or "20,000" not in a:
-                errors.append("Assignment 2 must preserve the five-point progressive rubric and measurement step.")
+        previous=root/assignment.get('previous_path',assignment['path'])
+        if not previous.is_file(): errors.append(f"Chapter {ch} must preserve the previous assignment edition for draft recovery.")
+        if assignment.get("edition")=="ai-v3":
+            expected_points=4 if ch==10 else 5
+            if assignment.get("points")!=expected_points: errors.append(f"Chapter {ch} AI-only assignment has the wrong point total.")
+            for marker in ('data-assessment-edition="ai-v3"','AI-ONLY','Download Blackboard JSON','22964248'):
+                if marker.lower() not in a.lower(): errors.append(f"Chapter {ch} AI-only assignment is missing required marker: {marker}")
         if sp.is_file():
             try:
                 stress=json.loads(sp.read_text(encoding="utf-8"))

@@ -1,0 +1,7 @@
+{
+  "chapter": "12",
+  "version": "2026-09-ch12-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, a log shows the cumulative checker receives zero when the position sensor drops out for two seconds, so the next AI command can pass using an incorrect total. No accident occurred in this teaching case. Reassess the fail-safe requirement.",
+  "principle": "Identify the broken safety assumption and defend the final control, degraded state and verification evidence."
+}

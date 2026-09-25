@@ -1,0 +1,7 @@
+{
+  "chapter": "17",
+  "version": "2026-09-ch17-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, a failover drill shows the idempotency record is stored only in application memory. After restart, the same key is forgotten and a retry can send another message. Reassess the mechanism.",
+  "principle": "Explain why stable request identity is insufficient without durable state and defend the final retry/reconciliation design."
+}

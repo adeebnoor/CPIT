@@ -1,0 +1,7 @@
+{
+  "chapter": "13",
+  "version": "2026-09-ch13-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, refusal tests still look good, but a synthetic cross-user request sent directly to the retrieval endpoint returns another student's document before the model sees it. Reassess the security claim.",
+  "principle": "Explain why model refusal evidence cannot repair the retrieval breach and defend the final control and retest scope."
+}

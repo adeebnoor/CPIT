@@ -1,0 +1,7 @@
+{
+  "chapter": "10",
+  "version": "2026-09-ch10-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, two identical incident summaries sent to the same model version produce opposite failover recommendations. Both application servers would consume the same assistant path. No transaction loss has been confirmed. Reassess the shared dependency and the permitted role of the assistant.",
+  "principle": "Explain what the contradictory AI output does to the original boundary, then defend RETAIN, REVISE or REPLACE."
+}

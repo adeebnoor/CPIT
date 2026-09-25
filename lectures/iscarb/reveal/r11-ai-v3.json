@@ -1,0 +1,7 @@
+{
+  "chapter": "11",
+  "version": "2026-09-ch11-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, the security team says external traffic will rise from 10% to 60% next week, but no new labeled sample has been collected. The model is unchanged. Reassess whether the pilot estimate supports the new operating profile.",
+  "principle": "Explain how the profile shift affects the original estimate and defend RETAIN, REVISE or REPLACE."
+}

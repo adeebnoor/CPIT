@@ -35,8 +35,16 @@ for (const lectureSpec of release.lectures) {
   const lecture = read(lectureSpec.path);
   for (const id of ['prevBtn', 'nextBtn']) assert(lecture.includes(`id="${id}"`), `Chapter ${lectureSpec.chapter} navigation: ${id}`);
 }
-const assignment11 = read(release.assignments.find(item => item.chapter === 11).path);
-assert(assignment11.includes('MEASURE · 1 POINT'), 'Assignment 2 must add exactly the MEASURE scored step');
-assert(assignment11.includes('20,000'), 'Assignment 2 keeps the supplied measurement exercise');
+assert.equal(release.assignment_release, '20260925-ai-only-v3', 'AI-only assignment release must be active');
+const rubrics = JSON.parse(read('curriculum/ai-assignment-rubrics.json'));
+for (const item of release.assignments) {
+  const html = read(item.path);
+  assert(html.includes('data-assessment-edition="ai-v3"'), `Chapter ${item.chapter} must use AI-only v3`);
+  assert(html.includes('How your AI assignment is assessed'), `Chapter ${item.chapter} must show the rubric before submission`);
+  assert(html.includes('See a complete example before you start'), `Chapter ${item.chapter} must show a worked example`);
+  assert(html.includes('22964248'), `Chapter ${item.chapter} must link the Zenodo research basis`);
+  assert(html.includes('Download Blackboard JSON'), `Chapter ${item.chapter} must export the Blackboard JSON`);
+  assert(rubrics.chapters[String(item.chapter)], `Chapter ${item.chapter} must have a machine-readable rubric`);
+}
 assert(read('.github/workflows/static.yml').includes('tools/build_public_site.py'));
-console.log(`PASS: Nine-chapter release catalog, ${scripts} valid scripts, standalone navigation, and progressive Assignment 2 gateway.`);
+console.log(`PASS: Nine AI-only assignments, ${scripts} valid scripts, visible examples/rubrics, Zenodo linkage, and Blackboard JSON export.`);

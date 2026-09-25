@@ -1,0 +1,7 @@
+{
+  "chapter": "14",
+  "version": "2026-09-ch14-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, a rehearsal shows the central identity service is unavailable in the same outage, so staff cannot open the protected fallback file or the AI assistant. Reassess the common dependency.",
+  "principle": "Explain how the shared dependency changes the recovery path and defend the final degraded mode and rehearsal evidence."
+}

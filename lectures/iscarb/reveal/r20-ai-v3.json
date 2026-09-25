@@ -1,0 +1,7 @@
+{
+  "chapter": "20",
+  "version": "2026-09-ch20-ai-v3",
+  "label": "STRESS · new AI evidence",
+  "text": "After Part A is committed, the security owner deploys a new classifier without changing the API schema. The share of 'high severity' incidents doubles overnight, and the dashboard owner cannot inspect or roll back the model. Reassess the shared claim.",
+  "principle": "Explain how independent AI evolution affects the dashboard promise and defend the final boundary, visible uncertainty and negotiated next step."
+}
