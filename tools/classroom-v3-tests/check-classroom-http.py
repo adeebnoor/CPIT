@@ -27,7 +27,7 @@ async def main():
     try:
      response=await page.goto(urljoin(BASE,c['path'])+'#START',wait_until='networkidle');assert response.status==200
      await page.wait_for_function('!!window.iscarb');D=await page.evaluate('iscarb.data')
-     assert D['release']==PUB['release'] and len(D['slides'])==20
+     assert D.get('version',D.get('release'))==PUB['release'] and len(D['slides'])==20,(ch,D.get('release'),D.get('version'),PUB['release'])
      assert 'This earlier unit' not in await page.locator('#modal-body').inner_text(),'Existing hub entry must resolve'
      await page.evaluate('iscarb.closeModal()')
      assert not await page.evaluate("performance.getEntriesByType('resource').some(x=>/\\.(pdf|pptx)([?#]|$)/i.test(x.name))"),'Sources must be on demand'
