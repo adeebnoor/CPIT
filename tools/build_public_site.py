@@ -22,12 +22,12 @@ def main():
     immutable_lectures={item['path'] for item in spec['lectures']}
     for p in DEST.rglob('*.html'):
         if p==DEST/'index.html' or 'wealth-os' in p.parts: continue
-        rel=p.relative_to(DEST).as_posix(); s=p.read_text()
+        rel=p.relative_to(DEST).as_posix(); s=p.read_text(encoding='utf-8')
         if rel in immutable_lectures or 'data-iscarb-standalone="1"' in s or p.name in ('InClass-Presenter.html','Faculty-Presenter.html'): continue
         prefix=os.path.relpath(DEST,p.parent).replace('\\','/'); prefix='' if prefix=='.' else prefix+'/'
         if 'iscarb-theme.css' not in s: s=s.replace('</head>',f'<link rel="stylesheet" href="{prefix}iscarb-theme.css?v={VERSION}"></head>',1)
         if 'iscarb-theme.js' not in s: s=s.replace('</body>',f'<script src="{prefix}iscarb-theme.js?v={VERSION}" defer></script></body>',1)
-        p.write_text(s)
+        p.write_text(s,encoding='utf-8')
     old=sys.argv; sys.argv=['sanitize_static_site.py',str(DEST)]
     try: result=sanitize()
     finally: sys.argv=old

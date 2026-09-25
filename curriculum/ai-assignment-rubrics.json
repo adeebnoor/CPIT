@@ -1,0 +1,265 @@
+{
+  "schema": "cpit455-ai-v3",
+  "chapters": {
+    "10": {
+      "assignment": 1,
+      "max_score": 4,
+      "title": "AI Dependability: decide what the assistant may control",
+      "artifact": "AI dependability claim + bounded operating decision",
+      "criteria": [
+        "FIT + AI MECHANISM",
+        "BOUND + EVIDENCE",
+        "ACT + RESPONSIBILITY",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional university uses a generative-AI operations assistant during course registration. It recommends CONTINUE, FAILOVER or HOLD. Two application servers are redundant, but both call the same model, prompt template and retrieval service. A quiet-period server failover test passed; no peak-load test covers AI outage, contradictory recommendations or a wrong recommendation. Operators can ignore the assistant, but the current procedure does not require an independent check before acting. Decide whether the assistant may control the action, remain advisory-only, or be disabled for the peak window.",
+      "expected_focus": {
+        "fit": "Identify the dependability property or properties that govern the AI-assisted decision and explain the shared/common-cause dependency.",
+        "artifact": "Explain one AI-specific failure mechanism and one engineering control that does not rely on the model being correct.",
+        "bound": "State the model/version, operating profile and human-check conditions under which your claim holds, plus one trigger that reopens the decision.",
+        "act": "Choose CONTROL, ADVISORY-ONLY or DISABLE. Name the accountable owner and the inspectable evidence required before widening the boundary.",
+        "refit": "Explain what the contradictory AI output does to the original boundary, then defend RETAIN, REVISE or REPLACE."
+      },
+      "worked_example": {
+        "weak": "Use a backup model and test more.",
+        "strong": "Keep the assistant advisory-only. Two servers do not remove the shared model/prompt dependency. Before any control authority, run versioned repeatability and AI-unavailable tests under peak-like load, require an independent rule/human check, and record the owner and rollback trigger."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "11": {
+      "assignment": 2,
+      "max_score": 5,
+      "title": "AI Reliability: compute before you trust",
+      "artifact": "Metric + denominator + operating-profile decision",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional email gateway pilots an AI phishing classifier on 1,000 messages: 50 are phishing. It catches 40 phishing messages, misses 10, flags 19 legitimate messages as phishing and correctly passes 931 legitimate messages. The vendor advertises 98% accuracy. The pilot traffic is 10% external and the deployed model version is fixed for the trial. Decide whether the evidence supports a protection claim and what operating decision is justified.",
+      "expected_focus": {
+        "fit": "State which reliability measure supports the protection claim and why overall accuracy is insufficient by itself.",
+        "artifact": "Compute accuracy, phishing POFOD and false-alarm rate. Show numerator, denominator and exposure; do not hide uncertainty behind a single percentage.",
+        "bound": "State the model version, traffic profile and exposure for which your estimate applies and a trigger for re-estimation.",
+        "act": "Choose LIMITED PILOT, ADVISORY-ONLY or HOLD. Name the owner and the next representative evidence needed.",
+        "refit": "Explain how the profile shift affects the original estimate and defend RETAIN, REVISE or REPLACE."
+      },
+      "worked_example": {
+        "weak": "Accuracy is 97.1%, so the model is reliable.",
+        "strong": "Accuracy is 971/1000 = 97.1%, but phishing POFOD is 10/50 = 0.20 and false-alarm rate is 19/950 = 0.02. A protection claim must use the phishing-demand denominator and state that it is based on only 50 phishing demands in this pilot profile."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "12": {
+      "assignment": 3,
+      "max_score": 5,
+      "title": "AI Safety: write the missing control",
+      "artifact": "Hazard → safety requirement → independent checker → verification",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional laboratory uses an AI optimiser to propose actuator commands. The controller rejects any single command above 10 units. During a trial the AI proposes six 10-unit commands within one minute; every command passes the current check, but the modeled cumulative safe limit for that minute is 50 units. The current requirements contain no cumulative-window rule. Decide whether the AI path can remain enabled and what safety control is required.",
+      "expected_focus": {
+        "fit": "Name the hazard, possible accident and affected party. Distinguish the unsafe requirement gap from an ordinary model-quality problem.",
+        "artifact": "Write the missing safety requirement, place an independent checker, and specify one verification sequence that would expose the cumulative hazard.",
+        "bound": "State the sensing, window and enforcement assumptions required for the checker to be trusted, plus a condition that forces a safe state.",
+        "act": "Choose ENABLE WITH CONTROL, RESTRICT or HOLD. Name the safety owner/reviewer and the evidence required before operation.",
+        "refit": "Identify the broken safety assumption and defend the final control, degraded state and verification evidence."
+      },
+      "worked_example": {
+        "weak": "Tell the AI not to exceed the safe limit.",
+        "strong": "Enforce the cumulative limit in an independent controller: reject any command that would take the one-minute total above 50 units, regardless of source. On lost sensing, enter a defined safe state. Verify sequences of many small commands and sensor-loss cases; record the tested version and reviewer."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "13": {
+      "assignment": 4,
+      "max_score": 5,
+      "title": "AI Security: permission-aware RAG, not prompt promises",
+      "artifact": "Threat → server-side control → negative test",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional university RAG assistant answers questions over student project files. The model prompt says it must reveal only files the requester is allowed to see. Retrieval currently uses one broad service account that can read every project. The UI hides other students' file links, and ordinary same-user questions work. No cross-user retrieval test exists. Decide whether the assistant may be released, restricted, or held.",
+      "expected_focus": {
+        "fit": "Identify the protected asset, actor/threat and the AI-specific vulnerability. Keep prompt injection distinct from authorization failure.",
+        "artifact": "Write one allowed and one forbidden retrieval test with actor, object, expected server result and evidence to inspect.",
+        "bound": "State which actors, document stores and retrieval paths the claim covers, plus one untested path that reopens the decision.",
+        "act": "Choose RELEASE, RESTRICT or HOLD. Name the server-side authorization control, reviewer and evidence needed.",
+        "refit": "Explain why model refusal evidence cannot repair the retrieval breach and defend the final control and retest scope."
+      },
+      "worked_example": {
+        "weak": "Improve the system prompt and add more refusal examples.",
+        "strong": "Enforce permission-aware retrieval before documents reach the model. Test Student A requesting A's file (allow) and Student A requesting B's file through both preview and export paths (deny). Model refusals remain a secondary defense, not the authorization boundary."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "14": {
+      "assignment": 5,
+      "max_score": 5,
+      "title": "AI Resilience: recover when the assistant is gone",
+      "artifact": "Essential service → AI-independent degraded mode → recovery rehearsal",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional campus operations desk uses an AI recovery assistant to guide staff during major service outages. The assistant retrieves the current runbook from the network and proposes the next recovery step. A printed one-page fallback exists, but it covers only the first two steps and assumes staff can sign in to the central identity service. No rehearsal has been run with the AI unavailable. Decide whether the AI-assisted recovery path is ready for a limited trial.",
+      "expected_focus": {
+        "fit": "Name the essential service and the critical dependencies introduced by the AI assistant. Separate normal convenience from recovery necessity.",
+        "artifact": "Describe recognition, degraded operation, recovery and reinstatement with the AI unavailable. Include a rehearsal that proves the fallback works.",
+        "bound": "State the maximum dependency/staleness assumptions that keep the fallback usable and one condition that makes it unacceptable.",
+        "act": "Choose TRIAL, RESTRICTED TRIAL or HOLD. Name the recovery owner and the evidence that must exist before widening use.",
+        "refit": "Explain how the shared dependency changes the recovery path and defend the final degraded mode and rehearsal evidence."
+      },
+      "worked_example": {
+        "weak": "Keep a backup AI model.",
+        "strong": "Keep the AI off the critical recovery path. Maintain a versioned offline runbook, bounded emergency authority, a second trained person and a rehearsed degraded mode. Test the exact case where both AI and central identity are unavailable, then reconcile actions after recovery."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "15": {
+      "assignment": 6,
+      "max_score": 5,
+      "title": "AI Reuse: hosted model or local model?",
+      "artifact": "Reuse options → lifecycle/data constraints → evidence-based choice",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional faculty is building an AI room-booking assistant for a three-year pilot. Option A is a hosted model API that can be integrated in days; prompts and booking text leave the university boundary, and the supplier may retire model versions. Option B is a locally hosted open model; deployment takes longer and needs model-operations expertise, but data and versions remain under university control. Both options passed the same ten-request demonstration. No representative evaluation set or total lifecycle cost is available. Recommend an option, a bounded evaluation, or a hold.",
+      "expected_focus": {
+        "fit": "Classify the reuse choices and identify the functional, data, lifetime and expertise constraints that matter.",
+        "artifact": "Compare hosted and local options across at least four relevant factors. Mark each fact SUPPORTED, UNKNOWN or CONDITION-DEPENDENT; do not invent scores.",
+        "bound": "State one lifecycle or data assumption that must hold and one change that would reverse the recommendation.",
+        "act": "Choose HOSTED, LOCAL, BOUNDED EVALUATION or HOLD. Name the owner and the evidence needed to settle the most consequential unknown.",
+        "refit": "Update only the affected assumptions and defend the final choice, migration/exit plan and evaluation evidence."
+      },
+      "worked_example": {
+        "weak": "Use the hosted model because it is easier.",
+        "strong": "Hosted wins on schedule, but the three-year lifetime and data boundary are material. Treat version retirement as an interface change: require a workflow evaluation set, version pinning where possible, an exit path and regression evidence before each model migration."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "16": {
+      "assignment": 7,
+      "max_score": 5,
+      "title": "AI Component Contract: say what every call must mean",
+      "artifact": "AI interface → pre/postconditions → versioned quality evidence",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional scheduling component calls an AI forecast service with temperature values. The caller sends Celsius. The provider accepts any number and returns a forecast plus a modelVersion field. The approved integration requires -40 ≤ temperatureC ≤ 60 and modelVersion = 'approved-v7'. A sample call at 30 returns a plausible forecast, but no adapter currently checks units, range or version. Forecast quality is specified separately as a maximum mean error on held-out data. Decide whether to use, adapt or hold the component.",
+      "expected_focus": {
+        "fit": "Separate syntactic compatibility from semantic and model-version obligations. Name one caller obligation and one provider obligation.",
+        "artifact": "Write a precondition, postcondition and adapter check for unit/range/version. Also state which quality requirement cannot be proven by one call and how it should be evaluated.",
+        "bound": "State the input range, approved version and evaluation conditions on which the contract depends, plus one trigger for re-validation.",
+        "act": "Choose USE, ADAPT or HOLD. Name the integration owner/reviewer and the evidence required after composition.",
+        "refit": "Identify the invalidated postcondition/evidence and defend the final adapter, version policy and re-evaluation step."
+      },
+      "worked_example": {
+        "weak": "Check that the API returns a forecast.",
+        "strong": "Pre: unit='Celsius' and -40≤t≤60. Post: result.unit='Celsius' and result.modelVersion='approved-v7'. The adapter rejects missing or different versions. Mean forecast error is not a per-call postcondition; verify it on a held-out set and repeat after model-version or input-distribution changes."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "17": {
+      "assignment": 8,
+      "max_score": 5,
+      "title": "AI Distributed Service: retry without duplicate effects",
+      "artifact": "Failure sequence → idempotency boundary → durable evidence",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional event service asks an AI model to draft an attendee notification, then sends the message through a delivery service. The application times out after the send request and does not know whether the message was delivered. It retries by calling the AI again and sending the new draft with a new request identifier. Normal tests pass; no lost-response test exists. Decide whether automatic retry is acceptable and what mechanism is required.",
+      "expected_focus": {
+        "fit": "Map the remote boundaries and distinguish 'no response received' from 'no effect occurred'. Explain why model non-determinism matters.",
+        "artifact": "Write the lost-response event sequence. Specify an idempotency/reconciliation rule and one test that distinguishes one committed send from duplicate sends.",
+        "bound": "State which failure modes, key lifetime and durable storage assumptions your claim covers, plus one condition that reopens it.",
+        "act": "Choose ENABLE RETRY, RESTRICT or HOLD. Name the owner and the evidence required before automatic retry.",
+        "refit": "Explain why stable request identity is insufficient without durable state and defend the final retry/reconciliation design."
+      },
+      "worked_example": {
+        "weak": "Retry the AI call if it times out.",
+        "strong": "Assign one idempotency key before generation, persist the committed effect and chosen output durably, and return that stored result on retry. Test a lost response after commit and a service restart; verify exactly one external send. Calling the model again is a new request, not evidence about the first effect."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    },
+    "20": {
+      "assignment": 9,
+      "max_score": 5,
+      "title": "AI Systems-of-Systems: govern changing model-produced feeds",
+      "artifact": "Independent owners → AI feed contract → staged acceptance",
+      "criteria": [
+        "FIT",
+        "AI ENGINEERING ARTIFACT",
+        "BOUND",
+        "ACT + EVIDENCE",
+        "STRESS → REFIT"
+      ],
+      "scenario": "A fictional university incident dashboard combines three independently owned feeds. Campus security supplies incident severity from an AI classifier, transport supplies vehicle status from its own model, and facilities supplies building-access status. Each owner controls its own release schedule. The dashboard displays the fields without recording model version or confidence. Local API tests pass, but there is no cross-system agreement for model changes, freshness or unavailable feeds. Decide whether a daytime pilot is justified and what governance record is required.",
+      "expected_focus": {
+        "fit": "Classify the system-of-systems relationship and identify operational/managerial independence plus one emergent shared-service risk from AI-produced semantics.",
+        "artifact": "Propose a cross-owner interface/governance record and a staged acceptance test. Include source, timestamp, model version, freshness, unavailable-feed behavior and change notification.",
+        "bound": "Separate what the dashboard owner can enforce locally from what requires agreement with constituent owners; state a suspension/narrowing trigger.",
+        "act": "Choose PILOT, RESTRICTED PILOT or HOLD. Name the coordination owner, participating owners and evidence required for the next stage.",
+        "refit": "Explain how independent AI evolution affects the dashboard promise and defend the final boundary, visible uncertainty and negotiated next step."
+      },
+      "worked_example": {
+        "weak": "Ask every owner to keep the same API.",
+        "strong": "Treat model/semantic changes as interface changes even when JSON shape is unchanged. Display source, timestamp and declared model version; monitor distribution shifts; label affected data unverified; and require change notification plus staged acceptance before restoring the broader shared claim."
+      },
+      "paper": {
+        "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
+        "url": "https://zenodo.org/records/22964248"
+      }
+    }
+  }
+}
