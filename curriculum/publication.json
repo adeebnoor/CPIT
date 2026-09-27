@@ -1608,8 +1608,8 @@
   ],
   "delivery": "Local, integrity-checked shared runtime and on-demand source assets; offline chapter ZIPs preserve the same folder structure.",
   "delivery_asset_sha256": {
-    "lectures/iscarb/runtime/classroom-v3.js": "9a8fa963889b2ce42b15217b34c7341b5a4ebc4001b6b94cfeb9f7461658d9f1",
-    "lectures/iscarb/runtime/classroom-v3.css": "23e5a28d4428840ec97dfc29fe49937db744bfbc0ed49ca4f3ae722a648d6626",
+    "lectures/iscarb/runtime/classroom-v3.js": "6018cf386d76d4795d4d7cbd88cff04e6123b8779a99305832ca8763b40ea0b9",
+    "lectures/iscarb/runtime/classroom-v3.css": "315faa3b72f734df184b05866d7e7470a726c8b5c7d61193ddcb9c529d47a491",
     "lectures/iscarb/assets/v3/ch14-cyberplan-combined.jpg": "24569c89e9f240063fd99e3293bda2dbbb1c5d114dbd792bea68e0bd120eaeb2",
     "lectures/iscarb/assets/v3/genai-banner.jpg": "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02",
     "lectures/iscarb/assets/v3/21292a8c946062a4.jpg": "21292a8c946062a4da6a3b82fc59b352a8ff0a62ad4b85aebea0fb90c068f9e8",
@@ -1772,5 +1772,5 @@
     "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
     "url": "https://zenodo.org/records/22964248"
   },
-  "design_release": "20260927-readable-v1"
+  "design_release": "20260928-nelc-v1"
 }
