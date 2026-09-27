@@ -22,6 +22,20 @@ jobs:
           python-version: '3.12'
       - name: Rebuild packages from reviewed source
         run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('curriculum/publication.json')
+          d=json.loads(p.read_text())
+          for name in [
+            'lectures/iscarb/runtime/classroom-v3.js',
+            'lectures/iscarb/runtime/classroom-v3.css',
+            'lectures/iscarb/runtime/readable.css',
+            'lectures/iscarb/runtime/assignment-readable.css'
+          ]:
+            if pathlib.Path(name).is_file():
+              d['delivery_asset_sha256'][name]=hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+          PY
           python tools/prepare_readable_release.py
           python tools/check_paper_fidelity.py
           python tools/audit_classroom.py
