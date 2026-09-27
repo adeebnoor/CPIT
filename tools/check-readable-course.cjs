@@ -30,7 +30,7 @@ async function run(){
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'horizontal overflow');
       assert(await page.locator('#chapter-main img').evaluateAll(a=>a.every(im=>im.complete&&im.naturalWidth>0)),'broken image');
       if(viewport.width>1000){
-       const problem=await page.evaluate(()=>{const root=document.querySelector('.lecture-section:not([hidden])');const edge=document.querySelector('.footerbar').getBoundingClientRect().top;return [...root.querySelectorAll('p,li,td,th,img')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.bottom>edge-2}).map(e=>e.textContent.slice(0,60));});
+       const problem=await page.evaluate(()=>{const root=document.querySelector('.lecture-section:not([hidden])')||document.querySelector('#chapter-main');const edge=document.querySelector('.footerbar').getBoundingClientRect().top;return root?[...root.querySelectorAll('p,li,td,th,img')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.bottom>edge-2}).map(e=>e.textContent.slice(0,60)):[];});
        if(problem.length){results.overflow.push({chapter:chapter.chapter,slide:data.slides[i].id,section:j,viewport,problem});if(results.overflow.length<15)await page.screenshot({path:out+`/overflow-${chapter.chapter}-${i}-${j}-${viewport.width}.png`});}
       }
       results.sections++;
@@ -60,7 +60,7 @@ async function run(){
   try{
    await page.goto(base+'fbr-submission.html?chapter='+a.chapter);await page.locator('#sid').fill('QA-DESIGN-ONLY');await page.locator('#ack').check();await page.locator('#openBtn').click();await page.waitForURL('**/Ch'+a.chapter+'-FBR-Student-Assignment.html');assert.equal(reveals.length,0);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'assignment horizontal overflow');
-   for(const k of ['fit','measure','bound','act','evidence','technical'])if(await page.locator('#'+k).count())await page.locator('#'+k).fill('QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.');
+   for(const k of ['fit','measure','bound','act','evidence','technical','labPrediction','labCases','labEvidence'])if(await page.locator('#'+k).count())await page.locator('#'+k).fill('QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.');
    await page.locator('#sourceUse').fill('Slide '+a.reading_pages[0]+': the source concept constrains the model assumptions and defines a bounded control that must be independently checked.');
    await page.locator('#section').fill('QA');await page.locator('#save').click();await page.reload();assert.match(await page.locator('#fit').inputValue(),/QA:/);
    await page.locator('#lock').click();await page.locator('#refitwhy').waitFor();assert.equal(reveals.length,1);assert(await page.locator('#fit').evaluate(e=>e.readOnly));
@@ -69,9 +69,9 @@ async function run(){
    await page.locator('#revised').fill('QA: keep the model advisory-only; a human owner checks independently. Verify version and workload, record missing tests and reopen the decision when assumptions change.');
    await page.locator('#aiUse').fill('No AI used.');await page.locator('#signer').fill('QA test');await page.locator('#attested').check();
    await page.reload();assert(await page.locator('#fit').evaluate(e=>e.readOnly));assert.equal(reveals.length,1);
-   await page.locator('#json').waitFor();assert(await page.locator('#json').isEnabled(),await page.locator('#done').innerText());
-   const dl=page.waitForEvent('download');await page.locator('#json').click();const d=await dl;const file=out+`/qa-assignment-${a.chapter}.json`;await d.saveAs(file);const record=JSON.parse(fs.readFileSync(file));assert.equal(record.chapter,a.chapter);assert.equal(record.max_score,a.points);assert(record.commit.id);assert(record.humanReview.attested);
-   await page.screenshot({path:out+`/assignment-${a.chapter}-mobile.png`});results.assignments.push({chapter:a.chapter,entry:true,save_reload:true,delayed_reveal:true,locked_reload:true,json_export:true});console.log('PASS assignment',a.chapter);
+   await page.locator('#download').waitFor();assert(await page.locator('#download').isEnabled(),await page.locator('#done').innerText());
+   const dl=page.waitForEvent('download');await page.locator('#download').click();const d=await dl;const file=out+`/qa-assignment-${a.chapter}.md`;await d.saveAs(file);const record=fs.readFileSync(file,'utf8');assert.match(record,new RegExp('Chapter '+a.chapter));assert.match(record,/Commit ID:/);assert.match(record,/Reviewed and responsibility accepted/);
+   await page.screenshot({path:out+`/assignment-${a.chapter}-mobile.png`});results.assignments.push({chapter:a.chapter,entry:true,save_reload:true,delayed_reveal:true,locked_reload:true,editable_export:true});console.log('PASS assignment',a.chapter);
   }catch(e){console.error('FAIL assignment',a.chapter,e.message);results.errors.push({assignment:a.chapter,error:e.message});await page.screenshot({path:out+`/FAIL-assignment-${a.chapter}.png`,fullPage:true});}finally{await context.close();}
  }
  await browser.close();fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2));console.log(JSON.stringify({slides:results.slides,sections:results.sections,assignments:results.assignments.length,errors:results.errors,overflow:results.overflow},null,2));if(results.errors.length||results.overflow.length)process.exitCode=1;
