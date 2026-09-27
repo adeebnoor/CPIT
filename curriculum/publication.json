@@ -1608,7 +1608,7 @@
   ],
   "delivery": "Local, integrity-checked shared runtime and on-demand source assets; offline chapter ZIPs preserve the same folder structure.",
   "delivery_asset_sha256": {
-    "lectures/iscarb/runtime/classroom-v3.js": "9e3a70709a2e5cefdf327fdeefd22fc1009c2ed88614fdb90a1813d9a1a4a369",
+    "lectures/iscarb/runtime/classroom-v3.js": "d4d59c898058641e5ed2ebefcac60b622b4235d732f651664039a258aa29701b",
     "lectures/iscarb/runtime/classroom-v3.css": "56417e16e20be0357885677f68be365aaf564795517e2ca3e22266c0325e6ccd",
     "lectures/iscarb/assets/v3/ch14-cyberplan-combined.jpg": "24569c89e9f240063fd99e3293bda2dbbb1c5d114dbd792bea68e0bd120eaeb2",
     "lectures/iscarb/assets/v3/genai-banner.jpg": "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02",
@@ -1762,7 +1762,7 @@
     "lectures/iscarb/Ch16-FBR-Student-Assignment.html": "a2cc551aaa19840f3b28e2ca4459495547526564c5de2b4a57ff1a98a80d0875",
     "lectures/iscarb/Ch17-FBR-Student-Assignment.html": "a8d4100da8bd53aaf9aca1ab246c675b5f9369e719bb700c2b98b1e9a9180128",
     "lectures/iscarb/Ch20-FBR-Student-Assignment.html": "c616a72caca882d2eeacb59e75027cc55a1993ff126a313eaa95398a58df8f13",
-    "lectures/iscarb/runtime/readable.css": "8beb25d7bf5155023a68088b866b02102965758cac1129e2f23fbf5a64a93c73",
+    "lectures/iscarb/runtime/readable.css": "14dd0a0cd6253c0a59600038758e5bd298acdd6ed4a1f4fe5ed2c9e5fca2180f",
     "lectures/iscarb/runtime/assignment-readable.css": "a7d7b760c04e8e66548e296f599dbecfe97cde8da28e51c3a84b25f20480a02e"
   },
   "mindmap_version": "20260922-story-v2",
