@@ -37,11 +37,16 @@ function buildReadable(s){
  else if(s.id==='MAP'){
   const cases=document.createElement('div');cases.className='map-connections';
   main.querySelectorAll('.map-step').forEach(step=>{const c=document.createElement('section');c.className='connection-card';const title=document.createElement('h3');title.textContent=step.querySelector('strong').textContent;c.append(title);step.querySelectorAll('.step-case,.step-lens').forEach(n=>c.append(n));cases.append(c);});
+  const storyContext=get('.map-question p');
+  if(storyContext)storyContext.remove();
   add('Concept map',[get('.map-question'),get('.concept-path'),get('.mind-link')]);
   add('Your chapter tasks',[get('.student-roadmap'),get('.map-bottom')]);
-  add('Story connections',[cases]);
+  add('Story connections',[storyContext,cases]);
  }else if(s.id==='START'){
-  add('The scenario',[get('.story-head'),get('.story-grid')]);
+  const situation=get('.story-grid section');
+  if(situation)situation.classList.add('story-situation');
+  add('The scenario',[get('.story-head'),situation]);
+  add('Your decision',[get('.story-grid')]);
   add('AI context & route',[get('.story-lens'),get('.story-route'),get('.story-note'),get('.story-action')]);
  }else if(s.id==='END'){
   const hero=get('.end-hero'),copy=get('.end-copy');

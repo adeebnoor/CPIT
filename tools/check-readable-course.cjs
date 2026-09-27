@@ -56,7 +56,7 @@ async function run(){
   await context.close();
  }
  for(const a of pub.assignments){
-  const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true});const page=await context.newPage();const reveals=[];page.on('request',r=>{if(r.url().includes('/reveal/'))reveals.push(r.url())});page.on('dialog',d=>d.accept());
+  const context=await browser.newContext({viewport:{width:320,height:740},acceptDownloads:true});const page=await context.newPage();const reveals=[];page.on('pageerror',e=>results.errors.push({assignment:a.chapter,kind:'javascript',error:e.message}));page.on('request',r=>{if(r.url().includes('/reveal/'))reveals.push(r.url())});page.on('dialog',d=>d.accept());
   try{
    await page.goto(base+'fbr-submission.html?chapter='+a.chapter);await page.locator('#sid').fill('QA-DESIGN-ONLY');await page.locator('#ack').check();await page.locator('#openBtn').click();await page.waitForURL('**/Ch'+a.chapter+'-FBR-Student-Assignment.html');assert.equal(reveals.length,0);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'assignment horizontal overflow');
