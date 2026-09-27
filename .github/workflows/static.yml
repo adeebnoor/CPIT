@@ -25,8 +25,6 @@ jobs:
         run: python tools/audit_classroom.py
       - name: Enforce iSCARB preprint fidelity contract
         run: python tools/check_paper_fidelity.py
-      - name: Enforce iSCARB preprint fidelity contract
-        run: python tools/check_paper_fidelity.py
       - name: Check publication catalog and script syntax
         run: node tools/check-fbr-release.mjs
       - name: Setup Pages
