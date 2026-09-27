@@ -26,16 +26,16 @@ function classroomRedraw(s){
  const items=(s.nodes?.length?s.nodes:(s.bullets||[]).map(p=>[p[0],p[1]||''])).filter(Boolean).slice(0,5);
  if(!items.length)return '';
  const cls='redraw-count-'+Math.min(items.length,5);
- return `<button class="figure-button classroom-redraw-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Open original source figure: ${esc(s.title)}">
-  <span class="classroom-redraw ${cls}" role="img" aria-label="Classroom redraw of ${esc(s.title)}">
+ return `<div class="figure-button classroom-redraw-wrap">
+  <div class="classroom-redraw ${cls}" role="img" aria-label="Classroom redraw of ${esc(s.title)}">
    <span class="redraw-kicker">CLASSROOM REDRAW · SOURCE-GROUNDED</span>
    <span class="redraw-title">${esc(s.title)}</span>
    <span class="redraw-flow">
     ${items.map((n,i)=>`<span class="redraw-node"><i>${i+1}</i><b>${esc(n[0])}</b>${n[1]?`<small>${esc(n[1])}</small>`:''}</span>`).join('')}
    </span>
-   <span class="redraw-open">Open original source figure ↗</span>
-  </span>
- </button><p class="caption">${esc(s.caption||'Classroom redraw for legibility · original source figure opens on selection')}</p>`;
+   <button class="redraw-open" type="button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Open original source figure: ${esc(s.title)}">Open original source figure ↗</button>
+  </div>
+ </div><p class="caption">${esc(s.caption||'Classroom redraw for legibility · original source figure preserved')}</p>`;
 }
 function visual(s){if(s.rows)return table(s);if(s.visual?.rows)return table(s.visual);if(s.approaches)return `<div class="two-approaches">${s.approaches.map(a=>`<section class="approach"><h3>${esc(a.label)}</h3><p>${esc(a.title||'')}</p><div class="arrow-chain">${(a.nodes||[]).map(n=>`<span>${esc(n)}</span>`).join('')}</div><p>${esc(a.text||'')}</p></section>`).join('')}</div>`;
 if(s.figure){if(/\.(?:png|jpe?g|webp)(?:$|[?#])/i.test(s.figure))return classroomRedraw(s);return `<button class="figure-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Enlarge figure: ${esc(s.title)}"><img src="${esc(s.figure)}" alt="${esc(s.caption||s.title)}" decoding="async"></button><p class="caption">${esc(s.caption||'Original source figure · select to enlarge')}</p>`;}
