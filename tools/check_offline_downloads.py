@@ -119,6 +119,9 @@ async def main():
             response = await page.goto(urljoin(BASE,'iscarb.html')+'?offline-test='+PUB['release'], wait_until='networkidle')
             assert response and response.status == 200
             for chapter in CHAPTERS:
+                resources = page.locator(f'#chapter-{chapter} details.chapter-resources')
+                if await resources.count() and not await resources.evaluate('(e)=>e.open'):
+                    await resources.locator('summary').click()
                 link = page.locator(f'#chapter-{chapter} a[download]').filter(has_text='Offline ZIP')
                 assert await link.count() == 1, f'CH{chapter}: expected one download link'
                 target = f'lectures/iscarb/packages/Ch{chapter}-iSCARB.zip'
