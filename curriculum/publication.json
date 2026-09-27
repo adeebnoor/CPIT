@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "20260926-genai-v12",
-  "status": "Nine reviewed iSCARB learning paths using a 20-slide single-canvas classroom layout with enlarged classroom text; source ledgers, assignments, and integrity gates preserved.",
+  "status": "Chapter 12 showcase visual prototype under review; all nine chapters retain the reviewed 20/5/3 iSCARB structure and source-ledger integrity.",
   "automatic_generation": false,
   "lectures": [
     {
@@ -261,7 +261,7 @@
       "chapter": 12,
       "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
       "source_filename": "Ch12-Safety-Engineering_ISCARB_COMPLETE.html",
-      "source_sha256": "6e9a721dc5bb4da5700a97c27440247e9f28dd93f4dfc50d8be883e05f5188ca",
+      "source_sha256": "df70ad1bd96a69a2dad9645a6110f2ddf0c1af7834ce90194b453a58e377c0cc",
       "original_html_sha256": "4670366197e435bbbcd9ecac76c878e4484f5f9d7b49d17f72420a25ce933326",
       "original_source_sha256": "678e38b4a06a1e84f9e391ae56573c9afae56ad074aa5292afb402dc0900e65b",
       "source_download": "lectures/iscarb/sources/Ch12-Original.pptx",
@@ -1766,7 +1766,7 @@
     "lectures/iscarb/packages/Ch14-iSCARB.zip": "94b3ccacc298eeb34ece123537c7ce872cc2d72c4faa718e4842f118d89e13e7",
     "lectures/iscarb/Ch10-Dependable-Systems.html": "35fb62f0db306642374a84256a8722094bab598beecc8c3b47cc308ae6f85be1",
     "lectures/iscarb/Ch11-Reliability-Engineering.html": "c39e826a08df74b5e2b6ff43b578f89eeb4aed5a83334d1da594c2d75f6d4e4f",
-    "lectures/iscarb/Ch12-Safety-Engineering.html": "6e9a721dc5bb4da5700a97c27440247e9f28dd93f4dfc50d8be883e05f5188ca",
+    "lectures/iscarb/Ch12-Safety-Engineering.html": "df70ad1bd96a69a2dad9645a6110f2ddf0c1af7834ce90194b453a58e377c0cc",
     "lectures/iscarb/Ch13-Security-Engineering.html": "b65fe64a0e64caca0dd6730ddb8fbf7c3a37781e6cc307ce745b1ef22b4ae6f5",
     "lectures/iscarb/Ch14-Resilience-Engineering.html": "5925a4420aed71108dc2fbd28254d88a925cca5f797fc005501dcba83f2e65fb",
     "lectures/iscarb/Ch15-Software-Reuse.html": "b26c58d08457a2c98176dd471ebc48069aa520a07ecdd86b6b9e31539c86f2de",
