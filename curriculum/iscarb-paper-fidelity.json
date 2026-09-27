@@ -1,0 +1,356 @@
+{
+  "schema": "iscarb-paper-fidelity-v1",
+  "preprint": {
+    "doi": "10.5281/zenodo.22964248",
+    "record": "https://zenodo.org/records/22964248",
+    "published": "2026-09-25"
+  },
+  "reference": {
+    "release": "20260926-genai-v12",
+    "commit": "21646c190df65c2b4639182d4fe08f31af4a774f"
+  },
+  "claims": {
+    "observable_target": "defensible engineering judgment",
+    "reasoning_grammar": [
+      "FIT",
+      "BOUND",
+      "ACT",
+      "EVIDENCE",
+      "COMMIT",
+      "STRESS",
+      "REFIT"
+    ],
+    "ai_role": "transfer/practice layer; not a separate formal learning outcome",
+    "slides_per_chapter": 20,
+    "objectives_per_chapter": 5,
+    "stations_per_chapter": 3,
+    "rules_per_chapter": 20,
+    "assessed_assignment_edition": "mastery-v2"
+  },
+  "lectures": {
+    "10": {
+      "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
+      "lecture_data_sha256": "21b2cde4921127ea8de816b7edbd4fdf1e769d48f4cb399f51b03266034c02ec",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "X07",
+        "X02A",
+        "X03",
+        "CHECK1",
+        "R08",
+        "X04",
+        "X05",
+        "R18",
+        "CHECK2",
+        "X06",
+        "X06A",
+        "X06B",
+        "APPLY",
+        "CHALLENGE",
+        "END"
+      ]
+    },
+    "11": {
+      "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
+      "lecture_data_sha256": "79c541e0ffb4b123cbb6080e4c0be0a9154769eb1a200d8b69cbd8822cb1645e",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "FAULT",
+        "MANAGE",
+        "RELAV",
+        "METRICS",
+        "AVAIL",
+        "REQ",
+        "PROTECT",
+        "SELFCHECK",
+        "VOTE",
+        "DIVERSITY",
+        "CODE1",
+        "MEASURE",
+        "PROFILE",
+        "LIMITS",
+        "AISYS",
+        "REVISE",
+        "END"
+      ]
+    },
+    "12": {
+      "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
+      "lecture_data_sha256": "168510fdc3e89a010229f5a246b00a7214010cc737d08d699e4a72796cf3f8bb",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "X02A",
+        "X03",
+        "CHECK1",
+        "X04",
+        "X05",
+        "X06",
+        "X09",
+        "CHECK2",
+        "R18",
+        "D12",
+        "B01",
+        "X10",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    },
+    "13": {
+      "path": "lectures/iscarb/Ch13-Security-Engineering.html",
+      "lecture_data_sha256": "4d4f4f7271408c9e36ff6d1cfebb41953a691ecb51159d834809966dac03199f",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "X02A",
+        "X03",
+        "CHECK1",
+        "X04",
+        "X05",
+        "X06",
+        "R11",
+        "CHECK2",
+        "R09",
+        "B01",
+        "X09",
+        "R18",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    },
+    "14": {
+      "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
+      "lecture_data_sha256": "2d89eb37fe77b99909089314595cca75001f71a1b7f3cfc1b49eef8398f882cf",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "X02A",
+        "X03",
+        "CHECK1",
+        "X04",
+        "X05",
+        "D14",
+        "EMERGENCY",
+        "X06",
+        "CHECK2",
+        "R18",
+        "B01",
+        "R09",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    },
+    "15": {
+      "path": "lectures/iscarb/Ch15-Software-Reuse.html",
+      "lecture_data_sha256": "16bd2658278d560f322c0ab8369a6e2f8e663c69a4d461ee831b5929bcd5acaf",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "X02A",
+        "D15",
+        "CHECK1",
+        "X03",
+        "IOC",
+        "X04",
+        "X05",
+        "CONFIG",
+        "X06",
+        "CHECK2",
+        "R18",
+        "R09",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    },
+    "16": {
+      "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
+      "lecture_data_sha256": "192561fdf093e9025a31acfbe0bb22c7ccb3656ffe9cab33f3a8b6ec1a2a32e9",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02A",
+        "X03",
+        "X04",
+        "MIDDLEWARE",
+        "CHECK1",
+        "X05",
+        "X06",
+        "VALIDATE",
+        "B01",
+        "CHECK2",
+        "R09",
+        "D16",
+        "D16B",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    },
+    "17": {
+      "path": "lectures/iscarb/Ch17-Distributed-SE.html",
+      "lecture_data_sha256": "6dd1689b541d4b46a150610185df54e1196eab9110eff57d14ce99e8638c36c1",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "SCALE",
+        "X02A",
+        "X03",
+        "CHECK1",
+        "X04",
+        "X05",
+        "X06",
+        "CHECK2",
+        "B01",
+        "X07",
+        "X09",
+        "X10",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    },
+    "20": {
+      "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
+      "lecture_data_sha256": "38cd88c219e864be6e6c0621abcaa04cde706cb0b346d1f0c56e9b14eb0fc442",
+      "core_keys": [
+        "TITLE",
+        "MAP",
+        "START",
+        "X01",
+        "X02",
+        "X02A",
+        "X03",
+        "CHECK1",
+        "X04",
+        "X05",
+        "DEPLOY",
+        "X06",
+        "CHECK2",
+        "X09",
+        "X08",
+        "CONTAINER",
+        "TRADING",
+        "AISYS",
+        "APPLY",
+        "END"
+      ]
+    }
+  },
+  "assignments": {
+    "10": {
+      "path": "lectures/iscarb/Ch10-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r10-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch10-mastery-v2",
+      "assignment_sha256_lf": "a3c50fba7163c6e61fcb651f345cd08a85a113dab5146cb2a269f56e5f03e220",
+      "stress_sha256_lf": "3e20f2b704ab21213a5b3e736a3e6bcf4491a219c210ff5c941820153102a7d2"
+    },
+    "11": {
+      "path": "lectures/iscarb/Ch11-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r11-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch11-mastery-v2",
+      "assignment_sha256_lf": "e51be6090c2429fcb2b3f6f30b33585413fb16fce980d60447461d5a4047169c",
+      "stress_sha256_lf": "846c5f3ea4eb257c75fbcacdb6340290c996dc595f272806aaf9fbdeb8a05d46"
+    },
+    "12": {
+      "path": "lectures/iscarb/Ch12-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch12-mastery-v2",
+      "assignment_sha256_lf": "6710cdfbf0c7329e0f62059f728d68c6ad27ce39b6ea5369bca5d0a60925bbbf",
+      "stress_sha256_lf": "6094a673a0c7f39608528852aed72f6156d927d5e31c251adb32e4f505841ceb"
+    },
+    "13": {
+      "path": "lectures/iscarb/Ch13-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch13-mastery-v2",
+      "assignment_sha256_lf": "3f8116a6eaaebac62a217828eec2cc023e9054c81f8b7b5fde49f6f978b5b7e3",
+      "stress_sha256_lf": "f7d8ea5652309e82f4a01e9d9f994810923116ef0a6500f1a479c35cf158172c"
+    },
+    "14": {
+      "path": "lectures/iscarb/Ch14-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch14-mastery-v2",
+      "assignment_sha256_lf": "09dcb9018904475e82c87e0dc05d2e38eb4d51df628bcfee86106e934a74606b",
+      "stress_sha256_lf": "78c0eecb94823d781e1bff949b6b31b41a8b9b7f0aade7589467d5386e876c8e"
+    },
+    "15": {
+      "path": "lectures/iscarb/Ch15-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch15-mastery-v2",
+      "assignment_sha256_lf": "03f40e84444be153d1da48b975d4480650d324ec6bb444913c4e91ac8d36a489",
+      "stress_sha256_lf": "dca807ca4f7c15cfc44217ffbe4af39cd9261a621291cca049c4dbb37574b9cb"
+    },
+    "16": {
+      "path": "lectures/iscarb/Ch16-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch16-mastery-v2",
+      "assignment_sha256_lf": "a2cc551aaa19840f3b28e2ca4459495547526564c5de2b4a57ff1a98a80d0875",
+      "stress_sha256_lf": "d916dba4b516fe195ae8d9f2e3406064c6296eaa88be4bee314dfc9127e1223b"
+    },
+    "17": {
+      "path": "lectures/iscarb/Ch17-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch17-mastery-v2",
+      "assignment_sha256_lf": "a8d4100da8bd53aaf9aca1ab246c675b5f9369e719bb700c2b98b1e9a9180128",
+      "stress_sha256_lf": "d2e755e00344b1b17d73e008a4ad64e149d06525f5f782b6c7c2978669a7b1ce"
+    },
+    "20": {
+      "path": "lectures/iscarb/Ch20-FBR-Student-Assignment.html",
+      "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
+      "edition": "mastery-v2",
+      "version": "2026-09-ch20-mastery-v2",
+      "assignment_sha256_lf": "c616a72caca882d2eeacb59e75027cc55a1993ff126a313eaa95398a58df8f13",
+      "stress_sha256_lf": "6914b4ccc31a05392a0e9c5803f11fbfe34b9068657dfb42b0776758484d1559"
+    }
+  },
+  "official_guidance": [
+    "iscarb.html",
+    "student-guide.html",
+    "course-resources.html",
+    "instructor-guide.html",
+    "fbr-submission.html"
+  ],
+  "forbidden_official_phrases": [
+    "AI-only assignment",
+    "AI-only assignments",
+    "AI-FIRST · iSCARB"
+  ],
+  "forbidden_public_patterns": [
+    "previous-mastery-v2/",
+    "-ai-v3.json"
+  ]
+}
