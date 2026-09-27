@@ -71,7 +71,9 @@ async def run_case(browser,url,ch,offline,out,kind):
  await page.locator('#station-back').click();await blur(page)
  fig=await page.evaluate('iscarb.data.slides.findIndex(s=>!!s.figure)')
  if fig>=0:
-  await page.evaluate('i=>iscarb.go(i)',fig);await page.locator('.figure-button').click()
+  await page.evaluate('i=>iscarb.go(i)',fig)
+  opener=page.locator('.redraw-open') if await page.locator('.redraw-open').count() else page.locator('.figure-button')
+  await opener.click()
   await check('Figure opens zoom without advancing',await idx(page)==fig and not await page.locator('#modal').is_hidden())
   await page.keyboard.press('Escape');await blur(page)
  for i in range(20):
