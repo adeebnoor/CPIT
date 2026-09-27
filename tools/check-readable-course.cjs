@@ -1,0 +1,79 @@
+/* End-to-end regression on an isolated origin and synthetic local drafts only. */
+const {chromium}=require('playwright');
+const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');
+const base=process.env.COURSE_BASE_URL||'http://127.0.0.1:8765/';
+const pub=JSON.parse(fs.readFileSync('curriculum/publication.json','utf8'));
+const out='test-results/readable';fs.mkdirSync(out,{recursive:true});
+const results={base,slides:0,sections:0,assignments:[],errors:[],overflow:[],checks:[]};
+async function run(){
+ const browser=await chromium.launch();
+ for(const viewport of [{width:1440,height:900},{width:1366,height:768},{width:1024,height:768},{width:390,height:844},{width:320,height:740}]){
+  const context=await browser.newContext({viewport,acceptDownloads:true});const page=await context.newPage();
+  page.on('pageerror',e=>results.errors.push({kind:'javascript',error:e.message}));
+  await page.goto(base+'iscarb.html');
+  assert.equal(await page.locator('.lesson').count(),9);
+  await page.locator('#chapterSearch').fill('reliability');assert.equal(await page.locator('.lesson:visible').count(),1);
+  await page.locator('#chapterSearch').fill('no-match-qa');assert.equal(await page.locator('.lesson:visible').count(),0);assert.match(await page.locator('#chapterSearchStatus').innerText(),/No matching/);
+  await page.locator('#chapterSearch').fill('');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+  if(viewport.width===390){await page.locator('#navToggle').click();assert(await page.locator('#courseNav').isVisible());await page.locator('#navToggle').click();}
+  if(viewport.width===1440||viewport.width===390)await page.screenshot({path:out+'/hub-'+viewport.width+'.png',fullPage:viewport.width===390});
+  for(const chapter of pub.lectures){
+   try{
+    await page.goto(base+chapter.path+'#TITLE');await page.waitForFunction(()=>!!window.iscarb);
+    const data=await page.evaluate(()=>iscarb.data);assert.equal(data.slides.length,20);assert.equal(data.rules.length,20);assert.equal(data.objectives.length,5);
+    for(let i=0;i<20;i++){
+     await page.evaluate(i=>iscarb.go(i),i);await page.locator('#chapter-main img').evaluateAll(imgs=>Promise.all(imgs.map(im=>im.decode().catch(()=>{}))));
+     const count=await page.locator('[data-slide-section]').count();
+     for(let j=0;j<Math.max(count,1);j++){
+      if(count)await page.locator('[data-slide-section]').nth(j).click();
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'horizontal overflow');
+      assert(await page.locator('#chapter-main img').evaluateAll(a=>a.every(im=>im.complete&&im.naturalWidth>0)),'broken image');
+      if(viewport.width>1000){
+       const problem=await page.evaluate(()=>{const root=document.querySelector('.lecture-section:not([hidden])');const edge=document.querySelector('.footerbar').getBoundingClientRect().top;return [...root.querySelectorAll('p,li,td,th,img')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.bottom>edge-2}).map(e=>e.textContent.slice(0,60));});
+       if(problem.length){results.overflow.push({chapter:chapter.chapter,slide:data.slides[i].id,section:j,viewport,problem});if(results.overflow.length<15)await page.screenshot({path:out+`/overflow-${chapter.chapter}-${i}-${j}-${viewport.width}.png`});}
+      }
+      results.sections++;
+     }
+     results.slides++;
+    }
+    if(viewport.width===1440){
+     await page.evaluate(()=>iscarb.jump('MAP'));await page.screenshot({path:out+`/ch${chapter.chapter}-map.png`});
+     await page.evaluate(()=>iscarb.go(4));await page.screenshot({path:out+`/ch${chapter.chapter}-concept.png`});
+     // Next/previous walks sections; reading view exposes all authored sections.
+     const first=await page.locator('.lecture-section:not([hidden])').getAttribute('aria-label');await page.locator('#nextBtn').click();assert.notEqual(await page.locator('.lecture-section:not([hidden])').getAttribute('aria-label'),first);
+     await page.locator('#viewBtn').click();assert.equal(await page.locator('.lecture-section[hidden]').count(),0);await page.locator('#viewBtn').click();
+     await page.evaluate(()=>iscarb.open('RULES'));assert.equal(await page.locator('[data-rule]').count(),20);await page.locator('#modal-close').click();
+     for(const st of data.stations){await page.evaluate(no=>iscarb.startStation(no),st.no);await page.locator('#hintBtn').click();assert.match(await page.locator('#coach').innerText(),/Authored hint/);await page.locator('[data-field]').first().fill('QA-only reasoning and a proposed evidence check.');await page.locator('#timer-start').click();await page.waitForTimeout(1100);assert.notEqual(await page.locator('#timer-output').innerText(),'03:00');await page.locator('#timer-start').click();await page.locator('#station-back').click();}
+     await page.evaluate(()=>iscarb.open('CARD'));await page.locator('[data-field="claim"]').fill('QA-only persistent claim.');await page.reload();await page.evaluate(()=>iscarb.open('CARD'));assert.equal(await page.locator('[data-field="claim"]').inputValue(),'QA-only persistent claim.');
+     const dl=page.waitForEvent('download');await page.locator('[data-export="json"]').click();const download=await dl;await download.saveAs(out+`/qa-card-${chapter.chapter}.json`);
+     await page.locator('#modal-close').click();
+     await page.evaluate(()=>iscarb.open('QUIZ'));for(let q=0;q<5;q++){await page.locator(`[data-quiz="${q}"]`).first().click();await page.locator(`input[name="quiz"][value="${data.quiz[q].answer}"]`).check();await page.locator('#quiz-check').click();assert.match(await page.locator('#quiz-feedback').innerText(),/Correct for/);}await page.locator('#modal-close').click();
+    }
+    console.log('PASS lecture',chapter.chapter,viewport.width);
+   }catch(e){results.errors.push({chapter:chapter.chapter,viewport,error:e.message});await page.screenshot({path:out+`/FAIL-${chapter.chapter}-${viewport.width}.png`,fullPage:true});}
+  }
+  await context.close();
+ }
+ for(const a of pub.assignments){
+  const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true});const page=await context.newPage();const reveals=[];page.on('request',r=>{if(r.url().includes('/reveal/'))reveals.push(r.url())});page.on('dialog',d=>d.accept());
+  try{
+   await page.goto(base+'fbr-submission.html?chapter='+a.chapter);await page.locator('#sid').fill('QA-DESIGN-ONLY');await page.locator('#ack').check();await page.locator('#openBtn').click();await page.waitForURL('**/Ch'+a.chapter+'-FBR-Student-Assignment.html');assert.equal(reveals.length,0);
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'assignment horizontal overflow');
+   for(const k of ['fit','measure','bound','act','evidence','technical'])if(await page.locator('#'+k).count())await page.locator('#'+k).fill('QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.');
+   await page.locator('#sourceUse').fill('Slide '+a.reading_pages[0]+': the source concept constrains the model assumptions and defines a bounded control that must be independently checked.');
+   await page.locator('#section').fill('QA');await page.locator('#save').click();await page.reload();assert.match(await page.locator('#fit').inputValue(),/QA:/);
+   await page.locator('#lock').click();await page.locator('#refitwhy').waitFor();assert.equal(reveals.length,1);assert(await page.locator('#fit').evaluate(e=>e.readOnly));
+   await page.locator('input[name="boundaryState"]').first().check();await page.locator('input[name="refit"]').first().check();
+   await page.locator('#refitwhy').fill('QA: the changed evidence breaks the shared-dependency assumption, so revise the boundary and require an independent check.');
+   await page.locator('#revised').fill('QA: keep the model advisory-only; a human owner checks independently. Verify version and workload, record missing tests and reopen the decision when assumptions change.');
+   await page.locator('#aiUse').fill('No AI used.');await page.locator('#signer').fill('QA test');await page.locator('#attested').check();
+   await page.reload();assert(await page.locator('#fit').evaluate(e=>e.readOnly));assert.equal(reveals.length,1);
+   await page.locator('#json').waitFor();assert(await page.locator('#json').isEnabled(),await page.locator('#done').innerText());
+   const dl=page.waitForEvent('download');await page.locator('#json').click();const d=await dl;const file=out+`/qa-assignment-${a.chapter}.json`;await d.saveAs(file);const record=JSON.parse(fs.readFileSync(file));assert.equal(record.chapter,a.chapter);assert.equal(record.max_score,a.points);assert(record.commit.id);assert(record.humanReview.attested);
+   await page.screenshot({path:out+`/assignment-${a.chapter}-mobile.png`});results.assignments.push({chapter:a.chapter,entry:true,save_reload:true,delayed_reveal:true,locked_reload:true,json_export:true});console.log('PASS assignment',a.chapter);
+  }catch(e){results.errors.push({assignment:a.chapter,error:e.message});await page.screenshot({path:out+`/FAIL-assignment-${a.chapter}.png`,fullPage:true});}finally{await context.close();}
+ }
+ await browser.close();fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2));console.log(JSON.stringify({slides:results.slides,sections:results.sections,assignments:results.assignments.length,errors:results.errors,overflow:results.overflow},null,2));if(results.errors.length||results.overflow.length)process.exitCode=1;
+}
+run().catch(e=>{console.error(e);fs.writeFileSync(out+'/fatal.txt',String(e.stack));process.exitCode=1});

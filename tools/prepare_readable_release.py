@@ -1,0 +1,32 @@
+"""Refresh the nine downloadable course packages from the reviewed source files.
+
+Runs before validation/staging, so offline downloads and online runtime are identical.
+Never regenerates authored lecture or assessment content.
+"""
+from pathlib import Path
+import hashlib, io, json, zipfile
+ROOT=Path(__file__).resolve().parents[1]
+def main():
+    p=ROOT/'curriculum/publication.json';spec=json.loads(p.read_text())
+    shared=['lectures/iscarb/runtime/classroom-v3.css','lectures/iscarb/runtime/classroom-v3.js','lectures/iscarb/runtime/readable.css','lectures/iscarb/runtime/assignment-readable.css']
+    for lecture in spec['lectures']:
+        name=lecture['offline_package'];path=ROOT/name
+        replace=shared+[lecture['path'],next(a['path'] for a in spec['assignments'] if a['chapter']==lecture['chapter'])]
+        additions={n:(ROOT/n).read_bytes() for n in replace}
+        buf=io.BytesIO()
+        with zipfile.ZipFile(path) as old,zipfile.ZipFile(buf,'w',zipfile.ZIP_DEFLATED) as out:
+            seen=set()
+            for item in old.infolist():
+                if item.filename in seen:continue
+                seen.add(item.filename)
+                out.writestr(item,additions.get(item.filename,old.read(item.filename)))
+            for n,b in additions.items():
+                if n not in seen:out.writestr(n,b)
+        with zipfile.ZipFile(io.BytesIO(buf.getvalue())) as check:
+            assert check.testzip() is None
+            for n,b in additions.items():assert check.read(n)==b
+        path.write_bytes(buf.getvalue())
+        spec['delivery_asset_sha256'][name]=hashlib.sha256(path.read_bytes()).hexdigest()
+    p.write_text(json.dumps(spec,ensure_ascii=False,indent=2)+'\n')
+    print('PASS: all 9 offline packages contain current lecture, assignment and readable runtime.')
+if __name__=='__main__':main()

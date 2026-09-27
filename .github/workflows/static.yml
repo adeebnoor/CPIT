@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Refresh matching offline packages
+        run: python tools/prepare_readable_release.py
       - name: Check approved lecture, preserved figures and withdrawn content
         run: python tools/audit_classroom.py
       - name: Check publication catalog and script syntax

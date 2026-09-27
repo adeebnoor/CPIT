@@ -1,0 +1,37 @@
+name: Verify readable course design
+on:
+  push:
+    branches: [main, codex/iscarb-readable-20260927]
+    paths: ['iscarb.html', 'course-design.css', 'lectures/iscarb/**', 'tools/check-readable-course.cjs', 'tools/prepare_readable_release.py', '.github/workflows/readable-course.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refresh offline downloads
+        run: python tools/prepare_readable_release.py
+      - name: Validate publication integrity
+        run: python tools/audit_classroom.py
+      - name: Install browser test tools
+        run: |
+          npm install --prefix /tmp/course-qa playwright@1.55.0
+          /tmp/course-qa/node_modules/.bin/playwright install --with-deps chromium
+      - name: Check all slides, sections, mobile layouts and assignments
+        env:
+          NODE_PATH: /tmp/course-qa/node_modules
+        run: |
+          python -m http.server 8765 > /tmp/course-http.log 2>&1 &
+          node tools/check-readable-course.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: readable-course-evidence
+          path: test-results/readable/
+          retention-days: 14
