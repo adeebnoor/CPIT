@@ -104,6 +104,9 @@ async def main(a):
    browser=await p.chromium.launch(**options)
    downloader=await browser.new_page();await downloader.goto(urljoin(base,'iscarb.html'),wait_until='load')
    for ch in CHAPTERS:
+    resources=downloader.locator(f'#chapter-{ch} details.chapter-resources')
+    if await resources.count() and not await resources.evaluate('(e)=>e.open'):
+     await resources.locator('summary').click()
     link=downloader.locator(f'#chapter-{ch} a[download]')
     assert await link.count()==1
     href=await link.get_attribute('href');assert href.split('?')[0]==f'lectures/iscarb/packages/Ch{ch}-iSCARB.zip',href
