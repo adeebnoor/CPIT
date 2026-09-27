@@ -1,4 +1,5 @@
 name: Refresh iSCARB offline packages
+# visual-sync-v2
 on:
   workflow_dispatch:
   push:
