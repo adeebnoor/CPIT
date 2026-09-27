@@ -32,3 +32,5 @@ This audit supports **implementation fidelity and curricular coverage** only. It
 ## Visual-readability implementation note
 
 As of the final 27 Sep 2026 classroom build, low-resolution raster source figures are not enlarged as bitmaps in the main classroom canvas. The slide preview uses a source-grounded classroom redraw derived from the already-authored slide concepts; selecting it opens the unchanged original figure. Original SVG figures continue to render directly. This is a presentation-layer change only and does not modify the pinned scientific lecture-data or assessment contract.
+
+Final offline-package refresh after the redraw/mobile fixes: `0e6d24750e0123576c676636d9adad96c261a75b`.
