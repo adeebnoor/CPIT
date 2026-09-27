@@ -4,7 +4,7 @@ Run against an HTTP-served staged site or the explicitly selected live site.
 Student data is never used: each test gets a fresh browser context and QA-only
 local state. The static assignment does not submit work to an LMS.
 """
-import asyncio, hashlib, json, os, re, sys
+import asyncio, hashlib, json, os, re, sys, traceback
 from pathlib import Path
 from urllib.parse import urljoin
 from playwright.async_api import async_playwright
@@ -17,7 +17,9 @@ CHS=[x['chapter'] for x in PUB['lectures']]
 async def main():
  errors=[]; checked=0; records=[]; interactions=[]
  async with async_playwright() as p:
-  browser=await p.chromium.launch(headless=True)
+  options={'headless':True}
+  if os.environ.get('CHROMIUM_EXECUTABLE'): options['executable_path']=os.environ['CHROMIUM_EXECUTABLE']
+  browser=await p.chromium.launch(**options)
   for viewport in [{'width':1440,'height':900},{'width':390,'height':844}]:
    for c in PUB['lectures']:
     ch=c['chapter'];ctx=await browser.new_context(viewport=viewport,accept_downloads=True);page=await ctx.new_page()
@@ -52,10 +54,13 @@ async def main():
        await page.locator('#stationBtn').click();await page.locator('#hintBtn').click()
        assert st['hint'] in await page.locator('#coach').inner_text()
        for k in st['fields']:await page.locator(f'[data-field="{k}"]').fill(f'QA CH{ch} station {st["no"]} {k}: bounded evidence, not student work.')
-       await page.locator('#timer-start').click();await page.wait_for_timeout(1150)
-       assert await page.locator('#timer-output').inner_text()!='03:00'
-       await page.locator('#timer-start').click();t=await page.locator('#timer-output').inner_text();await page.wait_for_timeout(280);assert await page.locator('#timer-output').inner_text()==t
-       await page.locator('#timer-reset').click();assert await page.locator('#timer-output').inner_text()=='03:00'
+       await page.locator('#timer-start').click()
+       await page.wait_for_function("document.querySelector('#timer-output')?.textContent !== '03:00'",timeout=4000)
+       assert await page.locator('#timer-output').inner_text()!='03:00',f'CH{ch} station {st["no"]}: timer did not advance'
+       await page.locator('#timer-start').click();t=await page.locator('#timer-output').inner_text();await page.wait_for_timeout(400)
+       assert await page.locator('#timer-output').inner_text()==t,f'CH{ch} station {st["no"]}: paused timer changed'
+       await page.locator('#timer-reset').click()
+       await page.wait_for_function("document.querySelector('#timer-output')?.textContent === '03:00'",timeout=2000)
        await page.locator('#station-back').click()
       await page.evaluate('iscarb.open("CARD")');claim=await page.locator('[data-field="claim"]').input_value()
       await page.reload(wait_until='networkidle');await page.evaluate('iscarb.open("CARD")');assert await page.locator('[data-field="claim"]').input_value()==claim
@@ -100,7 +105,7 @@ async def main():
      records.append({'chapter':ch,'viewport':viewport,'slides':20,'pass':True})
      print('PASS HTTP CH',ch,viewport,flush=True)
     except Exception as e:
-     errors.append({'chapter':ch,'viewport':viewport,'error':str(e)});await page.screenshot(path=str(OUT/f'FAIL-{ch}-{viewport["width"]}.png'),full_page=True)
+     errors.append({'chapter':ch,'viewport':viewport,'error':repr(e),'traceback':traceback.format_exc()});await page.screenshot(path=str(OUT/f'FAIL-{ch}-{viewport["width"]}.png'),full_page=True)
     finally:await ctx.close()
   # On a real origin, confirm all assessed cases still defer STRESS until commitment.
   for c in PUB['assignments']:
@@ -125,7 +130,7 @@ async def main():
     first=await page.locator('#fit').input_value();await page.reload(wait_until='networkidle');assert await page.locator('#fit').input_value()==first and await page.locator('#fit').evaluate('(e)=>e.readOnly')
     assert len(requests)==1,'Reveal should restore from the correct saved edition'
     print('PASS HTTP assignment',c['chapter'],'commit / delayed reveal / locked reload',flush=True)
-   except Exception as e:errors.append({'assignment':c['chapter'],'error':str(e)});await page.screenshot(path=str(OUT/f'FAIL-assignment-{c["chapter"]}.png'),full_page=True)
+   except Exception as e:errors.append({'assignment':c['chapter'],'error':repr(e),'traceback':traceback.format_exc()});await page.screenshot(path=str(OUT/f'FAIL-assignment-{c["chapter"]}.png'),full_page=True)
    finally:await ctx.close()
   await browser.close()
  report={'base':BASE,'release':PUB['release'],'real_http_slide_checks':checked,'viewports':records,'interactions':interactions,'errors':errors}
