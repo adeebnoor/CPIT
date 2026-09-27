@@ -25,7 +25,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify reviewed sources locally
-        run: python tools/audit_classroom.py
+        run: |
+          python tools/audit_classroom.py
+          python tools/check_paper_fidelity.py
       - name: Wait for the exact reviewed lecture bytes on Pages
         run: |
           mkdir -p test-results
