@@ -114,13 +114,13 @@ async def main(a):
     d=await pending.value;package=out/f'Ch{ch}-iSCARB.zip';await d.save_as(package)
     assert d.suggested_filename.endswith('.zip')
     if (root/'curriculum/publication.json').is_file():
-     pub=json.loads((root/'curriculum/publication.json').read_text());assert hashlib.sha256(package.read_bytes()).hexdigest()==pub['delivery_asset_sha256'][href.split('?')[0]],'Live package differs from reviewed bytes'
+     pub=json.loads((root/'curriculum/publication.json').read_text(encoding='utf-8'));assert hashlib.sha256(package.read_bytes()).hexdigest()==pub['delivery_asset_sha256'][href.split('?')[0]],'Live package differs from reviewed bytes'
     extracted=out/f'extracted-{ch}'
     with zipfile.ZipFile(package) as z:
      assert z.testzip() is None
      for name in z.namelist():assert (extracted/name).resolve().is_relative_to(extracted.resolve())
      z.extractall(extracted)
-    lecture=[x for x in (extracted/'lectures/iscarb').glob(f'Ch{ch}-*.html') if 'data-navigation' in x.read_text()];assert len(lecture)==1
+    lecture=[x for x in (extracted/'lectures/iscarb').glob(f'Ch{ch}-*.html') if 'data-navigation' in x.read_text(encoding='utf-8')];assert len(lecture)==1
     path=lecture[0].relative_to(extracted).as_posix()
     report['cases'].append(await run_case(browser,urljoin(base,path),ch,False,out,'online'))
     report['cases'].append(await run_case(browser,lecture[0].as_uri(),ch,True,out,'offline'))
