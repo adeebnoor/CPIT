@@ -226,7 +226,7 @@ function renderClosing(){
  $('#chapter-main').classList.add('end-page');
  $('#chapter-main').insertAdjacentHTML('beforeend',`
  <div class="end-hero"><div class="end-copy">
-  <p class="ey">CHAPTER ${D.chapter} · READINESS</p><h2>${esc(D.title)}</h2>
+  <p class="ey">CHAPTER ${D.chapter} · COMPLETE · READINESS</p><h2>${esc(D.title)}</h2>
   <p class="end-success">Ready means you can <b>explain, verify and own</b> the decision—not merely repeat the content.</p>
   <div class="readiness-strip" aria-label="Readiness checks"><section><b>Explain</b><span>Use the mechanism without outsourcing the core judgment to AI.</span></section><section><b>Verify</b><span>Use inspectable evidence; label unknowns and any AI assistance.</span></section><section><b>Own</b><span>Revise under changed evidence and name the responsible human role.</span></section></div>
   <div class="end-required"><section><span>1</span><div><b>Required review</b><p>${D.readings.map(x=>esc(x.title)+' · '+esc(x.range)).join(' | ')}</p></div></section><section><span>2</span><div><b>Five-objective check</b><p>Correct misunderstandings before the assessed case.</p></div></section><section><span>3</span><div><b>Assignment ${D.assignment}</b><p>${esc(r.deliverable)} Submit through Blackboard.</p></div></section></div>
