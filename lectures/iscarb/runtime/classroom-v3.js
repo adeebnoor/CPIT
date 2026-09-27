@@ -25,6 +25,40 @@ function table(v){return `<table class="table-main"><thead><tr>${(v.heads||['CON
 function visual(s){if(s.rows)return table(s);if(s.visual?.rows)return table(s.visual);if(s.approaches)return `<div class="two-approaches">${s.approaches.map(a=>`<section class="approach"><h3>${esc(a.label)}</h3><p>${esc(a.title||'')}</p><div class="arrow-chain">${(a.nodes||[]).map(n=>`<span>${esc(n)}</span>`).join('')}</div><p>${esc(a.text||'')}</p></section>`).join('')}</div>`;
 if(s.figure)return `<button class="figure-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Enlarge figure: ${esc(s.title)}"><img src="${esc(s.figure)}" alt="${esc(s.caption||s.title)}" decoding="async"></button><p class="caption">${esc(s.caption||'Original source figure · select to enlarge')}</p>`;
 let ns=s.nodes?.length?s.nodes:(s.bullets||[]).slice(0,3).map(p=>[p[0],'']);return `<div class="concepts ${s.flow?'flow':''}">${ns.map(n=>`<div class="concept"><b>${esc(n[0])}</b>${n[1]?`<span>${esc(n[1])}</span>`:''}</div>`).join('')}</div>`;}
+
+/* Classroom figure legibility.
+   The original source asset remains the button target and source-ledger record.
+   For the in-slide preview only, raster figures with large near-uniform margins
+   are cropped to their informative pixel region and gently resampled. */
+function enhanceFigure(img){
+ if(!img||img.dataset.figureEnhanced||/\.svg(?:$|[?#])/i.test(img.getAttribute('src')||''))return;
+ img.dataset.figureEnhanced='1';
+ const nw=img.naturalWidth,nh=img.naturalHeight;if(!nw||!nh)return;
+ try{
+  const maxSample=640,ratio=Math.min(1,maxSample/Math.max(nw,nh)),w=Math.max(1,Math.round(nw*ratio)),h=Math.max(1,Math.round(nh*ratio));
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data;
+  const corners=[[0,0],[w-1,0],[0,h-1],[w-1,h-1]],bg=[0,0,0];
+  corners.forEach(([cx,cy])=>{const k=(cy*w+cx)*4;bg[0]+=d[k];bg[1]+=d[k+1];bg[2]+=d[k+2];});bg[0]/=4;bg[1]/=4;bg[2]/=4;
+  const bgGray=(bg[0]+bg[1]+bg[2])/3,rows=new Uint32Array(h),cols=new Uint32Array(w);
+  for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){const k=(y*w+xx)*4,r=d[k],g=d[k+1],b=d[k+2],gray=(r+g+b)/3,dr=r-bg[0],dg=g-bg[1],db=b-bg[2],dist=Math.sqrt(dr*dr+dg*dg+db*db);
+   if(dist>34||gray<bgGray-22){rows[y]++;cols[xx]++;}}
+  const rowMin=Math.max(2,Math.floor(w*.009)),colMin=Math.max(2,Math.floor(h*.009));
+  let y0=0,y1=h-1,x0=0,x1=w-1;while(y0<h&&rows[y0]<rowMin)y0++;while(y1>=0&&rows[y1]<rowMin)y1--;while(x0<w&&cols[x0]<colMin)x0++;while(x1>=0&&cols[x1]<colMin)x1--;
+  if(x0>=x1||y0>=y1)return;
+  const pad=Math.round(Math.max(w,h)*.035);x0=Math.max(0,x0-pad);y0=Math.max(0,y0-pad);x1=Math.min(w-1,x1+pad);y1=Math.min(h-1,y1+pad);
+  const occW=(x1-x0+1)/w,occH=(y1-y0+1)/h,area=occW*occH;
+  img.dataset.figureOccupancy=area.toFixed(3);
+  if(occW>.93&&occH>.93)return;
+  const sx=x0/ratio,sy=y0/ratio,sw=(x1-x0+1)/ratio,sh=(y1-y0+1)/ratio;
+  const scale=Math.min(4,Math.max(1,Math.min(1200/sw,760/sh))),ow=Math.max(1,Math.round(sw*scale)),oh=Math.max(1,Math.round(sh*scale));
+  const out=document.createElement('canvas');out.width=ow;out.height=oh;const o=out.getContext('2d');o.imageSmoothingEnabled=true;o.imageSmoothingQuality='high';o.drawImage(img,sx,sy,sw,sh,0,0,ow,oh);
+  img.src=out.toDataURL('image/png');img.classList.add('figure-enhanced');img.closest('.figure-button')?.classList.add('figure-button-enhanced');
+ }catch(e){img.dataset.figureEnhanceError='1';}
+}
+function enhanceFigures(){
+ qa('.figure-button img').forEach(img=>{if(img.complete&&img.naturalWidth)enhanceFigure(img);else img.addEventListener('load',()=>enhanceFigure(img),{once:true});});
+}
 // Readable presentation sections preserve all authored content and the 20-slide sequence.
 let sectionIndex=0,sectionNodes=[];
 function readingLayout(){return document.body.classList.contains('reading')||matchMedia('(max-width:1000px), (max-height:620px)').matches;}
@@ -108,7 +142,7 @@ else if(s.id==='MAP'){renderMindMap();}
 else if(s.id==='START'){renderStory();}
 else if(s.id==='END'){renderClosing();}
 else{$('#chapter-main').insertAdjacentHTML('beforeend',`${s.banner?bannerBlock(s):storyThread(s)}<p class="takeaway">${esc(s.takeaway||s.title)}${s.aiTag?AI_TAG:''}</p><div class="body-grid"><div class="visual">${visual(s)}</div><div class="meaning"><h2>WHAT IT MEANS</h2>${points(s.bullets)}</div></div>${lensStrip(s)}<div class="question"><p class="question-text"><b>BACK TO THE STORY</b>${esc(s.question||'Explain the concept using the teaching case.')}</p><div class="actions"><div class="buttons"><button data-full="${esc(s.id)}">Full explanation</button><button data-answer="${esc(s.id)}">Model answer</button>${stop?`<button class="primary" id="stationBtn">Station ${stop.no} · build the card</button>`:''}</div><span class="source-line">${esc(ref(s))} · ${sourceLink(s)}</span></div></div>`);}
-updateNav();buildReadable(s);}
+updateNav();buildReadable(s);requestAnimationFrame(enhanceFigures);}
 function updateNav(){$('#prevBtn').disabled=index===0;$('#nextBtn').disabled=index===D.slides.length-1;$('#progress').innerHTML=`${new Set(state.seen).size} / ${D.slides.length} visited · not mastery<span class="nav-shortcuts">Enter → · Backspace ←</span>`;$('#live').textContent=`Slide ${index+1} of ${D.slides.length}: ${D.slides[index].title}`;updateMapLocation();save();}
 function go(n,history=true){if(!Number.isInteger(n)||n<0||n>=D.slides.length)return;pauseTimer();stationMode=false;index=n;if(!state.seen.includes(D.slides[index].id))state.seen.push(D.slides[index].id);render();if(history)try{window.history.replaceState(null,'','#'+D.slides[index].id);}catch(e){}if(matchMedia('(max-width:1000px)').matches)window.scrollTo(0,0);}
 function jump(k){const aliases=D.aliases||{};k=aliases[k]||k;let n=D.slides.findIndex(s=>s.id===k);closeModal();if(n>=0)go(n);else open(k);}
