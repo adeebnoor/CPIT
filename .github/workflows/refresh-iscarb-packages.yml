@@ -1,0 +1,37 @@
+name: Refresh iSCARB offline packages
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'lectures/iscarb/runtime/classroom-v3.js'
+      - 'lectures/iscarb/runtime/readable.css'
+      - 'lectures/iscarb/runtime/assignment-readable.css'
+      - '.github/workflows/refresh-iscarb-packages.yml'
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild packages from reviewed source
+        run: |
+          python tools/prepare_readable_release.py
+          python tools/check_paper_fidelity.py
+          python tools/audit_classroom.py
+      - name: Commit generated package bytes and manifest hashes
+        run: |
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          git add curriculum/publication.json lectures/iscarb/packages/*.zip
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+          else
+            git commit -m 'Refresh iSCARB offline packages after runtime visual improvement'
+            git push origin HEAD:main
+          fi
