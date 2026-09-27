@@ -1,6 +1,6 @@
 /* Course hub: clear hierarchy, readable type, existing learning and assessment flows. */
-:root{--bg:#f1f5f8;--panel:#fff;--ink:#172c3b;--muted:#506475;--line:#cbd7de;--accent:#006b62;--accent-ink:#fff;--blue:#165e99;--purple:#6b4794;color-scheme:light}
-:root[data-theme=dark]{--bg:#0b1520;--panel:#142332;--ink:#f1f7fa;--muted:#b9cbd7;--line:#3b5263;--accent:#8ce2cf;--accent-ink:#102c28;--blue:#9bcff9;--purple:#d1b4f1;color-scheme:dark}
+:root,:root[data-theme=light]{--gold:#79551e;--bg:#f1f5f8;--panel:#fff;--ink:#172c3b;--muted:#506475;--line:#cbd7de;--accent:#006b62;--accent-ink:#fff;--blue:#165e99;--purple:#6b4794;color-scheme:light}
+:root[data-theme=dark]{--gold:#edc690;--bg:#0b1520;--panel:#142332;--ink:#f1f7fa;--muted:#b9cbd7;--line:#3b5263;--accent:#8ce2cf;--accent-ink:#102c28;--blue:#9bcff9;--purple:#d1b4f1;color-scheme:dark}
 .course-home{font:1.0625rem/1.65 system-ui,-apple-system,'Segoe UI',sans-serif}
 .course-home .wrap{width:min(1400px,100% - 64px)}
 .course-home header{background:var(--panel)}
