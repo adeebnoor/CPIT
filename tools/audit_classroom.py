@@ -8,7 +8,7 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "curriculum/publication.json"
 CURRENT_PAGES = ["iscarb.html", "student-guide.html", "course-resources.html", "instructor-guide.html",
-                 "download.html", "fbr-submission.html", "index.html", "404.html"]
+                 "nelc-alignment.html", "download.html", "fbr-submission.html", "index.html", "404.html"]
 WITHDRAWN_ROUTE = re.compile(
     r"Ch10-Dependable-Systems-(?:Faculty(?:-Rich)?|Final100)\.html",
     re.I,
