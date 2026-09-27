@@ -18,5 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate without regenerating instructor content
         run: python tools/build_classroom.py
+      - name: Enforce iSCARB preprint fidelity contract
+        run: python tools/check_paper_fidelity.py
       - name: Verify validation never modifies the approved lecture
         run: git diff --exit-code -- lectures/iscarb
