@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "20260926-genai-v12",
-  "status": "Paper-fidelity release: Showcase v3 presentation is applied to the nine 20-slide lectures while the 20260926-genai-v12 scientific lecture data, five objectives, readings, self-checks, and Mastery v2 assessed assignments remain the authoritative course contract. AI remains a transfer/practice layer, not a separate assessed learning outcome.",
+  "status": "Paper-fidelity release: Showcase v3 changes presentation only. The nine lectures retain the 20260926-genai-v12 scientific data and AI transfer/practice layer; the formal five objectives, readings, self-checks and Mastery v2 assessed assignments remain the authoritative assessment contract.",
   "automatic_generation": false,
   "lectures": [
     {
@@ -1767,8 +1767,7 @@
   },
   "mindmap_version": "20260922-story-v2",
   "story_version": "20260922-story-v2",
-  "student_submission_version": "20260925-ai-only-v3",
-  "assignment_release": "20260925-ai-only-v3",
+  "student_submission_version": "20260922-student-submit-v1",
   "assessment_research_basis": {
     "title": "From Answer Production to Defensible Engineering Judgment in AI-Containing Systems: The iSCARB Framework and a Nine-Chapter Software Engineering Implementation",
     "url": "https://zenodo.org/records/22964248"
