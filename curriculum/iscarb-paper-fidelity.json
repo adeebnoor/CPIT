@@ -353,5 +353,20 @@
   "forbidden_public_patterns": [
     "previous-mastery-v2/",
     "-ai-v3.json"
+  ],
+  "hub_assignment_labels": {
+    "10": "Assignment 1: Bound a claim",
+    "11": "Assignment 2: Measure",
+    "12": "Assignment 3: Trace a hazard",
+    "13": "Assignment 4: Test a misuse case",
+    "14": "Assignment 5: Plan recovery",
+    "15": "Assignment 6: Compare options",
+    "16": "Assignment 7: Specify a contract",
+    "17": "Assignment 8: Handle a remote failure",
+    "20": "Assignment 9: Integrate across owners"
+  },
+  "forbidden_public_root_files": [
+    "ai-assignment-example.html",
+    "ai-assignment-example.json"
   ]
 }
