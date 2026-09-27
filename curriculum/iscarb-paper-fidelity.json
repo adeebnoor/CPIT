@@ -368,5 +368,11 @@
   "forbidden_public_root_files": [
     "ai-assignment-example.html",
     "ai-assignment-example.json"
+  ],
+  "forbidden_hub_phrases": [
+    "Make your AI decision",
+    "new AI case",
+    "grading JSON",
+    "Apply to an AI-containing system"
   ]
 }
