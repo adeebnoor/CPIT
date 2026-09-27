@@ -34,6 +34,7 @@ function enhanceFigure(img){
  if(!img||img.dataset.figureEnhanced||/\.svg(?:$|[?#])/i.test(img.getAttribute('src')||''))return;
  img.dataset.figureEnhanced='1';
  const nw=img.naturalWidth,nh=img.naturalHeight;if(!nw||!nh)return;
+ const btn=img.closest('.figure-button');if(nw/nh>3.6)btn?.classList.add('figure-wide-strip');
  try{
   const maxSample=640,ratio=Math.min(1,maxSample/Math.max(nw,nh)),w=Math.max(1,Math.round(nw*ratio)),h=Math.max(1,Math.round(nh*ratio));
   const cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h);
@@ -43,8 +44,9 @@ function enhanceFigure(img){
   const bgGray=(bg[0]+bg[1]+bg[2])/3,rows=new Uint32Array(h),cols=new Uint32Array(w);
   for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){const k=(y*w+xx)*4,r=d[k],g=d[k+1],b=d[k+2],gray=(r+g+b)/3,dr=r-bg[0],dg=g-bg[1],db=b-bg[2],dist=Math.sqrt(dr*dr+dg*dg+db*db);
    if(dist>34||gray<bgGray-22){rows[y]++;cols[xx]++;}}
-  const rowMin=Math.max(2,Math.floor(w*.009)),colMin=Math.max(2,Math.floor(h*.009));
-  let y0=0,y1=h-1,x0=0,x1=w-1;while(y0<h&&rows[y0]<rowMin)y0++;while(y1>=0&&rows[y1]<rowMin)y1--;while(x0<w&&cols[x0]<colMin)x0++;while(x1>=0&&cols[x1]<colMin)x1--;
+  const total=rows.reduce((a,b)=>a+b,0);if(!total)return;
+  function massBounds(counts,q=.006){let sum=0,lo=0,hi=counts.length-1,loTarget=total*q,hiTarget=total*(1-q);for(let i=0;i<counts.length;i++){sum+=counts[i];if(sum>=loTarget){lo=i;break;}}sum=0;for(let i=0;i<counts.length;i++){sum+=counts[i];if(sum>=hiTarget){hi=i;break;}}return [lo,hi];}
+  let [y0,y1]=massBounds(rows),[x0,x1]=massBounds(cols);
   if(x0>=x1||y0>=y1)return;
   const pad=Math.round(Math.max(w,h)*.035);x0=Math.max(0,x0-pad);y0=Math.max(0,y0-pad);x1=Math.min(w-1,x1+pad);y1=Math.min(h-1,y1+pad);
   const occW=(x1-x0+1)/w,occH=(y1-y0+1)/h,area=occW*occH;
