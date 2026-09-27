@@ -44,7 +44,7 @@ async def main():
       if viewport['width']==1440 and s.get('figure'):
        raster=not str(s.get('figure')).lower().endswith('.svg')
        if raster:
-        redraw=page.locator('.classroom-redraw-button')
+        redraw=page.locator('.classroom-redraw-wrap')
         assert await redraw.count()==1,f'CH{ch} {s["id"]}: raster figure must use one classroom redraw'
         nodes=redraw.locator('.redraw-node');node_count=await nodes.count()
         assert 1<=node_count<=5,f'CH{ch} {s["id"]}: invalid redraw node count {node_count}'
@@ -52,7 +52,8 @@ async def main():
         sizes=await nodes.evaluate_all("(a)=>a.map(e=>parseFloat(getComputedStyle(e.querySelector('b')).fontSize))")
         assert sizes and min(sizes)>=13,f'CH{ch} {s["id"]}: redraw labels too small {sizes}'
         figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'redraw','nodes':node_count,'width':round(box['width']),'height':round(box['height'])})
-        await redraw.click()
+        open_original=redraw.locator('.redraw-open');assert await open_original.count()==1,f'CH{ch} {s["id"]}: original-source control missing'
+        await open_original.click()
         zoom=page.locator('#modal-body img.zoom-figure')
         assert await zoom.count()==1 and await zoom.is_visible(),f'CH{ch} {s["id"]}: original source figure did not open'
         src=await zoom.get_attribute('src');assert src and str(s.get('figure')).split('?')[0] in src,f'CH{ch} {s["id"]}: modal did not preserve original source figure'
