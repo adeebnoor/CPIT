@@ -113,7 +113,10 @@ async def main():
     report = {'base':BASE,'scope':'Download links and offline classroom/source review; assessed assignments and Blackboard require internet.', 'chapters':[]}
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch()
+            options = {'headless': True}
+            if os.environ.get('CHROMIUM_EXECUTABLE'):
+                options['executable_path'] = os.environ['CHROMIUM_EXECUTABLE']
+            browser = await p.chromium.launch(**options)
             online = await browser.new_context(accept_downloads=True)
             page = await online.new_page()
             response = await page.goto(urljoin(BASE,'iscarb.html')+'?offline-test='+PUB['release'], wait_until='networkidle')
