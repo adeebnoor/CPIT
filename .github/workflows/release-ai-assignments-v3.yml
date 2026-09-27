@@ -28,6 +28,10 @@ jobs:
           python-version: '3.12'
       - name: Install release dependency
         run: python -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Sync latest main before generation
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
       - name: Build and finalize AI-only assignments
         run: |
           python tools/build_ai_only_assignments.py
@@ -51,7 +55,5 @@ jobs:
             echo "No generated changes."
           else
             git commit -m 'Release AI-only iSCARB assignments v3'
-            git fetch origin main
-            git rebase origin/main
             git push origin HEAD:main
           fi
