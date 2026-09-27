@@ -128,6 +128,7 @@ jobs:
       - name: Verify final release is the intended one
         run: |
           python tools/audit_classroom.py
+          python tools/check_paper_fidelity.py
           python - <<'PY'
           import json,pathlib,hashlib,urllib.request,time
           pub=json.loads(pathlib.Path('curriculum/publication.json').read_text())
