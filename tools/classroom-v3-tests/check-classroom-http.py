@@ -4,12 +4,13 @@ Run against an HTTP-served staged site or the explicitly selected live site.
 Student data is never used: each test gets a fresh browser context and QA-only
 local state. The static assignment does not submit work to an LMS.
 """
-import asyncio, json, os, re, sys
+import asyncio, hashlib, json, os, re, sys
 from pathlib import Path
 from urllib.parse import urljoin
 from playwright.async_api import async_playwright
 ROOT=Path(__file__).resolve().parents[2]
 PUB=json.loads((ROOT/'curriculum/publication.json').read_text())
+FIDELITY=json.loads((ROOT/'curriculum/iscarb-paper-fidelity.json').read_text())
 BASE=os.environ.get('COURSE_BASE_URL','http://127.0.0.1:8765/').rstrip('/')+'/'
 OUT=Path(os.environ.get('COURSE_TEST_OUTPUT','test-results/classroom-v3'));OUT.mkdir(parents=True,exist_ok=True)
 CHS=[x['chapter'] for x in PUB['lectures']]
@@ -27,7 +28,11 @@ async def main():
     try:
      response=await page.goto(urljoin(BASE,c['path'])+'#START',wait_until='networkidle');assert response.status==200
      await page.wait_for_function('!!window.iscarb');D=await page.evaluate('iscarb.data')
-     assert D.get('version',D.get('release'))==PUB['release'] and len(D['slides'])==20,(ch,D.get('release'),D.get('version'),PUB['release'])
+     scientific=dict(D)
+     for k in ('version','release','presentationMode'): scientific.pop(k,None)
+     digest=hashlib.sha256(json.dumps(scientific,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')).hexdigest()
+     expected=FIDELITY['lectures'][str(ch)]['lecture_data_sha256']
+     assert digest==expected and len(D['slides'])==20,(ch,'scientific-data-drift',digest,expected,D.get('version'))
      assert 'This earlier unit' not in await page.locator('#modal-body').inner_text(),'Existing hub entry must resolve'
      await page.evaluate('iscarb.closeModal()')
      assert not await page.evaluate("performance.getEntriesByType('resource').some(x=>/\\.(pdf|pptx)([?#]|$)/i.test(x.name))"),'Sources must be on demand'
