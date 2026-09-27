@@ -7,7 +7,8 @@
   },
   "reference": {
     "release": "20260926-genai-v12",
-    "commit": "21646c190df65c2b4639182d4fe08f31af4a774f"
+    "commit": "21646c190df65c2b4639182d4fe08f31af4a774f",
+    "student_submission_version": "20260922-student-submit-v1"
   },
   "claims": {
     "observable_target": "defensible engineering judgment",
