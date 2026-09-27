@@ -18,7 +18,10 @@ jobs:
       - name: Refresh offline downloads
         run: python tools/prepare_readable_release.py
       - name: Validate publication integrity
-        run: python tools/audit_classroom.py
+        run: |
+          python tools/audit_classroom.py
+          node tools/check-fbr-release.mjs
+          python tools/build_public_site.py
       - name: Install browser test tools
         run: |
           npm install --prefix /tmp/course-qa playwright@1.55.0
@@ -27,7 +30,7 @@ jobs:
         env:
           NODE_PATH: /tmp/course-qa/node_modules
         run: |
-          python -m http.server 8765 > /tmp/course-http.log 2>&1 &
+          python -m http.server 8765 --directory _site > /tmp/course-http.log 2>&1 &
           node tools/check-readable-course.cjs
       - uses: actions/upload-artifact@v4
         if: always()

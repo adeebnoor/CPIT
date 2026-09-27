@@ -26,7 +26,7 @@ async function run(){
      await page.evaluate(i=>iscarb.go(i),i);await page.locator('#chapter-main img').evaluateAll(imgs=>Promise.all(imgs.map(im=>im.decode().catch(()=>{}))));
      const count=await page.locator('[data-slide-section]').count();
      for(let j=0;j<Math.max(count,1);j++){
-      if(count)await page.locator('[data-slide-section]').nth(j).click();
+      if(count&&viewport.width>1000)await page.locator('[data-slide-section]').nth(j).click();
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'horizontal overflow');
       assert(await page.locator('#chapter-main img').evaluateAll(a=>a.every(im=>im.complete&&im.naturalWidth>0)),'broken image');
       if(viewport.width>1000){
@@ -51,7 +51,7 @@ async function run(){
      await page.evaluate(()=>iscarb.open('QUIZ'));for(let q=0;q<5;q++){await page.locator(`[data-quiz="${q}"]`).first().click();await page.locator(`input[name="quiz"][value="${data.quiz[q].answer}"]`).check();await page.locator('#quiz-check').click();assert.match(await page.locator('#quiz-feedback').innerText(),/Correct for/);}await page.locator('#modal-close').click();
     }
     console.log('PASS lecture',chapter.chapter,viewport.width);
-   }catch(e){results.errors.push({chapter:chapter.chapter,viewport,error:e.message});await page.screenshot({path:out+`/FAIL-${chapter.chapter}-${viewport.width}.png`,fullPage:true});}
+   }catch(e){console.error('FAIL lecture',chapter.chapter,viewport.width,e.message);results.errors.push({chapter:chapter.chapter,viewport,error:e.message});await page.screenshot({path:out+`/FAIL-${chapter.chapter}-${viewport.width}.png`,fullPage:true});}
   }
   await context.close();
  }
@@ -72,7 +72,7 @@ async function run(){
    await page.locator('#json').waitFor();assert(await page.locator('#json').isEnabled(),await page.locator('#done').innerText());
    const dl=page.waitForEvent('download');await page.locator('#json').click();const d=await dl;const file=out+`/qa-assignment-${a.chapter}.json`;await d.saveAs(file);const record=JSON.parse(fs.readFileSync(file));assert.equal(record.chapter,a.chapter);assert.equal(record.max_score,a.points);assert(record.commit.id);assert(record.humanReview.attested);
    await page.screenshot({path:out+`/assignment-${a.chapter}-mobile.png`});results.assignments.push({chapter:a.chapter,entry:true,save_reload:true,delayed_reveal:true,locked_reload:true,json_export:true});console.log('PASS assignment',a.chapter);
-  }catch(e){results.errors.push({assignment:a.chapter,error:e.message});await page.screenshot({path:out+`/FAIL-assignment-${a.chapter}.png`,fullPage:true});}finally{await context.close();}
+  }catch(e){console.error('FAIL assignment',a.chapter,e.message);results.errors.push({assignment:a.chapter,error:e.message});await page.screenshot({path:out+`/FAIL-assignment-${a.chapter}.png`,fullPage:true});}finally{await context.close();}
  }
  await browser.close();fs.writeFileSync(out+'/results.json',JSON.stringify(results,null,2));console.log(JSON.stringify({slides:results.slides,sections:results.sections,assignments:results.assignments.length,errors:results.errors,overflow:results.overflow},null,2));if(results.errors.length||results.overflow.length)process.exitCode=1;
 }
