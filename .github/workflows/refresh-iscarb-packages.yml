@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'lectures/iscarb/runtime/classroom-v3.js'
+      - 'lectures/iscarb/Ch*-*.html'
       - 'lectures/iscarb/runtime/readable.css'
       - 'lectures/iscarb/runtime/assignment-readable.css'
       - '.github/workflows/refresh-iscarb-packages.yml'
