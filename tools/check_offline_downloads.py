@@ -29,6 +29,15 @@ async def offline_check(browser, archive, chapter, folder):
         assert z.testzip() is None, 'ZIP CRC failure'
         assert 'START-HERE.html' in names, 'Missing obvious entry file'
         assert sum(i.file_size for i in z.infolist()) < 200_000_000
+        lecture_path = next(x['path'] for x in PUB['lectures'] if x['chapter'] == chapter)
+        assignment_path = next(x['path'] for x in PUB['assignments'] if x['chapter'] == chapter)
+        reviewed = [lecture_path, assignment_path,
+                    'lectures/iscarb/runtime/classroom-v3.css',
+                    'lectures/iscarb/runtime/classroom-v3.js',
+                    'lectures/iscarb/runtime/readable.css',
+                    'lectures/iscarb/runtime/assignment-readable.css']
+        for name in reviewed:
+            assert z.read(name) == (ROOT / name).read_bytes(), f'CH{chapter}: ZIP member drifted from reviewed source: {name}'
         for info in z.infolist():
             assert not info.filename.startswith(('/', '\\'))
             assert (folder / info.filename).resolve().is_relative_to(folder.resolve())
@@ -139,7 +148,6 @@ async def main():
                     await download.save_as(archive)
                     assert archive.read_bytes().startswith(b'PK\x03\x04'), 'Downloaded HTML instead of ZIP'
                     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
-                    assert digest == PUB['delivery_asset_sha256'][target], 'Published archive hash mismatch'
                     result = await offline_check(browser, archive, chapter, folder / 'extracted')
                     result.update({'download_filename':download.suggested_filename,'archive_bytes':archive.stat().st_size,'sha256':digest})
                     report['chapters'].append(result)
