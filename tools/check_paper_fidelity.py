@@ -107,6 +107,9 @@ def main() -> int:
     for ch, label in CONTRACT.get("hub_assignment_labels", {}).items():
         if label not in hub:
             errors.append(f"Course hub assignment label drifted for Chapter {ch}: {label}")
+    for phrase in CONTRACT.get("forbidden_hub_phrases", []):
+        if phrase.lower() in hub.lower():
+            errors.append(f"Course hub still contains post-preprint workflow language: {phrase}")
     builder = (ROOT / "tools/build_public_site.py").read_text(encoding="utf-8")
     for name in CONTRACT.get("forbidden_public_root_files", []):
         if repr(name) in builder or f'"{name}"' in builder:
