@@ -41,29 +41,27 @@ async def main():
      for i,s in enumerate(D['slides']):
       await page.evaluate('(i)=>iscarb.go(i)',i)
       await page.locator('#chapter-main img').evaluate_all('(imgs)=>Promise.all(imgs.map(im=>im.decode().catch(()=>{})))')
-      if viewport['width']==1440 and s.get('figure') and not str(s.get('figure')).lower().endswith('.svg'):
-       try:
-        await page.wait_for_function("""()=>{const i=document.querySelector('.figure-button img');return !i||i.dataset.figureEnhanced||i.dataset.figureOccupancy||i.dataset.figureEnhanceError;}""",timeout=3000)
-       except Exception:
-        pass
-       fig=await page.evaluate('''()=>{
-        const img=document.querySelector('.figure-button img'),btn=img?.closest('.figure-button');if(!img||!btn)return null;
-        const nw=img.naturalWidth,nh=img.naturalHeight,ir=img.getBoundingClientRect(),br=btn.getBoundingClientRect();
-        const max=600,sc=Math.min(1,max/Math.max(nw,nh)),w=Math.max(1,Math.round(nw*sc)),h=Math.max(1,Math.round(nh*sc));
-        const cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d',{willReadFrequently:true});
-        try{x.drawImage(img,0,0,w,h);const d=x.getImageData(0,0,w,h).data,corners=[[0,0],[w-1,0],[0,h-1],[w-1,h-1]],bg=[0,0,0];
-         corners.forEach(([cx,cy])=>{const k=(cy*w+cx)*4;bg[0]+=d[k];bg[1]+=d[k+1];bg[2]+=d[k+2];});bg[0]/=4;bg[1]/=4;bg[2]/=4;
-         const bgGray=(bg[0]+bg[1]+bg[2])/3,rows=new Uint32Array(h),cols=new Uint32Array(w);
-         for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const k=(yy*w+xx)*4,r=d[k],g=d[k+1],b=d[k+2],gray=(r+g+b)/3,dr=r-bg[0],dg=g-bg[1],db=b-bg[2],dist=Math.sqrt(dr*dr+dg*dg+db*db);if(dist>34||gray<bgGray-22){rows[yy]++;cols[xx]++;}}
-         const rm=Math.max(2,Math.floor(w*.009)),cm=Math.max(2,Math.floor(h*.009));let y0=0,y1=h-1,x0=0,x1=w-1;while(y0<h&&rows[y0]<rm)y0++;while(y1>=0&&rows[y1]<rm)y1--;while(x0<w&&cols[x0]<cm)x0++;while(x1>=0&&cols[x1]<cm)x1--;
-         const cw=x0<x1?(x1-x0+1)/w:1,ch=y0<y1?(y1-y0+1)/h:1;
-         return {enhanced:img.classList.contains('figure-enhanced'),occupancy:+(img.dataset.figureOccupancy||1),contentW:cw,contentH:ch,displayW:ir.width,displayH:ir.height,panelW:br.width,panelH:br.height,effectiveW:ir.width*cw,effectiveH:ir.height*ch};
-        }catch(e){return {error:String(e),displayW:ir.width,displayH:ir.height,panelW:br.width,panelH:br.height};}
-       }''')
-       if fig and not fig.get('error'):
-        figure_checks.append({'chapter':ch,'slide':s['id'],**fig})
-        assert fig['contentW']>=.52 and fig['contentH']>=.38,f'Figure whitespace CH{ch} {s["id"]}: {fig}'
-        assert max(fig['effectiveW'],fig['effectiveH'])>=280 and min(fig['effectiveW'],fig['effectiveH'])>=85,f'Figure too small for classroom CH{ch} {s["id"]}: {fig}'
+      if viewport['width']==1440 and s.get('figure'):
+       raster=not str(s.get('figure')).lower().endswith('.svg')
+       if raster:
+        redraw=page.locator('.classroom-redraw-button')
+        assert await redraw.count()==1,f'CH{ch} {s["id"]}: raster figure must use one classroom redraw'
+        nodes=redraw.locator('.redraw-node');node_count=await nodes.count()
+        assert 1<=node_count<=5,f'CH{ch} {s["id"]}: invalid redraw node count {node_count}'
+        box=await redraw.bounding_box();assert box and box['width']>=260 and box['height']>=150,f'CH{ch} {s["id"]}: redraw too small {box}'
+        sizes=await nodes.evaluate_all("(a)=>a.map(e=>parseFloat(getComputedStyle(e.querySelector('b')).fontSize))")
+        assert sizes and min(sizes)>=13,f'CH{ch} {s["id"]}: redraw labels too small {sizes}'
+        figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'redraw','nodes':node_count,'width':round(box['width']),'height':round(box['height'])})
+        await redraw.click()
+        zoom=page.locator('#modal-body img.zoom-figure')
+        assert await zoom.count()==1 and await zoom.is_visible(),f'CH{ch} {s["id"]}: original source figure did not open'
+        src=await zoom.get_attribute('src');assert src and str(s.get('figure')).split('?')[0] in src,f'CH{ch} {s["id"]}: modal did not preserve original source figure'
+        await page.locator('#modal-close').click()
+       else:
+        img=page.locator('.figure-button img')
+        assert await img.count()==1,f'CH{ch} {s["id"]}: vector source figure missing'
+        box=await img.bounding_box();assert box and max(box['width'],box['height'])>=260,f'CH{ch} {s["id"]}: SVG source figure too small {box}'
+        figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'original-svg','width':round(box['width']),'height':round(box['height'])})
       bad=await page.evaluate('''()=>{const f=document.querySelector('.footerbar').getBoundingClientRect();return [...document.querySelectorAll('#chapter-main h1,#chapter-main p,#chapter-main li,#chapter-main td,#chapter-main th,#chapter-main img')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.left< -2||r.right>innerWidth+2||(innerWidth>1000&&r.bottom>f.top+2));}).map(e=>e.textContent.slice(0,90));}''')
       assert not bad,f'Layout CH{ch} {s["id"]} {viewport}: {bad}'
       assert await page.locator('#chapter-main img').evaluate_all('(a)=>a.every(i=>i.complete&&i.naturalWidth>0)')
