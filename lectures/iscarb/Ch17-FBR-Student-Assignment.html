@@ -26,7 +26,7 @@
 <p class="ey">AFTER-CLASS · CHAPTER 17 · AI-ONLY</p>
 <h1>AI Distributed Service: retry without duplicate effects</h1>
 <p class="sub">This assignment is only about an AI-containing system. Use the chapter mechanism to make a bounded engineering decision; polished AI text without inspectable reasoning earns no credit.</p>
-<div class="chips"><span class="chip">45–65 min total</span><span class="chip">5 points total</span><span class="chip">Deadline: course LMS</span><span class="chip">AI-containing system · individual judgment</span></div>
+<div class="chips"><span class="chip">Progression 8/9 · FAILURE</span><span class="chip">45–65 min total</span><span class="chip">5 points total</span><span class="chip">Deadline: course LMS</span><span class="chip">AI-containing system · individual judgment</span></div>
 <ol aria-label="Assignment sequence" class="flow"><li>AI warm-up</li><li>FIT → AI artifact → BOUND → ACT + EVIDENCE</li><li>Commit Part A</li><li>STRESS → REFIT</li><li>Download JSON → Blackboard</li><li>Export and submit in LMS</li></ol>
 <div aria-live="polite" class="status"><span class="st" id="storage">Checking storage…</span><span class="st" id="saved">Not yet saved</span></div>
 </header>
@@ -53,7 +53,7 @@
 <details id="qualityExample"><summary>See a complete example before you start</summary>
 <p><b>Different practice example · weak:</b> Retry the AI call if it times out.</p>
 <p><b>Stronger answer:</b> Assign one idempotency key before generation, persist the committed effect and chosen output durably, and return that stored result on retry. Test a lost response after commit and a service restart; verify exactly one external send. Calling the model again is a new request, not evidence about the first effect.</p>
-<p><b>Why stronger:</b> it names the mechanism, boundary, evidence and human responsibility. Do not copy it: your assessed scenario is different.</p></details></section>
+<p><b>Why stronger:</b> it names the mechanism, boundary, evidence and human responsibility. Do not copy it: your assessed scenario is different.</p><p class="hint"><a href="../../ai-assignment-example.html">Open the complete worked example and submission walkthrough →</a></p></details></section>
 <section class="card"><p class="ey">ONE SUBMISSION · BLACKBOARD</p><h2>Submit one Blackboard JSON</h2>
 <ol><li>Read the 5-point rubric and worked example before answering.</li>
 <li>Complete Part A, commit it, then finish STRESS → REFIT and human review.</li>
