@@ -54,9 +54,10 @@ async def main():
         figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'redraw','nodes':node_count,'width':round(box['width']),'height':round(box['height'])})
         open_original=redraw.locator('.redraw-open');assert await open_original.count()==1,f'CH{ch} {s["id"]}: original-source control missing'
         await open_original.click()
-        zoom=page.locator('#modal-body img.zoom-figure')
-        assert await zoom.count()==1 and await zoom.is_visible(),f'CH{ch} {s["id"]}: original source figure did not open'
-        src=await zoom.get_attribute('src');assert src and str(s.get('figure')).split('?')[0] in src,f'CH{ch} {s["id"]}: modal did not preserve original source figure'
+        modal=page.locator('#modal');body=page.locator('#modal-body')
+        assert not await modal.is_hidden(),f'CH{ch} {s["id"]}: original source modal did not open'
+        html=await body.inner_html()
+        assert str(s.get('figure')).split('?')[0] in html and 'Original figure retained' in html,f'CH{ch} {s["id"]}: modal did not preserve original source figure: {html[:240]}'
         await page.locator('#modal-close').click()
        else:
         img=page.locator('.figure-button img')
