@@ -58,7 +58,7 @@
     "storage_key": "fbr:cpit455:ch12:mastery:v2",
     "access_key": "fbr:access:ch12:path:v1",
     "points": 5,
-    "artifact": "Hazard → safety requirement → independent checker → verification",
+    "artifact": "Hazard → requirement → verification",
     "reading_pages": [
       25,
       26,
@@ -82,7 +82,7 @@
     "storage_key": "fbr:cpit455:ch13:mastery:v2",
     "access_key": "fbr:access:ch13:path:v1",
     "points": 5,
-    "artifact": "Threat → server-side control → negative test",
+    "artifact": "Threat → control → negative test",
     "reading_pages": [
       40,
       41,
@@ -104,7 +104,7 @@
     "storage_key": "fbr:cpit455:ch14:mastery:v2",
     "access_key": "fbr:access:ch14:path:v1",
     "points": 5,
-    "artifact": "Essential service → AI-independent degraded mode → recovery rehearsal",
+    "artifact": "Critical service → degraded mode → recovery check",
     "reading_pages": [
       18,
       19,
@@ -128,7 +128,7 @@
     "storage_key": "fbr:cpit455:ch15:mastery:v2",
     "access_key": "fbr:access:ch15:path:v1",
     "points": 5,
-    "artifact": "Reuse options → lifecycle/data constraints → evidence-based choice",
+    "artifact": "Options → constraints → justified choice",
     "reading_pages": [
       12,
       13,
@@ -152,7 +152,7 @@
     "storage_key": "fbr:cpit455:ch16:mastery:v2",
     "access_key": "fbr:access:ch16:path:v1",
     "points": 5,
-    "artifact": "AI interface → pre/postconditions → versioned quality evidence",
+    "artifact": "Interface → semantics → adapter and tests",
     "reading_pages": [
       40,
       41,
@@ -164,7 +164,7 @@
       54,
       55
     ],
-    "practical": false
+    "practical": true
   },
   {
     "chapter": 17,
@@ -175,7 +175,7 @@
     "storage_key": "fbr:cpit455:ch17:mastery:v2",
     "access_key": "fbr:access:ch17:path:v1",
     "points": 5,
-    "artifact": "Failure sequence → idempotency boundary → durable evidence",
+    "artifact": "Architecture → failure sequence → recovery evidence",
     "reading_pages": [
       29,
       30,
@@ -190,7 +190,7 @@
       57,
       58
     ],
-    "practical": false
+    "practical": true
   },
   {
     "chapter": 20,
@@ -201,7 +201,7 @@
     "storage_key": "fbr:cpit455:ch20:mastery:v2",
     "access_key": "fbr:access:ch20:path:v1",
     "points": 5,
-    "artifact": "Independent owners → AI feed contract → staged acceptance",
+    "artifact": "Governance → interfaces → staged acceptance",
     "reading_pages": [
       15,
       16,
