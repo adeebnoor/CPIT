@@ -27,3 +27,8 @@
 ## Research-use boundary
 
 This audit supports **implementation fidelity and curricular coverage** only. It does not show that students learned the concepts, that iSCARB is superior to another method, or that every detail in Sommerville is represented on the 20-slide route. Outcome claims remain subject to the planned end-of-term evaluation.
+
+
+## Visual-readability implementation note
+
+As of the final 27 Sep 2026 classroom build, low-resolution raster source figures are not enlarged as bitmaps in the main classroom canvas. The slide preview uses a source-grounded classroom redraw derived from the already-authored slide concepts; selecting it opens the unchanged original figure. Original SVG figures continue to render directly. This is a presentation-layer change only and does not modify the pinned scientific lecture-data or assessment contract.
