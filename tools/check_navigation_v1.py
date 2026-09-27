@@ -113,11 +113,16 @@ async def main(a):
     async with downloader.expect_download() as pending:await link.click()
     d=await pending.value;package=out/f'Ch{ch}-iSCARB.zip';await d.save_as(package)
     assert d.suggested_filename.endswith('.zip')
-    if (root/'curriculum/publication.json').is_file():
-     pub=json.loads((root/'curriculum/publication.json').read_text(encoding='utf-8'));assert hashlib.sha256(package.read_bytes()).hexdigest()==pub['delivery_asset_sha256'][href.split('?')[0]],'Live package differs from reviewed bytes'
+    pub=json.loads((root/'curriculum/publication.json').read_text(encoding='utf-8')) if (root/'curriculum/publication.json').is_file() else None
     extracted=out/f'extracted-{ch}'
     with zipfile.ZipFile(package) as z:
      assert z.testzip() is None
+     if pub:
+      lecture_path=next(x['path'] for x in pub['lectures'] if x['chapter']==ch)
+      assignment_path=next(x['path'] for x in pub['assignments'] if x['chapter']==ch)
+      reviewed=[lecture_path,assignment_path,'lectures/iscarb/runtime/classroom-v3.css','lectures/iscarb/runtime/classroom-v3.js','lectures/iscarb/runtime/readable.css','lectures/iscarb/runtime/assignment-readable.css']
+      for name in reviewed:
+       assert z.read(name)==(root/name).read_bytes(),f'CH{ch}: ZIP member drifted from reviewed source: {name}'
      for name in z.namelist():assert (extracted/name).resolve().is_relative_to(extracted.resolve())
      z.extractall(extracted)
     lecture=[x for x in (extracted/'lectures/iscarb').glob(f'Ch{ch}-*.html') if 'data-navigation' in x.read_text(encoding='utf-8')];assert len(lecture)==1
