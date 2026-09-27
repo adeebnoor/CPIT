@@ -104,6 +104,13 @@ def main() -> int:
         errors.append("Course hub must state that AI is a transfer/practice layer.")
     if "separate AI-only outcome" not in hub:
         errors.append("Course hub must state that the assessed assignment is not a separate AI-only outcome.")
+    for ch, label in CONTRACT.get("hub_assignment_labels", {}).items():
+        if label not in hub:
+            errors.append(f"Course hub assignment label drifted for Chapter {ch}: {label}")
+    builder = (ROOT / "tools/build_public_site.py").read_text(encoding="utf-8")
+    for name in CONTRACT.get("forbidden_public_root_files", []):
+        if repr(name) in builder or f'"{name}"' in builder:
+            errors.append(f"Post-preprint root file is still staged publicly: {name}")
 
     if errors:
         print("\n".join(errors), file=sys.stderr)
