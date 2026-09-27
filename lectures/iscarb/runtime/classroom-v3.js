@@ -22,8 +22,23 @@ function firstNumber(s){return Number(String(s||'').match(/\d+/)?.[0]||1);}
 function ref(s){return s.sourceLabel|| (s.sourceRange?`Sommerville Ch.${D.chapter} · source slides ${s.sourceRange}`:'Course-created teaching activity · fictional case');}
 function points(ps){return `<ul class="points">${(ps||[]).map(p=>`<li><strong>${esc(p[0])}.</strong> ${esc(p[1])}</li>`).join('')}</ul>`;}
 function table(v){return `<table class="table-main"><thead><tr>${(v.heads||['CONCEPT','MEANING']).map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${v.rows.map(r=>`<tr>${r.map((x,i)=>`<${i?'td':'th'}${i?'':' scope="row"'}>${esc(x)}</${i?'td':'th'}>`).join('')}</tr>`).join('')}</tbody></table>`;}
+function classroomRedraw(s){
+ const items=(s.nodes?.length?s.nodes:(s.bullets||[]).map(p=>[p[0],p[1]||''])).filter(Boolean).slice(0,5);
+ if(!items.length)return '';
+ const cls='redraw-count-'+Math.min(items.length,5);
+ return `<button class="figure-button classroom-redraw-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Open original source figure: ${esc(s.title)}">
+  <span class="classroom-redraw ${cls}" role="img" aria-label="Classroom redraw of ${esc(s.title)}">
+   <span class="redraw-kicker">CLASSROOM REDRAW · SOURCE-GROUNDED</span>
+   <span class="redraw-title">${esc(s.title)}</span>
+   <span class="redraw-flow">
+    ${items.map((n,i)=>`<span class="redraw-node"><i>${i+1}</i><b>${esc(n[0])}</b>${n[1]?`<small>${esc(n[1])}</small>`:''}</span>`).join('')}
+   </span>
+   <span class="redraw-open">Open original source figure ↗</span>
+  </span>
+ </button><p class="caption">${esc(s.caption||'Classroom redraw for legibility · original source figure opens on selection')}</p>`;
+}
 function visual(s){if(s.rows)return table(s);if(s.visual?.rows)return table(s.visual);if(s.approaches)return `<div class="two-approaches">${s.approaches.map(a=>`<section class="approach"><h3>${esc(a.label)}</h3><p>${esc(a.title||'')}</p><div class="arrow-chain">${(a.nodes||[]).map(n=>`<span>${esc(n)}</span>`).join('')}</div><p>${esc(a.text||'')}</p></section>`).join('')}</div>`;
-if(s.figure)return `<button class="figure-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Enlarge figure: ${esc(s.title)}"><img src="${esc(s.figure)}" alt="${esc(s.caption||s.title)}" decoding="async"></button><p class="caption">${esc(s.caption||'Original source figure · select to enlarge')}</p>`;
+if(s.figure){if(/\.(?:png|jpe?g|webp)(?:$|[?#])/i.test(s.figure))return classroomRedraw(s);return `<button class="figure-button" data-image="${esc(s.figure)}" data-caption="${esc(s.caption||s.title)}" aria-label="Enlarge figure: ${esc(s.title)}"><img src="${esc(s.figure)}" alt="${esc(s.caption||s.title)}" decoding="async"></button><p class="caption">${esc(s.caption||'Original source figure · select to enlarge')}</p>`;}
 let ns=s.nodes?.length?s.nodes:(s.bullets||[]).slice(0,3).map(p=>[p[0],'']);return `<div class="concepts ${s.flow?'flow':''}">${ns.map(n=>`<div class="concept"><b>${esc(n[0])}</b>${n[1]?`<span>${esc(n[1])}</span>`:''}</div>`).join('')}</div>`;}
 // Readable presentation sections preserve all authored content and the 20-slide sequence.
 let sectionIndex=0,sectionNodes=[];
