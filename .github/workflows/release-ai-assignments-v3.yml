@@ -1,0 +1,57 @@
+name: Release AI-only iSCARB assignments v3
+
+on:
+  push:
+    paths:
+      - 'curriculum/ai_assignment_v3.py'
+      - 'tools/build_ai_only_assignments.py'
+      - 'tools/finalize_ai_assignment_release.py'
+      - '.github/workflows/release-ai-assignments-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: iscarb-ai-assignment-release
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install release dependency
+        run: python -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Build and finalize AI-only assignments
+        run: |
+          python tools/build_ai_only_assignments.py
+          python tools/finalize_ai_assignment_release.py
+          python tools/check_ai_assignment_js.py
+      - name: Commit reviewed generated release
+        run: |
+          git config user.name 'Prof. Adeeb Noor'
+          git config user.email 'adeebnoor@users.noreply.github.com'
+          git add \
+            lectures/iscarb/Ch*-FBR-Student-Assignment.html \
+            lectures/iscarb/reveal/r*-ai-v3.json \
+            lectures/iscarb/previous-mastery-v2/ \
+            curriculum/ai-assignment-rubrics.json \
+            curriculum/learning-path/assignments.json \
+            curriculum/learning-path/gateway.json \
+            curriculum/publication.json \
+            fbr-submission.html \
+            iscarb.html student-guide.html course-resources.html instructor-guide.html
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+          else
+            git commit -m 'Release AI-only iSCARB assignments v3'
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
