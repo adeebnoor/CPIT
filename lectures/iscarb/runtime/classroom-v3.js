@@ -3,7 +3,8 @@
  * are deliberately different states. No responses are sent to a server.
  */
 (()=>{'use strict';
-const D=JSON.parse(document.getElementById('lecture-data').textContent),$=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
+const D=JSON.parse(document.getElementById('lecture-data').textContent),$=s=>document.querySelector(s),$=s=>Array.from(document.querySelectorAll(s));
+if(D.presentationMode==='single-canvas')document.body.classList.add('single-canvas');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key=`iscarb:classroom:ch${D.chapter}:v3`,validField=k=>/^[a-z][a-z0-9_]{0,59}$/.test(k)&&!['constructor','prototype','__proto__'].includes(k);
 let savedOK=true,state={fields:{},seen:[],quiz:{},ai:{},self:{},theme:'night'},index=0,stationMode=false,quizIndex=0,returnFocus=null;
@@ -31,6 +32,7 @@ function sectionNode(label,nodes){const e=document.createElement('section');e.cl
 function buildReadable(s){
  const main=$('#chapter-main');sectionIndex=0;sectionNodes=[];
  const heading=main.querySelector('.heading');if(!heading||stationMode)return;
+ if(D.presentationMode==='single-canvas'){main.classList.add('single-canvas-slide');return;}
  const get=sel=>main.querySelector(sel),groups=[];
  const add=(label,nodes)=>{const live=nodes.filter(Boolean);if(live.length)groups.push(sectionNode(label,live));};
  if(s.id==='TITLE'){add('Start here',[get('.hero'),get('.scope-note')]);}
