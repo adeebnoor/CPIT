@@ -10,6 +10,9 @@ on:
       - '.github/workflows/refresh-iscarb-packages.yml'
 permissions:
   contents: write
+concurrency:
+  group: iscarb-package-refresh
+  cancel-in-progress: true
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -48,5 +51,7 @@ jobs:
             echo "No generated changes."
           else
             git commit -m 'Refresh iSCARB offline packages after runtime visual improvement'
+            git fetch origin main
+            git rebase origin/main
             git push origin HEAD:main
           fi
