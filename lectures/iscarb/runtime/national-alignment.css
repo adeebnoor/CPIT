@@ -82,3 +82,13 @@ html[data-design="showcase-v1"] body.single-canvas .chapter-main.national-slide{
 .national-roles b{margin-left:0;margin-right:8px}
 .national-evidence span{font-size:clamp(1.1rem,1.7vw,1.5rem)}
 @media(max-width:480px){.national-brand h2{font-size:1.35rem}.national-principles b{font-size:1rem}.national-cycle{grid-template-columns:repeat(2,1fr)}.national-slide .heading h1{font-size:1.55rem!important}}
+
+/* Classroom palettes must remain readable in the shared light preference. */
+html[data-design="showcase-v1"] body.day.single-canvas .takeaway,
+html[data-design="showcase-v1"] body.day.single-canvas .map-question>span,
+html[data-design="showcase-v1"] body.day.single-canvas .map-bottom button{color:var(--gold)}
+html[data-design="showcase-v1"] body.day.single-canvas .footerbar{background:var(--panel);border-top-color:var(--line)}
+html[data-design="showcase-v1"] body.day.single-canvas .mind-link b{color:var(--teal)}
+body.day .step-case{color:var(--dim)}
+body.day .step-verb{color:var(--ink)}
+body.day .aix-stress h3{color:#9f3528}
