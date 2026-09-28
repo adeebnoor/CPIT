@@ -16,14 +16,14 @@ def main():
         (DEST/name).parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(ROOT/name,DEST/name)
     shutil.copy2(ROOT/'iSCARB-Teaching-Template.md',DEST/'iSCARB-Teaching-Template.md')
-    for name in ['slides','lectures/cimt','lectures/himma','wealth-os']:
+    for name in ['slides','lectures/cimt','lectures/himma']:
         if (ROOT/name).exists(): shutil.copytree(ROOT/name,DEST/name,ignore=shutil.ignore_patterns('.rsync-tmp'))
     for name in spec['iscarb_public_files']:
         (DEST/name).parent.mkdir(parents=True,exist_ok=True); shutil.copy2(ROOT/name,DEST/name)
     image='iscarb-studio/app/static/hero_user_original.png'; (DEST/image).parent.mkdir(parents=True,exist_ok=True); shutil.copy2(ROOT/image,DEST/image)
     immutable_lectures={item['path'] for item in spec['lectures']}
     for p in DEST.rglob('*.html'):
-        if p==DEST/'index.html' or 'wealth-os' in p.parts: continue
+        if p==DEST/'index.html': continue
         rel=p.relative_to(DEST).as_posix(); s=p.read_text(encoding='utf-8')
         if rel in immutable_lectures or 'course-shell.css' in s or 'data-iscarb-standalone="1"' in s or p.name in ('InClass-Presenter.html','Faculty-Presenter.html'): continue
         prefix=os.path.relpath(DEST,p.parent).replace('\\','/'); prefix='' if prefix=='.' else prefix+'/'

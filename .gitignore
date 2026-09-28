@@ -13,6 +13,10 @@ iscarb-studio/data/
 .env
 iscarb-studio/.env
 
+# Personal/private artifacts — never commit or publish
+wealth-os/
+wealth-os-v*.bundle.b64.*
+
 # OS/editor
 .DS_Store
 Thumbs.db
