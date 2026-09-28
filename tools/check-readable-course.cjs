@@ -32,6 +32,7 @@ async function run(){
       if(data.slides[i].figure&&!data.slides[i].figure.endsWith('.svg'))assert.equal(await page.locator('.source-vector-panel').count(),1,'original-source vector missing');
       if(viewport.width>1000){
        const problem=await page.evaluate(()=>{const root=document.querySelector('.lecture-section:not([hidden])')||document.querySelector('#chapter-main');const edge=document.querySelector('.footerbar').getBoundingClientRect().top;return root?[...root.querySelectorAll('p,li,td,th,img')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.bottom>edge-2}).map(e=>e.textContent.slice(0,60)):[];});
+       const cardOverflow=await page.locator('.map-step').evaluateAll(cards=>cards.filter(c=>c.scrollHeight>c.clientHeight+3).map(c=>c.innerText.slice(0,60)));problem.push(...cardOverflow.map(x=>'Map card overflow: '+x));
        if(problem.length){results.overflow.push({chapter:chapter.chapter,slide:data.slides[i].id,section:j,viewport,problem});if(results.overflow.length<15)await page.screenshot({path:out+`/overflow-${chapter.chapter}-${i}-${j}-${viewport.width}.png`});}
       }
       results.sections++;
@@ -54,6 +55,7 @@ async function run(){
      await page.locator('[data-national-return]').click();assert.equal(await page.locator('.counter').innerText(),classroomCounter);
     }
     results.checks.push({chapter:chapter.chapter,viewport:viewport.width,national_slides:2,return_restored:true});
+    if(viewport.width===1024){for(const slide of ['MAP','END']){await page.evaluate(s=>iscarb.jump(s),slide);await page.screenshot({path:out+`/ch${chapter.chapter}-${slide}-1024.png`});}if(chapter.chapter===10){await page.evaluate(()=>iscarb.jump('X06A'));await page.screenshot({path:out+'/ch10-approaches-1024.png'});}}
     if(viewport.width===1440){
      await page.evaluate(()=>iscarb.jump('MAP'));await page.screenshot({path:out+`/ch${chapter.chapter}-map.png`});
      await page.evaluate(()=>iscarb.go(4));await page.screenshot({path:out+`/ch${chapter.chapter}-concept.png`});
@@ -77,7 +79,14 @@ async function run(){
   try{
    await page.goto(base+'fbr-submission.html?chapter='+a.chapter);await page.locator('#sid').fill('QA-DESIGN-ONLY');await page.locator('#ack').check();await page.locator('#openBtn').click();await page.waitForURL('**/Ch'+a.chapter+'-FBR-Student-Assignment.html');assert.equal(reveals.length,0);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'assignment horizontal overflow');
-   for(const k of ['fit','measure','bound','act','evidence','technical','labPrediction','labCases','labEvidence'])if(await page.locator('#'+k).count())await page.locator('#'+k).fill('QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.');
+   for(const k of ['fit','measure','bound','act','evidence','technical'])if(await page.locator('#'+k).count())await page.locator('#'+k).fill('QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.');
+   if(a.practical){
+    const cases=a.chapter===16?[{name:'normal',durationMinutes:30,expectedStatus:'accepted',expectedSeconds:1800},{name:'upper',durationMinutes:120,expectedStatus:'accepted',expectedSeconds:7200},{name:'invalid',durationMinutes:0,expectedStatus:'rejected',expectedSeconds:null}]:[{name:'restart same identity',events:['send:a','lose-response','restart','retry:a'],expectedReservations:1},{name:'different identity',events:['send:b','lose-response','retry:c'],expectedReservations:2}];
+    await page.locator('#labPrediction').fill('QA: baseline may violate the expected contract; corrected model should meet it within the tested scope.');
+    await page.locator('#labCases').fill(JSON.stringify(cases));
+    await page.locator('[data-lab-mode="baseline"]').click();await page.locator('[data-lab-mode="corrected"]').click();
+    const run=JSON.parse(await page.locator('#labEvidence').inputValue());assert(run.runs.corrected.every(r=>r.passed));
+   }
    await page.locator('#sourceUse').fill('Slide '+a.reading_pages[0]+': the source concept constrains the model assumptions and defines a bounded control that must be independently checked.');
    await page.locator('#section').fill('QA');await page.locator('#save').click();await page.reload();assert.match(await page.locator('#fit').inputValue(),/QA:/);
    await page.locator('#lock').click();await page.locator('#refitwhy').waitFor();assert.equal(reveals.length,1);assert(await page.locator('#fit').evaluate(e=>e.readOnly));
@@ -87,7 +96,7 @@ async function run(){
    await page.locator('#aiUse').fill('No AI used.');await page.locator('#signer').fill('QA test');await page.locator('#attested').check();
    await page.reload();assert(await page.locator('#fit').evaluate(e=>e.readOnly));assert.equal(reveals.length,1);
    await page.locator('#download').waitFor();assert(await page.locator('#download').isEnabled(),await page.locator('#done').innerText());
-   const dl=page.waitForEvent('download');await page.locator('#download').click();const d=await dl;const file=out+`/qa-assignment-${a.chapter}.md`;await d.saveAs(file);const record=fs.readFileSync(file,'utf8');assert.match(record,new RegExp('Chapter '+a.chapter));assert.match(record,/Commit ID:/);assert.match(record,/Reviewed and responsibility accepted/);
+   const dl=page.waitForEvent('download');await page.locator('#download').click();const d=await dl;const file=out+`/qa-assignment-${a.chapter}.md`;await d.saveAs(file);const record=fs.readFileSync(file,'utf8');assert.match(record,new RegExp('Chapter '+a.chapter));assert.match(record,/Commit ID:/);assert.match(record,/Attested: Yes — reviewed and responsibility accepted/);
    await page.screenshot({path:out+`/assignment-${a.chapter}-mobile.png`});results.assignments.push({chapter:a.chapter,entry:true,save_reload:true,delayed_reveal:true,locked_reload:true,editable_export:true});console.log('PASS assignment',a.chapter);
   }catch(e){console.error('FAIL assignment',a.chapter,e.message);results.errors.push({assignment:a.chapter,error:e.message});await page.screenshot({path:out+`/FAIL-assignment-${a.chapter}.png`,fullPage:true});}finally{await context.close();}
  }
