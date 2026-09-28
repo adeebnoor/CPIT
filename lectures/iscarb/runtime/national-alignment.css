@@ -61,3 +61,13 @@ body.single-canvas .body-grid:has(.source-vector-panel){grid-template-columns:mi
 html[data-design="showcase-v1"] body.single-canvas .chapter-main.national-slide{display:flex}
 .national-canvas{width:100%}
 @media(max-width:1000px){body.single-canvas .body-grid:has(.source-vector-panel){grid-template-columns:1fr}}
+
+/* Keep the projected map focused on its five concepts; case detail remains one click away. */
+.case-map-details{display:grid;gap:18px}.case-map-details section{padding:16px;border:1px solid var(--line);border-radius:12px}.case-map-details p{margin:10px 0}
+@media(min-width:1001px) and (min-height:621px){
+ html[data-design="showcase-v1"] body.single-canvas:not(.reading) .map-step .step-case,
+ html[data-design="showcase-v1"] body.single-canvas:not(.reading) .map-step .step-lens{display:none}
+ html[data-design="showcase-v1"] body.single-canvas:not(.reading) .map-step{justify-content:center}
+ html[data-design="showcase-v1"] body.single-canvas .map-bottom{gap:14px}
+ html[data-design="showcase-v1"] body.single-canvas .map-bottom .actions{flex-wrap:nowrap;flex-shrink:0}
+}

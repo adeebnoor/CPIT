@@ -1672,7 +1672,7 @@
   ],
   "delivery": "Local, integrity-checked shared runtime and on-demand source assets; offline chapter ZIPs preserve the same folder structure.",
   "delivery_asset_sha256": {
-    "lectures/iscarb/runtime/classroom-v3.js": "6299ca9bdfd8cb30f268879c07de740a56edc7d13e0cead6a1abe64003fa6c26",
+    "lectures/iscarb/runtime/classroom-v3.js": "5d350d3b2993f4802eef5c972b88029a5c41f98ef585463728496638f2242190",
     "lectures/iscarb/runtime/classroom-v3.css": "315faa3b72f734df184b05866d7e7470a726c8b5c7d61193ddcb9c529d47a491",
     "lectures/iscarb/assets/v3/ch14-cyberplan-combined.jpg": "24569c89e9f240063fd99e3293bda2dbbb1c5d114dbd792bea68e0bd120eaeb2",
     "lectures/iscarb/assets/v3/genai-banner.jpg": "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02",
@@ -1890,7 +1890,7 @@
     "lectures/iscarb/assets/national/etec-logo.svg": "fda79f9379e9ff22f1ce386243de66ca952aaeab4d8e96101f821190ad6cdcf9",
     "lectures/iscarb/runtime/national-content.js": "cbbe66aabe9935abe18a7080efca323fae9a6f89c67a5326484711a89362467a",
     "lectures/iscarb/runtime/source-figures.js": "3438a7f94af4f81e2580075fa1a1b2c09d32165c3d8a1cb16ccbf2fc54c08103",
-    "lectures/iscarb/runtime/national-alignment.css": "28a7500325e614a2a791f928e56007ea7b4bb73c3bcd66634d157d1ea25cfeff",
+    "lectures/iscarb/runtime/national-alignment.css": "794da1f29a5a0886c7cbdd9a2736a6f55b3139ccfd276224f464398aedb20d4d",
     "lectures/iscarb/sources/NELC-AI-Learning-Design-v1-2026.pdf": "bdf792d796f039a6475beb417ed1e2c19ddeaba544946ed95a7a241e4113e8f8"
   },
   "mindmap_version": "20260922-story-v2",

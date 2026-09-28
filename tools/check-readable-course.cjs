@@ -57,7 +57,7 @@ async function run(){
     results.checks.push({chapter:chapter.chapter,viewport:viewport.width,national_slides:2,return_restored:true});
     if(viewport.width===1024){for(const slide of ['MAP','END']){await page.evaluate(s=>iscarb.jump(s),slide);await page.screenshot({path:out+`/ch${chapter.chapter}-${slide}-1024.png`});}if(chapter.chapter===10){await page.evaluate(()=>iscarb.jump('X06A'));await page.screenshot({path:out+'/ch10-approaches-1024.png'});}}
     if(viewport.width===1440){
-     await page.evaluate(()=>iscarb.jump('MAP'));await page.screenshot({path:out+`/ch${chapter.chapter}-map.png`});
+     await page.evaluate(()=>iscarb.jump('MAP'));await page.locator('[data-open="CASEMAP"]').click();assert.equal(await page.locator('.case-map-details section').count(),5);await page.locator('#modal-close').click();await page.screenshot({path:out+`/ch${chapter.chapter}-map.png`});
      await page.evaluate(()=>iscarb.go(4));await page.screenshot({path:out+`/ch${chapter.chapter}-concept.png`});
      // Next/previous walks sections; reading view exposes all authored sections.
      const before=await page.locator('.counter').innerText();await page.locator('#nextBtn').click();assert.notEqual(await page.locator('.counter').innerText(),before);
