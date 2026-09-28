@@ -1,7 +1,7 @@
 name: Verify readable course design
 on:
   push:
-    branches: [main, codex/iscarb-readable-20260927]
+    branches: [main, codex/iscarb-readable-20260927, codex/iscarb-national-20260928]
     paths: ['iscarb.html', 'course-design.css', 'lectures/iscarb/**', 'tools/check-readable-course.cjs', 'tools/prepare_readable_release.py', '.github/workflows/readable-course.yml']
   workflow_dispatch:
 permissions:

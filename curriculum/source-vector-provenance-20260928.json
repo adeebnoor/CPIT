@@ -1,0 +1,583 @@
+[
+  {
+    "chapter": 11,
+    "slideId": "MANAGE",
+    "preservedRaster": "assets/v3/ch11-fig-1.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      8
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 11,
+    "slideId": "RELAV",
+    "preservedRaster": "assets/v3/ch11-fig-3.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      15
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 11,
+    "slideId": "PROTECT",
+    "preservedRaster": "assets/v3/ch11-fig-6.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      37
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 11,
+    "slideId": "SELFCHECK",
+    "preservedRaster": "assets/v3/ch11-fig-7.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      40
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 11,
+    "slideId": "VOTE",
+    "preservedRaster": "assets/v3/ch11-fig-10.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      47
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 11,
+    "slideId": "MEASURE",
+    "preservedRaster": "assets/v3/ch11-fig-13.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      74
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 11,
+    "slideId": "PROFILE",
+    "preservedRaster": "assets/v3/ch11-fig-14.png",
+    "sourcePack": "sources/Ch11-Original.pptx",
+    "sourceSlides": [
+      77
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 12,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/62fc9035beb3e6fd.jpg",
+    "sourcePack": "sources/Ch12-Original.pptx",
+    "sourceSlides": [
+      21
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 12,
+    "slideId": "X05",
+    "preservedRaster": "assets/v3/3421e0acd3f7d7c8.jpg",
+    "sourcePack": "sources/Ch12-Original.pptx",
+    "sourceSlides": [
+      27
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 12,
+    "slideId": "R18",
+    "preservedRaster": "assets/v3/e3f528dd3c44af94.jpg",
+    "sourcePack": "sources/Ch12-Original.pptx",
+    "sourceSlides": [
+      49
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 12,
+    "slideId": "B01",
+    "preservedRaster": "assets/v3/7df5eac7ad160f75.jpg",
+    "sourcePack": "sources/Ch12-Original.pptx",
+    "sourceSlides": [
+      60
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 12,
+    "slideId": "X10",
+    "preservedRaster": "assets/v3/e8bc0cb8845159bb.jpg",
+    "sourcePack": "sources/Ch12-Original.pptx",
+    "sourceSlides": [
+      67
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 13,
+    "slideId": "X02A",
+    "preservedRaster": "assets/v3/c281fd6044088c5f.jpg",
+    "sourcePack": "sources/Ch13-Original.pptx",
+    "sourceSlides": [
+      6
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 13,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/42471cd2f387b9b6.jpg",
+    "sourcePack": "sources/Ch13-Original.pptx",
+    "sourceSlides": [
+      33
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 13,
+    "slideId": "X06",
+    "preservedRaster": "assets/v3/3004a5b08b27401f.jpg",
+    "sourcePack": "sources/Ch13-Original.pptx",
+    "sourceSlides": [
+      40
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 13,
+    "slideId": "R11",
+    "preservedRaster": "assets/v3/6d94c747a6361012.jpg",
+    "sourcePack": "sources/Ch13-Original.pptx",
+    "sourceSlides": [
+      48
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 13,
+    "slideId": "B01",
+    "preservedRaster": "assets/v3/c469e1289c907afc.jpg",
+    "sourcePack": "sources/Ch13-Original.pptx",
+    "sourceSlides": [
+      56
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "X02",
+    "preservedRaster": "assets/v3/16a0f6456c570849.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      8
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "X02A",
+    "preservedRaster": "assets/v3/ch14-cyberplan-combined.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      8,
+      15
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "X03",
+    "preservedRaster": "assets/v3/f082d48c0c892cff.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      21
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/fd384ab70c090c88.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      30
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "X06",
+    "preservedRaster": "assets/v3/34af5f8485dd7c6e.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      46
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "B01",
+    "preservedRaster": "assets/v3/6e0ebc9195f92ac2.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      52
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 14,
+    "slideId": "R09",
+    "preservedRaster": "assets/v3/c2229a1d4226e9e6.jpg",
+    "sourcePack": "sources/Ch14-Original.pptx",
+    "sourceSlides": [
+      57
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "X02A",
+    "preservedRaster": "assets/v3/c0bb96c1572c4e7b.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      11
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "X03",
+    "preservedRaster": "assets/v3/a9758d42b58b61ab.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      21
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "IOC",
+    "preservedRaster": "assets/v3/f57538bc503351a9.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      24
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/fea0ad89b97a3492.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      28
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "X05",
+    "preservedRaster": "assets/v3/d54935b32d14f918.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      36
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "CONFIG",
+    "preservedRaster": "assets/v3/c4cb0e4e2c3e960d.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      39
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "R18",
+    "preservedRaster": "assets/v3/7e06c30e25ad961a.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      48
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 15,
+    "slideId": "R09",
+    "preservedRaster": "assets/v3/87683e7a3fcd3641.jpg",
+    "sourcePack": "sources/Ch15-Original.pptx",
+    "sourceSlides": [
+      55
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "X03",
+    "preservedRaster": "assets/v3/6a4a7ae477bad9fa.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      15
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/acd2fa717aea514a.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      19
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "MIDDLEWARE",
+    "preservedRaster": "assets/v3/655ca33c2c431092.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      22
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "X05",
+    "preservedRaster": "assets/v3/267c35ba26f02115.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      25
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "VALIDATE",
+    "preservedRaster": "assets/v3/336b7a7881505be5.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      35
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "B01",
+    "preservedRaster": "assets/v3/2039319212ce1e2a.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      43
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "R09",
+    "preservedRaster": "assets/v3/b8feb8a84c04a27e.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      49
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 16,
+    "slideId": "D16B",
+    "preservedRaster": "assets/v3/1ee3d9d0236ec757.jpg",
+    "sourcePack": "sources/Ch16-Original.pptx",
+    "sourceSlides": [
+      57
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/317be56625de18e7.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      21
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "X05",
+    "preservedRaster": "assets/v3/94ee2b0be0e93e22.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      27
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "X06",
+    "preservedRaster": "assets/v3/1c615d574ed7c84a.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      32
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "B01",
+    "preservedRaster": "assets/v3/2a4ca8c9aed47835.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      44
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "X07",
+    "preservedRaster": "assets/v3/9298699049050726.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      34
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "X09",
+    "preservedRaster": "assets/v3/25511b06c754d815.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      60
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 17,
+    "slideId": "X10",
+    "preservedRaster": "assets/v3/31c786b1d6045a6f.jpg",
+    "sourcePack": "sources/Ch17-Original.pptx",
+    "sourceSlides": [
+      63
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X02",
+    "preservedRaster": "assets/v3/09d19e989499209f.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      8
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X02A",
+    "preservedRaster": "assets/v3/cc11430e2482e8ab.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      18
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X03",
+    "preservedRaster": "assets/v3/a19c188bb406ead3.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      25
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/9dd47ad69147bc4e.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      29
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X05",
+    "preservedRaster": "assets/v3/6f43909f3370e740.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      34
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "DEPLOY",
+    "preservedRaster": "assets/v3/e6e451bd15d86744.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      39
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X09",
+    "preservedRaster": "assets/v3/b83804ee6ccbfdb0.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      46
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "X08",
+    "preservedRaster": "assets/v3/1c08c1faae4be113.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      50
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "CONTAINER",
+    "preservedRaster": "assets/v3/3ee6a1792825a363.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      54
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 20,
+    "slideId": "TRADING",
+    "preservedRaster": "assets/v3/aafbde3e7bf09b87.jpg",
+    "sourcePack": "sources/Ch20-Original.pptx",
+    "sourceSlides": [
+      59
+    ],
+    "method": "Original EMF extracted from supplied PPTX and converted to SVG with Inkscape; no redrawing or change to the diagram relationships."
+  },
+  {
+    "chapter": 10,
+    "slideId": "X04",
+    "preservedRaster": "assets/v3/7b77c34e6cb8ac78.png",
+    "sourcePack": "sources/Ch10-Original.pdf",
+    "sourceSlides": [
+      15
+    ],
+    "method": "Cropped original PDF vector figure; title/footer excluded; labels and curve retained."
+  }
+]

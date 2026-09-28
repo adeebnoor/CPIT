@@ -29,6 +29,7 @@ async function run(){
       if(count&&viewport.width>1000)await page.locator('[data-slide-section]').nth(j).click();
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'horizontal overflow');
       assert(await page.locator('#chapter-main img').evaluateAll(a=>a.every(im=>im.complete&&im.naturalWidth>0)),'broken image');
+      if(data.slides[i].figure&&!data.slides[i].figure.endsWith('.svg'))assert.equal(await page.locator('.source-vector-panel').count(),1,'original-source vector missing');
       if(viewport.width>1000){
        const problem=await page.evaluate(()=>{const root=document.querySelector('.lecture-section:not([hidden])')||document.querySelector('#chapter-main');const edge=document.querySelector('.footerbar').getBoundingClientRect().top;return root?[...root.querySelectorAll('p,li,td,th,img')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.bottom>edge-2}).map(e=>e.textContent.slice(0,60)):[];});
        if(problem.length){results.overflow.push({chapter:chapter.chapter,slide:data.slides[i].id,section:j,viewport,problem});if(results.overflow.length<15)await page.screenshot({path:out+`/overflow-${chapter.chapter}-${i}-${j}-${viewport.width}.png`});}
@@ -37,11 +38,27 @@ async function run(){
      }
      results.slides++;
     }
+    // Both national references are full slides and must restore the same classroom position.
+    const classroomCounter=await page.locator('.counter').innerText();
+    for(const mode of ['READINESS','NELC']){
+     await page.evaluate(k=>iscarb.open(k),mode);
+     assert.equal(await page.locator('.national-canvas').count(),1);
+     assert.equal(await page.locator('.national-logo img').count(),1);
+     await page.locator('.national-logo img').evaluate(im=>im.decode());
+     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'national horizontal overflow');
+     if(viewport.width>1000){
+      const bad=await page.evaluate(()=>{const edge=document.querySelector('.footerbar').getBoundingClientRect().top;return [...document.querySelectorAll('.national-slide p,.national-slide h2,.national-slide h3,.national-slide img,.national-actions button')].filter(e=>e.getBoundingClientRect().bottom>edge+2).map(e=>e.textContent.slice(0,60));});
+      assert.equal(bad.length,0,'national slide overflow: '+JSON.stringify(bad));
+     }
+     if(viewport.width===1440||viewport.width===390)await page.screenshot({path:out+`/ch${chapter.chapter}-${mode}-${viewport.width}.png`,fullPage:viewport.width===390});
+     await page.locator('[data-national-return]').click();assert.equal(await page.locator('.counter').innerText(),classroomCounter);
+    }
+    results.checks.push({chapter:chapter.chapter,viewport:viewport.width,national_slides:2,return_restored:true});
     if(viewport.width===1440){
      await page.evaluate(()=>iscarb.jump('MAP'));await page.screenshot({path:out+`/ch${chapter.chapter}-map.png`});
      await page.evaluate(()=>iscarb.go(4));await page.screenshot({path:out+`/ch${chapter.chapter}-concept.png`});
      // Next/previous walks sections; reading view exposes all authored sections.
-     const first=await page.locator('.lecture-section:not([hidden])').getAttribute('aria-label');await page.locator('#nextBtn').click();assert.notEqual(await page.locator('.lecture-section:not([hidden])').getAttribute('aria-label'),first);
+     const before=await page.locator('.counter').innerText();await page.locator('#nextBtn').click();assert.notEqual(await page.locator('.counter').innerText(),before);
      await page.locator('#viewBtn').click();assert.equal(await page.locator('.lecture-section[hidden]').count(),0);await page.locator('#viewBtn').click();
      await page.evaluate(()=>iscarb.open('RULES'));assert.equal(await page.locator('[data-rule]').count(),20);await page.locator('#modal-close').click();
      for(const st of data.stations){await page.evaluate(no=>iscarb.startStation(no),st.no);await page.locator('#hintBtn').click();assert.match(await page.locator('#coach').innerText(),/Authored hint/);await page.locator('[data-field]').first().fill('QA-only reasoning and a proposed evidence check.');await page.locator('#timer-start').click();await page.waitForTimeout(1100);assert.notEqual(await page.locator('#timer-output').innerText(),'03:00');await page.locator('#timer-start').click();await page.locator('#station-back').click();}

@@ -44,20 +44,17 @@ async def main():
       if viewport['width']==1440 and s.get('figure'):
        raster=not str(s.get('figure')).lower().endswith('.svg')
        if raster:
-        redraw=page.locator('.classroom-redraw-wrap')
-        assert await redraw.count()==1,f'CH{ch} {s["id"]}: raster figure must use one classroom redraw'
-        nodes=redraw.locator('.redraw-node');node_count=await nodes.count()
-        assert 1<=node_count<=5,f'CH{ch} {s["id"]}: invalid redraw node count {node_count}'
-        box=await redraw.bounding_box();assert box and box['width']>=260 and box['height']>=150,f'CH{ch} {s["id"]}: redraw too small {box}'
-        sizes=await nodes.evaluate_all("(a)=>a.map(e=>parseFloat(getComputedStyle(e.querySelector('b')).fontSize))")
-        assert sizes and min(sizes)>=13,f'CH{ch} {s["id"]}: redraw labels too small {sizes}'
-        figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'redraw','nodes':node_count,'width':round(box['width']),'height':round(box['height'])})
-        open_original=redraw.locator('.redraw-open');assert await open_original.count()==1,f'CH{ch} {s["id"]}: original-source control missing'
-        await open_original.click()
-        modal=page.locator('#modal');body=page.locator('#modal-body')
-        assert not await modal.is_hidden(),f'CH{ch} {s["id"]}: original source modal did not open'
-        html=await body.inner_html()
-        assert str(s.get('figure')).split('?')[0] in html and 'Original figure retained' in html,f'CH{ch} {s["id"]}: modal did not preserve original source figure: {html[:240]}'
+        panel=page.locator('.source-vector-panel')
+        assert await panel.count()==1,f'CH{ch} {s["id"]}: source vector missing'
+        vector=panel.locator('.source-vector:visible')
+        assert await vector.count()==1
+        img=vector.locator('img');src=await img.get_attribute('src')
+        assert src.endswith('.svg') and '/source-vectors/' in src
+        box=await img.bounding_box();assert box and max(box['width'],box['height'])>=260
+        figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'original-source-vector','width':round(box['width']),'height':round(box['height'])})
+        await vector.click()
+        assert not await page.locator('#modal').is_hidden()
+        assert src in await page.locator('#modal-body').inner_html()
         await page.locator('#modal-close').click()
        else:
         img=page.locator('.figure-button img')
