@@ -71,3 +71,14 @@ html[data-design="showcase-v1"] body.single-canvas .chapter-main.national-slide{
  html[data-design="showcase-v1"] body.single-canvas .map-bottom{gap:14px}
  html[data-design="showcase-v1"] body.single-canvas .map-bottom .actions{flex-wrap:nowrap;flex-shrink:0}
 }
+
+/* English edition: read left to right and wrap long principle/stage labels. */
+.national-slide .heading h1,.national-canvas{font-family:Arial,sans-serif}
+.national-brand h2{line-height:1.25}
+.national-readiness h3{line-height:1.35;font-size:clamp(1.15rem,1.6vw,1.65rem)}
+.national-principles b{font-size:1.1rem;line-height:1.35}
+.national-cycle span{white-space:normal;line-height:1.3}
+.national-cycle i{margin-left:0;margin-right:8px}
+.national-roles b{margin-left:0;margin-right:8px}
+.national-evidence span{font-size:clamp(1.1rem,1.7vw,1.5rem)}
+@media(max-width:480px){.national-brand h2{font-size:1.35rem}.national-principles b{font-size:1rem}.national-cycle{grid-template-columns:repeat(2,1fr)}.national-slide .heading h1{font-size:1.55rem!important}}

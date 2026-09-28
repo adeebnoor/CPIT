@@ -1,17 +1,102 @@
-/* Course-authored educational crosswalk. Not official Jaheziah exam codes. */
+/* Course-authored English crosswalk. Not official Jaheziah exam codes. */
 window.ISCARB_NATIONAL = {
-  version: '20260928-national-v1',
-  chapters: {
-    10: {knowledge:'ميّز خصائص الاعتمادية',skill:'اربط العطل بأثره',value:'حدّد مسؤولية القرار',evidence:'ادعاء محدود + آلية + دليل',check:'يميّز الاعتمادية والسلامة والأمن، ويشرح أثر السبب المشترك على التكرار والتنوع.',ai:'نقد توصية مساعد لمحطة مياه',focus:'R08'},
-    11: {knowledge:'ميّز الموثوقية والإتاحة',skill:'احسب المقياس بمقامه',value:'صرّح بحدود القياس',evidence:'مقياس + وحدة + ملف تشغيلي',check:'يختار POFOD أو ROCOF أو MTTF أو AVAIL، ويبيّن لماذا يلائم التعرض المرصود.',ai:'فحص ادعاء موثوقية مكوّن متعلّم',focus:'METRICS'},
-    12: {knowledge:'ميّز الخطر والمخاطرة',skill:'اربط الخطر بمتطلب',value:'لا تدّعِ سلامة غير مثبتة',evidence:'خطر ← متطلب ← تحقق',check:'يقرأ بوابات شجرة الأعطال، ويذكر افتراضات الاستقلال وحدود حجة السلامة.',ai:'اختبار حدود توصية مرتبطة بالسلامة',focus:'X05'},
-    13: {knowledge:'ميّز الأصل والتهديد والثغرة',skill:'صمّم اختبار إساءة',value:'احمِ البيانات والصلاحيات',evidence:'إساءة + ضابط + اختبار سلبي',check:'يربط السياسة بمتطلب قابل للاختبار، ويوضّح حدود ما أثبته الاختبار.',ai:'نقد قرار وصول لمساعد ذكي',focus:'X06'},
-    14: {knowledge:'ميّز التعافي والاستعادة',skill:'خطّط لاستمرار الخدمة',value:'سمِّ مسؤول الطوارئ',evidence:'خدمة حرجة + بديل + تعافٍ',check:'يحافظ على الخدمة الأساسية، ويبيّن تبعيات البديل وصلاحية تفعيله ومخاطر الاستعادة.',ai:'محاكاة توقف المساعد وقت الأزمة',focus:'X06'},
-    15: {knowledge:'ميّز أساليب إعادة الاستخدام',skill:'قارن الملاءمة وتكلفة التكامل',value:'اكشف الاعتماد على المورد',evidence:'مقارنة + قيود + قرار مبرر',check:'يقارن البدائل بالمطلوب وتكلفة دورة الحياة، ويشرح متى ينتهي ادعاء الملاءمة.',ai:'مقارنة نموذج مستضاف وتشغيل محلي',focus:'IOC'},
-    16: {knowledge:'ميّز الواجهة والعقد الدلالي',skill:'اختبر الشروط والتوافق',value:'تحقق قبل إعادة الاستخدام',evidence:'عقد + محوّل + حالة اختبار',check:'يميّز التوافق الشكلي والدلالي، ويختبر شرطًا سابقًا ولاحقًا ومشكلة في التركيب.',ai:'تحديد عقد لمكوّن ذكاء اصطناعي',focus:'B01'},
-    17: {knowledge:'فسّر عدم يقين الاتصال',skill:'تتبّع الفشل وإعادة المحاولة',value:'لا تفترض نجاحًا غير مؤكد',evidence:'تتبّع + مسؤولية + استجابة للفشل',check:'يميّز فقد الرد وفشل التنفيذ، ويبرّر المعمارية وحدود تكرار الطلب.',ai:'تحليل إعادة طلب لخدمة ذكية',focus:'X02A'},
-    20: {knowledge:'فسّر استقلال الأنظمة',skill:'اختبر تفاعل المالكين',value:'احترم حدود الصلاحية',evidence:'واجهة + مالك + اختبار مشترك',check:'يربط الاستقلال التشغيلي والإداري بالواجهات والنشر التدريجي والاختبار عبر المالكين.',ai:'نقد تدفق تنتجه AI بين جهات',focus:'X05'}
+  "version": "20260928-national-en-v2",
+  "chapters": {
+    "10": {
+      "knowledge": "Distinguish dependability properties",
+      "skill": "Connect failures to their effects",
+      "value": "Name the decision owner",
+      "evidence": "Bounded claim + mechanism + evidence",
+      "check": "Distinguish dependability, safety and security; explain how common causes limit redundancy and diversity.",
+      "ai": "Critique an assistant’s recommendation for a water plant",
+      "focus": "R08"
+    },
+    "11": {
+      "knowledge": "Distinguish reliability and availability",
+      "skill": "Calculate the right metric",
+      "value": "State the limits of measurement",
+      "evidence": "Metric + unit + operational profile",
+      "check": "Choose POFOD, ROCOF, MTTF or AVAIL and explain why it fits the observed exposure.",
+      "ai": "Examine a reliability claim about a learned component",
+      "focus": "METRICS"
+    },
+    "12": {
+      "knowledge": "Distinguish hazards and risk",
+      "skill": "Trace a hazard to a requirement",
+      "value": "Keep safety claims within the evidence",
+      "evidence": "Hazard → requirement → verification",
+      "check": "Read fault-tree gates; state independence assumptions and the limits of the safety argument.",
+      "ai": "Test the limits of a safety-related recommendation",
+      "focus": "X05"
+    },
+    "13": {
+      "knowledge": "Distinguish assets, threats and vulnerabilities",
+      "skill": "Design a misuse test",
+      "value": "Protect data and access rights",
+      "evidence": "Misuse + control + negative test",
+      "check": "Connect policy to a testable requirement and state exactly what the test establishes.",
+      "ai": "Critique an access decision involving an AI assistant",
+      "focus": "X06"
+    },
+    "14": {
+      "knowledge": "Distinguish recovery and restoration",
+      "skill": "Plan service continuity",
+      "value": "Name the emergency owner",
+      "evidence": "Essential service + fallback + recovery",
+      "check": "Preserve the essential service; explain fallback dependencies, activation authority and restoration risks.",
+      "ai": "Simulate an assistant outage during a crisis",
+      "focus": "X06"
+    },
+    "15": {
+      "knowledge": "Distinguish approaches to reuse",
+      "skill": "Compare fit and integration cost",
+      "value": "Disclose supplier dependencies",
+      "evidence": "Comparison + constraints + justified choice",
+      "check": "Compare alternatives against requirements and lifecycle costs; explain when the fit claim no longer holds.",
+      "ai": "Compare a hosted model with local operation",
+      "focus": "IOC"
+    },
+    "16": {
+      "knowledge": "Distinguish interfaces and semantic contracts",
+      "skill": "Test conditions and compatibility",
+      "value": "Verify before reusing",
+      "evidence": "Contract + adapter + test case",
+      "check": "Distinguish signature compatibility from semantic compatibility; test a precondition, a postcondition and a composition failure.",
+      "ai": "Specify a contract for an AI component",
+      "focus": "B01"
+    },
+    "17": {
+      "knowledge": "Explain communication uncertainty",
+      "skill": "Trace failures and retries",
+      "value": "Keep unconfirmed success explicit",
+      "evidence": "Trace + owner + failure response",
+      "check": "Distinguish a lost response from failed execution; justify the architecture and limits of retrying a request.",
+      "ai": "Analyze retries to an AI service",
+      "focus": "X02A"
+    },
+    "20": {
+      "knowledge": "Explain system independence",
+      "skill": "Test interactions across owners",
+      "value": "Respect authority boundaries",
+      "evidence": "Interface + owner + joint test",
+      "check": "Connect operational and managerial independence to interfaces, incremental deployment and testing across owners.",
+      "ai": "Critique an AI-generated flow across organizations",
+      "focus": "X05"
+    }
   },
-  principles:['التعلم أولًا','قيمة تعليمية واضحة','الإنسان في مركز التصميم','التصميم المسؤول','التحسين القائم على الأدلة'],
-  stages:['حدّد','صمّم','عزّز','وزّع الأدوار','قيّم','تحقّق وحسّن']
+  "principles": [
+    "Learning first",
+    "Clear educational value",
+    "Human-centered design",
+    "Responsible design",
+    "Evidence-based improvement"
+  ],
+  "stages": [
+    "Define",
+    "Design",
+    "Enhance",
+    "Assign roles",
+    "Evaluate",
+    "Verify & improve"
+  ]
 };

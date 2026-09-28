@@ -18,6 +18,12 @@ async function run(){
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
   if(viewport.width===390){await page.locator('#navToggle').click();assert(await page.locator('#courseNav').isVisible());await page.locator('#navToggle').click();}
   if(viewport.width===1440||viewport.width===390)await page.screenshot({path:out+'/hub-'+viewport.width+'.png',fullPage:viewport.width===390});
+  await page.goto(base+'nelc-alignment.html');
+  assert.equal(await page.locator('html').getAttribute('lang'),'en');
+  assert.equal(await page.locator('.national-chapter').count(),9);
+  assert(!/[\u0600-\u06ff]/.test(await page.locator('body').innerText()),'Arabic remains in the English alignment page');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'alignment page horizontal overflow');
+  if(viewport.width===1440||viewport.width===390)await page.screenshot({path:out+'/national-page-'+viewport.width+'.png',fullPage:viewport.width===390});
   for(const chapter of pub.lectures){
    try{
     await page.goto(base+chapter.path+'#TITLE');await page.waitForFunction(()=>!!window.iscarb);
@@ -44,6 +50,8 @@ async function run(){
     for(const mode of ['READINESS','NELC']){
      await page.evaluate(k=>iscarb.open(k),mode);
      assert.equal(await page.locator('.national-canvas').count(),1);
+     assert(!/[\u0600-\u06ff]/.test(await page.locator('#chapter-main').innerText()),'Arabic remains in the English reference slide');
+     assert.equal(await page.locator('.national-canvas').getAttribute('dir'),'ltr');
      assert.equal(await page.locator('.national-logo img').count(),1);
      await page.locator('.national-logo img').evaluate(im=>im.decode());
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'national horizontal overflow');
