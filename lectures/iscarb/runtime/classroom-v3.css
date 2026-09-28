@@ -134,9 +134,9 @@
 /* Optional section banner (course-added AI segment) */
 .ai-banner{position:relative;margin:0;height:104px;border-radius:12px;overflow:hidden;border:1px solid rgba(182,163,255,.45);box-shadow:0 0 28px rgba(255,128,203,.12)}
 .ai-banner img{width:100%;height:100%;object-fit:cover;object-position:center 47%;display:block}
-.ai-banner figcaption{position:absolute;left:0;top:0;bottom:0;max-width:56%;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 16px;background:linear-gradient(90deg,rgba(8,7,12,.92) 0%,rgba(8,7,12,.78) 70%,rgba(8,7,12,0) 100%);font-size:13.5px;line-height:1.35;color:var(--ink)}
-.ai-banner figcaption span{font-size:10px;font-weight:900;letter-spacing:.08em;color:var(--violet)}
-@media(max-width:1000px){.ai-banner{height:auto}.ai-banner img{height:120px}.ai-banner figcaption{position:static;max-width:none;background:var(--panel)}}
+.ai-banner figcaption{position:absolute;left:0;top:0;bottom:0;max-width:56%;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 16px;background:linear-gradient(90deg,rgba(8,7,12,.92) 0%,rgba(8,7,12,.78) 70%,rgba(8,7,12,0) 100%);font-size:13.5px;line-height:1.35;color:#f6f3ff}
+.ai-banner figcaption span{font-size:11px;font-weight:900;letter-spacing:.08em;color:#d6c8ff}
+@media(max-width:1000px){.ai-banner{height:auto}.ai-banner img{height:120px}.ai-banner figcaption{position:static;max-width:none;background:var(--panel);color:var(--ink)}.ai-banner figcaption span{color:var(--violet)}}
 @media print{.ai-banner{box-shadow:none}}
 
 /* Optional slide skin: GenAI. Applies only to slides that set skin:"genai", only in night mode.
