@@ -3,10 +3,14 @@ name: Refresh iSCARB offline packages
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - 'lectures/iscarb/runtime/classroom-v3.js'
       - 'lectures/iscarb/Ch*-*.html'
       - 'lectures/iscarb/runtime/readable.css'
+      - 'lectures/iscarb/runtime/national-alignment.css'
+      - 'lectures/iscarb/runtime/national-content.js'
+      - 'lectures/iscarb/runtime/source-figures.js'
       - 'lectures/iscarb/runtime/assignment-readable.css'
       - '.github/workflows/refresh-iscarb-packages.yml'
 permissions:
