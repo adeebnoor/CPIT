@@ -1,6 +1,4 @@
 (()=>{'use strict';
-const toggle=document.getElementById('navToggle'),nav=document.getElementById('courseNav');
-if(toggle&&nav){const setOpen=o=>{nav.classList.toggle('is-open',o);toggle.setAttribute('aria-expanded',String(o))};toggle.addEventListener('click',()=>setOpen(!nav.classList.contains('is-open')));nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setOpen(false)));document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)})}
 const button=document.getElementById('exportProgress'),input=document.getElementById('progressImport'),status=document.getElementById('progressBackupStatus');
 const allowed=k=>k&&((k.startsWith('iscarb-'))||(k.startsWith('fbr:cpit455:')));
 const say=t=>{if(status)status.textContent=t};
@@ -16,4 +14,3 @@ input?.addEventListener('change',async()=>{const file=input.files?.[0];if(!file)
  say('Restored '+n+' saved items. Reloading…');setTimeout(()=>location.reload(),500);
 }catch{say('This is not a valid CPIT-455 progress backup.')}finally{input.value=''}});
 })();
-if(!document.querySelector('link[href*="student-ux.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href='student-ux.css?v=20260925';document.head.appendChild(l);}

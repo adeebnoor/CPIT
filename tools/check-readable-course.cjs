@@ -9,6 +9,7 @@ async function run(){
  const browser=await chromium.launch();
  for(const viewport of [{width:1440,height:900},{width:1366,height:768},{width:1024,height:768},{width:390,height:844},{width:320,height:740}]){
   const context=await browser.newContext({viewport,acceptDownloads:true});const page=await context.newPage();
+  await context.route('**/*.supabase.co/**',r=>r.abort());
   page.on('pageerror',e=>results.errors.push({kind:'javascript',error:e.message}));
   await page.goto(base+'iscarb.html');
   assert.equal(await page.locator('.lesson').count(),9);

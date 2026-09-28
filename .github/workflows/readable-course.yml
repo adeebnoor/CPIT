@@ -2,7 +2,7 @@ name: Verify readable course design
 on:
   push:
     branches: [main, codex/iscarb-readable-20260927, codex/iscarb-national-20260928]
-    paths: ['iscarb.html', 'course-design.css', 'lectures/iscarb/**', 'tools/check-readable-course.cjs', 'tools/prepare_readable_release.py', '.github/workflows/readable-course.yml']
+    paths: ['*.html', '*.css', 'course-shell.js', 'lectures/iscarb/**', 'tools/check-readable-course.cjs', 'tools/check-site-design.cjs', 'tools/course_shell.py', 'tools/prepare_readable_release.py', '.github/workflows/readable-course.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,6 +20,7 @@ jobs:
       - name: Validate publication integrity
         run: |
           python tools/audit_classroom.py
+          python tools/check_paper_fidelity.py
           node tools/check-fbr-release.mjs
           python tools/build_public_site.py
       - name: Install browser test tools
@@ -31,6 +32,7 @@ jobs:
           NODE_PATH: /tmp/course-qa/node_modules
         run: |
           python -m http.server 8765 --directory _site > /tmp/course-http.log 2>&1 &
+          node tools/check-site-design.cjs
           node tools/check-readable-course.cjs
       - uses: actions/upload-artifact@v4
         if: always()

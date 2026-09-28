@@ -10,6 +10,8 @@ def main():
     p=ROOT/'curriculum/publication.json';spec=json.loads(p.read_text())
     shared=['lectures/iscarb/runtime/classroom-v3.css','lectures/iscarb/runtime/classroom-v3.js','lectures/iscarb/runtime/readable.css','lectures/iscarb/runtime/assignment-readable.css']
     shared += ['lectures/iscarb/runtime/national-content.js','lectures/iscarb/runtime/source-figures.js','lectures/iscarb/runtime/national-alignment.css','nelc-alignment.html','national-site.css','iscarb-hub.css','iscarb-hub.js','course-design.css','student-ux.js','assets/fcit-kau-logo.png','lectures/iscarb/sources/NELC-AI-Learning-Design-v1-2026.pdf']
+    shared += ['course-shell.css','course-shell.js','iscarb.html','student-guide.html','course-resources.html','instructor-guide.html','methodology.html','index.html','student-ux.css','chapter-search.js']
+    shared += [item['study_path'] for item in spec['lectures']]
     shared += [str(p.relative_to(ROOT)) for folder in ('lectures/iscarb/assets/national','lectures/iscarb/assets/source-vectors') for p in (ROOT/folder).glob('*') if p.is_file()]
     for lecture in spec['lectures']:
         name=lecture['offline_package'];path=ROOT/name

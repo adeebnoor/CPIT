@@ -1,0 +1,575 @@
+{
+  "method": "Viewport-only correction from vector drawing bounds; all original paths retained. ch13-source-48 excludes only the isolated EMF registration stroke path359 from its viewport. ch20-source-46 excludes the detached unlabeled EMF arrow (path83, path85, path87) from the viewport; all paths remain in the file.",
+  "figures": [
+    {
+      "file": "ch11-source-15.svg",
+      "viewBox": [
+        -4.5503235,
+        -3.8503725,
+        256.549496,
+        203.716065
+      ],
+      "preserved_shapes": 64
+    },
+    {
+      "file": "ch11-source-37.svg",
+      "viewBox": [
+        -5.425239050000001,
+        -5.125010050000001,
+        244.66079610000003,
+        269.0548671
+      ],
+      "preserved_shapes": 153
+    },
+    {
+      "file": "ch11-source-40.svg",
+      "viewBox": [
+        -1.8998599999999999,
+        -4.0,
+        419.93444,
+        135.824
+      ],
+      "preserved_shapes": 93
+    },
+    {
+      "file": "ch11-source-47.svg",
+      "viewBox": [
+        -2.60266,
+        -3.251598,
+        392.6355,
+        172.30290000000002
+      ],
+      "preserved_shapes": 128
+    },
+    {
+      "file": "ch11-source-74.svg",
+      "viewBox": [
+        -3.29998,
+        -3.899824,
+        397.81138,
+        56.413044000000006
+      ],
+      "preserved_shapes": 114
+    },
+    {
+      "file": "ch11-source-77.svg",
+      "viewBox": [
+        -2.23173795,
+        -4.9317759500000005,
+        375.97763590000005,
+        215.53761389999997
+      ],
+      "preserved_shapes": 64
+    },
+    {
+      "file": "ch11-source-8.svg",
+      "viewBox": [
+        -3.4202245000000007,
+        -4.236024500000001,
+        333.999409,
+        240.26706900000002
+      ],
+      "preserved_shapes": 62
+    },
+    {
+      "file": "ch12-source-21.svg",
+      "viewBox": [
+        -3.65046665,
+        -5.45074265,
+        302.34341330000007,
+        241.5326193
+      ],
+      "preserved_shapes": 152
+    },
+    {
+      "file": "ch12-source-27.svg",
+      "viewBox": [
+        -9.169618600000002,
+        -9.669734600000002,
+        406.12885320000004,
+        523.0362692
+      ],
+      "preserved_shapes": 339
+    },
+    {
+      "file": "ch12-source-49.svg",
+      "viewBox": [
+        -3.399918,
+        -3.399766,
+        465.762718,
+        161.740366
+      ],
+      "preserved_shapes": 209
+    },
+    {
+      "file": "ch12-source-60.svg",
+      "viewBox": [
+        -4.298154725000001,
+        -4.397840725,
+        424.07402644999996,
+        191.02321245000002
+      ],
+      "preserved_shapes": 91
+    },
+    {
+      "file": "ch12-source-67.svg",
+      "viewBox": [
+        -7.961424750000001,
+        -10.161957750000001,
+        464.6033595,
+        578.3742425
+      ],
+      "preserved_shapes": 407
+    },
+    {
+      "file": "ch13-source-33.svg",
+      "viewBox": [
+        -4.369779900000001,
+        -4.569371900000001,
+        400.0704158,
+        212.93310780000002
+      ],
+      "preserved_shapes": 216
+    },
+    {
+      "file": "ch13-source-40.svg",
+      "viewBox": [
+        -5.4207255,
+        -6.0207375,
+        425.149523,
+        252.870975
+      ],
+      "preserved_shapes": 164
+    },
+    {
+      "file": "ch13-source-48.svg",
+      "viewBox": [
+        556.5491925,
+        341.6511925,
+        423.16191499999985,
+        183.65791499999995
+      ],
+      "preserved_shapes": 176
+    },
+    {
+      "file": "ch13-source-56.svg",
+      "viewBox": [
+        -7.0872725,
+        -6.5133685,
+        404.161981,
+        323.968197
+      ],
+      "preserved_shapes": 333
+    },
+    {
+      "file": "ch13-source-6.svg",
+      "viewBox": [
+        -5.0621055,
+        -5.0621055,
+        350.881295,
+        212.608431
+      ],
+      "preserved_shapes": 161
+    },
+    {
+      "file": "ch14-source-15.svg",
+      "viewBox": [
+        78.9167125,
+        280.9253125,
+        599.5070750000001,
+        196.88287499999998
+      ],
+      "preserved_shapes": 281
+    },
+    {
+      "file": "ch14-source-21.svg",
+      "viewBox": [
+        11.6519,
+        117.691,
+        233.028,
+        147.34600000000003
+      ],
+      "preserved_shapes": 68
+    },
+    {
+      "file": "ch14-source-30.svg",
+      "viewBox": [
+        -3.599985,
+        -4.0,
+        376.313115,
+        153.8021
+      ],
+      "preserved_shapes": 100
+    },
+    {
+      "file": "ch14-source-46.svg",
+      "viewBox": [
+        -5.278075,
+        -5.278075,
+        327.41615,
+        221.67915
+      ],
+      "preserved_shapes": 194
+    },
+    {
+      "file": "ch14-source-52.svg",
+      "viewBox": [
+        -6.455190000000001,
+        -6.455190000000001,
+        319.77187999999995,
+        271.11798
+      ],
+      "preserved_shapes": 120
+    },
+    {
+      "file": "ch14-source-57.svg",
+      "viewBox": [
+        -8.4229375,
+        -8.4229375,
+        366.802375,
+        353.76337499999994
+      ],
+      "preserved_shapes": 281
+    },
+    {
+      "file": "ch14-source-8.svg",
+      "viewBox": [
+        89.94118625,
+        184.01408625,
+        509.1047275,
+        206.67837750000004
+      ],
+      "preserved_shapes": 330
+    },
+    {
+      "file": "ch15-source-11.svg",
+      "viewBox": [
+        74.82285,
+        -4.28639,
+        416.02270000000004,
+        215.74769999999998
+      ],
+      "preserved_shapes": 328
+    },
+    {
+      "file": "ch15-source-21.svg",
+      "viewBox": [
+        -2.30967,
+        -4.109345,
+        454.76194,
+        197.81580000000002
+      ],
+      "preserved_shapes": 168
+    },
+    {
+      "file": "ch15-source-24.svg",
+      "viewBox": [
+        171.530119375,
+        -3.903605625,
+        273.25876124999996,
+        189.16298625
+      ],
+      "preserved_shapes": 127
+    },
+    {
+      "file": "ch15-source-28.svg",
+      "viewBox": [
+        -4.246200000000001,
+        -4.246200000000001,
+        230.4744,
+        178.34040000000002
+      ],
+      "preserved_shapes": 85
+    },
+    {
+      "file": "ch15-source-36.svg",
+      "viewBox": [
+        -3.499957,
+        -3.799561,
+        483.140857,
+        115.16496099999999
+      ],
+      "preserved_shapes": 161
+    },
+    {
+      "file": "ch15-source-39.svg",
+      "viewBox": [
+        159.2859138,
+        -4.3855341999999995,
+        313.0121724,
+        211.5156204
+      ],
+      "preserved_shapes": 112
+    },
+    {
+      "file": "ch15-source-48.svg",
+      "viewBox": [
+        -3.249944,
+        -4.0,
+        408.28024400000004,
+        163.40030000000002
+      ],
+      "preserved_shapes": 127
+    },
+    {
+      "file": "ch15-source-55.svg",
+      "viewBox": [
+        -1.5186937499999997,
+        -1.91814375,
+        298.1609575,
+        177.19395749999998
+      ],
+      "preserved_shapes": 106
+    },
+    {
+      "file": "ch16-source-15.svg",
+      "viewBox": [
+        -1.9996800000000001,
+        -1.2983699999999998,
+        423.26732,
+        87.24745
+      ],
+      "preserved_shapes": 184
+    },
+    {
+      "file": "ch16-source-19.svg",
+      "viewBox": [
+        -2.1545022499999997,
+        -2.25444225,
+        345.5009745,
+        191.3163945
+      ],
+      "preserved_shapes": 194
+    },
+    {
+      "file": "ch16-source-22.svg",
+      "viewBox": [
+        -4.400573925,
+        -4.200354925,
+        323.73191185,
+        195.32679284999998
+      ],
+      "preserved_shapes": 200
+    },
+    {
+      "file": "ch16-source-25.svg",
+      "viewBox": [
+        -6.574284500000001,
+        -3.9240685000000006,
+        465.284657,
+        299.221797
+      ],
+      "preserved_shapes": 343
+    },
+    {
+      "file": "ch16-source-35.svg",
+      "viewBox": [
+        -3.6894468479,
+        -4.189194763900001,
+        402.38990769579993,
+        175.95735561179998
+      ],
+      "preserved_shapes": 217
+    },
+    {
+      "file": "ch16-source-43.svg",
+      "viewBox": [
+        -4.44842895,
+        -4.24838695,
+        351.4148579,
+        186.8340159
+      ],
+      "preserved_shapes": 111
+    },
+    {
+      "file": "ch16-source-49.svg",
+      "viewBox": [
+        -2.74993,
+        -3.850015,
+        444.27509000000003,
+        138.604
+      ],
+      "preserved_shapes": 168
+    },
+    {
+      "file": "ch16-source-57.svg",
+      "viewBox": [
+        -1.19976,
+        -3.149808,
+        385.53203,
+        144.322308
+      ],
+      "preserved_shapes": 131
+    },
+    {
+      "file": "ch17-source-21.svg",
+      "viewBox": [
+        -4.1789515,
+        -4.8289885,
+        448.68294000000003,
+        202.81751699999998
+      ],
+      "preserved_shapes": 296
+    },
+    {
+      "file": "ch17-source-27.svg",
+      "viewBox": [
+        -4.0,
+        -3.899986,
+        185.53774,
+        160.42058600000001
+      ],
+      "preserved_shapes": 69
+    },
+    {
+      "file": "ch17-source-32.svg",
+      "viewBox": [
+        -3.9799837500000006,
+        -3.28014375,
+        576.9490375,
+        238.5706575
+      ],
+      "preserved_shapes": 568
+    },
+    {
+      "file": "ch17-source-34.svg",
+      "viewBox": [
+        -1.3383287500000005,
+        -1.4379487500000003,
+        401.3472275,
+        190.6337475
+      ],
+      "preserved_shapes": 196
+    },
+    {
+      "file": "ch17-source-44.svg",
+      "viewBox": [
+        -4.3302245075000005,
+        -5.1303838075,
+        397.712068015,
+        219.674427315
+      ],
+      "preserved_shapes": 304
+    },
+    {
+      "file": "ch17-source-60.svg",
+      "viewBox": [
+        -4.029248300000001,
+        -3.7791803000000006,
+        325.8792966,
+        169.22842860000003
+      ],
+      "preserved_shapes": 127
+    },
+    {
+      "file": "ch17-source-63.svg",
+      "viewBox": [
+        -4.0,
+        -4.0,
+        302.615,
+        115.716
+      ],
+      "preserved_shapes": 149
+    },
+    {
+      "file": "ch20-source-18.svg",
+      "viewBox": [
+        326.0312575,
+        46.7394575,
+        477.765485,
+        234.22318499999997
+      ],
+      "preserved_shapes": 172
+    },
+    {
+      "file": "ch20-source-25.svg",
+      "viewBox": [
+        31.278371125000003,
+        -4.877613875,
+        462.52725775,
+        234.26041274999997
+      ],
+      "preserved_shapes": 360
+    },
+    {
+      "file": "ch20-source-29.svg",
+      "viewBox": [
+        150.1246206,
+        -5.7803554,
+        479.67815879999995,
+        246.9759348
+      ],
+      "preserved_shapes": 195
+    },
+    {
+      "file": "ch20-source-34.svg",
+      "viewBox": [
+        326.52506999999997,
+        56.22967,
+        374.36846,
+        230.19906000000003
+      ],
+      "preserved_shapes": 121
+    },
+    {
+      "file": "ch20-source-39.svg",
+      "viewBox": [
+        326.225463,
+        210.612463,
+        503.55707399999994,
+        273.232554
+      ],
+      "preserved_shapes": 430
+    },
+    {
+      "file": "ch20-source-46.svg",
+      "viewBox": [
+        434.593395,
+        232.778395,
+        291.71541,
+        401.82901
+      ],
+      "preserved_shapes": 299
+    },
+    {
+      "file": "ch20-source-50.svg",
+      "viewBox": [
+        369.3387525,
+        100.2397525,
+        336.971495,
+        183.88639500000002
+      ],
+      "preserved_shapes": 72
+    },
+    {
+      "file": "ch20-source-54.svg",
+      "viewBox": [
+        516.002,
+        261.034,
+        157.90100000000007,
+        219.92603000000003
+      ],
+      "preserved_shapes": 103
+    },
+    {
+      "file": "ch20-source-59.svg",
+      "viewBox": [
+        432.302,
+        236.307,
+        214.9013,
+        162.10350000000003
+      ],
+      "preserved_shapes": 90
+    },
+    {
+      "file": "ch20-source-8.svg",
+      "viewBox": [
+        288.604651,
+        144.50165099999998,
+        509.72569799999997,
+        189.140658
+      ],
+      "preserved_shapes": 48
+    }
+  ]
+}

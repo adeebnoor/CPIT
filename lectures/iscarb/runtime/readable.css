@@ -193,3 +193,7 @@ body.reading #app{height:auto;min-height:100dvh}body.reading .lecture-stage{over
  body.single-canvas .student-roadmap .road-result{display:none}
  body.single-canvas .end-hero{padding:16px 22px}
 }
+
+/* Shared course profile access, with classroom controls kept compact. */
+.lecture-profile{color:var(--teal);font-size:.875rem;white-space:nowrap;text-underline-offset:4px}.hero .small a{color:var(--teal)}
+@media(max-width:1000px){.footer-left>.lecture-profile{display:none}}

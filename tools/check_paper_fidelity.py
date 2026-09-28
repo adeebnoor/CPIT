@@ -6,6 +6,7 @@ formal objectives/readings/self-checks and Mastery-v2 assessed assignments.
 from __future__ import annotations
 import hashlib, json, re, sys
 from pathlib import Path
+from course_shell import strip_assessment_presentation
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = json.loads((ROOT / "curriculum/iscarb-paper-fidelity.json").read_text(encoding="utf-8"))
@@ -79,7 +80,14 @@ def main() -> int:
         if a.get("edition") != claims["assessed_assignment_edition"]:
             errors.append(f"Chapter {ch} assessed assignment is not Mastery v2.")
         ap, sp = ROOT / spec["path"], ROOT / spec["stress_path"]
-        if not ap.is_file() or sha_lf(ap) != spec["assignment_sha256_lf"]:
+        # Only the exact shared header/footer and CSS preference loader are new.
+        # Keep the original preprint hash for ALL other bytes, including every script.
+        try:
+            original = strip_assessment_presentation(ap.read_text(encoding="utf-8"))
+            assignment_hash = hashlib.sha256(original.encode("utf-8")).hexdigest()
+        except (OSError, ValueError):
+            assignment_hash = None
+        if assignment_hash != spec["assignment_sha256_lf"]:
             errors.append(f"Chapter {ch} assessed assignment content changed.")
         if not sp.is_file() or sha_lf(sp) != spec["stress_sha256_lf"]:
             errors.append(f"Chapter {ch} STRESS payload changed.")
