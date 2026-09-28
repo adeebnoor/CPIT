@@ -60,8 +60,11 @@ async def check_page(browser,url,ch,mode,out):
     await page.evaluate('iscarb.go(1)')
     assert await page.locator('.concept-path .map-step').count()==5
     assert await page.locator('.mind-wires').count()==0
+    await page.locator('[data-open="CASEMAP"]').click()
+    assert await page.locator('.case-map-details section').count()==5
     for b in d['roadmap']['branches']:
-        assert b['caseLens'] in await page.locator('.concept-path').inner_text()
+        assert b['caseLens'] in await page.locator('.case-map-details').inner_text()
+    await page.locator('#modal-close').click()
     assert not await no_overflow(page)
 
     # Story is immediately after the map and does not reveal the mutation.
@@ -89,7 +92,7 @@ async def check_page(browser,url,ch,mode,out):
     # The ending is unmistakable and tells the learner exactly what remains.
     await page.evaluate('iscarb.go(19)')
     end=await page.locator('#chapter-main').inner_text()
-    for phrase in ['COMPLETE','Required review','Check yourself',f'Assignment {d["assignment"]}']:
+    for phrase in ['COMPLETE','Required review','Five-objective check',f'Assignment {d["assignment"]}']:
         assert phrase in end,(ch,phrase,end[:500])
     assert await page.locator('.end-hero').count()==1
     assert not await no_overflow(page)
