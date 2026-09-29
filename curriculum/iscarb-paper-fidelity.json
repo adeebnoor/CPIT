@@ -7,8 +7,10 @@
  },
  "reference": {
   "release": "20260926-genai-v12",
-  "commit": "21646c190df65c2b4639182d4fe08f31af4a774f",
-  "student_submission_version": "20260922-student-submit-v1"
+  "commit": "f76c35e0ad781a159bcd0b773be46d10d91cce95",
+  "student_submission_version": "20260922-student-submit-v1",
+  "commit_before_history_rewrite": "21646c190df65c2b4639182d4fe08f31af4a774f",
+  "history_rewrite_note": "Public history was rewritten on 2026-09 to remove a separate private project and plain-text assessment STRESS. The preprint cites the commit shown in commit_before_history_rewrite; its content equivalent in the current history is the commit above."
  },
  "claims": {
   "observable_target": "defensible engineering judgment",
