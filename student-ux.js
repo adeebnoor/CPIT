@@ -2,6 +2,7 @@
 const button=document.getElementById('exportProgress'),input=document.getElementById('progressImport'),status=document.getElementById('progressBackupStatus');
 const allowed=k=>k&&((k.startsWith('iscarb-'))||(k.startsWith('fbr:cpit455:')));
 const say=t=>{if(status)status.textContent=t};
+document.getElementById('restoreProgress')?.addEventListener('click',()=>input?.click());
 button?.addEventListener('click',()=>{try{
  const items={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(allowed(k))items[k]=localStorage.getItem(k)}
  const data={schema:'cpit455-progress-backup-v1',created_at:new Date().toISOString(),items};

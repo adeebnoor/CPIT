@@ -1,6 +1,6 @@
 """Stage the explicit reviewed ISCARB release without modifying approved lectures."""
 from pathlib import Path
-import shutil, os, sys
+import json, shutil, os, sys
 from sanitize_static_site import main as sanitize
 from audit_classroom import audit, publication
 ROOT=Path(__file__).resolve().parents[1]
@@ -25,6 +25,9 @@ def main():
     forbidden_bundles=list(DEST.glob('wealth-os-v*.bundle.b64.*'))
     if any(p.exists() for p in forbidden_dirs) or forbidden_bundles:
         raise SystemExit('Private Wealth OS artifacts must never be included in the public site.')
+    # Student showcase: list only staff-approved PDFs that are explicitly allowlisted for publication.
+    showcase=sorted(n for n in spec['iscarb_public_files'] if n.startswith('lectures/iscarb/students/') and n.lower().endswith('.pdf'))
+    (DEST/'iscarb-students.json').write_text(json.dumps([{'path':n,'title':Path(n).stem.replace('_',' ').replace('-',' ').strip(),'bytes':(ROOT/n).stat().st_size} for n in showcase],ensure_ascii=False,indent=1)+'\n',encoding='utf-8')
     immutable_lectures={item['path'] for item in spec['lectures']}
     for p in DEST.rglob('*.html'):
         if p==DEST/'index.html': continue

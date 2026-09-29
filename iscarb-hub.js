@@ -6,23 +6,22 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
 
 // Course-level progress is a local review mark, never a mastery score.
 (function(){
- const chapters=[10,11,12,13,14,15,16,17,20],evalKey='iscarb-qeeem-evaluation-complete',openedKey='iscarb-qeeem-opened';
- const safeGet=k=>{try{return localStorage.getItem(k)}catch{return null}},safeSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch{return false}};
- const evalBox=document.getElementById('qeeemComplete'),evalStatus=document.getElementById('qeeemStatus'),label=document.getElementById('courseProgressLabel'),qeeemLinks=[document.getElementById('openQeeem'),document.getElementById('topQeeem')].filter(Boolean);
- const unlockEval=()=>{safeSet(openedKey,'1');if(evalBox)evalBox.disabled=false;if(evalStatus&&!evalBox?.checked)evalStatus.textContent='Qeeem opened. Complete the evaluation, then confirm below.'};
- qeeemLinks.forEach(a=>a.addEventListener('click',unlockEval));
- if(evalBox){evalBox.checked=safeGet(evalKey)==='1';evalBox.disabled=safeGet(openedKey)!=='1'&&!evalBox.checked;}
- const render=()=>{const checks=[...document.querySelectorAll('.review-check')];if(!checks.length)return;const n=checks.filter(x=>x.checked).length,evaluated=evalBox?.checked===true;const t=document.getElementById('courseProgress'),bar=document.getElementById('courseProgressBar'),next=checks.find(x=>!x.checked),link=document.getElementById('continueCourse');if(bar)bar.value=n;
-  if(t)t.textContent=n<chapters.length?n+' / '+chapters.length:(evaluated?'Course complete':'9 / 9 · evaluation required');
-  if(label)label.textContent=n<chapters.length?'chapters reviewed · evaluation required to finish':(evaluated?'all chapters reviewed · evaluation completed':'all chapters reviewed · complete Qeeem evaluation to finish');
-  if(evalStatus){evalStatus.textContent=evaluated?'Evaluation completion recorded on this device. Course completion is now unlocked.':(evalBox?.disabled?'Open Qeeem first. Then complete the evaluation and confirm below.':'Required before this browser marks the course complete.');evalStatus.classList.toggle('complete',evaluated)}
+ const chapters=[10,11,12,13,14,15,16,17,20],label=document.getElementById('courseProgressLabel');
+ const render=()=>{const checks=[...document.querySelectorAll('.review-check')];if(!checks.length)return;const n=checks.filter(x=>x.checked).length;const t=document.getElementById('courseProgress'),bar=document.getElementById('courseProgressBar'),next=checks.find(x=>!x.checked),link=document.getElementById('continueCourse');if(bar)bar.value=n;
+  if(t)t.textContent=n+' / '+chapters.length;
+  if(label)label.textContent=n<chapters.length?'chapters reviewed':'all chapters reviewed';
   if(next&&link){const lesson=next.closest('.lesson'),a=lesson.querySelector('.actions a');link.href=a.href;link.textContent=n?'Continue with Chapter '+next.dataset.reviewChapter:'Start Chapter 10'}
-  else if(link&&!evaluated){link.href='#course-evaluation';link.textContent='Complete required course evaluation'}
-  else if(link){link.href='course-resources.html#outcomes';link.textContent='Course complete · Review outcomes'}
+  else if(link){link.href='course-resources.html#outcomes';link.textContent='All chapters reviewed · See the outcome map'}
  };
  document.querySelectorAll('.review-check').forEach(x=>x.addEventListener('change',render));
- evalBox?.addEventListener('change',()=>{safeSet(evalKey,evalBox.checked?'1':'0');render()});
  render();
+})();
+
+// Show the student showcase link only when approved PDFs have been published.
+(function(){
+ const link=document.getElementById('showcaseLink');
+ if(!link||typeof fetch!=='function')return;
+ try{fetch('iscarb-students.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).then(list=>{if(Array.isArray(list)&&list.length)link.hidden=false}).catch(()=>{})}catch(e){}
 })();
 
 // Approximate unique-browser counter for the public iSCARB hub.
@@ -68,4 +67,4 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
 
 
 
-if(!document.querySelector('script[src^="student-ux.js"]'))import('./student-ux.js?v=20260927-readable-v1').catch(()=>{});
+if(!document.querySelector('script[src^="student-ux.js"]'))import('./student-ux.js?v=20260929-review-v1').catch(()=>{});

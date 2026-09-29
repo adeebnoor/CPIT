@@ -227,3 +227,4 @@ html[data-design="showcase-v1"] body.single-canvas #chapter-main .concepts.merge
 }
 .concepts.merged .concept b{display:block}
 html[data-design="showcase-v1"] body.single-canvas #chapter-main .concepts:not(.merged){grid-auto-rows:minmax(min-content,1fr)}
+ul.concepts.merged{list-style:none;margin:0;padding:0}

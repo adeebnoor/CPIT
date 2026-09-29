@@ -8,7 +8,7 @@ for(const c of pub.lectures){const x=load(c);try{
  for(let i=0;i<20;i++){x.api.go(i);assert.equal(x.api.getIndex(),i);assert(x.d.querySelector('h1').textContent.trim());assert.equal(x.d.querySelectorAll('.counter').length,1);const ids=[...x.d.querySelectorAll('[id]')].map(e=>e.id);assert.equal(ids.length,new Set(ids).size);}
  x.d.getElementById('nextBtn').click();assert.equal(x.api.getIndex(),19);x.api.go(0);assert(x.d.getElementById('prevBtn').disabled);
  for(const st of D.stations){x.api.startStation(st.no);assert(x.d.getElementById('timer-start'));assert(x.d.querySelector('.station-steps').textContent.includes('PAIR'));x.d.getElementById('hintBtn').click();assert(x.d.getElementById('coach').textContent.includes(st.hint));for(const f of st.fields)put(x,f,'A source-backed draft for '+f);}
- x.api.open('CARD');assert.equal(x.d.querySelector('[data-field="claim"]').value,'A source-backed draft for claim');assert.match(x.d.getElementById('progress').textContent,/not mastery/);
+ x.api.open('CARD');assert.equal(x.d.querySelector('[data-field="claim"]').value,'A source-backed draft for claim');assert.match(x.d.getElementById('progress').textContent,/visited/);
  const study=read(c.study_path);const ids=[...study.matchAll(/id="source-slide-(\d+)"/g)].map(m=>+m[1]);assert.equal(new Set(ids).size,c.source_slide_count);for(let i=1;i<=c.source_slide_count;i++)assert(ids.includes(i));sourceTotal+=c.source_slide_count;
  for(const r of D.readings){const ns=r.range.match(/\d+/g).map(Number);assert(ns.every(n=>n>=1&&n<=c.source_slide_count));}
  for(const g of D.groups)for(const k of g.units)assert(D.slides.some(s=>s.id===k));
