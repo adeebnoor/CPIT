@@ -2,13 +2,5 @@
   "chapter": "13",
   "version": "2026-09-ch13-path-v1",
   "label": "STRESS · new evidence",
-  "sealed": {
-    "v": 1,
-    "alg": "AES-256-GCM",
-    "kdf": "PBKDF2-SHA256",
-    "iter": 250000,
-    "salt": "sb6ZLfwIme5pXxGatLBdcw==",
-    "iv": "kGF2arwtEeJt0ft/",
-    "ct": "/TVPWU/V+WZn6h9TJa8pU7noX75bXo7SEGnj8TqLEVK0LIyz6RUz1jbibpuxyx+DZoSXYdrTac+r+E1qo77qRqG+y+FwFZ1naGZ2aO2TEApoX7Fjx4lbEDFhryZoKyOHRd5vsNYlFXF9mRUJ3xz8L2S4F0AelRx8q+e4jDd0DBXu7AC6/z5SxKYoC9aN00CIRK2hngc0neZ0hMY6wEDTs0tnUybQ6hcr/XAEfPOcX+arFe4s4ATjODXvFpxBNQkZjPCPbSYrsWfgLludmO7VlKQ6liDXhpG4488EPn2I3kwaN7xX3llcd30HKE5E87KQCwJObSThFRJzvyxKoUoK1+y6KymUz5PFCKoOlAwB/EjTzcjMYPUaQW5Pyr8t47FBDJGWVw/oHh/GESNM0NLS848NHMqh4dtN2ql6AM1KT9xVoOdBbGrwXaLIWokaqYt6H7qYaSk6gIAGh4wL"
-  }
+  "text": "A reviewer now provides a trace showing that the preview endpoint rejects a cross-user request, but the bulk export endpoint checks only whether the requester is logged in. The trace uses synthetic student accounts. Explain the implication for the scope of the original security claim."
 }

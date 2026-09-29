@@ -272,72 +272,72 @@
    "stress_path": "lectures/iscarb/reveal/r10-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch10-mastery-v2",
-   "assignment_sha256_lf": "74b24312b25ec90ec0d3881ad70e082811409903229e9bda9f02dfc602f32177",
-   "stress_sha256_lf": "9e663f491d6941633716e29db69b3d9d9c39a6f532c9e99726d155ad25d6fbe8"
+   "assignment_sha256_lf": "01fa833aed462c4d17ba62c5e9e40180d6721eb690661a394585b9ad504cd1d9",
+   "stress_sha256_lf": "ac666164869bf11ab5c9966bba8aeb7d8852a55c5d708c85904dfbb5a9402e07"
   },
   "11": {
    "path": "lectures/iscarb/Ch11-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r11-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch11-mastery-v2",
-   "assignment_sha256_lf": "b7d1345c7a49295c1459a005d1452e70623fcc26603dee1ab7802088594938ca",
-   "stress_sha256_lf": "c5dd49558842f4c249e6ddaa1c3b5928a1bf37840ca24cc8571129b15307ea76"
+   "assignment_sha256_lf": "6ecf1cd92d9e60b4af0e9669f672656989c879a8039d5b5c4b49cfe21ccefa0a",
+   "stress_sha256_lf": "9a60b7fa83d3656aa2b943c06b07616bdb1c5a008bc14a7c9cacc14845f6d2e0"
   },
   "12": {
    "path": "lectures/iscarb/Ch12-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "e594d9024e6383a836d49e0fd43e070349d2a589523db800e3ab548e4f819172",
-   "stress_sha256_lf": "689911e87d1ef37edd594a0600a207ba4ff90dfc476c8a1b6e62788c7d5580a3"
+   "assignment_sha256_lf": "204502fea55ad807a0fba250331c848de5efc32eb0d84929c4b05a14c01a40ef",
+   "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
    "path": "lectures/iscarb/Ch13-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "97bd3de3ba7b144b1df05f07fdb0a2b05dd1c02e12e770198aacb99b16781755",
-   "stress_sha256_lf": "028c114ffbde03adc8c9bf28a4362ecf420e3d2929368b845486501826ec06a6"
+   "assignment_sha256_lf": "ad1a5fd67e08802673934591117b75c2dd72ad4a6de7397800a06e5a1a3df051",
+   "stress_sha256_lf": "db3663c3ac2ef31db79e70a2c279f1c784913bda41209334e5c9a3a6c76fd6cc"
   },
   "14": {
    "path": "lectures/iscarb/Ch14-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "2ccb5bd7a0434caf41b60daf31d7cbe3978a5bc2d8013839a30d94d4299856fa",
-   "stress_sha256_lf": "5903009bbbe0b02e4b84892a2baacb7efff89b0ad2173213165db744d5bcf35e"
+   "assignment_sha256_lf": "104ea4b8513d7553f4bed3c94ab3b6e46375ecdfadbf752589ef7ee7532f95fd",
+   "stress_sha256_lf": "97e209be6bf0bd9442c17d663bb667f7cd977ddf1e53e809d5a7f911632b6b67"
   },
   "15": {
    "path": "lectures/iscarb/Ch15-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "bf39972c9995cbd7b66c9bb55ad80c20e5b9f6607585397a7f2956c49fd86013",
-   "stress_sha256_lf": "61381673a89688db19e68a7f0c3f9ad33154b5ceaff4ace9126085bace873637"
+   "assignment_sha256_lf": "d3a9aaa30c00bdc0096bd0f3e453b7bc82d24d0425b9c46be6c4b4fe2ef53280",
+   "stress_sha256_lf": "59f9c063fb19615335582861ff6ba9395501cbb90a9c87a3a6fa017c9e49a84d"
   },
   "16": {
    "path": "lectures/iscarb/Ch16-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "a6a991b4e181986a0d975da45a5ed9e6f640ca23ef1fbfb4490c94b72711853a",
-   "stress_sha256_lf": "22e054692b50c98307e45bb044ac865db5d7b9a7dec8a3194323f133e6c566b3"
+   "assignment_sha256_lf": "1a2ec9ff96625ed5f634febc76e555100a85a1b1d071cf3252377042373c75b0",
+   "stress_sha256_lf": "5d558e91bc9d2a11c50f25d5c1220772c51cbd07231823daa5ac7e354b6e8048"
   },
   "17": {
    "path": "lectures/iscarb/Ch17-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "71010cb62240f5f7c273e2e5f62b98b121e917251fbda9c8b552f428b258276d",
-   "stress_sha256_lf": "ad6670ed6944c936614060571a269687a60d0d766f31f8af55de4e09ca95b307"
+   "assignment_sha256_lf": "ba914220fd3df97dec6b4f7ca1eab5aac1a249607d053d841b42c3986ced51ec",
+   "stress_sha256_lf": "7a6a8c3d1e64b662501a40812df2cadf8ab40f9b15d8025094cce49441167914"
   },
   "20": {
    "path": "lectures/iscarb/Ch20-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "8f4b27b049194320edf980a9f180cfda413e4559b5ff32998cd05b883d823449",
-   "stress_sha256_lf": "bce19de6147d24dee60cdc32859b14fa2eaeac7a5631956db59413c79e84d8bf"
+   "assignment_sha256_lf": "3af8cdf7d863c04f3983576cac97c70ccfdf001f51a9e75daea5ebe25e89817c",
+   "stress_sha256_lf": "caac8d5d01403ad0decaad0500aa072893b848be2e895586eea604bb8c1d01d8"
   }
  },
  "official_guidance": [
@@ -410,6 +410,32 @@
     "stress 15",
     "stress 16",
     "stress 17",
+    "stress 20"
+   ]
+  },
+  {
+   "revision": "20260929-code-free-stress",
+   "date": "2026-09-29",
+   "base_release": "20260926-genai-v12",
+   "summary": "Instructor-authorized removal of STRESS unlock codes from all nine current and nine previous assignments after student access reports. Evidence text is unchanged. Part A save verification, read-only commitment, edition and draft identities, rubric totals and deadlines remain unchanged; STRESS opens automatically after commitment. Guides and offline packages match the code-free workflow.",
+   "repinned": [
+    "assignment 10",
+    "stress 10",
+    "assignment 11",
+    "stress 11",
+    "assignment 12",
+    "stress 12",
+    "assignment 13",
+    "stress 13",
+    "assignment 14",
+    "stress 14",
+    "assignment 15",
+    "stress 15",
+    "assignment 16",
+    "stress 16",
+    "assignment 17",
+    "stress 17",
+    "assignment 20",
     "stress 20"
    ]
   }

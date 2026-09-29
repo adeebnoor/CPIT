@@ -2,13 +2,5 @@
   "chapter": "10",
   "version": "2026-09-ch10-mastery-v2",
   "label": "STRESS · new evidence",
-  "sealed": {
-    "v": 1,
-    "alg": "AES-256-GCM",
-    "kdf": "PBKDF2-SHA256",
-    "iter": 250000,
-    "salt": "Ju0EDg4tYyCdaSybbhGLNA==",
-    "iv": "6zSqPYfu/gbgMkUt",
-    "ct": "X5cqC3I3vu7P52Ly6/HSONpZMbuqw5I8foTWIvX9cPHuwL+bPiZeFUxrVbS78w/4ogILOTTvPOWexXpfIV+XTMK3bJ46UN2e85VKMrJ2TQNQ5Nouq8Bkq3cxOS5MjQs08lm5rWaTApMzNHbwE4w9+feSuYb38K1JfRmxNs5Lr6eqF1VMOTLLO/QEMXB/m4BRTH++XBx3qt2gN3owbJrvKNttxtTuS6kUGu/kmS03Q7/etfq0V9k2u6N5x97aGmgAvCmV72nGUbGhZjDDL60E0NwQ6PZ2hKVu6mVhrNjSOKzdIpRdZZkj46ajozLh8P24MOg79enGr6TnXaBXaZfvs5yDJp1QvBQ/zL/V2yFWZebPpJ9cP7IYz0q2FOi3zEin7cVO/2vGYnR52N+2sxjhi3O4BrXxD1h3x5ZQ3ZV/PkKlViaZ7xe+PyoMQufeCt9vnZm2trN203mIGfWPpiC7b9CLG+pTbSIKAyqH0/zhXOoTP658HJCeHKQLTA6XoX2Ny1twoij/gHqKWlS/sJgbhGhGCY6NADjCj1JD87PlDN5EsIxack02+pHeuJ/UDHRiY13mego4Eum4XpDWliHucvVOkLEjRzAA1/TRxmyZq2aVXogBwO95BGS5/Yg93cNSjX0cGH/FtprIB1hseH0ENcbRAR+eEg3U+uEh2HFbLUkdGCV+91ZZlZ2aOMqyQ266ppjdQcktfygbc+keK/rAKw=="
-  }
+  "text": "A peak-load failover rehearsal now passes using the current release and the registration request mix. An independent reconciliation of the inspected registrations finds no lost or duplicate confirmations. The registrar authorizes a documented alternative submission route if errors recur. These are supplied teaching-case observations, not a guarantee about future operation. Reassess whether continuing under your original boundary is justified; explain any remaining uncertainty."
 }

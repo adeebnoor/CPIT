@@ -2,13 +2,5 @@
   "chapter": "17",
   "version": "2026-09-ch17-path-v1",
   "label": "STRESS · new evidence",
-  "sealed": {
-    "v": 1,
-    "alg": "AES-256-GCM",
-    "kdf": "PBKDF2-SHA256",
-    "iter": 250000,
-    "salt": "fPrx51WcYxRTZfWw+zN+sQ==",
-    "iv": "VKHgLnxkLRMI7xge",
-    "ct": "LINsIX0Nz9Mcvh/qARHtrMJ5UOYCxnIRPWRLC6FllQbTJN0OQHDtnpR0tGUb6rmHtYHt56CrqkIpjj/fSgYl7H2/xVCiyGn2fJV1pbUKtEi3kEGwqbqXVIX19h31Zn0yn4tCyyCpR7tYqsCXWhQzY7V4OLEViFbB1Puc+9mu6vN42K9qIYE7xjRHhoZk0cw1mj3QFYcCVetoGohvShNifst+Q+WbGXu1SSF7nr2a6JtSvaWbIfyGp2v49hSODsTMviWJMCCZfQAVwcqly5LunjPAAdznM5/H5nzRu4PwR6Yk7q68GS5sf3hzU8qn8P/rjPDSoJ98sJG2gPTSD7F2qiGMnot7sNkXAbFXqD/8xmdx5xm00Cj8+Xrv0zg201sLLAtD1xPBdL1kJSN6v97bnQ45y1AjJgH2WakLtunXx/tZQZBS0v8Sppl1utbHAf7sxl4="
-  }
+  "text": "A failover drill shows that the deduplication record is stored only in the application service’s memory. After the service restarts, a retry can create another database reservation even when the same request identifier is reused. Revise the scope of your earlier mechanism."
 }
