@@ -15,7 +15,9 @@ iscarb-studio/.env
 
 # Personal/private artifacts — never commit or publish
 wealth-os/
+wealth-os-v3/
 wealth-os-v*.bundle.b64.*
+.github/workflows/package-wealth-os.yml
 
 # OS/editor
 .DS_Store
