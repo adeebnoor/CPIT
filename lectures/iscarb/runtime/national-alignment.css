@@ -27,7 +27,7 @@ body.single-canvas .body-grid:has(.source-vector-panel){grid-template-columns:mi
  html[data-design="showcase-v1"] body.single-canvas .body-grid:has(.two-approaches) .meaning{display:none!important}
  html[data-design="showcase-v1"] body.single-canvas .two-approaches{gap:22px}
  html[data-design="showcase-v1"] body.single-canvas .approach{padding:20px 24px}
- html[data-design="showcase-v1"] body.single-canvas .approach h3{font-size:1.3rem;margin-bottom:10px}
+ html[data-design="showcase-v1"] body.single-canvas .approach h3,html[data-design="showcase-v1"] body.single-canvas .approach h2{font-size:1.3rem;margin-bottom:10px}
  html[data-design="showcase-v1"] body.single-canvas .approach p{font-size:1.18rem;line-height:1.4}
  html[data-design="showcase-v1"] body.single-canvas .arrow-chain{font-size:1.1rem;margin:12px 0}
 }

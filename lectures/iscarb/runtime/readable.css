@@ -39,7 +39,7 @@ button,.topnav button,.topnav a,.footerbar button{font-size:1rem;min-height:44px
 .meaning{max-width:1150px;width:100%;padding:32px;margin:auto;border-radius:16px;display:block!important}
 .meaning h2{font-size:.9375rem;margin-bottom:22px}.points{font-size:1.5rem;line-height:1.6;gap:20px;padding-left:28px;max-width:1050px}
 .table-main,.full-table .table-main{font-size:1.375rem;line-height:1.5;max-width:1150px;width:100%}.table-main td,.table-main th{padding:16px 22px}
-.table-main th:first-child{width:29%}.two-approaches{gap:24px}.approach{padding:24px}.approach h3{font-size:1.5rem}.approach p{font-size:1.25rem}.arrow-chain{font-size:1.25rem}
+.table-main th:first-child{width:29%}.two-approaches{gap:24px}.approach{padding:24px}.approach h3,.approach h2{font-size:1.5rem}.approach p{font-size:1.25rem}.arrow-chain{font-size:1.25rem}
 .question{gap:22px;border:0;padding:0}.question-text{font-size:1.5rem;line-height:1.6;max-width:1100px}.question-text b{display:block;font-size:.875rem;margin:0 0 10px}.question .buttons{gap:12px}.source-line{font-size:.875rem;max-width:none;line-height:1.6}.question .actions{gap:24px;align-items:flex-start}
 .case-thread{font-size:1.125rem;padding:18px;grid-template-columns:auto 1fr;gap:8px 14px}.case-thread>span{font-size:.875rem}.case-thread>b{font-size:1.125rem}.case-thread>em{grid-column:1/-1;font-size:1.25rem}
 .ai-lens{font-size:1.25rem;padding:20px;line-height:1.6}.ai-lens>span{font-size:.875rem;white-space:normal}.ai-tag{font-size:.75rem;padding:5px 9px}
