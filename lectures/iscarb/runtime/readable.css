@@ -226,3 +226,4 @@ html[data-design="showcase-v1"] body.single-canvas #chapter-main .concepts.merge
 html[data-design="showcase-v1"] body.single-canvas #chapter-main .concepts.merged .concept span{font-size:clamp(1.12rem,1.5vw,1.4rem)}
 }
 .concepts.merged .concept b{display:block}
+html[data-design="showcase-v1"] body.single-canvas #chapter-main .concepts:not(.merged){grid-auto-rows:minmax(min-content,1fr)}
