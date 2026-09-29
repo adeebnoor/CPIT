@@ -21,6 +21,10 @@ def main():
     for name in spec['iscarb_public_files']:
         (DEST/name).parent.mkdir(parents=True,exist_ok=True); shutil.copy2(ROOT/name,DEST/name)
     image='iscarb-studio/app/static/hero_user_original.png'; (DEST/image).parent.mkdir(parents=True,exist_ok=True); shutil.copy2(ROOT/image,DEST/image)
+    forbidden_dirs=[DEST/'wealth-os', DEST/'wealth-os-v3']
+    forbidden_bundles=list(DEST.glob('wealth-os-v*.bundle.b64.*'))
+    if any(p.exists() for p in forbidden_dirs) or forbidden_bundles:
+        raise SystemExit('Private Wealth OS artifacts must never be included in the public site.')
     immutable_lectures={item['path'] for item in spec['lectures']}
     for p in DEST.rglob('*.html'):
         if p==DEST/'index.html': continue
