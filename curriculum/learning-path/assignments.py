@@ -8,7 +8,7 @@ ASSIGNMENTS={
  bound='State the operating conditions supported by the evidence and a condition that would require a new safety decision.',
  act='Choose release, restricted pilot or hold. Name one responsible role and the evidence that must support the chosen boundary.',
  measurecrit='A coherent hazard-to-requirement-to-control-to-verification trace, with existing and proposed evidence clearly separated.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='State which link in the original hazard trace is weakened or broken, then defend RETAIN, REVISE or REPLACE.',
  source='X03, X05, X06, D12 and B01; original slides 15–32 and 44–58.'),
 13:dict(step='TEST',title='Turn a misuse case into a test',minutes='35–45',artifact='Threat → control → negative test',
@@ -19,7 +19,7 @@ ASSIGNMENTS={
  bound='State which roles, objects and access paths the recommendation covers. Name an untested path and a reopening trigger.',
  act='Choose a bounded release action. Link a concrete server-side control to the tests and identify the reviewer.',
  measurecrit='One positive and one negative authorization test, each with actor, input, observable expected result and evidence; no invented execution result.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='Name the control or coverage assumption contradicted by the new trace and specify the final action and retest scope.',
  source='X02, X05, X06, R09 and R18; original slides 29–43 and 59–70.'),
 14:dict(step='RECOVER',title='Keep one critical service running',minutes='40–50',artifact='Critical service → degraded mode → recovery check',
@@ -30,7 +30,7 @@ ASSIGNMENTS={
  bound='State the allowed operating scope and the staleness or confidentiality condition that makes the fallback unacceptable. Any new threshold must be labelled proposed.',
  act='Choose trial, restricted trial or hold. Give the immediate action, owner and one rehearsal that would test the service rather than only the server.',
  measurecrit='A coherent response across the four resilience activities, including usable degraded service, reconciliation and a testable recovery check.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='Explain what the shared dependency does to your proposed recovery path. Defend the revised boundary and the evidence needed before another trial.',
  source='X02, X04, D14, X06 and B01; original slides 6–17 and 28–61.'),
 15:dict(step='COMPARE',title='Choose a reuse strategy with evidence',minutes='40–50',artifact='Options → constraints → justified choice',
@@ -41,7 +41,7 @@ ASSIGNMENTS={
  bound='Identify a lifecycle assumption that must hold and a specific change that would reverse the recommendation.',
  act='Make a bounded selection or evaluation decision. Identify the owner and the evidence needed to settle one consequential unknown.',
  measurecrit='A comparison using relevant planning factors, traceable facts and visible unknowns, leading to a defensible conditional choice.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='Update only the affected assumptions and explain why the final choice is retained, revised or replaced.',
  source='X02, D15, X03, X06 and R09; original slides 5–15 and 41–56.'),
 16:dict(step='CONTRACT',title='Validate a component contract',minutes='40–50',artifact='Interface → semantics → adapter and tests',
@@ -52,7 +52,7 @@ ASSIGNMENTS={
  bound='State the input range and documented behavior your recommendation relies on. Name the unanswered error-handling question.',
  act='Choose use, adapt, replace or hold. Name the integration owner and evidence required to check the contract after composition.',
  measurecrit='A coherent pre/post contract, justified unit conversion, valid range and a discriminating boundary or invalid-input test.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='Identify the invalidated semantic assumption. State the final contract, action and evidence needed without guessing a new exception type.',
  source='X03, B01, R09, D16 and D16B; original slides 14–22 and 40–59.'),
 17:dict(step='FAILURE',title='Reason about a lost remote response',minutes='40–50',artifact='Architecture → failure sequence → recovery evidence',
@@ -63,7 +63,7 @@ ASSIGNMENTS={
  bound='State the failure modes and consistency requirement your recommendation covers. Identify the limit of the supplied tests.',
  act='Recommend a bounded pilot action and an owner. Explain the mechanism and the evidence required before accepting automatic retries.',
  measurecrit='A causally correct failure sequence, justified retry or reconciliation rule, and a test that distinguishes one committed action from duplicate actions.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='Explain why stable request identity alone may be insufficient and what durable evidence or recovery rule your final decision requires.',
  source='X02A, X03, X05, R09 and X09; original slides 14–28 and 53–64. Retry-specific reasoning is a labelled course application.'),
 20:dict(step='INTEGRATE',title='Make an integration decision across owners',minutes='45–55',artifact='Governance → interfaces → staged acceptance',
@@ -74,7 +74,7 @@ ASSIGNMENTS={
  bound='Separate what the pilot owner can control from what requires agreement. State a trigger for suspending or narrowing the shared claim.',
  act='Recommend pilot, restricted pilot or hold. Name the responsible coordination role, participating owners and evidence needed for the next stage.',
  measurecrit='A feasible cross-owner agreement and staged acceptance test that handles incomplete participation and makes assumptions and authority explicit.',
- stress=None,
+ stress=None,  # sealed; see docs/stress-unlock.md
  refit='Show how independent evolution affects the shared service. Defend the final deployment boundary, visible uncertainty and negotiated next step.',
  source='X02A, X03, X04, X05, X06 and X08; original slides 15–41 and 48–60.')
 }

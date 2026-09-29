@@ -35,6 +35,18 @@ def canonical_sha(path):
     if p.suffix.lower() in TEXT_EXT: b=b.replace(b'\r\n',b'\n')
     return hashlib.sha256(b).hexdigest()
 
+def stress_problem(stress, ch, version):
+    """STRESS payloads are published sealed (AES-256-GCM, PBKDF2 key from an instructor-held code)."""
+    if str(stress.get("chapter"))!=str(ch) or stress.get("version")!=version:
+        return f"Invalid Chapter {ch} STRESS payload identity."
+    if any(k in stress for k in ("text","principle")):
+        return f"Chapter {ch} STRESS payload is in plain text; seal it with tools/seal_stress.py."
+    sealed=stress.get("sealed")
+    ok=(isinstance(sealed,dict) and sealed.get("v")==1 and sealed.get("alg")=="AES-256-GCM" and sealed.get("kdf")=="PBKDF2-SHA256"
+        and isinstance(sealed.get("iter"),int) and sealed["iter"]>=100000
+        and all(isinstance(sealed.get(k),str) and len(sealed[k])>=16 for k in ("salt","iv","ct")))
+    return "" if ok else f"Invalid sealed Chapter {ch} STRESS payload."
+
 def audit(root=ROOT):
     root=Path(root); spec=publication(); errors=[]
     if spec.get("automatic_generation") is not False:
@@ -142,13 +154,22 @@ def audit(root=ROOT):
             if assignment.get("points")!=expected_points: errors.append(f"Chapter {ch} AI-only assignment has the wrong point total.")
             for marker in ('data-assessment-edition="ai-v3"','AI-ONLY','Download Blackboard JSON','22964248'):
                 if marker.lower() not in a.lower(): errors.append(f"Chapter {ch} AI-only assignment is missing required marker: {marker}")
+        if "function openStress(" not in a: errors.append(f"Chapter {ch} assignment must support unlock-code STRESS.")
         if sp.is_file():
             try:
-                stress=json.loads(sp.read_text(encoding="utf-8"))
-                if str(stress.get("chapter"))!=str(ch) or stress.get("version")!=assignment.get("version") or not stress.get("text"):
-                    errors.append(f"Invalid Chapter {ch} STRESS payload.")
-                if stress.get("text") and stress["text"] in a: errors.append(f"Chapter {ch} STRESS must not be included in the initial assignment HTML.")
+                problem=stress_problem(json.loads(sp.read_text(encoding="utf-8")),ch,assignment.get("version"))
+                if problem: errors.append(problem)
             except ValueError: errors.append(f"Invalid Chapter {ch} STRESS JSON.")
+        else: errors.append(f"Missing Chapter {ch} STRESS payload.")
+    # Older editions stay available for draft recovery; their STRESS must be sealed too.
+    for older in spec.get("previous_assignments", []):
+        ch=older.get("chapter"); op=root/older["path"]; sp=root/older["stress_path"]
+        if not op.is_file() or not sp.is_file(): errors.append(f"Missing previous Chapter {ch} edition or payload."); continue
+        if "function openStress(" not in op.read_text(encoding="utf-8"): errors.append(f"Previous Chapter {ch} edition must support unlock-code STRESS.")
+        try:
+            problem=stress_problem(json.loads(sp.read_text(encoding="utf-8")),ch,older.get("version"))
+            if problem: errors.append("Previous edition: "+problem)
+        except ValueError: errors.append(f"Invalid previous Chapter {ch} STRESS JSON.")
     # Current page references and local links.
     pages=CURRENT_PAGES+[name for name in allowed if name.endswith(".html")]
     for name in pages:

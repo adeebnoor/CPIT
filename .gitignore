@@ -27,3 +27,7 @@ Thumbs.db
 
 # Public staging and local review artifacts
 _site/
+
+# Assignment STRESS secrets (keep outside the repository; see docs/stress-unlock.md)
+stress-codes*.json
+stress-plain*.json

@@ -1,5 +1,14 @@
 {
   "chapter": "16",
   "version": "2026-09-ch16-path-v1",
-  "redacted": "STRESS text removed from public history; see docs/stress-unlock.md"
+  "label": "STRESS · new evidence",
+  "sealed": {
+    "v": 1,
+    "alg": "AES-256-GCM",
+    "kdf": "PBKDF2-SHA256",
+    "iter": 250000,
+    "salt": "ot5ZZ1Qtvcuy+uUxYHof3w==",
+    "iv": "7ZzcKVyAjvz0NCM7",
+    "ct": "MDdkJQ0i5NfwXV3RJh0KxenBgviJZHzG+q/QmH/E/tpJLWVNYFt7bKprZAOQTWJ2AnXpnWMDeAbrOWc6LrZkZwib7MZylxcAkN6J5gTPpbY2KaWe7m8pmHp97aScFwbptEb8yj7+Nq+Fk/oY5CjhEyBtNl/bPEzHB8aFuYT8DZlULUIhceIXEIcfr3GWkKF7V9mB6oAp8/J7/v8yNbNkszfx4QFWhRVzd3sSZKdHrkTdS5XCGqf40+fT75V919ltjupUpoRt0eDJmC06TKj1xRhBHTpRfqyLGPk137KBsgiLV7MuTg+bOUvJhOF8p7eU28zj53vUAXxsXl7gCbi3MtRmdB7emgT2vY3tzb+dVWHFgMZPKt/asXunLsbvTS8ciYJl15YMlB6xahSTs+htu6yd2bIdABTCPw8i9XjZHOm1b8SF1SOXntc0FeKP0rIKFX2n8K3uvQIKqtDY0cKxebW8vSaUG7PpTa/t"
+  }
 }

@@ -4,7 +4,10 @@ const path=require('path');
 const assert=require('node:assert/strict');
 const {JSDOM,VirtualConsole}=require('jsdom');
 const html=fs.readFileSync(process.argv[2]||path.join(__dirname,'../lectures/iscarb/previous/Ch10-FBR-Student-Assignment.html'),'utf8');
-const stress=JSON.parse(fs.readFileSync(process.argv[3]||path.join(__dirname,'../lectures/iscarb/reveal/r10-v5.json'),'utf8'));
+const {sealForTest,withWebCrypto,unlock,assertSealed}=require('./learning-path-tests/sealed-stress.cjs');
+const published=JSON.parse(fs.readFileSync(process.argv[3]||path.join(__dirname,'../lectures/iscarb/reveal/r10-v5.json'),'utf8'));
+const TEXT='Test STRESS for the previous Chapter 10 edition: sealed new evidence opens only with the released unlock code.';
+let stress=published;
 const access='fbr:access:ch10:v4';
 function token(s){let h=2166136261;for(const c of s.trim()){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return(h>>>0).toString(36);}
 const sid='22001234',T=token(sid),key='fbr:cpit455:ch10:reviewed:v5:'+T,oldkey='fbr:cpit455:ch10:prod:v4:'+T;
@@ -12,7 +15,7 @@ function page(opts={}){
  const errors=[],fetches=[],downloads=[];
  const virtualConsole=new VirtualConsole();
  virtualConsole.on('jsdomError',e=>{if(!/Not implemented: navigation/.test(e.message))errors.push(e.message);});
- const dom=new JSDOM(html,{url:'https://adeebnoor.github.io/CPIT/lectures/iscarb/previous/Ch10-FBR-Student-Assignment.html',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole,beforeParse(w){
+ const dom=new JSDOM(html,{url:'https://adeebnoor.github.io/CPIT/lectures/iscarb/previous/Ch10-FBR-Student-Assignment.html',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole,beforeParse(w){withWebCrypto(w);
   if(opts.access!==false)w.sessionStorage.setItem(access,JSON.stringify({sid,acknowledged:true,edition:'reviewed-v5'}));
   if(opts.saved)w.localStorage.setItem(key,JSON.stringify(opts.saved));
   if(opts.legacy)w.localStorage.setItem(oldkey,JSON.stringify(opts.legacy));
@@ -29,10 +32,11 @@ function partA(w){put(w,'fit','Availability governs because students need access
 function partB(w){w.document.querySelector('[name="boundaryState"][value="CROSSED"]').checked=true;w.document.querySelector('[name="refit"][value="REVISE"]').checked=true;put(w,'refitwhy','The sign-in outage crosses my access boundary, so new applicants need an approved alternative while confirmed work remains checkable.');put(w,'revised','Continue confirmed active sessions with integrity monitoring; ask the registrar to approve an alternative for blocked students and review before 12:00.');put(w,'aiUse','No AI used.');put(w,'signer','Student Example');w.document.getElementById('attested').checked=true;w.exportState();}
 async function tick(){await new Promise(r=>setTimeout(r,0));}
 (async()=>{
+ if(published.sealed){assertSealed(published,'r10-v5.json');stress=await sealForTest('10',published.version,{text:TEXT,principle:'Reassess the committed boundary.'});}
  const p=page();assert.deepEqual(p.errors,[]);assert.equal(p.fetches.length,0);assert(p.w.document.getElementById('lock').disabled===false);assert(p.w.valB().includes('Commit Part A'));assert(!p.w.document.getElementById('backup').disabled);assert(!p.w.document.querySelector('a[href$="#unit-10"]'));assert(!html.includes('SCENARIO_PENDING'));assert.equal(p.w.document.documentElement.dataset.iscarbStandalone,'1');
  p.w.backup();assert(p.downloads[0].includes('DRAFT_BACKUP'));assert.equal(p.fetches.length,0);assert(p.w.md().includes('DRAFT / BACKUP'));await p.w.commit();assert.equal(p.fetches.length,0);
  partA(p.w);p.w.confirm=()=>false;await p.w.commit();assert.equal(p.fetches.length,0);assert.equal(p.w.document.getElementById('fit').readOnly,false);
- p.w.confirm=()=>true;await p.w.commit();assert.equal(p.fetches.length,1);assert.equal(p.fetches[0],'../reveal/r10-v5.json');assert.equal(p.w.document.getElementById('fit').readOnly,true);assert.equal(p.w.document.getElementById('save').disabled,false);assert(p.w.document.getElementById('pdf').disabled);
+ p.w.confirm=()=>true;const committing=p.w.commit();if(stress.sealed)await unlock(p.w,TEXT);await committing;assert.equal(p.fetches.length,1);assert.equal(p.fetches[0],'../reveal/r10-v5.json');assert.equal(p.w.document.getElementById('fit').readOnly,true);assert.equal(p.w.document.getElementById('save').disabled,false);assert(p.w.document.getElementById('pdf').disabled);
  partB(p.w);assert.equal(p.w.valB(),'');assert(!p.w.document.getElementById('pdf').disabled);assert(p.w.save());const saved=JSON.parse(p.w.localStorage.getItem(key));assert(saved.locked&&saved.attested);p.w.download();assert(p.downloads.some(x=>x.endsWith('_FBR.md')));assert(p.w.md(true).includes('Campus course-registration portal'));assert(p.w.md(true).includes('AI-use declaration'));p.w.printSheet(true);assert(p.w.document.getElementById('print').textContent.includes('Human review'));
  put(p.w,'revised','Changed final plan after review; this must reset the human sign-off to protect the submitted reasoning.');p.w.document.getElementById('revised').dispatchEvent(new p.w.Event('input',{bubbles:true}));assert(!p.w.document.getElementById('attested').checked);assert(p.w.document.getElementById('pdf').disabled);assert.equal(p.w.eval('S.exportedAt'),'');assert(p.w.document.getElementById('erase').disabled);p.dom.window.close();
  const reload=page({saved});await tick();assert.equal(reload.fetches.length,0);assert.equal(reload.w.document.getElementById('fit').value,saved.lockedPartA.fit);assert.equal(reload.w.document.getElementById('revised').value,saved.revised);assert.equal(reload.w.valB(),'');assert.deepEqual(reload.errors,[]);reload.dom.window.close();

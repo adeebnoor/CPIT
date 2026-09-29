@@ -20,8 +20,10 @@ STUDY = {
  quiz=[('A constituent remains useful on its own and has its own owner. This indicates:',['Only technical replication','Operational and managerial independence','One centrally controlled application'],1,'These independent purposes and owners constrain SoS coordination.'),('A coalition coordinates voluntarily without one owner controlling every system. Which classification is plausible?',['Collaborative','Automatically directed','Necessarily virtual with no agreed purpose'],0,'Classification depends on authority and shared coordination, not only network connections.'),('Why can reductionist reasoning fail in a SoS?',['Constituents never have specifications','Interfaces are irrelevant','Interactions and independent evolution produce emergent behavior'],2,'Local correctness alone does not establish a shared system-level outcome.'),('A staged release should:',['Provide bounded value with explicit interfaces and incomplete participation','Wait for total control of all owners in every case','Ignore version differences'],0,'Incremental acceptance must state participation and interface assumptions.'),('Which statement best distinguishes trading from a one-way feed?',['Trading is only a faster feed','Trading supports exchanges between participants rather than only publishing observations','Data feeds cannot have timestamps'],1,'Select the interaction pattern according to the service and ownership needs.')])
 }
 
-# Balanced new evidence: support, contradiction, mixed evidence and the cost of delay.
-STRESS = {}  # removed from public history; see docs/stress-unlock.md
+# STRESS (new evidence) texts are not kept in this public repository. The sealed payloads in
+# lectures/iscarb/reveal/ are the only published copies; the instructor keeps the plain text and
+# the unlock codes privately. See docs/stress-unlock.md and tools/seal_stress.py.
+STRESS = {}
 
 def pages(n):
  return [p for _,a,b in STUDY[n]['readings'] for p in range(a,b+1)]
