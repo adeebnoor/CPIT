@@ -443,7 +443,7 @@
    "revision": "20261002-story-stage-v4",
    "date": "2026-10-02",
    "base_release": "20260926-genai-v12",
-   "summary": "Story-led presentation layer over unchanged lecture data, rolled out from Chapter 12 (Assignment 3); Chapters 10-11 keep the design students already used. 50-minute pace plan by default in presenter mode.",
+   "summary": "Story-led presentation layer from Chapter 12, 50-minute pace plan, text fitted to available space, no click-to-reveal, and the AI-as-practice-layer principle carried in the story. Lecture data unchanged.",
    "repinned": []
   }
  ]

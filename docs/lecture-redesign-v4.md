@@ -28,8 +28,9 @@ The screenshots confirmed all three.
 | Layout | Mostly four equal cards | Layout follows the content: two-way split, three-step flow with arrows, 2×2 grid, or numbered steps. Checkpoints read as a **think → pair → record** routine. |
 | Question bar | "Back to the story" + *Model answer* (modal) | "**Your call**": a **30-second think timer**, then *Reveal answer* in place (no dialog), and *Full explanation*. |
 | Checks for understanding | After class only (five-objective practice) | A **class vote at the end of every act** (peer instruction): vote alone → convince a neighbour (60 s) → vote again → reveal with the explanation. Tap to count hands, and see both rounds as bars. |
-| Pacing | Whole slide at once | In presenter mode, Enter reveals **one idea at a time** before moving on. Students reviewing on their own see everything. |
-| Projection | Body text ≈ 14–17 px on many cards | Headlines 26–39 px, body text 16–22 px. The layout is checked to fit 1366×768 and 1440×900 with no overlap, and reflows on phones. |
+| Pacing | Whole slide at once | Whole slide at once, by the instructor's choice after trying builds: no click-to-reveal and no animation. |
+| Projection | Body text ≈ 14–17 px on many cards; text covered about 27% of the content area on average and 12% on figure slides | Evidence text **grows to fill the space** each slide gives it, up to 1.65× and without overflow: average coverage 45%, minimum 29%. |
+| Type sizes | Same small sizes on every slide | Headlines 26–39 px; body text from 16–22 px upward, fitted per slide. The layout is checked to fit 1366×768 and 1440×900 with no overlap, and reflows on phones. |
 
 Unchanged: the scientific lecture data (pinned hash, re-pinned **0** items), the 20-slide order, the 5 objectives, 3 stations, 20 rules, readings, assignments and STRESS. The new material is a presentation layer: `runtime/story-v3.js` (narrative) and `runtime/stage-v4.css` (design), plus rendering in `runtime/classroom-v3.js`.
 
@@ -46,7 +47,7 @@ Unchanged: the scientific lecture data (pinned hash, re-pinned **0** items), the
 | Multimedia principles (Mayer, 2009): signalling, segmenting, coherence, personalisation | Cue structure, present in segments, cut redundancy, use conversational characters | Repeated banner, everything shown at once, double headings | Act colours and progress (signalling), builds and votes (segmenting), single headline (coherence), named characters (personalisation) |
 | Attention resets (Bunce et al., 2010; Bradbury, 2016) | Change activity every 10–15 minutes | Long stretches between stations | An activity change roughly every four slides: act scene, vote, station or twist |
 | Minute paper (Angelo & Cross, 1993) | Close with a one-minute reflection and the muddiest point | Absent | Exit ticket on every episode close |
-| Projection legibility (common presentation guidance) | Large type for the back row; one idea at a time | Small text in large cards | Larger type, fewer words visible at once in presenter mode |
+| Projection legibility (common presentation guidance) | Large type for the back row; one idea at a time | Small text in large cards | Larger type that grows to fill each slide's space; one headline per slide |
 
 ## Fitting a 50-minute lecture
 
@@ -80,3 +81,13 @@ Counts stay on the presenting device only. Nothing is sent to a server, and none
 - Presenter interaction test (19 checks): builds, think timer, inline answer, full vote cycle, twist lock and reveal, gut-check counts carried to the end, persistence through reload, and no builds for students.
 
 Known limit: on 1366×768 screens, the largest metric table in Chapter 11 scrolls inside its panel instead of shrinking below projection size. It already overflowed in v3.
+
+## Revision after the first classroom review (3 Oct 2026)
+
+- **Text size.** A fitting step enlarges the evidence text (cards, explanation points, tables, approaches) until it fills its panel without overflow. It is recomputed on every slide, resize and answer reveal. At 1366×768, text coverage rose from 27% to 45% of the content area; figure slides rose from 12–13% to at least 29%.
+- **No click-to-reveal.** Builds were removed. The twist no longer sits behind a button: the slide before it says *"Before the next slide: write your decision in one sentence"*, and the twist slide states the new information openly. This keeps commit-before-STRESS through slide order alone.
+- **AI is the practice layer; engineering judgment is assessed.** This is now part of the story:
+  - every episode has a `practice` line in which Layan uses AI to rehearse, while the decision she signs is her own; it is shown on the chapter's first AI-segment slide;
+  - the principle appears on the cold open and in the case file;
+  - the episode close spells out what is assessed (FIT, BOUND, ACT, EVIDENCE and REFIT, in the student's own words);
+  - class votes are labelled practice, not assessment.
