@@ -13,8 +13,11 @@ def main():
     shared += ['course-shell.css','course-shell.js','iscarb.html','student-guide.html','course-resources.html','instructor-guide.html','methodology.html','index.html','student-ux.css','chapter-search.js']
     shared += ['fbr-submission.html']
     shared += [item['study_path'] for item in spec['lectures']]
-    shared += [item[key] for item in spec['assignments']+spec['previous_assignments'] for key in ('path','stress_path')]
+    shared += [item['path'] for item in spec['assignments']+spec['previous_assignments']]
+    shared += [item['stress_path'] for item in spec['assignments']+spec['previous_assignments'] if item.get('stress_delivery')!='lms']
     shared += [str(p.relative_to(ROOT)) for folder in ('lectures/iscarb/assets/national','lectures/iscarb/assets/source-vectors') for p in (ROOT/folder).glob('*') if p.is_file()]
+    # STRESS delivered through the LMS must not survive inside older package contents.
+    withdrawn={item['stress_path'] for item in spec['assignments']+spec['previous_assignments'] if item.get('stress_delivery')=='lms'}
     for lecture in spec['lectures']:
         name=lecture['offline_package'];path=ROOT/name
         replace=shared+[lecture['path'],next(a['path'] for a in spec['assignments'] if a['chapter']==lecture['chapter'])]
@@ -23,7 +26,7 @@ def main():
         with zipfile.ZipFile(path) as old,zipfile.ZipFile(buf,'w',zipfile.ZIP_DEFLATED) as out:
             seen=set()
             for item in old.infolist():
-                if item.filename in seen:continue
+                if item.filename in seen or item.filename in withdrawn:continue
                 seen.add(item.filename)
                 out.writestr(item,additions.get(item.filename,old.read(item.filename)))
             for n,b in additions.items():

@@ -174,7 +174,7 @@ def main(dest: Path) -> list[str]:
         banned += secrets(d)
         (dest / f"ai/ch{d['chapter']}.md").write_text(chapter_md(d, lec, asg.get(lec['chapter'])), encoding='utf-8')
     for a in PUB['assignments']:
-        if a.get('stress_path'):
+        if a.get('stress_path') and (ROOT / a['stress_path']).is_file():
             rv = json.loads((ROOT / a['stress_path']).read_text(encoding='utf-8'))
             banned += [text(v) for k, v in rv.items() if k not in ('chapter', 'label', 'version') and len(text(v)) > 30]
     (dest / 'ai/iscarb-coach.md').write_text(coach_md(), encoding='utf-8')

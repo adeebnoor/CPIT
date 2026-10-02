@@ -91,3 +91,15 @@ Known limit: on 1366×768 screens, the largest metric table in Chapter 11 scroll
   - the principle appears on the cold open and in the case file;
   - the episode close spells out what is assessed (FIT, BOUND, ACT, EVIDENCE and REFIT, in the student's own words);
   - class votes are labelled practice, not assessment.
+
+## Assessment revision (3 Oct 2026, Assignments 3–9)
+
+Applied after a review against the standards of research-university software-engineering courses:
+
+1. **Ownership check (micro-viva).** Each assignment page announces that the student may be asked to explain their Part A and REFIT in two minutes. `micro-viva.html` gives the instructor a random picker (runs locally) and a question bank per assignment. Each question asks about the student's own submitted reasoning.
+2. **STRESS through Blackboard.** The texts were removed from the site, the repository and the offline packages (`tools/apply_lms_stress.py`; see `docs/stress-unlock.md`). Blackboard releases them after the Part A upload, and the page verifies the pasted text by fingerprint.
+3. **Executable labs.** Assignments 3–5 gained a small executable lab, like Assignments 7–8 (`curriculum/learning-path/labs.js`): a fail-safe barrier decision, server-side access control, and an outage fallback. Five of the seven assignments from Assignment 3 onward now include executed tests.
+4. **Varied formats.** Assignment 6 asks students to critique a colleague's flawed recommendation, and Assignment 9 to review another team's design. Criteria, points and fields are unchanged.
+5. **Shorter pages.** The lecture-connection section, the scope notes and the partial-credit rubric levels are folded. Visible text before the task fell by about 38%.
+6. **Pre/post concept inventory.** Fourteen items for Chapters 12–20, kept privately with the instructor (not in this repository) so that items stay unseen.
+7. **Story.** The episode close now says "your turn: same reasoning, new case in the assignment", because assignment cases differ from the lecture story.

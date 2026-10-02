@@ -326,3 +326,24 @@ html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.practice-scene)
 html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.practice-scene) .ai-banner img{height:100%;width:100%;object-fit:cover;object-position:right center}
 
 html[data-stage="v4"] .gut-before{color:var(--a2)}
+/* Very short projector screens (≈720 px high): drop duplicated titles and secondary labels, never content. */
+@media (min-width:1001px) and (max-height:820px){
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy>h2{display:none}
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy>.ey{margin-bottom:2px}
+}
+@media (min-width:1001px) and (max-height:760px){
+ html[data-stage="v4"] .cast-card span{display:none}
+ html[data-stage="v4"] .cast-card{grid-template-columns:30px 1fr;padding:4px 10px}
+ html[data-stage="v4"] .cast-card i{width:30px;height:30px;grid-row:auto}
+ html[data-stage="v4"] .case-file .story-head h2{font-size:1.3rem!important}
+ html[data-stage="v4"] .case-file .story-grid section p{font-size:.88rem!important;line-height:1.32!important}
+ html[data-stage="v4"] .case-file .story-note{font-size:.88rem}
+ html[data-stage="v4"] .epilogue p{font-size:.95rem}
+ html[data-stage="v4"] .assess-line{font-size:.8rem!important}
+ html[data-stage="v4"] .end-copy>.end-required section p{font-size:.82rem!important}
+}
+@media (min-width:1001px) and (max-height:760px){
+ html[data-stage="v4"] .case-file .story-route{display:none}
+ html[data-stage="v4"] .case-file .story-lens{font-size:.8rem!important}
+}
+@media (max-width:1000px){html[data-stage="v4"] .clock,html[data-stage="v4"] .principle-chip{white-space:normal;max-width:100%}}
