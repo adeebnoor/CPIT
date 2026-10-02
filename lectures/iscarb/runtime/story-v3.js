@@ -11,10 +11,13 @@ window.ISCARB_STORY = {
  // Rolled out from Chapter 12 (Assignment 3) on. Chapters 10 and 11 were already taught in the previous
  // design and stay that way; their pilot episodes are kept here, inactive, for a later offering.
  firstChapter: 12,
+ // The course principle every episode shows: Layan practises with AI; what she signs is her own judgment.
+ principle: 'AI is the practice layer. Your engineering judgment is what we assess.',
  lead: {name: 'Layan', role: 'Junior software engineer at a Jeddah engineering consultancy · your seat in the story'},
  mentor: {name: 'Khalid', role: 'Senior engineer · her mentor · always asks “what is your evidence?”'},
  chapters: {
   10: {
+   practice: 'Layan asks an AI chat to play devil’s advocate on her alarm analysis. It sharpens her questions. It does not get a vote on whether the plant keeps running.',
    episode: 'Pilot A · The alarm at 02:10',
    setting: 'Night shift at a coastal desalination plant that supplies a city’s drinking water. Layan is on her first on-call rotation for the control-system upgrade.',
    client: {name: 'Huda', role: 'Plant shift supervisor · must decide whether the plant keeps running'},
@@ -33,6 +36,7 @@ window.ISCARB_STORY = {
    epilogue: '05:00 arrives. Whatever Layan advised, Khalid’s first question in the morning review is the one you will face too: what did you claim, where does the claim stop, and what evidence would another engineer accept?'
   },
   11: {
+   practice: 'Layan has an AI tutor quiz her on POFOD and ROCOF before the board meets. The release scope she recommends, and the evidence behind it, are hers.',
    episode: 'Pilot B · Release on Thursday',
    setting: 'A university is about to release a new communications gateway that also relays every student’s and staff member’s email. Layan’s team ran the pilot.',
    client: {name: 'Nouf', role: 'IT services director · promised the deans “99.99%”'},
@@ -51,6 +55,7 @@ window.ISCARB_STORY = {
    epilogue: 'Thursday 10:00. The board will ask Layan for one sentence: which scope, which metric, which evidence. Write yours before you leave the room.'
   },
   12: {
+   practice: 'Layan asks an AI chat to play Tariq and argue for Monday. It helps her rehearse the conversation. The hazard analysis and the safety claim she signs are her own.',
    episode: 'Episode 1 · Every command within limits',
    setting: 'A plant is about to switch on a repeated-command mode for a controller whose safety argument Layan’s team prepared last year.',
    client: {name: 'Tariq', role: 'Operations manager · measured on throughput'},
@@ -69,6 +74,7 @@ window.ISCARB_STORY = {
    epilogue: 'Monday’s first shift is waiting. Khalid will sign only a claim with a stated boundary and the evidence behind it. What exactly would your safety claim cover, and what would it not?'
   },
   13: {
+   practice: 'Layan uses an AI assistant to brainstorm misuse cases. It suggests ten. She chooses the one worth a negative test and writes the claim Khalid will sign.',
    episode: 'Episode 2 · The record that crossed the line',
    setting: 'A Jeddah startup sells a team-documents application to three client organisations. Next week it switches on an AI assistant that answers questions about each team’s files.',
    client: {name: 'Majed', role: 'Product owner · wants the assistant live on Sunday'},
@@ -87,6 +93,7 @@ window.ISCARB_STORY = {
    epilogue: 'Sunday 09:00. Khalid signs only what is tested. Layan’s note has three lines: claim, boundary, evidence. What would yours say?'
   },
   14: {
+   practice: 'Layan rehearses the four Rs with an AI tutor during a quiet hour. When Amal asks “are we recovered?”, the answer and its evidence must be Layan’s.',
    episode: 'Episode 3 · 02:00, and nobody can sign in',
    setting: 'A public service’s records system after a cyber incident. The incident is contained. Khalid, the only trained recovery specialist, is off shift and not answering. Layan is on call.',
    client: {name: 'Amal', role: 'Service manager · must tell the public when counters reopen'},
@@ -105,6 +112,7 @@ window.ISCARB_STORY = {
    epilogue: '08:00. Amal will announce something to the public. Khalid, back in the morning, will ask Layan which part of the service was restored, which was not, and who knew.'
   },
   15: {
+   practice: 'Layan asks an AI to summarise the supplier’s roadmap. Useful practice, but the reuse route, and what would change her mind, she must defend herself.',
    episode: 'Episode 4 · Buy, bend or build',
    setting: 'A clinic group bought an appointment product to replace its old booking system. Layan’s team must make it work for the clinics.',
    client: {name: 'Dr. Sara', role: 'Clinic operations lead · knows the real workflow'},
@@ -123,6 +131,7 @@ window.ISCARB_STORY = {
    epilogue: 'The contract decision is due. Dr. Sara does not need a perfect product; she needs to know which route survives the next five years, and what would make Layan change her mind.'
   },
   16: {
+   practice: 'Layan has an AI generate test values for the adapter. She still decides which boundaries matter and writes the contract Rakan relies on.',
    episode: 'Episode 5 · Ninety-five degrees',
    setting: 'A city operations team is composing a heat-alert service from reusable parts: a sensor data component and a vendor’s AI forecasting component. Layan is the integrator.',
    client: {name: 'Rakan', role: 'Operations lead · issues public heat alerts'},
@@ -141,6 +150,7 @@ window.ISCARB_STORY = {
    epilogue: 'Rakan asks Layan one question before the season opens: “What stops this happening with the next component?” Her answer has to be a contract and a test, not a promise.'
   },
   17: {
+   practice: 'Layan asks an AI to explain idempotency keys three different ways until it clicks. The retry design she commits to before 20:00 is her judgment.',
    episode: 'Episode 6 · Did it go through?',
    setting: 'A national events app is preparing for a big ticket sale. Layan works on the backend service that accepts each booking and sends the confirmation.',
    client: {name: 'Hessa', role: 'Customer support lead · her team answers the angry calls'},
@@ -159,6 +169,7 @@ window.ISCARB_STORY = {
    epilogue: '20:00 is coming. Hessa needs to know what happens on a retry, and how support will tell a duplicate from a real second booking. What would Layan’s design guarantee, and what would it only detect?'
   },
   20: {
+   practice: 'Layan uses an AI chat to role-play the three agency owners. It is rehearsal. The bounded promise Faisal reads aloud is Layan’s, with her name on it.',
    episode: 'Episode 7 · Whose dashboard is it?',
    setting: 'A multi-agency incident dashboard combines data feeds from agencies Layan’s team does not control. Officials will rely on it.',
    client: {name: 'Faisal', role: 'Coordinator · briefs officials every morning'},
