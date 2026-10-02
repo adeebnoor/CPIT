@@ -3,6 +3,7 @@ from pathlib import Path
 import json, shutil, os, sys
 from sanitize_static_site import main as sanitize
 from audit_classroom import audit, publication
+from build_llm_index import main as build_llm_index
 ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
 VERSION=publication()['release']
@@ -37,6 +38,9 @@ def main():
         if 'iscarb-theme.css' not in s: s=s.replace('</head>',f'<link rel="stylesheet" href="{prefix}iscarb-theme.css?v={VERSION}"></head>',1)
         if 'iscarb-theme.js' not in s: s=s.replace('</body>',f'<script src="{prefix}iscarb-theme.js?v={VERSION}" defer></script></body>',1)
         p.write_text(s,encoding='utf-8')
+    # LLM-readable course index: assistants coach FIT/BOUND/ACT/EVIDENCE; COMMIT and STRESS stay on the site.
+    errors=build_llm_index(DEST)
+    if errors: raise SystemExit('\n'.join(errors))
     old=sys.argv; sys.argv=['sanitize_static_site.py',str(DEST)]
     try: result=sanitize()
     finally: sys.argv=old
