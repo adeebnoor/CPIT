@@ -89,7 +89,11 @@ def main() -> int:
             assignment_hash = None
         if assignment_hash != spec["assignment_sha256_lf"]:
             errors.append(f"Chapter {ch} assessed assignment content changed.")
-        if not sp.is_file() or sha_lf(sp) != spec["stress_sha256_lf"]:
+        if spec.get("stress_delivery") == "lms":
+            # Same pinned STRESS, delivered through the LMS: the page carries its text fingerprint.
+            if a.get("stress_text_sha256") != spec.get("stress_text_sha256") or f'"sha": "{spec.get("stress_text_sha256")}"' not in ap.read_text(encoding="utf-8"):
+                errors.append(f"Chapter {ch} LMS STRESS fingerprint drifted.")
+        elif not sp.is_file() or sha_lf(sp) != spec["stress_sha256_lf"]:
             errors.append(f"Chapter {ch} STRESS payload changed.")
 
     public_files = PUB.get("iscarb_public_files", [])

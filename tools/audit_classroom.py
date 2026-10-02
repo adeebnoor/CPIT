@@ -45,6 +45,14 @@ def stress_problem(stress, ch, version):
         return f"Invalid Chapter {ch} STRESS evidence text."
     return ""
 
+def lms_problem(source, assignment, payload):
+    ch=assignment.get("chapter"); sha=assignment.get("stress_text_sha256","")
+    if "/* lms-stress:v1 */" not in source: return f"Chapter {ch} must deliver STRESS through the LMS flow."
+    if not re.fullmatch(r"[0-9a-f]{64}",sha) or f'"sha": "{sha}"' not in source: return f"Chapter {ch} LMS STRESS fingerprint is missing or does not match publication.json."
+    if payload.exists(): return f"Chapter {ch} STRESS is LMS-delivered but a public payload remains: {payload.name}"
+    if "commit()" not in source or "verifiedCommit" not in source: return f"Chapter {ch} must verify saved Part A before accepting STRESS."
+    return ""
+
 def stress_sequence_problem(source, ch):
     if any(token in source for token in ("function openStress(", "function unsealStress(", "id=\"stressCode\"")):
         return f"Chapter {ch} still contains a STRESS code gate."
@@ -150,7 +158,8 @@ def audit(root=ROOT):
         a=ap.read_text(encoding="utf-8"); page=Page(); page.feed(a)
         if not page.standalone: errors.append(f"Chapter {ch} assignment must retain standalone styling.")
         if len(page.ids)!=len(set(page.ids)): errors.append(f"Chapter {ch} assignment has duplicate static IDs.")
-        for token in (assignment.get("storage_key"),assignment.get("access_key"),assignment.get("stress_path").split("lectures/iscarb/")[-1],assignment.get("version")):
+        lms=assignment.get("stress_delivery")=="lms"
+        for token in (assignment.get("storage_key"),assignment.get("access_key"),None if lms else assignment.get("stress_path").split("lectures/iscarb/")[-1],assignment.get("version")):
             if token and token not in a: errors.append(f"Chapter {ch} assignment is missing required identity token: {token}")
         previous=root/assignment.get('previous_path',assignment['path'])
         if not previous.is_file(): errors.append(f"Chapter {ch} must preserve the previous assignment edition for draft recovery.")
@@ -161,7 +170,11 @@ def audit(root=ROOT):
                 if marker.lower() not in a.lower(): errors.append(f"Chapter {ch} AI-only assignment is missing required marker: {marker}")
         problem=stress_sequence_problem(a,ch)
         if problem: errors.append(problem)
-        if sp.is_file():
+        if lms:
+            # STRESS is released in the LMS; the page must carry the matching fingerprint and no public payload may remain.
+            problem=lms_problem(a,assignment,sp)
+            if problem: errors.append(problem)
+        elif sp.is_file():
             try:
                 problem=stress_problem(json.loads(sp.read_text(encoding="utf-8")),ch,assignment.get("version"))
                 if problem: errors.append(problem)
@@ -170,6 +183,11 @@ def audit(root=ROOT):
     # Older editions retain the same code-free sequence for draft recovery.
     for older in spec.get("previous_assignments", []):
         ch=older.get("chapter"); op=root/older["path"]; sp=root/older["stress_path"]
+        if older.get("stress_delivery")=="lms":
+            if not op.is_file(): errors.append(f"Missing previous Chapter {ch} edition."); continue
+            problem=lms_problem(op.read_text(encoding="utf-8"),older,sp)
+            if problem: errors.append("Previous edition: "+problem)
+            continue
         if not op.is_file() or not sp.is_file(): errors.append(f"Missing previous Chapter {ch} edition or payload."); continue
         problem=stress_sequence_problem(op.read_text(encoding="utf-8"),ch)
         if problem: errors.append("Previous edition: "+problem)

@@ -61,6 +61,8 @@ def main() -> int:
             if h != spec["assignment_sha256_lf"]:
                 spec["assignment_sha256_lf"] = h
                 pinned.append(f"assignment {ch}")
+            if spec.get("stress_delivery") == "lms":
+                continue
             s = sha_lf(ROOT / spec["stress_path"])
             if s != spec["stress_sha256_lf"]:
                 spec["stress_sha256_lf"] = s
