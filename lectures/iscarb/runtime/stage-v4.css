@@ -1,0 +1,284 @@
+/* iSCARB stage v4 · story-led classroom design.
+ * Loaded after the per-lecture showcase styles and active only when story-v3 sets html[data-stage="v4"].
+ * Principles: one assertion headline per slide (the takeaway), the slide title as a quiet kicker,
+ * one colour per act for orientation, layouts that follow the content, and type sized for projection.
+ * Authored lecture data, slide order and the 20-slide grammar are unchanged.
+ */
+html[data-stage="v4"]{--a1:#0f766e;--a2:#4338ca;--a3:#b45309;--a4:#be123c;--a5:#7e22ce;--act:#0f766e;--act-soft:rgba(15,118,110,.08);--card:#fff;--ink-strong:#14212b;--muted:#4a5a66;--rule:#d5dde3}
+html[data-stage="v4"] body:not(.day){--a1:#5eead4;--a2:#a5b4fc;--a3:#fcd34d;--a4:#fda4af;--a5:#d8b4fe;--act:#5eead4;--act-soft:rgba(94,234,212,.08);--card:#14121b;--ink-strong:#f5f0ea;--muted:#c0b6c5;--rule:#3b3343}
+html[data-stage="v4"] .chapter-main[data-act="1"]{--act:var(--a1)}
+html[data-stage="v4"] .chapter-main[data-act="2"]{--act:var(--a2)}
+html[data-stage="v4"] .chapter-main[data-act="3"]{--act:var(--a3)}
+html[data-stage="v4"] .chapter-main[data-act="4"]{--act:var(--a4)}
+html[data-stage="v4"] .chapter-main[data-act="5"]{--act:var(--a5)}
+html[data-stage="v4"] .chapter-main{--act-soft:color-mix(in srgb,var(--act) 9%,transparent)}
+
+/* ---------- Teaching slides: assertion headline + evidence ---------- */
+html[data-stage="v4"] body.single-canvas #app .chapter-main:not(.mindmap-page):not(.story-page):not(.end-page):not(.cold-open-page):not(.national-slide){display:flex;flex-direction:column;gap:clamp(6px,1vh,11px)}
+html[data-stage="v4"] body.single-canvas #app .chapter-main>*{flex:0 0 auto}
+html[data-stage="v4"] body.single-canvas #app .chapter-main>.body-grid,html[data-stage="v4"] body.single-canvas #app .chapter-main>.vote,html[data-stage="v4"] body.single-canvas #app .chapter-main>.station{flex:1 1 auto;min-height:0}
+html[data-stage="v4"] body.single-canvas #app .chapter-main:not(.story-page):not(.end-page):not(.cold-open-page):not(.mindmap-page) .heading h1{font-size:clamp(1.05rem,1.35vw,1.3rem);line-height:1.2;letter-spacing:0;font-weight:750;color:var(--act)}
+html[data-stage="v4"] body.single-canvas #app .heading .ey{font-size:.72rem;letter-spacing:.12em;color:var(--muted)}
+html[data-stage="v4"] body.single-canvas #app .takeaway{font-size:clamp(1.6rem,2.35vw,2.45rem);line-height:1.14;font-weight:800;letter-spacing:-.02em;color:var(--ink-strong);max-width:62ch;padding:0}
+
+/* Act ribbon replaces the repeated case banner: slim, coloured, with progress */
+html[data-stage="v4"] body.single-canvas #app .case-thread{display:flex;align-items:center;gap:12px;padding:6px 12px;border:0;border-left:5px solid var(--act);border-radius:8px;background:var(--act-soft);font-size:.92rem;min-height:0}
+html[data-stage="v4"] body.single-canvas #app .case-thread>span:first-child{font-size:.7rem;font-weight:850;letter-spacing:.1em;color:var(--act);white-space:nowrap}
+html[data-stage="v4"] body.single-canvas #app .case-thread>b{font-size:.95rem;white-space:nowrap}
+html[data-stage="v4"] body.single-canvas #app .case-thread>em{font-size:.95rem;font-style:normal;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+html[data-stage="v4"] .act-dots{display:flex;gap:5px;margin-left:auto;flex:none}
+html[data-stage="v4"] .act-dots i{width:22px;height:6px;border-radius:3px;background:var(--rule)}
+html[data-stage="v4"] .act-dots i.done{background:color-mix(in srgb,var(--act) 45%,var(--rule))}
+html[data-stage="v4"] .act-dots i.on{background:var(--act)}
+html[data-stage="v4"] .act-scene{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--rule);box-shadow:0 1px 0 var(--rule)}
+html[data-stage="v4"] .act-scene .scene-who{flex:none;display:grid;place-items:center;min-width:64px;height:30px;padding:0 10px;border-radius:15px;background:var(--act);color:#fff;font-weight:800;font-size:.85rem}
+html[data-stage="v4"] body:not(.day) .act-scene .scene-who{color:#111}
+html[data-stage="v4"] .act-scene p{margin:0;font-size:clamp(1.02rem,1.25vw,1.22rem);line-height:1.38;color:var(--ink-strong)}
+
+/* Layouts that follow the content */
+html[data-stage="v4"] body.single-canvas #app .body-merged .concepts.merged{height:100%;display:grid;gap:clamp(8px,1.2vh,14px);grid-auto-rows:minmax(0,1fr)}
+html[data-stage="v4"] body.single-canvas #app .body-merged .concept{position:relative;justify-content:center;gap:6px;padding:clamp(10px,1.6vh,18px) clamp(14px,1.4vw,22px);border-radius:12px;background:var(--card);border:1px solid var(--rule);border-top:4px solid var(--act);box-shadow:none}
+html[data-stage="v4"] body.single-canvas #app .body-merged .concept b{font-size:clamp(1.15rem,1.55vw,1.6rem);line-height:1.15;color:var(--ink-strong)}
+html[data-stage="v4"] body.single-canvas #app .body-merged .concept span{font-size:clamp(.98rem,1.2vw,1.2rem);line-height:1.38;color:var(--muted)}
+html[data-stage="v4"] body.single-canvas #app .lay-split .concepts.merged{grid-template-columns:1fr 1fr}
+html[data-stage="v4"] body.single-canvas #app .lay-split .concept:nth-child(2){border-top-color:color-mix(in srgb,var(--act) 50%,var(--ink-strong))}
+html[data-stage="v4"] body.single-canvas #app .lay-trio .concepts.merged,html[data-stage="v4"] body.single-canvas #app .lay-flow .concepts.merged{grid-template-columns:repeat(3,minmax(0,1fr))}
+html[data-stage="v4"] body.single-canvas #app .lay-flow .concept:not(:last-child)::after{content:"→";position:absolute;right:-17px;top:50%;transform:translateY(-50%);z-index:1;font-size:1.4rem;font-weight:800;color:var(--act)}
+html[data-stage="v4"] body.single-canvas #app .lay-quad .concepts.merged{grid-template-columns:1fr 1fr}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concepts.merged{grid-template-columns:1fr;counter-reset:step}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concept{display:grid;grid-template-columns:44px minmax(180px,.42fr) 1fr;align-items:center;column-gap:16px;border-top:1px solid var(--rule);border-left:5px solid var(--act);counter-increment:step}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concept::before{content:counter(step);display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--act-soft);color:var(--act);font-weight:850;font-size:1.1rem}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concept b{font-size:clamp(1.08rem,1.4vw,1.4rem)}
+/* figure / table + meaning */
+html[data-stage="v4"] body.single-canvas #app .body-grid:not(.body-merged){gap:clamp(12px,1.4vw,22px)}
+html[data-stage="v4"] body.single-canvas #app .meaning{border:1px solid var(--rule);border-top:4px solid var(--act);background:var(--card);border-radius:12px}
+html[data-stage="v4"] body.single-canvas #app .meaning h2{color:var(--act)}
+html[data-stage="v4"] body.single-canvas #app .meaning .points{font-size:clamp(1rem,1.25vw,1.25rem)}
+html[data-stage="v4"] body.single-canvas #app .meaning .points strong{color:var(--ink-strong)}
+
+/* Presenter builds: reveal one idea at a time with Enter / → / click */
+html[data-stage="v4"] .build{opacity:.13;transition:opacity .25s ease}
+html[data-stage="v4"] .build.built{opacity:1}
+@media (prefers-reduced-motion:reduce){html[data-stage="v4"] .build{transition:none}}
+
+/* Your call */
+html[data-stage="v4"] body.single-canvas #app .question.your-call{padding:8px 12px;border:1px solid color-mix(in srgb,var(--act) 35%,var(--rule));border-radius:12px;background:var(--act-soft);gap:6px}
+html[data-stage="v4"] body.single-canvas #app .your-call .question-text{font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.35;color:var(--ink-strong)}
+html[data-stage="v4"] body.single-canvas #app .your-call .question-text b{display:inline-block;margin-right:10px;padding:2px 9px;border-radius:999px;background:var(--act);color:#fff;font-size:.72rem;letter-spacing:.1em;vertical-align:2px}
+html[data-stage="v4"] body:not(.day) .your-call .question-text b{color:#111!important}
+html[data-stage="v4"] body.single-canvas #app .your-call button{min-height:36px;font-size:.9rem;padding:6px 12px}
+html[data-stage="v4"] .think-btn.running{background:var(--act);color:#fff;border-color:var(--act);font-variant-numeric:tabular-nums}
+html[data-stage="v4"] .think-btn.done{border-color:var(--act);color:var(--act);font-weight:800}
+html[data-stage="v4"] .vote-btn{border-color:var(--act)!important;color:var(--act)!important;font-weight:800}
+html[data-stage="v4"] .inline-answer{margin-top:4px;padding:8px 12px;border-radius:10px;background:var(--card);border:1px dashed var(--act)}
+html[data-stage="v4"] .inline-answer b{display:block;font-size:.72rem;letter-spacing:.08em;color:var(--act)}
+html[data-stage="v4"] .inline-answer p{margin:3px 0;font-size:1.05rem;line-height:1.38}
+html[data-stage="v4"] .inline-answer small{color:var(--muted)}
+
+/* Commit before the twist */
+html[data-stage="v4"] .twist{border-radius:12px}
+html[data-stage="v4"] .twist-commit{display:flex;align-items:center;gap:16px;padding:10px 14px;border:2px dashed var(--a3);border-radius:12px;background:color-mix(in srgb,var(--a3) 7%,transparent)}
+html[data-stage="v4"] .twist-commit span,html[data-stage="v4"] .twist-scene span{flex:none;font-size:.72rem;font-weight:850;letter-spacing:.12em;color:var(--a3)}
+html[data-stage="v4"] .twist-commit p{margin:0;flex:1;font-size:1.05rem}
+html[data-stage="v4"] .twist-scene{padding:10px 14px;border-radius:12px;border-left:6px solid var(--a4);background:color-mix(in srgb,var(--a4) 8%,var(--card))}
+html[data-stage="v4"] .twist-scene span{color:var(--a4)}
+html[data-stage="v4"] .twist-scene p{margin:4px 0 0;font-size:clamp(1.05rem,1.3vw,1.25rem);line-height:1.38;font-weight:600;color:var(--ink-strong)}
+html[data-stage="v4"] .twist-locked .body-grid,html[data-stage="v4"] .twist-locked .your-call .question-text{filter:blur(7px);opacity:.4;pointer-events:none;user-select:none}
+
+/* ---------- Class vote (peer instruction) ---------- */
+html[data-stage="v4"] .vote{display:flex;flex-direction:column;gap:12px;min-height:0}
+html[data-stage="v4"] .vote-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+html[data-stage="v4"] .vote-top h2{margin:2px 0 0;font-size:clamp(1.45rem,2.1vw,2.1rem);line-height:1.18;color:var(--ink-strong)}
+html[data-stage="v4"] .vote-steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex:none}
+html[data-stage="v4"] .vote-steps li{padding:5px 10px;border-radius:999px;border:1px solid var(--rule);font-size:.78rem;color:var(--muted);white-space:nowrap}
+html[data-stage="v4"] .vote-steps li.on{background:var(--act);border-color:var(--act);color:#fff;font-weight:800}
+html[data-stage="v4"] .vote-steps li.done{border-color:var(--act);color:var(--act)}
+html[data-stage="v4"] .vote-options{display:grid;gap:8px;flex:1;min-height:0;grid-auto-rows:minmax(0,1fr)}
+html[data-stage="v4"] .vote-opt{position:relative;display:grid;grid-template-columns:46px 1fr minmax(120px,.3fr);align-items:center;gap:14px;text-align:left;padding:8px 14px;border-radius:12px;border:1px solid var(--rule);background:var(--card);color:var(--ink-strong);font-size:clamp(1rem,1.3vw,1.25rem);line-height:1.3;cursor:pointer}
+html[data-stage="v4"] .vote-opt:disabled{cursor:default;opacity:1}
+html[data-stage="v4"] .vote-opt i{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--act-soft);color:var(--act);font-style:normal;font-weight:900;font-size:1.2rem}
+html[data-stage="v4"] .vote-opt.correct{border:2px solid #15803d;background:color-mix(in srgb,#15803d 9%,var(--card))}
+html[data-stage="v4"] .vote-opt.correct i{background:#15803d;color:#fff}
+html[data-stage="v4"] .vote-opt.muted{opacity:.55}
+html[data-stage="v4"] .vote-opt .bars{display:grid;gap:3px}
+html[data-stage="v4"] .vote-opt .bar{position:relative;display:block;height:14px;border-radius:7px;background:var(--rule);overflow:hidden;font-style:normal}
+html[data-stage="v4"] .vote-opt .bar::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:color-mix(in srgb,var(--act) 45%,transparent)}
+html[data-stage="v4"] .vote-opt .bar.r2::before{background:var(--act)}
+html[data-stage="v4"] .vote-opt .bar span{position:relative;padding-left:6px;font-size:.7rem;font-weight:800;line-height:14px}
+html[data-stage="v4"] .vote-why{padding:10px 14px;border-radius:12px;background:var(--act-soft);border-left:5px solid var(--act)}
+html[data-stage="v4"] .vote-why p{margin:3px 0 0;font-size:1.08rem;line-height:1.4}
+html[data-stage="v4"] .vote .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* ---------- Cold open (title) and gut check ---------- */
+html[data-stage="v4"] body.single-canvas #app .chapter-main.cold-open-page{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:28px;align-items:center;min-height:0}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open h2{margin:4px 0 10px;font-size:clamp(2rem,3.4vw,3.4rem);line-height:1.02}
+html[data-stage="v4"] .cold-scene{margin:0 0 12px;padding-left:16px;border-left:5px solid var(--a4);font-size:clamp(1.12rem,1.55vw,1.5rem)!important;line-height:1.42!important;color:var(--ink-strong)!important;max-width:60ch}
+html[data-stage="v4"] .cold-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+html[data-stage="v4"] .clock{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:color-mix(in srgb,var(--a4) 10%,transparent);color:var(--a4);font-weight:800;font-size:.95rem;white-space:nowrap}
+html[data-stage="v4"] .cold-meta .hero-hook{display:inline-flex;align-items:center;gap:8px;margin:0;padding:5px 12px;border-radius:999px;font-size:.95rem}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open img{width:100%;max-height:44vh;object-fit:cover;border-radius:16px}
+html[data-stage="v4"] .gut{padding:10px 14px;border-radius:14px;border:1px solid var(--rule);background:var(--card)}
+html[data-stage="v4"] .gut-q{margin:0 0 8px;font-size:clamp(1.05rem,1.4vw,1.35rem);font-weight:750;color:var(--ink-strong)}
+html[data-stage="v4"] .gut-q span{display:block;font-size:.7rem;letter-spacing:.12em;color:var(--a2);font-weight:850}
+html[data-stage="v4"] .gut-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+html[data-stage="v4"] .gut-opt{position:relative;display:flex;align-items:center;gap:10px;text-align:left;padding:8px 12px;border-radius:10px;border:1px solid var(--rule);background:var(--bg);color:var(--ink-strong);font-size:.98rem;line-height:1.25;overflow:hidden;cursor:pointer}
+html[data-stage="v4"] .gut-opt i{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--a2);color:#fff;font-style:normal;font-weight:900}
+html[data-stage="v4"] .gut-opt span{position:relative;z-index:1;flex:1}
+html[data-stage="v4"] .gut-opt b{position:relative;z-index:1;font-size:1.1rem;color:var(--a2)}
+html[data-stage="v4"] .gut-opt em{position:absolute;inset:auto auto 0 0;height:4px;width:var(--w);background:var(--a2)}
+html[data-stage="v4"] .gut-help{margin:6px 0 0;font-size:.82rem;color:var(--muted)}
+html[data-stage="v4"] .link-btn{border:0;background:none;padding:0;min-height:0;color:var(--a2);text-decoration:underline;font-size:.82rem;cursor:pointer}
+
+/* ---------- Case file (story page) ---------- */
+html[data-stage="v4"] body.single-canvas #app .chapter-main.case-file{display:flex;flex-direction:column;gap:clamp(6px,1vh,10px)}
+html[data-stage="v4"] .case-file .story-head h2{font-size:clamp(1.5rem,2.2vw,2.2rem)!important}
+html[data-stage="v4"] .case-file .story-head p{font-size:1rem!important}
+html[data-stage="v4"] .case-file .story-head .clock{margin-left:6px;font-size:.85rem}
+html[data-stage="v4"] .cast{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+html[data-stage="v4"] .cast-card{display:grid;grid-template-columns:36px 1fr;column-gap:10px;align-items:center;padding:7px 12px;border-radius:12px;border:1px solid var(--rule);background:var(--card)}
+html[data-stage="v4"] .cast-card i{grid-row:span 2;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--a1);color:#fff;font-style:normal;font-weight:900}
+html[data-stage="v4"] .cast-card:nth-child(2) i{background:var(--a2)}
+html[data-stage="v4"] .cast-card:nth-child(3) i{background:var(--a4)}
+html[data-stage="v4"] .cast-card b{font-size:1rem}
+html[data-stage="v4"] .cast-card span{font-size:.8rem;line-height:1.25;color:var(--muted)}
+html[data-stage="v4"] .case-file .story-grid section h3{font-size:.95rem!important;letter-spacing:.02em}
+html[data-stage="v4"] .case-file .story-grid section p{font-size:clamp(.95rem,1.1vw,1.08rem)!important;line-height:1.38!important}
+html[data-stage="v4"] .case-file .story-lens{font-size:.9rem!important;line-height:1.35!important}
+
+/* ---------- Episode close ---------- */
+html[data-stage="v4"] .epilogue{margin:6px 0 8px;padding:10px 14px;border-radius:12px;border-left:5px solid var(--a5);background:color-mix(in srgb,var(--a5) 7%,var(--card))}
+html[data-stage="v4"] .epilogue span{font-size:.7rem;font-weight:850;letter-spacing:.12em;color:var(--a5)}
+html[data-stage="v4"] .epilogue p{margin:4px 0 0;font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.4;color:var(--ink-strong)}
+html[data-stage="v4"] .end-page .gut{margin-bottom:8px;padding:8px 12px}
+html[data-stage="v4"] .end-page .gut-opt{padding:6px 10px;font-size:.9rem}
+html[data-stage="v4"] .exit-ticket{margin-bottom:8px;padding:8px 14px;border-radius:12px;border:1px dashed var(--rule)}
+html[data-stage="v4"] .exit-ticket b{font-size:.85rem}
+html[data-stage="v4"] .exit-ticket ol{margin:4px 0 0;padding-left:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 22px;font-size:.92rem}
+html[data-stage="v4"] body.single-canvas #app .end-page .readiness-strip{display:none}
+
+/* Presenter: quieter chrome, more room for the slide */
+html[data-stage="v4"] body.presenter.single-canvas #app .topbar{padding-top:6px;padding-bottom:6px}
+html[data-stage="v4"] body.presenter.single-canvas #app .topnav button{font-size:.8rem;padding:5px 9px;min-height:30px}
+
+/* ---------- Small screens and reading view: everything reflows, nothing is hidden by builds ---------- */
+@media (max-width:1000px){
+ html[data-stage="v4"] .build{opacity:1}
+ html[data-stage="v4"] body.single-canvas #app .lay-split .concepts.merged,html[data-stage="v4"] body.single-canvas #app .lay-trio .concepts.merged,html[data-stage="v4"] body.single-canvas #app .lay-flow .concepts.merged,html[data-stage="v4"] body.single-canvas #app .lay-quad .concepts.merged{grid-template-columns:1fr}
+ html[data-stage="v4"] body.single-canvas #app .lay-flow .concept::after{display:none}
+ html[data-stage="v4"] body.single-canvas #app .lay-steps .concept{grid-template-columns:38px 1fr}
+ html[data-stage="v4"] body.single-canvas #app .lay-steps .concept span{grid-column:2}
+ html[data-stage="v4"] body.single-canvas #app .hero.cold-open,html[data-stage="v4"] .gut-options,html[data-stage="v4"] .cast,html[data-stage="v4"] .exit-ticket ol{grid-template-columns:1fr}
+ html[data-stage="v4"] .case-thread{flex-wrap:wrap}
+ html[data-stage="v4"] body.single-canvas #app .case-thread>em{white-space:normal;flex-basis:100%}
+ html[data-stage="v4"] .vote-top{flex-direction:column}
+ html[data-stage="v4"] .vote-steps{flex-wrap:wrap}
+ html[data-stage="v4"] .vote-opt{grid-template-columns:40px 1fr}
+ html[data-stage="v4"] .vote-opt .bars{grid-column:2}
+ html[data-stage="v4"] .twist-commit{flex-direction:column;align-items:flex-start}
+ html[data-stage="v4"] .act-dots{display:none}
+}
+html[data-stage="v4"] body.reading .build{opacity:1}
+
+/* Content-sized cards: rows and columns hold their text, centred in the space, instead of stretching empty. */
+html[data-stage="v4"] body.single-canvas #app .lay-split .concepts.merged,html[data-stage="v4"] body.single-canvas #app .lay-trio .concepts.merged,html[data-stage="v4"] body.single-canvas #app .lay-flow .concepts.merged{grid-auto-rows:auto;align-content:center}
+html[data-stage="v4"] body.single-canvas #app .lay-split .concept,html[data-stage="v4"] body.single-canvas #app .lay-trio .concept,html[data-stage="v4"] body.single-canvas #app .lay-flow .concept{min-height:min(34vh,300px);justify-content:flex-start;padding-top:clamp(16px,2.4vh,26px)}
+html[data-stage="v4"] body.single-canvas #app .lay-split .concept b,html[data-stage="v4"] body.single-canvas #app .lay-trio .concept b,html[data-stage="v4"] body.single-canvas #app .lay-flow .concept b{font-size:clamp(1.3rem,1.8vw,1.85rem)}
+html[data-stage="v4"] body.single-canvas #app .lay-split .concept span,html[data-stage="v4"] body.single-canvas #app .lay-trio .concept span,html[data-stage="v4"] body.single-canvas #app .lay-flow .concept span{font-size:clamp(1.05rem,1.35vw,1.35rem)}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concepts.merged{grid-auto-rows:auto;align-content:center}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concept{min-height:min(11vh,96px)}
+/* Checkpoints read as a routine: think → pair → record, each with its own colour. */
+html[data-stage="v4"] body.single-canvas #app .lay-check .concept{border-top:0;border-left:6px solid var(--a2)}
+html[data-stage="v4"] body.single-canvas #app .lay-check .concept:nth-child(2){border-left-color:var(--a3)}
+html[data-stage="v4"] body.single-canvas #app .lay-check .concept:nth-child(3){border-left-color:var(--a1)}
+html[data-stage="v4"] body.single-canvas #app .lay-check .concept b{text-transform:uppercase;letter-spacing:.06em;font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--muted)}
+html[data-stage="v4"] body.single-canvas #app .lay-check .concept span{font-size:clamp(1.15rem,1.55vw,1.55rem);color:var(--ink-strong);font-weight:600}
+
+/* Episode close: story and class activity on the left, required work on the right. */
+@media (min-width:1001px){
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-hero{display:block}
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-hero>img{display:none}
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-areas:"ey ey" "h2 h2" "epi req" "gut req" "exit act" "succ act";gap:6px 22px;align-items:start}
+ html[data-stage="v4"] .end-copy>.ey{grid-area:ey;margin:0}
+ html[data-stage="v4"] .end-copy>h2{grid-area:h2;margin:0;font-size:clamp(1.7rem,2.4vw,2.4rem)!important}
+ html[data-stage="v4"] .end-copy>.epilogue{grid-area:epi;margin:0}
+ html[data-stage="v4"] .end-copy>.gut{grid-area:gut;margin:0}
+ html[data-stage="v4"] .end-copy>.exit-ticket{grid-area:exit;margin:0}
+ html[data-stage="v4"] .end-copy>.end-success{grid-area:succ;margin:0;font-size:1rem!important}
+ html[data-stage="v4"] .end-copy>.end-required{grid-area:req;display:grid!important;grid-template-columns:1fr!important;gap:8px;margin:0}
+ html[data-stage="v4"] .end-copy>.actions{grid-area:act;align-self:end}
+ html[data-stage="v4"] .end-page .gut-options{grid-template-columns:1fr}
+ html[data-stage="v4"] .end-page .exit-ticket ol{grid-template-columns:1fr}
+}
+
+/* Fit on short projector screens (1366×768) without shrinking body text below projection size. */
+html[data-stage="v4"] .case-file .story-note{display:flex;align-items:center;gap:14px}
+html[data-stage="v4"] .case-file .story-note p{margin:0;flex:1}
+html[data-stage="v4"] .case-file .story-note .actions{flex:none;margin:0}
+html[data-stage="v4"] .end-copy>.end-success{display:none}
+@media (min-width:1001px){
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy{grid-template-areas:"ey ey" "h2 h2" "epi req" "gut req" "exit act"}
+ html[data-stage="v4"] .end-page .gut-options{grid-template-columns:repeat(3,minmax(0,1fr))}
+ html[data-stage="v4"] .end-page .gut-opt{font-size:.85rem;padding:5px 8px}
+ html[data-stage="v4"] .end-page .gut-opt i{width:24px;height:24px}
+}
+@media (min-width:1001px) and (max-height:820px){
+ html[data-stage="v4"] body.single-canvas #app .hero.cold-open h2{font-size:clamp(1.8rem,2.8vw,2.6rem);margin-bottom:6px}
+ html[data-stage="v4"] .cold-scene{font-size:1.12rem!important;margin-bottom:8px}
+ html[data-stage="v4"] .cold-meta{margin-bottom:6px}
+ html[data-stage="v4"] body.single-canvas #app .hero.cold-open img{max-height:36vh}
+ html[data-stage="v4"] .gut{padding:7px 12px}
+ html[data-stage="v4"] .gut-q{margin-bottom:5px;font-size:1.02rem}
+ html[data-stage="v4"] .gut-opt{padding:5px 10px;font-size:.9rem}
+ html[data-stage="v4"] .case-file .story-head h2{font-size:1.45rem!important}
+ html[data-stage="v4"] .case-file .story-grid section p{font-size:.92rem!important}
+ html[data-stage="v4"] .case-file .story-lens{font-size:.82rem!important}
+ html[data-stage="v4"] .cast-card{padding:5px 10px}
+ html[data-stage="v4"] .end-copy>h2{font-size:1.6rem!important}
+ html[data-stage="v4"] .epilogue{padding:7px 12px}
+ html[data-stage="v4"] .epilogue p{font-size:1rem}
+ html[data-stage="v4"] .exit-ticket{padding:6px 12px}
+ html[data-stage="v4"] .exit-ticket ol{font-size:.85rem}
+ html[data-stage="v4"] .end-copy>.end-required section{padding:8px 10px!important}
+}
+
+/* Twist slides carry an extra story block: cards give up their minimum height so everything fits. */
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.twist) .concept{min-height:0;padding-top:10px;padding-bottom:10px}
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.twist) .concepts.merged{grid-auto-rows:minmax(0,auto)}
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.twist) .concept b{font-size:clamp(1.05rem,1.35vw,1.35rem)}
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.twist) .concept span{font-size:clamp(.95rem,1.15vw,1.12rem)}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concepts.merged{grid-auto-rows:minmax(0,1fr);align-content:stretch}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concept{min-height:0;padding-top:6px;padding-bottom:6px}
+html[data-stage="v4"] body.single-canvas #app .lay-steps .concept::before{width:32px;height:32px;font-size:1rem}
+@media (min-width:1001px) and (max-height:820px){
+ html[data-stage="v4"] body.single-canvas #app .lay-steps .concepts.merged{grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr)}
+ html[data-stage="v4"] body.single-canvas #app .lay-steps .concept{grid-template-columns:34px 1fr;align-content:center}
+ html[data-stage="v4"] body.single-canvas #app .lay-steps .concept::before{grid-row:span 2}
+ html[data-stage="v4"] body.single-canvas #app .lay-steps .concept span{grid-column:2}
+}
+/* Table slides need the height for evidence: a slightly smaller headline. */
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.table-main) .takeaway{font-size:clamp(1.3rem,1.8vw,1.85rem)}
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.table-main) .act-scene{padding:6px 12px}
+html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.table-main) .act-scene p{font-size:1rem}
+@media (min-width:1001px) and (max-height:820px){
+ html[data-stage="v4"] body.single-canvas #app .chapter-main:has(.table-main) .takeaway{font-size:1.3rem}
+ html[data-stage="v4"] body.single-canvas #app .visual .table-main th,html[data-stage="v4"] body.single-canvas #app .visual .table-main td{padding-top:5px;padding-bottom:5px;line-height:1.25}
+}
+/* Last resort for the largest tables on short screens: the evidence panel scrolls; nothing overlaps. */
+html[data-stage="v4"] body.single-canvas #app .body-grid:not(.body-merged)>.visual{min-height:0;max-height:100%;overflow:auto}
+/* Cold open on short screens: the scene is the hook, so the separate AI tagline moves out of the way. */
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open{overflow:hidden}
+@media (min-width:1001px) and (max-height:820px){
+ html[data-stage="v4"] .cold-meta .hero-hook{display:none}
+ html[data-stage="v4"] body.single-canvas #app .hero.cold-open .ey{margin-bottom:0}
+ html[data-stage="v4"] body.single-canvas #app .hero.cold-open .actions{margin-top:4px}
+ html[data-stage="v4"] body.single-canvas #app .hero.cold-open .small{display:none}
+}
+/* Cold open, simplified: episode title above, chapter name, the scene, one line of meta, actions. */
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open>div>.ey{display:none}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open h2{margin-top:0}
+html[data-stage="v4"] .cold-scene{font-size:clamp(1.05rem,1.4vw,1.38rem)!important}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open .cold-meta .hero-hook{font-size:.92rem!important;line-height:1.3!important;padding:5px 12px!important;margin:0!important;max-width:none;border-radius:999px;min-height:0}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open .cold-meta .hero-hook .ai-tag{transform:scale(.85)}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open .small{font-size:.8rem;margin-top:8px}
+html[data-stage="v4"] body.single-canvas #app .hero.cold-open .actions{margin:4px 0 0}
