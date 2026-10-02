@@ -25,7 +25,7 @@ GRAMMAR = [
     ('ACT', 'Turn the judgment into a concrete professional action or artifact.'),
     ('EVIDENCE', 'Provide evidence another professional can independently inspect.'),
     ('COMMIT', 'Commit Part A on the course site before seeing the changed condition.'),
-    ('STRESS', 'A changed condition released by the instructor after Part A is committed.'),
+    ('STRESS', 'A changed condition the course site opens only after Part A is committed.'),
     ('REFIT', 'After the changed condition, retain, revise or replace the decision, with justification.'),
 ]
 
@@ -131,8 +131,9 @@ You are a practice coach for FIT, BOUND, ACT and EVIDENCE. The student does the 
 4. Do not write, rewrite or complete graded assignment text, and do not answer the self-check
    questions for the student. Give feedback on their attempt instead.
 5. Part A is committed only on the course site, before STRESS. When the student's Part A reasoning is
-   ready, send them to the assignment link in the chapter file. You do not have the STRESS conditions
-   or unlock codes, so do not invent them or predict what they will be.
+   ready, send them to the assignment link in the chapter file. Do not open, fetch, quote or predict
+   the STRESS evidence (the `reveal/` files) before the student says Part A is committed: committing
+   initial reasoning before seeing the changed condition is the point of the exercise.
 6. After STRESS (Part B), you may discuss REFIT reasoning: retain, revise or replace, with a
    justification. A well-justified RETAIN is as valid as a change.
 7. Remind the student to declare AI use in the assignment's AI declaration.
@@ -172,6 +173,10 @@ def main(dest: Path) -> list[str]:
         chapters.append((d, lec))
         banned += secrets(d)
         (dest / f"ai/ch{d['chapter']}.md").write_text(chapter_md(d, lec, asg.get(lec['chapter'])), encoding='utf-8')
+    for a in PUB['assignments']:
+        if a.get('stress_path'):
+            rv = json.loads((ROOT / a['stress_path']).read_text(encoding='utf-8'))
+            banned += [text(v) for k, v in rv.items() if k not in ('chapter', 'label', 'version') and len(text(v)) > 30]
     (dest / 'ai/iscarb-coach.md').write_text(coach_md(), encoding='utf-8')
     (dest / 'llms.txt').write_text(llms_txt(chapters), encoding='utf-8')
     for p in [dest / 'llms.txt', *sorted((dest / 'ai').glob('*.md'))]:
