@@ -7,9 +7,11 @@ from pathlib import Path
 import hashlib, io, json, zipfile
 ROOT=Path(__file__).resolve().parents[1]
 def main():
+    # One source for the teaching models: lectures use a copy of the assignment lab engine.
+    (ROOT/'lectures/iscarb/runtime/labs.js').write_bytes((ROOT/'curriculum/learning-path/labs.js').read_bytes())
     p=ROOT/'curriculum/publication.json';spec=json.loads(p.read_text())
     shared=['lectures/iscarb/runtime/classroom-v3.css','lectures/iscarb/runtime/classroom-v3.js','lectures/iscarb/runtime/readable.css','lectures/iscarb/runtime/assignment-readable.css']
-    shared += ['lectures/iscarb/runtime/national-content.js','lectures/iscarb/runtime/source-figures.js','lectures/iscarb/runtime/national-alignment.css','lectures/iscarb/runtime/story-v3.js','lectures/iscarb/runtime/stage-v4.css','nelc-alignment.html','national-site.css','iscarb-hub.css','iscarb-hub.js','course-design.css','student-ux.js','assets/fcit-kau-logo.png','lectures/iscarb/sources/NELC-AI-Learning-Design-v1-2026.pdf']
+    shared += ['lectures/iscarb/runtime/national-content.js','lectures/iscarb/runtime/source-figures.js','lectures/iscarb/runtime/national-alignment.css','lectures/iscarb/runtime/story-v3.js','lectures/iscarb/runtime/labs.js','lectures/iscarb/runtime/stage-v4.css','nelc-alignment.html','national-site.css','iscarb-hub.css','iscarb-hub.js','course-design.css','student-ux.js','assets/fcit-kau-logo.png','lectures/iscarb/sources/NELC-AI-Learning-Design-v1-2026.pdf']
     shared += ['course-shell.css','course-shell.js','iscarb.html','student-guide.html','course-resources.html','instructor-guide.html','methodology.html','index.html','student-ux.css','chapter-search.js']
     shared += ['fbr-submission.html']
     shared += [item['study_path'] for item in spec['lectures']]

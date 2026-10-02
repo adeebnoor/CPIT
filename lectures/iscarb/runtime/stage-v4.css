@@ -346,4 +346,54 @@ html[data-stage="v4"] .gut-before{color:var(--a2)}
  html[data-stage="v4"] .case-file .story-route{display:none}
  html[data-stage="v4"] .case-file .story-lens{font-size:.8rem!important}
 }
+/* Narrow projectors (about 1024×768): same compaction as short screens, and a tighter close */
+@media (min-width:1001px) and (max-width:1180px) and (max-height:820px){
+ html[data-stage="v4"] .cast-card span{display:none}
+ html[data-stage="v4"] .cast-card{grid-template-columns:30px 1fr;padding:4px 10px}
+ html[data-stage="v4"] .cast-card i{width:30px;height:30px;grid-row:auto}
+ html[data-stage="v4"] body.single-canvas #app .case-file .story-route{display:none!important}
+ html[data-stage="v4"] .case-file .story-grid section p{font-size:.88rem!important;line-height:1.32!important}
+ html[data-stage="v4"] .case-file .story-lens{font-size:.8rem!important}
+ html[data-stage="v4"] .epilogue p{font-size:.95rem}
+ html[data-stage="v4"] .assess-line{font-size:.8rem!important}
+ html[data-stage="v4"] .end-page .gut-opt,html[data-stage="v4"] .end-page .gut button{padding-top:4px;padding-bottom:4px}
+ html[data-stage="v4"] .end-page .exit-ticket{padding-top:6px;padding-bottom:6px}
+ html[data-stage="v4"] .end-page .exit-ticket ol{font-size:.8rem}
+ html[data-stage="v4"] .end-copy>.actions{align-self:start;gap:5px}
+ html[data-stage="v4"] .end-page .actions>*{font-size:.76rem!important;padding:5px 8px!important;white-space:nowrap}
+ html[data-stage="v4"] .end-copy>.gut .gut-opt{padding-top:3px!important;padding-bottom:3px!important}
+ html[data-stage="v4"] .end-copy>.gut .gut-opt b,html[data-stage="v4"] .end-copy>.gut .gut-opt span{font-size:.8rem!important}
+ html[data-stage="v4"] .end-copy>.end-required section p{font-size:.82rem!important}
+ html[data-stage="v4"] .end-copy>.epilogue>span{display:block;line-height:1.35!important}
+ html[data-stage="v4"] .end-copy>.epilogue p{font-size:.9rem!important;line-height:1.35!important}
+ html[data-stage="v4"] .end-copy>.gut .gut-q{font-size:1rem!important}
+ html[data-stage="v4"] .end-copy>.exit-ticket ol{line-height:1.25!important}
+ html[data-stage="v4"] .end-copy>.actions [data-open="DISCLOSURE"]{display:none}
+}
 @media (max-width:1000px){html[data-stage="v4"] .clock,html[data-stage="v4"] .principle-chip{white-space:normal;max-width:100%}}
+
+/* Extra track: live lab, explain it, assignment steps (outside the pinned 20 slides) */
+html[data-stage="v4"] body.single-canvas #app .chapter-main.extra-slide{display:flex;flex-direction:column;gap:12px}
+html[data-stage="v4"] .extra-body{display:flex;flex-direction:column;gap:12px;min-height:0;flex:1 1 0;overflow:auto}
+html[data-stage="v4"] .extra-q{margin:0;font-size:calc(clamp(1.3rem,2vw,1.9rem) * var(--fit,1));font-weight:800;line-height:1.2;color:var(--ink-strong)}
+html[data-stage="v4"] .extra-how{margin:0;font-size:calc(clamp(1rem,1.25vw,1.2rem) * var(--fit,1));color:var(--muted)}
+html[data-stage="v4"] .lab-table-wrap{flex:0 0 auto}
+html[data-stage="v4"] .lab-table{width:100%;border-collapse:collapse;font-size:calc(clamp(.95rem,1.2vw,1.2rem) * var(--fit,1));background:var(--card);border-radius:12px;overflow:hidden}
+html[data-stage="v4"] .lab-table th,html[data-stage="v4"] .lab-table td{padding:10px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+html[data-stage="v4"] .lab-table thead th{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--act)}
+html[data-stage="v4"] .lab-table td.pass{background:color-mix(in srgb,#15803d 10%,transparent)}
+html[data-stage="v4"] .lab-table td.fail{background:color-mix(in srgb,var(--a4) 12%,transparent)}
+html[data-stage="v4"] .lab-table td.pass b{color:#15803d}
+html[data-stage="v4"] .lab-table td.fail b{color:var(--a4)}
+html[data-stage="v4"] .lab-table td.pending{color:var(--muted)}
+html[data-stage="v4"] .explain-steps{margin:0;padding-left:1.4em;display:grid;gap:8px;font-size:calc(clamp(1.1rem,1.5vw,1.45rem) * var(--fit,1));line-height:1.35}
+html[data-stage="v4"] .explain-ask{padding:10px 16px;border-radius:12px;background:var(--act-soft);border-left:5px solid var(--act);font-size:calc(clamp(1rem,1.3vw,1.25rem) * var(--fit,1))}
+html[data-stage="v4"] .explain-ask ul{margin:6px 0 0;padding-left:1.2em}
+html[data-stage="v4"] .steps-grid{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;counter-reset:st}
+html[data-stage="v4"] .steps-grid li{counter-increment:st;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--rule);border-top:4px solid var(--act)}
+html[data-stage="v4"] .steps-grid li b::before{content:counter(st) " · ";color:var(--act)}
+html[data-stage="v4"] .steps-grid li b{font-size:calc(clamp(1.05rem,1.4vw,1.35rem) * var(--fit,1))}
+html[data-stage="v4"] .steps-grid li span{font-size:calc(clamp(.95rem,1.15vw,1.12rem) * var(--fit,1));color:var(--muted);line-height:1.35}
+html[data-stage="v4"] .extra-body .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+html[data-stage="v4"] .btn-link{display:inline-flex;align-items:center;padding:8px 14px;border-radius:10px;border:1px solid var(--act);color:var(--act);font-weight:800;text-decoration:none}
+@media (max-width:1000px){html[data-stage="v4"] .lab-table-wrap{overflow:auto}html[data-stage="v4"] .extra-body{overflow:visible}html[data-stage="v4"] .steps-grid{grid-template-columns:1fr}html[data-stage="v4"] .lab-table{font-size:.9rem}}
