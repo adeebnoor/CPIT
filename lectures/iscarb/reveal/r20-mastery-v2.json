@@ -2,13 +2,5 @@
   "chapter": "20",
   "version": "2026-09-ch20-mastery-v2",
   "label": "STRESS · new evidence",
-  "sealed": {
-    "v": 1,
-    "alg": "AES-256-GCM",
-    "kdf": "PBKDF2-SHA256",
-    "iter": 250000,
-    "salt": "an9Agsu9na0RnoYbMIu4Gw==",
-    "iv": "OMlfLvX5JjRxr3V+",
-    "ct": "u0cee53HuHsmItldpLJ/gyi3kV7yPip0tqTs++4EdGGXuafr7u347yOJE28xiqvNf8iqi8Bw9ZPkFPb6mLNwoq1SznVp7gxu2/4JZb2V4fBdsoZy+WFrAHoXFePr3Pp2lH3FKatJEeJ5l0ocBwFOW6dmgu21Mpa3qdb8c5b2tuRgTG2kh2lfKtSHGPGACXYpuDg/OUe1JK+DhOAAG+BN/Zw1jKWotbD2C+aiXF4OyeTSHh7rH0neQr1tk+PhGuOSTqQuCny3qHRJYaBGQpCjwBNAOWnKSPPfPsZFGruKFxJvcGJdP1B0utQ7x2kDkqQ/ezNcfCiUuBNdjd0opyGBpksTqGxG6SGbquncAzx5OkIFw1ZjhWEKv18UzwCA10yNAtLwXBc8RpNl+ARoYBzGcHhResJYWrawVQb60mZWKRKS1jPMQOaMegbk6xail6j5arKicW7COhNIg8mI8jvahqw95ywGa5NYUJHWxV4DGgrmlRU5sdS25vZS9gt37cWpDN9knJRpzn/6o04GvRwPcGrJP2D1xmzHtD/k8eAayw2EqoKjWJym/aIrs53JwAQicIH43Opf2GpWq5L+5xY1"
-  }
+  "text": "Transport changes location updates from every minute to every 20 minutes without changing the API shape. Security observations remain current. The pilot owner cannot force transport to revert, and facilities still benefits from current security incidents even without transport locations. Decide whether to retain, narrow or replace the shared claim, and identify what remains useful."
 }

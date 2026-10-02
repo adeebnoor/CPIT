@@ -1,7 +1,6 @@
 /* End-to-end regression on an isolated origin and synthetic local drafts only. */
 const {chromium}=require('playwright');
 const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');
-const {sealForTest,TEST_CODE}=require('./learning-path-tests/sealed-stress.cjs');
 const base=process.env.COURSE_BASE_URL||'http://127.0.0.1:8765/';
 const pub=JSON.parse(fs.readFileSync('curriculum/publication.json','utf8'));
 const out='test-results/readable';fs.mkdirSync(out,{recursive:true});
@@ -87,9 +86,9 @@ async function run(){
  for(const a of pub.assignments){
   const context=await browser.newContext({viewport:{width:320,height:740},acceptDownloads:true});const page=await context.newPage();const reveals=[];page.on('pageerror',e=>results.errors.push({assignment:a.chapter,kind:'javascript',error:e.message}));page.on('request',r=>{if(r.url().includes('/reveal/'))reveals.push(r.url())});page.on('dialog',d=>d.accept());
   try{
-   const real=await (await page.request.get(base+a.stress_path)).json();assert(real.sealed&&!('text' in real),'published STRESS must be sealed');
-   const sealed=await sealForTest(a.chapter,a.version,{text:'QA sealed evidence for chapter '+a.chapter+': the unlock code opens this text.',principle:'Reassess the committed claim.'});
-   await page.route('**/reveal/*.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sealed)}));
+   const real=await (await page.request.get(base+a.stress_path)).json();assert(!real.sealed&&typeof real.text==='string'&&real.text.length>30,'published STRESS must require no code');
+   const evidence={chapter:String(a.chapter),version:a.version,text:'QA evidence for chapter '+a.chapter+': this opens automatically after commitment.',principle:'Reassess the committed claim.'};
+   await page.route('**/reveal/*.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(evidence)}));
    await page.goto(base+'fbr-submission.html?chapter='+a.chapter);await page.locator('#sid').fill('QA-DESIGN-ONLY');await page.locator('#ack').check();await page.locator('#openBtn').click();await page.waitForURL('**/Ch'+a.chapter+'-FBR-Student-Assignment.html');assert.equal(reveals.length,0);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'assignment horizontal overflow');
    for(const k of ['fit','measure','bound','act','evidence','technical'])if(await page.locator('#'+k).count())await page.locator('#'+k).fill('QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.');
@@ -102,7 +101,7 @@ async function run(){
    }
    await page.locator('#sourceUse').fill('Slide '+a.reading_pages[0]+': the source concept constrains the model assumptions and defines a bounded control that must be independently checked.');
    await page.locator('#section').fill('QA');await page.locator('#save').click();await page.reload();assert.match(await page.locator('#fit').inputValue(),/QA:/);
-   await page.locator('#lock').click();await page.locator('#stressCode').waitFor();assert.equal(await page.locator('#refitwhy').count(),0,'STRESS stays locked until the code is entered');await page.locator('#stressCode').fill(TEST_CODE);await page.locator('#unlockStress').click();await page.locator('#refitwhy').waitFor();assert.equal(reveals.length,1);assert(await page.locator('#fit').evaluate(e=>e.readOnly));
+   await page.locator('#lock').click();await page.locator('#refitwhy').waitFor();assert.equal(await page.locator('#stressCode').count(),0);assert.equal(reveals.length,1);assert(await page.locator('#fit').evaluate(e=>e.readOnly));
    await page.locator('input[name="boundaryState"]').first().check();await page.locator('input[name="refit"]').first().check();
    await page.locator('#refitwhy').fill('QA: the changed evidence breaks the shared-dependency assumption, so revise the boundary and require an independent check.');
    await page.locator('#revised').fill('QA: keep the model advisory-only; a human owner checks independently. Verify version and workload, record missing tests and reopen the decision when assumptions change.');

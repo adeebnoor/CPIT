@@ -2,13 +2,5 @@
   "chapter": "14",
   "version": "2026-09-ch14-path-v1",
   "label": "STRESS · new evidence",
-  "sealed": {
-    "v": 1,
-    "alg": "AES-256-GCM",
-    "kdf": "PBKDF2-SHA256",
-    "iter": 250000,
-    "salt": "vI3Qerdzb5VdXN4TmmLH4g==",
-    "iv": "RTlkGOU4LZ2H23HL",
-    "ct": "QKFFhTSvakEoILEPpQpPxYdSQpjqmErB9aAS9CvwpxpbQr3Si6Fb9fRBMNj09HXdPBZDIPYqTU7B75WGPI81GPHRSIgo9iPtV5dXckPy7lhi9bz7YLHEJwrVKF+MaTO990HdmC4ZsLwgiBfxUN/UKljSBdfJCcKjgKKMeTbE3cPgYVKmKJVHdYXMJM/mB3SiEFCg0nWzMmDnVzAkrML9SMmcf2q/Rxrq300Vf/3azrW8y2q8y1KUrQZxhNAdXhxk+REqAW6mkxFTIdPxorAwPJ0txCgAxhEJducWR6rayNh2dZ9550DQt/AzPMvS8YQGJa8F4xsakYpGIym5/Xae/JQQW2GIcosD0+806lyXT9k9l5XIEJWni5uoV1T22yElwb5J2EdWg3FixpY80vQGxxtOEZoHo3T/1VU8MaXz+9waJcN6/3MaJQvcZkCJbVWo0bjQG6VZ6EPBH+SfYFm+U+cy6A=="
-  }
+  "text": "The outage rehearsal reveals that the desk device and backup server both require the same central sign-in service, which is also unavailable. The local pickup list is present but authorized staff cannot open it. No bypass is authorized. Revisit the shared dependency and the claimed fallback."
 }

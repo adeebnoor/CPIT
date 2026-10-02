@@ -36,16 +36,21 @@ def canonical_sha(path):
     return hashlib.sha256(b).hexdigest()
 
 def stress_problem(stress, ch, version):
-    """STRESS payloads are published sealed (AES-256-GCM, PBKDF2 key from an instructor-held code)."""
+    """Validate code-free evidence, requested by the instructor on 2026-09-29."""
     if str(stress.get("chapter"))!=str(ch) or stress.get("version")!=version:
         return f"Invalid Chapter {ch} STRESS payload identity."
-    if any(k in stress for k in ("text","principle")):
-        return f"Chapter {ch} STRESS payload is in plain text; seal it with tools/seal_stress.py."
-    sealed=stress.get("sealed")
-    ok=(isinstance(sealed,dict) and sealed.get("v")==1 and sealed.get("alg")=="AES-256-GCM" and sealed.get("kdf")=="PBKDF2-SHA256"
-        and isinstance(sealed.get("iter"),int) and sealed["iter"]>=100000
-        and all(isinstance(sealed.get(k),str) and len(sealed[k])>=16 for k in ("salt","iv","ct")))
-    return "" if ok else f"Invalid sealed Chapter {ch} STRESS payload."
+    if "sealed" in stress:
+        return f"Chapter {ch} STRESS still requires a removed unlock code."
+    if not isinstance(stress.get("text"),str) or len(stress["text"].strip())<=30:
+        return f"Invalid Chapter {ch} STRESS evidence text."
+    return ""
+
+def stress_sequence_problem(source, ch):
+    if any(token in source for token in ("function openStress(", "function unsealStress(", "id=\"stressCode\"")):
+        return f"Chapter {ch} still contains a STRESS code gate."
+    if "if(!S.locked||!verifiedCommit||!validLocked(S))" not in source:
+        return f"Chapter {ch} must verify saved Part A before revealing STRESS."
+    return ""
 
 def audit(root=ROOT):
     root=Path(root); spec=publication(); errors=[]
@@ -154,18 +159,20 @@ def audit(root=ROOT):
             if assignment.get("points")!=expected_points: errors.append(f"Chapter {ch} AI-only assignment has the wrong point total.")
             for marker in ('data-assessment-edition="ai-v3"','AI-ONLY','Download Blackboard JSON','22964248'):
                 if marker.lower() not in a.lower(): errors.append(f"Chapter {ch} AI-only assignment is missing required marker: {marker}")
-        if "function openStress(" not in a: errors.append(f"Chapter {ch} assignment must support unlock-code STRESS.")
+        problem=stress_sequence_problem(a,ch)
+        if problem: errors.append(problem)
         if sp.is_file():
             try:
                 problem=stress_problem(json.loads(sp.read_text(encoding="utf-8")),ch,assignment.get("version"))
                 if problem: errors.append(problem)
             except ValueError: errors.append(f"Invalid Chapter {ch} STRESS JSON.")
         else: errors.append(f"Missing Chapter {ch} STRESS payload.")
-    # Older editions stay available for draft recovery; their STRESS must be sealed too.
+    # Older editions retain the same code-free sequence for draft recovery.
     for older in spec.get("previous_assignments", []):
         ch=older.get("chapter"); op=root/older["path"]; sp=root/older["stress_path"]
         if not op.is_file() or not sp.is_file(): errors.append(f"Missing previous Chapter {ch} edition or payload."); continue
-        if "function openStress(" not in op.read_text(encoding="utf-8"): errors.append(f"Previous Chapter {ch} edition must support unlock-code STRESS.")
+        problem=stress_sequence_problem(op.read_text(encoding="utf-8"),ch)
+        if problem: errors.append("Previous edition: "+problem)
         try:
             problem=stress_problem(json.loads(sp.read_text(encoding="utf-8")),ch,older.get("version"))
             if problem: errors.append("Previous edition: "+problem)
