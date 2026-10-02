@@ -25,6 +25,14 @@ SPEC = {
   instructions='Write at least three cases. Each case is a JSON object with name, actor (student:ID or staff:GROUP), object (project:OWNER@GROUP), path (ui or api) and expected (allow or deny). A student may access only their own project; staff may access only projects in their assigned group. Include an allowed and a forbidden request on the api path. Predict each decision before running.',
   code='// One request is decided at a time.\n// Rule: a student may access a project they own; staff may access projects in their assigned group.\n// Baseline: the rule is applied only where the interface lists links (path "ui");\n//           the API serves any project identifier it receives.\n// Corrected: the server checks the actor against the object on every path.\n// No sessions, logs, network or real accounts are modelled.',
   shape='[{"name":"my case","actor":"student:YOUR_ID","object":"project:OWNER@GROUP","path":"api","expected":"allow or deny"}]'),
+ 15: dict(title='Evidence-only fit check',
+  instructions='Write at least four cases. Each case is a JSON object with name, option (A or B), requirement (booking, recurring, export-api, support-3-years or peak-load) and expected (met, gap or unknown). Check both options and include at least one requirement the supplied facts do not settle. Predict what each model reports before running. Use the result to test the claims in the colleague’s draft.',
+  code='// The facts are exactly those in the scenario, nothing more.\n// Baseline ("brochure reading"): anything not shown to be a gap counts as met.\n// Corrected ("evidence only"): a requirement the supplied facts do not settle stays unknown.\n// No prices, workloads, supplier negotiations or real products are modelled.',
+  shape='[{"name":"my case","option":"A or B","requirement":"YOUR_REQUIREMENT","expected":"met, gap or unknown"}]'),
+ 20: dict(title='Feed display tests',
+  instructions='Write at least three cases. Each case is a JSON object with name, feed (security, transport or facilities), minutesSinceUpdate (whole minutes), available (true or false) and expectedDisplay (live, stale or unavailable). The pilot proposes an agreed freshness limit of 5 minutes. Include an unavailable feed and an available feed older than the limit. Predict what each model shows before running. Use the result in your review of the proposed design.',
+  code='// One display decision per feed.\n// Baseline (the proposed design): every feed shows its last value as live.\n// Corrected: an unavailable feed is shown as unavailable; a feed older than the\n//            agreed limit (5 minutes, proposed) is shown as stale; otherwise live.\n// No networks, owners, schedules or AI models are modelled.',
+  shape='[{"name":"my case","feed":"YOUR_FEED","minutesSinceUpdate":YOUR_MINUTES,"available":true,"expectedDisplay":"live, stale or unavailable"}]'),
  14: dict(title='Outage fallback tests',
   instructions='Write at least two cases. Each case is a JSON object with name, events (in order), expectedLookups (current, stale or missing for each lookup, in order) and expectedLost (how many changes are lost). Events: refresh, outage, recover, change:ID and lookup:ID. Include a case with a change and a lookup during the outage. Predict the lookups and losses before running.',
   code='// One central pickup list. While the central server is up, "refresh" replaces the desk\'s local copy.\n// "change:ID" updates a pickup; "lookup:ID" asks what the desk can see at that moment.\n// current = the desk sees the latest change; stale = an older version; missing = nothing for that ID.\n// Baseline: during an outage the desk reads the local copy, and new changes are lost.\n// Corrected: during an outage changes go on the controlled paper log; the desk reads the local copy\n//            plus the paper log; "recover" reconciles the paper log into the central list.\n// No devices or staff workload are modelled.',
@@ -73,6 +81,18 @@ def patch(path: Path, n: int) -> bool:
     return True
 
 
+INLINE = re.compile(r"<script>/\* Deterministic teaching models\..*?module\.exports=StudyLab;\n?</script>", re.S)
+
+
+def sync_inline(path: Path) -> bool:
+    """Keep every page's inline copy of the teaching models identical to curriculum/learning-path/labs.js."""
+    s = path.read_text(encoding='utf-8')
+    new = INLINE.sub(lambda m: '<script>' + LABS + '</script>', s, count=1)
+    if new != s:
+        path.write_text(new, encoding='utf-8'); return True
+    return False
+
+
 def main() -> int:
     pub = json.loads(PUB.read_text(encoding='utf-8'))
     done = []
@@ -81,6 +101,8 @@ def main() -> int:
             if patch(ROOT / a['path'], a['chapter']):
                 done.append(a['chapter'])
             a['practical'] = True
+        if a.get('practical'):
+            sync_inline(ROOT / a['path'])
     PUB.write_text(json.dumps(pub, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('Executable labs added to chapters', done or 'none (already present)')
     return 0

@@ -55,6 +55,7 @@ window.ISCARB_STORY = {
    epilogue: 'Thursday 10:00. The board will ask Layan for one sentence: which scope, which metric, which evidence. Write yours before you leave the room.'
   },
   12: {
+   lab: {"question": "Assignment 3’s loading-bay barrier: will it close when the camera has no usable image?", "cases": [{"name": "zone occupied", "frames": ["empty", "occupied"], "expectedAction": "hold"}, {"name": "zone clear", "frames": ["empty"], "expectedAction": "close"}, {"name": "camera covered", "frames": ["occupied", "missing"], "expectedAction": "hold"}]},
    practice: 'Layan asks an AI chat to play Tariq and argue for Monday. It helps her rehearse the conversation. The hazard analysis and the safety claim she signs are her own.',
    episode: 'Episode 1 · Every command within limits',
    setting: 'A plant is about to switch on a repeated-command mode for a controller whose safety argument Layan’s team prepared last year.',
@@ -74,6 +75,7 @@ window.ISCARB_STORY = {
    epilogue: 'Monday’s first shift is waiting. Khalid will sign only a claim with a stated boundary and the evidence behind it. What exactly would your safety claim cover, and what would it not?'
   },
   13: {
+   lab: {"question": "Assignment 4’s portal: does hiding a link stop a direct request?", "cases": [{"name": "own project, direct request", "actor": "student:ali", "object": "project:ali@g1", "path": "api", "expected": "allow"}, {"name": "another student’s project, direct request", "actor": "student:sara", "object": "project:ali@g1", "path": "api", "expected": "deny"}, {"name": "staff, other group, via the interface", "actor": "staff:g2", "object": "project:ali@g1", "path": "ui", "expected": "deny"}]},
    practice: 'Layan uses an AI assistant to brainstorm misuse cases. It suggests ten. She chooses the one worth a negative test and writes the claim Khalid will sign.',
    episode: 'Episode 2 · The record that crossed the line',
    setting: 'A Jeddah startup sells a team-documents application to three client organisations. Next week it switches on an AI assistant that answers questions about each team’s files.',
@@ -93,6 +95,7 @@ window.ISCARB_STORY = {
    epilogue: 'Sunday 09:00. Khalid signs only what is tested. Layan’s note has three lines: claim, boundary, evidence. What would yours say?'
   },
   14: {
+   lab: {"question": "Assignment 5’s transport desk: what can staff see during an outage?", "cases": [{"name": "change made during the outage", "events": ["change:p1", "refresh", "outage", "change:p1", "lookup:p1", "recover", "lookup:p1"], "expectedLookups": ["current", "current"], "expectedLost": 0}, {"name": "change made after the 06:00 refresh", "events": ["refresh", "change:p2", "outage", "lookup:p2"], "expectedLookups": ["missing"], "expectedLost": 0}]},
    practice: 'Layan rehearses the four Rs with an AI tutor during a quiet hour. When Amal asks “are we recovered?”, the answer and its evidence must be Layan’s.',
    episode: 'Episode 3 · 02:00, and nobody can sign in',
    setting: 'A public service’s records system after a cyber incident. The incident is contained. Khalid, the only trained recovery specialist, is off shift and not answering. Layan is on call.',
@@ -112,6 +115,7 @@ window.ISCARB_STORY = {
    epilogue: '08:00. Amal will announce something to the public. Khalid, back in the morning, will ask Layan which part of the service was restored, which was not, and who knew.'
   },
   15: {
+   lab: {"question": "Assignment 6’s two options: which needs do the facts actually settle?", "cases": [{"name": "A has recurring bookings", "option": "A", "requirement": "recurring", "expected": "met"}, {"name": "B has recurring bookings", "option": "B", "requirement": "recurring", "expected": "gap"}, {"name": "A supported for three years", "option": "A", "requirement": "support-3-years", "expected": "gap"}, {"name": "A’s export is complete", "option": "A", "requirement": "export-api", "expected": "unknown"}]},
    practice: 'Layan asks an AI to summarise the supplier’s roadmap. Useful practice, but the reuse route, and what would change her mind, she must defend herself.',
    episode: 'Episode 4 · Buy, bend or build',
    setting: 'A clinic group bought an appointment product to replace its old booking system. Layan’s team must make it work for the clinics.',
@@ -131,6 +135,7 @@ window.ISCARB_STORY = {
    epilogue: 'The contract decision is due. Dr. Sara does not need a perfect product; she needs to know which route survives the next five years, and what would make Layan change her mind.'
   },
   16: {
+   lab: {"question": "Assignment 7’s adapter: what does “30 minutes” become inside the component?", "cases": [{"name": "normal booking", "durationMinutes": 30, "expectedStatus": "accepted", "expectedSeconds": 1800}, {"name": "upper boundary", "durationMinutes": 120, "expectedStatus": "accepted", "expectedSeconds": 7200}, {"name": "zero length", "durationMinutes": 0, "expectedStatus": "rejected", "expectedSeconds": null}]},
    practice: 'Layan has an AI generate test values for the adapter. She still decides which boundaries matter and writes the contract Rakan relies on.',
    episode: 'Episode 5 · Ninety-five degrees',
    setting: 'A city operations team is composing a heat-alert service from reusable parts: a sensor data component and a vendor’s AI forecasting component. Layan is the integrator.',
@@ -150,6 +155,7 @@ window.ISCARB_STORY = {
    epilogue: 'Rakan asks Layan one question before the season opens: “What stops this happening with the next component?” Her answer has to be a contract and a test, not a promise.'
   },
   17: {
+   lab: {"question": "Assignment 8’s booking service: what happens when the reply is lost and the service restarts?", "cases": [{"name": "restart, same request identity", "events": ["send:a", "lose-response", "restart", "retry:a"], "expectedReservations": 1}, {"name": "retry with a new identity", "events": ["send:b", "lose-response", "retry:c"], "expectedReservations": 2}]},
    practice: 'Layan asks an AI to explain idempotency keys three different ways until it clicks. The retry design she commits to before 20:00 is her judgment.',
    episode: 'Episode 6 · Did it go through?',
    setting: 'A national events app is preparing for a big ticket sale. Layan works on the backend service that accepts each booking and sends the confirmation.',
@@ -169,6 +175,7 @@ window.ISCARB_STORY = {
    epilogue: '20:00 is coming. Hessa needs to know what happens on a retry, and how support will tell a duplicate from a real second booking. What would Layan’s design guarantee, and what would it only detect?'
   },
   20: {
+   lab: {"question": "Assignment 9’s dashboard: what should a slow or missing feed look like?", "cases": [{"name": "security, updated a minute ago", "feed": "security", "minutesSinceUpdate": 1, "available": true, "expectedDisplay": "live"}, {"name": "transport, 12 minutes old", "feed": "transport", "minutesSinceUpdate": 12, "available": true, "expectedDisplay": "stale"}, {"name": "facilities, feed down", "feed": "facilities", "minutesSinceUpdate": 3, "available": false, "expectedDisplay": "unavailable"}]},
    practice: 'Layan uses an AI chat to role-play the three agency owners. It is rehearsal. The bounded promise Faisal reads aloud is Layan’s, with her name on it.',
    episode: 'Episode 7 · Whose dashboard is it?',
    setting: 'A multi-agency incident dashboard combines data feeds from agencies Layan’s team does not control. Officials will rely on it.',

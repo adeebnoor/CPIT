@@ -68,6 +68,22 @@ def fold_levels(path: Path) -> tuple[int, int] | None:
     return before, visible_before_task(s)
 
 
+def fold_prep(path: Path) -> tuple[int, int] | None:
+    """Warm-up and preparation: keep the question and the reading; fold the scope sentences (v2)."""
+    s = path.read_text(encoding='utf-8')
+    if 'data-concise="v2"' in s:
+        return None
+    before = visible_before_task(s)
+    s = s.replace('<p class="hint">No written warm-up response is required.</p>', '', 1)
+    a = s.index('id="requiredPreparation"'); b = s.index('</section>', a); sec = s[a:b]
+    m = re.search(r'(Complete the <a [^>]*>five-objective preparation check</a> after the <a [^>]*>assigned reading</a>), before starting this task and before the next chapter discussion\. (Blackboard supplies the calendar deadline\. All five chapter objectives, the classroom concepts and named reading are in assessment scope\. Optional toolkit activities are enrichment unless assigned\.)', sec)
+    if not m: raise SystemExit(f'{path.name}: preparation paragraph not found')
+    sec = sec.replace(m.group(0), m.group(1) + ' before you start.').replace('<details><summary>Scope notes and earlier editions</summary>', '<details><summary>Scope notes and earlier editions</summary><p>' + m.group(2) + '</p>', 1)
+    s = s[:a] + sec.replace('id="requiredPreparation"', 'id="requiredPreparation" data-concise="v2"', 1) + s[b:]
+    path.write_text(s, encoding='utf-8')
+    return before, visible_before_task(s)
+
+
 def main() -> int:
     pub = json.loads((ROOT / 'curriculum/publication.json').read_text(encoding='utf-8'))
     for a in pub['assignments']:
@@ -76,6 +92,8 @@ def main() -> int:
         if r: print(f"Chapter {a['chapter']}: visible text before the task {r[0]} → {r[1]} characters ({100 - round(100 * r[1] / r[0])}% less)")
         r = fold_levels(ROOT / a['path'])
         if r: print(f"Chapter {a['chapter']}: rubric levels folded {r[0]} → {r[1]} characters")
+        r = fold_prep(ROOT / a['path'])
+        if r: print(f"Chapter {a['chapter']}: preparation folded {r[0]} → {r[1]} characters")
     return 0
 
 

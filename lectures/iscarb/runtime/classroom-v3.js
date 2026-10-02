@@ -13,6 +13,7 @@ if(STORY)document.documentElement.dataset.stage='v4';
 const ACTS=(D.roadmap?.branches||[]).map((b,i)=>{const at=(b.units||[]).map(u=>D.slides.findIndex(s=>s.id===u)).filter(n=>n>=0);return {b,i,first:Math.min(...at),last:Math.max(...at)};}).filter(a=>Number.isFinite(a.first));
 const TWIST_AT=D.stations?.[2]?.at;
 setInterval(()=>{const c=document.querySelector('.pace-chip');if(c&&PLAN)c.outerHTML=paceChip();},20000);
+let extraIndex=null;
 let savedOK=true,state={fields:{},seen:[],quiz:{},ai:{},self:{},votes:{},gut:{},theme:'night'},index=0,stationMode=false,voteMode=null,voteStage=0,quizIndex=0,returnFocus=null;
 try{const s=JSON.parse(localStorage.getItem(key)||'null');if(s&&s.schema==='iscarb-classroom-v3'&&s.chapter===D.chapter){state={...state,...sanitize(s).state};}}catch(e){savedOK=false;}
 let remaining=180,deadline=0,ticker=null,nationalIndex=null;
@@ -25,6 +26,7 @@ const PACE=(()=>{if(!PRESENTER||!STORY)return null;let p='50';try{const q=new UR
 function buildPlan(B){
  const fixed={TITLE:3,MAP:1,START:2,END:3},voteActs=[1,3].filter(i=>i<ACTS.length),stationNos=B>=60?[2]:[],extra=D.slides.map(()=>0);
  const tw=D.slides.findIndex(s=>s.id===TWIST_AT);if(tw>=0)extra[tw]+=3;
+ extra[D.slides.length-2]+=7; // extra track: live lab 4, explain 2, steps 1
  voteActs.forEach(a=>{extra[ACTS[a].last]+=4;});
  D.stations.filter(st=>stationNos.includes(st.no)).forEach(st=>{const i=D.slides.findIndex(s=>s.id===st.at);if(i>=0)extra[i]+=5;});
  const regular=D.slides.filter(s=>!fixed[s.id]).length,used=Object.values(fixed).reduce((a,b)=>a+b,0)+extra.reduce((a,b)=>a+b,0),per=Math.max(1,(B-used)/regular);
@@ -160,6 +162,8 @@ function checkSectionFit(){
  stage.classList.toggle('needs-scroll',overflow);
 }
 function advanceSection(delta){
+ if(extraIndex!==null){const n=extraIndex+delta;if(n>=0&&n<EXTRAS.length){renderExtra(n);return;}const back=n<0;extraIndex=null;go(back?index:D.slides.length-1);return;}
+ if(voteMode===null&&!stationMode&&delta>0&&PRESENTER&&EXTRAS.length&&index===D.slides.length-2){renderExtra(0);return;}
  if(voteMode!==null){if(delta>0&&voteStage<3){voteStage++;render();return;}voteMode=null;voteStage=0;if(delta>0&&index<D.slides.length-1)go(index+1);else render();return;}
  if(nationalIndex!==null){const n=nationalIndex+delta;if(n>=0&&n<2)nationalSlide(n);else go(index);return;}
  if(!stationMode&&!readingLayout()&&sectionNodes.length){const n=sectionIndex+delta;if(n>=0&&n<sectionNodes.length){showSection(n);return;}}
@@ -199,7 +203,7 @@ else if(s.id==='END'){renderClosing();}
 else{const merged=mergedCards(s),twist=twistBlock(s);$('#chapter-main').insertAdjacentHTML('beforeend',`${s.banner?bannerBlock(s):storyThread(s)}${practiceBlock(s)}<p class="takeaway">${esc(s.takeaway||s.title)}${s.aiTag?AI_TAG:''}</p>${twist}${merged?`<div class="body-grid body-merged ${STORY?layoutFor(s):''}">${merged}</div>`:`<div class="body-grid"><div class="visual">${visual(s)}</div><div class="meaning"><h2>WHAT IT MEANS</h2>${points(s.bullets)}</div></div>`}${lensStrip(s)}${yourCall(s,stop)}`);}
 updateNav();buildReadable(s);requestAnimationFrame(fitText);}
 function updateNav(){$('#prevBtn').disabled=index===0;$('#nextBtn').disabled=index===D.slides.length-1;$('#progress').innerHTML=`${new Set(state.seen).size} / ${D.slides.length} visited<span class="nav-shortcuts">Enter → · Backspace ←</span>`;$('#live').textContent=`Slide ${index+1} of ${D.slides.length}: ${D.slides[index].title}`;updateMapLocation();save();}
-function go(n,history=true){if(!Number.isInteger(n)||n<0||n>=D.slides.length)return;if(PLAN&&n>0&&!paceStart())try{sessionStorage.setItem(paceKey,String(Date.now()-PLAN.end[0]*60000));}catch(e){}pauseTimer();stationMode=false;voteMode=null;voteStage=0;index=n;if(!state.seen.includes(D.slides[index].id))state.seen.push(D.slides[index].id);render();if(history)try{window.history.replaceState(null,'','#'+D.slides[index].id);}catch(e){}if(matchMedia('(max-width:1000px)').matches)window.scrollTo(0,0);}
+function go(n,history=true){if(!Number.isInteger(n)||n<0||n>=D.slides.length)return;extraIndex=null;if(PLAN&&n>0&&!paceStart())try{sessionStorage.setItem(paceKey,String(Date.now()-PLAN.end[0]*60000));}catch(e){}pauseTimer();stationMode=false;voteMode=null;voteStage=0;index=n;if(!state.seen.includes(D.slides[index].id))state.seen.push(D.slides[index].id);render();if(history)try{window.history.replaceState(null,'','#'+D.slides[index].id);}catch(e){}if(matchMedia('(max-width:1000px)').matches)window.scrollTo(0,0);}
 function jump(k){const aliases=D.aliases||{};k=aliases[k]||k;let n=D.slides.findIndex(s=>s.id===k);closeModal();if(n>=0)go(n);else open(k);}
 function modal(title,html){pauseTimer();returnFocus=document.activeElement;$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;$('#modal').hidden=false;$('#modal-close').focus();save();}
 function closeModal(){if($('#modal').hidden)return;$('#modal').hidden=true;$('#modal-body').innerHTML='';if(returnFocus?.isConnected)returnFocus.focus();}
@@ -272,6 +276,27 @@ function practiceBlock(s){
  if(!STORY?.practice||D.slides.indexOf(s)!==AI_SLIDE)return '';
  return `<div class="practice-scene"><span class="practice-tag">AI = PRACTICE · JUDGMENT = ASSESSED</span><p>${esc(STORY.practice)}</p></div>`;
 }
+// Extra track v1: up to three slides outside the pinned 20 (live lab, explain it, assignment steps).
+// Presenter flow enters them after the slide before the close; students reach them from the close.
+const EXTRAS=STORY?[{id:'X-LAB',title:'Live lab · predict, then run'},{id:'X-EXPLAIN',title:'Explain it in two minutes'},{id:'X-STEPS',title:'Your assignment, step by step'}]:[];
+function caseInputs(c){return Object.entries(c).filter(([k])=>k!=='name'&&!/^expected/.test(k)).map(([k,v])=>`${k}: ${Array.isArray(v)?v.join(' → '):v}`).join(' · ');}
+function caseExpected(c){return Object.entries(c).filter(([k])=>/^expected/.test(k)).map(([,v])=>Array.isArray(v)?v.join(', '):String(v)).join(' · ');}
+function labRow(r){if(!r)return '<td class="pending">—</td>';const a=r.actual,v=a.action??a.decision??a.status??a.display??(a.lookups?a.lookups.join(', ')+(a.lostChanges?` · lost ${a.lostChanges}`:''):undefined)??(a.reservations!==undefined?a.reservations+' reservation(s)':a.storedSeconds!==undefined?(a.status+(a.storedSeconds!==null?' · '+a.storedSeconds+' s':'')):JSON.stringify(a));return `<td class="${r.passed?'pass':'fail'}">${esc(v)} <b>${r.passed?'✓':'✗'}</b></td>`;}
+let labRuns={};
+function renderExtra(k){
+ closeModal();pauseTimer();clearInterval(thinkTimer);thinkTimer=null;stationMode=false;voteMode=null;sectionNodes=[];nationalIndex=null;extraIndex=k;
+ const x=EXTRAS[k],main=$('#chapter-main');main.className='chapter-main extra-slide';main.dataset.act='5';
+ let body='';
+ if(x.id==='X-LAB'){const L=STORY.lab,ok=window.StudyLab&&L;const runs=labRuns[D.chapter]||{};
+  body=ok?`<p class="extra-q">${esc(L.question)}</p><p class="extra-how"><b>1.</b> For each case, the class predicts what the <i>baseline</i> does. <b>2.</b> Run it. <b>3.</b> Run the corrected model. <b>4.</b> Ask: what did the failing case have that the others did not?</p><div class="lab-table-wrap"><table class="lab-table"><thead><tr><th>Case</th><th>Inputs</th><th>Expected</th><th>Baseline</th><th>Corrected</th></tr></thead><tbody>${L.cases.map((c,i)=>`<tr><th>${esc(c.name)}</th><td>${esc(caseInputs(c))}</td><td>${esc(caseExpected(c))}</td>${labRow(runs.baseline?.[i])}${labRow(runs.corrected?.[i])}</tr>`).join('')}</tbody></table></div><div class="actions"><button class="primary" data-xlab="baseline">Run baseline</button><button data-xlab="corrected">Run corrected</button><button data-xlab="reset">Clear</button><span class="small">Same teaching model as Assignment ${D.assignment}. In the assignment you write your own cases.</span></div>`:`<p>The lab model is not available offline in this copy.</p>`;}
+ else if(x.id==='X-EXPLAIN'){body=`<p class="extra-q">Pairs. Partner A has 60 seconds; then swap.</p><ol class="explain-steps"><li><b>Say your decision</b> for: ${esc(D.case.question)}</li><li><b>Say where it stops holding:</b> the observation that would make you reopen it.</li><li><b>Say what evidence would change it,</b> and who would check it.</li></ol><div class="explain-ask"><b>Partner B asks one:</b><ul><li>Why that boundary and not another?</li><li>What did the new information change, and what did it not?</li><li>Which part are you least sure of?</li></ul></div><div class="actions"><button class="think-btn" data-think="60">Start 60 s</button><span class="small">This is the same two-minute ownership check your instructor may run after each assignment. ${esc(SERIES.principle||'')}</span></div>`;}
+ else{const a=D.assignment,fmt={15:'Format: critique a colleague’s recommendation.',20:'Format: review another team’s design.'}[D.chapter]||'';
+  body=`<p class="extra-q">Assignment ${a} · about 50–60 minutes in total${fmt?` · ${esc(fmt)}`:''}</p><ol class="steps-grid"><li><b>Prepare</b><span>Read ${D.readings.map(r=>esc(r.title)+' ('+esc(r.range)+')').join(' and ')}; do the five-objective check.</span></li><li><b>Part A</b><span>FIT · the chapter artifact · BOUND · ACT + EVIDENCE, 180–260 words, supplied facts only.</span></li><li><b>Lab</b><span>Predict, write your own JSON cases, run both models, explain surprises.</span></li><li><b>Commit, then Blackboard</b><span>Save the Part A PDF and upload it to “Assignment ${a} · Part A”.</span></li><li><b>New evidence → REFIT</b><span>Paste Blackboard’s “Assignment ${a} · New evidence”; retain, revise or replace, and say why.</span></li><li><b>Declare and submit</b><span>AI use (or “No AI used”), final PDF to Blackboard. Be ready to explain it in two minutes.</span></li></ol><div class="actions"><a class="btn-link" href="https://adeebnoor.github.io/CPIT/fbr-submission.html?chapter=${D.chapter}">Open Assignment ${a}</a><a class="btn-link" href="../../student-guide.html#assignments-3-9">Step-by-step guide</a></div>`;}
+ main.innerHTML=`<div class="heading"><div><p class="ey">EXTRA ${k+1} OF ${EXTRAS.length} · CHAPTER ${D.chapter}</p><h1>${esc(x.title)}</h1></div><span class="counter">+${k+1} / ${EXTRAS.length}</span>${paceChip()}</div><section class="extra-body extra-${x.id.toLowerCase()}">${body}</section>`;
+ $('#prevBtn').disabled=false;$('#nextBtn').disabled=false;$('#progress').innerHTML=`Extra ${k+1} of ${EXTRAS.length} · then the close`;$('#live').textContent=x.title;
+ try{history.replaceState(null,'','#'+x.id);}catch(e){}
+ requestAnimationFrame(fitExtra);
+}
 function gutBlock(round){
  const g=STORY?.gut;if(!g)return '';
  const counts=state.gut[round]||g.options.map(()=>0),total=counts.reduce((x,y)=>x+y,0),before=state.gut.before;
@@ -297,7 +322,15 @@ function fitText(){
  let lo=1,hi=1.65;for(let k=0;k<8;k++){const m=(lo+hi)/2;g.style.setProperty('--fit',m.toFixed(3));if(fits())lo=m;else hi=m;}
  g.style.setProperty('--fit',lo.toFixed(3));
 }
-window.addEventListener('resize',()=>requestAnimationFrame(fitText));
+function fitExtra(){
+ const g=$('#chapter-main .extra-body');if(!g)return;if(matchMedia('(max-width:1000px)').matches){g.style.removeProperty('--fit');return;}
+ const m=$('#chapter-main'),room=()=>m.getBoundingClientRect().bottom-parseFloat(getComputedStyle(m).paddingBottom)-g.getBoundingClientRect().top;
+ const fits=()=>g.scrollHeight<=room()+1&&g.scrollWidth<=g.clientWidth+1;
+ let lo=.8,hi=1.6;g.style.setProperty('--fit','.8');if(!fits())return;
+ for(let k=0;k<9;k++){const m=(lo+hi)/2;g.style.setProperty('--fit',m.toFixed(3));if(fits())lo=m;else hi=m;}
+ g.style.setProperty('--fit',lo.toFixed(3));
+}
+window.addEventListener('resize',()=>requestAnimationFrame(()=>{fitText();fitExtra();}));
 let thinkTimer=null;
 function think(b){clearInterval(thinkTimer);let t=Number(b.dataset.think)||30;const show=()=>{b.textContent=t>0?`Think · ${t} s`:'Now compare with a neighbour';};b.classList.remove('done');b.classList.add('running');show();thinkTimer=setInterval(()=>{t--;show();if(t<=0){clearInterval(thinkTimer);thinkTimer=null;b.classList.replace('running','done');}},1000);}
 function renderMindMap(){
@@ -369,7 +402,7 @@ function renderClosing(){
   <p class="end-success">Ready means you can <b>explain, verify and own</b> the decision—not merely repeat the content.</p>
   <div class="readiness-strip" aria-label="Readiness checks"><section><b>Explain</b><span>Use the mechanism without outsourcing the core judgment to AI.</span></section><section><b>Verify</b><span>Use inspectable evidence; label unknowns and any AI assistance.</span></section><section><b>Own</b><span>Revise under changed evidence and name the responsible human role.</span></section></div>
   <div class="end-required"><section><span>1</span><div><b>Required review</b><p>${D.readings.map(x=>esc(x.title)+' · '+esc(x.range)).join(' | ')}</p></div></section><section><span>2</span><div><b>Five-objective check</b><p>Correct misunderstandings before the assessed case.</p></div></section><section><span>3</span><div><b>Assignment ${D.assignment}</b><p>${esc(r.deliverable)} Submit through Blackboard.</p></div></section></div>
-  <div class="actions">${button('Preparation & sources','DISCLOSURE')}${button('Open required review','READING','primary')}<a href="https://adeebnoor.github.io/CPIT/fbr-submission.html?chapter=${D.chapter}">Open Assignment ${D.assignment}</a></div>
+  <div class="actions">${EXTRAS.length?`<button data-open="X-LAB">Lab &amp; practice · ${EXTRAS.length} extra slides</button>`:''}${STORY&&PRESENTER?'<button data-evidence title="Counts from this device only, for the instructor evidence page">Export class evidence (CSV)</button>':''}${button('Preparation & sources','DISCLOSURE')}${button('Open required review','READING','primary')}<a href="https://adeebnoor.github.io/CPIT/fbr-submission.html?chapter=${D.chapter}">Open Assignment ${D.assignment}</a></div>
  </div><img src="${esc(D.brand)}" alt=""></div>`);
 }
 function nelcAlignment(){
@@ -392,8 +425,14 @@ function updateMapLocation(){
  const mapButton=$('#mapBtn');if(mapButton)mapButton.setAttribute('aria-current',s.id==='MAP'?'step':'false');
 }
 
-function open(k){k=(D.aliases||{})[k]||k;if(D.slides.some(s=>s.id===k)){jump(k);return;}const aliases={PREP:'QUIZ',C01:'COVERAGE',J01:'READINESS',J02:'QUIZ',AIGATE:'AI',READING:'READING'};k=aliases[k]||k;({UNITS:indexModal,READING:reading,COVERAGE:coverage,RULES:rules,TOOLS:studyTools,OBJECTIVES:mapObjectives,CASEMAP:()=>modal('Five concepts in our case',`<p>${esc(D.case.question)}</p><div class="case-map-details">${D.roadmap.branches.map(b=>`<section><h3>${esc(b.label)}</h3><p>${esc(b.caseLens||'Use this concept to narrow the decision.')}</p>${b.aiLens?`<p>AI lens · ${esc(b.aiLens)}</p>`:''}${jumpButton(b.target,'Open this concept')}</section>`).join('')}</div>`),CARD:card,HSTACK:hstack,PREDICT:predict,BRIDGE:bridge,MONITOR:monitor,LOCAL:local,PRACTICE:practice,WELLBEING:wellbeing,AI:ai,EVIDENCE:evidence,RUBRIC:rubric,READINESS:()=>nationalSlide(0),NELC:()=>nationalSlide(1),DISCLOSURE:()=>modal('Preparation, sources and national alignment',`<p>${esc(D.disclosure||'Source-grounded classroom materials; instructor review remains required.')}</p><p>National alignment: learning outcomes first; bounded AI assistance; accountable human judgment; improvement from evidence.</p><div class="actions">${button('Jaheziah readiness','READINESS')}${button('NELC alignment','NELC')}${button('Source coverage','COVERAGE')}</div>`),READINESSDETAIL:readiness,NELCDETAIL:nelcAlignment,'NATIONAL-JAHEZIAH':()=>nationalSlide(0),'NATIONAL-NELC':()=>nationalSlide(1),PORTFOLIO:portfolio,QUIZ:quiz,CALCULATOR:calculator,HELP:help,NOTES:notes,AIASSIGN:aiChallenge}[k]||(()=>modal('Source or tool',`<p>This earlier unit is available in the complete source review.</p><a href="sources/Ch${D.chapter}-Study.html">Open the source ledger</a>`)))();}
+function open(k){k=(D.aliases||{})[k]||k;const xi=EXTRAS.findIndex(x=>x.id===k);if(xi>=0){if(!PRESENTER)index=D.slides.length-2;renderExtra(xi);return;}if(D.slides.some(s=>s.id===k)){jump(k);return;}const aliases={PREP:'QUIZ',C01:'COVERAGE',J01:'READINESS',J02:'QUIZ',AIGATE:'AI',READING:'READING'};k=aliases[k]||k;({UNITS:indexModal,READING:reading,COVERAGE:coverage,RULES:rules,TOOLS:studyTools,OBJECTIVES:mapObjectives,CASEMAP:()=>modal('Five concepts in our case',`<p>${esc(D.case.question)}</p><div class="case-map-details">${D.roadmap.branches.map(b=>`<section><h3>${esc(b.label)}</h3><p>${esc(b.caseLens||'Use this concept to narrow the decision.')}</p>${b.aiLens?`<p>AI lens · ${esc(b.aiLens)}</p>`:''}${jumpButton(b.target,'Open this concept')}</section>`).join('')}</div>`),CARD:card,HSTACK:hstack,PREDICT:predict,BRIDGE:bridge,MONITOR:monitor,LOCAL:local,PRACTICE:practice,WELLBEING:wellbeing,AI:ai,EVIDENCE:evidence,RUBRIC:rubric,READINESS:()=>nationalSlide(0),NELC:()=>nationalSlide(1),DISCLOSURE:()=>modal('Preparation, sources and national alignment',`<p>${esc(D.disclosure||'Source-grounded classroom materials; instructor review remains required.')}</p><p>National alignment: learning outcomes first; bounded AI assistance; accountable human judgment; improvement from evidence.</p><div class="actions">${button('Jaheziah readiness','READINESS')}${button('NELC alignment','NELC')}${button('Source coverage','COVERAGE')}</div>`),READINESSDETAIL:readiness,NELCDETAIL:nelcAlignment,'NATIONAL-JAHEZIAH':()=>nationalSlide(0),'NATIONAL-NELC':()=>nationalSlide(1),PORTFOLIO:portfolio,QUIZ:quiz,CALCULATOR:calculator,HELP:help,NOTES:notes,AIASSIGN:aiChallenge}[k]||(()=>modal('Source or tool',`<p>This earlier unit is available in the complete source review.</p><a href="sources/Ch${D.chapter}-Study.html">Open the source ledger</a>`)))();}
 function readable(){return [`# Chapter ${D.chapter}: ${D.title}`,'Professor Adeeb Noor · CPIT-455',`Release ${D.release}`,'Fictional teaching case. Student draft; not a grade, submission or certification.','',...Object.entries(state.fields).flatMap(([k,v])=>['## '+(labels[k]||k),v||'[not entered]','']),'## AI gate',aiVerdict(state.ai)].join('\n');}
+function evidenceCSV(){
+ const q=v=>/[",\n]/.test(v=String(v??''))?'"'+v.replace(/"/g,'""')+'"':v,day=new Date().toISOString().slice(0,10),rows=[['chapter','date','item','kind','option','option_text','correct','round1','round2']];
+ const g=STORY?.gut;if(g)g.options.forEach((o,k)=>rows.push([D.chapter,day,'gut','gut',k+1,o,'',state.gut.before?.[k]??'',state.gut.after?.[k]??'']));
+ D.quiz.forEach((x,i)=>{const v=state.votes[i];if(!v?.r1&&!v?.r2)return;x.options.forEach((o,k)=>rows.push([D.chapter,day,'act'+(i+1),'vote',k+1,o,k===x.answer?1:0,v.r1?.[k]??'',v.r2?.[k]??'']));});
+ return rows.map(r=>r.map(q).join(',')).join('\n')+'\n';
+}
 function download(text,name,type){const u=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),10000);}
 function sanitize(p){if(!p||p.schema!=='iscarb-classroom-v3'||p.chapter!==D.chapter||!p.state)throw Error('This backup belongs to a different chapter or format.');let x=p.state,st={fields:{},seen:[],quiz:{},ai:{},self:{},votes:{},gut:{},theme:x.theme==='day'?'day':'night'};for(const [k,v]of Object.entries(x.fields||{})){if(!validField(k)||typeof v!=='string'||v.length>15000)throw Error('Invalid text field.');st.fields[k]=v;}for(const [k,v]of Object.entries(x.quiz||{})){if(!/^[0-4]$/.test(k)||!v||!Number.isInteger(v.answer)||v.answer<0||v.answer>=D.quiz[k].options.length)throw Error('Invalid quiz record.');st.quiz[k]={answer:v.answer,checked:!!v.checked};}for(const[k,v]of Object.entries(x.ai||{})){if(!/^[0-3]$/.test(k)||!['yes','no'].includes(v))throw Error('Invalid AI record.');st.ai[k]=v;}st.seen=(Array.isArray(x.seen)?x.seen:[]).filter(k=>D.slides.some(s=>s.id===k));const counts=(a,n)=>Array.isArray(a)&&a.length===n&&a.every(c=>Number.isInteger(c)&&c>=0&&c<=999);for(const[k,v]of Object.entries(x.votes||{})){if(/^[0-4]$/.test(k)&&D.quiz[k]&&v&&['r1','r2'].every(r=>v[r]===undefined||counts(v[r],D.quiz[k].options.length)))st.votes[k]={r1:v.r1,r2:v.r2};}const g=STORY?.gut?.options?.length||0;for(const r of['before','after'])if(g&&counts(x.gut?.[r],g))st.gut[r]=x.gut[r];return {state:st};}
 async function restore(file){try{if(file.size>1000000)throw Error('Backup is too large.');const p=sanitize(JSON.parse(await file.text()));if(!confirm('Replace this chapter’s current classroom draft with the imported backup? Assignment work will not change.'))return;state=p.state;save();render();card();}catch(e){modal('Import did not complete',`<p>${esc(e.message)}</p><p>Your existing draft was not changed.</p>`);}}
@@ -489,6 +528,8 @@ switch(b.id){case 'prevBtn':advanceSection(-1);break;case 'nextBtn':advanceSecti
 });
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-pace-reset')){try{sessionStorage.setItem(paceKey,String(Date.now()-(index?PLAN.end[index-1]:0)*60000));}catch(e){}b.outerHTML=paceChip();return;}
+ if(b.hasAttribute('data-evidence')){download(evidenceCSV(),`iscarb-ch${D.chapter}-class-evidence-${new Date().toISOString().slice(0,10)}.csv`,'text/csv');return;}
+ if(b.dataset.xlab){const L=STORY?.lab;if(!L||!window.StudyLab)return;const r=labRuns[D.chapter]=labRuns[D.chapter]||{};if(b.dataset.xlab==='reset')delete labRuns[D.chapter];else{const cs=StudyLab.casesFrom(JSON.stringify(L.cases),Number(D.chapter));r[b.dataset.xlab]=StudyLab.run(Number(D.chapter),b.dataset.xlab,cs);}renderExtra(extraIndex??0);return;}
  if(b.dataset.think){think(b);return;}
  if(b.dataset.vote!==undefined){voteMode=Number(b.dataset.vote);voteStage=0;render();$('#chapter-main').scrollTo?.(0,0);return;}
  if(b.dataset.voteOpt!==undefined&&voteMode!==null){const q=D.quiz[voteMode],r=voteStage<2?'r1':'r2',v=state.votes[voteMode]=state.votes[voteMode]||{};v[r]=v[r]||q.options.map(()=>0);v[r][Number(b.dataset.voteOpt)]=Math.min(999,v[r][Number(b.dataset.voteOpt)]+1);v.last=Number(b.dataset.voteOpt);save();render();return;}

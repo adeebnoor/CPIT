@@ -103,3 +103,29 @@ Applied after a review against the standards of research-university software-eng
 5. **Shorter pages.** The lecture-connection section, the scope notes and the partial-credit rubric levels are folded. Visible text before the task fell by about 38%.
 6. **Pre/post concept inventory.** Fourteen items for Chapters 12–20, kept privately with the instructor (not in this repository) so that items stay unseen.
 7. **Story.** The episode close now says "your turn: same reasoning, new case in the assignment", because assignment cases differ from the lecture story.
+
+## Practice and evidence revision (3 Oct 2026)
+
+Applied after a second review that scored evidence of effectiveness, engineering practice, assessment calibration and page length lowest.
+
+**Lecture extra track (23 slides at most; the 20 pinned slides are unchanged).** In presenter mode, Enter on slide 19 opens three extra slides before the close. Students reach them from the close (*Lab & practice*).
+
+1. *Live lab: predict, then run.* The class predicts the baseline on three demo cases, then runs the baseline and the corrected model of the assignment's teaching lab (`runtime/labs.js`, the same code the assignment uses). At least one case fails on the baseline.
+2. *Explain it in two minutes.* Pairs rehearse the ownership check: decision, boundary, evidence that would change it.
+3. *Your assignment, step by step.* Six steps, the format, the time, and links to the assignment and the student guide.
+
+The 50-minute plan absorbs the track (+7 minutes on slide 19, taken from the concept-slide budget). Chapters 10 and 11 are unchanged (pixel-identical).
+
+**Executed tests in every assignment from Assignment 3.** Assignments 3–9 each include a lab in which the student writes their own cases, runs a baseline and a corrected model, and explains the difference.
+
+**Evidence of learning (`evidence.html`).** Three measures, computed locally from files the instructor already has:
+
+| Measure | Source | Reported |
+|---|---|---|
+| Concept gain | Private 14-item inventory as Blackboard pre-test (start of Chapter 12) and post-test (after Chapter 20) | Normalized gain ⟨g⟩, mean individual gain, paired d<sub>z</sub>, improved/same/lower |
+| Peer-instruction gain | Presenter close: *Export class evidence (CSV)* (counts from the presenting device) | % correct before and after discussion per vote, weighted overall gain; gut-check shift |
+| Ownership | Micro-viva sheet downloaded as CSV and completed | Agrees / partly / does not agree, per assignment |
+
+Plan for this offering: run the pre-test before Chapter 12, export class evidence after every lecture, run micro-vivas on 3–5 students per section per assignment, run the post-test after Chapter 20, then paste the page's summary into the course report. Reference points are Hake (1998) for ⟨g⟩ and Crouch & Mazur (2001) for peer instruction. Small sections give wide uncertainty, so the N is always reported.
+
+**Grader calibration.** Anchored examples at full, partial and no credit for each criterion of Assignments 3–9 are kept privately with the instructor (not in this repository, because they reveal the assessed cases).
