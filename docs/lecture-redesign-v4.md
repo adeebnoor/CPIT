@@ -1,6 +1,6 @@
 # Lecture redesign v4: story, engagement and slide design
 
-Revision `20261002-story-stage-v4`. Applies to all nine iSCARB lectures (Chapters 10–17, 20).
+Revision `20261002-story-stage-v4`. **Rolled out from Chapter 12 (Assignment 3) onward**: Chapters 12–17 and 20 use it. Chapters 10 and 11 were already taught and stay exactly as students saw them (verified pixel-identical). Their pilot episodes are kept inactive in `story-v3.js`. To include them in a later offering, change `firstChapter` there. Episodes are numbered from Chapter 12 (Episode 1) to Chapter 20 (Episode 7).
 
 ## Why
 
@@ -20,7 +20,7 @@ The screenshots confirmed all three.
 
 | Area | Before | Now |
 |---|---|---|
-| Story | One fictional case, stated once, no characters | A nine-episode series, *Layan's first year*. A junior engineer (the student's seat) and a mentor recur in every chapter. Each episode adds a client under pressure, a deadline and stakes, and has five acts that follow the chapter's five roadmap branches. |
+| Story | One fictional case, stated once, no characters | A seven-episode series, *Layan's first year* (Chapters 12–20). A junior engineer (the student's seat) and a mentor recur in every chapter. Each episode adds a client under pressure, a deadline and stakes, and has five acts that follow the chapter's five roadmap branches. |
 | Twist | The changed constraint appeared inside a station | The class must **commit** a one-sentence decision before the twist is revealed. This is the iSCARB COMMIT → STRESS → REFIT sequence, done in class. |
 | Opening | Title, tags, hook | A **cold open**: a short scene, a deadline chip, and a **gut-check vote** before any theory. |
 | Closing | Readiness checklist | An **episode close**: an epilogue that hands the open question to the assignment, a **revote** on the opening question (with the start counts shown), an **exit ticket**, then the required work. |

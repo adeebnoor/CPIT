@@ -290,3 +290,7 @@ html[data-stage="v4"] .heading .pace-chip.ahead{border-color:var(--a2);color:var
 html[data-stage="v4"] .heading .pace-chip.behind{border-color:var(--a4);background:color-mix(in srgb,var(--a4) 10%,var(--card));color:var(--a4)}
 html[data-stage="v4"] body.single-canvas #app .heading:has(.pace-chip){display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:start}
 html[data-stage="v4"] .your-call button.if-time{border-style:dashed;opacity:.8}
+@media (max-width:1000px){
+ html[data-stage="v4"] body.single-canvas #app .heading:has(.pace-chip){grid-template-columns:minmax(0,1fr) auto}
+ html[data-stage="v4"] .heading .pace-chip{grid-column:1/-1;justify-self:start;margin:6px 0 0;white-space:normal;text-align:left}
+}
