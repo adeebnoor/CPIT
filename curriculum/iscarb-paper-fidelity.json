@@ -443,7 +443,7 @@
    "revision": "20261002-story-stage-v4",
    "date": "2026-10-02",
    "base_release": "20260926-genai-v12",
-   "summary": "Story-led presentation layer over unchanged lecture data: story-v3 narrative series (one episode per chapter, five acts following the roadmap branches, twist = existing station-3 constraint), stage-v4 design (assertion headlines, act colours, content-shaped layouts, projection sizing) and in-class engagement (gut check before/after, peer-instruction vote per act, think timer, inline answer reveal, commit-before-twist, exit ticket, presenter builds).",
+   "summary": "Story-led presentation layer over unchanged lecture data (story-v3, stage-v4, in-class engagement), plus a 50-minute pace plan by default in presenter mode (&pace=60, &pace=full).",
    "repinned": []
   }
  ]
