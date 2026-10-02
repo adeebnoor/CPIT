@@ -282,3 +282,11 @@ html[data-stage="v4"] body.single-canvas #app .hero.cold-open .cold-meta .hero-h
 html[data-stage="v4"] body.single-canvas #app .hero.cold-open .cold-meta .hero-hook .ai-tag{transform:scale(.85)}
 html[data-stage="v4"] body.single-canvas #app .hero.cold-open .small{font-size:.8rem;margin-top:8px}
 html[data-stage="v4"] body.single-canvas #app .hero.cold-open .actions{margin:4px 0 0}
+
+/* Pace v1 (presenter): planned finish minute for the slide against elapsed time */
+html[data-stage="v4"] .heading .pace-chip{justify-self:end;align-self:start;margin:0 0 0 10px;padding:3px 10px;min-height:0;border-radius:999px;border:1px solid var(--rule);background:var(--card);color:var(--muted);font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}
+html[data-stage="v4"] .heading .pace-chip.on{border-color:#15803d;color:#15803d}
+html[data-stage="v4"] .heading .pace-chip.ahead{border-color:var(--a2);color:var(--a2)}
+html[data-stage="v4"] .heading .pace-chip.behind{border-color:var(--a4);background:color-mix(in srgb,var(--a4) 10%,var(--card));color:var(--a4)}
+html[data-stage="v4"] body.single-canvas #app .heading:has(.pace-chip){display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:start}
+html[data-stage="v4"] .your-call button.if-time{border-style:dashed;opacity:.8}

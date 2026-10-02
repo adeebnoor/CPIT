@@ -48,12 +48,24 @@ Unchanged: the scientific lecture data (pinned hash, re-pinned **0** items), the
 | Minute paper (Angelo & Cross, 1993) | Close with a one-minute reflection and the muddiest point | Absent | Exit ticket on every episode close |
 | Projection legibility (common presentation guidance) | Large type for the back row; one idea at a time | Small text in large cards | Larger type, fewer words visible at once in presenter mode |
 
+## Fitting a 50-minute lecture
+
+Doing every activity takes about 85–90 minutes, so presenter mode uses a **50-minute plan by default**. Add `&pace=60` for a one-hour class or `&pace=full` for everything.
+
+| Plan | Class votes | Stations | Per-slide budget |
+|---|---|---|---|
+| `pace=50` (default) | After acts 2 and 4 | All three marked "if time allows"; the twist slide's commit replaces station 3 | Cover 3 min, map 1, case file 2, close 3, twist +3, each vote +4; the remaining ~30 min is shared across the concept slides (about 2 min each) |
+| `pace=60` | After acts 2 and 4 | Station 2 planned (+5 min), others optional | As above, with about 2.3 min per concept slide |
+| `pace=full` | After every act | All three | No clock |
+
+A chip beside the slide number shows the minute by which the current slide should be finished, the elapsed time, and whether the class is on time, ahead or behind (±3 min). The clock starts when the presenter leaves the cover, which counts as its planned 3 minutes. Clicking the chip re-aligns the clock to the plan at the current slide. Detail not discussed in class remains in *Full explanation* and the required source review. Students' copies have no clock and keep every vote for self-study.
+
 ## Using it in class (presenter)
 
 1. Open the lecture with `?presenter=1` (or from *Faculty-Presenter.html*). Students' copies show no builds.
 2. **Cold open**: read the scene, then ask the gut-check question. Students show 1, 2 or 3 fingers; tap each option to count.
 3. **Concept slides**: press Enter to reveal one idea at a time. Start the 30-second think timer, take answers, then *Reveal answer*.
-4. **End of each act**: *Class vote · Act N*. Enter steps through vote → discuss → revote → reveal.
+4. **Class votes** (after acts 2 and 4 in the 50-minute plan): *Class vote · Act N*. Enter steps through vote → discuss → revote → reveal.
 5. **Twist slide**: students write one sentence first, then *Reveal the new information*.
 6. **Episode close**: revote (the start counts are shown), then the exit ticket.
 
