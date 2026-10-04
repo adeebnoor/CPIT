@@ -510,6 +510,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Case file text grows to fill the slide",
    "repinned": []
+  },
+  {
+   "revision": "20261004-fill2",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Cover and episode close grow to fill the slide",
+   "repinned": []
   }
  ]
 }
