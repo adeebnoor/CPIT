@@ -219,3 +219,26 @@ Sources: `curriculum/learning-path/builds/`. Generator: `tools/apply_assignment_
 - Every known bug breaks at least one course check, so each one is a real bug against the specification.
 - Empty tests catch none of the bugs, and the mutation test reports them.
 - The engine carries the mutants and the viva requests.
+
+## Lecture-to-assignment alignment: the live lab in Python (5 Oct 2026)
+
+**Audit.**
+- The lectures already teach what each Part A asks for:
+  - Every lecture's artifact (TRACE, TEST, RECOVER, COMPARE, CONTRACT, FAILURE, INTEGRATE) is the assignment's second criterion.
+  - Stations 1–3 rehearse claim and evidence, uncertainty (BOUND), and counter-evidence (REFIT).
+- Two gaps remained:
+  - The Python build was never practised in class. The live lab still ran the old JSON teaching model.
+  - Chapter 12 never named minimal cut sets or single points of failure, which the Assignment 3 build checks.
+
+**Change.**
+- In Chapters 12–20 the live lab becomes **"Live lab · from slide to Python"**:
+  - It shows a short example from the lecture's own story, not the assignment case: the code as designed and three tests.
+  - The class predicts ✓ or ✗ for each test, then reveals Python's result, then the fix.
+  - Three cards map a slide to the line of code that implements it, for example "Slide 17 · check every path → `cut_sets(tree)`".
+  - A closing line says how the assignment repeats the same steps on its own case.
+- The Chapter 12 demo teaches cut sets and single points directly.
+- The results are produced by CPython with the course harness. `tools/apply_class_builds.py` verifies them (the design as taught fails a test; the fix passes all three) and embeds them in `story-v3.js`, so the slide also works offline.
+- The assignment-steps slide now says where each part was practised that day, and links to the worked example.
+- Lecture data and the 20-slide grammar are unchanged; this is an extra slide.
+
+Sources: `curriculum/learning-path/builds/class/chNN.py`.

@@ -583,6 +583,13 @@
     "assignment 17",
     "assignment 20"
    ]
+  },
+  {
+   "revision": "20261005-classbuild",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Live lab in Python for Chapters 12-20: slide-to-code demo from the lecture story, predict then reveal CPython results; assignment steps show where each part was practised",
+   "repinned": []
   }
  ]
 }

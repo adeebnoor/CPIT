@@ -91,5 +91,15 @@ check('a syntax error is reported with its line', bool(r['error']) and 'line 1' 
 r = run(13, 'def can_read(user, project):\n    return False\n')
 check('missing own tests are reported', any('at least three' in (c[2] or '') for c in r['checks'] if not c[1]))
 
+# 6. the in-class demos embedded in the lectures are current and behave as taught
+import importlib.util
+spec_cb = importlib.util.spec_from_file_location('apply_class_builds', ROOT / 'tools/apply_class_builds.py')
+cb = importlib.util.module_from_spec(spec_cb); spec_cb.loader.exec_module(cb)
+story = (ROOT / 'lectures/iscarb/runtime/story-v3.js').read_text(encoding='utf-8')
+data = cb.build()
+check('the lecture live labs embed the current demo results (run tools/apply_class_builds.py)', json.dumps({str(k): v for k, v in data.items()}, ensure_ascii=False, indent=1) in story)
+for ch, d in data.items():
+    check(f'Ch{ch} live lab: the design as taught fails a test, and the fix passes all three', any(not ok for _, ok, _ in d['result']['buggy']['tests']) and all(ok for _, ok, _ in d['result']['fixed']['tests']) and len(d['result']['fixed']['tests']) == 3)
+
 print('ALL PASS' if not failed else f'{failed} FAILED')
 sys.exit(1 if failed else 0)
