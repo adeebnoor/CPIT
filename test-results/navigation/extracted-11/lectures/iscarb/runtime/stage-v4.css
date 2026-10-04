@@ -483,3 +483,22 @@ html[data-stage="v4"] .case-foot .story-action button{white-space:nowrap}
 @media (min-width:1001px) and (max-height:760px){html[data-stage="v4"] .case-side .cast.compact{display:none}}
 @media (max-width:1000px){html[data-stage="v4"] .cast.compact{grid-template-columns:1fr!important}}
 @media (min-width:1001px) and (max-width:1180px),(min-width:1001px) and (max-height:800px){html[data-stage="v4"] .case-body{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}html[data-stage="v4"] .case-side .cast.compact{display:none}}
+
+/* Live lab · from slide to Python (X-LAB with STORY.build) */
+html[data-stage="v4"] .extra-x-lab .cb-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;min-height:0}
+html[data-stage="v4"] .extra-x-lab .cb-code,html[data-stage="v4"] .extra-x-lab .cb-tests{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 14px;min-width:0}
+html[data-stage="v4"] .extra-x-lab .cb-label{margin:0 0 6px;font-size:.72rem;letter-spacing:.1em;font-weight:800;color:var(--act)}
+html[data-stage="v4"] .extra-x-lab pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:calc(clamp(.8rem,1.02vw,1.05rem) * var(--fit,1))/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+html[data-stage="v4"] .extra-x-lab .cb-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:calc(clamp(.85rem,1.05vw,1.1rem) * var(--fit,1))}
+html[data-stage="v4"] .extra-x-lab .cb-list li{padding:6px 8px;border-radius:8px;border:1px solid var(--rule);overflow-wrap:anywhere}
+html[data-stage="v4"] .extra-x-lab .cb-list li b{display:inline-block;width:1.3em}
+html[data-stage="v4"] .extra-x-lab .cb-list li span{display:block;font-size:.85em;color:var(--muted)}
+html[data-stage="v4"] .extra-x-lab .cb-list li.pass{background:color-mix(in srgb,#15803d 10%,transparent)}html[data-stage="v4"] .extra-x-lab .cb-list li.pass b{color:#15803d}
+html[data-stage="v4"] .extra-x-lab .cb-list li.fail{background:color-mix(in srgb,var(--a4) 12%,transparent)}html[data-stage="v4"] .extra-x-lab .cb-list li.fail b{color:var(--a4)}
+html[data-stage="v4"] .extra-x-lab .cb-show{margin:8px 0 0;font-size:calc(clamp(.8rem,.95vw,1rem) * var(--fit,1));overflow-wrap:anywhere}
+html[data-stage="v4"] .extra-x-lab .cb-more{margin-top:6px;font-size:calc(.85rem * var(--fit,1))}html[data-stage="v4"] .extra-x-lab .cb-more summary{cursor:pointer;color:var(--act);font-weight:700}
+html[data-stage="v4"] .extra-x-lab .cb-map{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:calc(clamp(.8rem,.95vw,1rem) * var(--fit,1))}
+html[data-stage="v4"] .extra-x-lab .cb-map li{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:8px 10px;min-width:0}
+html[data-stage="v4"] .extra-x-lab .cb-map li b{display:block;color:var(--act);font-size:.8em;letter-spacing:.06em;text-transform:uppercase}
+html[data-stage="v4"] .extra-x-lab .cb-map li code{display:block;margin-top:4px;overflow-wrap:anywhere}
+@media (max-width:1000px){html[data-stage="v4"] .extra-x-lab .cb-grid,html[data-stage="v4"] .extra-x-lab .cb-map{grid-template-columns:1fr}}
