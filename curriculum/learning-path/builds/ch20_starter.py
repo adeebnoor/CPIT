@@ -12,5 +12,6 @@ def headline(states):
     return "All feeds live"   # CHANGE ME
 
 # Your tests: at least three functions whose names start with test_
+# The course also runs your tests against known buggy versions: each bug must make one of them fail.
 def test_fresh_feed_is_live():
     assert display_state({"available": True, "updated": 100}, now=102) == "live"

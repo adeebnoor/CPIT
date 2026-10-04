@@ -14,6 +14,7 @@ class BookingService:
         return rid
 
 # Your tests: at least three functions whose names start with test_
+# The course also runs your tests against known buggy versions: each bug must make one of them fail.
 def test_two_actions_two_bookings():
     s = BookingService({})
     assert s.reserve("a", "u1", "E1") != s.reserve("b", "u1", "E1")

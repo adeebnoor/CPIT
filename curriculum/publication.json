@@ -1159,7 +1159,7 @@
       "practical": true,
       "stress_text_sha256": "a251b2d112c5e6142a5bc51f98997c4d55edebe6c1a0c91b5fe4e3dfc67833e3",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     },
     {
       "chapter": 13,
@@ -1185,7 +1185,7 @@
       "practical": true,
       "stress_text_sha256": "4f21e2c66a7992fea45fe81307e2ea16deeb04ee8cc4d49afe914f63078e02c4",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     },
     {
       "chapter": 14,
@@ -1213,7 +1213,7 @@
       "practical": true,
       "stress_text_sha256": "0d680439adac44dffae1d061154a7d363fe52f8d8758259ec2c725134528ce7b",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     },
     {
       "chapter": 15,
@@ -1241,7 +1241,7 @@
       "practical": true,
       "stress_text_sha256": "d4ab9eaf428ea3bb0b3af2a0cb476d62c9b37c9a0a33d62b0cfb4ff6d8a32ea9",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     },
     {
       "chapter": 16,
@@ -1268,7 +1268,7 @@
       "practical": true,
       "stress_text_sha256": "41980ee797fee70a7d5bb5e47438a90ec5fe3cabf78469a5ab8c940cf3a455d4",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     },
     {
       "chapter": 17,
@@ -1298,7 +1298,7 @@
       "practical": true,
       "stress_text_sha256": "d9022511217158fd08aa63968bc1e8fdb90ef5d6774bf449389c477c33379cf7",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     },
     {
       "chapter": 20,
@@ -1328,7 +1328,7 @@
       "practical": true,
       "stress_text_sha256": "28c7c4c0c88e7656a1562c857fd8bcc3e47d62f34ac4e4d0ae28fbc12376bda4",
       "stress_delivery": "lms",
-      "build": "python-v1"
+      "build": "python-v2"
     }
   ],
   "iscarb_public_files": [
@@ -1831,15 +1831,15 @@
     "lectures/iscarb/sources/Ch17-Study.html": "853fbb9541068be22bc038c7c27aae753b7c83d31647235c54849c082e9adf19",
     "lectures/iscarb/sources/Ch11-Textbook.pdf": "921bb43e2599d40c30a302b2211ccf29cb48145ba5befd88435a4562c90115e5",
     "lectures/iscarb/sources/Ch14-Textbook.pdf": "1707c8f398d9fcd77e699f7354beda52aeb997dabda5d7134c2d580e53106083",
-    "lectures/iscarb/packages/Ch10-iSCARB.zip": "8e2d922f4d655127c4e15550c9fc32f6bd8dbd4c9b2321e05db787a9651f12b3",
-    "lectures/iscarb/packages/Ch17-iSCARB.zip": "a6747f17ed382b4c1e522fcc2805e028ab107e69f6ac4e12db41ba6a247c89c1",
-    "lectures/iscarb/packages/Ch16-iSCARB.zip": "0a542d5e9d47a33bd740e4397a6a96b9cadc34038adae5b4828f8404d9e63786",
-    "lectures/iscarb/packages/Ch13-iSCARB.zip": "61d6098461fc19d5a47dd30e8fc7c75e89d40e5097dd9a3caa2a0209adf674cb",
-    "lectures/iscarb/packages/Ch15-iSCARB.zip": "5ffb0950d15708ef8002c3d297676379b1bc72512c76197d679c69620de0edbd",
-    "lectures/iscarb/packages/Ch11-iSCARB.zip": "d8f04297f4445eb77c0c068e94b7d90108464cdef955edcce3c866a310c38eab",
-    "lectures/iscarb/packages/Ch20-iSCARB.zip": "0ac8522cd80d1f149ea46007f3ff63595318531708064f608bc9f8b6ef7e8c6a",
-    "lectures/iscarb/packages/Ch12-iSCARB.zip": "4d6bfc2a239d6c6c7caeee403357ba0155d5e8dee9b65af0c85e5bcc2008377c",
-    "lectures/iscarb/packages/Ch14-iSCARB.zip": "fbf22124fba7018dededa9b57bd4803786f6cc38a7e9bb9dbeb3728b909f44bc",
+    "lectures/iscarb/packages/Ch10-iSCARB.zip": "9ceabb1664e69b48185b60ed7dc68229b3bdb5709b213d49286c55acaaa4b11f",
+    "lectures/iscarb/packages/Ch17-iSCARB.zip": "09f2707e9b312541308dc901edbd190988893c6571f4c99d766055b3865278cd",
+    "lectures/iscarb/packages/Ch16-iSCARB.zip": "d114d27b016cc5b638d9075cda48689faedbe4aac24ece40acd04100a51924b1",
+    "lectures/iscarb/packages/Ch13-iSCARB.zip": "d3194a1f5dadd17a967d3aa63f6f76bf341fc206d53593fa634d79e9a61abaee",
+    "lectures/iscarb/packages/Ch15-iSCARB.zip": "e52612362ba92b4c157877173d93ae190a2289f07525b0a73094806ef590f3d8",
+    "lectures/iscarb/packages/Ch11-iSCARB.zip": "bd01ad6de3cb279b484141340117f09f0f0813fee25f0820d94513afa81d26fb",
+    "lectures/iscarb/packages/Ch20-iSCARB.zip": "e0c283b13defa7d5924a502374b8dd7446e85edbe10b1818669f6b68e1a09d85",
+    "lectures/iscarb/packages/Ch12-iSCARB.zip": "22199d545d3c512ac9a6a162a182a8d483acbdef4ccf1c3c428f24a027134e97",
+    "lectures/iscarb/packages/Ch14-iSCARB.zip": "c9d28499edce829b244f379847cd32f0dda24510afc0b789a354a8cacb6cefd5",
     "lectures/iscarb/Ch10-Dependable-Systems.html": "1ee1a863601cd6a932ebe4c7a83def56238d25c5543c22b96b0b6f9eba3a8a1c",
     "lectures/iscarb/Ch11-Reliability-Engineering.html": "d9cbd9645245280b97b85ace2a866146bb7cbecaad94f37485afd96ae04fc7b3",
     "lectures/iscarb/Ch12-Safety-Engineering.html": "ce4d7d60e30ff49958a50f28055825416657d0b19f5ed3b6dbfad2006413e5c2",
@@ -1851,13 +1851,13 @@
     "lectures/iscarb/Ch20-Systems-of-Systems.html": "52f4e1b92887c637b52f4029722ce34318dbc5992ecb6516f512e6edaa47f555",
     "lectures/iscarb/Ch10-FBR-Student-Assignment.html": "d42ad4cd633aa50904104c3e4ca780b8b555de01e65fb7e0d508f5fb5d52c95c",
     "lectures/iscarb/Ch11-FBR-Student-Assignment.html": "3f191556a4cd0af424b0abc430d6d8ee7167685a2266b9e0a3c2bdc4516c280b",
-    "lectures/iscarb/Ch12-FBR-Student-Assignment.html": "05bb097ca104c525592ad528eff8143ce19727dde434cb5364e9daf654157dc3",
-    "lectures/iscarb/Ch13-FBR-Student-Assignment.html": "89c0590941bf2985418b22e367dace1ec3b093d1e4feccf0d66b365d67dc6012",
-    "lectures/iscarb/Ch14-FBR-Student-Assignment.html": "a1a5eff1416fe5ae560abb5316fcf40f2ed490793730dfecb46bf10b741a00ca",
-    "lectures/iscarb/Ch15-FBR-Student-Assignment.html": "fdacd6e91bd876c38514b96f5a4ff12a66da91d7356da85a0fc18e047724c0a0",
-    "lectures/iscarb/Ch16-FBR-Student-Assignment.html": "d082eb45cffbacb24dbaf08bdad7c222f9c8413017de44de9a84025cec1c6019",
-    "lectures/iscarb/Ch17-FBR-Student-Assignment.html": "88040dab9aeef1472a1236cb00ced9db10a8910b9b05ef4c5ba678500fed04ff",
-    "lectures/iscarb/Ch20-FBR-Student-Assignment.html": "f0ace3e4ed18d98c45a4a958debbb9bf825e80e238f07b4dcaf3a55bffa294b1",
+    "lectures/iscarb/Ch12-FBR-Student-Assignment.html": "3d39b5343e12d49d28c7e28e487621b9017d94b63155360211e54cd0c8c761f7",
+    "lectures/iscarb/Ch13-FBR-Student-Assignment.html": "f15a472e392216f822b913daaefd27a78e220dffaf83e255285c5c3b02ddf828",
+    "lectures/iscarb/Ch14-FBR-Student-Assignment.html": "88fde540b5a6f26e75d584893a92af6851c805b944a0aae30d5c10ae883096b7",
+    "lectures/iscarb/Ch15-FBR-Student-Assignment.html": "b72ef5475ca0bb8c294dafd53dd461d29b89b1f4b1c5ee71df770588ecdb5fa5",
+    "lectures/iscarb/Ch16-FBR-Student-Assignment.html": "de9f46e390355e5d2b00b80743207daf2ab17f7b76e9b2b558822bb5a6846ead",
+    "lectures/iscarb/Ch17-FBR-Student-Assignment.html": "699595e9fc8eda306a16bd63a5ee01262255b0b08ff5a42cbe9611bd7acb75bb",
+    "lectures/iscarb/Ch20-FBR-Student-Assignment.html": "09e273eb03b9c80833bb51758ee888d51ca6831fa58be22d8d80310da86bfe61",
     "lectures/iscarb/runtime/readable.css": "c9ec88c70bd2c0063680435c33b94fbaf4e8587db7411882d4ee6e5c2e2d2efd",
     "lectures/iscarb/runtime/assignment-readable.css": "a7d7b760c04e8e66548e296f599dbecfe97cde8da28e51c3a84b25f20480a02e",
     "lectures/iscarb/assets/source-vectors/ch17-source-34.svg": "3adfcc8bf3ee96fd7cf1673026181fab16ed2b63689b57b18a02e5c05df73132",

@@ -181,3 +181,41 @@ After teaching Chapter 12, the instructor found the aircraft example from the ea
 - The jsdom and readable-course suites use the engine's test-runner hook.
 
 Sources: `curriculum/learning-path/builds/`. Generator: `tools/apply_assignment_build.py`.
+
+## Build v2: tests that are tested, a viva that cannot be outsourced, primary sources (4 Oct 2026)
+
+**Problem.** A review against leading engineering programmes rated three areas weakest. First, test quality: "at least three tests" says nothing about whether the tests can find a bug. Second, integrity: the build can be generated, and every student solves the same task. Third, scientific depth: there are no primary readings.
+
+**Change.**
+- **Mutation testing (Assignments 4–9).**
+  - Each task has three or four known buggy versions in `chNN_mutants.py`, one for each classic mistake of the chapter. Examples:
+    - the hidden-link authorization bug
+    - last-write-wins reconciliation
+    - deduplication in memory only
+    - a feed shown as live at the wrong boundary
+  - The student's own tests run against each buggy version, and a bug counts as caught when one of those tests fails.
+  - Full credit needs every bug caught. The record lists each bug as caught or not caught.
+  - This moves the grade from "has tests" to "the tests find real bugs", as in test-quality grading in leading software-engineering courses.
+- **Micro-viva change request.** Each record names one of four change requests, chosen deterministically from the Student ID. An example: "the component now takes milliseconds: change the adapter and say which tests change". In the two-minute micro-viva the student makes the change live, so a student who did not write the code cannot answer.
+- **One primary source per task.** Each task names one source, with a focus question to use in the build plan:
+
+  | Assignment | Primary source | Year |
+  |---|---|---|
+  | 3 | Vesely et al., *Fault Tree Handbook* | 1981 |
+  | 4 | Saltzer and Schroeder, "The Protection of Information in Computer Systems" | 1975 |
+  | 5 | Helland and Campbell, "Building on Quicksand" | 2009 |
+  | 6 | Garlan, Allen and Ockerbloom, "Architectural Mismatch" | 1995 |
+  | 7 | Meyer, "Applying 'Design by Contract'" | 1992 |
+  | 8 | Helland, "Idempotence Is Not a Medical Condition" | 2012 |
+  | 9 | Maier, "Architecting Principles for Systems-of-Systems" | 1998 |
+
+- **Fact correction (Assignment 6).** The Ch15 case states that Option A has an export API, and it says nothing about a three-year support commitment for Option B. The supplied facts now match the case:
+  - Option A's export API counts as met.
+  - Option B's three-year support counts as unknown.
+  - `evidence_needed` becomes `['peak-load']` for A and `['export-api', 'support-3-years', 'peak-load']` for B.
+  - The shortlist check also refuses an option that nobody has checked.
+
+**Verification.** `check-builds.py` (52 checks) confirms three things:
+- Every known bug breaks at least one course check, so each one is a real bug against the specification.
+- Empty tests catch none of the bugs, and the mutation test reports them.
+- The engine carries the mutants and the viva requests.

@@ -13,6 +13,7 @@ def reconcile(central, paper_log):
     return new, []   # CHANGE ME
 
 # Your tests: at least three functions whose names start with test_
+# The course also runs your tests against known buggy versions: each bug must make one of them fail.
 def test_one_change_is_applied():
     new, conflicts = reconcile({"P1": {"time": "08:00", "version": 1}},
                                [{"change_id": "c1", "pickup_id": "P1", "time": "08:30", "base_version": 1}])
