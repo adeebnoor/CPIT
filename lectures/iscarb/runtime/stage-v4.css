@@ -397,3 +397,25 @@ html[data-stage="v4"] .steps-grid li span{font-size:calc(clamp(.95rem,1.15vw,1.1
 html[data-stage="v4"] .extra-body .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 html[data-stage="v4"] .btn-link{display:inline-flex;align-items:center;padding:8px 14px;border-radius:10px;border:1px solid var(--act);color:var(--act);font-weight:800;text-decoration:none}
 @media (max-width:1000px){html[data-stage="v4"] .lab-table-wrap{overflow:auto}html[data-stage="v4"] .extra-body{overflow:visible}html[data-stage="v4"] .steps-grid{grid-template-columns:1fr}html[data-stage="v4"] .lab-table{font-size:.9rem}}
+
+/* Checkpoint v2: a review question, not another concept slide (Chapter 12 first) */
+html[data-stage="v4"] body.single-canvas #app .chapter-main.checkpoint-page{display:flex;flex-direction:column;gap:14px}
+html[data-stage="v4"] .checkpoint-page .heading h1{font-size:clamp(1rem,1.3vw,1.25rem)!important;color:var(--act)}
+html[data-stage="v4"] body.single-canvas #app .chapter-main.checkpoint-page>.checkpoint{flex:1 1 auto!important;display:flex;flex-direction:column;gap:clamp(12px,2.2vh,28px);justify-content:center;min-height:0}
+html[data-stage="v4"] body.single-canvas #app .chapter-main.checkpoint-page>.checkpoint .cp-q{flex:1 1 auto;max-height:44vh}
+html[data-stage="v4"] .cp-q{display:flex;gap:22px;align-items:center;padding:clamp(18px,2.4vw,34px) clamp(18px,2.6vw,40px);border-radius:18px;border:2px dashed var(--act);background:var(--act-soft)}
+html[data-stage="v4"] .cp-mark{flex:0 0 auto;display:grid;place-items:center;width:clamp(64px,6vw,104px);height:clamp(64px,6vw,104px);border-radius:50%;background:var(--act);color:var(--card,#fff);font-size:clamp(2.4rem,4vw,4.2rem);font-weight:900;line-height:1}
+html[data-stage="v4"] .cp-ey{margin:0 0 6px;font-size:clamp(.8rem,.95vw,.95rem);font-weight:800;letter-spacing:.12em;color:var(--act)}
+html[data-stage="v4"] .cp-text{margin:0;font-size:clamp(1.6rem,min(3.2vw,6vh),3.6rem);font-weight:800;line-height:1.18;color:var(--ink-strong);text-wrap:balance}
+html[data-stage="v4"] .cp-recap{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+html[data-stage="v4"] .cp-recap>span{font-size:.85rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-inline-end:4px}
+html[data-stage="v4"] .cp-chip{border-radius:999px;padding:6px 14px;font-size:clamp(.9rem,1.05vw,1.05rem);border:1px solid var(--rule);background:var(--card);color:var(--ink-strong)}
+html[data-stage="v4"] .cp-steps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:cp}
+html[data-stage="v4"] .cp-steps li{counter-increment:cp;display:flex;flex-direction:column;gap:8px;padding:clamp(10px,2vh,24px) clamp(12px,1.4vw,22px);border-radius:12px;background:var(--card);border:1px solid var(--rule)}
+html[data-stage="v4"] .cp-steps li b{display:flex;align-items:baseline;gap:8px;font-size:clamp(1rem,1.2vw,1.2rem);text-transform:uppercase;letter-spacing:.06em;color:var(--act)}
+html[data-stage="v4"] .cp-steps li b::before{content:counter(cp);display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--act);color:var(--card,#fff);font-size:.85em;letter-spacing:0}
+html[data-stage="v4"] .cp-steps li b small{font-size:.75em;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted)}
+html[data-stage="v4"] .cp-steps li span{font-size:clamp(1rem,min(1.5vw,2.9vh),1.6rem);line-height:1.35;color:var(--ink-strong)}
+html[data-stage="v4"] .checkpoint-page .your-call .question-text{display:none}
+@media (max-width:1000px){html[data-stage="v4"] .cp-steps{grid-template-columns:1fr}html[data-stage="v4"] .cp-q{flex-direction:column;align-items:flex-start;gap:12px}}
+@media (min-width:1001px) and (max-height:820px){html[data-stage="v4"] .checkpoint{gap:10px}html[data-stage="v4"] .cp-text{font-size:clamp(1.4rem,2.4vw,2.3rem)}html[data-stage="v4"] .cp-steps li{padding:8px 12px}}

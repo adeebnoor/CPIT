@@ -496,6 +496,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Ch12 X05: teaching fault tree with AND and OR gates and a common cause; source slide 27 kept as second tab",
    "repinned": []
+  },
+  {
+   "revision": "20261004-checkpoint-v2",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Ch12 checkpoints redesigned as review questions",
+   "repinned": []
   }
  ]
 }

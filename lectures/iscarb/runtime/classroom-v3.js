@@ -200,6 +200,7 @@ else if(s.id==='TITLE'){$('#chapter-main').insertAdjacentHTML('beforeend',`<div 
 else if(s.id==='MAP'){renderMindMap();}
 else if(s.id==='START'){renderStory();}
 else if(s.id==='END'){renderClosing();}
+else if(CHECK_V2&&s.phase==='CHECK'){$('#chapter-main').classList.add('checkpoint-page');$('#chapter-main').insertAdjacentHTML('beforeend',`${storyThread(s)}${checkpointBlock(s)}${yourCall(s,stop)}`);}
 else{const merged=mergedCards(s),twist=twistBlock(s);$('#chapter-main').insertAdjacentHTML('beforeend',`${s.banner?bannerBlock(s):storyThread(s)}${practiceBlock(s)}<p class="takeaway">${esc(s.takeaway||s.title)}${s.aiTag?AI_TAG:''}</p>${twist}${merged?`<div class="body-grid body-merged ${STORY?layoutFor(s):''}">${merged}</div>`:`<div class="body-grid"><div class="visual">${visual(s)}</div><div class="meaning"><h2>WHAT IT MEANS</h2>${points(s.bullets)}</div></div>`}${lensStrip(s)}${yourCall(s,stop)}`);}
 updateNav();buildReadable(s);requestAnimationFrame(fitText);}
 function updateNav(){$('#prevBtn').disabled=index===0;$('#nextBtn').disabled=index===D.slides.length-1;$('#progress').innerHTML=`${new Set(state.seen).size} / ${D.slides.length} visited<span class="nav-shortcuts">Enter → · Backspace ←</span>`;$('#live').textContent=`Slide ${index+1} of ${D.slides.length}: ${D.slides[index].title}`;updateMapLocation();save();}
@@ -255,6 +256,17 @@ function storyThread(s){
  const opening=!!(STORY&&a&&i===a.first&&STORY.acts?.[a.i]);
  const dots=STORY&&a?`<span class="act-dots" aria-hidden="true">${ACTS.map((x,k)=>`<i class="${k<a.i?'done':k===a.i?'on':''}"></i>`).join('')}</span>`:'';
  return `<div class="case-thread${opening?' act-open':''}"><span>CASE THREAD${STORY&&n?` · ACT ${n} OF ${ACTS.length}`:''}</span><b>${esc(b?.label||D.case.headline)}</b><em>${esc(lens)}</em>${dots}</div>${opening?`<div class="act-scene"><span class="scene-who">${esc(SERIES.lead.name)}</span><p>${esc(STORY.acts[a.i])}</p></div>`:''}`;
+}
+// Checkpoints read as review questions (rolled out from Chapter 12 first): the question is the headline,
+// the routine is a numbered strip, and chips name what the checkpoint reviews.
+const CHECK_V2=!!(STORY&&[12].includes(Number(D.chapter)));
+function checkpointBlock(s){
+ const i=D.slides.indexOf(s),checks=D.slides.map((x,k)=>x.phase==='CHECK'?k:-1).filter(k=>k>=0),n=checks.indexOf(i)+1,prev=n>1?checks[n-2]:D.slides.findIndex(x=>x.id==='START');
+ const covered=D.slides.slice(prev+1,i).filter(x=>x.phase!=='CHECK'&&x.title);
+ const steps=(s.bullets||[]).filter(b=>Array.isArray(b)&&b[0]).slice(0,3),time=['30 s alone','60 s with a neighbour','1 min on your card'];
+ return `<div class="checkpoint"><div class="cp-q"><span class="cp-mark" aria-hidden="true">?</span><div><p class="cp-ey">CHECKPOINT ${n} OF ${checks.length} · REVIEW QUESTION</p><p class="cp-text">${esc(s.question||s.takeaway)}</p></div></div>`
+ +`<div class="cp-recap"><span>Reviews</span>${covered.map(x=>`<button class="cp-chip" data-jump="${esc(x.id)}">${esc(x.title)}</button>`).join('')}</div>`
+ +`<ol class="cp-steps">${steps.map((b,k)=>`<li><b>${esc(b[0])}<small>${time[k]||''}</small></b><span>${esc(b[1])}</span></li>`).join('')}</ol></div>`;
 }
 // Layout follows the content, so consecutive slides do not all become four equal cards.
 function layoutFor(s){const n=(s.bullets||[]).filter(b=>Array.isArray(b)&&b[0]).length,i=D.slides.indexOf(s);if(s.phase==='CHECK'&&n===3)return 'lay-flow lay-check';if(/^\s*\d+\s*·/.test(s.nodes?.[0]?.[0]||''))return n===4?'lay-quad':n===3?'lay-flow':'lay-trio';if(n<=2)return 'lay-split';if(n===3)return s.flow?'lay-flow':'lay-trio';if(n===4)return i%2?'lay-quad':'lay-steps';return 'lay-steps';}
