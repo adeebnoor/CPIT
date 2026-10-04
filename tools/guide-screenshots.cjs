@@ -59,14 +59,11 @@ async function shot(pg, name, sels, pad = 30, maxH = 900) {
   await mark(pg, [{ sel: '#lock', n: 1 }]);
   await shot(pg, 'step-commit', ['#lock', '#clear'], 40);
   await pg.evaluate(() => document.querySelectorAll('.zz-mark').forEach(e => e.remove()));
-  await pg.locator('#lock').click(); await pg.waitForTimeout(800); console.log('MSG', await pg.locator('#msg').innerText().catch(()=>''), '|', await pg.evaluate(()=>document.querySelector('[role=alert],.error')?.innerText||'')); await pg.waitForSelector('#lmsStress');
-  await pg.locator('#lmsText').fill('Paste the WHOLE “New evidence” item from Blackboard here.');
-  await mark(pg, [{ sel: '#lmsPartA', n: 1 }, { sel: '#lmsText', n: 2 }, { sel: '#lmsCheck', n: 3 }]);
-  await shot(pg, 'step-stress', ['#lmsStress'], 20, 900);
-  // Part B via the unverified path, then hide anything specific
-  await pg.evaluate(() => document.querySelectorAll('.zz-mark').forEach(e => e.remove()));
-  await pg.locator('#lmsCheck').click(); await pg.locator('#lmsCheck').click(); await pg.waitForSelector('input[name="boundaryState"]');
-  await pg.evaluate(() => { const b = document.getElementById('partB'); b.querySelectorAll('*').forEach(e => { if (e.children.length === 0 && /UNVERIFIED|Paste the WHOLE/.test(e.textContent)) e.textContent = 'The new evidence from Blackboard appears here.'; }); });
+  await pg.locator('#lock').click(); await pg.waitForSelector('#partB .card.stress');
+  // the new evidence opens on the page; hide its text so the picture reveals nothing
+  await pg.evaluate(() => { document.querySelector('#partB .card.stress p:not(.ey)').textContent = 'The new evidence for this assignment appears here, right after you commit Part A.'; });
+  await mark(pg, [{ sel: '#partB .card.stress', n: 1 }, { sel: '#partB .card.refit h2', n: 2 }]);
+  await shot(pg, 'step-stress', ['#partB .card.stress', '#partB .card.refit h2'], 30, 700);
   await pg.locator('input[name="boundaryState"][value="PRESSURED"]').check(); await pg.locator('input[name="refit"][value="REVISE"]').check();
   await mark(pg, [{ sel: 'input[name="boundaryState"][value="INTACT"]', n: 1, up: 2 }, { sel: 'input[name="refit"][value="RETAIN"]', n: 2, up: 2 }, { sel: '#refitwhy', n: 3 }, { sel: '#revised', n: 4 }]);
   await shot(pg, 'step-refit', ['input[name="boundaryState"][value="INTACT"]', '#revised'], 40, 1000);

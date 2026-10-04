@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MARK = 'data-concise="v1"'
 START = ('<section class="card" ' + MARK + '><h2>Before you start</h2><ul>'
          '<li><b>Save often.</b> Use <b>Save draft</b> while working and download a backup before leaving a shared device.</li>'
-         '<li><b>Commit, then Blackboard.</b> Part A becomes read-only when you commit. Upload the Part A record to Blackboard; it then releases the new evidence, which you paste here to complete Part B.</li>'
+         '<li><b>Commit, then the new evidence.</b> Part A becomes read-only when you commit, and the new evidence opens on this page straight away. Complete Part B, export the PDF and upload it in Blackboard.</li>'
          '<li><b>Ownership check.</b> Your instructor may ask you to explain your Part A and REFIT in a two-minute conversation. Your written work and your explanation should agree. AI may help you practise; the reasoning you submit must be your own.</li>'
          '</ul><p class="hint">The sequence preserves your first judgment; it is not a secure examination system.</p></section>')
 

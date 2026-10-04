@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-04  
-**Commit ID:** f1421207-d896-44f3-a75d-274853f56f2a  
-**Part A committed:** 2026-10-04T21:28:12.896Z  
-**STRESS revealed:** 2026-10-04T21:28:12.976Z
+**Commit ID:** 2e197ddd-1298-408a-8800-5c4a294ebaae  
+**Part A committed:** 2026-10-04T22:06:09.025Z  
+**STRESS revealed:** 2026-10-04T22:06:09.038Z
 
 ## Scenario
 A fictional campus transport desk must retain access to the day’s pickup list when its central scheduling server is unavailable. A local copy is refreshed at 06:00. Authorized staff can read it on a desk device. Changes after 06:00 normally remain on the central server until the next refresh. The brief includes a successful restart log for a backup server, but no full service rehearsal. Staff can record changes on a controlled paper form during an outage. You recommend whether this fallback is ready for a limited trial.
@@ -42,7 +42,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-04T21:28:12.729Z
+BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-04T22:06:08.859Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Return conflicts with the pickup id as well as the change id. Change the code and one test.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

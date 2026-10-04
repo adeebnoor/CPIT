@@ -272,3 +272,20 @@ Advancing to the next slide is the reveal. Code keeps its lines: the fit loop pi
 - **Long text folded.** The long text stays available under "Text version". Case texts and rubrics are unchanged.
 
 Generator: `tools/apply_visual_guide.py` (idempotent). Screenshots: `tools/guide-screenshots.cjs`.
+
+## One Blackboard upload: STRESS opens on the page again (5 Oct 2026)
+
+**Decision (instructor).** The Blackboard flow was too complex for students and for set-up. It involved a Part A upload, Adaptive Release, a released item and pasting its text back. Each assignment now has **one** Blackboard item, for the final PDF.
+
+**Change.**
+- `tools/apply_auto_stress.py` reverses `apply_lms_stress.py` for Assignments 3–9 and their previous editions. It restores each reveal payload byte for byte from history, and restores the page's original `reveal()` together with its path.
+- The commit-then-reveal order is unchanged. The page reveals STRESS only after a verified, saved Part A commitment, and the record keeps the commit and reveal times.
+- `publication.json` and the fidelity contract no longer mark these assignments as LMS-delivered, and the payloads are public files again.
+- These texts now describe automatic delivery and a single upload:
+  - the "Before you start" bullet;
+  - the student guide;
+  - the worked example (steps, pictures and FAQ);
+  - the instructor guide;
+  - the lecture's assignment-steps slide.
+
+**Trade-off.** A determined student can read a public payload before committing. Ownership is still checked by the commit and reveal timestamps, by mutation testing and by the micro-viva.
