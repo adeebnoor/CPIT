@@ -17,6 +17,7 @@ def main():
         (DEST/name).parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(ROOT/name,DEST/name)
     shutil.copy2(ROOT/'iSCARB-Teaching-Template.md',DEST/'iSCARB-Teaching-Template.md')
+    shutil.copytree(ROOT/'assets/guide',DEST/'assets/guide')  # pictures for the visual assignment guide
     for name in ['slides','lectures/cimt','lectures/himma']:
         if (ROOT/name).exists(): shutil.copytree(ROOT/name,DEST/name,ignore=shutil.ignore_patterns('.rsync-tmp'))
     for name in spec['iscarb_public_files']:
