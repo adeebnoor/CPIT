@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">The backup runs, but nobody can sign in</title><desc id="d">The primary system is down. The backup server is running. The identity service is down, so staff cannot complete the critical task. An AI recovery assistant offers instructions it has never rehearsed.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.2;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<rect x="40" y="40" width="200" height="90" rx="12" class="box"/><text x="60" y="72" class="h">Primary system</text><text x="60" y="100" class="bad">✗ down</text>
+<rect x="40" y="160" width="200" height="90" rx="12" class="box"/><text x="60" y="192" class="h">Backup server</text><text x="60" y="220" class="ok">✓ running</text>
+<rect x="580" y="40" width="200" height="90" rx="12" class="box"/><text x="600" y="72" class="h">AI recovery</text><text x="600" y="92" class="h">assistant</text><text x="600" y="116" class="s">never rehearsed</text>
+<rect x="580" y="160" width="200" height="90" rx="12" class="box"/><text x="600" y="192" class="h">Staff at 02:00</text><text x="600" y="220" class="s">need one critical task</text>
+<rect x="300" y="100" width="220" height="110" rx="14" fill="#fdecea" stroke="#b42318" stroke-width="2.4"/>
+<text x="410" y="138" class="h" text-anchor="middle">Identity / sign-in</text><text x="410" y="166" class="bad" text-anchor="middle">✗ down</text><text x="410" y="190" class="s" text-anchor="middle">staff cannot complete the task</text>
+<path class="lnr" d="M578 205 L524 180" marker-end="url(#arr)"/>
+<rect x="40" y="290" width="740" height="206" rx="12" fill="#fff" stroke="#c9d6e3"/>
+<text x="60" y="320" class="h">A running backup is not a recovered service</text>
+<text x="60" y="360" class="t">Data copy available</text><text x="430" y="360" class="ok">✓</text>
+<text x="60" y="394" class="t">Servers running</text><text x="430" y="394" class="ok">✓</text>
+<text x="60" y="428" class="t">Staff can sign in</text><text x="430" y="428" class="bad">✗</text>
+<text x="60" y="462" class="t">Critical task completed end to end</text><text x="430" y="462" class="bad">✗  ← the only test that counts</text>
+</svg>
