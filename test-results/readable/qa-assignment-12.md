@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-04  
-**Commit ID:** d194f922-3e51-4ab1-83e8-4ca5cc792618  
-**Part A committed:** 2026-10-04T11:49:42.723Z  
-**STRESS revealed:** 2026-10-04T11:49:42.804Z
+**Commit ID:** f8b91462-06a1-4e38-91df-474c0876ddfa  
+**Part A committed:** 2026-10-04T13:17:16.410Z  
+**STRESS revealed:** 2026-10-04T13:17:16.491Z
 
 ## Scenario
 A fictional campus is evaluating an automatic loading-bay barrier. The proposed safety requirement is: the barrier must not close while the monitored zone is occupied. A prototype has passed the recorded daylight tests with an unobstructed camera. The test report does not include low light, rain or a covered lens. A separate stop button exists, but no drill report shows how quickly an operator can recognize a hazard and use it. Deployment is proposed for both day and night. You advise the service owner: release, restrict the pilot, or hold.
@@ -42,7 +42,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 3 (Chapter 12) · 2026-10-04T11:49:42.555Z
+BUILD RECORD · Assignment 3 (Chapter 12) · 2026-10-04T13:17:16.243Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove your proposed control from revised and run again. Which check fails, and what does it say about the barrier?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

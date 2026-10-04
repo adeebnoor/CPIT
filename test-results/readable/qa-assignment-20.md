@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-04  
-**Commit ID:** 06a893ad-4cb9-41ad-a2d8-7f959b37f6a7  
-**Part A committed:** 2026-10-04T11:49:55.006Z  
-**STRESS revealed:** 2026-10-04T11:49:55.087Z
+**Commit ID:** a027adb9-791c-4228-b285-27471c9600df  
+**Part A committed:** 2026-10-04T13:17:31.994Z  
+**STRESS revealed:** 2026-10-04T13:17:32.075Z
 
 ## Scenario
 A fictional university plans a shared incident dashboard using campus security, transport and facilities systems. Each system remains operational on its own and has a different owner and release schedule. Security supplies incident identifiers; transport supplies vehicle locations with timestamps; facilities supplies building-access status. The owners agree to a limited daytime pilot, but no agreement defines a common freshness limit or how to display an unavailable feed. Local API tests passed. No cross-system failure rehearsal has been performed.Proposed integration design from the transport team · review it before the pilot: “The dashboard polls the three feeds every minute and shows the latest value from each as live. If a feed fails, the dashboard keeps showing its last value so the screen never looks empty. Each owner signs a one-page agreement promising 99.9% availability. Acceptance test: each API returns HTTP 200 with the agreed JSON schema.”
@@ -42,7 +42,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-04T11:49:54.837Z
+BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-04T13:17:31.826Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

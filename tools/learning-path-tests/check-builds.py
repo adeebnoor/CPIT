@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / 'curriculum/learning-path/builds'
-CH = [12, 13, 14, 15, 16, 17, 20]
+CH = [0, 12, 13, 14, 15, 16, 17, 20]   # 0 = the practice task on assignment-example.html
 ns: dict = {}
 exec((SRC / 'harness.py').read_text(encoding='utf-8'), ns)
 MUT = {ch: (SRC / f'ch{ch}_mutants.py').read_text() if (SRC / f'ch{ch}_mutants.py').exists() else '' for ch in CH}
