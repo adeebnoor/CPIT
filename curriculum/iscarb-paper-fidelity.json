@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "4d798e63156dfce5e892f4a402b0550d79029fb7e4d275c7fa79ce96b52378ae",
+   "assignment_sha256_lf": "f2938fc4440e545477fa927dbaa40a7c7d7db3a36d1e4582f9bcf53d54a906a4",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6",
    "stress_delivery": "lms",
    "stress_text_sha256": "a251b2d112c5e6142a5bc51f98997c4d55edebe6c1a0c91b5fe4e3dfc67833e3"
@@ -298,7 +298,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "9c41c87af62c28bbb441796e5932770da7640ba10d13b9f3f1b9a27b994de7b8",
+   "assignment_sha256_lf": "6e8df5a4fe6caa39f0ff9a317297da0513debdb6858cc9205b2bdf785ce3a663",
    "stress_sha256_lf": "db3663c3ac2ef31db79e70a2c279f1c784913bda41209334e5c9a3a6c76fd6cc",
    "stress_delivery": "lms",
    "stress_text_sha256": "4f21e2c66a7992fea45fe81307e2ea16deeb04ee8cc4d49afe914f63078e02c4"
@@ -308,7 +308,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "502645171f474f32ed0b224d1f758e9ef19e0c9c5491cb4a02fef91d24322089",
+   "assignment_sha256_lf": "81c6b7b3155459ce01a47a048860269a48f006b09e14228f8d83cbc7ffe7fb84",
    "stress_sha256_lf": "97e209be6bf0bd9442c17d663bb667f7cd977ddf1e53e809d5a7f911632b6b67",
    "stress_delivery": "lms",
    "stress_text_sha256": "0d680439adac44dffae1d061154a7d363fe52f8d8758259ec2c725134528ce7b"
@@ -318,7 +318,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "793c5558334486fe720ff67cd895c548cd9a8d7d2f462b27cd78415f9af7cd00",
+   "assignment_sha256_lf": "5a5c4cad7d4495c2be28b07d4b5011650b6670bef36fa040b0aa7c8c46e4d8bc",
    "stress_sha256_lf": "59f9c063fb19615335582861ff6ba9395501cbb90a9c87a3a6fa017c9e49a84d",
    "stress_delivery": "lms",
    "stress_text_sha256": "d4ab9eaf428ea3bb0b3af2a0cb476d62c9b37c9a0a33d62b0cfb4ff6d8a32ea9"
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "da33b5dc76fe8ae505e40af118f1074d9eb03406e62c5f28529ad51636b04240",
+   "assignment_sha256_lf": "57e06a0af1b06da826eac45682e63dacc0df55cc3b8b27c887e773a63e4cf3c2",
    "stress_sha256_lf": "5d558e91bc9d2a11c50f25d5c1220772c51cbd07231823daa5ac7e354b6e8048",
    "stress_delivery": "lms",
    "stress_text_sha256": "41980ee797fee70a7d5bb5e47438a90ec5fe3cabf78469a5ab8c940cf3a455d4"
@@ -338,7 +338,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "46c1dde2d8fd9a655caf5833a2a4cc3961daaed2b42bf9c5772d697cdc315cb7",
+   "assignment_sha256_lf": "cc08cbe3704960c6d3d0538b4a2a0daac8ea6d62e67328b188a6c830dfad4b3f",
    "stress_sha256_lf": "7a6a8c3d1e64b662501a40812df2cadf8ab40f9b15d8025094cce49441167914",
    "stress_delivery": "lms",
    "stress_text_sha256": "d9022511217158fd08aa63968bc1e8fdb90ef5d6774bf449389c477c33379cf7"
@@ -348,7 +348,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "7a31d11d6513c048ebafa4e4731f9dfd199af2f379cf978c050175fa47d76271",
+   "assignment_sha256_lf": "812196e55efa43fe99ab86e5651a8a300e37658b21425870864a31f1571a318e",
    "stress_sha256_lf": "caac8d5d01403ad0decaad0500aa072893b848be2e895586eea604bb8c1d01d8",
    "stress_delivery": "lms",
    "stress_text_sha256": "28c7c4c0c88e7656a1562c857fd8bcc3e47d62f34ac4e4d0ae28fbc12376bda4"
@@ -538,6 +538,21 @@
    "base_release": "20260926-genai-v12",
    "summary": "Case-file illustration per chapter (pre-twist), Ch12 aircraft",
    "repinned": []
+  },
+  {
+   "revision": "20261004-python-build",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Python build in Assignments 3-9 (fault tree, access rule, reconciliation, fit check, adapter, idempotent service, honest display); written budget 120-180 words",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
   }
  ]
 }
