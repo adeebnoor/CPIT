@@ -248,3 +248,27 @@ Sources: `curriculum/learning-path/builds/class/chNN.py`.
 - **Live lab 2 of 2 · Python's result and the fix.** Python's result for the code as designed, the fix (3 of 3 tests pass), the three slide-to-code cards, and the bridge to the assignment.
 
 Advancing to the next slide is the reveal. Code keeps its lines: the fit loop picks the largest font with no wrapping and no overflow. The demo sources were reformatted to one statement per line (at most 52 characters). The pace plan gives the lab one extra minute.
+
+## Visual, bilingual assignment guide (5 Oct 2026)
+
+**Problem.** Students asked how to do the assignments even though every step was written down. The explanation sat in long English text: about 2,300 words on the guide page and 2,200 on each assignment page.
+
+**Change.**
+- **One nine-step strip in three places.** Each step has a number, an icon, a time estimate, a short English line and a short Arabic line. It appears on the worked-example page, at the top of the student guide's assignment section, and at the top of Assignments 3–9. On the assignment pages it is HTML and CSS only, so offline copies still work.
+- **Annotated screenshots of the real assignment page**, ten in all, each with a numbered English and Arabic legend:
+  - opening the assignment;
+  - Part A;
+  - the build;
+  - reading the build record;
+  - commit;
+  - Blackboard;
+  - pasting the new evidence;
+  - REFIT;
+  - signing;
+  - export.
+- **Safe screenshots.** They show only public text, empty fields or neutral placeholders. No STRESS text appears, and the build record comes from the not-assessed practice task.
+- **Worked example as cards.** Each Part A field shows a strong answer (✓) next to a weak one (✗).
+- **Questions that expand on click**, each with an Arabic one-line summary.
+- **Long text folded.** The long text stays available under "Text version". Case texts and rubrics are unchanged.
+
+Generator: `tools/apply_visual_guide.py` (idempotent). Screenshots: `tools/guide-screenshots.cjs`.

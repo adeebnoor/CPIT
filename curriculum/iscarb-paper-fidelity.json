@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "89e102c70511d9701c706b7aae5e078087a1462d6ce5b4b7aa6828930e97f1cd",
+   "assignment_sha256_lf": "8ca3d4f7e1c7370e34af53fe64bf13812733986a6f9567e570772487cbb03012",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6",
    "stress_delivery": "lms",
    "stress_text_sha256": "a251b2d112c5e6142a5bc51f98997c4d55edebe6c1a0c91b5fe4e3dfc67833e3"
@@ -298,7 +298,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "6424b8d31471c3221edbf7e20d4104d6cac336fde76266d330440225c2db6717",
+   "assignment_sha256_lf": "3a9c59b56cbc8fceeaa478d7ce5337d30b681635bdeb7ae7f6ef475c7e562fda",
    "stress_sha256_lf": "db3663c3ac2ef31db79e70a2c279f1c784913bda41209334e5c9a3a6c76fd6cc",
    "stress_delivery": "lms",
    "stress_text_sha256": "4f21e2c66a7992fea45fe81307e2ea16deeb04ee8cc4d49afe914f63078e02c4"
@@ -308,7 +308,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "d48300822e22044a7bf3978fda7b1c9fc7f7470bda4ca788b6910b68af6d1357",
+   "assignment_sha256_lf": "4c0a9bf42f216b660d28be35c044fc7d8364d4519148290b206e75ccfc965b15",
    "stress_sha256_lf": "97e209be6bf0bd9442c17d663bb667f7cd977ddf1e53e809d5a7f911632b6b67",
    "stress_delivery": "lms",
    "stress_text_sha256": "0d680439adac44dffae1d061154a7d363fe52f8d8758259ec2c725134528ce7b"
@@ -318,7 +318,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "bac0d520a39c3120593d073ccbaeaa4507816a850a60c140f18d057117566222",
+   "assignment_sha256_lf": "82e45612ea0b5fc8ceccf36e5a276e5cc14bd412ca6cb84f5aba35a078da7b1a",
    "stress_sha256_lf": "59f9c063fb19615335582861ff6ba9395501cbb90a9c87a3a6fa017c9e49a84d",
    "stress_delivery": "lms",
    "stress_text_sha256": "d4ab9eaf428ea3bb0b3af2a0cb476d62c9b37c9a0a33d62b0cfb4ff6d8a32ea9"
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "722b1a127102306626fb2bc8604fe461cd4d0e40944dcab1aaa2333f4b74ac96",
+   "assignment_sha256_lf": "3eddea20afb3772e7d08c2013f21513b831b7ab79ac973c913b046cd6c5951cb",
    "stress_sha256_lf": "5d558e91bc9d2a11c50f25d5c1220772c51cbd07231823daa5ac7e354b6e8048",
    "stress_delivery": "lms",
    "stress_text_sha256": "41980ee797fee70a7d5bb5e47438a90ec5fe3cabf78469a5ab8c940cf3a455d4"
@@ -338,7 +338,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "ed8a96249af4012f42f61441c604a066e1b3f32d8e5f45516a78b8a5a55951f7",
+   "assignment_sha256_lf": "22a06365bf84a5099428ab87fcf501c37c409e78e042d7ec4c9ec73760d3f3e9",
    "stress_sha256_lf": "7a6a8c3d1e64b662501a40812df2cadf8ab40f9b15d8025094cce49441167914",
    "stress_delivery": "lms",
    "stress_text_sha256": "d9022511217158fd08aa63968bc1e8fdb90ef5d6774bf449389c477c33379cf7"
@@ -348,7 +348,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "460e4e1e674d3d65115c328e1502e18d15a164691a044144b277471a30fc9f19",
+   "assignment_sha256_lf": "73946788410853ff8013ab9411dc61341d41d1cff9e45d1e5d4f217d0dfdeb03",
    "stress_sha256_lf": "caac8d5d01403ad0decaad0500aa072893b848be2e895586eea604bb8c1d01d8",
    "stress_delivery": "lms",
    "stress_text_sha256": "28c7c4c0c88e7656a1562c857fd8bcc3e47d62f34ac4e4d0ae28fbc12376bda4"
@@ -619,6 +619,21 @@
    "base_release": "20260926-genai-v12",
    "summary": "Slide counter and index show all 25 slides; extras follow slide 19 in every view",
    "repinned": []
+  },
+  {
+   "revision": "20261005-visual",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Visual bilingual assignment guide: nine-step strip, annotated screenshots, worked-example cards",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
   }
  ]
 }

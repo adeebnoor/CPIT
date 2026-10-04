@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-04  
-**Commit ID:** d4a901a4-3b5b-4225-92c0-912fe2a0715c  
-**Part A committed:** 2026-10-04T21:14:46.444Z  
-**STRESS revealed:** 2026-10-04T21:14:46.527Z
+**Commit ID:** 3fd27de0-0b99-4c27-87c6-5852521578ae  
+**Part A committed:** 2026-10-04T21:28:16.447Z  
+**STRESS revealed:** 2026-10-04T21:28:16.544Z
 
 ## Scenario
 A fictional lab-booking application reuses a component with reserve(roomId, duration). The caller supplies duration in minutes. The component documentation defines duration in seconds, requires 1 ≤ duration ≤ 7200, and says an accepted call returns a reservation identifier. A thin adapter currently forwards both arguments unchanged. A sample call using duration = 30 returns an identifier. No test has checked the stored end time or invalid-input behavior. Recommend whether to use, adapt or replace the component for a limited pilot.
@@ -42,7 +42,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 7 (Chapter 16) · 2026-10-04T21:14:46.277Z
+BUILD RECORD · Assignment 7 (Chapter 16) · 2026-10-04T21:28:16.262Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The maximum becomes 90 minutes. Change one thing and show the test that proves it.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
