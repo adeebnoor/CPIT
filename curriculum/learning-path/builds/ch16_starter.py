@@ -8,6 +8,7 @@ def reserve_minutes(component, room_id, minutes):
     return component.reserve(room_id, minutes)   # CHANGE ME: today the adapter forwards unchanged
 
 # Your tests: at least three functions whose names start with test_
+# The course also runs your tests against known buggy versions: each bug must make one of them fail.
 def test_thirty_minutes():
     c = FakeComponent()
     reserve_minutes(c, "Lab-1", 30)

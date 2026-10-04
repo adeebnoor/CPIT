@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">Several owners, one dashboard: who controls the promise?</title><desc id="d">A shared incident dashboard shows three feeds from independent agencies. The dashboard labels every feed live, although it cannot control each agency’s update schedule, and one feed is classified by an AI model nobody outside can inspect.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.2;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<rect x="230" y="36" width="360" height="200" rx="14" class="box"/>
+<text x="250" y="66" class="h">Incident dashboard</text><text x="570" y="66" class="bad" text-anchor="end">“real-time”?</text>
+<rect x="250" y="84" width="320" height="40" rx="8" fill="#e3f1ee"/><text x="262" y="109" class="t">Agency A feed</text><text x="558" y="109" class="ok" text-anchor="end">updated 1 min ago</text>
+<rect x="250" y="132" width="320" height="40" rx="8" fill="#fff4dc"/><text x="262" y="157" class="t">Agency B feed</text><text x="558" y="157" style="fill:#9a5b00;font-weight:700" text-anchor="end">age not shown ?</text>
+<rect x="250" y="180" width="320" height="40" rx="8" fill="#fff4dc"/><text x="262" y="205" class="t">Agency C · AI-classified</text><text x="558" y="205" style="fill:#9a5b00;font-weight:700" text-anchor="end">model version ?</text>
+<g class="s"><rect x="30" y="80" width="160" height="56" rx="10" class="box"/><text x="42" y="104">Agency A</text><text x="42" y="124">own schedule</text>
+<rect x="30" y="150" width="160" height="56" rx="10" class="box"/><text x="42" y="174">Agency B</text><text x="42" y="194">own schedule</text>
+<rect x="630" y="160" width="160" height="56" rx="10" class="box"/><text x="642" y="184">Agency C</text><text x="642" y="204">own AI model</text></g>
+<path class="ln" d="M192 106 L246 104" marker-end="url(#ar)"/><path class="ln" d="M192 176 L246 154" marker-end="url(#ar)"/><path class="ln" d="M628 190 L574 200" marker-end="url(#ar)"/>
+<rect x="40" y="270" width="740" height="226" rx="12" fill="#fff" stroke="#c9d6e3"/>
+<text x="60" y="300" class="h">What the dashboard can honestly promise</text>
+<text x="60" y="340" class="t">It controls</text><text x="250" y="340" class="ok">validation, display, the age shown for each feed</text>
+<text x="60" y="374" class="t">It cannot control</text><text x="250" y="374" class="bad">each agency's update schedule or AI model</text>
+<text x="60" y="408" class="t">So it must</text><text x="250" y="408" class="t">show every feed's age, and mark stale or unavailable feeds</text>
+<text x="60" y="442" class="t">And negotiate</text><text x="250" y="442" class="t">a freshness limit and change notices with each owner</text>
+<text x="60" y="476" class="s">Silence looks like normal: a stale feed shown as live misleads everyone who relies on it.</text>
+</svg>

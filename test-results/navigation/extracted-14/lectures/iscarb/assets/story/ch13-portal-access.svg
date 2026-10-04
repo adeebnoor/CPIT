@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">The interface hides the link; does the server refuse?</title><desc id="d">A browser shows only the student’s own documents. Changing the document number in the address sends a request for another team’s document. No test shows whether the server refuses it. An AI assistant reads all teams’ files through one service account.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.2;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<rect x="30" y="30" width="360" height="230" rx="12" class="box"/>
+<rect x="30" y="30" width="360" height="34" rx="12" fill="#dbe4ee"/>
+<rect x="44" y="40" width="300" height="16" rx="8" fill="#fff" stroke="#9fb4c8"/>
+<text x="52" y="53" class="s">portal/docs/<tspan class="bad">1043</tspan></text>
+<text x="48" y="92" class="h">My team's files</text>
+<rect x="48" y="104" width="320" height="28" rx="6" fill="#e3f1ee"/><text x="58" y="123" class="t">Project plan.pdf</text>
+<rect x="48" y="138" width="320" height="28" rx="6" fill="#e3f1ee"/><text x="58" y="157" class="t">Design notes.docx</text>
+<text x="48" y="194" class="s">Other teams' links are hidden ✓</text>
+<text x="48" y="216" class="s">…but anyone can type another number</text>
+<rect x="470" y="40" width="320" height="120" rx="12" class="box"/>
+<text x="490" y="68" class="h">Server · GET /docs/1043</text>
+<text x="490" y="96" class="t">Is this user allowed</text><text x="490" y="116" class="t">to read document 1043?</text>
+<text x="490" y="144" class="bad">No test shows that it refuses</text>
+<path class="lnr" d="M392 120 L466 100" marker-end="url(#arr)"/>
+<rect x="470" y="190" width="320" height="76" rx="12" class="box"/>
+<text x="490" y="216" class="h">AI assistant</text>
+<text x="490" y="240" class="s">service account reads every team's files;</text>
+<text x="490" y="258" class="s">only its instructions limit the answers</text>
+<rect x="40" y="300" width="740" height="196" rx="12" fill="#fff" stroke="#c9d6e3"/>
+<text x="60" y="330" class="h">Hiding is not authorising</text>
+<text x="60" y="370" class="t">Interface</text><text x="230" y="370" class="ok">hides the link</text>
+<text x="60" y="404" class="t">Server, every path</text><text x="230" y="404" class="bad">must check: owner or assigned staff?</text>
+<text x="60" y="438" class="t">Tests</text><text x="230" y="438" class="bad">all log in as the owner; none as another user</text>
+<text x="60" y="472" class="t">AI assistant</text><text x="230" y="472" class="bad">reads with its own identity, not the asker's</text>
+</svg>

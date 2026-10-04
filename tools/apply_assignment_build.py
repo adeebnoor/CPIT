@@ -9,6 +9,9 @@ locally with Pyodide in a Web Worker, with a time limit; nothing is uploaded. Th
 fingerprint, own tests, course checks) is frozen with Part A and exported. The build is assessed inside
 the second rubric criterion; the 5-point total is unchanged and the written budget drops to 120–180 words.
 
+v2 adds: mutation testing (the student's own tests run against known buggy versions in chNN_mutants.py and
+must catch each one), a micro-viva change request chosen from the Student ID, and one primary source per task.
+
 Idempotent:  python3 tools/apply_assignment_build.py
 """
 from __future__ import annotations
@@ -32,6 +35,52 @@ TASK = {
  17: ('Build the idempotent service', 'Write BookingService.reserve so that one user action creates at most one reservation, even when the reply is lost, the app retries or the service restarts. Your tests reproduce those failures.'),
  20: ('Build the honest display', 'Write display_state and headline so the dashboard shows each feed’s real state and never calls a degraded view live. Use the proposed 5-minute limit, and use the result in your review of the proposed design.'),
 }
+READING = {
+ 12: ('W. E. Vesely, F. F. Goldberg, N. H. Roberts and D. F. Haasl, <i>Fault Tree Handbook</i> (NUREG-0492), U.S. Nuclear Regulatory Commission, 1981',
+      'the AND and OR gates and minimal cut sets. Which cut set of one event does your revised tree remove?'),
+ 13: ('J. H. Saltzer and M. D. Schroeder, “The Protection of Information in Computer Systems,” <i>Proceedings of the IEEE</i> 63(9), 1975',
+      'the design principles “complete mediation” and “fail-safe defaults”. Which line of can_read applies each one?'),
+ 14: ('P. Helland and D. Campbell, “Building on Quicksand,” <i>CIDR</i>, 2009',
+      'why work done while disconnected must be reconciled later, and why each change needs a unique identity. Where does your code use that identity?'),
+ 15: ('D. Garlan, R. Allen and J. Ockerbloom, “Architectural Mismatch: Why Reuse Is So Hard,” <i>IEEE Software</i> 12(6), 1995',
+      'the assumptions a reused component makes that its description does not state. Which of your “unknown” results is such an assumption?'),
+ 16: ('B. Meyer, “Applying ‘Design by Contract’,” <i>IEEE Computer</i> 25(10), 1992',
+      'preconditions, postconditions and who is to blame when each is broken. Which side does your ValueError protect, and which side does your ContractError blame?'),
+ 17: ('P. Helland, “Idempotence Is Not a Medical Condition,” <i>ACM Queue</i> 10(4), 2012',
+      'why messages are retried and how a unique request identity makes a retry safe. Which of your tests reproduces the retry the article describes?'),
+ 20: ('M. W. Maier, “Architecting Principles for Systems-of-Systems,” <i>Systems Engineering</i> 1(4), 1998',
+      'operational and managerial independence of the component systems. Which line of your code exists because no feed owner answers to the dashboard?'),
+}
+VIVA = {
+ 12: ['The night tests now exist and the camera passed them. Change your trees: which event changes its source tag, and does any cut set change?',
+      'Remove your proposed control from revised and run again. Which check fails, and what does it say about the barrier?',
+      'An auditor says the stop button is enough. Show with cut_sets why it is or is not.',
+      'Add rain as a new fact under the camera. Where does it belong in current, and does revised still pass?'],
+ 13: ['A new role “ta” is added and must read only its assigned groups. Change can_read and add one test that must be refused.',
+      'A project may now have two owners (owner is a list). Change can_read; which of your tests changes?',
+      'Remove your malformed-input handling and run again. Which known bug is no longer caught, and why?',
+      'Staff may now read a project only while it is not archived. Add the rule and one refusal test.'],
+ 14: ['Two paper changes to the same pickup were written from the same base version. Show what your code does and defend it.',
+      'Delete your repeated-change test and run again. Which known bug survives, and what would it cost the transport desk?',
+      'The paper log arrives out of order (c2 before c1). Show what happens and whether it is safe.',
+      'Return conflicts with the pickup id as well as the change id. Change the code and one test.'],
+ 15: ['The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.',
+      'Add a sixth requirement, “arabic-ui”, that nobody has checked. Which outputs change, and why do no facts change?',
+      'Remove your test for an unchecked option and run again. Which known bug survives?',
+      'Option B gets a written three-year support commitment. Change one fact: is B shortlisted now? Why not?'],
+ 16: ['The component now takes milliseconds (1 to 7,200,000). Change the adapter and say which tests change.',
+      'The maximum becomes 90 minutes. Change one thing and show the test that proves it.',
+      'The component may return an end time one second late. Keep or relax the postcondition? Defend it with a test.',
+      'Remove the type check and run again. Which known bug is no longer caught?'],
+ 17: ['The store is wiped every night. Is your service still idempotent across midnight? Show it with a test.',
+      'Two different users send the same request id. What does your service do, and should it?',
+      'Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?',
+      'A retry arrives with a different event for the same request id. Change the code to refuse it, with a test.'],
+ 20: ['The owners agree a 3-minute limit. Change one thing and show which of your tests changes.',
+      'Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.',
+      'The transport clock runs 2 minutes ahead. Which feed state changes, and is it honest?',
+      'Change > to >= in the freshness rule and run again. Which known bug did you reintroduce?'],
+}
 OLD_LABELS = '"labPrediction": "LAB PREDICTION", "labCases": "EXECUTABLE TEST CASES", "labEvidence": "LOCAL EXECUTION RECORD"'
 NEW_LABELS = '"labPrediction": "BUILD PLAN", "labCases": "PYTHON BUILD (CODE AND TESTS)", "labEvidence": "BUILD RECORD"'
 OLD_BUDGET = ('Keep the complete written response to about 180–260 focused words; use compact tables or notation. Include the source application and transfer answer in that budget. '
@@ -45,7 +94,8 @@ OLD_CHECK = ("if(V2_CONFIG.lab){try{const r=JSON.parse($('labEvidence').value),c
              "catch(e){return'Run both teaching-model versions with your own current test cases before commitment. Report the actual outcomes even when a test fails.';}}")
 NEW_CHECK = ("if(V2_CONFIG.lab&&!/^BUILD RECORD · Assignment /.test($('labEvidence').value))"
              "return'Run your Python build (your own tests and the course checks) with your current code before commitment. Keep the actual result even when a check fails, and explain it.';")
-FULL = ' <b>Build:</b> every course check passes, and your own tests (at least three) include a case that must be refused or must fail safely; the text uses what the build showed.'
+FULL = ' <b>Build:</b> every course check passes, your own tests catch every known bug (mutation test), and you can make your micro-viva change and explain which tests change; the text uses what the build showed.'
+OLD_FULL = ' <b>Build:</b> every course check passes, and your own tests (at least three) include a case that must be refused or must fail safely; the text uses what the build showed.'
 HALF = ' Or the build fails course checks that the written record does not explain.'
 
 ENGINE = r'''/* Python build tasks for Assignments 3–9 (generated by tools/apply_assignment_build.py).
@@ -56,20 +106,21 @@ var BASE=(typeof window!=='undefined'&&window.ISCARB_PYODIDE_BASE)||__BASE__;
 var HARNESS=__HARNESS__;
 var SPEC=__SPEC__;
 var worker=null,runner=null;
-function workerSource(){return "self.onmessage=async function(e){var m=e.data;try{if(!self.py){importScripts(m.base+'pyodide.js');self.py=await loadPyodide({indexURL:m.base});self.py.runPython(m.harness);}if(m.kind==='load'){postMessage({ok:true});return;}var f=self.py.globals.get('__run');var r=f(m.helpers,m.student,m.checks);if(f.destroy)f.destroy();postMessage({ok:true,result:String(r)});}catch(err){postMessage({ok:false,error:String(err&&err.message||err)});}};";}
+function workerSource(){return "self.onmessage=async function(e){var m=e.data;try{if(!self.py){importScripts(m.base+'pyodide.js');self.py=await loadPyodide({indexURL:m.base});self.py.runPython(m.harness);}if(m.kind==='load'){postMessage({ok:true});return;}var f=self.py.globals.get('__run');var r=f(m.helpers,m.student,m.checks,m.mutants||'');if(f.destroy)f.destroy();postMessage({ok:true,result:String(r)});}catch(err){postMessage({ok:false,error:String(err&&err.message||err)});}};";}
 function call(msg,ms){return new Promise(function(resolve,reject){
  if(!worker){try{worker=new Worker(URL.createObjectURL(new Blob([workerSource()],{type:'text/javascript'})));}catch(e){reject(Error('This browser cannot start Python here. Use a current Chrome, Edge, Firefox or Safari.'));return;}}
  var w=worker,t=setTimeout(function(){w.terminate();if(worker===w)worker=null;reject(Error(msg.kind==='load'?'Python did not load in time. Check your internet connection and try again.':'Stopped after '+ms/1000+' seconds. Look for an endless loop, then run again.'));},ms);
  w.onmessage=function(e){clearTimeout(t);e.data.ok?resolve(e.data.result):reject(Error(e.data.error));};
  w.onerror=function(e){clearTimeout(t);w.terminate();if(worker===w)worker=null;reject(Error('Python could not start: '+(e.message||'check your internet connection')));};
  w.postMessage(Object.assign({base:BASE,harness:HARNESS},msg));});}
-function runChecks(ch,code){var s=SPEC[ch];if(runner)return Promise.resolve(runner(ch,code,s));return call({kind:'load'},120000).then(function(){return call({kind:'run',helpers:s.helpers,student:code,checks:s.checks},10000);}).then(JSON.parse);}
+function runChecks(ch,code){var s=SPEC[ch];if(runner)return Promise.resolve(runner(ch,code,s));return call({kind:'load'},120000).then(function(){return call({kind:'run',helpers:s.helpers,student:code,checks:s.checks,mutants:s.mutants||''},20000);}).then(JSON.parse);}
 function fingerprint(text){try{if(typeof crypto!=='undefined'&&crypto.subtle&&typeof TextEncoder!=='undefined')return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}catch(e){}var h=2166136261;for(var i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return Promise.resolve('fnv1a-'+h.toString(16));}
 function lines(list){return list.map(function(r){return '  '+(r[1]?'✓ ':'✗ ')+r[0]+(r[1]||!r[2]?'':' · '+r[2]);}).join('\n');}
 function summary(r){if(r.error)return r.error;var t=r.tests.filter(function(x){return x[1];}).length,c=r.checks.filter(function(x){return x[1];}).length;return 'Your tests: '+t+' of '+r.tests.length+' pass · Course checks: '+c+' of '+r.checks.length+' pass';}
-function report(ch,r,hash){var head='BUILD RECORD · Assignment '+SPEC[ch].assignment+' (Chapter '+ch+') · '+new Date().toISOString()+'\nCode fingerprint: '+hash.slice(0,16)+' (the code above, exactly as run)\n';
+function vivaFor(ch,sid){var v=SPEC[ch].viva||[],h=2166136261,i;sid=String(sid||'').trim();if(!v.length||!sid)return '';for(i=0;i<sid.length;i++){h^=sid.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return v[(h+ch)%v.length];}
+function report(ch,r,hash,sid){var q=vivaFor(ch,sid),head='BUILD RECORD · Assignment '+SPEC[ch].assignment+' (Chapter '+ch+') · '+new Date().toISOString()+'\nCode fingerprint: '+hash.slice(0,16)+' (the code above, exactly as run)\n'+(q?'Micro-viva change request (from Student ID '+String(sid).trim()+'): '+q+'\n':'');
  if(r.error)return head+'Result: '+r.error+'\n';
- return head+summary(r)+'\nYour tests:\n'+(r.tests.length?lines(r.tests):'  (none found: name them test_…)')+'\nCourse checks:\n'+lines(r.checks)+'\n';}
+ return head+summary(r)+'\nYour tests:\n'+(r.tests.length?lines(r.tests):'  (none found: name them test_…)')+'\nCourse checks:\n'+lines(r.checks)+'\n'+(r.mutants?'Known bugs your tests catch (mutation test):\n'+lines(r.mutants.map(function(m){return [m[0],m[1],m[1]?'':'not caught'];}))+'\n':'');}
 function mount(ch){
  var el=function(id){return document.getElementById(id);},code=el('labCases'),s=SPEC[ch];if(!code||!s)return;
  var ev=el('labEvidence'),plan=el('labPrediction'),out=el('buildOutput'),run=el('buildRun'),reset=el('buildReset'),status=el('labStatus'),armed=false;
@@ -84,11 +135,11 @@ function mount(ch){
   if(plan.value.trim().length<30){status.textContent='Write your build plan first (at least 30 characters): what your code will do and which cases your tests cover.';return;}
   run.disabled=true;status.textContent=runner?'Running…':'Starting Python… the first run downloads it once (about 10 MB).';
   var src=code.value;
-  runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var rec=report(ch,r,h);if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
+  runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var sidEl=el('sid'),rec=report(ch,r,h,sidEl?sidEl.value:'');if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
   .catch(function(e){status.textContent=e.message;}).then(function(){run.disabled=code.readOnly;});});
  if(reset)reset.addEventListener('click',function(){if(code.readOnly)return;if(!armed){armed=true;reset.textContent='Click again to replace your code';setTimeout(function(){armed=false;reset.textContent='Reset to starter code';},4000);return;}armed=false;reset.textContent='Reset to starter code';code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));});
 }
-return{SPEC:SPEC,mount:mount,runChecks:runChecks,setRunner:function(f){runner=f;}};
+return{SPEC:SPEC,mount:mount,runChecks:runChecks,vivaFor:vivaFor,setRunner:function(f){runner=f;}};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=StudyBuild;
 '''
@@ -104,7 +155,10 @@ def spec() -> dict:
     out = {}
     for ch in CRIT:
         part = {k: (SRC / f'ch{ch}_{k}.py').read_text(encoding='utf-8') for k in ('helpers', 'starter', 'checks')}
-        out[ch] = dict(part, title=TASK[ch][0], criterion=CRIT[ch], assignment=number.get(ch), checkLabels=check_labels(part['checks']))
+        mut = SRC / f'ch{ch}_mutants.py'
+        if mut.exists(): part['mutants'] = mut.read_text(encoding='utf-8')
+        labels = check_labels(part['checks']) + (['your tests catch every known bug (mutation test)'] if 'mutants' in part else [])
+        out[ch] = dict(part, title=TASK[ch][0], criterion=CRIT[ch], assignment=number.get(ch), checkLabels=labels, viva=VIVA[ch])
     return out
 
 
@@ -118,9 +172,12 @@ def markup(ch: int, sp: dict) -> str:
     title, task = TASK[ch]
     checks = ''.join(f'<li>{esc(c)}</li>' for c in sp['checkLabels'])
     mono = 'font:15px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:4'
-    return (f'<section class="card" id="practical" data-build="v1"><p class="ey">PYTHON BUILD · ASSESSED IN {CRIT[ch]}</p><h2>{esc(title)}</h2><p>{esc(task)}</p>'
+    return (f'<section class="card" id="practical" data-build="v2"><p class="ey">PYTHON BUILD · ASSESSED IN {CRIT[ch]}</p><h2>{esc(title)}</h2><p>{esc(task)}</p>'
             '<p>Budget about 30 minutes. Python runs in your browser: nothing to install, and nothing is uploaded. The first run downloads Python once (about 10 MB, internet needed). '
             'Passing every check is necessary, not sufficient: your written record must use what the build shows.</p>'
+            + (f'<p>Your own tests are tested too: the course runs them against known buggy versions of this code, and each bug must make one of your tests fail. ' if 'mutants' in sp else '<p>')
+            + 'Your build record names a <b>micro-viva change request</b> chosen from your Student ID. Be ready to make that change in front of your instructor and explain which tests change and why.</p>'
+            f'<p class="hint"><b>Primary source · about 15 minutes:</b> {READING[ch][0]}. Read it for {esc(READING[ch][1])} Use the answer in your build plan.</p>'
             f'<details><summary>The course checks your build must pass</summary><ul>{checks}</ul></details>'
             '<label for="labPrediction" class="field-label">Build plan: what will your code do, and which cases will your tests cover?</label>'
             '<textarea id="labPrediction" placeholder="My approach, the edge cases I will test, and the case that must be refused or fail safely…"></textarea>'
@@ -160,7 +217,9 @@ def patch(path: Path, ch: int, sp: dict, eng: str) -> bool:
     row = re.search(rf'<tr><th scope="row">{CRIT[ch]} · 1 point</th>.*?</tr>', table, re.S)
     if not row: raise SystemExit(f'{path.name}: rubric row {CRIT[ch]} not found')
     r = row.group(0)
-    if '<b>Build:</b>' not in r:
+    if OLD_FULL in r:
+        r = r.replace(OLD_FULL, FULL); table = table.replace(row.group(0), r); s = s[:i] + table + s[j:]
+    elif '<b>Build:</b>' not in r:
         r = r.replace('<details class="levels">', FULL + '<details class="levels">', 1)
         r = re.sub(r'(<b>0\.5:</b>.*?)(<br/>)', lambda m: m.group(1).rstrip() + HALF + m.group(2), r, count=1, flags=re.S)
         table = table.replace(row.group(0), r); s = s[:i] + table + s[j:]
@@ -175,7 +234,7 @@ def main() -> int:
     for a in pub['assignments']:
         if a['chapter'] in CRIT:
             if patch(ROOT / a['path'], a['chapter'], sp[a['chapter']], eng): done.append(a['chapter'])
-            a['build'] = 'python-v1'
+            a['build'] = 'python-v2'
     PUB.write_text(json.dumps(pub, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('Python build applied or refreshed in chapters', done or 'none (already current)')
     return 0

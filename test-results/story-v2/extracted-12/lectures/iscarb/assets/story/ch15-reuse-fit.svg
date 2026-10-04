@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">The purchased system does not fit the actual workflow</title><desc id="d">A purchased appointment product covers ordinary bookings but not waiting periods or linked follow-ups. A hosted AI model is also proposed; it worked on a ten-request demo, and its version and the product support period are open questions.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.2;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<rect x="40" y="36" width="350" height="230" rx="12" class="box"/>
+<text x="60" y="66" class="h">Purchased booking product</text>
+<text x="60" y="104" class="t">Ordinary bookings</text><text x="340" y="104" class="ok">✓</text>
+<text x="60" y="138" class="t">Waiting period before follow-up</text><text x="340" y="138" class="bad">✗</text>
+<text x="60" y="172" class="t">Follow-up linked to first visit</text><text x="340" y="172" class="bad">✗</text>
+<text x="60" y="206" class="t">“Just configure it”</text><text x="340" y="206" style="fill:#9a5b00;font-weight:700">?</text>
+<text x="60" y="240" class="s">not demonstrated on the full workflow</text>
+<rect x="430" y="36" width="350" height="230" rx="12" class="box"/>
+<text x="450" y="66" class="h">Also proposed: a hosted AI model</text>
+<text x="450" y="100" class="t">drafts booking replies and</text><text x="450" y="122" class="t">suggests linked appointments</text>
+<text x="450" y="160" class="ok">✓ worked on a 10-request demo</text>
+<text x="450" y="194" class="t">Who controls its version?</text><text x="740" y="194" style="fill:#9a5b00;font-weight:700">?</text>
+<text x="450" y="226" class="t">How long is the product supported?</text><text x="740" y="226" style="fill:#9a5b00;font-weight:700">?</text>
+<rect x="40" y="296" width="740" height="200" rx="12" fill="#fff" stroke="#c9d6e3"/>
+<text x="60" y="326" class="h">Decide from evidence: unknown is not “met”</text>
+<g class="t"><text x="60" y="366">Requirement</text><text x="360" y="366">Configure</text><text x="500" y="366">Integrate</text><text x="640" y="366">Replace</text></g>
+<text x="60" y="400" class="t">Waiting periods</text><text x="360" y="400" style="fill:#9a5b00;font-weight:700">unknown</text><text x="500" y="400" style="fill:#9a5b00;font-weight:700">unknown</text><text x="640" y="400" class="ok">met</text>
+<text x="60" y="434" class="t">Linked follow-ups</text><text x="360" y="434" class="bad">not met</text><text x="500" y="434" style="fill:#9a5b00;font-weight:700">unknown</text><text x="640" y="434" class="ok">met</text>
+<text x="60" y="468" class="t">Ready next term</text><text x="360" y="468" class="ok">met</text><text x="500" y="468" style="fill:#9a5b00;font-weight:700">unknown</text><text x="640" y="468" class="bad">not met</text>
+</svg>

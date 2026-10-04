@@ -3,6 +3,8 @@
 - builds.js carries exactly the helpers, starters and checks in curriculum/learning-path/builds/.
 - Every starter runs without crashing and fails at least one course check (it is not a solution).
 - Classic mistakes are caught by the check that names them (the checks discriminate).
+- Every known bug (chNN_mutants.py) breaks at least one course check, and the mutation test reports
+  bugs that weak tests miss.
 - Syntax errors and missing tests are reported clearly.
 Reference solutions are kept privately with the instructor and are not needed here.
 
@@ -17,7 +19,8 @@ SRC = ROOT / 'curriculum/learning-path/builds'
 CH = [12, 13, 14, 15, 16, 17, 20]
 ns: dict = {}
 exec((SRC / 'harness.py').read_text(encoding='utf-8'), ns)
-run = lambda ch, code: json.loads(ns['__run']((SRC / f'ch{ch}_helpers.py').read_text(), code, (SRC / f'ch{ch}_checks.py').read_text()))
+MUT = {ch: (SRC / f'ch{ch}_mutants.py').read_text() if (SRC / f'ch{ch}_mutants.py').exists() else '' for ch in CH}
+run = lambda ch, code: json.loads(ns['__run']((SRC / f'ch{ch}_helpers.py').read_text(), code, (SRC / f'ch{ch}_checks.py').read_text(), MUT[ch]))
 failed = 0
 
 
@@ -35,6 +38,7 @@ def failing(r: dict) -> list[str]:
 spec = json.loads(subprocess.run(['node', '-e', 'process.stdout.write(JSON.stringify(require(process.argv[1]).SPEC))', str(ROOT / 'curriculum/learning-path/builds.js')], capture_output=True, text=True, check=True).stdout)
 for ch in CH:
     same = all(spec[str(ch)][k] == (SRC / f'ch{ch}_{k}.py').read_text(encoding='utf-8') for k in ('helpers', 'starter', 'checks'))
+    same = same and spec[str(ch)].get('mutants', '') == MUT[ch] and len(spec[str(ch)].get('viva', [])) >= 4
     check(f'Ch{ch} builds.js matches the source files', same)
 
 # 2. starters are not solutions
@@ -67,7 +71,21 @@ for ch, (what, code, key) in MISTAKES.items():
     hit = [c for c in failing(r) if key in c]
     check(f'Ch{ch} catches {what}', r['error'] is None and bool(hit), f"failing: {failing(r)} error: {r['error']}")
 
-# 4. errors are reported clearly
+# 4. every known bug is a real bug, and weak tests are told which bugs they miss
+for ch in CH:
+    if not MUT[ch]:
+        continue
+    m: dict = {}
+    exec(MUT[ch], m)
+    for label, code in m['MUTANTS']:
+        r = run(ch, code + OWN)
+        bad = [c for c in failing(r) if 'mutation' not in c and 'own tests' not in c]
+        check(f'Ch{ch} known bug breaks a course check: {label}', r['error'] is None and bool(bad), str(r['error']))
+    r = run(ch, (SRC / f'ch{ch}_starter.py').read_text().split('# Your tests')[0] + OWN)
+    weak = r.get('mutants') or []
+    check(f'Ch{ch} mutation test reports {len(weak)} bugs missed by empty tests', bool(weak) and not any(k for _, k in weak))
+
+# 5. errors are reported clearly
 r = run(13, 'def can_read(user, project:\n    return False\n')
 check('a syntax error is reported with its line', bool(r['error']) and 'line 1' in r['error'], str(r['error']))
 r = run(13, 'def can_read(user, project):\n    return False\n')

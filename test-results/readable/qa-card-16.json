@@ -1,0 +1,41 @@
+{
+  "schema": "iscarb-classroom-v3",
+  "chapter": 16,
+  "release": "20260921-classroom-v3",
+  "exportedAt": "2026-10-04T11:48:46.340Z",
+  "state": {
+    "fields": {
+      "claim": "QA-only persistent claim.",
+      "warrant": "QA-only reasoning and a proposed evidence check.",
+      "counter": "QA-only reasoning and a proposed evidence check."
+    },
+    "seen": [
+      "TITLE",
+      "MAP",
+      "START",
+      "X01",
+      "X02A",
+      "X03",
+      "X04",
+      "MIDDLEWARE",
+      "CHECK1",
+      "X05",
+      "X06",
+      "VALIDATE",
+      "B01",
+      "CHECK2",
+      "R09",
+      "D16",
+      "D16B",
+      "AISYS",
+      "APPLY",
+      "END"
+    ],
+    "quiz": {},
+    "ai": {},
+    "self": {},
+    "votes": {},
+    "gut": {},
+    "theme": "day"
+  }
+}

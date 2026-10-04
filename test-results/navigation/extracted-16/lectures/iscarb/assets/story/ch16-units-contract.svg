@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">The interfaces match; their meanings do not</title><desc id="d">A sensor component sends the number 95 to an AI forecasting component. Its unit is not documented; the forecaster assumes Celsius. The interface type matches, number to number, but no contract states the unit or range.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.2;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<rect x="40" y="60" width="210" height="130" rx="12" class="box"/><text x="60" y="92" class="h">Sensor component</text><text x="60" y="122" class="t">sends a number</text><text x="60" y="164" style="font-size:34px;font-weight:700;fill:#13212e">95</text><text x="122" y="164" class="s">(unit not documented)</text>
+<rect x="570" y="60" width="210" height="130" rx="12" class="box"/><text x="590" y="92" class="h">AI forecaster</text><text x="590" y="122" class="t">expects °C</text><text x="590" y="164" class="bad">reads it as 95 °C</text>
+<path class="ln" d="M252 125 L566 125" marker-end="url(#ar)"/>
+<rect x="320" y="92" width="180" height="66" rx="10" fill="#fff4dc" stroke="#b26a00" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="410" y="118" class="h" text-anchor="middle">contract?</text><text x="410" y="142" class="s" text-anchor="middle">unit · range · meaning</text>
+<text x="410" y="80" class="ok" text-anchor="middle">type matches: number → number ✓</text>
+<rect x="40" y="226" width="740" height="270" rx="12" fill="#fff" stroke="#c9d6e3"/>
+<text x="60" y="258" class="h">If nobody states the unit, which is it?</text>
+<rect x="100" y="282" width="34" height="180" rx="17" fill="#eef2f6" stroke="#5b6b7b"/>
+<rect x="106" y="372" width="22" height="86" rx="11" fill="#f59f0a"/><circle cx="117" cy="462" r="20" fill="#f59f0a"/>
+<text x="150" y="380" class="t">if °F: 35 °C · a hot day</text>
+<rect x="430" y="282" width="34" height="180" rx="17" fill="#eef2f6" stroke="#5b6b7b"/>
+<rect x="436" y="292" width="22" height="166" rx="11" fill="#b42318"/><circle cx="447" cy="462" r="20" fill="#b42318"/>
+<text x="480" y="300" class="bad">if °C: near boiling</text>
+<text x="480" y="330" class="s">both are accepted without error</text>
+</svg>

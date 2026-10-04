@@ -1,5 +1,5 @@
 # Assignment 6 build: an evidence-only fit check for the colleague's draft.
-# FACTS[(option, requirement)] is "met" or "gap". REQUIREMENTS lists what the pilot needs.
+# FACTS[(option, requirement)] is "met" or "gap", read only from the scenario. REQUIREMENTS lists what the pilot needs.
 # A requirement the facts do not settle is "unknown". Unknown never counts as met.
 
 def fit(option, requirement):
@@ -14,5 +14,6 @@ def evidence_needed(option):
     return []   # CHANGE ME
 
 # Your tests: at least three functions whose names start with test_
+# The course also runs your tests against known buggy versions: each bug must make one of them fail.
 def test_known_gap():
     assert fit("A", "support-3-years") == "gap"

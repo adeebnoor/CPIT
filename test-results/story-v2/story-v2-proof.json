@@ -1,0 +1,316 @@
+{
+  "version": "20260922-story-v2",
+  "static": [
+    {
+      "chapter": 10,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 11,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 12,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 13,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 14,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 15,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 16,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 17,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    },
+    {
+      "chapter": 20,
+      "count": 20,
+      "opening": [
+        "TITLE",
+        "MAP",
+        "START"
+      ],
+      "closing": "END",
+      "duplicate_adjacent": []
+    }
+  ],
+  "browser": [
+    {
+      "chapter": 10,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 10,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 11,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 11,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 12,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 12,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 13,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 13,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 14,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 14,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 15,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 15,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 16,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 16,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 17,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 17,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 20,
+      "mode": "online",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    },
+    {
+      "chapter": 20,
+      "mode": "offline",
+      "map_steps": 5,
+      "story_after_map": true,
+      "case_thread": true,
+      "explicit_end": true,
+      "errors": []
+    }
+  ],
+  "packages": [
+    {
+      "chapter": 10,
+      "sha256": "9ceabb1664e69b48185b60ed7dc68229b3bdb5709b213d49286c55acaaa4b11f",
+      "offline_opened": true
+    },
+    {
+      "chapter": 11,
+      "sha256": "bd01ad6de3cb279b484141340117f09f0f0813fee25f0820d94513afa81d26fb",
+      "offline_opened": true
+    },
+    {
+      "chapter": 12,
+      "sha256": "22199d545d3c512ac9a6a162a182a8d483acbdef4ccf1c3c428f24a027134e97",
+      "offline_opened": true
+    },
+    {
+      "chapter": 13,
+      "sha256": "d3194a1f5dadd17a967d3aa63f6f76bf341fc206d53593fa634d79e9a61abaee",
+      "offline_opened": true
+    },
+    {
+      "chapter": 14,
+      "sha256": "c9d28499edce829b244f379847cd32f0dda24510afc0b789a354a8cacb6cefd5",
+      "offline_opened": true
+    },
+    {
+      "chapter": 15,
+      "sha256": "e52612362ba92b4c157877173d93ae190a2289f07525b0a73094806ef590f3d8",
+      "offline_opened": true
+    },
+    {
+      "chapter": 16,
+      "sha256": "d114d27b016cc5b638d9075cda48689faedbe4aac24ece40acd04100a51924b1",
+      "offline_opened": true
+    },
+    {
+      "chapter": 17,
+      "sha256": "09f2707e9b312541308dc901edbd190988893c6571f4c99d766055b3865278cd",
+      "offline_opened": true
+    },
+    {
+      "chapter": 20,
+      "sha256": "e0c283b13defa7d5924a502374b8dd7446e85edbe10b1818669f6b68e1a09d85",
+      "offline_opened": true
+    }
+  ],
+  "status": "passed"
+}

@@ -8,6 +8,7 @@ def can_read(user, project):
     return True   # CHANGE ME: today the API serves any project identifier it receives
 
 # Your tests: at least three functions whose names start with test_
+# The course also runs your tests against known buggy versions: each bug must make one of them fail.
 # Include at least two requests that must be refused.
 def test_owner_can_read():
     assert can_read({"id": "s1", "role": "student", "groups": []},

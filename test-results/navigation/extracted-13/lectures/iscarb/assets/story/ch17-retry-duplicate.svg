@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">The request executes; its response disappears</title><desc id="d">A user taps Confirm. The response is lost and the app times out; the trace does not show whether the first booking was committed. The retry carries a new request identifier.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.2;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<g class="h" text-anchor="middle"><text x="120" y="50">App</text><text x="410" y="50">Booking service</text><text x="700" y="50">Database</text></g>
+<g stroke="#9fb4c8" stroke-width="2" stroke-dasharray="5 5"><line x1="120" y1="62" x2="120" y2="300"/><line x1="410" y1="62" x2="410" y2="300"/><line x1="700" y1="62" x2="700" y2="300"/></g>
+<path class="ln" d="M120 90 L404 90" marker-end="url(#ar)"/><text x="262" y="82" class="t" text-anchor="middle">confirm · request A</text>
+<path class="ln" d="M410 116 L694 116" marker-end="url(#ar)"/><text x="555" y="108" class="t" text-anchor="middle">insert booking</text>
+<text x="712" y="140" style="font-size:22px;font-weight:700;fill:#9a5b00">?</text>
+<path class="lnr" d="M404 160 L230 160" stroke-dasharray="6 4"/><text x="200" y="166" class="bad" text-anchor="end">✗ lost</text>
+<text x="132" y="196" class="s">timeout · “Try again”</text>
+<path class="ln" d="M120 220 L404 220" marker-end="url(#ar)"/><text x="262" y="212" class="t" text-anchor="middle">confirm · request B (new id)</text>
+<path class="ln" d="M410 246 L694 246" marker-end="url(#ar)"/><text x="555" y="238" class="t" text-anchor="middle">insert booking</text>
+<text x="712" y="270" style="font-size:22px;font-weight:700;fill:#9a5b00">?</text>
+<rect x="40" y="320" width="740" height="176" rx="12" fill="#fff" stroke="#c9d6e3"/>
+<text x="60" y="350" class="h">A timeout does not tell you whether the work happened</text>
+<text x="60" y="388" class="t">Same request, new identifier</text><text x="380" y="388" class="bad">possibly two bookings, two AI messages</text>
+<text x="60" y="422" class="t">Same request, same identifier</text><text x="380" y="422" class="ok">service returns the first outcome</text>
+<text x="60" y="456" class="t">Bounded retries with back-off</text><text x="380" y="456" class="ok">no flood when the service is slow</text>
+<text x="60" y="484" class="s">Who stores the identifier, and does it survive a restart?</text>
+</svg>

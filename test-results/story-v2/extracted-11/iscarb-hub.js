@@ -1,0 +1,70 @@
+(()=>{'use strict';
+const prefs={get(key){try{return localStorage.getItem(key)}catch{return null}},set(key,value){try{localStorage.setItem(key,value);return true}catch{return false}}};
+document.querySelectorAll('.review-check[data-review-chapter]').forEach(check=>{const chapter=check.dataset.reviewChapter,key='iscarb-ch'+chapter+'-reviewed',status=check.closest('.lesson')?.querySelector('.review-status');check.checked=prefs.get(key)==='1';const render=()=>{if(status)status.textContent=check.checked?'Marked as reviewed on this device.':'Your review status stays on this device.'};render();check.addEventListener('change',()=>{if(prefs.set(key,check.checked?'1':'0'))render();else if(status)status.textContent='Browser storage is unavailable. This mark will reset when the page closes.'})});
+const legacy=document.getElementById('reviewed'),legacyStatus=document.getElementById('reviewStatus');if(legacy){const key='iscarb-ch10-v7-reviewed';legacy.checked=prefs.get(key)==='1';const render=()=>{if(legacyStatus)legacyStatus.textContent=legacy.checked?'Marked as reviewed on this device.':'Your review status stays on this device.'};render();legacy.addEventListener('change',()=>{if(prefs.set(key,legacy.checked?'1':'0'))render()})}
+})();
+
+// Course-level progress is a local review mark, never a mastery score.
+(function(){
+ const chapters=[10,11,12,13,14,15,16,17,20],label=document.getElementById('courseProgressLabel');
+ const render=()=>{const checks=[...document.querySelectorAll('.review-check')];if(!checks.length)return;const n=checks.filter(x=>x.checked).length;const t=document.getElementById('courseProgress'),bar=document.getElementById('courseProgressBar'),next=checks.find(x=>!x.checked),link=document.getElementById('continueCourse');if(bar)bar.value=n;
+  if(t)t.textContent=n+' / '+chapters.length;
+  if(label)label.textContent=n<chapters.length?'chapters reviewed':'all chapters reviewed';
+  if(next&&link){const lesson=next.closest('.lesson'),a=lesson.querySelector('.actions a');link.href=a.href;link.textContent=n?'Continue with Chapter '+next.dataset.reviewChapter:'Start Chapter 10'}
+  else if(link){link.href='course-resources.html#outcomes';link.textContent='All chapters reviewed · See the outcome map'}
+ };
+ document.querySelectorAll('.review-check').forEach(x=>x.addEventListener('change',render));
+ render();
+})();
+
+// Show the student showcase link only when approved PDFs have been published.
+(function(){
+ const link=document.getElementById('showcaseLink');
+ if(!link||typeof fetch!=='function')return;
+ try{fetch('iscarb-students.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).then(list=>{if(Array.isArray(list)&&list.length)link.hidden=false}).catch(()=>{})}catch(e){}
+})();
+
+// Approximate unique-browser counter for the public iSCARB hub.
+// The backend stores only a random browser UUID, the fixed hub path, and first-seen time.
+(function(){
+ const out=document.getElementById('visitorCount'),wrap=document.getElementById('visitorStat');
+ if(!out)return;
+ const endpoint='https://xcirpzxpcpbxpowjbpiq.supabase.co/functions/v1/iscarb-visitor-counter';
+ const key='iscarb-hub-visitor-id-v1';
+ const uuidRe=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+ function uuid(){
+  if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+  const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
+  return [...b].map((x,i)=>([4,6,8,10].includes(i)?'-':'')+x.toString(16).padStart(2,'0')).join('');
+ }
+ function identity(){
+  try{
+   let id=localStorage.getItem(key);
+   if(uuidRe.test(id||''))return{id,count:true};
+   id=uuid();
+   localStorage.setItem(key,id);
+   if(localStorage.getItem(key)===id)return{id,count:true};
+  }catch{}
+  return{id:null,count:false};
+ }
+ async function load(){
+  const automated=!!navigator.webdriver;
+  const v=automated?{id:null,count:false}:identity();
+  try{
+   const options=v.count?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitor_id:v.id,path:'/CPIT/iscarb.html'})}:{method:'GET'};
+   const r=await fetch(endpoint,options),d=await r.json();
+   if(!r.ok||!d.ok||!Number.isFinite(Number(d.visitors)))throw Error('counter');
+   out.textContent=Number(d.visitors).toLocaleString('en-US');
+   if(wrap)wrap.title='Approximate unique browsers visiting this course hub. No name, email or IP is stored by the iSCARB counter.';
+  }catch{
+   out.textContent='—';
+   if(wrap)wrap.title='Visitor count temporarily unavailable.';
+  }
+ }
+ load();
+})();
+
+
+
+
+if(!document.querySelector('script[src^="student-ux.js"]'))import('./student-ux.js?v=20260929-review-v1').catch(()=>{});
