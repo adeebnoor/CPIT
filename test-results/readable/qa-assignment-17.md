@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-04  
-**Commit ID:** ba7b5a10-5cfe-4730-b263-2924785473b9  
-**Part A committed:** 2026-10-04T20:44:00.139Z  
-**STRESS revealed:** 2026-10-04T20:44:00.220Z
+**Commit ID:** 85c36aff-669b-47f3-9ccc-d47837b69379  
+**Part A committed:** 2026-10-04T21:14:48.994Z  
+**STRESS revealed:** 2026-10-04T21:14:49.076Z
 
 ## Scenario
 A fictional event-registration system uses a browser, an application service and a booking database. The browser sends a reservation request through the service. When the request times out, the browser automatically retries with a new request identifier. The database creates one reservation per new identifier. The brief confirms that normal requests succeed, but contains no test where the response is lost after a database commit. You recommend a pilot architecture and retry policy.
@@ -42,7 +42,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-04T20:43:59.972Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-04T21:14:48.845Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
