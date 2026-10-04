@@ -328,9 +328,9 @@ function renderVote(i){
 // designed size, never overflow). Recomputed on every render, resize and answer reveal.
 // The case file grows to fill the slide (zoom on its blocks, binary search), never past the footer.
 function fitCase(){
- const m=$('#chapter-main');if(!m?.classList.contains('case-file'))return;
+ const m=$('#chapter-main');if(!m||!STORY||!['case-file','cold-open-page','end-page'].some(c=>m.classList.contains(c)))return;
  if(readingLayout()||matchMedia('(max-width:1000px)').matches){m.style.removeProperty('--cf');return;}
- const fits=()=>m.scrollHeight<=m.clientHeight+1&&m.scrollWidth<=m.clientWidth+1;
+ const fits=()=>{const r=m.getBoundingClientRect(),lim=r.bottom-parseFloat(getComputedStyle(m).paddingBottom)-6;if(m.scrollWidth>m.clientWidth+1)return false;for(const c of m.querySelectorAll('.hero,.end-hero,.end-copy,.gut,.story-grid section,.story-head,.cast-card'))if(c.scrollHeight>c.clientHeight+1||c.scrollWidth>c.clientWidth+1)return false;for(const e of m.querySelectorAll('p,li,button,a,h2,h3,section,img,ol,.gut,.epilogue,.exit-ticket')){const q=e.getBoundingClientRect();if(q.width&&(q.bottom>lim||q.right>r.right+1))return false;}return true;};
  let lo=.85,hi=1.6;m.style.setProperty('--cf','1');if(fits())lo=1;else{m.style.setProperty('--cf',String(lo));if(!fits())return;}
  for(let k=0;k<8;k++){const x=(lo+hi)/2;m.style.setProperty('--cf',x.toFixed(3));if(fits())lo=x;else hi=x;}
  m.style.setProperty('--cf',lo.toFixed(3));
