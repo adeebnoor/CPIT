@@ -17,7 +17,7 @@ def main():
     shared += [item['study_path'] for item in spec['lectures']]
     shared += [item['path'] for item in spec['assignments']+spec['previous_assignments']]
     shared += [item['stress_path'] for item in spec['assignments']+spec['previous_assignments'] if item.get('stress_delivery')!='lms']
-    shared += [str(p.relative_to(ROOT)) for folder in ('lectures/iscarb/assets/national','lectures/iscarb/assets/source-vectors') for p in (ROOT/folder).glob('*') if p.is_file()]
+    shared += [str(p.relative_to(ROOT)) for folder in ('lectures/iscarb/assets/national','lectures/iscarb/assets/source-vectors','lectures/iscarb/assets/story') for p in (ROOT/folder).glob('*') if p.is_file()]
     # STRESS delivered through the LMS must not survive inside older package contents.
     withdrawn={item['stress_path'] for item in spec['assignments']+spec['previous_assignments'] if item.get('stress_delivery')=='lms'}
     for lecture in spec['lectures']:

@@ -531,6 +531,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Real-case anchor per chapter, Ch12 on an aircraft, AI in the system vs at your desk, clipped panels shrink to fit",
    "repinned": []
+  },
+  {
+   "revision": "20261004-casefig",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Case-file illustration per chapter (pre-twist), Ch12 aircraft",
+   "repinned": []
   }
  ]
 }

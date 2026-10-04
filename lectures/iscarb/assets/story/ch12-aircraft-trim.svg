@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">Automatic trim on an airliner: each command is within its limit; is the total?</title>
+<desc id="d">Side view of an airliner. One angle-of-attack sensor at the nose feeds the flight-control computer, which limits each nose-down trim command. The horizontal stabiliser at the tail moves a little with every command. A chart below shows four commands each under the per-command limit and asks whether the total trim stays under the modelled limit.</desc>
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f1fb"/><stop offset="1" stop-color="#f7fafd"/></linearGradient>
+  <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+  <style>
+    .lbl{font-size:16px;fill:#13212e}
+    .lblb{font-size:16px;fill:#13212e;font-weight:700}
+    .sm{font-size:13px;fill:#3b4b5a}
+    .lead{stroke:#3b4b5a;stroke-width:1.4;fill:none}
+  </style>
+</defs>
+<rect width="820" height="520" rx="18" fill="url(#sky)"/>
+
+<!-- airliner, nose to the right, pitching slightly down -->
+<g transform="rotate(4 420 170)">
+  <!-- vertical fin -->
+  <path d="M120 150 L160 70 L200 70 L215 150 Z" fill="#c9d6e3" stroke="#5b6b7b" stroke-width="1.5"/>
+  <!-- fuselage -->
+  <path d="M95 150 Q100 140 140 138 L640 138 Q700 140 735 160 Q745 168 735 176 Q700 194 640 196 L150 196 Q110 192 95 170 Z" fill="#ffffff" stroke="#5b6b7b" stroke-width="2"/>
+  <!-- windows -->
+  <g fill="#9fb4c8">
+    <rect x="250" y="152" width="300" height="9" rx="4"/>
+  </g>
+  <path d="M690 152 Q712 156 724 166 L700 166 Q695 158 690 152Z" fill="#9fb4c8"/>
+  <!-- wing -->
+  <path d="M360 182 L470 182 L420 238 L380 238 Z" fill="#dbe4ee" stroke="#5b6b7b" stroke-width="1.5"/>
+  <!-- engine -->
+  <rect x="395" y="200" width="58" height="22" rx="10" fill="#c9d6e3" stroke="#5b6b7b" stroke-width="1.4"/>
+  <!-- horizontal stabiliser, trimmed leading-edge up (nose-down) -->
+  <g transform="rotate(-9 140 176)">
+    <path d="M78 176 Q110 168 176 172 L180 180 Q110 184 78 182 Z" fill="#f59f0a" stroke="#9a5b00" stroke-width="1.6"/>
+  </g>
+  <!-- AoA sensor vane -->
+  <path d="M705 178 L722 192" stroke="#b42318" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="705" cy="178" r="4" fill="#b42318"/>
+  <!-- flight-control computer -->
+  <rect x="560" y="160" width="46" height="26" rx="4" fill="#1f3b57"/>
+  <text x="583" y="178" font-size="11" fill="#ffffff" text-anchor="middle" font-weight="700">FCC</text>
+</g>
+<!-- nose-down arrow -->
+<path d="M748 150 Q790 190 768 238" stroke="#b42318" stroke-width="3" fill="none" marker-end="url(#ar)"/>
+<text x="800" y="268" class="lblb" text-anchor="end" style="fill:#b42318">nose pushed down</text>
+
+<!-- labels -->
+<path class="lead" d="M716 200 L716 300 L640 300"/>
+<text x="470" y="296" class="lblb">One angle-of-attack sensor</text>
+<text x="470" y="315" class="sm">a wrong value looks like a real stall</text>
+
+<path class="lead" d="M584 182 L584 60 L540 60"/>
+<text x="250" y="45" class="lblb">Flight-control computer</text>
+<text x="250" y="66" class="sm">limits each trim command ✓</text>
+
+<path class="lead" d="M120 196 L120 300 L170 300"/>
+<text x="175" y="296" class="lblb">Tail stabiliser</text>
+<text x="175" y="315" class="sm">moves a little with every command</text>
+
+<!-- chart: per-command vs total -->
+<rect x="40" y="340" width="740" height="160" rx="12" fill="#ffffff" stroke="#c9d6e3"/>
+<text x="60" y="366" class="lblb">Each command is within its limit. Is the total?</text>
+<!-- per-command limit line -->
+<line x1="80" y1="432" x2="360" y2="432" stroke="#0f766e" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="80" y="425" class="sm" style="fill:#0f766e">limit per command</text>
+<g fill="#5b8bd9">
+  <rect x="100" y="440" width="36" height="44"/><rect x="160" y="440" width="36" height="44"/><rect x="220" y="440" width="36" height="44"/><rect x="280" y="440" width="36" height="44"/>
+</g>
+<g class="sm" text-anchor="middle"><text x="118" y="456" fill="#fff" style="fill:#fff">1</text><text x="178" y="456" style="fill:#fff">2</text><text x="238" y="456" style="fill:#fff">3</text><text x="298" y="456" style="fill:#fff">4</text></g>
+<text x="210" y="498" class="sm" text-anchor="middle">commands ✓ ✓ ✓ ✓</text>
+<!-- cumulative -->
+<line x1="420" y1="425" x2="760" y2="425" stroke="#b42318" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="420" y="417" class="sm" style="fill:#b42318">modelled total limit</text>
+<g>
+  <rect x="440" y="466" width="56" height="18" fill="#f59f0a"/>
+  <rect x="510" y="448" width="56" height="36" fill="#f59f0a"/>
+  <rect x="580" y="430" width="56" height="54" fill="#f59f0a"/>
+  <rect x="650" y="384" width="56" height="100" fill="none" stroke="#b42318" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="678" y="446" text-anchor="middle" style="font-size:30px;font-weight:700;fill:#b42318">?</text>
+</g>
+<text x="573" y="498" class="sm" text-anchor="middle">total trim after repeated commands</text>
+</svg>

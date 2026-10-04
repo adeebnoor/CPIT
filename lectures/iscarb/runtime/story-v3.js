@@ -226,7 +226,8 @@ window.ISCARB_STORY = {
       epilogue: 'Monday’s review is waiting. Khalid will sign only a claim with a stated boundary and the evidence behind it. What exactly would your safety claim cover, and what would it not?',
       practice: 'Layan asks an AI chat to play the certification reviewer and attack her argument. It helps her rehearse. The hazard analysis and the safety claim she signs are her own.',
       hook: 'Every command the AI proposed passed its check. Total trim still crossed the line.',
-      lens: 'The jet also gets a vendor’s AI assistant that proposes trim sequences to cut fuel burn. Every command it proposed in the simulator passed the per-command limiter, and test crews now accept its sequences without editing. Hold that question: after the safety-case slides, one slide shows how this chapter’s methods apply to the assistant.',
+      caseFigure: {src: 'assets/story/ch12-aircraft-trim.svg', alt: 'Airliner with one angle-of-attack sensor and a flight-control computer that limits each trim command; a chart shows every command within its limit while the total trim passes the modelled limit', caption: 'Teaching illustration · select to enlarge'},
+      lens: 'A vendor’s AI assistant proposes trim sequences to cut fuel burn. Every command it proposed passed the per-command limiter in the simulator, and test crews now accept them without editing.',
       aiSystem: 'An AI assistant proposes trim sequences. The question for the engineer: does the limit hold whatever the assistant proposes?',
       real: {
         title: 'Boeing 737 MAX · MCAS', when: '2018–2019',
@@ -247,6 +248,7 @@ window.ISCARB_STORY = {
       }
     },
     13: {
+      caseFigure: {src: 'assets/story/ch13-portal-access.svg', alt: 'A portal hides other teams’ links, but a typed document number reaches the server, and no test shows that it refuses; an AI assistant reads every team’s files through one service account', caption: 'Teaching illustration · select to enlarge'},
       aiSystem: 'The AI assistant reads files through its own service account. The question for the engineer: does the server check access for the person asking, or only for the assistant?',
       real: {
         title: 'First American Financial', when: '2019',
@@ -267,6 +269,7 @@ window.ISCARB_STORY = {
       }
     },
     14: {
+      caseFigure: {src: 'assets/story/ch14-recovery-identity.svg', alt: 'The backup server runs, but the identity service is down, so staff cannot complete the critical task', caption: 'Teaching illustration · select to enlarge'},
       aiSystem: 'An AI recovery assistant gives confident instructions it has never rehearsed. The question for the engineer: what evidence shows its steps work in this outage?',
       real: {
         title: 'Maersk · NotPetya', when: '2017',
@@ -287,6 +290,7 @@ window.ISCARB_STORY = {
       }
     },
     15: {
+      caseFigure: {src: 'assets/story/ch15-reuse-fit.svg', alt: 'A purchased booking product covers ordinary bookings but not waiting periods or linked follow-ups; an evidence table marks unknown as not met', caption: 'Teaching illustration · select to enlarge'},
       aiSystem: 'A hosted language model drafts replies, and the tested version will be retired. The question for the engineer: is a model you do not control a component you can rely on?',
       real: {
         title: 'Ariane 5 · Flight 501', when: '1996',
@@ -307,6 +311,7 @@ window.ISCARB_STORY = {
       }
     },
     16: {
+      caseFigure: {src: 'assets/story/ch16-units-contract.svg', alt: 'A sensor sends 95 with no documented unit to an AI forecaster that assumes Celsius', caption: 'Teaching illustration · select to enlarge'},
       aiSystem: 'An AI forecaster accepts any number without checking its unit. The question for the engineer: what contract must hold at its input?',
       real: {
         title: 'Mars Climate Orbiter', when: '1999',
@@ -327,6 +332,7 @@ window.ISCARB_STORY = {
       }
     },
     17: {
+      caseFigure: {src: 'assets/story/ch17-retry-duplicate.svg', alt: 'A booking request times out with its response lost; a retry with a new identifier may book twice', caption: 'Teaching illustration · select to enlarge'},
       aiSystem: 'A hosted AI service drafts each confirmation, so a retry produces a different message. The question for the engineer: how do you make the side effect safe to repeat?',
       real: {
         title: 'AWS us-east-1 outage', when: '2021',
@@ -347,6 +353,7 @@ window.ISCARB_STORY = {
       }
     },
     20: {
+      caseFigure: {src: 'assets/story/ch20-dashboard-feeds.svg', alt: 'A shared dashboard shows three independently owned feeds, one with its age not shown and one classified by an AI model', caption: 'Teaching illustration · select to enlarge'},
       aiSystem: 'One agency’s feed comes from an AI model nobody outside can inspect. The question for the engineer: what can the dashboard honestly claim about that feed?',
       real: {
         title: 'Northeast blackout', when: '2003',

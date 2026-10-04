@@ -332,8 +332,8 @@ function renderVote(i){
 function fitCase(){
  const m=$('#chapter-main');if(!m||!STORY||!['case-file','cold-open-page','end-page'].some(c=>m.classList.contains(c)))return;
  if(readingLayout()||matchMedia('(max-width:1000px)').matches){m.style.removeProperty('--cf');return;}
- const fits=()=>{const r=m.getBoundingClientRect(),lim=r.bottom-parseFloat(getComputedStyle(m).paddingBottom)-6;if(m.scrollWidth>m.clientWidth+1)return false;for(const c of m.querySelectorAll('.hero,.end-hero,.end-copy,.gut,.story-grid section,.story-head,.cast-card'))if(c.scrollHeight>c.clientHeight+1||c.scrollWidth>c.clientWidth+1)return false;for(const e of m.querySelectorAll('p,li,button,a,h2,h3,img')){const q=e.getBoundingClientRect();if(q.width&&(q.bottom>lim||q.right>r.right+1))return false;}return true;};
- let lo=.85,hi=1.6;m.style.setProperty('--cf','1');if(fits())lo=1;else{m.style.setProperty('--cf',String(lo));if(!fits()){m.style.setProperty('--cf','1');return;}}
+ const fits=()=>{const r=m.getBoundingClientRect(),lim=r.bottom-parseFloat(getComputedStyle(m).paddingBottom)-6;if(m.scrollWidth>m.clientWidth+1)return false;for(const c of m.querySelectorAll('.hero,.end-hero,.end-copy,.gut,.story-grid section,.story-head,.cast-card,.case-side'))if(c.scrollHeight>c.clientHeight+1||c.scrollWidth>c.clientWidth+1)return false;for(const e of m.querySelectorAll('p,li,button,a,h2,h3,img')){const q=e.getBoundingClientRect();if(q.width&&(q.bottom>lim||q.right>r.right+1))return false;}return true;};
+ let lo=.8,hi=1.6;m.style.setProperty('--cf','1');if(fits())lo=1;else{m.style.setProperty('--cf',String(lo));if(!fits()){m.style.setProperty('--cf','1');return;}}
  for(let k=0;k<8;k++){const x=(lo+hi)/2;m.style.setProperty('--cf',x.toFixed(3));if(fits())lo=x;else hi=x;}
  m.style.setProperty('--cf',lo.toFixed(3));
 }
@@ -406,15 +406,22 @@ function renderCaseFile(){
  $('#chapter-main').classList.add('story-page','case-file');
  $('#chapter-main').insertAdjacentHTML('beforeend',`
  <div class="story-head"><span>${esc(STORY.episode)} · FICTIONAL TEACHING CASE</span><h2>${esc(D.case.headline)}</h2><p>${esc(STORY.setting)} <b class="clock">⏱ ${esc(STORY.clock)}</b></p></div>
- <div class="cast" aria-label="People in this episode">${cast.map(c=>`<div class="cast-card"><i aria-hidden="true">${esc(c.name.replace(/^Dr\.\s*/,'').charAt(0))}</i><b>${esc(c.name)}</b><span>${esc(c.role)}</span></div>`).join('')}</div>
+ ${STORY.caseFigure?`<div class="case-body"><figure class="case-fig"><button class="figure-button" data-image="${esc(STORY.caseFigure.src)}" data-caption="${esc(STORY.caseFigure.alt)}" aria-label="Enlarge: ${esc(STORY.caseFigure.alt)}"><img src="${esc(STORY.caseFigure.src)}" alt="${esc(STORY.caseFigure.alt)}"></button><figcaption><b>One story, five lenses.</b> Five acts, one concept each; something changes before the end. Supplied facts only. · ${esc(STORY.caseFigure.caption||'')}</figcaption></figure><div class="case-side">
+ <div class="cast compact" aria-label="People in this episode">${cast.map(c=>`<div class="cast-card"><i aria-hidden="true">${esc(c.name.replace(/^Dr\.\s*/,'').charAt(0))}</i><b>${esc(c.name)}</b><span>${esc(c.role)}</span></div>`).join('')}</div>
+ <div class="story-grid stacked">
+   <section><h3>What we know</h3><p>${esc(D.case.text)}</p></section>
+   <section><h3>The decision</h3><p>${esc(D.case.question)}</p></section>
+   <section><h3>What is at stake</h3><p>${esc(STORY.stakes)}</p></section>
+ </div></div></div>
+ <div class="case-foot">${(STORY?.lens||D.case.lens)?`<div class="story-lens"><b>AI IN THE SYSTEM · PART OF THE CASE</b>${esc(STORY?.lens||D.case.lens)}</div>`:''}<span class="actions story-action">${jumpButton(r.branches[0].target,'Act 1 →')}</span></div>`:`<div class="cast" aria-label="People in this episode">${cast.map(c=>`<div class="cast-card"><i aria-hidden="true">${esc(c.name.replace(/^Dr\.\s*/,'').charAt(0))}</i><b>${esc(c.name)}</b><span>${esc(c.role)}</span></div>`).join('')}</div>
  <div class="story-grid">
    <section><h3>What we know</h3><p>${esc(D.case.text)}</p></section>
    <section><h3>The decision</h3><p>${esc(D.case.question)}</p></section>
    <section><h3>What is at stake</h3><p>${esc(STORY.stakes)}</p></section>
  </div>
  ${(STORY?.lens||D.case.lens)?`<div class="story-lens"><b>${STORY?'AI IN THE SYSTEM · PART OF THE CASE':'AI LENS · ADDED TO THE CASE'}</b>${esc(STORY?.lens||D.case.lens)}</div>`:''}
- <div class="story-route" aria-label="Five acts">${r.branches.map((b,i)=>`<span><b>${i+1}</b>${esc(b.label)}</span>`).join('')}</div>
- <div class="story-note"><p><b>One story, five lenses.</b> Five acts, one concept each, with class votes along the way; something changes before the end. Evidence rule: supplied facts and transparent calculations only, and keep unknowns visible. <b>${esc(SERIES.principle||'')}</b></p><span class="actions story-action">${jumpButton(r.branches[0].target,'Act 1 →')}</span></div>`);
+ <div class="story-route" aria-label="Five acts">${r.branches.map((b,i)=>`<span><b>${i+1}</b>${esc(b.label)}</span>`).join('')}</div>`}
+ ${STORY.caseFigure?'':`<div class="story-note"><p><b>One story, five lenses.</b> Five acts, one concept each, with class votes along the way; something changes before the end. Evidence rule: supplied facts and transparent calculations only, and keep unknowns visible. <b>${esc(SERIES.principle||'')}</b></p><span class="actions story-action">${jumpButton(r.branches[0].target,'Act 1 →')}</span></div>`}`);
 }
 function renderClosing(){
  const r=D.roadmap;
