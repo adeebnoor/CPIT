@@ -83,8 +83,15 @@ window.ISCARB_SOURCE_FIGURES = {
   "assets/v3/3421e0acd3f7d7c8.jpg": {
     "variants": [
       {
+        "src": "assets/source-vectors/ch12-teaching-faulttree-and-or.svg",
+        "sourceSlide": 27,
+        "label": "AND + OR gates",
+        "teaching": true
+      },
+      {
         "src": "assets/source-vectors/ch12-source-27.svg",
-        "sourceSlide": 27
+        "sourceSlide": 27,
+        "label": "Source 27 · insulin pump"
       }
     ],
     "type": "source-vector",
