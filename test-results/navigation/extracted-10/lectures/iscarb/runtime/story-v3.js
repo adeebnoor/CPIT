@@ -402,49 +402,49 @@ window.ISCARB_STORY = {
   "bridge": "Assignment 3: the same steps for the loading-bay barrier. Build current and revised trees, then test that no single event causes the hazard.",
   "assignment": 3,
   "helpers": "",
-  "buggy": "# Hazard: automatic trim pushes the nose down. Current design.\ntree = OR(\n    Event(\"Angle-of-attack sensor reads wrong\", \"fact\"),\n    AND(Event(\"Trim command repeats\", \"fact\"),\n        Event(\"Crew misses runaway trim\", \"assumption\")),\n)\n",
-  "fixed": "# Revised: a second sensor must also fail to catch the error.\ntree = OR(\n    AND(Event(\"Angle-of-attack sensor reads wrong\", \"fact\"),\n        Event(\"Two-sensor cross-check misses it\", \"proposed\")),\n    AND(Event(\"Trim command repeats\", \"fact\"),\n        Event(\"Crew misses runaway trim\", \"assumption\")),\n)\n",
-  "tests": "def test_no_single_event_causes_the_hazard():\n    assert single_points(tree) == []\ndef test_the_sensor_fault_stays_in_the_tree():\n    assert any(\"sensor\" in e.name for e in events(tree))\ndef test_new_control_is_marked_proposed():\n    assert any(e.source == \"proposed\" for e in events(tree))\n",
+  "buggy": "# Hazard: trim pushes the nose down.\n# Current design:\ntree = OR(\n    Event(\"AoA sensor reads wrong\", \"fact\"),\n    AND(Event(\"Trim command repeats\", \"fact\"),\n        Event(\"Crew misses runaway trim\",\n              \"assumption\")),\n)\n",
+  "fixed": "# Revised: a second sensor must also miss it.\ntree = OR(\n    AND(Event(\"AoA sensor reads wrong\", \"fact\"),\n        Event(\"Cross-check misses it\",\n              \"proposed\")),\n    AND(Event(\"Trim command repeats\", \"fact\"),\n        Event(\"Crew misses runaway trim\",\n              \"assumption\")),\n)\n",
+  "tests": "def test_no_single_event_causes_hazard():\n    assert single_points(tree) == []\n\ndef test_sensor_fault_stays_in_tree():\n    names = [e.name for e in events(tree)]\n    assert \"AoA sensor reads wrong\" in names\n\ndef test_new_control_marked_proposed():\n    tags = [e.source for e in events(tree)]\n    assert \"proposed\" in tags\n",
   "result": {
    "buggy": {
     "tests": [
      [
-      "test_no_single_event_causes_the_hazard",
+      "test_no_single_event_causes_hazard",
       false,
       "assertion failed"
      ],
      [
-      "test_the_sensor_fault_stays_in_the_tree",
+      "test_sensor_fault_stays_in_tree",
       true,
       ""
      ],
      [
-      "test_new_control_is_marked_proposed",
+      "test_new_control_marked_proposed",
       false,
       "assertion failed"
      ]
     ],
-    "show": "cut_sets(tree)  →  [('Angle-of-attack sensor reads wrong',), ('Crew misses runaway trim', 'Trim command repeats')]"
+    "show": "cut_sets(tree)  →  [('AoA sensor reads wrong',), ('Crew misses runaway trim', 'Trim command repeats')]"
    },
    "fixed": {
     "tests": [
      [
-      "test_no_single_event_causes_the_hazard",
+      "test_no_single_event_causes_hazard",
       true,
       ""
      ],
      [
-      "test_the_sensor_fault_stays_in_the_tree",
+      "test_sensor_fault_stays_in_tree",
       true,
       ""
      ],
      [
-      "test_new_control_is_marked_proposed",
+      "test_new_control_marked_proposed",
       true,
       ""
      ]
     ],
-    "show": "cut_sets(tree)  →  [('Angle-of-attack sensor reads wrong', 'Two-sensor cross-check misses it'), ('Crew misses runaway trim', 'Trim command repeats')]"
+    "show": "cut_sets(tree)  →  [('AoA sensor reads wrong', 'Cross-check misses it'), ('Crew misses runaway trim', 'Trim command repeats')]"
    }
   }
  },
@@ -470,9 +470,9 @@ window.ISCARB_STORY = {
   "bridge": "Assignment 4: the same steps for the project portal. Write can_read and tests that try to cross the boundary.",
   "assignment": 4,
   "helpers": "",
-  "buggy": "def can_view(user, grade):\n    # the page shows each student only a link to their own grade\n    return user.get(\"logged_in\", False)\n",
-  "fixed": "def can_view(user, grade):\n    try:\n        if user[\"role\"] == \"student\":\n            return grade[\"student\"] == user[\"id\"]\n        if user[\"role\"] == \"instructor\":\n            return grade[\"course\"] in user[\"courses\"]\n    except (KeyError, TypeError):\n        pass\n    return False   # fail-safe default\n",
-  "tests": "ALI  = {\"id\": \"s1\", \"role\": \"student\", \"logged_in\": True}\nSARA = {\"id\": \"s2\", \"role\": \"student\", \"logged_in\": True}\nG = {\"student\": \"s1\", \"course\": \"CPIT-455\"}\ndef test_own_grade_is_allowed():\n    assert can_view(ALI, G)\ndef test_another_student_is_refused():\n    assert can_view(SARA, G) is False\ndef test_broken_request_is_refused():\n    assert can_view({}, G) is False\n",
+  "buggy": "def can_view(user, grade):\n    # the page links only your own grade\n    return user.get(\"logged_in\", False)\n",
+  "fixed": "def can_view(user, grade):\n    try:\n        role = user[\"role\"]\n        if role == \"student\":\n            return grade[\"student\"] == user[\"id\"]\n        if role == \"instructor\":\n            mine = user[\"courses\"]\n            return grade[\"course\"] in mine\n    except (KeyError, TypeError):\n        pass\n    return False   # fail-safe default\n",
+  "tests": "ALI = {\"id\": \"s1\", \"role\": \"student\",\n       \"logged_in\": True}\nSARA = {\"id\": \"s2\", \"role\": \"student\",\n        \"logged_in\": True}\nG = {\"student\": \"s1\", \"course\": \"CPIT-455\"}\n\ndef test_own_grade_is_allowed():\n    assert can_view(ALI, G)\n\ndef test_another_student_is_refused():\n    assert can_view(SARA, G) is False\n\ndef test_broken_request_is_refused():\n    assert can_view({}, G) is False\n",
   "result": {
    "buggy": {
     "tests": [
@@ -536,9 +536,9 @@ window.ISCARB_STORY = {
   "bridge": "Assignment 5: the same steps for the transport desk. Write reconcile, apply each change once, and report stale changes as conflicts.",
   "assignment": 5,
   "helpers": "",
-  "buggy": "def merge(central, offline):\n    # after the outage, add everything recorded on paper\n    return central + offline\n",
-  "fixed": "def merge(central, offline):\n    seen, out = {r[\"id\"] for r in central}, list(central)\n    for r in offline:\n        # identity decides, not content\n        if r[\"id\"] not in seen:\n            seen.add(r[\"id\"]); out.append(r)\n    return out\n",
-  "tests": "C = [{\"id\": \"r1\", \"who\": \"Huda\"}]\ndef test_new_offline_record_is_added():\n    assert len(merge(C, [{\"id\": \"r2\", \"who\": \"Omar\"}])) == 2\ndef test_record_already_synced_is_not_doubled():\n    assert len(merge(C, [{\"id\": \"r1\", \"who\": \"Huda\"}])) == 1\ndef test_central_list_is_not_changed():\n    merge(C, [{\"id\": \"r2\", \"who\": \"Omar\"}])\n    assert len(C) == 1\n",
+  "buggy": "def merge(central, offline):\n    # add everything written on paper\n    return central + offline\n",
+  "fixed": "def merge(central, offline):\n    seen = {r[\"id\"] for r in central}\n    out = list(central)\n    for r in offline:\n        # identity decides, not content\n        if r[\"id\"] not in seen:\n            seen.add(r[\"id\"])\n            out.append(r)\n    return out\n",
+  "tests": "C = [{\"id\": \"r1\", \"who\": \"Huda\"}]\nNEW = {\"id\": \"r2\", \"who\": \"Omar\"}\nSAME = {\"id\": \"r1\", \"who\": \"Huda\"}\n\ndef test_new_offline_record_is_added():\n    assert len(merge(C, [NEW])) == 2\n\ndef test_synced_record_is_not_doubled():\n    assert len(merge(C, [SAME])) == 1\n\ndef test_central_list_is_not_changed():\n    merge(C, [NEW])\n    assert len(C) == 1\n",
   "result": {
    "buggy": {
     "tests": [
@@ -548,7 +548,7 @@ window.ISCARB_STORY = {
       ""
      ],
      [
-      "test_record_already_synced_is_not_doubled",
+      "test_synced_record_is_not_doubled",
       false,
       "assertion failed"
      ],
@@ -567,7 +567,7 @@ window.ISCARB_STORY = {
       ""
      ],
      [
-      "test_record_already_synced_is_not_doubled",
+      "test_synced_record_is_not_doubled",
       true,
       ""
      ],
@@ -601,10 +601,10 @@ window.ISCARB_STORY = {
   ],
   "bridge": "Assignment 6: the same steps for the booking system. Write fit, shortlist and evidence_needed from the supplied facts only.",
   "assignment": 6,
-  "helpers": "SOURCES = {\"arabic-ui\": \"demonstrated\", \"single-sign-on\": \"brochure\"}\n",
-  "buggy": "def status(feature):\n    # anything the vendor mentions counts\n    return \"met\" if feature in SOURCES else \"unknown\"\n",
-  "fixed": "def status(feature):\n    # only a demonstrated instance counts as met\n    shown = SOURCES.get(feature) == \"demonstrated\"\n    return \"met\" if shown else \"unknown\"\n",
-  "tests": "def test_demonstrated_feature_is_met():\n    assert status(\"arabic-ui\") == \"met\"\ndef test_brochure_claim_is_not_evidence():\n    assert status(\"single-sign-on\") == \"unknown\"\ndef test_unchecked_feature_is_unknown():\n    assert status(\"export\") == \"unknown\"\n",
+  "helpers": "SOURCES = {\"arabic-ui\": \"demonstrated\",\n           \"single-sign-on\": \"brochure\"}\n",
+  "buggy": "def status(feature):\n    # anything the vendor mentions counts\n    if feature in SOURCES:\n        return \"met\"\n    return \"unknown\"\n",
+  "fixed": "def status(feature):\n    # only a demonstrated instance counts\n    if SOURCES.get(feature) == \"demonstrated\":\n        return \"met\"\n    return \"unknown\"\n",
+  "tests": "def test_demonstrated_feature_is_met():\n    assert status(\"arabic-ui\") == \"met\"\n\ndef test_brochure_claim_is_not_evidence():\n    assert status(\"single-sign-on\") == \"unknown\"\n\ndef test_unchecked_feature_is_unknown():\n    assert status(\"export\") == \"unknown\"\n",
   "result": {
    "buggy": {
     "tests": [
@@ -667,20 +667,20 @@ window.ISCARB_STORY = {
   ],
   "bridge": "Assignment 7: the same steps for the room-booking component. Write reserve_minutes: precondition, conversion, postcondition.",
   "assignment": 7,
-  "helpers": "class Pump:\n    \"\"\"Documented contract: infuse(ml), ml a whole number from 1 to 5000.\"\"\"\n    def __init__(self):\n        self.calls = []\n    def infuse(self, ml):\n        self.calls.append(ml)\n        return ml\n",
+  "helpers": "class Pump:\n    \"\"\"Contract: infuse(ml), 1 to 5000 ml.\"\"\"\n    def __init__(self):\n        self.calls = []\n    def infuse(self, ml):\n        self.calls.append(ml)\n        return ml\n",
   "buggy": "def give(pump, litres):\n    # the types match: a number is a number\n    return pump.infuse(litres)\n",
-  "fixed": "def give(pump, litres):\n    # precondition: checked before the call\n    ok = type(litres) in (int, float) and 0.001 <= litres <= 5\n    if not ok:\n        raise ValueError(\"litres must be 0.001 to 5\")\n    ml = round(litres * 1000)\n    # postcondition: checked on the result\n    if pump.infuse(ml) != ml:\n        raise RuntimeError(\"pump broke its promise\")\n    return ml\n",
-  "tests": "def test_half_litre_reaches_pump_as_500_ml():\n    p = Pump(); give(p, 0.5)\n    assert p.calls == [500]\ndef test_too_much_is_refused_before_the_call():\n    p = Pump()\n    try:\n        give(p, 9); assert False, \"accepted\"\n    except ValueError:\n        assert p.calls == []\ndef test_zero_is_refused():\n    p = Pump()\n    try:\n        give(p, 0); assert False, \"accepted\"\n    except ValueError:\n        assert p.calls == []\n",
+  "fixed": "def give(pump, litres):\n    # precondition: before the call\n    ok = type(litres) in (int, float)\n    if not (ok and 0.001 <= litres <= 5):\n        raise ValueError(\"0.001 to 5 litres\")\n    ml = round(litres * 1000)\n    # postcondition: on the result\n    if pump.infuse(ml) != ml:\n        raise RuntimeError(\"pump broke contract\")\n    return ml\n",
+  "tests": "def test_half_litre_is_500_ml():\n    p = Pump()\n    give(p, 0.5)\n    assert p.calls == [500]\n\ndef test_too_much_refused_before_call():\n    p = Pump()\n    try:\n        give(p, 9)\n        assert False, \"accepted\"\n    except ValueError:\n        assert p.calls == []\n\ndef test_zero_is_refused():\n    p = Pump()\n    try:\n        give(p, 0)\n        assert False, \"accepted\"\n    except ValueError:\n        assert p.calls == []\n",
   "result": {
    "buggy": {
     "tests": [
      [
-      "test_half_litre_reaches_pump_as_500_ml",
+      "test_half_litre_is_500_ml",
       false,
       "assertion failed"
      ],
      [
-      "test_too_much_is_refused_before_the_call",
+      "test_too_much_refused_before_call",
       false,
       "assertion failed: accepted"
      ],
@@ -694,12 +694,12 @@ window.ISCARB_STORY = {
    "fixed": {
     "tests": [
      [
-      "test_half_litre_reaches_pump_as_500_ml",
+      "test_half_litre_is_500_ml",
       true,
       ""
      ],
      [
-      "test_too_much_is_refused_before_the_call",
+      "test_too_much_refused_before_call",
       true,
       ""
      ],
@@ -723,7 +723,7 @@ window.ISCARB_STORY = {
    [
     9,
     "Keep the uncertainty visible; record the outcome before replying.",
-    "store[\"done\"][request_id]"
+    "done[request_id]"
    ],
    [
     19,
@@ -734,24 +734,24 @@ window.ISCARB_STORY = {
   "bridge": "Assignment 8: the same steps for event registration. Make reserve idempotent, including after a restart.",
   "assignment": 8,
   "helpers": "",
-  "buggy": "class Payments:\n    def __init__(self, store):\n        self.store = store; store.setdefault(\"charges\", [])\n    def pay(self, request_id, amount):\n        # every call charges\n        self.store[\"charges\"].append(amount)\n        return len(self.store[\"charges\"])\n",
-  "fixed": "class Payments:\n    def __init__(self, store):\n        self.store = store\n        store.setdefault(\"charges\", [])\n        store.setdefault(\"done\", {})\n    def pay(self, request_id, amount):\n        if request_id in self.store[\"done\"]:     # a retry\n            return self.store[\"done\"][request_id]\n        self.store[\"charges\"].append(amount)\n        rid = len(self.store[\"charges\"])\n        self.store[\"done\"][request_id] = rid\n        return rid\n",
-  "tests": "def test_two_payments_make_two_charges():\n    st = {}; p = Payments(st); p.pay(\"a\", 50); p.pay(\"b\", 50)\n    assert len(st[\"charges\"]) == 2\ndef test_retry_after_lost_reply_charges_once():\n    st = {}; p = Payments(st); p.pay(\"a\", 50); p.pay(\"a\", 50)\n    assert len(st[\"charges\"]) == 1\ndef test_retry_after_restart_charges_once():\n    st = {}; Payments(st).pay(\"a\", 50); Payments(st).pay(\"a\", 50)\n    assert len(st[\"charges\"]) == 1\n",
+  "buggy": "class Payments:\n    def __init__(self, store):\n        self.store = store\n        store.setdefault(\"charges\", [])\n    def pay(self, request_id, amount):\n        # every call charges\n        self.store[\"charges\"].append(amount)\n        return len(self.store[\"charges\"])\n",
+  "fixed": "class Payments:\n    def __init__(self, store):\n        self.store = store\n        store.setdefault(\"charges\", [])\n        store.setdefault(\"done\", {})\n    def pay(self, request_id, amount):\n        done = self.store[\"done\"]\n        if request_id in done:   # a retry\n            return done[request_id]\n        self.store[\"charges\"].append(amount)\n        done[request_id] = len(done) + 1\n        return done[request_id]\n",
+  "tests": "def test_two_payments_two_charges():\n    st = {}\n    p = Payments(st)\n    p.pay(\"a\", 50)\n    p.pay(\"b\", 50)\n    assert len(st[\"charges\"]) == 2\n\ndef test_retry_after_lost_reply():\n    st = {}\n    p = Payments(st)\n    p.pay(\"a\", 50)\n    p.pay(\"a\", 50)   # same request id\n    assert len(st[\"charges\"]) == 1\n\ndef test_retry_after_restart():\n    st = {}\n    Payments(st).pay(\"a\", 50)\n    Payments(st).pay(\"a\", 50)   # new process\n    assert len(st[\"charges\"]) == 1\n",
   "result": {
    "buggy": {
     "tests": [
      [
-      "test_two_payments_make_two_charges",
+      "test_two_payments_two_charges",
       true,
       ""
      ],
      [
-      "test_retry_after_lost_reply_charges_once",
+      "test_retry_after_lost_reply",
       false,
       "assertion failed"
      ],
      [
-      "test_retry_after_restart_charges_once",
+      "test_retry_after_restart",
       false,
       "assertion failed"
      ]
@@ -760,17 +760,17 @@ window.ISCARB_STORY = {
    "fixed": {
     "tests": [
      [
-      "test_two_payments_make_two_charges",
+      "test_two_payments_two_charges",
       true,
       ""
      ],
      [
-      "test_retry_after_lost_reply_charges_once",
+      "test_retry_after_lost_reply",
       true,
       ""
      ],
      [
-      "test_retry_after_restart_charges_once",
+      "test_retry_after_restart",
       true,
       ""
      ]
@@ -800,9 +800,9 @@ window.ISCARB_STORY = {
   "bridge": "Assignment 9: the same steps for the incident dashboard. Write display_state and headline, and never call a degraded view live.",
   "assignment": 9,
   "helpers": "",
-  "buggy": "def label(feed, now, limit=5):\n    # the last value always looks live\n    return f\"{feed['name']}: {feed['value']} (live)\"\n",
-  "fixed": "def label(feed, now, limit=5):\n    if not feed.get(\"connected\") or feed.get(\"at\") is None:\n        return f\"{feed['name']}: unavailable\"\n    age = now - feed[\"at\"]\n    state = \"live\" if age <= limit else f\"stale, {age} min old\"\n    return f\"{feed['name']}: {feed['value']} ({state})\"\n",
-  "tests": "F = {\"name\": \"Lifts\", \"value\": \"2 down\", \"connected\": True, \"at\": 100}\ndef test_fresh_feed_is_live():\n    assert label(F, 103).endswith(\"(live)\")\ndef test_old_feed_shows_its_age():\n    assert \"stale, 9 min old\" in label(F, 109)\ndef test_lost_feed_is_not_shown_as_live():\n    assert label(dict(F, connected=False), 101).endswith(\"unavailable\")\n",
+  "buggy": "def label(feed, now, limit=5):\n    # the last value always looks live\n    return f\"{feed['name']}: live\"\n",
+  "fixed": "def label(feed, now, limit=5):\n    name, at = feed[\"name\"], feed.get(\"at\")\n    if not feed.get(\"connected\") or at is None:\n        return f\"{name}: unavailable\"\n    age = now - at\n    if age <= limit:\n        return f\"{name}: live\"\n    return f\"{name}: stale, {age} min old\"\n",
+  "tests": "F = {\"name\": \"Lifts\", \"connected\": True,\n     \"at\": 100}\nLOST = dict(F, connected=False)\n\ndef test_fresh_feed_is_live():\n    assert label(F, 103) == \"Lifts: live\"\n\ndef test_old_feed_shows_its_age():\n    assert \"9 min old\" in label(F, 109)\n\ndef test_lost_feed_is_not_live():\n    assert label(LOST, 101) == \"Lifts: unavailable\"\n",
   "result": {
    "buggy": {
     "tests": [
@@ -817,7 +817,7 @@ window.ISCARB_STORY = {
       "assertion failed"
      ],
      [
-      "test_lost_feed_is_not_shown_as_live",
+      "test_lost_feed_is_not_live",
       false,
       "assertion failed"
      ]
@@ -836,7 +836,7 @@ window.ISCARB_STORY = {
       ""
      ],
      [
-      "test_lost_feed_is_not_shown_as_live",
+      "test_lost_feed_is_not_live",
       true,
       ""
      ]

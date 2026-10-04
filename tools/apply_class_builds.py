@@ -46,7 +46,7 @@ META = {
           bridge='Assignment 7: the same steps for the room-booking component. Write reserve_minutes: precondition, conversion, postcondition.'),
  17: dict(question='The reply to a payment is lost and the app retries. Which tests fail, and how much is the customer charged?',
           map=[(7, 'A timeout does not tell you whether the work happened.', 'test_retry_after_lost_reply'),
-               (9, 'Keep the uncertainty visible; record the outcome before replying.', 'store["done"][request_id]'),
+               (9, 'Keep the uncertainty visible; record the outcome before replying.', 'done[request_id]'),
                (19, 'A retry is a new request unless it carries the same identity.', 'the same request_id')],
           bridge='Assignment 8: the same steps for event registration. Make reserve idempotent, including after a restart.'),
  20: dict(question='The lift feed lost its connection ten minutes ago. Which tests fail, and what does the dashboard tell the duty officer?',

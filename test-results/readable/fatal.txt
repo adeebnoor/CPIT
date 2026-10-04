@@ -1,0 +1,5 @@
+page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:8770/iscarb.html
+Call log:
+[2m  - navigating to "http://localhost:8770/iscarb.html", waiting until "load"[22m
+
+    at run (/home/user/CPIT/tools/check-readable-course.cjs:14:14)

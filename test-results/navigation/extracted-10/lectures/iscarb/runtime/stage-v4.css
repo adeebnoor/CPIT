@@ -502,3 +502,25 @@ html[data-stage="v4"] .extra-x-lab .cb-map li{background:var(--card);border:1px 
 html[data-stage="v4"] .extra-x-lab .cb-map li b{display:block;color:var(--act);font-size:.8em;letter-spacing:.06em;text-transform:uppercase}
 html[data-stage="v4"] .extra-x-lab .cb-map li code{display:block;margin-top:4px;overflow-wrap:anywhere}
 @media (max-width:1000px){html[data-stage="v4"] .extra-x-lab .cb-grid,html[data-stage="v4"] .extra-x-lab .cb-map{grid-template-columns:1fr}}
+html[data-stage="v4"] .extra-x-lab .cb-given{color:var(--muted);margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--rule)}
+html[data-stage="v4"] .extra-x-lab .cb-next,html[data-stage="v4"] .extra-x-lab2 .cb-next{margin:0;font-size:calc(clamp(.9rem,1.1vw,1.15rem) * var(--fit,1))}
+html[data-stage="v4"] .extra-x-lab2 .cb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;min-height:0}
+html[data-stage="v4"] :is(.extra-x-lab2) :is(.cb-code,.cb-tests){background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 14px;min-width:0}
+html[data-stage="v4"] .extra-x-lab2 .cb-label{margin:0 0 6px;font-size:.72rem;letter-spacing:.1em;font-weight:800;color:var(--act)}
+html[data-stage="v4"] .extra-x-lab2 pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:calc(clamp(.8rem,1.02vw,1.05rem) * var(--fit,1))/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+html[data-stage="v4"] .extra-x-lab2 .cb-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:calc(clamp(.85rem,1.05vw,1.1rem) * var(--fit,1))}
+html[data-stage="v4"] .extra-x-lab2 .cb-list li{padding:6px 8px;border-radius:8px;border:1px solid var(--rule);overflow-wrap:anywhere}
+html[data-stage="v4"] .extra-x-lab2 .cb-list li b{display:inline-block;width:1.3em}
+html[data-stage="v4"] .extra-x-lab2 .cb-list li span{display:block;font-size:.85em;color:var(--muted)}
+html[data-stage="v4"] .extra-x-lab2 .cb-list li.pass{background:color-mix(in srgb,#15803d 10%,transparent)}html[data-stage="v4"] .extra-x-lab2 .cb-list li.pass b{color:#15803d}
+html[data-stage="v4"] .extra-x-lab2 .cb-list li.fail{background:color-mix(in srgb,var(--a4) 12%,transparent)}html[data-stage="v4"] .extra-x-lab2 .cb-list li.fail b{color:var(--a4)}
+html[data-stage="v4"] .extra-x-lab2 .cb-show{margin:8px 0 0;font-size:calc(clamp(.8rem,.95vw,1rem) * var(--fit,1));overflow-wrap:anywhere}
+html[data-stage="v4"] .extra-x-lab2 .cb-map{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:calc(clamp(.8rem,.95vw,1rem) * var(--fit,1))}
+html[data-stage="v4"] .extra-x-lab2 .cb-map li{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:8px 10px;min-width:0}
+html[data-stage="v4"] .extra-x-lab2 .cb-map li b{display:block;color:var(--act);font-size:.8em;letter-spacing:.06em;text-transform:uppercase}
+html[data-stage="v4"] .extra-x-lab2 .cb-map li code{display:block;margin-top:4px;overflow-wrap:anywhere}
+@media (max-width:1000px){html[data-stage="v4"] .extra-x-lab2 .cb-grid,html[data-stage="v4"] .extra-x-lab2 .cb-map{grid-template-columns:1fr}}
+/* code keeps its lines: the fit loop picks the largest size with no wrap and no overflow */
+html[data-stage="v4"] :is(.extra-x-lab,.extra-x-lab2) pre{white-space:pre;overflow-wrap:normal;font-size:calc(clamp(.8rem,1.05vw,1.1rem) * var(--fit,1))}
+html[data-stage="v4"] .extra-x-lab .extra-q{font-size:clamp(1.15rem,1.7vw,1.75rem);line-height:1.25}
+@media (max-width:1000px){html[data-stage="v4"] :is(.extra-x-lab,.extra-x-lab2) pre{white-space:pre-wrap;overflow-wrap:anywhere}}

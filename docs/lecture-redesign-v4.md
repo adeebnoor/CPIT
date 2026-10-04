@@ -242,3 +242,9 @@ Sources: `curriculum/learning-path/builds/`. Generator: `tools/apply_assignment_
 - Lecture data and the 20-slide grammar are unchanged; this is an extra slide.
 
 Sources: `curriculum/learning-path/builds/class/chNN.py`.
+
+**Update (5 Oct 2026): two slides instead of buttons.** At the instructor's request, the live lab no longer hides anything behind clicks. It now spans two extra slides, so a Python lecture has 25 slides (20 plus 5 extras), the maximum.
+- **Live lab 1 of 2 · read the code, predict.** The code as designed and the three tests are shown in full. The class votes on each test.
+- **Live lab 2 of 2 · Python's result and the fix.** Python's result for the code as designed, the fix (3 of 3 tests pass), the three slide-to-code cards, and the bridge to the assignment.
+
+Advancing to the next slide is the reveal. Code keeps its lines: the fit loop picks the largest font with no wrapping and no overflow. The demo sources were reformatted to one statement per line (at most 52 characters). The pace plan gives the lab one extra minute.
