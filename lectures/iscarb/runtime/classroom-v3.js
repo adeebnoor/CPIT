@@ -326,7 +326,17 @@ function renderVote(i){
 }
 // Fit v1: grow the evidence text until it fills the space the slide gives it (never shrink below the
 // designed size, never overflow). Recomputed on every render, resize and answer reveal.
+// The case file grows to fill the slide (zoom on its blocks, binary search), never past the footer.
+function fitCase(){
+ const m=$('#chapter-main');if(!m?.classList.contains('case-file'))return;
+ if(readingLayout()||matchMedia('(max-width:1000px)').matches){m.style.removeProperty('--cf');return;}
+ const fits=()=>m.scrollHeight<=m.clientHeight+1&&m.scrollWidth<=m.clientWidth+1;
+ let lo=.85,hi=1.6;m.style.setProperty('--cf','1');if(fits())lo=1;else{m.style.setProperty('--cf',String(lo));if(!fits())return;}
+ for(let k=0;k<8;k++){const x=(lo+hi)/2;m.style.setProperty('--cf',x.toFixed(3));if(fits())lo=x;else hi=x;}
+ m.style.setProperty('--cf',lo.toFixed(3));
+}
 function fitText(){
+ fitCase();
  const g=$('#chapter-main .body-grid');if(!g||!STORY||readingLayout()||matchMedia('(max-width:1000px)').matches){g?.style.removeProperty('--fit');return;}
  const boxes=[g,...g.querySelectorAll('.concept,.meaning,.visual,.approach')];
  const fits=()=>boxes.every(e=>e.scrollHeight<=e.clientHeight+1)&&g.scrollWidth<=g.clientWidth+1&&[...g.querySelectorAll('.concept b,.concept span,.points li,td,th')].every(t=>t.scrollWidth<=t.clientWidth+1);
