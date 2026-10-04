@@ -419,3 +419,6 @@ html[data-stage="v4"] .cp-steps li span{font-size:clamp(1rem,min(1.5vw,2.9vh),1.
 html[data-stage="v4"] .checkpoint-page .your-call .question-text{display:none}
 @media (max-width:1000px){html[data-stage="v4"] .cp-steps{grid-template-columns:1fr}html[data-stage="v4"] .cp-q{flex-direction:column;align-items:flex-start;gap:12px}}
 @media (min-width:1001px) and (max-height:820px){html[data-stage="v4"] .checkpoint{gap:10px}html[data-stage="v4"] .cp-text{font-size:clamp(1.4rem,2.4vw,2.3rem)}html[data-stage="v4"] .cp-steps li{padding:8px 12px}}
+
+/* Case file fills the slide: the runtime sets --cf (0.85–1.6) so text grows into empty space */
+@media (min-width:1001px){html[data-stage="v4"] body.single-canvas #app .chapter-main.case-file>:not(.heading){zoom:var(--cf,1)}}
