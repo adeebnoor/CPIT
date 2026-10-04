@@ -517,6 +517,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Cover and episode close grow to fill the slide",
    "repinned": []
+  },
+  {
+   "revision": "20261004-fill4",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Fit check uses text elements; scale resets on every slide",
+   "repinned": []
   }
  ]
 }

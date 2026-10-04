@@ -191,7 +191,7 @@ function nationalSlide(n){
  $('#live').textContent=title;
  history.replaceState(null,'','#NATIONAL-'+(isReady?'JAHEZIAH':'NELC'));
 }
-function render(){nationalIndex=null;clearInterval(thinkTimer);thinkTimer=null;const s=D.slides[index],stop=D.stations.find(x=>x.at===s.id);$('#chapter-main').className='chapter-main'+(s.fullTable?' full-table':'')+(s.skin?' skin-'+String(s.skin).replace(/[^a-z0-9-]/gi,''):'');$('#chapter-main').dataset.act=String((actOf(s)?.i??-1)+1);
+function render(){nationalIndex=null;clearInterval(thinkTimer);thinkTimer=null;const s=D.slides[index],stop=D.stations.find(x=>x.at===s.id);$('#chapter-main').style.removeProperty('--cf');$('#chapter-main').className='chapter-main'+(s.fullTable?' full-table':'')+(s.skin?' skin-'+String(s.skin).replace(/[^a-z0-9-]/gi,''):'');$('#chapter-main').dataset.act=String((actOf(s)?.i??-1)+1);
 $('#chapter-main').innerHTML=`<div class="heading"><div><p class="ey">${esc(stationMode?'CLASSROOM STATION':s.phase||'LEARN')} · CHAPTER ${D.chapter}</p><h1>${esc(s.id==='TITLE'?(STORY?STORY.episode:'A decision you can explain'):s.id==='MAP'?'Chapter mind map':s.id==='START'?(STORY?'The case file':'The story we will solve'):s.id==='END'?(STORY?'Episode close · readiness':'Readiness & next step'):s.title)}</h1></div><span class="counter">${index+1} / ${D.slides.length}</span>${paceChip()}</div>`;
 if(stationMode&&stop){renderStation(stop);updateNav();return;}
 if(voteMode!==null&&D.quiz?.[voteMode]){$('#chapter-main .heading .ey').textContent='CLASS VOTE · CHAPTER '+D.chapter;renderVote(voteMode);updateNav();return;}
@@ -330,8 +330,8 @@ function renderVote(i){
 function fitCase(){
  const m=$('#chapter-main');if(!m||!STORY||!['case-file','cold-open-page','end-page'].some(c=>m.classList.contains(c)))return;
  if(readingLayout()||matchMedia('(max-width:1000px)').matches){m.style.removeProperty('--cf');return;}
- const fits=()=>{const r=m.getBoundingClientRect(),lim=r.bottom-parseFloat(getComputedStyle(m).paddingBottom)-6;if(m.scrollWidth>m.clientWidth+1)return false;for(const c of m.querySelectorAll('.hero,.end-hero,.end-copy,.gut,.story-grid section,.story-head,.cast-card'))if(c.scrollHeight>c.clientHeight+1||c.scrollWidth>c.clientWidth+1)return false;for(const e of m.querySelectorAll('p,li,button,a,h2,h3,section,img,ol,.gut,.epilogue,.exit-ticket')){const q=e.getBoundingClientRect();if(q.width&&(q.bottom>lim||q.right>r.right+1))return false;}return true;};
- let lo=.85,hi=1.6;m.style.setProperty('--cf','1');if(fits())lo=1;else{m.style.setProperty('--cf',String(lo));if(!fits())return;}
+ const fits=()=>{const r=m.getBoundingClientRect(),lim=r.bottom-parseFloat(getComputedStyle(m).paddingBottom)-6;if(m.scrollWidth>m.clientWidth+1)return false;for(const c of m.querySelectorAll('.hero,.end-hero,.end-copy,.gut,.story-grid section,.story-head,.cast-card'))if(c.scrollHeight>c.clientHeight+1||c.scrollWidth>c.clientWidth+1)return false;for(const e of m.querySelectorAll('p,li,button,a,h2,h3,img')){const q=e.getBoundingClientRect();if(q.width&&(q.bottom>lim||q.right>r.right+1))return false;}return true;};
+ let lo=.85,hi=1.6;m.style.setProperty('--cf','1');if(fits())lo=1;else{m.style.setProperty('--cf',String(lo));if(!fits()){m.style.setProperty('--cf','1');return;}}
  for(let k=0;k<8;k++){const x=(lo+hi)/2;m.style.setProperty('--cf',x.toFixed(3));if(fits())lo=x;else hi=x;}
  m.style.setProperty('--cf',lo.toFixed(3));
 }
