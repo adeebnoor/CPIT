@@ -151,3 +151,33 @@ After teaching Chapter 12, the instructor found the aircraft example from the ea
 **Two roles of AI, named separately.**
 - *AI in the system, which we analyse.* It appears on the case file and on the AI-segment slide, as an engineering question: does the protection hold whatever the AI proposes?
 - *AI at your desk, which you practise with.* It appears on the explain-it extra slide, with three concrete uses: play the reviewer, generate test cases you then judge, and ask the two-minute check questions. "You sign the decision. AI does not."
+
+## Engineering build in Assignments 3–9 (4 Oct 2026)
+
+**Problem.** A review found that every assignment was a 180–260-word text, and the pages said "No external experiment is required". Students did not build a fault tree (Chapter 12), write and run an access test (13), or implement idempotency (17). The earlier JSON lab ran a model the course had written; the student only supplied test cases.
+
+**Change.** Each assignment from 3 to 9 now has a **Python build**. The student completes real code and writes at least three tests of their own; course checks then run against it. Python runs in the browser with Pyodide in a Web Worker, with a 10-second limit. Nothing is installed or uploaded, and the first run downloads Python once (about 10 MB).
+
+| Assignment | Build | Example check |
+|---|---|---|
+| 3 · Safety | `current` and `revised` fault trees (Event, AND, OR) with minimal cut sets | The revised tree has no single event that causes the hazard |
+| 4 · Security | `can_read(user, project)` | Another student and unassigned staff are refused |
+| 5 · Resilience | `reconcile(central, paper_log)` | A stale paper change becomes a conflict, not an overwrite |
+| 6 · Reuse | `fit`, `shortlist`, `evidence_needed` | Unknown never counts as met |
+| 7 · Components | `reserve_minutes` adapter | Precondition checked before the call; postcondition checked on the result |
+| 8 · Distributed | Idempotent `BookingService.reserve` | The outcome survives a restart |
+| 9 · Systems of systems | `display_state`, `headline` | A degraded feed is never shown as live |
+
+**Assessment.**
+- The build is graded inside the second criterion, so the total stays at 5 points.
+- The written budget falls to 120–180 words, and code is not counted.
+- The exported **BUILD RECORD** contains the code fingerprint, the student's own tests and the course checks. It is frozen with Part A.
+- Passing every check is necessary for full credit, not sufficient: the written record must use what the build showed.
+- Reference solutions and build anchors are kept privately with the instructor.
+
+**Verification.**
+- `tools/learning-path-tests/check-builds.py` (CPython) confirms that every starter fails, and that seven classic mistakes are caught by the check that names them.
+- A real-Pyodide browser run covers all seven assignments: starter, reference solution, syntax error, endless loop stopped at 10 s, and editing clearing the record.
+- The jsdom and readable-course suites use the engine's test-runner hook.
+
+Sources: `curriculum/learning-path/builds/`. Generator: `tools/apply_assignment_build.py`.
