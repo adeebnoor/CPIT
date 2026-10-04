@@ -25,8 +25,9 @@ OUT = ROOT / 'curriculum/learning-path/builds.js'
 PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'
 esc = lambda s: html.escape(str(s), quote=True)
 
-CRIT = {12: 'TRACE', 13: 'TEST', 14: 'RECOVER', 15: 'COMPARE', 16: 'CONTRACT', 17: 'FAILURE', 20: 'INTEGRATE'}
+CRIT = {0: 'PRACTICE', 12: 'TRACE', 13: 'TEST', 14: 'RECOVER', 15: 'COMPARE', 16: 'CONTRACT', 17: 'FAILURE', 20: 'INTEGRATE'}
 TASK = {
+ 0: ('Practice build: the loan rule', 'Write can_borrow(student, item) for the lab-equipment desk, and tests that try to break the rule. Not assessed: use it to learn the build before your first assignment.'),
  12: ('Build the fault tree', 'Model the hazard “the barrier closes while the zone is occupied” as two fault trees built from the case facts: current (the design as described) and revised (with your proposed control or test). Tag every event as fact, assumption or proposed. The revised tree must leave no single event that causes the hazard on its own. Use its minimal cut sets in your TRACE.'),
  13: ('Build the server-side check', 'Write can_read(user, project) so the server enforces the access rule on every request, and write tests that try to cross the boundary. At least two of your tests must be requests that are refused. Use the result in your TEST.'),
  14: ('Build the reconciliation', 'Write reconcile(central, paper_log) to bring the controlled paper log back into the central list after recovery, without losing, duplicating or overwriting changes. Use the result in your RECOVER reasoning.'),
@@ -36,6 +37,8 @@ TASK = {
  20: ('Build the honest display', 'Write display_state and headline so the dashboard shows each feed’s real state and never calls a degraded view live. Use the proposed 5-minute limit, and use the result in your review of the proposed design.'),
 }
 READING = {
+ 0: ('J. H. Saltzer and M. D. Schroeder, “The Protection of Information in Computer Systems,” <i>Proceedings of the IEEE</i> 63(9), 1975',
+      'the principle “fail-safe defaults”. Which line of can_borrow refuses when it cannot read the input?'),
  12: ('W. E. Vesely, F. F. Goldberg, N. H. Roberts and D. F. Haasl, <i>Fault Tree Handbook</i> (NUREG-0492), U.S. Nuclear Regulatory Commission, 1981',
       'the AND and OR gates and minimal cut sets. Which cut set of one event does your revised tree remove?'),
  13: ('J. H. Saltzer and M. D. Schroeder, “The Protection of Information in Computer Systems,” <i>Proceedings of the IEEE</i> 63(9), 1975',
@@ -52,6 +55,10 @@ READING = {
       'operational and managerial independence of the component systems. Which line of your code exists because no feed owner answers to the dashboard?'),
 }
 VIVA = {
+ 0: ['The lab now lends three items. Change one thing and say which test changes.',
+     'Delete your overdue test and run again. Which known bug is no longer caught?',
+     'A student record arrives with loans as the text "1". What does your code do, and why is that safe?',
+     'Students with a lab permit may borrow one extra item. Add the rule and one refusal test.'],
  12: ['The night tests now exist and the camera passed them. Change your trees: which event changes its source tag, and does any cut set change?',
       'Remove your proposed control from revised and run again. Which check fails, and what does it say about the barrier?',
       'An auditor says the stop button is enough. Show with cut_sets why it is or is not.',
@@ -118,7 +125,7 @@ function fingerprint(text){try{if(typeof crypto!=='undefined'&&crypto.subtle&&ty
 function lines(list){return list.map(function(r){return '  '+(r[1]?'✓ ':'✗ ')+r[0]+(r[1]||!r[2]?'':' · '+r[2]);}).join('\n');}
 function summary(r){if(r.error)return r.error;var t=r.tests.filter(function(x){return x[1];}).length,c=r.checks.filter(function(x){return x[1];}).length;return 'Your tests: '+t+' of '+r.tests.length+' pass · Course checks: '+c+' of '+r.checks.length+' pass';}
 function vivaFor(ch,sid){var v=SPEC[ch].viva||[],h=2166136261,i;sid=String(sid||'').trim();if(!v.length||!sid)return '';for(i=0;i<sid.length;i++){h^=sid.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return v[(h+ch)%v.length];}
-function report(ch,r,hash,sid){var q=vivaFor(ch,sid),head='BUILD RECORD · Assignment '+SPEC[ch].assignment+' (Chapter '+ch+') · '+new Date().toISOString()+'\nCode fingerprint: '+hash.slice(0,16)+' (the code above, exactly as run)\n'+(q?'Micro-viva change request (from Student ID '+String(sid).trim()+'): '+q+'\n':'');
+function report(ch,r,hash,sid){var q=vivaFor(ch,sid),head='BUILD RECORD · '+(SPEC[ch].assignment?'Assignment '+SPEC[ch].assignment+' (Chapter '+ch+')':'Practice (not assessed)')+' · '+new Date().toISOString()+'\nCode fingerprint: '+hash.slice(0,16)+' (the code above, exactly as run)\n'+(q?'Micro-viva change request (from Student ID '+String(sid).trim()+'): '+q+'\n':'');
  if(r.error)return head+'Result: '+r.error+'\n';
  return head+summary(r)+'\nYour tests:\n'+(r.tests.length?lines(r.tests):'  (none found: name them test_…)')+'\nCourse checks:\n'+lines(r.checks)+'\n'+(r.mutants?'Known bugs your tests catch (mutation test):\n'+lines(r.mutants.map(function(m){return [m[0],m[1],m[1]?'':'not caught'];}))+'\n':'');}
 function mount(ch){
@@ -158,7 +165,7 @@ def spec() -> dict:
         mut = SRC / f'ch{ch}_mutants.py'
         if mut.exists(): part['mutants'] = mut.read_text(encoding='utf-8')
         labels = check_labels(part['checks']) + (['your tests catch every known bug (mutation test)'] if 'mutants' in part else [])
-        out[ch] = dict(part, title=TASK[ch][0], criterion=CRIT[ch], assignment=number.get(ch), checkLabels=labels, viva=VIVA[ch])
+        out[ch] = dict(part, title=TASK[ch][0], criterion=CRIT[ch] if ch else 'written answers', assignment=number.get(ch), checkLabels=labels, viva=VIVA[ch])
     return out
 
 
@@ -172,8 +179,10 @@ def markup(ch: int, sp: dict) -> str:
     title, task = TASK[ch]
     checks = ''.join(f'<li>{esc(c)}</li>' for c in sp['checkLabels'])
     mono = 'font:15px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:4'
-    return (f'<section class="card" id="practical" data-build="v2"><p class="ey">PYTHON BUILD · ASSESSED IN {CRIT[ch]}</p><h2>{esc(title)}</h2><p>{esc(task)}</p>'
-            '<p>Budget about 30 minutes. Python runs in your browser: nothing to install, and nothing is uploaded. The first run downloads Python once (about 10 MB, internet needed). '
+    eyebrow = 'PYTHON BUILD · PRACTICE, NOT ASSESSED' if ch == 0 else f'PYTHON BUILD · ASSESSED IN {CRIT[ch]}'
+    return (f'<section class="card" id="practical" data-build="v2"><p class="ey">{eyebrow}</p><h2>{esc(title)}</h2><p>{esc(task)}</p>'
+            + ('' if ch == 0 else '<p class="hint">First time? Try the not-assessed practice build and a complete worked example on <a href="../../assignment-example.html">How to do an assignment</a>.</p>')
+            + '<p>Budget about 30 minutes. Python runs in your browser: nothing to install, and nothing is uploaded. The first run downloads Python once (about 10 MB, internet needed). '
             'Passing every check is necessary, not sufficient: your written record must use what the build shows.</p>'
             + (f'<p>Your own tests are tested too: the course runs them against known buggy versions of this code, and each bug must make one of your tests fail. ' if 'mutants' in sp else '<p>')
             + 'Your build record names a <b>micro-viva change request</b> chosen from your Student ID. Be ready to make that change in front of your instructor and explain which tests change and why.</p>'
@@ -187,7 +196,7 @@ def markup(ch: int, sp: dict) -> str:
             '<div class="buttons"><button type="button" id="buildRun" data-lab-mode="build">Run my tests and the course checks</button><button type="button" id="buildReset" data-lab-mode="reset">Reset to starter code</button></div>'
             '<p id="labStatus" role="status" aria-live="polite">Write your plan, then run.</p>'
             f'<pre id="buildOutput" style="white-space:pre-wrap;overflow-wrap:anywhere;{mono}"></pre>'
-            '<label for="labEvidence" class="field-label">Build record · included in your submission</label>'
+            '<label for="labEvidence" class="field-label">Build record' + ('' if ch == 0 else ' · included in your submission') + '</label>'
             '<textarea id="labEvidence" readonly style="min-height:160px" placeholder="Created when you run. Changing the code clears it until you run again."></textarea></section>')
 
 
@@ -230,6 +239,13 @@ def patch(path: Path, ch: int, sp: dict, eng: str) -> bool:
 def main() -> int:
     sp = spec(); eng = engine(sp)
     OUT.write_text(eng, encoding='utf-8')
+    ex = ROOT / 'assignment-example.html'
+    if ex.exists():
+        t = ex.read_text(encoding='utf-8'); t2, n = BUILD_INLINE.subn(lambda _: '<script>' + eng + '</script>', t, count=1)
+        t2, m = re.subn(r'<!--practice-build-->.*?<!--/practice-build-->', lambda _: '<!--practice-build-->' + markup(0, sp[0]) + '<!--/practice-build-->', t2, count=1, flags=re.S)
+        if m != 1: raise SystemExit('assignment-example.html: practice-build markers not found')
+        if n != 1: raise SystemExit('assignment-example.html: build engine block not found')
+        if t2 != t: ex.write_text(t2, encoding='utf-8')
     pub = json.loads(PUB.read_text(encoding='utf-8')); done = []
     for a in pub['assignments']:
         if a['chapter'] in CRIT:
