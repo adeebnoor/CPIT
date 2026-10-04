@@ -196,3 +196,176 @@ window.ISCARB_STORY = {
   }
  }
 };
+
+/* Real-case anchors and the two roles of AI (revision 20261004-realcase).
+   Every chapter gets one documented real incident that shows the same engineering pattern as its episode.
+   Chapter 12 is told on an aircraft, after the 737 MAX MCAS accidents. */
+(function (S) {
+  if (!S || !S.chapters) return;
+  S.desk = [
+    'Ask it to play the reviewer and attack your argument.',
+    'Ask it for test cases, then decide yourself which ones matter.',
+    'Ask it the two-minute check questions and answer aloud.'
+  ];
+  const R = {
+    12: {
+      setting: 'An aircraft maker is adding an automatic trim function to a new airliner. The flight-control computer limits each nose-down trim command to a set maximum. Layan’s team wrote the safety argument last year.',
+      client: {name: 'Tariq', role: 'Programme manager · measured on the certification date'},
+      clock: 'Certification review: Monday, 09:00',
+      coldOpen: 'Tariq is delighted. A new AI assistant proposes trim sequences that cut fuel burn, and every single command passed the limiter in the simulator. Test crews now accept its sequences without editing them. Layan opens the safety case. It argues about one command at a time.',
+      stakes: 'Certify without analysis and the jet flies on trim authority nobody has modelled. Block without evidence and a real fuel saving is lost for a reason no one can inspect.',
+      gut: {q: 'Can the new trim mode be certified on Monday?', options: ['Yes: every command passed its check', 'No: switch the AI assistant off', 'Not until the safety argument covers repeated commands']},
+      acts: [
+        'Tariq: “The software meets its specification. How can it be unsafe?” Layan has to answer that first.',
+        'Layan sketches it on the whiteboard: what happens when many small trim commands add up, and how bad could it be?',
+        'Khalid wants a requirement, not a worry: exactly what must the flight-control computer never allow?',
+        'The simulator report checks one command at a time. Layan lists the evidence that would show the protection works.',
+        'The safety case is due for sign-off. Does its argument even reach repeated trim, or a failed angle-of-attack sensor?'
+      ],
+      twist: 'Friday 16:00. A simulator trace: in repeated mode, total nose-down trim went past the modelled limit while every individual command stayed within its bound. The sequences came from the AI assistant, which had found that many small commands save fuel.',
+      epilogue: 'Monday’s review is waiting. Khalid will sign only a claim with a stated boundary and the evidence behind it. What exactly would your safety claim cover, and what would it not?',
+      practice: 'Layan asks an AI chat to play the certification reviewer and attack her argument. It helps her rehearse. The hazard analysis and the safety claim she signs are her own.',
+      hook: 'Every command the AI proposed passed its check. Total trim still crossed the line.',
+      lens: 'The jet also gets a vendor’s AI assistant that proposes trim sequences to cut fuel burn. Every command it proposed in the simulator passed the per-command limiter, and test crews now accept its sequences without editing. Hold that question: after the safety-case slides, one slide shows how this chapter’s methods apply to the assistant.',
+      aiSystem: 'An AI assistant proposes trim sequences. The question for the engineer: does the limit hold whatever the assistant proposes?',
+      real: {
+        title: 'Boeing 737 MAX · MCAS', when: '2018–2019',
+        facts: [
+          'MCAS pushed the nose down automatically when it sensed a high angle of attack. It acted on one angle-of-attack sensor at a time.',
+          'The safety analysis described at most 0.6° of tail movement per activation. In service it could move 2.5°, and it reset and activated again after each pilot correction.',
+          'The design assumed pilots would respond to an unexpected activation within about three seconds.',
+          'A faulty sensor led to two crashes: Lion Air 610 (October 2018) and Ethiopian 302 (March 2019). 346 people died, and the fleet was grounded worldwide.'
+        ],
+        map: [
+          ['Reliable but unsafe', 'MCAS did what its specification said, on a wrong sensor value.'],
+          ['Single cause in the fault tree', 'One sensor could trigger it: no redundancy on that path.'],
+          ['A bound per command is not a bound on the total', 'Each activation was limited; repeated activations drove the nose down.'],
+          ['Scope of the safety case', 'The argument covered one 0.6° activation, not repeated 2.5° ones.']
+        ],
+        lesson: 'The fix compares both sensors, activates once per event and never commands more than pilots can counter. The safety claim now matches what the system can actually do.',
+        sources: [['Seattle Times investigation (Gates & Baker, 2019)', 'https://afacwa.org/?p=1143'], ['MCAS overview', 'https://en.wikipedia.org/wiki/Maneuvering_Characteristics_Augmentation_System']]
+      }
+    },
+    13: {
+      aiSystem: 'The AI assistant reads files through its own service account. The question for the engineer: does the server check access for the person asking, or only for the assistant?',
+      real: {
+        title: 'First American Financial', when: '2019',
+        facts: [
+          'A title-insurance website served customer documents at web addresses that ended in a document number.',
+          'Changing one digit in the address opened another customer’s documents. No sign-in was needed.',
+          'About 885 million documents, dating back to 2003, were exposed: bank statements, Social Security numbers, mortgage and tax records.',
+          'KrebsOnSecurity reported it on 24 May 2019, and the company disabled access the same day.'
+        ],
+        map: [
+          ['A hidden link is not access control', 'Nobody saw the links, but the server served any number asked for.'],
+          ['Check on the server, on every path', 'The server never asked: may this requester see this document?'],
+          ['Test as another user', 'One test as a different customer would have found it in minutes.'],
+          ['Over-broad identity', 'Like the assistant’s service account in the story: access was not limited to the asker.']
+        ],
+        lesson: 'Hiding is not authorising. The server must check every request, on every path, for the person who is asking.',
+        sources: [['KrebsOnSecurity, 24 May 2019', 'https://krebsonsecurity.com/2019/05/first-american-financial-corp-leaked-hundreds-of-millions-of-title-insurance-records/']]
+      }
+    },
+    14: {
+      aiSystem: 'An AI recovery assistant gives confident instructions it has never rehearsed. The question for the engineer: what evidence shows its steps work in this outage?',
+      real: {
+        title: 'Maersk · NotPetya', when: '2017',
+        facts: [
+          'On 27 June 2017, NotPetya malware spread through the network of Maersk, one of the world’s largest shipping companies.',
+          'It wiped every domain controller, the identity service that every sign-in depends on, and made about 4,000 servers and 45,000 PCs unusable.',
+          'One domain controller in Ghana survived only because a local power cut had taken it offline. Its copy was carried to the recovery team.',
+          'Maersk rebuilt in about ten days. The attack cost it an estimated 300 million US dollars.'
+        ],
+        map: [
+          ['A running backup is not a recovered service', 'Servers could be restored, but nothing worked without sign-in.'],
+          ['Hidden shared dependency', 'Every system, recovery tools included, depended on the identity service.'],
+          ['Recognise, resist, recover, reinstate', 'Recovery hung on one copy that survived by luck.'],
+          ['Rehearse the whole service', 'A rehearsal without the identity service would have shown the gap.']
+        ],
+        lesson: 'Recovery means the essential service works again, not that a server is running. Find what everything depends on before the outage.',
+        sources: [['Redmond Magazine: “Domain controller nightmare” (2018)', 'https://redmondmag.com/blogs/scott-bekker/2018/08/domain-controller-nightmare.aspx']]
+      }
+    },
+    15: {
+      aiSystem: 'A hosted language model drafts replies, and the tested version will be retired. The question for the engineer: is a model you do not control a component you can rely on?',
+      real: {
+        title: 'Ariane 5 · Flight 501', when: '1996',
+        facts: [
+          'Ariane 5 reused the inertial reference software of Ariane 4, which had flown successfully for years.',
+          'Ariane 5 flew a faster early trajectory. A horizontal velocity value no longer fitted when converted from a 64-bit floating-point number to a 16-bit integer.',
+          'The overflow shut down both inertial reference units, which ran the same reused software.',
+          'The rocket veered off course and self-destructed 37 seconds after launch on 4 June 1996. Losses exceeded 370 million US dollars.'
+        ],
+        map: [
+          ['Reuse carries assumptions', 'The code assumed Ariane 4 flight speeds.'],
+          ['Proven elsewhere is not fit here', 'Years of success on Ariane 4 said nothing about Ariane 5.'],
+          ['Redundancy with a common cause', 'Both units ran the same code and failed together.'],
+          ['Evaluate before you commit', 'The new trajectory was never used to test the reused unit.']
+        ],
+        lesson: 'A reused component brings its old assumptions. Check them against the new system, not against its past success.',
+        sources: [['Ariane flight V88', 'https://en.wikipedia.org/wiki/Ariane_flight_V88']]
+      }
+    },
+    16: {
+      aiSystem: 'An AI forecaster accepts any number without checking its unit. The question for the engineer: what contract must hold at its input?',
+      real: {
+        title: 'Mars Climate Orbiter', when: '1999',
+        facts: [
+          'Ground software built by Lockheed Martin reported thruster impulse in pound-force seconds.',
+          'NASA’s navigation software expected newton-seconds, so every value was off by a factor of about 4.45.',
+          'The interface accepted every number without error. The spacecraft approached Mars at about 57 km instead of the planned 226 km.',
+          'It was lost on 23 September 1999. The mission cost 327.6 million US dollars.'
+        ],
+        map: [
+          ['Matching interfaces are not matching meanings', 'Number in, number out; nobody checked the unit.'],
+          ['Write the contract', 'The unit was a precondition no one enforced.'],
+          ['Test the meaning', 'One test with a known value would have shown the 4.45× gap.'],
+          ['Someone owns the seam', 'NASA: the problem was not the error, but the failure to detect it.']
+        ],
+        lesson: 'A component contract is more than a data type. State units, ranges and meaning, and test across the seam.',
+        sources: [['Mars Climate Orbiter', 'https://en.wikipedia.org/wiki/Mars_Climate_Orbiter']]
+      }
+    },
+    17: {
+      aiSystem: 'A hosted AI service drafts each confirmation, so a retry produces a different message. The question for the engineer: how do you make the side effect safe to repeat?',
+      real: {
+        title: 'AWS us-east-1 outage', when: '2021',
+        facts: [
+          'On 7 December 2021, an automated scaling activity in AWS’s main network triggered unexpected behaviour from a large number of clients on its internal network.',
+          'A latent issue stopped those clients from backing off. Their retries created a surge of connections that overwhelmed networking devices.',
+          'Many services and customer applications in the region were degraded for about seven hours.',
+          'AWS disabled the scaling activity and changed the clients’ back-off behaviour.'
+        ],
+        map: [
+          ['Retries are not free', 'Each client retried; together they made the outage worse.'],
+          ['Back off and bound retries', 'Clients that cannot back off turn a fault into a flood.'],
+          ['A timeout says little', 'A slow reply does not tell you whether the work happened.'],
+          ['Make repeats safe', 'A safe retry needs the same request identity, as in the story.']
+        ],
+        lesson: 'A retry is a new request. Bound it, back off, and make repeated requests safe to run twice.',
+        sources: [['AWS post-event summary', 'https://aws.amazon.com/message/12721/']]
+      }
+    },
+    20: {
+      aiSystem: 'One agency’s feed comes from an AI model nobody outside can inspect. The question for the engineer: what can the dashboard honestly claim about that feed?',
+      real: {
+        title: 'Northeast blackout', when: '2003',
+        facts: [
+          'On 14 August 2003, a race condition stalled the alarm system in FirstEnergy’s control room for over an hour.',
+          'Operators did not know. Their screens still showed data, but refreshed every 59 seconds instead of every 1–3 seconds.',
+          'FirstEnergy did not tell the regional coordinator (MISO) that its view of the grid was degraded.',
+          'Failures cascaded across connected systems, and about 55 million people lost power.'
+        ],
+        map: [
+          ['Stale shown as live', 'Screens looked normal while the data behind them aged.'],
+          ['No one owns the whole system', 'Neighbouring operators relied on a view they did not control.'],
+          ['Agree freshness and failure display', 'Nobody was told the view was degraded.'],
+          ['Narrow the claim', 'Knowing which feed is stale lets others act on what is still true.']
+        ],
+        lesson: 'In a system of systems, show the age of every feed and say when a view is degraded. Silence looks like normal.',
+        sources: [['Northeast blackout of 2003', 'https://en.wikipedia.org/wiki/Northeast_blackout_of_2003']]
+      }
+    }
+  };
+  for (const k in R) if (S.chapters[k]) Object.assign(S.chapters[k], R[k]);
+})(window.ISCARB_STORY);

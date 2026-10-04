@@ -129,3 +129,25 @@ The 50-minute plan absorbs the track (+7 minutes on slide 19, taken from the con
 Plan for this offering: run the pre-test before Chapter 12, export class evidence after every lecture, run micro-vivas on 3–5 students per section per assignment, run the post-test after Chapter 20, then paste the page's summary into the course report. Reference points are Hake (1998) for ⟨g⟩ and Crouch & Mazur (2001) for peer instruction. Small sections give wide uncertainty, so the N is always reported.
 
 **Grader calibration.** Anchored examples at full, partial and no credit for each criterion of Assignments 3–9 are kept privately with the instructor (not in this repository, because they reveal the assessed cases).
+
+## Real cases and the two roles of AI (4 Oct 2026)
+
+After teaching Chapter 12, the instructor found the aircraft example from the earlier lecture clearer than the abstract controller, and said the role of AI was hard to show in class.
+
+**One documented real case per chapter.** The cover shows a *REAL CASE* chip. The first extra slide after slide 19, *This really happened*, lists four verified facts, maps the lecture's ideas to the real event, and links its sources. The lecture thus has at most 24 slides.
+
+| Chapter | Real case | Same pattern as the episode |
+|---|---|---|
+| 12 Safety | Boeing 737 MAX · MCAS (2018–2019) | Each activation was bounded; repeated activations were not |
+| 13 Security | First American Financial (2019) | Changing one number in the address opened other customers' documents |
+| 14 Resilience | Maersk · NotPetya (2017) | Identity service lost; recovery relied on one surviving copy |
+| 15 Reuse | Ariane 5 · Flight 501 (1996) | Reused code kept assumptions that no longer held |
+| 16 Components | Mars Climate Orbiter (1999) | Interfaces matched; units did not |
+| 17 Distributed | AWS us-east-1 (2021) | Retries without back-off amplified a fault |
+| 20 Systems of systems | Northeast blackout (2003) | Stale data looked live, and neighbours were not told |
+
+**Chapter 12 is told on an aircraft.** An automatic trim function, a per-command limiter, and an AI assistant that proposes trim sequences. The pinned case text (a controller that limits each actuation command) is unchanged; only the story layer moved from a plant to an airliner.
+
+**Two roles of AI, named separately.**
+- *AI in the system, which we analyse.* It appears on the case file and on the AI-segment slide, as an engineering question: does the protection hold whatever the AI proposes?
+- *AI at your desk, which you practise with.* It appears on the explain-it extra slide, with three concrete uses: play the reviewer, generate test cases you then judge, and ask the two-minute check questions. "You sign the decision. AI does not."
