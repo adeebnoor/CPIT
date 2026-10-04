@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-04  
-**Commit ID:** 788cebba-6523-4ff3-8dd8-d168ea205b96  
-**Part A committed:** 2026-10-04T21:28:10.262Z  
-**STRESS revealed:** 2026-10-04T21:28:10.343Z
+**Commit ID:** b534f38a-0ce2-4332-b957-149768825a62  
+**Part A committed:** 2026-10-04T22:06:05.625Z  
+**STRESS revealed:** 2026-10-04T22:06:05.638Z
 
 ## Scenario
 A fictional university portal has student and staff roles. Students should access only their own project files; staff should access only the groups assigned to them. The interface hides other students’ files. A developer reports that every ordinary upload/download test passed. The API receives a project identifier in the request, but the brief contains no cross-user authorization test. Log retention is configured, but nobody has reviewed a sample for sensitive content. You recommend release, restricted access, or hold.
@@ -42,7 +42,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-04T21:28:10.096Z
+BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-04T22:06:05.459Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove your malformed-input handling and run again. Which known bug is no longer caught, and why?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

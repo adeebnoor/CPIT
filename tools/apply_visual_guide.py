@@ -20,11 +20,11 @@ STEPS = [
     ('🔑', 'Open', 'Open it with your Student ID, in the same browser every time', 'افتح الواجب برقمك الجامعي، ومن نفس المتصفح دائماً', '1 min', 'pic-open'),
     ('✍️', 'Part A', 'FIT · artifact · BOUND · ACT + EVIDENCE, 120–180 words', 'اكتب حكمك الأول: المشكلة، المهمة، الحدود، القرار والدليل', '20 min', 'pic-parta'),
     ('🐍', 'Build', 'Plan, complete the code, write 3+ tests, Run', 'اكتب الخطة، أكمل الكود، 3 اختبارات على الأقل، ثم Run', '30 min', 'pic-build'),
-    ('🔒', 'Commit', 'Review & commit Part A. This is not submission', 'ثبّت الجزء A، وهذا ليس تسليماً', '1 min', 'pic-commit'),
-    ('⬆️', 'Blackboard', 'Save the Part A PDF and upload it', 'احفظ PDF الجزء A وارفعه في Blackboard', '3 min', 'pic-blackboard'),
-    ('📋', 'New evidence', 'Copy ALL of it from Blackboard, paste, Check and continue', 'انسخ الدليل الجديد كاملاً من Blackboard والصقه', '2 min', 'pic-stress'),
+    ('🔒', 'Commit', 'Review & commit Part A: it becomes read-only', 'ثبّت الجزء A: يصبح للقراءة فقط', '1 min', 'pic-commit'),
+    ('📋', 'New evidence', 'It opens on the page right after you commit. Read it', 'يظهر الدليل الجديد في الصفحة مباشرة بعد التثبيت: اقرأه', '2 min', 'pic-stress'),
     ('🔄', 'Part B', 'Boundary status, then RETAIN / REVISE / REPLACE and why', 'هل تغيّر قرارك؟ اختر وبرّر، ثم اكتب القرار النهائي', '10 min', 'pic-refit'),
-    ('✅', 'Submit', 'Declare AI, sign, Print / PDF, submit in Blackboard', 'صرّح بالذكاء الاصطناعي، وقّع، صدّر PDF وسلّمه في Blackboard', '3 min', 'pic-submit'),
+    ('🖊️', 'Sign', 'Declare AI use, type your name, tick the box', 'صرّح بالذكاء الاصطناعي، اكتب اسمك، وضع العلامة', '2 min', 'pic-submit'),
+    ('✅', 'Submit', 'Print / PDF, then upload the PDF in Blackboard', 'صدّر PDF وارفعه في Blackboard', '3 min', 'pic-pdf'),
 ]
 
 FIGS = [
@@ -40,11 +40,11 @@ FIGS = [
      [('Your micro-viva change request', 'طلب التعديل الخاص بك للمقابلة القصيرة'), ('Your own tests: ✗ means fix code or test', 'اختباراتك: ✗ تعني أصلح الكود أو الاختبار'), ('Course checks: the rule from the task', 'فحوصات المقرر: قواعد الواجب'), ('“Not caught”: add a test for this bug', '«not caught»: أضف اختباراً يكشف هذا الخطأ')]),
     ('pic-commit', 'step-commit', 'Step 5 · Commit Part A', 'الخطوة 5 · ثبّت الجزء A',
      [('Review & commit Part A: freezes Part A, it is not submission', 'Review & commit يثبّت الجزء A، وهو ليس تسليماً')]),
-    ('pic-stress', 'step-stress', 'Steps 6–7 · Blackboard, then the new evidence', 'الخطوتان 6–7 · Blackboard ثم الدليل الجديد',
-     [('Save Part A as PDF, upload it to “Assignment N · Part A”', 'احفظ الجزء A كـ PDF وارفعه في Blackboard'), ('Paste the WHOLE “New evidence” item', 'الصق نص «New evidence» كاملاً'), ('Check and continue to Part B', 'اضغط Check and continue')]),
-    ('pic-refit', 'step-refit', 'Step 8 · Part B: REFIT', 'الخطوة 8 · الجزء B: المراجعة',
+    ('pic-stress', 'step-stress', 'Step 6 · The new evidence opens on the page', 'الخطوة 6 · الدليل الجديد يظهر في الصفحة',
+     [('Read the new evidence: it appears right after you commit', 'اقرأ الدليل الجديد: يظهر مباشرة بعد التثبيت'), ('Part B starts here, on the same page', 'الجزء B يبدأ هنا في نفس الصفحة')]),
+    ('pic-refit', 'step-refit', 'Step 7 · Part B: REFIT', 'الخطوة 7 · الجزء B: المراجعة',
      [('What happened to your boundary?', 'ماذا حدث لحدود حكمك؟'), ('RETAIN, REVISE or REPLACE', 'أبقِ، عدّل، أو استبدل القرار'), ('Defend the choice from the new evidence', 'برّر اختيارك من الدليل الجديد'), ('The final decision another person can act on', 'القرار النهائي الذي ينفّذه غيرك')]),
-    ('pic-submit', 'step-submit', 'Step 9 · Declare AI and sign', 'الخطوة 9 · التصريح والتوقيع',
+    ('pic-submit', 'step-submit', 'Step 8 · Declare AI and sign', 'الخطوة 8 · التصريح والتوقيع',
      [('AI use, or “No AI used.”', 'استخدام الذكاء الاصطناعي، أو «No AI used.»'), ('Type your name', 'اكتب اسمك'), ('Tick: you reviewed it and take responsibility', 'ضع علامة: راجعت العمل وأتحمّل مسؤوليته')]),
     ('pic-pdf', 'step-pdf', 'Step 9 · Export and submit', 'الخطوة 9 · صدّر وسلّم',
      [('Print / PDF, check the file, upload it in Blackboard', 'Print / PDF، راجع الملف، ثم ارفعه في Blackboard')], 4),
@@ -95,11 +95,9 @@ def figures() -> str:
         alt = f'{en}: screenshot of the assignment page with numbered markers. ' + '; '.join(f'{start + k}: {e}' for k, (e, _) in enumerate(legend))
         out.append(f'<figure class="vs-fig" id="{fid}"><h3>{esc(en)}</h3><span class="vs-ar-h" lang="ar" dir="rtl">{esc(ar)}</span>'
                    f'<img src="assets/guide/{img}.webp" width="{w}" height="{h}" loading="lazy" alt="{esc(alt)}"><ol class="vs-legend">{lis}</ol></figure>')
-        if fid == 'pic-commit':
-            out.append('<figure class="vs-fig" id="pic-blackboard"><h3>Step 6 · In Blackboard</h3><span class="vs-ar-h" lang="ar" dir="rtl">الخطوة 6 · في Blackboard</span>'
-                       '<div class="vs-bb"><div><b>① Assignment N · Part A (committed record)</b><br>Upload the Part A PDF here.<br><span lang="ar" dir="rtl">ارفع ملف PDF الجزء A هنا.</span></div>'
-                       '<div><b>② Assignment N · New evidence</b><br>Opens only after your upload. Copy ALL of its text.<br><span lang="ar" dir="rtl">يظهر بعد الرفع فقط. انسخ النص كاملاً.</span></div>'
-                       '<div><b>③ Assignment N · final submission</b><br>At the end, upload the final PDF here.<br><span lang="ar" dir="rtl">في النهاية ارفع ملف PDF النهائي هنا.</span></div></div></figure>')
+        if fid == 'pic-pdf':
+            out.append('<figure class="vs-fig" id="pic-blackboard"><h3>Step 9 · In Blackboard: one item</h3><span class="vs-ar-h" lang="ar" dir="rtl">الخطوة 9 · في Blackboard: خانة واحدة فقط</span>'
+                       '<div class="vs-bb"><div><b>Assignment N · Chapter X</b><br>Upload your final PDF here, before the deadline. That is all.<br><span lang="ar" dir="rtl">ارفع ملف PDF النهائي هنا قبل الموعد. هذا كل شيء.</span></div></div></figure>')
     return ''.join(out)
 
 
