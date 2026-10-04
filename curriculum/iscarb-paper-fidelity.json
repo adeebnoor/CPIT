@@ -612,6 +612,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Live lab as two visible slides: code and tests, then result and fix; no clicks",
    "repinned": []
+  },
+  {
+   "revision": "20261005-count25",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Slide counter and index show all 25 slides; extras follow slide 19 in every view",
+   "repinned": []
   }
  ]
 }
