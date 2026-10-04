@@ -605,6 +605,13 @@
     "assignment 17",
     "assignment 20"
    ]
+  },
+  {
+   "revision": "20261005-lab2",
+   "date": "2026-10-04",
+   "base_release": "20260926-genai-v12",
+   "summary": "Live lab as two visible slides: code and tests, then result and fix; no clicks",
+   "repinned": []
   }
  ]
 }
