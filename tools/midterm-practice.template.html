@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html data-iscarb-standalone="1" data-theme="light" lang="en"><head><meta charset="utf-8"><meta content="width=device-width,initial-scale=1" name="viewport"><meta content="#006b62" name="theme-color"><meta content="CPIT-455 midterm practice: Chapters 10–14, 26 questions, 30 marks, 90 minutes, self-graded with explanations in English and Arabic." name="description"><title>Midterm practice · iSCARB</title><link href="iscarb-hub.css?v=20260928-campus-v3" rel="stylesheet"><link rel="stylesheet" href="course-design.css?v=20260928-campus-v3"><link rel="stylesheet" href="course-shell.css?v=20260928-campus-v3"><script src="course-shell.js?v=20260928-campus-v3" defer></script><script>try{document.documentElement.dataset.theme=localStorage.getItem('iscarb-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}</script>
+<style>
+.mt{max-width:56rem;margin-inline:auto}
+.mt .ar{direction:rtl;text-align:right;font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic","Geeza Pro",sans-serif;color:var(--muted);line-height:1.9}
+.mt h1 .ar,.mt h2 .ar{display:block;font-size:.7em;font-weight:600;margin-top:.15em}
+.mt .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:10px;margin:14px 0}
+.mt .fact{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2)}
+.mt .fact b{display:block;font-size:1.5rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.mt .fact span{display:block;font-size:.85rem;color:var(--muted)}
+.mt .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 20px;font:inherit;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.mt .btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.mt .btn:focus-visible,.mt select:focus-visible,.mt input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.mt .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.mt .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:14px 0;box-shadow:var(--shadow)}
+.mt .clock{font:700 1.35rem/1 ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--ink)}
+.mt .clock.low{color:var(--red)}
+.mt .count{color:var(--muted);font-size:.92rem}
+.mt .confirm{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:2px solid var(--gold);border-radius:12px;padding:12px 16px;margin:10px 0;background:var(--panel)}
+.mt fieldset.q{min-width:0;max-width:100%;box-sizing:border-box}
+.mt .opts .txt,.mt .stem{overflow-wrap:anywhere}
+.mt .q{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:90px}
+.mt .qh{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;align-items:baseline;margin-bottom:8px}
+.mt .qn{font-weight:800;color:var(--accent)}
+.mt .marks{font-size:.82rem;color:var(--muted)}
+.mt .stem{margin:.3em 0;font-size:1.04rem}
+.mt .stem.ar{font-size:1rem;margin-bottom:.8em}
+.mt figure.fig{margin:6px 0 12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;padding:10px}
+.mt figure.fig img{display:block;width:100%;max-height:330px;object-fit:contain;margin-inline:auto}
+.mt pre.code{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;font:400 .88rem/1.55 ui-monospace,Menlo,Consolas,monospace;margin:6px 0 12px;white-space:pre}
+.mt code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+.mt .opts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mt .opts label{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.mt .opts label:hover{border-color:var(--accent)}
+.mt .opts input{margin-top:.35em;flex:none;accent-color:var(--accent);width:1.05rem;height:1.05rem}
+.mt .opts .txt{min-width:0;flex:1}
+.mt .opts .txt .ar{display:block;font-size:.93rem;margin-top:2px}
+.mt .opts label.sel{border-color:var(--accent);background:var(--panel2)}
+.mt .done .opts label{cursor:default}
+.mt .opts label.right{border-color:var(--green);background:color-mix(in srgb,var(--green) 12%,var(--panel))}
+.mt .opts label.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 10%,var(--panel))}
+.mt .tagl{display:inline-block;font-size:.75rem;font-weight:800;border-radius:999px;padding:1px 10px;margin-inline-start:6px;vertical-align:middle}
+.mt .tagl.ok{color:var(--green);border:1.5px solid var(--green)}
+.mt .tagl.no{color:var(--red);border:1.5px solid var(--red)}
+.mt .res{font-weight:800;border-radius:999px;padding:2px 12px;font-size:.85rem}
+.mt .res.ok{color:var(--green);border:1.5px solid var(--green)}
+.mt .res.no{color:var(--red);border:1.5px solid var(--red)}
+.mt .res.skip{color:var(--gold);border:1.5px solid var(--gold)}
+.mt .fb{margin-top:12px;display:grid;gap:8px}
+.mt .fb div{border-inline-start:4px solid var(--green);background:var(--panel2);border-radius:8px;padding:8px 12px}
+.mt .fb div.bad{border-color:var(--red)}
+.mt .fb b{display:block;font-size:.8rem;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.mt .fb p{margin:.2em 0}
+.mt .case{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--panel2);margin:8px 0 12px}
+.mt .case ul{margin:.3em 0;padding-inline-start:1.2em}
+.mt .case li{margin:.35em 0}
+.mt .pool{list-style:none;margin:8px 0 14px;padding:0;display:grid;gap:8px}
+.mt .pool li{border:1.5px dashed var(--line);border-radius:10px;padding:8px 12px}
+.mt .pool li b{color:var(--accent);margin-inline-end:6px}
+.mt .slot{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+.mt .slot label{display:block;font-weight:700;margin-bottom:6px}
+.mt .slot select{width:100%;max-width:100%;padding:8px;border-radius:8px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);font:inherit}
+.mt .slot.right{border-color:var(--green)}
+.mt .slot.wrong{border-color:var(--red)}
+.mt .score{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline}
+.mt .score .big{font-size:2.6rem;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.mt table.t{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.mt table.t th,.mt table.t td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left}
+.mt .tw{overflow-x:auto}
+.mt .meter{height:8px;border-radius:99px;background:var(--panel2);overflow:hidden;min-width:5rem}
+.mt .meter i{display:block;height:100%;background:var(--accent)}
+.mt .jump{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mt .jump a{min-width:2.2em;text-align:center;border-radius:8px;padding:4px 6px;font-weight:700;text-decoration:none;border:1.5px solid var(--line)}
+.mt .jump a.ok{border-color:var(--green);color:var(--green)}
+.mt .jump a.no{border-color:var(--red);color:var(--red)}
+@media (prefers-reduced-motion:no-preference){.mt .q{transition:border-color .2s}}
+@media (max-width:560px){.mt .q{padding:14px 12px}.mt .clock{font-size:1.15rem}}
+</style></head><body class="course-page" id="top"><a class="skip" href="#main">Skip to content</a><header class="site-header" data-surface="document"><div class="site-masthead">
+<a class="site-brand" href="iscarb.html"><img src="assets/fcit-kau-logo.png" width="48" height="48" alt="FCIT, King Abdulaziz University"><span><strong>iSCARB</strong><small>CPIT-455 · King Abdulaziz University</small></span></a>
+<div class="site-utilities"><a class="profile-link" href="https://adeebnoor.github.io/">About &amp; contact <span aria-hidden="true">↗</span></a><button class="theme" id="themeBtn" type="button">Dark mode</button></div>
+<button class="nav-toggle" id="navToggle" type="button" aria-controls="courseNav" aria-expanded="false">Menu <span aria-hidden="true">☰</span></button></div>
+<nav class="site-nav" id="courseNav" aria-label="Course navigation"><a href="iscarb.html">Learning path</a><a href="student-guide.html">How to study</a><a href="course-resources.html">Course &amp; sources</a><a href="nelc-alignment.html">Saudi alignment</a><a href="methodology.html">For educators</a><a href="https://qeeem.com/" id="topQeeem" target="_blank" rel="noopener">Evaluation <span aria-hidden="true">↗</span></a></nav></header>
+<main class="wrap" id="main"><div class="mt">
+
+<section class="panel" id="intro"><p class="ey">CPIT-455 · PRACTICE</p>
+<h1>Midterm practice: Chapters 10–14<span class="ar">تدريب على الاختبار الفصلي: الفصول 10 إلى 14</span></h1>
+<p>This practice test has the same shape as the online midterm. Try it as many times as you like. When you submit, every answer is marked and explained in English and Arabic.</p>
+<p class="ar">هذا الاختبار التدريبي بنفس شكل الاختبار الفصلي الإلكتروني. جرّبه كما تشاء. عند التسليم تُصحح كل إجابة ويُشرح سبب صحتها أو خطئها بالإنجليزي والعربي.</p>
+<div class="facts"><div class="fact"><b>26</b><span>questions · سؤالاً</span></div><div class="fact"><b>30</b><span>marks · درجة</span></div><div class="fact"><b>90</b><span>minutes · دقيقة</span></div><div class="fact"><b>10–14</b><span>chapters · الفصول</span></div></div>
+<ul><li>Questions 1–25 are multiple choice, 1 mark each. Question 26 is a 5-mark puzzle: build one dependable system from pieces.<div class="ar">الأسئلة 1 إلى 25 اختيار من متعدد، لكل سؤال درجة. السؤال 26 بزل من 5 درجات: تبني نظاماً موثوقاً من قطع.</div></li>
+<li>The timer runs for 90 minutes. When it reaches zero, your answers are submitted.<div class="ar">المؤقت 90 دقيقة. عندما يصل للصفر تُسلَّم إجاباتك تلقائياً.</div></li>
+<li>Practice only: this is not graded, and nothing is sent to your instructor. Your answers and scores stay on this device.<div class="ar">للتدريب فقط: لا تُحسب لها درجة ولا يُرسل شيء للأستاذ. إجاباتك ونتائجك تبقى على جهازك.</div></li>
+<li>The real midterm uses different questions. Use the explanations to find what to review.<div class="ar">الاختبار الحقيقي بأسئلة مختلفة. استخدم الشرح لتعرف ما تحتاج مراجعته.</div></li></ul>
+<div class="row"><button class="btn" id="startBtn" type="button">Start a new attempt · ابدأ محاولة جديدة</button><button class="btn ghost" id="resumeBtn" type="button" hidden>Continue my attempt · أكمل محاولتي</button></div>
+<div id="history" hidden><h2>Your attempts<span class="ar">محاولاتك</span></h2><div class="tw"><table class="t"><thead><tr><th>#</th><th>Date · التاريخ</th><th>Score · الدرجة</th><th>Time · الوقت</th></tr></thead><tbody id="histBody"></tbody></table></div></div>
+</section>
+
+<section id="exam" hidden>
+<div class="bar" role="region" aria-label="Attempt status"><div class="row"><span class="clock" id="clock" aria-live="off">90:00</span><span class="count" id="count">0 / 26 answered</span></div><div class="row"><button class="btn" id="submitBtn" type="button">Submit · تسليم</button></div></div>
+<div class="confirm" id="confirm" hidden><span id="confirmMsg"></span><button class="btn" id="confirmYes" type="button">Submit now · سلّم الآن</button><button class="btn ghost" id="confirmNo" type="button">Keep working · أكمل</button></div>
+<div id="results" hidden></div>
+<form id="paper" novalidate></form>
+<div class="row" id="endRow" hidden><button class="btn" id="againBtn" type="button">Start a new attempt · ابدأ محاولة جديدة</button><a class="btn ghost" href="#top">Back to top · للأعلى</a></div>
+</section>
+
+<template id="puzzleSvg"><!--PUZZLE-SVG--></template>
+</div>
+<script>
+(()=>{
+const D=/*DATA*/null;
+const KEY='cpit455-midterm-practice-v1', LIMIT=90*60*1000, TOTAL=30, NQ=26;
+const CH={10:'Ch10 Dependable systems',11:'Ch11 Reliability engineering',12:'Ch12 Safety engineering',13:'Ch13 Security engineering',14:'Ch14 Resilience engineering'};
+const $=id=>document.getElementById(id);
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}};
+let S=load(); S.history=S.history||[];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const shuffle=n=>{const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+let timer=null, submitted=false;
+
+function intro(){
+  $('intro').hidden=false; $('exam').hidden=true;
+  $('resumeBtn').hidden=!(S.cur&&!S.cur.done&&Date.now()-S.cur.start<LIMIT);
+  if(S.history.length){$('history').hidden=false;$('histBody').innerHTML=S.history.map((h,i)=>`<tr><td>${i+1}</td><td>${new Date(h.date).toLocaleString()}</td><td><b>${h.score}</b> / ${TOTAL}</td><td>${h.mins} min</td></tr>`).join('');}
+}
+
+function start(resume){
+  if(!resume){S.cur={start:Date.now(),perm:D.items.map(q=>shuffle(q.opts.length)),pieces:shuffle(D.puzzle.pieces.length),ans:{},slots:{},done:false};save();}
+  submitted=false; $('intro').hidden=true; $('exam').hidden=false; $('results').hidden=true; $('endRow').hidden=true; $('confirm').hidden=true; $('submitBtn').hidden=false;
+  render(); tick(); clearInterval(timer); timer=setInterval(tick,1000); window.scrollTo(0,0);
+}
+
+function optionHTML(qi,q){
+  return '<ul class="opts">'+S.cur.perm[qi].map(oi=>{const o=q.opts[oi];const id=`q${qi}o${oi}`;return `<li><label for="${id}" data-o="${oi}"><input type="radio" id="${id}" name="q${qi}" value="${oi}"${S.cur.ans[qi]===oi?' checked':''}><span class="txt"><span>${o[0]}</span><span class="ar" lang="ar">${o[1]}</span></span></label></li>`;}).join('')+'</ul>';
+}
+
+function render(){
+  const P=D.puzzle; let h='';
+  D.items.forEach((q,qi)=>{
+    h+=`<fieldset class="q" id="q${qi+1}"><legend class="qh"><span class="qn">Question ${qi+1}</span> <span class="marks">1 mark · درجة واحدة</span></legend>`
+     +(q.fig?`<figure class="fig"><img src="${q.fig[0]}" alt="${q.fig[1]}" loading="lazy"></figure>`:'')
+     +(q.code?`<pre class="code">${q.code}</pre>`:'')
+     +`<p class="stem">${q.en}</p><p class="stem ar" lang="ar">${q.ar}</p>${optionHTML(qi,q)}<div class="fb" id="fb${qi}" hidden></div></fieldset>`;
+  });
+  h+=`<fieldset class="q" id="q26"><legend class="qh"><span class="qn">Question 26 · Puzzle</span> <span class="marks">5 marks · 5 درجات</span></legend>
+   <p class="stem"><b>Build a dependable ambulance dispatch system.</b> A city is rebuilding its ambulance dispatch system. Read the facts, then place one piece in each slot. Each piece fits one slot at most, and the five pieces must work together: a piece that fits its slot but breaks a fact, or another slot, is wrong. Five pieces are left over. 1 mark per correct slot.</p>
+   <p class="stem ar" lang="ar"><b>ابنِ نظام إرسال إسعاف موثوقاً.</b> مدينة تعيد بناء نظام إرسال الإسعاف. اقرأ الحقائق، ثم ضع قطعة واحدة في كل خانة. كل قطعة تناسب خانة واحدة على الأكثر، والقطع الخمس يجب أن تعمل معاً: القطعة التي تناسب خانتها لكنها تكسر حقيقة أو خانة أخرى خاطئة. ستبقى خمس قطع زائدة. لكل خانة صحيحة درجة.</p>
+   <div class="case"><ul>${P.facts.map(f=>`<li><b>${f[0]}</b> ${f[1]}<div class="ar" lang="ar">${f[2]}</div></li>`).join('')}</ul></div>
+   <figure class="fig">${$('puzzleSvg').innerHTML}</figure>
+   <p><b>Pieces · القطع</b></p><ul class="pool">${S.cur.pieces.map(pi=>{const p=P.pieces[pi];return `<li><b>${p.id}</b>${p.en}<div class="ar" lang="ar">${p.ar}</div></li>`;}).join('')}</ul>
+   ${P.slots.map(s=>`<div class="slot" id="slot${s.id}"><label for="sel${s.id}">Slot ${s.id}: ${s.en} <span class="ar" lang="ar" style="display:inline">· ${s.ar}</span></label><select id="sel${s.id}" data-slot="${s.id}"><option value="">Choose a piece · اختر قطعة</option>${[...P.pieces].sort((a,b)=>+a.id.slice(1)-+b.id.slice(1)).map(p=>`<option value="${p.id}"${S.cur.slots[s.id]===p.id?' selected':''}>${p.id}: ${p.en.length>70?p.en.slice(0,68)+'…':p.en}</option>`).join('')}</select><div class="fb" id="fbs${s.id}" hidden></div></div>`).join('')}
+   </fieldset>`;
+  $('paper').innerHTML=h; $('paper').classList.remove('done'); mark(); count();
+}
+
+function mark(){document.querySelectorAll('.opts label').forEach(l=>l.classList.toggle('sel',l.querySelector('input').checked));}
+function count(){const n=Object.keys(S.cur.ans).length+(Object.values(S.cur.slots).filter(Boolean).length===5?1:0);$('count').textContent=`${n} / ${NQ} answered · تمت الإجابة`;return n;}
+
+$('paper').addEventListener('change',e=>{
+  if(submitted||!S.cur)return; const t=e.target;
+  if(t.type==='radio'){S.cur.ans[+t.name.slice(1)]=+t.value;mark();}
+  if(t.tagName==='SELECT'){S.cur.slots[t.dataset.slot]=t.value;}
+  save(); count();
+});
+
+function tick(){
+  if(!S.cur||submitted)return; const left=Math.max(0,S.cur.start+LIMIT-Date.now());
+  const m=Math.floor(left/60000), s=Math.floor(left%60000/1000);
+  $('clock').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; $('clock').classList.toggle('low',left<5*60000);
+  if(left<=0){finish(true);}
+}
+
+$('submitBtn').onclick=()=>{const left=NQ-count();$('confirmMsg').textContent=left?`${left} question(s) not answered. Submit anyway? · لم تُجب عن ${left} سؤال. هل تسلّم؟`:'Submit your attempt? · هل تسلّم محاولتك؟';$('confirm').hidden=false;$('confirmYes').focus();};
+$('confirmNo').onclick=()=>{$('confirm').hidden=true;$('submitBtn').focus();};
+$('confirmYes').onclick=()=>finish(false);
+
+function fbBlock(cls,title,en,ar){return `<div class="${cls}"><b>${title}</b><p>${en}</p><p class="ar" lang="ar">${ar}</p></div>`;}
+
+function finish(timeUp){
+  if(submitted)return; submitted=true; clearInterval(timer);
+  $('confirm').hidden=true; $('submitBtn').hidden=true; $('paper').classList.add('done');
+  document.querySelectorAll('#paper input,#paper select').forEach(x=>x.disabled=true);
+  let score=0; const per={10:0,11:0,12:0,13:0,14:0}; const status=[];
+  D.items.forEach((q,qi)=>{
+    const a=S.cur.ans[qi], ok=a===q.key; if(ok){score++;per[q.ch]++;} status.push(ok?'ok':(a===undefined?'skip':'no'));
+    document.querySelectorAll(`#q${qi+1} label`).forEach(l=>{const o=+l.dataset.o;if(o===q.key){l.classList.add('right');l.querySelector('.txt').insertAdjacentHTML('beforeend','<span class="tagl ok">Correct answer · الإجابة الصحيحة</span>');}else if(o===a){l.classList.add('wrong');l.querySelector('.txt').insertAdjacentHTML('beforeend','<span class="tagl no">Your answer · إجابتك</span>');}});
+    const head=document.querySelector(`#q${qi+1} .qh`); head.insertAdjacentHTML('beforeend',ok?'<span class="res ok">✓ Correct · صحيحة</span>':a===undefined?'<span class="res skip">Not answered · بلا إجابة</span>':'<span class="res no">✗ Incorrect · خاطئة</span>');
+    let f=fbBlock('','Why this is the answer · لماذا هذه الإجابة',q.why[0],q.why[1]);
+    if(!ok&&a!==undefined&&q.wrong[a])f=fbBlock('bad','Why your answer is wrong · لماذا إجابتك خاطئة',q.wrong[a][0],q.wrong[a][1])+f;
+    const fb=$('fb'+qi); fb.innerHTML=f; fb.hidden=false;
+  });
+  const P=D.puzzle; let pz=0;
+  P.slots.forEach(s=>{
+    const pid=S.cur.slots[s.id], piece=P.pieces.find(p=>p.id===pid), right=P.pieces.find(p=>p.slot===s.id), ok=pid===right.id;
+    if(ok){pz++;score++;per[s.ch]++;}
+    $('slot'+s.id).classList.add(ok?'right':'wrong');
+    let f='';
+    if(!ok&&piece){f+=piece.slot?fbBlock('bad',`Why ${piece.id} is wrong here · لماذا ${piece.id} خاطئة هنا`,`${piece.id} belongs in slot ${piece.slot}.`,`القطعة ${piece.id} مكانها الخانة ${piece.slot}.`):fbBlock('bad',`Why ${piece.id} is wrong · لماذا ${piece.id} خاطئة`,piece.no[0],piece.no[1]);}
+    f+=fbBlock('',`${ok?'✓ Correct':'Correct piece'}: ${right.id} · ${ok?'صحيحة':'القطعة الصحيحة'}`,`${right.en} ${s.why[0]}`,`${right.ar} ${s.why[1]}`);
+    const fb=$('fbs'+s.id); fb.innerHTML=f; fb.hidden=false;
+  });
+  status.push(pz===5?'ok':pz?'part':'no');
+  document.querySelector('#q26 .qh').insertAdjacentHTML('beforeend',`<span class="res ${pz===5?'ok':'no'}">${pz} / 5</span>`);
+  const mins=Math.max(1,Math.round((Date.now()-S.cur.start)/60000));
+  S.cur.done=true; S.history.push({date:Date.now(),score,mins:Math.min(mins,90)}); save();
+  const pct=Math.round(score/TOTAL*100);
+  $('results').innerHTML=`<section class="panel"><h2>Your result<span class="ar">نتيجتك</span></h2>${timeUp?'<p><b>Time is up. Your answers were submitted.</b></p><p class="ar">انتهى الوقت وسُلِّمت إجاباتك.</p>':''}
+   <div class="score"><span class="big">${score} / ${TOTAL}</span><span>${pct}% · ${Math.min(mins,90)} min</span></div>
+   <div class="tw"><table class="t"><thead><tr><th>Chapter · الفصل</th><th>Score · الدرجة</th><th></th></tr></thead><tbody>${Object.keys(per).map(c=>`<tr><td>${CH[c]}</td><td>${per[c]} / 6</td><td><div class="meter"><i style="width:${Math.round(per[c]/6*100)}%"></i></div></td></tr>`).join('')}</tbody></table></div>
+   <p>Each chapter is worth 6 marks. Read the explanation under every question, then open the chapter where you lost the most marks.</p><p class="ar">كل فصل له 6 درجات. اقرأ الشرح تحت كل سؤال، ثم راجع الفصل الذي فقدت فيه أكثر الدرجات.</p>
+   <p><b>Go to a question · انتقل إلى سؤال</b></p><div class="jump">${status.map((s,i)=>`<a class="${s==='ok'?'ok':'no'}" href="${'#'}q${i+1}">${i+1}</a>`).join('')}</div></section>`;
+  $('results').hidden=false; $('endRow').hidden=false; $('results').scrollIntoView(); $('results').querySelector('h2').setAttribute('tabindex','-1'); $('results').querySelector('h2').focus({preventScroll:true});
+}
+
+$('startBtn').onclick=()=>start(false);
+$('resumeBtn').onclick=()=>start(true);
+$('againBtn').onclick=()=>{S.cur=null;save();start(false);};
+intro();
+})();
+</script>
+</main><footer class="site-footer"><div class="site-footer-inner"><div><a class="footer-brand" href="iscarb.html">iSCARB</a><p>Software Engineering II · CPIT-455<br>Faculty of Computing &amp; Information Technology<br>King Abdulaziz University · Jeddah, Saudi Arabia</p></div><div><h2>Explore the course</h2><a href="iscarb.html">Learning path</a><a href="student-guide.html">Student guide</a><a href="course-resources.html">Course &amp; sources</a></div><div><h2>Practice</h2><a href="midterm-practice.html">Midterm practice</a><a href="assignment-example.html">How to do an assignment</a></div><div><h2>Professor Adeeb Noor</h2><p>Course instructor &amp; iSCARB developer</p><a class="profile-link" href="https://adeebnoor.github.io/">Profile, research &amp; contact ↗</a><a href="mailto:arnoor@kau.edu.sa">arnoor@kau.edu.sa</a></div></div><div class="site-footer-bottom"><span>Learning resources · Human judgment · Evidence</span><a href="#top">Back to top ↑</a></div></footer></body></html>
