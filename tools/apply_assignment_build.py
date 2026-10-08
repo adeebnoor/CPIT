@@ -117,10 +117,11 @@ function workerSource(){return "self.onmessage=async function(e){var m=e.data;tr
 function call(msg,ms){return new Promise(function(resolve,reject){
  if(!worker){try{worker=new Worker(URL.createObjectURL(new Blob([workerSource()],{type:'text/javascript'})));}catch(e){reject(Error('This browser cannot start Python here. Use a current Chrome, Edge, Firefox or Safari.'));return;}}
  var w=worker,t=setTimeout(function(){w.terminate();if(worker===w)worker=null;reject(Error(msg.kind==='load'?'Python did not load in time. Check your internet connection and try again.':'Stopped after '+ms/1000+' seconds. Look for an endless loop, then run again.'));},ms);
- w.onmessage=function(e){clearTimeout(t);e.data.ok?resolve(e.data.result):reject(Error(e.data.error));};
+ w.onmessage=function(e){clearTimeout(t);if(e.data.ok){resolve(e.data.result);}else{w.terminate();if(worker===w)worker=null;reject(Error(e.data.error));}};
  w.onerror=function(e){clearTimeout(t);w.terminate();if(worker===w)worker=null;reject(Error('Python could not start: '+(e.message||'check your internet connection')));};
  w.postMessage(Object.assign({base:BASE,harness:HARNESS},msg));});}
-function runChecks(ch,code){var s=SPEC[ch];if(runner)return Promise.resolve(runner(ch,code,s));return call({kind:'load'},120000).then(function(){return call({kind:'run',helpers:s.helpers,student:code,checks:s.checks,mutants:s.mutants||''},20000);}).then(JSON.parse);}
+function runOnce(ch,code){var s=SPEC[ch];return call({kind:'load'},120000).then(function(){return call({kind:'run',helpers:s.helpers,student:code,checks:s.checks,mutants:s.mutants||''},20000);}).then(JSON.parse);}
+function runChecks(ch,code){var s=SPEC[ch];if(runner)return Promise.resolve(runner(ch,code,s));return runOnce(ch,code).catch(function(first){if(/^Stopped after /.test(first.message||''))throw first;if(worker){try{worker.terminate();}catch(e){}worker=null;}return runOnce(ch,code).catch(function(second){throw Error('Python build could not start after an automatic retry. Your code is preserved. '+(second.message||second));});});}
 function fingerprint(text){try{if(typeof crypto!=='undefined'&&crypto.subtle&&typeof TextEncoder!=='undefined')return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}catch(e){}var h=2166136261;for(var i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return Promise.resolve('fnv1a-'+h.toString(16));}
 function lines(list){return list.map(function(r){return '  '+(r[1]?'✓ ':'✗ ')+r[0]+(r[1]||!r[2]?'':' · '+r[2]);}).join('\n');}
 function summary(r){if(r.error)return r.error;var t=r.tests.filter(function(x){return x[1];}).length,c=r.checks.filter(function(x){return x[1];}).length;return 'Your tests: '+t+' of '+r.tests.length+' pass · Course checks: '+c+' of '+r.checks.length+' pass';}
@@ -143,7 +144,7 @@ function mount(ch){
   run.disabled=true;status.textContent=runner?'Running…':'Starting Python… the first run downloads it once (about 10 MB).';
   var src=code.value;
   runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var sidEl=el('sid'),rec=report(ch,r,h,sidEl?sidEl.value:'');if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
-  .catch(function(e){status.textContent=e.message;}).then(function(){run.disabled=code.readOnly;});});
+  .catch(function(e){status.textContent='Python build problem: '+e.message+' Your code is preserved; click Run to retry.';}).then(function(){run.disabled=code.readOnly;});});
  if(reset)reset.addEventListener('click',function(){if(code.readOnly)return;if(!armed){armed=true;reset.textContent='Click again to replace your code';setTimeout(function(){armed=false;reset.textContent='Reset to starter code';},4000);return;}armed=false;reset.textContent='Reset to starter code';code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));});
 }
 return{SPEC:SPEC,mount:mount,runChecks:runChecks,vivaFor:vivaFor,setRunner:function(f){runner=f;}};
