@@ -66,8 +66,13 @@ async def offline_check(browser, archive, chapter, folder):
             assert await page.locator('#modal-body').inner_text()
             await page.locator('#modal-close').click()
             await page.locator('[data-answer]').click()
-            assert await page.locator('#modal-body').inner_text()
-            await page.locator('#modal-close').click()
+            if await page.locator('#modal').is_hidden():
+                inline = page.locator('#chapter-main .inline-answer')
+                assert await inline.count() == 1 and await inline.is_visible()
+                assert (await inline.inner_text()).strip()
+            else:
+                assert (await page.locator('#modal-body').inner_text()).strip()
+                await page.locator('#modal-close').click()
     for station in data['stations']:
         await page.evaluate('(n)=>iscarb.startStation(n)', station['no'])
         await page.locator('#hintBtn').click()
