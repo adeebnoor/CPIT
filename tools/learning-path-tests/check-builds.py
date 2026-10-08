@@ -90,6 +90,10 @@ r = run(13, 'def can_read(user, project:\n    return False\n')
 check('a syntax error is reported with its line', bool(r['error']) and 'line 1' in r['error'], str(r['error']))
 r = run(13, 'def can_read(user, project):\n    return False\n')
 check('missing own tests are reported', any('at least three' in (c[2] or '') for c in r['checks'] if not c[1]))
+r = run(13, 'raise SystemExit(1)\n')
+check('SystemExit from student module code is contained and reported', bool(r['error']) and 'SystemExit: 1' in r['error'], str(r['error']))
+r = run(13, 'def can_read(user, project):\n    raise SystemExit(2)\n' + OWN)
+check('SystemExit raised through a course check is contained', any('SystemExit: 2' in (c[2] or '') for c in r['checks']), str(r['checks']))
 
 # 6. the in-class demos embedded in the lectures are current and behave as taught
 import importlib.util
