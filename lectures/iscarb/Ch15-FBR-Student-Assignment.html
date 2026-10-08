@@ -127,7 +127,7 @@ function mount(ch){
  out.textContent=ev.value?'Last recorded run:\n\n'+ev.value:'Write your plan, then run your tests and the course checks.';
  if(ev.value)plan.readOnly=true;
  code.addEventListener('keydown',function(e){if(e.key==='Tab'&&!e.shiftKey&&!code.readOnly){e.preventDefault();var a=code.selectionStart,b=code.selectionEnd;code.value=code.value.slice(0,a)+'    '+code.value.slice(b);code.selectionStart=code.selectionEnd=a+4;code.dispatchEvent(new Event('input',{bubbles:true}));}});
- code.addEventListener('input',function(){if(code.readOnly)return;if(ev.value){ev.value='';changed();out.textContent='Code changed: run again to record the new result.';}});
+ code.addEventListener('input',function(){if(code.readOnly)return;if(plan.readOnly)plan.readOnly=false;if(ev.value){ev.value='';changed();out.textContent='Code changed: run again to record the new result.';}});
  run.disabled=code.readOnly;if(reset)reset.disabled=code.readOnly;
  run.addEventListener('click',function(){if(code.readOnly)return;
   if(plan.value.trim().length<30){status.textContent='Write your build plan first (at least 30 characters): what your code will do and which cases your tests cover.';return;}
@@ -135,7 +135,7 @@ function mount(ch){
   var src=code.value;
   runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var sidEl=el('sid'),rec=report(ch,r,h,sidEl?sidEl.value:'');if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
   .catch(function(e){status.textContent='Python build problem: '+e.message+' Your code is preserved; click Run to retry.';}).then(function(){run.disabled=code.readOnly;});});
- if(reset)reset.addEventListener('click',function(){if(code.readOnly)return;if(!armed){armed=true;reset.textContent='Click again to replace your code';setTimeout(function(){armed=false;reset.textContent='Reset to starter code';},4000);return;}armed=false;reset.textContent='Reset to starter code';code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));});
+ if(reset)reset.addEventListener('click',function(){if(code.readOnly)return;if(!armed){armed=true;reset.textContent='Click again to replace your code';setTimeout(function(){armed=false;reset.textContent='Reset to starter code';},4000);return;}armed=false;reset.textContent='Reset to starter code';plan.readOnly=false;code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));});
 }
 return{SPEC:SPEC,mount:mount,runChecks:runChecks,vivaFor:vivaFor,setRunner:function(f){runner=f;}};
 })();
