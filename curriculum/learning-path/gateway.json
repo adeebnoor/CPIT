@@ -1,10 +1,10 @@
 {
   "10": {
     "chapter": "10",
-    "ey": "Chapter 10 \u00b7 Assignment 1 \u00b7 Mastery v2",
+    "ey": "Chapter 10 · Assignment 1 · Mastery v2",
     "title": "Dependable Systems: a decision you can defend",
     "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "time": "35–55 minutes total, including preparation",
     "points": "4 points",
     "access": "fbr:access:ch10:v4",
     "edition": "mastery-v2",
@@ -23,10 +23,10 @@
   },
   "11": {
     "chapter": "11",
-    "ey": "Chapter 11 \u00b7 Assignment 2 \u00b7 Mastery v2",
+    "ey": "Chapter 11 · Assignment 2 · Mastery v2",
     "title": "Reliability Engineering: measure before you claim",
     "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "time": "35–55 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch11:a2:v1",
     "edition": "mastery-v2",
@@ -45,10 +45,10 @@
   },
   "12": {
     "chapter": "12",
-    "ey": "Chapter 12 \u00b7 Assignment 3 \u00b7 Mastery v2",
+    "ey": "Chapter 12 · Assignment 3 · Mastery v2",
     "title": "Trace the hazard to a control",
     "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "time": "35–55 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch12:path:v1",
     "edition": "mastery-v2",
@@ -67,10 +67,10 @@
   },
   "13": {
     "chapter": "13",
-    "ey": "Chapter 13 \u00b7 Assignment 4 \u00b7 Mastery v2",
-    "title": "Turn a misuse case into a test",
-    "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "ey": "Chapter 13 · Assignment 4 · Mastery v2",
+    "title": "Test who may open a file",
+    "intro": "Use the chapter ideas to explain the case and make a decision. Complete the Python code and tests, and use the results in your answer. The assignment includes short word explanations in English and Arabic.",
+    "time": "35–55 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch13:path:v1",
     "edition": "mastery-v2",
@@ -78,21 +78,21 @@
     "lecture": "lectures/iscarb/Ch13-Security-Engineering.html",
     "previous": "lectures/iscarb/previous/Ch13-FBR-Student-Assignment.html",
     "steps": [
-      "Read the named source selections and attempt all five preparation questions.",
-      "Write compact reasoning, a source application and a short transfer answer.",
-      "Commit Part A before the new evidence; justify RETAIN, REVISE or REPLACE.",
-      "Review, export and submit in Blackboard; revise after feedback when requested."
+      "Read the assigned pages and try all five preparation questions.",
+      "Explain your decision, apply an idea from the reading, and answer the question about a second chapter idea. Complete and test your Python build.",
+      "Save and lock Part A. Read the new information (STRESS), then explain whether you keep, adjust or replace your decision.",
+      "Review your work, declare any AI use, export a PDF and submit it in Blackboard. Revise after feedback when asked."
     ],
-    "note": "Preparation replaces unfocused review. Existing rubric totals remain unchanged. Report actual workload; previous drafts and completed submissions are retained.",
-    "ack": "I will prepare, record my own initial reasoning, and explain what evidence changes or supports it.",
-    "commit": "All Part A responses, including source application, transfer answer and any lab record, are saved and frozen before STRESS. The page checks completeness; the instructor assesses understanding."
+    "note": "The language is simpler; the reasoning, code, tests and marks are unchanged. Tell us how long the work actually took. Your existing drafts and completed work are kept.",
+    "ack": "I will prepare, write my own first decision, and explain how the evidence supports or changes it.",
+    "commit": "All Part A answers and the build record are saved and locked. The new information (STRESS) then opens automatically on this page. You can still write Part B. The page checks that the required work is present; the instructor assesses your understanding."
   },
   "14": {
     "chapter": "14",
-    "ey": "Chapter 14 \u00b7 Assignment 5 \u00b7 Mastery v2",
-    "title": "Keep one critical service running",
-    "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "ey": "Chapter 14 · Assignment 5 · Mastery v2",
+    "title": "Keep an essential service working during an outage",
+    "intro": "Use the chapter ideas to explain the case and make a decision. Complete the Python code and tests, and use the results in your answer. The assignment includes short word explanations in English and Arabic.",
+    "time": "35–55 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch14:path:v1",
     "edition": "mastery-v2",
@@ -100,21 +100,21 @@
     "lecture": "lectures/iscarb/Ch14-Resilience-Engineering.html",
     "previous": "lectures/iscarb/previous/Ch14-FBR-Student-Assignment.html",
     "steps": [
-      "Read the named source selections and attempt all five preparation questions.",
-      "Write compact reasoning, a source application and a short transfer answer.",
-      "Commit Part A before the new evidence; justify RETAIN, REVISE or REPLACE.",
-      "Review, export and submit in Blackboard; revise after feedback when requested."
+      "Read the assigned pages and try all five preparation questions.",
+      "Explain your decision, apply an idea from the reading, and answer the question about a second chapter idea. Complete and test your Python build.",
+      "Save and lock Part A. Read the new information (STRESS), then explain whether you keep, adjust or replace your decision.",
+      "Review your work, declare any AI use, export a PDF and submit it in Blackboard. Revise after feedback when asked."
     ],
-    "note": "Preparation replaces unfocused review. Existing rubric totals remain unchanged. Report actual workload; previous drafts and completed submissions are retained.",
-    "ack": "I will prepare, record my own initial reasoning, and explain what evidence changes or supports it.",
-    "commit": "All Part A responses, including source application, transfer answer and any lab record, are saved and frozen before STRESS. The page checks completeness; the instructor assesses understanding."
+    "note": "The language is simpler; the reasoning, code, tests and marks are unchanged. Tell us how long the work actually took. Your existing drafts and completed work are kept.",
+    "ack": "I will prepare, write my own first decision, and explain how the evidence supports or changes it.",
+    "commit": "All Part A answers and the build record are saved and locked. The new information (STRESS) then opens automatically on this page. You can still write Part B. The page checks that the required work is present; the instructor assesses your understanding."
   },
   "15": {
     "chapter": "15",
-    "ey": "Chapter 15 \u00b7 Assignment 6 \u00b7 Mastery v2",
-    "title": "Choose a reuse strategy with evidence",
-    "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "ey": "Chapter 15 · Assignment 6 · Mastery v2",
+    "title": "Compare existing software before choosing",
+    "intro": "Use the chapter ideas to explain the case and make a decision. Complete the Python code and tests, and use the results in your answer. The assignment includes short word explanations in English and Arabic.",
+    "time": "35–55 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch15:path:v1",
     "edition": "mastery-v2",
@@ -122,21 +122,21 @@
     "lecture": "lectures/iscarb/Ch15-Software-Reuse.html",
     "previous": "lectures/iscarb/previous/Ch15-FBR-Student-Assignment.html",
     "steps": [
-      "Read the named source selections and attempt all five preparation questions.",
-      "Write compact reasoning, a source application and a short transfer answer.",
-      "Commit Part A before the new evidence; justify RETAIN, REVISE or REPLACE.",
-      "Review, export and submit in Blackboard; revise after feedback when requested."
+      "Read the assigned pages and try all five preparation questions.",
+      "Explain your decision, apply an idea from the reading, and answer the question about a second chapter idea. Complete and test your Python build.",
+      "Save and lock Part A. Read the new information (STRESS), then explain whether you keep, adjust or replace your decision.",
+      "Review your work, declare any AI use, export a PDF and submit it in Blackboard. Revise after feedback when asked."
     ],
-    "note": "Preparation replaces unfocused review. Existing rubric totals remain unchanged. Report actual workload; previous drafts and completed submissions are retained.",
-    "ack": "I will prepare, record my own initial reasoning, and explain what evidence changes or supports it.",
-    "commit": "All Part A responses, including source application, transfer answer and any lab record, are saved and frozen before STRESS. The page checks completeness; the instructor assesses understanding."
+    "note": "The language is simpler; the reasoning, code, tests and marks are unchanged. Tell us how long the work actually took. Your existing drafts and completed work are kept.",
+    "ack": "I will prepare, write my own first decision, and explain how the evidence supports or changes it.",
+    "commit": "All Part A answers and the build record are saved and locked. The new information (STRESS) then opens automatically on this page. You can still write Part B. The page checks that the required work is present; the instructor assesses your understanding."
   },
   "16": {
     "chapter": "16",
-    "ey": "Chapter 16 \u00b7 Assignment 7 \u00b7 Mastery v2",
-    "title": "Validate a component contract",
-    "intro": "Apply the chapter concepts, use the assigned source and explain a new case. Run the small local teaching lab as part of the artifact.",
-    "time": "45\u201365 minutes total, including preparation",
+    "ey": "Chapter 16 · Assignment 7 · Mastery v2",
+    "title": "Check the rules before and after a function call",
+    "intro": "Use the chapter ideas to explain the case and make a decision. Complete the Python code and tests, and use the results in your answer. The assignment includes short word explanations in English and Arabic.",
+    "time": "45–65 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch16:path:v1",
     "edition": "mastery-v2",
@@ -144,21 +144,21 @@
     "lecture": "lectures/iscarb/Ch16-Component-Based-SE.html",
     "previous": "lectures/iscarb/previous/Ch16-FBR-Student-Assignment.html",
     "steps": [
-      "Read the named source selections and attempt all five preparation questions.",
-      "Write compact reasoning, a source application and a short transfer answer.",
-      "Commit Part A before the new evidence; justify RETAIN, REVISE or REPLACE.",
-      "Review, export and submit in Blackboard; revise after feedback when requested."
+      "Read the assigned pages and try all five preparation questions.",
+      "Explain your decision, apply an idea from the reading, and answer the question about a second chapter idea. Complete and test your Python build.",
+      "Save and lock Part A. Read the new information (STRESS), then explain whether you keep, adjust or replace your decision.",
+      "Review your work, declare any AI use, export a PDF and submit it in Blackboard. Revise after feedback when asked."
     ],
-    "note": "Preparation replaces unfocused review. Existing rubric totals remain unchanged. Report actual workload; previous drafts and completed submissions are retained.",
-    "ack": "I will prepare, record my own initial reasoning, and explain what evidence changes or supports it.",
-    "commit": "All Part A responses, including source application, transfer answer and any lab record, are saved and frozen before STRESS. The page checks completeness; the instructor assesses understanding."
+    "note": "The language is simpler; the reasoning, code, tests and marks are unchanged. Tell us how long the work actually took. Your existing drafts and completed work are kept.",
+    "ack": "I will prepare, write my own first decision, and explain how the evidence supports or changes it.",
+    "commit": "All Part A answers and the build record are saved and locked. The new information (STRESS) then opens automatically on this page. You can still write Part B. The page checks that the required work is present; the instructor assesses your understanding."
   },
   "17": {
     "chapter": "17",
-    "ey": "Chapter 17 \u00b7 Assignment 8 \u00b7 Mastery v2",
-    "title": "Reason about a lost remote response",
-    "intro": "Apply the chapter concepts, use the assigned source and explain a new case. Run the small local teaching lab as part of the artifact.",
-    "time": "45\u201365 minutes total, including preparation",
+    "ey": "Chapter 17 · Assignment 8 · Mastery v2",
+    "title": "Handle a lost reply without making two bookings",
+    "intro": "Use the chapter ideas to explain the case and make a decision. Complete the Python code and tests, and use the results in your answer. The assignment includes short word explanations in English and Arabic.",
+    "time": "45–65 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch17:path:v1",
     "edition": "mastery-v2",
@@ -166,21 +166,21 @@
     "lecture": "lectures/iscarb/Ch17-Distributed-SE.html",
     "previous": "lectures/iscarb/previous/Ch17-FBR-Student-Assignment.html",
     "steps": [
-      "Read the named source selections and attempt all five preparation questions.",
-      "Write compact reasoning, a source application and a short transfer answer.",
-      "Commit Part A before the new evidence; justify RETAIN, REVISE or REPLACE.",
-      "Review, export and submit in Blackboard; revise after feedback when requested."
+      "Read the assigned pages and try all five preparation questions.",
+      "Explain your decision, apply an idea from the reading, and answer the question about a second chapter idea. Complete and test your Python build.",
+      "Save and lock Part A. Read the new information (STRESS), then explain whether you keep, adjust or replace your decision.",
+      "Review your work, declare any AI use, export a PDF and submit it in Blackboard. Revise after feedback when asked."
     ],
-    "note": "Preparation replaces unfocused review. Existing rubric totals remain unchanged. Report actual workload; previous drafts and completed submissions are retained.",
-    "ack": "I will prepare, record my own initial reasoning, and explain what evidence changes or supports it.",
-    "commit": "All Part A responses, including source application, transfer answer and any lab record, are saved and frozen before STRESS. The page checks completeness; the instructor assesses understanding."
+    "note": "The language is simpler; the reasoning, code, tests and marks are unchanged. Tell us how long the work actually took. Your existing drafts and completed work are kept.",
+    "ack": "I will prepare, write my own first decision, and explain how the evidence supports or changes it.",
+    "commit": "All Part A answers and the build record are saved and locked. The new information (STRESS) then opens automatically on this page. You can still write Part B. The page checks that the required work is present; the instructor assesses your understanding."
   },
   "20": {
     "chapter": "20",
-    "ey": "Chapter 20 \u00b7 Assignment 9 \u00b7 Mastery v2",
-    "title": "Make an integration decision across owners",
-    "intro": "Apply the chapter concepts, use the assigned source and explain a new case. ",
-    "time": "35\u201355 minutes total, including preparation",
+    "ey": "Chapter 20 · Assignment 9 · Mastery v2",
+    "title": "Connect systems run by different teams",
+    "intro": "Use the chapter ideas to explain the case and make a decision. Complete the Python code and tests, and use the results in your answer. The assignment includes short word explanations in English and Arabic.",
+    "time": "35–55 minutes total, including preparation",
     "points": "5 points",
     "access": "fbr:access:ch20:path:v1",
     "edition": "mastery-v2",
@@ -188,13 +188,13 @@
     "lecture": "lectures/iscarb/Ch20-Systems-of-Systems.html",
     "previous": "lectures/iscarb/previous/Ch20-FBR-Student-Assignment.html",
     "steps": [
-      "Read the named source selections and attempt all five preparation questions.",
-      "Write compact reasoning, a source application and a short transfer answer.",
-      "Commit Part A before the new evidence; justify RETAIN, REVISE or REPLACE.",
-      "Review, export and submit in Blackboard; revise after feedback when requested."
+      "Read the assigned pages and try all five preparation questions.",
+      "Explain your decision, apply an idea from the reading, and answer the question about a second chapter idea. Complete and test your Python build.",
+      "Save and lock Part A. Read the new information (STRESS), then explain whether you keep, adjust or replace your decision.",
+      "Review your work, declare any AI use, export a PDF and submit it in Blackboard. Revise after feedback when asked."
     ],
-    "note": "Preparation replaces unfocused review. Existing rubric totals remain unchanged. Report actual workload; previous drafts and completed submissions are retained.",
-    "ack": "I will prepare, record my own initial reasoning, and explain what evidence changes or supports it.",
-    "commit": "All Part A responses, including source application, transfer answer and any lab record, are saved and frozen before STRESS. The page checks completeness; the instructor assesses understanding."
+    "note": "The language is simpler; the reasoning, code, tests and marks are unchanged. Tell us how long the work actually took. Your existing drafts and completed work are kept.",
+    "ack": "I will prepare, write my own first decision, and explain how the evidence supports or changes it.",
+    "commit": "All Part A answers and the build record are saved and locked. The new information (STRESS) then opens automatically on this page. You can still write Part B. The page checks that the required work is present; the instructor assesses your understanding."
   }
 }

@@ -2,5 +2,5 @@
   "chapter": "14",
   "version": "2026-09-ch14-mastery-v2",
   "label": "STRESS · new evidence",
-  "text": "An outage rehearsal disconnects the central sign-in service. Authorized staff successfully access the protected local pickup list using the documented offline procedure. Paper changes are reconciled after recovery with no discrepancy in the rehearsal sample. The evidence covers the tested desk, trained staff and daytime workload. Explain whether this supports your original fallback boundary and what it does not establish."
+  "text": "In a practice outage, the team disconnects the central sign-in service. Staff with permission can still open the protected local pickup list by following the written offline procedure. After the system returns, they merge the paper changes into the central list. No differences remain in the sample checked during this practice run. The results cover the desk tested, trained staff and daytime work. Explain whether this supports the limits you set for the fallback, and what these results still do not show."
 }

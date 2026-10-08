@@ -296,48 +296,48 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "5c2f3e3eb8092acbb064e6b509801bd3f1696f5b9951fb4272f6f9a3625be72e",
-   "stress_sha256_lf": "db3663c3ac2ef31db79e70a2c279f1c784913bda41209334e5c9a3a6c76fd6cc"
+   "assignment_sha256_lf": "6055959efa3f52c49dd138494759e798c32a57da494f9e055f80a267c733edc1",
+   "stress_sha256_lf": "94696ea2bc67547ac2520a923ff23fd281bdaae01514ae89637b64e6fe8e23f1"
   },
   "14": {
    "path": "lectures/iscarb/Ch14-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "f14b05e051f43a382849bbdd1165100aa00025b5eac1049f89e3e994821f5509",
-   "stress_sha256_lf": "97e209be6bf0bd9442c17d663bb667f7cd977ddf1e53e809d5a7f911632b6b67"
+   "assignment_sha256_lf": "ec71b969fd9fd8e5f0931a3cb6259d39382a2d41b514991adebb0957f3dcc086",
+   "stress_sha256_lf": "6e4f43415cd427fbad9eadd34d0cc23b27e2f6755e8c26e5c4bcf29f54cd4802"
   },
   "15": {
    "path": "lectures/iscarb/Ch15-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "c14202d79d49a2f14112fe8f759889e9c7f472fa85f8266563d378afdcacc65b",
-   "stress_sha256_lf": "59f9c063fb19615335582861ff6ba9395501cbb90a9c87a3a6fa017c9e49a84d"
+   "assignment_sha256_lf": "35bf6184f62bfb26cd44eb00bb981888c6888a39e28caf01e2deff530f7ebddc",
+   "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
    "path": "lectures/iscarb/Ch16-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "13e2a316371430c6eff8b8f0e9d7ac77dca1a6602c3875e8f8d4f321e1d9f0fa",
-   "stress_sha256_lf": "5d558e91bc9d2a11c50f25d5c1220772c51cbd07231823daa5ac7e354b6e8048"
+   "assignment_sha256_lf": "575b35f8312641e5ffe3d9a4168e12f4d1a5dbf24779c595c6e355ce1fd3cfa8",
+   "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
    "path": "lectures/iscarb/Ch17-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "2e59c0f594b78d586275ec932b604d162d90abd72965c0a467e1137f262be46c",
-   "stress_sha256_lf": "7a6a8c3d1e64b662501a40812df2cadf8ab40f9b15d8025094cce49441167914"
+   "assignment_sha256_lf": "9cdfae013ddfa57e9da8199fd056d9185bfee8196dd3125b5bd5084f76bbbddc",
+   "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
    "path": "lectures/iscarb/Ch20-FBR-Student-Assignment.html",
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "44e542ec27e71b3f16430e3dbe65adf06c6235149a9d72fa265be44a62cd3443",
-   "stress_sha256_lf": "caac8d5d01403ad0decaad0500aa072893b848be2e895586eea604bb8c1d01d8"
+   "assignment_sha256_lf": "18d12ce4d765614502608af145336cce66b2a687ac36cec758f9610b45eea4a3",
+   "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
  "official_guidance": [
@@ -679,6 +679,26 @@
     "assignment 16",
     "assignment 17",
     "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261008-assignment-language-v1",
+   "date": "2026-10-08",
+   "base_release": "20260926-genai-v12",
+   "summary": "Instructor-requested plain-language revision of Assignments 4–9: shorter scenarios and prompts, English/Arabic term explanations, clearer Python build and Part B instructions, and matching entry-page wording. Case facts, numerical limits, scoring requirements, required readings, code and tests, commitment flow and saved-draft identities are preserved.",
+   "repinned": [
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20",
+    "stress 13",
+    "stress 14",
+    "stress 15",
+    "stress 16",
+    "stress 17",
+    "stress 20"
    ]
   }
  ]

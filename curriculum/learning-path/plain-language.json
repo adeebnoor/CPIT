@@ -1,0 +1,335 @@
+{
+  "revision": "20261008-assignment-language-v1",
+  "chapters": {
+    "13": {
+      "scenario": [
+        "A fictional university website stores student project files. It has two user roles: student and staff.",
+        "Students may read only their own project files. Staff may read files only for the groups assigned to them.",
+        "The screen hides other students' files. A developer says all normal upload and download tests passed.",
+        "Each request sent to the server includes a project ID (the value that identifies a project). The API is the way the website sends these requests. The brief includes no test of a user requesting someone else's project.",
+        "The system is set up to keep activity logs (records of what happened). Nobody has checked a sample for private information.",
+        "Your decision: release the service, allow only limited access, or hold the release. Explain your choice using the facts above."
+      ],
+      "fit": "Name one thing to protect (asset), one possible harmful action (threat), and one possible weakness (vulnerability). Say which weakness you suspect and which, if any, has actually been demonstrated.",
+      "measure": "Plan two tests: a request that should be allowed and a request that should be refused. For each, state who sends it, the project and input used, the expected response, and what record or response you would inspect. These are planned tests; do not claim that they have already run.",
+      "bound": "List the user roles, project files and ways of accessing them that your recommendation covers. Name one access path that has not been tested and one result that would make you review your decision.",
+      "act": "Choose release, limited access or hold. State the limits of your choice. Name a permission check the server must perform, connect it to your tests, and say who will review the results.",
+      "technical": "The rule says: students may read only their own files. Explain the difference between a misuse case (an attempt to use the system in a forbidden way) and a normal use case. Write one server permission rule that a test could check.",
+      "build_title": "Build the permission check on the server",
+      "build_task": "Write can_read(user, project). It must check the access rule each time a request reaches the server. Write tests that try to break the rule, including at least two requests that must be refused. Use the actual results in your TEST answer.",
+      "reading": "Read about complete mediation (check permission on every access) and fail-safe defaults (refuse access unless the rule clearly allows it). Which line of can_read applies each principle?",
+      "terms": [
+        [
+          "Authorization",
+          "Checking whether this user may access this file.",
+          "التحقق من صلاحية المستخدم لفتح هذا الملف."
+        ],
+        [
+          "Server-side",
+          "A check performed by the server, not just by the screen.",
+          "فحص ينفذه الخادم، وليس إخفاء زر على الشاشة فقط."
+        ],
+        [
+          "Positive / negative test",
+          "A test of an allowed action / an action that should be refused.",
+          "اختبار طلب مسموح / طلب يجب رفضه."
+        ],
+        [
+          "Endpoint",
+          "An API address for one operation, such as preview or export.",
+          "عنوان في واجهة البرمجة لعملية مثل المعاينة أو التصدير."
+        ],
+        [
+          "Malformed input",
+          "Input with missing fields or the wrong type of value.",
+          "بيانات ينقصها حقل أو تحتوي نوع قيمة غير مناسب."
+        ],
+        [
+          "Bulk export",
+          "Downloading several files or records together.",
+          "تنزيل عدة ملفات أو سجلات دفعة واحدة."
+        ]
+      ],
+      "stress": "A reviewer uses test accounts to check two API operations: file preview and bulk export (downloading several records together). Both operations refuse requests for another user's files at the server. Allowed requests succeed. The report names the software version and user roles tested. It does not check whether the activity logs contain private information. Explain which concern these results address, which concern remains, and whether to keep, relax or narrow your original action.",
+      "warmup": [
+        "A student can download their own file. Does this show that they cannot download another student's file?",
+        "No. This checks an allowed action only. Also test a request for another user's file. Check that the server refuses it, including through any export option."
+      ]
+    },
+    "14": {
+      "scenario": [
+        "A fictional campus transport desk needs to read today's pickup list even when the central scheduling server stops working.",
+        "A copy of the list is updated on the desk device at 06:00. Staff with permission can read this local copy.",
+        "Changes made after 06:00 normally stay on the central server until the next update of the local copy.",
+        "A record shows that a backup server restarted successfully. Nobody has tested the full service from the staff member's point of view.",
+        "During an outage, staff can write changes on an approved paper form.",
+        "Your decision: is this backup way of working (fallback) ready for a limited trial? Explain what the desk can safely do and what still needs checking."
+      ],
+      "fit": "Name the service that must continue during the outage. Explain how it differs from everything the normal system does. Identify the staff who need it and the people, data or other services it depends on.",
+      "measure": "Describe four steps for one outage: recognize the problem (recognition), keep essential work going (resistance), restore the service (recovery), and return to normal working (reinstatement). Include how staff check the age of the local list and merge the paper changes back into the central list. Mark steps that have not been tested as proposed.",
+      "bound": "State where, when and by whom the fallback may be used. Explain when an old list or a risk of exposing private information would make it unacceptable. Label any limit you introduce as proposed, not as a measured fact.",
+      "act": "Choose trial, restricted trial or hold. Name the next action and the person or role responsible. Describe one practice run that checks whether staff can deliver the service, not just whether a server restarts.",
+      "technical": "Survivability analysis asks how essential work can continue when something fails. Explain why it starts with the essential services and possible failures. Name one dependency on people or working procedures that a server-only recovery test would miss.",
+      "build_title": "Build the merge of paper changes",
+      "build_task": "Write reconcile(central, paper_log). After the central system returns, it must merge the changes recorded on paper into the central list, without losing changes, applying one change twice, or replacing a newer change without checking it. Use the actual results in your RECOVER answer.",
+      "reading": "Read why changes made while disconnected must be merged when the system returns, and why each change needs its own unique ID. Where does your code use that ID?",
+      "terms": [
+        [
+          "Reconciliation",
+          "Comparing records and merging changes when the system returns.",
+          "مقارنة السجلات ودمج التغييرات بعد عودة النظام."
+        ],
+        [
+          "Degraded mode",
+          "Keeping essential work going with fewer features.",
+          "استمرار العمل الضروري بإمكانات أقل من الوضع المعتاد."
+        ],
+        [
+          "Fresh / stale data",
+          "Data that is recent enough / too old for the intended task.",
+          "بيانات حديثة بما يكفي للمهمة / بيانات أقدم من الحد المقبول."
+        ],
+        [
+          "Dependency",
+          "Something else the service needs in order to work.",
+          "شيء آخر تحتاجه الخدمة لكي تعمل."
+        ],
+        [
+          "Conflict",
+          "Changes that cannot be safely combined without a decision.",
+          "تغييرات لا يمكن دمجها بأمان دون مراجعة أو قرار."
+        ],
+        [
+          "Base version",
+          "The version of the record on which a change was based.",
+          "نسخة السجل التي اعتمد عليها الشخص عند كتابة التغيير."
+        ]
+      ],
+      "stress": "In a practice outage, the team disconnects the central sign-in service. Staff with permission can still open the protected local pickup list by following the written offline procedure. After the system returns, they merge the paper changes into the central list. No differences remain in the sample checked during this practice run. The results cover the desk tested, trained staff and daytime work. Explain whether this supports the limits you set for the fallback, and what these results still do not show.",
+      "warmup": [
+        "A backup server starts successfully. Does that mean staff can carry out the essential service again?",
+        "No. Check whether the data is recent enough, staff can access it, other required services work, and staff can finish the task. A running server alone does not show this."
+      ]
+    },
+    "15": {
+      "scenario": [
+        "A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.",
+        "Option A is a ready-made commercial product that the team can configure. It has the required booking features and an export API (a way for another program to retrieve data). The supplier promises support for two years.",
+        "Option B is an existing university application. The university owns its source code, and the team knows that code. It cannot yet create repeating bookings. There are no measurements of how it performs at the busiest times.",
+        "Neither option has a reliable estimate of the full cost over its use, including support and later changes.",
+        "The goal is a trial next term, not replacing the faculty's whole system. Recommend an option, a limited evaluation, or a hold."
+      ],
+      "review_title": "A colleague's draft recommendation — review it; do not copy it",
+      "review": "Choose Option A for the whole faculty next term. It already has all the booking features, so changing its settings will be enough. Two years of support is fine for a three-year trial: we can simply renew it. Finishing Option B would take too long; the team's knowledge of its code makes no difference. Option A clearly costs less overall because it is ready-made.",
+      "fit": "Name the type of software reuse in each option. List the features needed and the limits the choice must meet. Point out where the colleague's draft misstates the intended size of the trial, needs over its lifetime, or requirements.",
+      "measure": "Make the comparison missing from the draft. Use four relevant factors for choosing software to reuse. For each entry, mark it supported by a supplied fact, unknown, or dependent on a condition. Identify claims in the draft that the facts do not support. Do not invent scores, prices or performance results.",
+      "bound": "Name an assumption about support or use over time that the draft treats as certain without evidence. State one specific change that would make you change your own recommendation.",
+      "act": "Write the recommendation you would sign: choose an option or propose an evaluation, and state its limits. Name who is responsible and what evidence is needed to answer one important unknown.",
+      "technical": "A framework calls the extra code you add to it; your program calls a library when it needs one of its functions. Explain who controls the order of work in each case. Give one effect this difference has when connecting an existing software component.",
+      "build_title": "Build the check against known facts",
+      "build_task": "Write fit, shortlist and evidence_needed. Use only the supplied facts. A requirement with no evidence must stay unknown, not be marked met. Use the output to check the claims in the colleague's draft.",
+      "reading": "Read about assumptions a reused software component relies on but does not state in its description. Which unknown result in your comparison represents such an assumption?",
+      "terms": [
+        [
+          "Software reuse",
+          "Using existing software instead of writing every part again.",
+          "استخدام برنامج أو جزء برمجي موجود بدل كتابة كل شيء من البداية."
+        ],
+        [
+          "Configuration",
+          "Changing supported settings to fit the task.",
+          "ضبط الإعدادات التي يدعمها البرنامج لتناسب المهمة."
+        ],
+        [
+          "Lifecycle",
+          "The period of using, supporting, changing and eventually replacing software.",
+          "فترة استخدام البرنامج ودعمه وتعديله ثم استبداله عند الحاجة."
+        ],
+        [
+          "Recurring booking",
+          "A booking repeated on a schedule, such as every week.",
+          "حجز يتكرر وفق جدول، مثل كل أسبوع."
+        ],
+        [
+          "Peak load",
+          "The busiest expected level of use.",
+          "أعلى مستوى استخدام متوقع في وقت الازدحام."
+        ],
+        [
+          "Shortlist",
+          "The options that meet the stated selection conditions.",
+          "قائمة الخيارات التي تستوفي شروط الاختيار المحددة."
+        ]
+      ],
+      "stress": "The supplier confirms that Option A cannot export the rules for repeating bookings or the record of past approvals. Option B could be extended, but its owner still has no measurements for the busiest usage times. The person responsible for the trial says that waiting until every unknown is answered would miss next term's start. A limited evaluation of one option is possible. Compare the effect of waiting with the unresolved risks of using, supporting and later leaving each option. Do not invent a money value for the delay.",
+      "warmup": [
+        "Ready-made software costs less to buy than building your own. Must it also cost less over the years you use it?",
+        "No. Include the work of connecting it, changing settings, support, upgrades, moving data and leaving the product later. Keep unknown costs marked as unknown."
+      ]
+    },
+    "16": {
+      "scenario": [
+        "A fictional lab-booking app uses an existing software component with the function reserve(roomId, duration).",
+        "The app sends duration in minutes. The component's instructions say duration is in seconds and must be between 1 and 7200, inclusive. An accepted request returns a reservation ID.",
+        "A small connecting function (adapter) currently passes both values to the component without changing them.",
+        "A sample request with duration = 30 returns an ID. Nobody has tested the saved end time or what happens with invalid input.",
+        "Your decision: use the component, adapt the connection, replace the component, or hold the limited trial. Explain what must be checked before relying on it."
+      ],
+      "fit": "Explain the difference between matching the function name and input types (syntax) and agreeing on what the values mean (semantics). Name the service the component provides and one rule the calling app must follow.",
+      "measure": "Write a precondition (what must be true before the call) and a postcondition (what must be true after it succeeds). Use clear notation; OCL-style notation is also allowed. State the unit conversion the adapter needs. Give one test at a limit or with invalid input, and the result you expect to observe. Use your actual build record to explain a difference between the original and corrected behavior, one limit of the model, and any prediction you corrected.",
+      "bound": "State the allowed input range and the documented behavior you rely on. Name one unanswered question about how errors are reported or handled.",
+      "act": "Choose use, adapt, replace or hold. Name who is responsible for connecting the software. State what evidence is needed to check the agreed rules after the parts are connected.",
+      "technical": "A report component calls a storage component to do its work. Name this type of component composition (way of connecting components). Compare it with a design in which two components work side by side and their outputs are then combined.",
+      "build_title": "Build the connecting function (adapter)",
+      "build_task": "Write reserve_minutes(component, room_id, minutes). Check that the input meets the required condition before calling the component. Convert minutes to seconds. Then check that the returned result meets the promised condition. Write tests for these before-and-after rules.",
+      "reading": "Read about the rule before a call (precondition), the promise after a successful call (postcondition), and which side is responsible if either is broken. Which side does ValueError protect? Which side has broken its promise when ContractError is raised?",
+      "terms": [
+        [
+          "Component",
+          "An existing software part that provides a service.",
+          "جزء برمجي موجود يقدم خدمة يمكن لبرنامج آخر استخدامها."
+        ],
+        [
+          "Adapter",
+          "A small function that connects parts with different expectations.",
+          "دالة صغيرة تصل بين جزأين تختلف متطلباتهما، مثل وحدة قياس الوقت."
+        ],
+        [
+          "Contract",
+          "The rules the caller and component agree to follow.",
+          "قواعد يتفق عليها البرنامج المستدعي والمكوّن المستخدم."
+        ],
+        [
+          "Precondition / postcondition",
+          "A rule before the call / a promise after a successful call.",
+          "شرط قبل الاستدعاء / نتيجة يجب ضمانها بعد نجاحه."
+        ],
+        [
+          "Boundary test",
+          "A test at or near a limit of the allowed input.",
+          "اختبار عند حد من حدود الإدخال المسموح أو قريب منه."
+        ],
+        [
+          "OCL",
+          "Object Constraint Language: notation for writing precise rules.",
+          "لغة لكتابة القيود بدقة؛ يسمح السؤال أيضًا بصياغة واضحة أخرى."
+        ]
+      ],
+      "stress": "A separate run, outside the small duration-testing model, tries to book a room that is already reserved. The component returns the existing reservation's ID. It does not report a conflict, and it does not create a second reservation. The brief had not described this behavior. Explain whether your duration tests check this situation. Then revise what a successful call must guarantee (the postcondition), or request written rules for this case.",
+      "warmup": [
+        "A function accepts a number called duration. Does its name and input type tell you whether this means minutes or seconds?",
+        "No. The unit is part of what the input means. The calling app and the component need agreed rules for units, limits and what happens on an error."
+      ]
+    },
+    "17": {
+      "scenario": [
+        "A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.",
+        "The browser sends a booking request through the service. If no reply arrives before the waiting time ends (timeout), the browser sends the request again with a new request ID.",
+        "The database creates one reservation for each new request ID.",
+        "Normal requests have succeeded. Nobody has tested what happens if the database saves a booking but the reply is then lost.",
+        "Recommend how these parts should work together in a trial, and the rule for sending a request again (retry)."
+      ],
+      "fit": "State what the browser, application service and database each do, and where they run (deployment tiers). Identify where a request crosses between computers. Explain the difference between receiving no reply and the server doing no work.",
+      "measure": "List the events in order when a booking is saved but its reply is lost. Propose a rule for retrying or checking the saved records, and a test that would reveal a duplicate booking. State what you are assuming. Use your actual build record to explain a difference between the original and corrected behavior, one limit of the model, and any prediction you corrected.",
+      "bound": "Name the kinds of failure your recommendation covers and the rule the stored bookings must still satisfy (consistency requirement). Say what the supplied tests do not cover.",
+      "act": "Recommend an action for the trial and state its limits. Name who is responsible. Explain how your design works and what results you need before allowing the browser to retry automatically.",
+      "technical": "SaaS means providing software to users over the internet. Service-oriented architecture means organizing software as services that communicate. Explain how these ideas differ and why one system can use both. Give one concern about keeping different customer organizations' data separate (tenant isolation).",
+      "build_title": "Build a service that handles repeated requests safely",
+      "build_task": "Write BookingService.reserve so that one user action creates at most one reservation. It must still do this when a reply is lost, the app sends the request again, or the service restarts. This property is called idempotence. Write tests that reproduce these failures.",
+      "reading": "Read why a message may need to be sent again, and how a unique request ID can make that retry safe. Which of your tests reproduces the retry described in the article?",
+      "terms": [
+        [
+          "Request ID",
+          "A value used to identify one request.",
+          "قيمة تميز طلبًا محددًا عن غيره."
+        ],
+        [
+          "Idempotence",
+          "Repeating the same request does not create an extra effect.",
+          "إعادة الطلب نفسه لا تنتج أثرًا إضافيًا مثل حجز ثانٍ."
+        ],
+        [
+          "Commit",
+          "Here, saving the database change; on this page, locking Part A.",
+          "في قاعدة البيانات: تثبيت التغيير. وفي صفحة الواجب: تثبيت الجزء A."
+        ],
+        [
+          "Persistent / durable storage",
+          "Saved records that remain after the service restarts.",
+          "سجلات محفوظة تبقى بعد إعادة تشغيل الخدمة."
+        ],
+        [
+          "Atomic save",
+          "Related changes are saved together: all succeed or none does.",
+          "حفظ تغييرات مترابطة كوحدة واحدة: تنجح كلها أو لا يحفظ أي منها."
+        ],
+        [
+          "Reconciliation",
+          "Checking and comparing records to resolve missing or conflicting outcomes.",
+          "مراجعة السجلات ومقارنتها لحسم النتائج المفقودة أو المتعارضة."
+        ]
+      ],
+      "stress": "A reviewer checks a separate record of switching to a backup and restarting. It shows that the request ID, its result and the reservation are saved together: either all are saved or none is (an atomic save). They remain in storage after restart. Sending the same ID again after restart returns the saved result without creating a second reservation. This evidence covers one booking store. It does not cover actions in an outside payment service. Compare this evidence with your simulator results and explain whether keeping your retry rule within these limits is justified.",
+      "warmup": [
+        "You send a payment request to another computer, but the waiting time ends with no reply. Can you assume no payment happened?",
+        "No. The server may have completed the payment before its reply was lost. Before sending the request again, define how to identify the same request, prevent a second effect, or check the saved result."
+      ]
+    },
+    "20": {
+      "scenario": [
+        "A fictional university wants one screen showing incidents using information from security, transport and facilities.",
+        "Each system can work on its own. Each has its own owner and schedule for releasing software updates.",
+        "Security sends incident IDs. Transport sends vehicle locations and the time each location was recorded. Facilities sends building-access status.",
+        "The owners agree to a limited daytime trial. They have not agreed how old information may be before it is unsuitable, or what the screen should show when a system stops sending data.",
+        "Each system passed its own API tests (tests of its program-to-program connection). Nobody has tested a failure involving the systems working together."
+      ],
+      "review_title": "The transport team's proposed design — review it before the trial",
+      "review": "The screen asks all three systems for data every minute. It labels the latest value received from each as live. If a system stops sending data, it keeps displaying that system's last value so the screen is never empty. Each owner signs a one-page promise of 99.9% availability. To accept the design, check that every API returns HTTP 200 (a successful response code) and uses the agreed JSON data structure.",
+      "fit": "Name the type of system of systems (SoS). Explain how each system can work alone and make its own management decisions. Name one useful shared service. Identify control over the other owners that the proposed design wrongly assumes.",
+      "measure": "Review the proposed design. Write an agreement for two participating systems: who owns each, what data they exchange, assumptions about software versions and data age, and useful behavior if one stops sending data. Plan a test of the shared service in stages. For each change you propose, say which weakness in the team's design it addresses.",
+      "bound": "Separate what the trial coordinator can decide alone from what needs agreement with another owner. Name an event that would require stopping or limiting what the shared service promises.",
+      "act": "Approve the design, approve it with conditions, or reject it for the trial. Name the coordinating role and the owners who must take part. State what evidence is needed before moving to the next stage.",
+      "technical": "Compare a data-feed design (systems send updates to a shared service) with a trading design (systems request or offer services through agreed exchanges). Which fits this incident screen? What extra kind of interaction would make the other design appropriate?",
+      "build_title": "Build a display that shows the data's real state",
+      "build_task": "Write display_state and headline. For every incoming data feed, show whether it is recent enough, too old, or unavailable. Do not label the whole display live when one feed is old or unavailable. Use the proposed 5-minute age limit. Use the actual result when reviewing the team's design.",
+      "reading": "Read about operational independence (each system can work alone) and managerial independence (each owner makes its own decisions). Which line of your code is needed because the dashboard does not control the owners of the data feeds?",
+      "terms": [
+        [
+          "System of systems (SoS)",
+          "Independent systems working together to provide a shared service.",
+          "أنظمة مستقلة تتعاون لتقديم خدمة مشتركة."
+        ],
+        [
+          "Constituent",
+          "One of the systems taking part.",
+          "أحد الأنظمة المشاركة."
+        ],
+        [
+          "Governance",
+          "Agreements about who decides, who is responsible and how changes are handled.",
+          "اتفاقات تحدد صاحب القرار والمسؤولية وطريقة التعامل مع التغييرات."
+        ],
+        [
+          "Feed / timestamp",
+          "Incoming updates / the recorded time attached to a value.",
+          "تحديثات بيانات واردة / الوقت المسجل مع القيمة."
+        ],
+        [
+          "Freshness limit",
+          "The greatest acceptable age of a data item for this task.",
+          "أقصى عمر مقبول للبيانات في هذه المهمة."
+        ],
+        [
+          "Staged acceptance",
+          "Checking readiness in steps before allowing wider use.",
+          "التحقق من الجاهزية على مراحل قبل توسيع الاستخدام."
+        ]
+      ],
+      "stress": "Transport now sends vehicle-location updates every 20 minutes instead of every minute. Its API data structure has not changed. Security information is still current. The trial coordinator cannot force transport to return to the old update rate. Facilities can still use current security incidents even without vehicle locations. Decide whether to keep, limit or replace the promise made by the shared service. Identify what remains useful.",
+      "warmup": [
+        "Every participating system passes its own tests. Does this prove that their shared service works?",
+        "No. You still need tests of the connections between systems, changes made by independent owners, and behavior that appears only when the systems work together."
+      ]
+    }
+  }
+}
