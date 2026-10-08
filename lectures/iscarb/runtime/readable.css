@@ -17,6 +17,7 @@ button,.topnav button,.topnav a,.footerbar button{font-size:1rem;min-height:44px
 .visual{width:100%;max-width:1150px;margin:0 auto;flex:1;min-height:0;gap:12px}
 .figure-button{min-height:0;padding:18px;max-height:100%;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:1}
 .figure-button img{max-height:min(46dvh,510px);max-width:100%;width:auto;height:auto;object-fit:contain}
+@media(min-width:1001px){.source-vector img{width:min(100%,520px);height:auto;object-fit:contain}}
 .caption{font-size:.875rem}
 .classroom-redraw-wrap{background:linear-gradient(145deg,#f8fbfd,#eef5f8);border:1px solid #9fc3cf;color:#0d2430;text-align:left;overflow:hidden}
 .classroom-redraw-wrap:hover{border-color:#58c9d1;box-shadow:0 12px 34px rgba(0,0,0,.18)}
