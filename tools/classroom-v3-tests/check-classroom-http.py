@@ -48,8 +48,9 @@ async def main():
         assert await panel.count()==1,f'CH{ch} {s["id"]}: source vector missing'
         vector=panel.locator('.source-vector:visible')
         assert await vector.count()==1
-        img=vector.locator('img');src=await img.get_attribute('src')
-        assert urlsplit(src).path.endswith('.svg') and '/source-vectors/' in urlsplit(src).path
+        img=vector.locator('img');src=await img.evaluate("(i)=>i.currentSrc||i.src")
+        src_path=urlsplit(src).path
+        assert src_path.endswith('.svg') and '/source-vectors/' in src_path
         box=await img.bounding_box();assert box and max(box['width'],box['height'])>=260
         figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'original-source-vector','width':round(box['width']),'height':round(box['height'])})
         await vector.click()
@@ -58,7 +59,7 @@ async def main():
         assert await zoom.count()==1
         await zoom.evaluate("(i)=>i.decode().catch(()=>{})")
         zoom_info=await zoom.evaluate("(i)=>({src:i.currentSrc||i.src,width:i.naturalWidth,height:i.naturalHeight})")
-        assert urlsplit(zoom_info['src']).path==urlsplit(src).path,(src,zoom_info)
+        assert urlsplit(zoom_info['src']).path==src_path,(src,zoom_info)
         assert zoom_info['width']>0 and zoom_info['height']>0,zoom_info
         await page.locator('#modal-close').click()
        else:
