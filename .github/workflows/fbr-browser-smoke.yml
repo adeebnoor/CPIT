@@ -33,6 +33,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Install DOM test environment
         run: npm install --no-save --package-lock=false jsdom@30.0.1
       - name: Check current course interactions and invalid routes
@@ -47,5 +50,7 @@ jobs:
         run: node tools/learning-path-tests/check-assignments.cjs
       - name: Check executable contract and retry teaching models
         run: node tools/learning-path-tests/check-labs.cjs
+      - name: Check Python build engine, SystemExit containment and recovery
+        run: python tools/learning-path-tests/check-builds.py
       - name: Check nine-chapter hub and gateways
         run: node tools/learning-path-tests/check-hub.cjs
