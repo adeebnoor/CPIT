@@ -133,8 +133,9 @@ async def main():
             browser = await p.chromium.launch(**options)
             online = await browser.new_context(accept_downloads=True)
             page = await online.new_page()
-            response = await page.goto(urljoin(BASE,'iscarb.html')+'?offline-test='+PUB['release'], wait_until='networkidle')
+            response = await page.goto(urljoin(BASE,'iscarb.html')+'?offline-test='+PUB['release'], wait_until='domcontentloaded', timeout=60000)
             assert response and response.status == 200
+            await page.wait_for_selector('#chapter-10 details.chapter-resources', timeout=15000)
             for chapter in CHAPTERS:
                 resources = page.locator(f'#chapter-{chapter} details.chapter-resources')
                 if await resources.count() and not await resources.evaluate('(e)=>e.open'):
