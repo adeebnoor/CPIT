@@ -6,7 +6,7 @@ local state. The static assignment does not submit work to an LMS.
 """
 import asyncio, hashlib, json, os, re, sys, traceback
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 from playwright.async_api import async_playwright
 ROOT=Path(__file__).resolve().parents[2]
 PUB=json.loads((ROOT/'curriculum/publication.json').read_text())
@@ -49,7 +49,7 @@ async def main():
         vector=panel.locator('.source-vector:visible')
         assert await vector.count()==1
         img=vector.locator('img');src=await img.get_attribute('src')
-        assert src.endswith('.svg') and '/source-vectors/' in src
+        assert urlsplit(src).path.endswith('.svg') and '/source-vectors/' in urlsplit(src).path
         box=await img.bounding_box();assert box and max(box['width'],box['height'])>=260
         figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'original-source-vector','width':round(box['width']),'height':round(box['height'])})
         await vector.click()
