@@ -133,14 +133,10 @@ jobs:
           import json,pathlib,hashlib,urllib.request,time
           pub=json.loads(pathlib.Path('curriculum/publication.json').read_text())
           assert pub.get('student_submission_version')=='20260922-student-submit-v1'
-          names=['lectures/iscarb/runtime/classroom-v3.js',
-                 'lectures/iscarb/Ch10-FBR-Student-Assignment.html',
-                 'lectures/iscarb/Ch11-FBR-Student-Assignment.html']
+          names=['lectures/iscarb/runtime/classroom-v3.js']+[a['path'] for a in pub['assignments']]
           expected={n:pub['delivery_asset_sha256'].get(n) for n in names}
-          # Assignments may not be declared in older manifests; compare to reviewed manifest when needed.
-          review=json.loads(pathlib.Path('curriculum/student-submit-v1-review.json').read_text())
-          expected[names[1]]=review['assignment_sha256']['10']
-          expected[names[2]]=review['assignment_sha256']['11']
+          missing=[n for n,d in expected.items() if not d]
+          assert not missing,('Missing declared delivery hashes',missing)
           for attempt in range(30):
             bad=[]
             for n,d in expected.items():
