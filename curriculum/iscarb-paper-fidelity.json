@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "812977bf8baeb0f33e96055126e6f1cf5536c94adc3aedc239575f97498e0efe",
+   "assignment_sha256_lf": "f03846fe510af49f0c3e41d366ef0d402fa2ec4092dac4f76bce1c480edee71e",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "0b1ca9a798a9921bef7b4a6f5927578de6275ca224e532769b6396a3c001f5b5",
+   "assignment_sha256_lf": "2d6b40306a61e3fcc2aa2365dd5192208c02f98744f5615fec5435e1ae3fc78b",
    "stress_sha256_lf": "db3663c3ac2ef31db79e70a2c279f1c784913bda41209334e5c9a3a6c76fd6cc"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "02699889743f7b59bcac55d33db10f41be8635bdf8ec99d2320c65e1407b55b9",
+   "assignment_sha256_lf": "1b3b6c1547551c0dbf5cc7d2fd7d8c64f9f6f0afb461f15d9f2e764ca8396ff5",
    "stress_sha256_lf": "97e209be6bf0bd9442c17d663bb667f7cd977ddf1e53e809d5a7f911632b6b67"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "6ff8714a9c8f83664bd051903a28789144c6c35843473f63dbb91565edffff91",
+   "assignment_sha256_lf": "3e7e1f345e1c8b5609a66a4c70d05f2cc9bda57b3142c40ab0dd99cea07d43c5",
    "stress_sha256_lf": "59f9c063fb19615335582861ff6ba9395501cbb90a9c87a3a6fa017c9e49a84d"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "6b5b77e4161aa5df833ba1b4f1dbf985926734d3d0ebba30fe90999b1c62fff6",
+   "assignment_sha256_lf": "e08a5b9e0ffaefce8bfecd2967c47742e437e16162a4a3acf7d2cfa6118e0d97",
    "stress_sha256_lf": "5d558e91bc9d2a11c50f25d5c1220772c51cbd07231823daa5ac7e354b6e8048"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "dd56a86691d553a455a661b97f3e63941add7133856dc343f443f7a7e44ad5d6",
+   "assignment_sha256_lf": "b53182ce4618c999d10173d2a2f0f3d1ea6c9c37bf9d1056845d95a98592f80a",
    "stress_sha256_lf": "7a6a8c3d1e64b662501a40812df2cadf8ab40f9b15d8025094cce49441167914"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "f4c12c4a30dffba44209806cbb4798c53268fdc4e077686f1d6b036d30068389",
+   "assignment_sha256_lf": "ee5019974bfd2717c4dfea6b1666fbc25df73444b01b6bca5b4df22bab8cd5b1",
    "stress_sha256_lf": "caac8d5d01403ad0decaad0500aa072893b848be2e895586eea604bb8c1d01d8"
   }
  },
@@ -626,6 +626,21 @@
    "date": "2026-10-04",
    "base_release": "20260926-genai-v12",
    "summary": "Assignments 3-9: STRESS opens on the page after commit again; one Blackboard upload for the final PDF",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261008-python-runtime-hardening",
+   "date": "2026-10-08",
+   "base_release": "20260926-genai-v12",
+   "summary": "Assignments 3-9 runtime-only hardening: contain SystemExit and other BaseException exits inside the build record, restart a failed Pyodide worker automatically, preserve student code on infrastructure failure, and add real Python-build regression/live-browser checks. Assignment prompts, criteria, points, case evidence and STRESS content are unchanged.",
    "repinned": [
     "assignment 12",
     "assignment 13",
