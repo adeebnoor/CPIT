@@ -54,7 +54,11 @@ async def main():
         figure_checks.append({'chapter':ch,'slide':s['id'],'mode':'original-source-vector','width':round(box['width']),'height':round(box['height'])})
         await vector.click()
         assert not await page.locator('#modal').is_hidden()
-        assert src in await page.locator('#modal-body').inner_html()
+        zoom=page.locator('#modal-body img.zoom-figure')
+        assert await zoom.count()==1
+        zoom_info=await zoom.evaluate("(i)=>({src:i.currentSrc||i.src,width:i.naturalWidth,height:i.naturalHeight})")
+        assert urlsplit(zoom_info['src']).path==urlsplit(src).path,(src,zoom_info)
+        assert zoom_info['width']>0 and zoom_info['height']>0,zoom_info
         await page.locator('#modal-close').click()
        else:
         img=page.locator('.figure-button img')
