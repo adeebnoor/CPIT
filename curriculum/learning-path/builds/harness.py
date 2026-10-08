@@ -14,13 +14,13 @@ def __mutate(helpers, student, mutants, tests):
             exec(helpers, mns)
             exec(compile(student, "your_code.py", "exec"), mns)
             exec(code, mns)
-        except Exception:
+        except BaseException:
             res.append([label, True]); continue
         killed = False
         for name in tests:
             try:
                 mns[name]()
-            except Exception:
+            except BaseException:
                 killed = True
                 break
         res.append([label, killed])
@@ -31,7 +31,7 @@ def __run(helpers, student, checks, mutants=""):
     out = {"tests": [], "checks": [], "error": None}
     try:
         exec(helpers, ns)
-    except Exception as e:
+    except BaseException as e:
         out["error"] = "Course helpers failed: " + __last_line(e)
         return json.dumps(out)
     base = dict(ns)   # the checks use the very same helper classes as the student code
@@ -40,7 +40,7 @@ def __run(helpers, student, checks, mutants=""):
     except SyntaxError as e:
         out["error"] = f"Your code did not run (line {e.lineno}): SyntaxError: {e.msg}"
         return json.dumps(out)
-    except Exception as e:
+    except BaseException as e:
         tb = traceback.extract_tb(e.__traceback__)
         line = next((f.lineno for f in reversed(tb) if f.filename == "your_code.py"), None)
         out["error"] = "Your code did not run" + (f" (line {line})" if line else "") + ": " + __last_line(e)
@@ -52,7 +52,7 @@ def __run(helpers, student, checks, mutants=""):
             out["tests"].append([name, True, ""])
         except AssertionError as e:
             out["tests"].append([name, False, "assertion failed" + (": " + str(e) if str(e) else "")])
-        except Exception as e:
+        except BaseException as e:
             out["tests"].append([name, False, __last_line(e)])
     cns = dict(base)
     cns["__name__"] = "checks"
@@ -76,6 +76,6 @@ def __run(helpers, student, checks, mutants=""):
             out["checks"].append([label, True, ""])
         except AssertionError as e:
             out["checks"].append([label, False, str(e) or "not met"])
-        except Exception as e:
+        except BaseException as e:
             out["checks"].append([label, False, "your code raised " + __last_line(e)])
     return json.dumps(out)
