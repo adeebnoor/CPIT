@@ -144,7 +144,7 @@ function mount(ch){
   run.disabled=true;status.textContent=runner?'Running…':'Starting Python… the first run downloads it once (about 10 MB).';
   var src=code.value;
   runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var sidEl=el('sid'),rec=report(ch,r,h,sidEl?sidEl.value:'');if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
-  .catch(function(e){status.textContent='Python build problem: '+e.message+' Your code is preserved; click Run to retry.';}).then(function(){run.disabled=code.readOnly;});});
+  .catch(function(e){return fingerprint(src).then(function(h){var sidEl=el('sid'),r={error:'TECHNICAL RUNNER FAILURE: '+(e.message||e)},rec=report(ch,r,h,sidEl?sidEl.value:'');if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent='Python runner failed after automatic recovery attempts. A technical-failure Build Record was created so Part A is not blocked; your instructor can review it.';});}).then(function(){run.disabled=code.readOnly;});});
  if(reset)reset.addEventListener('click',function(){if(code.readOnly)return;if(!armed){armed=true;reset.textContent='Click again to replace your code';setTimeout(function(){armed=false;reset.textContent='Reset to starter code';},4000);return;}armed=false;reset.textContent='Reset to starter code';plan.readOnly=false;code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));});
 }
 return{SPEC:SPEC,mount:mount,runChecks:runChecks,vivaFor:vivaFor,setRunner:function(f){runner=f;}};

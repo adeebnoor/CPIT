@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "59639c06cbb67bf8262054b2e74b2eada303ac8d0bbfbff90d4e90dff8f67981",
+   "assignment_sha256_lf": "bf3dff510328e857fe9c346c79e9479756b9b06eb592de6e731a86a68f7c0e3a",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "bccf8090c04fa28f586a5e9d57a6f46fe838bb7e7a33b081689f510166776cc5",
+   "assignment_sha256_lf": "5c2f3e3eb8092acbb064e6b509801bd3f1696f5b9951fb4272f6f9a3625be72e",
    "stress_sha256_lf": "db3663c3ac2ef31db79e70a2c279f1c784913bda41209334e5c9a3a6c76fd6cc"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "3a94a197d021e1e6de8a63ec0cc35c5b4ab3f55249fbdeb58aed1da0663fa340",
+   "assignment_sha256_lf": "f14b05e051f43a382849bbdd1165100aa00025b5eac1049f89e3e994821f5509",
    "stress_sha256_lf": "97e209be6bf0bd9442c17d663bb667f7cd977ddf1e53e809d5a7f911632b6b67"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "4eaa8acd196358ab8b8c8df65d53e6f35da06a2a6c7ed60336a89153d497f3e0",
+   "assignment_sha256_lf": "c14202d79d49a2f14112fe8f759889e9c7f472fa85f8266563d378afdcacc65b",
    "stress_sha256_lf": "59f9c063fb19615335582861ff6ba9395501cbb90a9c87a3a6fa017c9e49a84d"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "12bc23a3a6bbe6bc5ef5f47830791b591bbc488310fbe239bbe84c59eab5f2fd",
+   "assignment_sha256_lf": "13e2a316371430c6eff8b8f0e9d7ac77dca1a6602c3875e8f8d4f321e1d9f0fa",
    "stress_sha256_lf": "5d558e91bc9d2a11c50f25d5c1220772c51cbd07231823daa5ac7e354b6e8048"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "637157d5340c559af17a768fbea2b251310a031ee86763a7c97333a5b256c34b",
+   "assignment_sha256_lf": "2e59c0f594b78d586275ec932b604d162d90abd72965c0a467e1137f262be46c",
    "stress_sha256_lf": "7a6a8c3d1e64b662501a40812df2cadf8ab40f9b15d8025094cce49441167914"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "a8510a72de157f44056f29a0a1107519aab12d8e55b34036a86f1dcb1af8a87c",
+   "assignment_sha256_lf": "44e542ec27e71b3f16430e3dbe65adf06c6235149a9d72fa265be44a62cd3443",
    "stress_sha256_lf": "caac8d5d01403ad0decaad0500aa072893b848be2e895586eea604bb8c1d01d8"
   }
  },
@@ -656,6 +656,21 @@
    "date": "2026-10-08",
    "base_release": "20260926-genai-v12",
    "summary": "Student-facing Python Build recovery: editing code or resetting the starter unlocks the Build Plan so students can revise and rerun without losing work.",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261008-build-runner-failsafe-v1",
+   "date": "2026-10-08",
+   "base_release": "20260926-genai-v12",
+   "summary": "Student-facing fail-safe: if the in-browser Python runner still fails after automatic recovery, the assignment records a technical-runner-failure Build Record instead of blocking Part A.",
    "repinned": [
     "assignment 12",
     "assignment 13",
