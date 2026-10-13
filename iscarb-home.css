@@ -176,6 +176,7 @@ button.text-link{background:none;border:0;cursor:pointer;color:var(--muted);font
 .note-logos{display:flex;gap:18px;align-items:center;margin:4px 0 10px}
 .note-logos a{display:flex;align-items:center;text-decoration:none}
 .note-logos img{height:36px;width:auto;max-width:120px;object-fit:contain;background:#fff;border-radius:4px}
+.course-home .intro-copy .fact-warn{margin:0 0 16px;max-width:38rem}
 @media(max-width:900px){
   .course-home .course-intro{grid-template-columns:1fr;gap:22px;padding-top:18px}
   .course-home h1{max-width:none;font-size:2.5rem}
@@ -187,4 +188,7 @@ button.text-link{background:none;border:0;cursor:pointer;color:var(--muted);font
   .course-home .lesson .actions{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}
   .course-home h1{font-size:2.15rem}
   .course-home .lesson{padding:16px 0}
+  .course-home .course-intro .actions{display:flex;flex-wrap:wrap;gap:4px 16px}
+  .course-home .course-intro .actions .btn{flex:1 1 100%}
+  .course-home .course-intro .actions .text-link{flex:0 1 auto;min-height:44px}
 }
