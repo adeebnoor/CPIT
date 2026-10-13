@@ -1,0 +1,190 @@
+/* CPIT-455 hub only. Shared course chrome stays in course-shell.css. */
+.course-home{
+  --paper:var(--bg);
+  --rule:var(--line);
+}
+.course-home h1,
+.course-home .section-heading h2,
+.course-home .chapter-heading h3,
+.course-home .note h3{
+  font-family:Palatino,"Palatino Linotype","Iowan Old Style",Georgia,serif;
+  font-weight:560;
+}
+.course-home .course-intro{
+  grid-template-columns:minmax(0,1.45fr) minmax(240px,.62fr);
+  align-items:start;
+  gap:56px;
+  padding:28px 0 8px;
+}
+.course-home h1{
+  font-size:clamp(2.7rem,5.2vw,4.35rem);
+  line-height:1.02;
+  letter-spacing:-.03em;
+  font-weight:560;
+  max-width:14em;
+  margin:8px 0 18px;
+}
+.course-home h1 em{
+  font-style:italic;
+  font-weight:500;
+  color:var(--ink);
+}
+.course-home .intro{
+  font-size:1.125rem;
+  line-height:1.55;
+  max-width:38rem;
+  color:var(--ink);
+  margin:0 0 8px;
+}
+.course-home .intro-ar{
+  direction:rtl;
+  width:max-content;
+  max-width:100%;
+  margin:0 0 16px;
+  color:var(--muted);
+  font-size:1.05rem;
+}
+.course-home .intro-credit{margin-top:8px}
+.intro-facts{
+  border-top:3px solid var(--accent);
+  background:var(--panel);
+  padding:18px 20px 16px;
+}
+.intro-facts .ey{margin-bottom:10px}
+.intro-facts ul{list-style:none;margin:0;padding:0}
+.intro-facts li{
+  display:grid;
+  grid-template-columns:2.4rem minmax(0,1fr);
+  gap:10px;
+  align-items:baseline;
+  padding:9px 0;
+  border-bottom:1px solid var(--line);
+}
+.intro-facts li b{
+  font-family:Palatino,Georgia,serif;
+  font-size:1.35rem;
+  font-weight:560;
+  letter-spacing:-.03em;
+}
+.intro-facts li span{font-size:.9375rem;color:var(--muted);line-height:1.35}
+.fact-warn{
+  margin:12px 0 0;
+  font-size:.875rem;
+  line-height:1.45;
+  color:var(--gold);
+}
+.course-home .course-layout{padding-top:8px}
+.course-home .course-sidebar>p{max-width:16rem}
+.course-home .chapter-search{
+  align-items:end;
+  margin:8px 0 8px;
+  padding-top:8px;
+}
+.course-home .chapter-search h2{
+  font-family:Palatino,Georgia,serif;
+  font-weight:560;
+  font-size:clamp(1.8rem,2.4vw,2.2rem);
+  letter-spacing:-.03em;
+  margin:0;
+}
+.course-home .path-section{padding-top:28px}
+.course-home .section-heading{margin-bottom:10px}
+.course-home .section-heading h2{font-size:1.45rem;font-weight:560}
+.course-home .section-heading p{font-size:.975rem}
+.course-home .chapter-list{
+  border:0;
+  border-top:1px solid var(--line);
+  border-radius:0;
+  gap:0;
+  background:transparent;
+}
+.course-home .lesson{
+  border:0;
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+  padding:16px 0 14px;
+  gap:18px;
+  grid-template-columns:52px minmax(0,1fr);
+}
+.course-home .chapter-number{
+  border:0;
+  padding-top:4px;
+  font-size:1.65rem;
+}
+.course-home .chapter-heading h3{font-size:1.45rem}
+.course-home .chapter-number small{display:none}
+.course-home .chapter-content{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  column-gap:28px;
+  align-items:start;
+}
+.course-home .chapter-heading,
+.course-home .chapter-content>p,
+.course-home .meta{grid-column:1}
+.course-home .chapter-content>p{margin:2px 0 4px;max-width:42rem}
+.course-home .lesson .actions{
+  grid-column:2;
+  grid-row:1 / span 3;
+  margin:2px 0 0;
+  align-self:center;
+}
+.course-home .meta{align-items:center}
+.course-home .meta span+span{flex-basis:auto;border:0;padding-left:14px}
+.course-home .chapter-resources,
+.course-home .check,
+.course-home .review-status{grid-column:1 / -1}
+button.text-link{background:none;border:0;cursor:pointer;color:var(--muted);font-weight:600}
+.chapter-resources{margin:0 0 4px}
+.course-home .check{margin-top:2px}
+.course-notes{margin:36px 0 8px;padding-top:8px}
+.course-notes>h2{
+  font-family:Palatino,Georgia,serif;
+  font-weight:560;
+  font-size:1.7rem;
+  letter-spacing:-.03em;
+  margin:0 0 14px;
+}
+.note-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.course-home .note{
+  margin:0;
+  border:1px solid var(--line);
+  border-left:0;
+  border-radius:0;
+  background:var(--panel);
+  padding:18px 18px 14px;
+}
+.course-home .note h3{
+  font-size:1.25rem;
+  margin:0 0 8px;
+  letter-spacing:-.02em;
+}
+.course-home .note p{margin:0 0 10px;color:var(--muted);font-size:.975rem;line-height:1.55}
+.course-home .note .actions{margin:8px 0 0}
+.coach-prompt{
+  display:block;
+  margin:0 0 8px;
+  padding:10px 12px;
+  background:var(--bg);
+  border:1px solid var(--line);
+  font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color:var(--ink);
+  overflow-wrap:anywhere;
+}
+.note-logos{display:flex;gap:18px;align-items:center;margin:4px 0 10px}
+.note-logos a{display:flex;align-items:center;text-decoration:none}
+.note-logos img{height:36px;width:auto;max-width:120px;object-fit:contain;background:#fff;border-radius:4px}
+@media(max-width:900px){
+  .course-home .course-intro{grid-template-columns:1fr;gap:22px;padding-top:18px}
+  .course-home h1{max-width:none;font-size:2.5rem}
+  .note-grid{grid-template-columns:1fr}
+  .intro-facts{order:2}
+}
+@media(max-width:700px){
+  .course-home .chapter-content{display:block}
+  .course-home .lesson .actions{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}
+  .course-home h1{font-size:2.15rem}
+  .course-home .lesson{padding:16px 0}
+}
