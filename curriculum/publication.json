@@ -1690,7 +1690,7 @@
   ],
   "delivery": "Local, integrity-checked shared runtime and on-demand source assets; offline chapter ZIPs preserve the same folder structure.",
   "delivery_asset_sha256": {
-    "lectures/iscarb/runtime/classroom-v3.js": "884e0a3d826e8200b6de61fd773e09fa65bb56e59375801a1f6217035a615c25",
+    "lectures/iscarb/runtime/classroom-v3.js": "b2d83069ff674e755972d9e093be047d65892ecad9bffe729fcb93b57ec56b5f",
     "lectures/iscarb/runtime/classroom-v3.css": "797d9157d4a4106a9b1ec948d8fbd19c381f20057de6a1c2e3d8b7354728b565",
     "lectures/iscarb/assets/v3/ch14-cyberplan-combined.jpg": "24569c89e9f240063fd99e3293bda2dbbb1c5d114dbd792bea68e0bd120eaeb2",
     "lectures/iscarb/assets/v3/genai-banner.jpg": "384fa4180722fd7ffa0d096d1993e49e2afc0ab316f598eb9eb404201d9d2e02",
