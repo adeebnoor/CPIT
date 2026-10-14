@@ -3,7 +3,8 @@
  "case": {
   "fictional": true,
   "answerKey": "server-side ownership check for each actor and object",
-  "lens": "The application also adds an AI assistant that answers questions about team documents. It retrieves documents through a service account that can read every team's files. It relies on its instructions to answer only from the asker's team. Pilot users rated its answers highly. Hold that question: after the testing slides, one slide shows how this chapter's methods apply to the assistant."
+  "lens": "The application also adds an AI assistant that answers questions about team documents. It retrieves documents through a service account that can read every team's files. It relies on its instructions to answer only from the asker's team. Pilot users rated its answers highly. Hold that question: after the testing slides, one slide shows how this chapter's methods apply to the assistant.",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -83,7 +84,21 @@
   "answer": "A privacy requirement: records are encrypted while in transit between clinics. The negative test captures a transfer on the network in an authorized environment and checks that no readable record appears.",
   "concept": "misuse case to requirement and test",
   "answerKey": "encrypt records in transit; capture test shows no readable record",
-  "at": "X06"
+  "at": "X06",
+  "kind": "source",
+  "check": {
+   "options": [
+    "A sign-in check at each clinic",
+    "Encrypt records in transit, and test by capturing a transfer",
+    "Hide the transfer menu from other staff"
+   ],
+   "answer": 1,
+   "why": [
+    "Sign-in protects the endpoints, not the records travelling between them.",
+    "Right. Encryption in transit addresses the interception, and a capture test shows no readable record.",
+    "Hiding a menu does not protect data that is already on the network."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -639,7 +654,6 @@
   },
   "14": {
    "cls": "full",
-   "reason": "Section heading or figure-only slide; TODO",
    "unit": "X02"
   },
   "15": {
@@ -660,7 +674,6 @@
   },
   "19": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X01"
   },
   "20": {
@@ -705,7 +718,6 @@
   },
   "30": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "31": {
@@ -726,7 +738,6 @@
   },
   "35": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X06"
   },
   "36": {
@@ -805,7 +816,6 @@
   },
   "49": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "R11"
   },
   "50": {
@@ -890,7 +900,6 @@
   },
   "70": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "R18"
   },
   "71": {
@@ -1226,5 +1235,9 @@
    }
   ],
   "other": "the answer uses a chapter concept correctly, rests only on the facts given in the task, names a negative test with an observable result, and states which paths the claim covers. A different decision that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "Hiding a link is the wrong control whenever the server still returns the record to anyone who asks for it.",
+  "condition": "the server answers a request for another user's record"
  }
 }

@@ -2,7 +2,8 @@
  "chapter": 16,
  "case": {
   "fictional": true,
-  "answerKey": "the unit stated as a precondition at the boundary"
+  "answerKey": "the unit stated as a precondition at the boundary",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -70,6 +71,11 @@
    "short": "a property, such as an error rate, that only many calls together can show",
    "ar": "متطلب جودة",
    "added": true
+  },
+  {
+   "term": "contract",
+   "short": "a written statement of what a component needs and provides: inputs, outputs, units, ranges and errors",
+   "ar": "عقد الواجهة"
   }
  ],
  "transfer": {
@@ -81,7 +87,21 @@
   "answer": "A test of the reused component against Ariane 5's input ranges, not Ariane 4's. The earlier success was evidence for the earlier context only. The source case is historical, not a new experiment.",
   "concept": "validation in the new context",
   "answerKey": "test against the new system's input ranges",
-  "at": "VALIDATE"
+  "at": "VALIDATE",
+  "kind": "source",
+  "check": {
+   "options": [
+    "Re-run the Ariane 4 flight tests",
+    "Review the code style of the reused module",
+    "Test the reused component against Ariane 5's input ranges"
+   ],
+   "answer": 2,
+   "why": [
+    "Ariane 4 tests repeat the old context, where the values fitted.",
+    "Code style does not reveal a value that no longer fits the new trajectory.",
+    "Right. Only Ariane 5's ranges would have shown the overflow."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -239,7 +259,7 @@
    "minutes": 3,
    "tier": "core",
    "concept": "contract clauses for an AI component",
-   "answerKey": "a unit precondition; the error rate is a quality requirement",
+   "answerKey": "the error-rate bound is a quality requirement, not a postcondition",
    "commonError": "Students try to write the forecast-error limit as a postcondition. No single call can satisfy or violate it.",
    "added": true,
    "answer": "The precondition. State unit = 'Celsius' with a plausible range, checked at the adapter. That rejects Fahrenheit values a model trained on Celsius would otherwise accept. A value plausible in both units still needs the unit declared, not inferred. OCL pre- and postconditions constrain each individual call. The forecast-error limit cannot be one: no single call satisfies or violates it. It belongs in a separate quality requirement. Verify it on a held-out evaluation set. Re-check it when the input distribution or the model version changes. Record the approved model version in the postcondition or as an invariant. A version change then becomes a contract change that needs re-validation."
@@ -247,13 +267,14 @@
   "APPLY": {
    "minutes": 1,
    "tier": "core",
-   "concept": "revising under new evidence",
-   "answerKey": "unit precondition at the adapter; re-validate past forecasts",
+   "concept": "ownership after the change",
+   "answerKey": "the integration owner owns it; forecast users are told",
    "commonError": "Students fix the adapter and forget the forecasts already produced. Ask what was issued since the mismatch began.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the forecaster, state the unit and range as a precondition at the adapter. Re-validate the forecasts produced since the mismatch began before anyone relies on them.",
-   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
+   "answer": "The integration owner of the heat-alert service owns it, at the adapter. Forecast users are told which past forecasts were wrong and must be ignored.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case",
+   "question": "Who owns the unit agreement between the two components?"
   },
   "END": {
    "minutes": 2,
@@ -704,7 +725,6 @@
   },
   "32": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X06"
   },
   "33": {
@@ -741,7 +761,7 @@
    "kind": "title"
   },
   "41": {
-   "cls": "full",
+   "cls": "slide",
    "unit": "B01",
    "kind": "list",
    "items": [
@@ -795,7 +815,6 @@
   },
   "51": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "prose",
    "unit": "D16"
   },
@@ -1173,5 +1192,9 @@
    }
   ],
   "other": "the answer names the chapter concept that decides, uses only the facts given in the task, writes at least one testable condition at the component boundary, and names evidence from a boundary test or record that someone else can check. A different contract that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "Connecting two components directly is the wrong choice when their interfaces do not state the same unit and range.",
+  "condition": "the two interfaces state different or no units"
  }
 }

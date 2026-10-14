@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-14  
-**Commit ID:** 6edac557-fb49-4e96-8236-fda867a7d767  
-**Part A committed:** 2026-10-14T20:26:20.925Z  
-**STRESS revealed:** 2026-10-14T20:26:20.936Z
+**Commit ID:** d9df9bf5-4f5b-4d91-ba17-26ffb3f10219  
+**Part A committed:** 2026-10-14T21:14:45.125Z  
+**STRESS revealed:** 2026-10-14T21:14:45.136Z
 
 ## Scenario
 A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.
@@ -17,6 +17,9 @@ The database creates one reservation for each new request ID.
 Normal requests have succeeded. Nobody has tested what happens if the database saves a booking but the reply is then lost.
 
 Recommend how these parts should work together in a trial, and the rule for sending a request again (retry).
+
+## Chapter boundary sentence (written in the lecture)
+Not written in the lecture on this device.
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -48,7 +51,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-14T20:26:20.725Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-14T21:14:44.924Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

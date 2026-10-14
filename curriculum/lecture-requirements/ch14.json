@@ -4,7 +4,8 @@
   "fictional": true,
   "answerKey": "identity restored through an independent audited route",
   "text": "After a fictional disruption, a backup server starts. Authorized staff still cannot complete the critical task, because the access service is unavailable. The only trained recovery specialist is off shift.",
-  "lens": "With the specialist off shift, staff turn to the organisation's AI recovery assistant. It is a vendor-hosted chatbot trained on past runbooks, and it gives confident step-by-step instructions. It has never been used in a recovery rehearsal. Hold that question: after the design slides, one slide shows how this chapter's methods apply to the assistant."
+  "lens": "With the specialist off shift, staff turn to the organisation's AI recovery assistant. It is a vendor-hosted chatbot trained on past runbooks, and it gives confident step-by-step instructions. It has never been used in a recovery rehearsal. Hold that question: after the design slides, one slide shows how this chapter's methods apply to the assistant.",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -87,6 +88,20 @@
    ],
    "answer": 0,
    "why": "The timer detects that the system stopped responding. The restart begins recovery, but it does not restore lost calls or check dispatch data."
+  },
+  "kind": "source",
+  "check": {
+   "options": [
+    "Recognition: it notices that the system has stopped responding",
+    "Reinstatement: it restores every service and normal operation",
+    "Resistance: it prevents the failure from happening"
+   ],
+   "answer": 0,
+   "why": [
+    "Right. The timer detects the stop; the restart only begins recovery.",
+    "A restart does not restore lost calls or check dispatch data, so it is not reinstatement.",
+    "The failure has already happened when the timer fires, so it does not resist it."
+   ]
   }
  },
  "slides": {
@@ -276,13 +291,14 @@
   "APPLY": {
    "minutes": 1,
    "tier": "core",
-   "concept": "revising under new evidence",
-   "answerKey": "take the assistant off the critical path",
+   "concept": "ownership after the change",
+   "answerKey": "the on-call service manager owns it; ward staff are told",
    "commonError": "Students keep the assistant in the plan and add a backup copy. Ask who tells the users of the critical service what is degraded and for how long.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. Take the assistant off the critical path. Restore identity through an independent, audited emergency route. Tell the users of the critical service what is degraded and for how long.",
-   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
+   "answer": "The on-call service manager owns it, because recovery authority sits with a named person. Ward staff are told what is degraded and for how long. The vendor is told that the assistant may not hold emergency credentials.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case",
+   "question": "Who owns the decision to take the assistant off the critical path?"
   },
   "END": {
    "minutes": 2,
@@ -384,7 +400,7 @@
    "minutes": 3,
    "tier": "core",
    "concept": "independent recovery path",
-   "answerKey": "the assistant shares the runbooks' assumptions",
+   "answerKey": "a separately rehearsed path fails for different reasons",
    "think": "Compare two mechanisms: a separately controlled recovery path, or following the AI assistant's recovery steps. Which one would you choose?",
    "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
    "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
@@ -731,7 +747,6 @@
   },
   "26": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "D14"
   },
   "27": {
@@ -760,7 +775,6 @@
   },
   "33": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "34": {
@@ -781,22 +795,18 @@
   },
   "38": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "39": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "40": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "41": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "42": {
@@ -890,12 +900,10 @@
   },
   "60": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "R18"
   },
   "61": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "R09"
   },
   "62": {
@@ -1193,5 +1201,9 @@
    }
   ],
   "other": "the answer names the critical service, uses only the facts given in the task, separates recovery from reinstatement, and names evidence from a rehearsal or record that someone else can check. A different plan that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "Adding a backup copy is the wrong choice when it shares the same credentials or identity service as the original.",
+  "condition": "the backup signs in through the same identity service"
  }
 }

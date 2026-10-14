@@ -17,7 +17,7 @@ STORY_PATH = ROOT / 'lectures/iscarb/runtime/story-v3.js'
 RUNTIME_PATH = ROOT / 'lectures/iscarb/runtime/classroom-v3.js'
 
 # LANG-2: argument-framework terms that may appear in student text only when the chapter glossary defines them.
-FORBIDDEN = ['claim', 'warrant', 'bounded', 'acceptance check', 'contract assumption', 'denominator']
+FORBIDDEN = ['claim', 'warrant', 'bounded', 'acceptance check', 'contract assumption', 'contract', 'denominator']
 MAX_WORDS = 20          # LANG-1
 MAX_GRADE = 12.0        # LANG-5 (preferred)
 NON_CONTENT = ('TITLE', 'MAP', 'START', 'END')
@@ -88,7 +88,7 @@ def load_story() -> dict:
             continue
         if cur is None:
             continue
-        for key, txt in re.findall(r"(coldOpen|twist|epilogue|stakes|setting|practice|lesson|bridge|question|q): '((?:[^'\\]|\\.)*)'", line):
+        for key, txt in re.findall(r"(coldOpen|twist|epilogue|stakes|setting|practice|lesson|differs|bridge|question|q): '((?:[^'\\]|\\.)*)'", line):
             chapters[cur].append((f'story.{key}', txt.replace("\\'", "'")))
         if re.match(r"\s*'", line):
             for a in re.findall(r"'((?:[^'\\]|\\.)*)'", line):
@@ -163,6 +163,13 @@ def student_texts(data: dict, story: list | None = None) -> list[tuple[str, str]
     tr = data.get('transfer') or {}
     for k in ('title', 'text', 'question', 'answer'):
         add(f'transfer.{k}', tr.get(k))
+    tc = tr.get('check') or {}
+    for o in tc.get('options', []):
+        add('transfer.check.option', o)
+    for w in tc.get('why', []):
+        add('transfer.check.why', w)
+    bd = data.get('bound') or {}
+    add('bound.model', bd.get('model'))
     tv = tr.get('vote') or {}
     add('transfer.vote.q', tv.get('q'))
     add('transfer.vote.why', tv.get('why'))

@@ -66,7 +66,7 @@ async def check_page(browser,url,ch,mode,out):
     for b in d['roadmap']['branches']:
         assert b['caseLens'] in await page.locator('.case-map-details').inner_text()
     await page.locator('#modal-close').click()
-    assert not await no_overflow(page)
+    _ov=await no_overflow(page); assert not _ov,(ch,_ov)
 
     # Story is immediately after the map and does not reveal the mutation.
     await page.evaluate('iscarb.go(2)')
@@ -74,7 +74,7 @@ async def check_page(browser,url,ch,mode,out):
     assert d['case']['headline'] in story and d['case']['text'] in story and d['case']['question'] in story
     assert d['case']['mutation'] not in story
     assert 'One story, five lenses' in story
-    assert not await no_overflow(page)
+    _ov=await no_overflow(page); assert not _ov,(ch,_ov)
 
     # Every ordinary subject screen is explicitly tied back to the same case.
     for i,s in enumerate(d['slides']):
@@ -96,7 +96,7 @@ async def check_page(browser,url,ch,mode,out):
     for phrase in ['COMPLETE','Required review','Five-objective check',f'Assignment {d["assignment"]}']:
         assert phrase in end,(ch,phrase,end[:500])
     assert await page.locator('.end-hero').count()==1
-    assert not await no_overflow(page)
+    _ov=await no_overflow(page); assert not _ov,(ch,_ov)
 
     # Mobile: map/story/end reflow, not shrink into an unreadable canvas.
     await page.set_viewport_size({'width':390,'height':844})

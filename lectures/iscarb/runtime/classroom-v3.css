@@ -267,3 +267,63 @@ dfn.gl[data-ar]:hover::after,dfn.gl[data-ar]:focus::after{content:attr(data-def)
 .src-fig img{max-width:100%;max-height:120px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:6px}
 .aix-rubric table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
 .aix-rubric th,.aix-rubric td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+
+/* report 4 · COMMIT: write before the reveal */
+.commit-box{display:flex;flex-direction:column;gap:2px;margin:4px 0 2px;flex:0 0 auto}
+.commit-box span{font-size:10.5px;letter-spacing:.08em;color:var(--teal)}
+.commit-box textarea{font:inherit;font-size:15px;line-height:1.3;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical;min-height:2.1em}
+.skip-btn{opacity:.85}
+button[data-commit-for]:disabled{opacity:.55;cursor:not-allowed}
+.you-wrote{margin:0 0 6px;padding:5px 9px;border-left:3px solid var(--teal);background:var(--panel);font-size:14px}
+.you-wrote.none{border-left-color:var(--gold)}
+.you-wrote p{margin:2px 0}
+
+/* report 4 · REAL: fixed tags for the training story, real incidents and textbook cases */
+.kind-tag{display:inline-block;margin:0 6px;padding:1px 7px;border-radius:999px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;line-height:1.5;vertical-align:middle;white-space:nowrap;border:1px solid currentColor}
+.kind-training{color:var(--teal)}
+.kind-real{color:var(--pink)}
+.kind-source,.kind-fictional{color:var(--gold)}
+.kind-line{margin:6px 0 0;font-size:13px;line-height:1.45;color:var(--dim)}
+.kind-line .kind-tag{margin-left:0}
+.real-differs{margin:6px 0 0}
+
+/* report 4 · GATE: transfer check */
+.gate-btn{margin:4px 0;border:1px dashed var(--gold);font-weight:600}
+.gate-btn.done{border-style:solid;border-color:var(--green);color:var(--green)}
+.gate-note{margin-left:6px;padding:1px 8px;font-size:12px;border:1px solid var(--gold);border-radius:999px;background:transparent;color:var(--gold);cursor:pointer}
+.tc-opts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.tc-opts button{text-align:left}
+.tc-opts button.right{border-color:var(--green);color:var(--green)}
+.tc-opts button.wrong{border-color:var(--pink);color:var(--pink)}
+.tc-right{border-left:3px solid var(--green);padding-left:8px}
+.tc-wrong{border-left:3px solid var(--pink);padding-left:8px}
+
+/* report 4 · BOUND: when the chapter's mechanism is the wrong choice */
+.bound-block{margin:10px 0;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--violet);border-radius:10px;background:var(--panel)}
+.bound-block .ey{margin:0 0 4px;color:var(--violet)}
+.bound-answer p{margin:4px 0}
+/* END slide: the gate button and the boundary sentence fit in one row each so the close slide does not overflow */
+.end-copy .gate-btn{margin:2px 0 4px;padding:4px 10px;min-height:0;font-size:13px}
+.bound-block{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:end;margin:6px 0}
+.bound-block>.ey,.bound-block>.bound-answer{grid-column:1/-1}
+.bound-block>.buttons{display:flex;gap:6px;margin:0}
+.bound-block .commit-box{margin:0}
+@media(max-width:700px){.bound-block{grid-template-columns:1fr}.bound-block>.buttons{flex-wrap:wrap}}
+.end-copy:has(.bound-block)>h2{min-height:0;margin:2px 0 4px}
+html[data-design] body.single-canvas .end-copy:has(.bound-block) .readiness-strip{margin:4px 0 6px;gap:6px}
+html[data-design] body.single-canvas .end-copy:has(.bound-block) .readiness-strip section{padding:5px 9px}
+html[data-design] body.single-canvas .end-copy:has(.bound-block) .readiness-strip span{font-size:.8rem;line-height:1.3}
+html[data-design] body.single-canvas .end-hero:has(.bound-block){padding-top:14px;padding-bottom:14px}
+.end-copy:has(.bound-block)>.end-success{margin:4px 0}
+/* Story END grid (stage-v4): the transfer-check button and the boundary sentence get their own areas */
+@media (min-width:1001px){
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy:has(.bound-block){grid-template-areas:"ey ey" "gate gate" "h2 h2" "epi req" "epi bnd" "gut bnd" "exit act"}
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy>.gate-btn{grid-area:gate;justify-self:start;margin:0}
+ html[data-stage="v4"] body.single-canvas #app .end-page .end-copy>.bound-block{grid-area:bnd;margin:0}
+}
+html[data-stage="v4"] .end-page .bound-block{grid-template-columns:minmax(0,1fr)}
+html[data-stage="v4"] .end-page .bound-block>.buttons button{padding:4px 10px;min-height:0;font-size:.85rem}
+/* the kind tag adds a third item to scene rows: let them wrap on narrow screens instead of pushing text off the page */
+.act-scene,.twist-scene,.practice-scene{flex-wrap:wrap}
+.act-scene>p,.twist-scene>p,.practice-scene>p{flex:1 1 220px;min-width:0}
+@media (max-height:760px){.end-copy:has(.bound-block)>.end-success{display:none}}

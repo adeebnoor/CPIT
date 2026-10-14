@@ -43,6 +43,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 | RUB-4 | Conditions for accepting other answers are written explicitly | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
 | RUB-5 | The student sees the assignment rubric before submitting | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
 | RUB-6 | One rubric template across all lectures | pref | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| COMMIT-1 | The student’s own sentence appears beside the model answer (“You wrote: …”) | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| COMMIT-2 | No model answer before the student writes or explicitly skips; a skip shows “You did not write a decision” | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| COMMIT-3 | The sentence is saved on the device only and the commit step is absent in presenter mode | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| REAL-1 | One line on the cover separates the training story from the real incident | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| REAL-2 | Every story or incident mention carries a fixed tag (training story / real incident), checked against a case-kind field | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| REAL-3 | A real incident states its actual lesson and how it differs from the training story’s answer | manual | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL |
+| GATE-1 | In self-study the chapter cannot be marked complete before the transfer question is answered | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| GATE-2 | The student writes a justification line before the answer is revealed | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| GATE-3 | A wrong answer shows an explanation and allows another try | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| GATE-4 | The progress bar shows “Transfer case not solved” until it is solved | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| GATE-5 | The gate is off in presenter mode | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| BOUND-1 | Each chapter ends with one sentence on when its mechanism is the wrong choice | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| BOUND-2 | That sentence names an observable condition | manual | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL | MANUAL |
+| BOUND-3 | The student writes first; the model sentence is revealed after | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| BOUND-4 | The student’s sentence travels with the assignment and appears in its export | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| DATA-1 | No TODO placeholder in lecture data, authored requirements or coverage reasons; source lists on a slide are classified on-slide | must | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
 
 ## Acceptance list per lecture
 
@@ -84,6 +100,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — No real incident in this lecture
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the second channel shares a sensor or power supply
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 11: accepted
 - [x] KEEP-1 (PASS)
@@ -123,6 +155,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — No real incident in this lecture
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the input mix in use differs from the test profile
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 12: accepted
 - [x] KEEP-1 (PASS)
@@ -162,6 +210,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: commands can repeat within the same period
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 13: accepted
 - [x] KEEP-1 (PASS)
@@ -201,6 +265,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the server answers a request for another user's record
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 14: accepted
 - [x] KEEP-1 (PASS)
@@ -240,6 +320,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the backup signs in through the same identity service
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 15: accepted
 - [x] KEEP-1 (PASS)
@@ -279,6 +375,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the supplier's support end date is earlier than your planned lifetime
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 16: accepted
 - [x] KEEP-1 (PASS)
@@ -318,6 +430,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the two interfaces state different or no units
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 17: accepted
 - [x] KEEP-1 (PASS)
@@ -357,6 +485,22 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the call sends, charges or writes something and carries no request key
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 
 ### Chapter 20: accepted
 - [x] KEEP-1 (PASS)
@@ -396,4 +540,20 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 - [x] RUB-4 (PASS)
 - [x] RUB-5 (PASS)
 - [x] RUB-6 (PASS)
+- [x] COMMIT-1 (PASS)
+- [x] COMMIT-2 (PASS)
+- [x] COMMIT-3 (PASS)
+- [x] REAL-1 (PASS)
+- [x] REAL-2 (PASS)
+- [x] REAL-3 (MANUAL) — Lesson and difference sentences reviewed by the instructor
+- [x] GATE-1 (PASS)
+- [x] GATE-2 (PASS)
+- [x] GATE-3 (PASS)
+- [x] GATE-4 (PASS)
+- [x] GATE-5 (PASS)
+- [x] BOUND-1 (PASS)
+- [x] BOUND-2 (MANUAL) — Observable condition: the feed carries no timestamp the dashboard can check
+- [x] BOUND-3 (PASS)
+- [x] BOUND-4 (PASS)
+- [x] DATA-1 (PASS)
 

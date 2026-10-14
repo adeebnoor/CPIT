@@ -4,7 +4,8 @@
   "fictional": true,
   "answerKey": "hold or restrict: observed availability is below the target",
   "text": "A fictional university communications gateway records 20 failed demands out of 10,000. It also records two outages in a 1,000-hour window, with one unavailable hour in total. The proposed availability target is 99.99%. The test assumes 10% external traffic; no new profile test is supplied.",
-  "lens": "The gateway also relays the university's email. Its upgrade added a vendor's learned message classifier that flags phishing and routes messages. The vendor reports 98% accuracy on its own benchmark. In the pilot's 1,000 external messages, 50 were phishing. The classifier missed 10 and wrongly flagged 19 legitimate messages. Hold that question: after the measurement slides, one slide shows how this chapter's metrics and tests apply to the classifier."
+  "lens": "The gateway also relays the university's email. Its upgrade added a vendor's learned message classifier that flags phishing and routes messages. The vendor reports 98% accuracy on its own benchmark. In the pilot's 1,000 external messages, 50 were phishing. The classifier missed 10 and wrongly flagged 19 legitimate messages. Hold that question: after the measurement slides, one slide shows how this chapter's metrics and tests apply to the classifier.",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -104,7 +105,21 @@
   "answer": "Availability, around 0.9999 between 7 am and 11 pm. If the database fails, every ATM stops, so availability matters more than reliability. Transaction mechanisms correct individual ATM errors, so a lower ATM availability of 0.999 is acceptable.",
   "concept": "matching the metric and level to the service",
   "answerKey": "availability of 0.9999 for the shared database",
-  "at": "REQ"
+  "at": "REQ",
+  "kind": "source",
+  "check": {
+   "options": [
+    "POFOD of 0.002 per transaction",
+    "Availability of about 0.9999 during service hours",
+    "ROCOF of two failures per 1,000 hours"
+   ],
+   "answer": 1,
+   "why": [
+    "POFOD suits rare protection demands; the database serves every transaction, all day.",
+    "Right. If the shared database fails, every ATM stops, so availability during service hours matters most.",
+    "ROCOF counts failures over time but ignores how long the database stays down."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -665,7 +680,6 @@
   },
   "11": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "RELAV"
   },
   "12": {
@@ -678,7 +692,6 @@
   },
   "14": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "RELAV"
   },
   "15": {
@@ -734,7 +747,6 @@
   },
   "22": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "prose",
    "items": [
     "Measure of the fraction of the time that the system is available for use.",
@@ -770,7 +782,6 @@
   },
   "27": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "REQ"
   },
   "28": {
@@ -779,7 +790,6 @@
   },
   "29": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "REQ"
   },
   "30": {
@@ -816,7 +826,6 @@
   },
   "38": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "PROTECT"
   },
   "39": {
@@ -873,7 +882,6 @@
   },
   "52": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "DIVERSITY"
   },
   "53": {
@@ -882,7 +890,6 @@
   },
   "54": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "CODE1"
   },
   "55": {
@@ -923,7 +930,6 @@
   },
   "64": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "CODE1"
   },
   "65": {
@@ -952,8 +958,8 @@
    "kind": "title"
   },
   "71": {
-   "cls": "full",
-   "unit": "METRICS",
+   "cls": "slide",
+   "unit": "MEASURE",
    "kind": "list",
    "items": [
     "Number of failures given a number of requests (POFOD)",
@@ -963,7 +969,6 @@
   },
   "72": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "prose",
    "items": [
     "Reliability testing (Statistical testing) involves running the program to assess whether or not it has reached the required level of reliability.",
@@ -974,7 +979,6 @@
   },
   "73": {
    "cls": "full",
-   "reason": "TODO",
    "kind": "prose",
    "items": [
     "Testing software for reliability rather than fault detection.",
@@ -1317,5 +1321,9 @@
    },
    "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
+ },
+ "bound": {
+  "model": "Quoting one reliability number is the wrong choice when real inputs no longer match the profile it was measured on.",
+  "condition": "the input mix in use differs from the test profile"
  }
 }

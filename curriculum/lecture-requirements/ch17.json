@@ -2,7 +2,8 @@
  "chapter": 17,
  "case": {
   "fictional": true,
-  "answerKey": "an idempotency key checked before any external effect"
+  "answerKey": "an idempotency key checked before any external effect",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -96,7 +97,21 @@
   "answer": "The master. In the master–slave pattern the master computes, coordinates and communicates, and it controls the slaves. The slave processes only acquire data or drive equipment, so they cannot judge the whole system.",
   "concept": "responsibility in the master–slave pattern",
   "answerKey": "the master detects and decides",
-  "at": "X06"
+  "at": "X06",
+  "kind": "source",
+  "check": {
+   "options": [
+    "The master, because it coordinates and controls the slave processes",
+    "The slave that stopped replying, because it knows its own state",
+    "Each traffic light, because it acts on its own"
+   ],
+   "answer": 0,
+   "why": [
+    "Right. In master–slave the master coordinates, so it must detect the missing reply and decide.",
+    "A slave that stopped replying cannot report its own failure.",
+    "The lights are driven by slave processes; they do not judge the whole system."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -267,13 +282,14 @@
   "APPLY": {
    "minutes": 1,
    "tier": "core",
-   "concept": "revising under new evidence",
-   "answerKey": "send only the recorded message; never re-ask the model for a past effect",
+   "concept": "ownership after the change",
+   "answerKey": "the service owner owns it; support and customers are told",
    "commonError": "Students fix the retry and forget the two messages already sent. Ask who tells the customer and how support tells a duplicate from a real second booking.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the AI step, record the drafted message against the operation's key. Send only that recorded message. A retry must never ask the model again for an effect that already happened.",
-   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
+   "answer": "The service owner owns it: the retry path and the review of each duplicate. Support is told how to tell a duplicate from a real second booking. Affected customers get one correcting message.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case",
+   "question": "Who owns the fix for the duplicate messages already sent?"
   },
   "END": {
    "minutes": 2,
@@ -716,7 +732,7 @@
    "kind": "title"
   },
   "30": {
-   "cls": "full",
+   "cls": "slide",
    "unit": "X06",
    "kind": "list",
    "items": [
@@ -754,7 +770,6 @@
   },
   "34": {
    "cls": "slide",
-   "reason": "Section heading or figure-only slide; TODO",
    "kind": "figure",
    "unit": "X07"
   },
@@ -812,7 +827,6 @@
   },
   "48": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X06"
   },
   "49": {
@@ -838,13 +852,11 @@
   },
   "54": {
    "cls": "full",
-   "reason": "TODO",
    "kind": "prose",
    "unit": "B01"
   },
   "55": {
    "cls": "full",
-   "reason": "TODO",
    "kind": "prose",
    "items": [
     "Security concerns are the principal reason why p2p architectures are not widely used.",
@@ -1215,5 +1227,9 @@
    }
   ],
   "other": "the answer names the chapter concept that decides, uses only the facts given in the task, separates no reply from no execution, and names evidence from a replay test or record that someone else can check. A different design that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "Retrying after a timeout is the wrong choice when the operation has an outside effect and no request identity.",
+  "condition": "the call sends, charges or writes something and carries no request key"
  }
 }

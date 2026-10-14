@@ -33,7 +33,7 @@
  "lectures": {
   "10": {
    "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
-   "lecture_data_sha256": "b6e00d18d1799c6783384a1390d8853f4bfa130e8aae29b4e1975347781002f7",
+   "lecture_data_sha256": "c70b0653e1c004134e82b1cf5e48339e4ce95fe0f1eb792ac6e691844f435da3",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -59,7 +59,7 @@
   },
   "11": {
    "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
-   "lecture_data_sha256": "d0d142e7d4bded17e62d5c80f90d40b623c659bd96cdb3b5b029dbc764f983a1",
+   "lecture_data_sha256": "9139eb0afbcb5bd2717c036f418faaefdbfdc02eaf2bc95db9dfd28a09d6a78c",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -85,7 +85,7 @@
   },
   "12": {
    "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
-   "lecture_data_sha256": "e731738cd2c199593b513030037924dded257fcf4bd615716603fde1685f4a0e",
+   "lecture_data_sha256": "7c446dd6c2befd75be5eeca79ff32e4875eaf46c523d821cf3369c04eb653bc2",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -111,7 +111,7 @@
   },
   "13": {
    "path": "lectures/iscarb/Ch13-Security-Engineering.html",
-   "lecture_data_sha256": "e90bde7577ee204894338e211421edade8f8c4f6d19afc509866bcdcc3d3fa86",
+   "lecture_data_sha256": "40ad7d43acd21a7402d2ace1e3e8a29ff3c0561396bb5641bd51a492b0ffd356",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -137,7 +137,7 @@
   },
   "14": {
    "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
-   "lecture_data_sha256": "8abba1c107b6c9bf631ab028135ecbd319c2c740026e19672ec2a77ca00f9e71",
+   "lecture_data_sha256": "4f5ec1889440081354629936ea70ac0aed87a36a4243b49f1b575e37df2cc121",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -163,7 +163,7 @@
   },
   "15": {
    "path": "lectures/iscarb/Ch15-Software-Reuse.html",
-   "lecture_data_sha256": "2518f69626abaddd1785b5ad3ea2f47e7f79a98fbceb9e4c167ced7f94105ae0",
+   "lecture_data_sha256": "3af9eebfca8dbc32d3f56d197acfe37d4afb2a5806155f38148a039c2b49d182",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -189,7 +189,7 @@
   },
   "16": {
    "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
-   "lecture_data_sha256": "60afa51f90cf7a299475b99c8c5b212003b2cdb6cdda989c9a31f8664bfb062f",
+   "lecture_data_sha256": "7478e67f8ab77d05a527165f0cb981c9aba7de3d39fabe4a9e6eb5aae93ffe55",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -215,7 +215,7 @@
   },
   "17": {
    "path": "lectures/iscarb/Ch17-Distributed-SE.html",
-   "lecture_data_sha256": "aa5e2bedb019b91ac4231aac0367efe3ef1a8651d48698e1797b9772d0f284ea",
+   "lecture_data_sha256": "0b0ae0a9d480bfc99213fb8edc623f67888af78ae73ba1c503d9918c31f80cd9",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -241,7 +241,7 @@
   },
   "20": {
    "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
-   "lecture_data_sha256": "76e44d0f35748f7866bc09a2d23de8161c2dad632d07ac1f8f8d6d5f927ce9b9",
+   "lecture_data_sha256": "8a1d9e04f546a916fc3a8ee5dd11234b502b010d8069806609fedec66580017a",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "7bf209a4bcf022d692bbb0ba8850a3ea2e5a58a6eb1b5ab7eb07807179687aac",
+   "assignment_sha256_lf": "6198a7d71fe1ee2c7c05ac7a7b07945e187238d670620133bf51feb37cf50871",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "a516fa327f3a9c37b8fff847378bf87598d2072fe653f697fbbdd972c3d5f1c4",
+   "assignment_sha256_lf": "abeb5b3c6541316e965ed3a11e92aee3b71bc7044e9b7c604bb58144a100b8e4",
    "stress_sha256_lf": "94696ea2bc67547ac2520a923ff23fd281bdaae01514ae89637b64e6fe8e23f1"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "643957bebe40667e48c22ff066e51f719c706a2f6f74e60038ea76ada27c1dc4",
+   "assignment_sha256_lf": "6c37e35bdd267aa0764a3a763146327ce51b43dfd529023938dabb55397d796a",
    "stress_sha256_lf": "6e4f43415cd427fbad9eadd34d0cc23b27e2f6755e8c26e5c4bcf29f54cd4802"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "4b1b29a325fe39f0912da25fd08dd2182e58ba79b83a145d75e6a79e9d798b93",
+   "assignment_sha256_lf": "5fe526c0ee95f185c4dd822aeb5a90db1265d347e69df2da239c4e1cae82e1a0",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "e4fd47717e95afa4448a4dbba830af31e1ccb7f74f80c44cf12d9fadadfed0d4",
+   "assignment_sha256_lf": "91c4fd6534bc4688d98c5dfb941265cb8b9769cd2c6d45511ddf23b42a7c0a2d",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "773f5bd7693c4ad17d882e84d88519c389959498ecdc92d564147c4918f6f820",
+   "assignment_sha256_lf": "b2db08c9de99ea3486c777cef67d3ea77586f5f0f9d7b4bf4698fc2a17cea1b0",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "2caff0a6d408fd85c76fe56849beb1a6953dde08103aa365129dd3b216261e4d",
+   "assignment_sha256_lf": "682ec618664d16813c6063aa84e6fabd3e83c4d772041439dba0a2c5affbfa38",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -797,6 +797,30 @@
    "base_release": "20260926-genai-v12",
    "summary": "AI challenge buttons say practice, not graded; counters reworded; announcement updated; source figure thumbnails load eagerly",
    "repinned": []
+  },
+  {
+   "revision": "20261015-requirements-review-4",
+   "date": "2026-10-14",
+   "base_release": "20260926-genai-v12",
+   "summary": "Fourth requirements review: write before reveal, training/real tags, transfer gate, boundary sentence",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20",
+    "lecture 10",
+    "lecture 11",
+    "lecture 12",
+    "lecture 13",
+    "lecture 14",
+    "lecture 15",
+    "lecture 16",
+    "lecture 17",
+    "lecture 20"
+   ]
   }
  ]
 }

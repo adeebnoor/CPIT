@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-14  
-**Commit ID:** 0bfef36f-21ca-4497-8bf3-76057f04639c  
-**Part A committed:** 2026-10-14T20:26:10.058Z  
-**STRESS revealed:** 2026-10-14T20:26:10.069Z
+**Commit ID:** 7b298038-58f4-42ed-ae79-02a5c8b2dc34  
+**Part A committed:** 2026-10-14T21:14:36.110Z  
+**STRESS revealed:** 2026-10-14T21:14:36.119Z
 
 ## Scenario
 A fictional campus transport desk needs to read today's pickup list even when the central scheduling server stops working.
@@ -18,6 +18,9 @@ A record shows that a backup server restarted successfully. Nobody has tested th
 During an outage, staff can write changes on an approved paper form.
 
 Your decision: is this backup way of working (fallback) ready for a limited trial? Explain what the desk can safely do and what still needs checking.
+
+## Chapter boundary sentence (written in the lecture)
+Not written in the lecture on this device.
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -49,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-14T20:26:09.858Z
+BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-14T21:14:35.909Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Return conflicts with the pickup id as well as the change id. Change the code and one test.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

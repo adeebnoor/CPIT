@@ -17,7 +17,7 @@ SLIDE_KEYS = ('minutes', 'tier', 'concept', 'answerKey', 'concept2', 'answerKey2
               'rows', 'heads', 'notes', 'title', 'sourceRange', 'sourceLabel')
 STATION_KEYS = ('minutes', 'seconds', 'tier', 'concept', 'answerKey', 'transfer', 'think', 'pair', 'write', 'hint', 'answer', 'note', 'rubric', 'title')
 QUIZ_KEYS = ('concept', 'answerKey', 'beyondCase', 'q', 'options', 'why', 'answer')
-LECTURE_KEYS = ('glossary', 'transfer', 'studyList', 'activities', 'hook', 'timeRule')
+LECTURE_KEYS = ('glossary', 'transfer', 'studyList', 'activities', 'hook', 'timeRule', 'bound')
 RUB_START, RUB_END = '<!-- rubric-examples:start -->', '<!-- rubric-examples:end -->'
 
 
@@ -85,6 +85,11 @@ def apply_chapter(ch: int) -> bool:
             if k not in QUIZ_KEYS:
                 raise SystemExit(f'Ch{ch} quiz {i+1}: unknown key {k}')
             data['quiz'][i][k] = v
+    # data cleanliness: placeholder tags left by the first draft are removed, never published
+    for s in data['slides']:
+        for k in ('concept', 'answerKey', 'concept2', 'answerKey2'):
+            if s.get(k) == 'TODO':
+                del s[k]
     # rubric template: fill level labels from common.json when a criterion gives only texts
     after = json.dumps(data, sort_keys=True)
     if after != before:
@@ -123,10 +128,39 @@ def apply_assignment(ch: int, req: dict) -> bool:
     return False
 
 
+BOUND_MARK = '/* BOUND-4: the boundary sentence written in the lecture travels with the assignment */'
+
+
+def apply_bound_export(ch: int) -> bool:
+    """BOUND-4: add the student's lecture boundary sentence to the assignment export and show it under BOUND."""
+    a = next((x for x in PUB['assignments'] if int(x['chapter']) == ch), None)
+    if not a or ch < common().get('assignmentRubricFromChapter', 12):
+        return False
+    p = ROOT / a['path']; s = p.read_text(encoding='utf-8')
+    if BOUND_MARK in s:
+        return False
+    anchor = "function md(final=false){"
+    push = "lines.push('## Scenario',d.scenario||'','');"
+    if s.count(anchor) != 1 or s.count(push) != 1:
+        raise SystemExit(f'Ch{ch} assignment: export anchors not found')
+    helper = (BOUND_MARK + "\nfunction lectureBound(){try{const x=JSON.parse(localStorage.getItem('iscarb:classroom:ch" + str(ch) +
+              ":v3')||'null');return String(x?.state?.fields?.commit_bound||'').trim();}catch(e){return ''}}\n"
+              "setTimeout(()=>{const t=document.getElementById('bound');if(!t||document.getElementById('lectureBound'))return;const p=document.createElement('p');"
+              "p.id='lectureBound';p.className='hint';const v=lectureBound();p.textContent=v?'Your boundary sentence from the lecture (included in your export): '+v:"
+              "'Your boundary sentence from the Chapter " + str(ch) + " lecture is not on this device yet. Write it on the lecture\u2019s closing slide; it is then added to your export.';"
+              "t.insertAdjacentElement('afterend',p);},0);\n")
+    s = s.replace(anchor, helper + anchor, 1)
+    s = s.replace(push, push + "lines.push('## Chapter boundary sentence (written in the lecture)',lectureBound()||'Not written in the lecture on this device.','');", 1)
+    p.write_text(s, encoding='utf-8')
+    return True
+
+
 def main(argv: list[str]) -> int:
     chapters = [int(x) for x in argv] or CHAPTERS
     for ch in chapters:
         apply_chapter(ch)
+        if apply_bound_export(ch):
+            print(f'Ch{ch} assignment: boundary sentence added to the export')
     pub = json.loads((ROOT / 'curriculum/publication.json').read_text(encoding='utf-8'))
     cfg = common()
     if pub.get('lecture_minutes') != cfg['lectureMinutes']:
