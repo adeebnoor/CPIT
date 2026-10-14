@@ -122,11 +122,11 @@ The 50-minute plan absorbs the track (+7 minutes on slide 19, taken from the con
 
 | Measure | Source | Reported |
 |---|---|---|
-| Concept gain | Private 14-item inventory as Blackboard pre-test (start of Chapter 12) and post-test (after Chapter 20) | Normalized gain ⟨g⟩, mean individual gain, paired d<sub>z</sub>, improved/same/lower |
+| Concept gain | Private 12-item inventory (Chapters 13–20) as Blackboard pre-test (before Chapter 13) and post-test (after Chapter 20) | Normalized gain ⟨g⟩, mean individual gain, paired d<sub>z</sub>, improved/same/lower |
 | Peer-instruction gain | Presenter close: *Export class evidence (CSV)* (counts from the presenting device) | % correct before and after discussion per vote, weighted overall gain; gut-check shift |
 | Ownership | Micro-viva sheet downloaded as CSV and completed | Agrees / partly / does not agree, per assignment |
 
-Plan for this offering: run the pre-test before Chapter 12, export class evidence after every lecture, run micro-vivas on 3–5 students per section per assignment, run the post-test after Chapter 20, then paste the page's summary into the course report. Reference points are Hake (1998) for ⟨g⟩ and Crouch & Mazur (2001) for peer instruction. Small sections give wide uncertainty, so the N is always reported.
+Plan for this offering: run the pre-test before Chapter 13, export class evidence after every lecture, run micro-vivas on 3–5 students per section per assignment, run the post-test after Chapter 20, then paste the page's summary into the course report. Reference points are Hake (1998) for ⟨g⟩ and Crouch & Mazur (2001) for peer instruction. Small sections give wide uncertainty, so the N is always reported.
 
 **Grader calibration.** Anchored examples at full, partial and no credit for each criterion of Assignments 3–9 are kept privately with the instructor (not in this repository, because they reveal the assessed cases).
 

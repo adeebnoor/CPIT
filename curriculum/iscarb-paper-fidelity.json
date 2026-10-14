@@ -85,7 +85,7 @@
   },
   "12": {
    "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
-   "lecture_data_sha256": "d6f509e93c4da1808f37f4b2d2f94ebf2e5fecde76ae5402bddb828479f51515",
+   "lecture_data_sha256": "313ad149e7738bfef6860dd24810c44275a1b28f134eaedf5a357495845f4ac5",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -111,7 +111,7 @@
   },
   "13": {
    "path": "lectures/iscarb/Ch13-Security-Engineering.html",
-   "lecture_data_sha256": "0de7c1ca0ece51e9ae58a64c2ca376575b11f949dbc84b8ecd438391c3713890",
+   "lecture_data_sha256": "f29d3558aa9345c73f5559b5d4074e4e792acbdd4cd58d38e1a4e9584d7016cd",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -137,7 +137,7 @@
   },
   "14": {
    "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
-   "lecture_data_sha256": "f2e5786c79cf19da137174a252db2623b5f55ac55c89c9dc61ba4e5116cf73ed",
+   "lecture_data_sha256": "62d4136c45376dfb2c5579009cafa6cc390ad1873d0c77569bd644bd585e6f45",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -163,7 +163,7 @@
   },
   "15": {
    "path": "lectures/iscarb/Ch15-Software-Reuse.html",
-   "lecture_data_sha256": "7c511398a9b100400799d1130289d74ab6169fbcf4d5ee947121d0aafc8d2b75",
+   "lecture_data_sha256": "0b029760d38ef735a7db60a4474c8d086c2b0c0ca718b0e37d0c4ecc29d59b10",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -189,7 +189,7 @@
   },
   "16": {
    "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
-   "lecture_data_sha256": "a64c293ccd59640c221f1397720714519520e6edd2a7d34afeb7e64a24138620",
+   "lecture_data_sha256": "880789c7d433abdc49702e4d6a11ba4862af82669f7ab6d0bf5567a966001632",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -215,7 +215,7 @@
   },
   "17": {
    "path": "lectures/iscarb/Ch17-Distributed-SE.html",
-   "lecture_data_sha256": "7f25ab18179d150a7c477a25f4f4dccc19b062e4f96177bf59f52361648bbf31",
+   "lecture_data_sha256": "5e3bb564d5d7a05fde6385e709e711a637c5d77a5c4774480bda4e0d4badf442",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -241,7 +241,7 @@
   },
   "20": {
    "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
-   "lecture_data_sha256": "50f44ebdcc564a77114885746e6cd57f567a6b0ca428f3bd0d3d8b392ee33fd8",
+   "lecture_data_sha256": "9d6f699344c95b67ee61c894fe5440fb2dfd05ad160f4a84d2999e59ebd7e160",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -716,6 +716,21 @@
     "assignment 20",
     "lecture 10",
     "lecture 11",
+    "lecture 12",
+    "lecture 13",
+    "lecture 14",
+    "lecture 15",
+    "lecture 16",
+    "lecture 17",
+    "lecture 20"
+   ]
+  },
+  {
+   "revision": "20261015-counter-pretest",
+   "date": "2026-10-14",
+   "base_release": "20260926-genai-v12",
+   "summary": "Counter counts the 20 lecture slides, extras labelled Extra k/n and listed separately in the index; optional extras time in the plan; evidence page set to the 12-item Chapters 13-20 inventory",
+   "repinned": [
     "lecture 12",
     "lecture 13",
     "lecture 14",

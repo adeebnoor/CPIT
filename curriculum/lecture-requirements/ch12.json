@@ -621,6 +621,13 @@
    "at": "D12",
    "minutes": 3,
    "tier": "core"
+  },
+  {
+   "id": "EXTRAS",
+   "label": "Optional extras · real case, live lab and explain-it",
+   "at": "APPLY",
+   "minutes": 7,
+   "tier": "optional"
   }
  ],
  "coverage": {
