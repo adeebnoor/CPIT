@@ -33,7 +33,7 @@
  "lectures": {
   "10": {
    "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
-   "lecture_data_sha256": "fbfafc9ac1127a75fefa827ec08cbe5ce96cc19de2d5a4db33ce94f7db38abb5",
+   "lecture_data_sha256": "b65a0a9e660b10a21ffb5c39daa2a58bfb898aa85adb7bfddeaafb1a8d3dd192",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -59,7 +59,7 @@
   },
   "11": {
    "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
-   "lecture_data_sha256": "672dc7900769da54038b2b01ba3b931dd09bfbdc87c7569b3d57df80b98775bd",
+   "lecture_data_sha256": "f568940dfe04d5b466629b3614cb06b499d56091c54229f8e5e16854ec96126d",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -85,7 +85,7 @@
   },
   "12": {
    "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
-   "lecture_data_sha256": "fab04110c9d2f180e74d92d3156fc29b2c07542ae91f14158a70fd7cc3f28739",
+   "lecture_data_sha256": "68106687bef0bb33566b6b5757d7c608397251f90ca2b51b951421b1baa1b988",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -111,7 +111,7 @@
   },
   "13": {
    "path": "lectures/iscarb/Ch13-Security-Engineering.html",
-   "lecture_data_sha256": "ae07cb9bbe7da0e2376e42c04020c24d27bceb6e3a6bfb0040f2b8ee2b9ea613",
+   "lecture_data_sha256": "5632be22023a889acc3364d50cfa1474cd1c19013cb6f167fe5dfd1748002ae1",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -137,7 +137,7 @@
   },
   "14": {
    "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
-   "lecture_data_sha256": "4bbf56cd15b45db0af6ace14fde0c8fd7733668041cbb466dbc1e48d1c067218",
+   "lecture_data_sha256": "78e0568038198fba9b914c72538ea5eaefa9616a9f4622c55492c597d2eb74b4",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -163,7 +163,7 @@
   },
   "15": {
    "path": "lectures/iscarb/Ch15-Software-Reuse.html",
-   "lecture_data_sha256": "0e0f7aa82620a829ba288e58dbd9b0c290a72b645df34f1b7c36e34e09fd958d",
+   "lecture_data_sha256": "9c987ff7c925360cf15f1dd9b7ccca5d8ff636556ca0eb49c145ebf43e2894e0",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -189,7 +189,7 @@
   },
   "16": {
    "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
-   "lecture_data_sha256": "f9ed40a1497364968f7d0309a791172899a5b557909e1789c1f0a71e20b251a8",
+   "lecture_data_sha256": "a12574d16f5941a0852c2c71341bdb8ed82c3f52010ff997c71497c19f43f6b4",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -215,7 +215,7 @@
   },
   "17": {
    "path": "lectures/iscarb/Ch17-Distributed-SE.html",
-   "lecture_data_sha256": "82467db3a25d17f7e4db3b8d5f71aaa9b71a427e03119e73c12455b37d4e925b",
+   "lecture_data_sha256": "8633840ff57375e8ce75426d500e21528b6aa294639ad0cb541e053cf8079019",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -241,7 +241,7 @@
   },
   "20": {
    "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
-   "lecture_data_sha256": "67350acbb865ffa4647c2199a3f45c331501b9f2d3df9f884d45bdb83bfa84a4",
+   "lecture_data_sha256": "f2aab550e29f276e3ff08b5b9ab276f60724e36653a7f675509b0aa835b4fb83",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -745,6 +745,23 @@
    "date": "2026-10-14",
    "base_release": "20260926-genai-v12",
    "summary": "Second requirements report (Ch14 fix list, applied to all lectures): stations core with a stated time model, transfer step in a station, AI assignment rubric before commit, source figure links, Hollnagel list on Ch14 X03, four failure factors, varied answer keys, plain field label, source labels on course additions",
+   "repinned": [
+    "lecture 10",
+    "lecture 11",
+    "lecture 12",
+    "lecture 13",
+    "lecture 14",
+    "lecture 15",
+    "lecture 16",
+    "lecture 17",
+    "lecture 20"
+   ]
+  },
+  {
+   "revision": "20261015-ai-practice-only",
+   "date": "2026-10-14",
+   "base_release": "20260926-genai-v12",
+   "summary": "The in-lecture AI challenge is practice only and not graded; its rubric is a self-check",
    "repinned": [
     "lecture 10",
     "lecture 11",

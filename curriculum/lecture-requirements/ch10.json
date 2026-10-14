@@ -1199,7 +1199,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "Claim: dispensing is not shown to be highly dependable. Both checks read the same drug library, so they are not independent. The claim ends if a library error reaches a dispensed dose. Action: the pharmacy lead adds a second, separately maintained unit check. Evidence: a test log with a planted wrong-unit entry, proposed. After the audit I revise: the two checks share one cause.",
     "why": "Names common cause and independence, gives an observable limit, an owner and checkable evidence, and revises with a reason."
@@ -1208,7 +1208,7 @@
     "text": "The system is dependable because no patient was harmed in three months and both checks passed the vendor tests.",
     "why": "Treats absence of harm and vendor tests as proof; no limit, no owner, ignores the shared library."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  }
 }

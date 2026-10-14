@@ -1119,7 +1119,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "The composition must state the number format and keep the OCR confidence. The adapter flags lines below 0.9 instead of dropping the value. The design ends if a report uses an undeclared script. Action: the integration engineer adds the flag. Evidence: a boundary test with a low-confidence Arabic-Indic value, proposed. After the 5.8 read as 3.8 I revise the adapter contract.",
     "why": "Writes a testable contract at the boundary, gives an observable limit, an owner and a test, and revises the contract."
@@ -1128,7 +1128,7 @@
     "text": "Both components passed their tests, so the composition works.",
     "why": "Supplier tests cover each part, not the composition; no contract, no evidence."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  },
  "assignmentRubric": {

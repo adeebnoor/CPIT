@@ -1172,7 +1172,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "Claim: the office cannot say the assistant only discloses to the student. Its service account can read every record. Control: retrieval with the asker's own rights, enforced by the server. The claim ends if any reply reaches an outside address. Evidence: a negative test asking for another student's record, proposed. After the injected email I replace the design; the instruction was not a control.",
     "why": "Separates an instruction from an enforced control, names a checkable negative test, and revises with the broken assumption."
@@ -1181,7 +1181,7 @@
     "text": "The assistant is safe because its instructions forbid disclosure and the portal passed a penetration test.",
     "why": "Treats an instruction and an unrelated test as controls; no boundary, no owner."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  },
  "assignmentRubric": {

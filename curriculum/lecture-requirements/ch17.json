@@ -1161,7 +1161,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "Each photo carries an idempotency key. The service stores the first diagnosis per key and returns it on redelivery. The design ends if one key ever gets two different diagnoses. Action: the backend lead adds the key check before the model call. Evidence: a replay test that sends 100 photos twice, proposed. After the double diagnoses I revise: the model was asked twice.",
     "why": "Separates no reply from no execution, names a mechanism that stops duplicate effects, a test and an owner, and revises."
@@ -1170,7 +1170,7 @@
     "text": "Retry whenever there is no reply; the network is just slow.",
     "why": "Treats a timeout as failure and ignores duplicates; no evidence or owner."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  },
  "assignmentRubric": {

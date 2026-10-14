@@ -1318,7 +1318,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "The metric is POFOD on deadline questions: 30 of 200 wrong, so 0.15 per demand. It does not cover Arabic dialect questions. Action: staff review every deadline answer until an Arabic evaluation passes, owned by the admissions lead. Evidence: a scored test set of 200 Arabic deadline questions, proposed. After the new mix I restrict: the profile changed.",
     "why": "Picks the right metric and denominator and states what it does not cover. Names an owner and a test, and revises for the new profile."
@@ -1327,7 +1327,7 @@
     "text": "The chatbot is 94% correct, so it can answer deadline questions alone.",
     "why": "Uses overall accuracy instead of the demand that matters; no limit, no evidence, no owner."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  }
 }

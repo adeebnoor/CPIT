@@ -1216,7 +1216,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "Hazard: a pedestrian unseen in the path. Requirement: the shuttle stops when detection is degraded. The attendant stays until it is verified. The claim ends in rain or darkness, which the pilot never covered. Action: the safety manager adds a rain test campaign. Evidence: logged braking tests with dummies in rain, proposed. After the rain report I revise: the advisor is not a safety function.",
     "why": "Starts from the hazard, writes a verifiable requirement, limits the claim to tested conditions, and revises with the new evidence."
@@ -1225,7 +1225,7 @@
     "text": "Remove the attendant: 1,200 trips without a collision prove the shuttle is safe.",
     "why": "Treats a clean pilot as proof for untested conditions; no hazard, requirement or verification."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  },
  "assignmentRubric": {

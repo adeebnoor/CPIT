@@ -1205,7 +1205,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "The dashboard can promise only what it observes: each owner's queue, its time and its declared model version. It must not merge the rankings. The promise ends if one owner's share of urgent calls shifts without notice. Action: the city lead seeks an agreement to announce model changes. Evidence: a per-owner baseline with a drift alert, proposed. After the weighting change I replace the merged list with per-owner queues.",
     "why": "Separates what the dashboard controls from what it receives, names an observable limit, an owner and evidence, and revises."
@@ -1214,7 +1214,7 @@
     "text": "The dashboard is in charge, so it sorts all calls by urgency score.",
     "why": "Assumes scores mean the same across owners and that display gives authority."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  },
  "assignmentRubric": {

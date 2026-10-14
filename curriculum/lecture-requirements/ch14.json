@@ -1129,7 +1129,7 @@
      ]
     }
    ],
-   "marks": "5 points · 1 per criterion",
+   "marks": "Practice only · not graded · score yourself 1, 0.75, 0.5 or 0 per criterion",
    "strong": {
     "text": "Critical service: card blocking after hours. The plan must work without the chatbot: a staffed phone line and an offline procedure. The claim ends if the knowledge base cannot be restored to a checked version. Action: the operations lead rehearses a night without the chatbot. Evidence: the rehearsal record, proposed. After the ransomware I revise: a three-week-old backup gives wrong fees, so answers stay offline until checked.",
     "why": "Names the critical service and covers recovery without the AI. Gives an observable limit and an owner, and revises for stale data."
@@ -1138,7 +1138,7 @@
     "text": "Resilience means having a backup of the chatbot, so the plan is to restore it quickly.",
     "why": "Equates a backup with resilience; ignores the critical service, stale data and who acts."
    },
-   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
  },
  "assignmentRubric": {
