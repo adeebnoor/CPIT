@@ -9,6 +9,7 @@ let failed = 0; const ok = (n, c, x) => { console.log((c ? 'PASS ' : 'FAIL ') + 
   const br = await chromium.launch(); const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1366, height: 900 } });
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.goto(BASE + 'evidence.html', { waitUntil: 'networkidle' });
+  await pg.fill('#maxScore', '14'); // the synthetic fixtures (and their SciPy reference values) use a 14-point test
   await pg.setInputFiles('#preFile', F + '/pre.csv'); await pg.setInputFiles('#postFile', F + '/post.csv'); await pg.waitForTimeout(800);
   const g = await pg.locator('#gainOut').innerText();
   ok('concept gain: 28 matched, 1 pre-only, 2 post-only', /28 \(pre only 1, post only 2\)/.test(g), g);

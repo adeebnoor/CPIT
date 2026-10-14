@@ -17,8 +17,8 @@ Status: plan for the current term (written 5 Oct 2026). No outcome data exist ye
 
 **Single cohort with repeated measures.** All students of the term's sections take part. Two built-in contrasts:
 
-- **Pre/post (RQ1).** The same 14-item concept inventory is given twice as a Blackboard test:
-  - once before Chapter 12 is assessed;
+- **Pre/post (RQ1).** The same 12-item concept inventory (Chapters 13–20) is given twice as a Blackboard test:
+  - once before the Chapter 13 lecture;
   - once after Chapter 20, before the final exam.
 
   The items are not exam items and are not released.
@@ -30,15 +30,13 @@ Status: plan for the current term (written 5 Oct 2026). No outcome data exist ye
 - the same items or rubric criteria exist in both years;
 - archival use of the grades is approved by the ethics committee.
 
-**Note on timing this term.** If the pre-test was not given before the Chapter 12 lecture, give it before the Chapter 13 lecture. Then report two things:
-- that Chapter 12 had already been taught;
-- the gain separately for items on Chapters 13–20, as well as overall.
+**Timing this term (decided).** The pre-test runs before the Chapter 13 lecture. Chapter 12 had already been taught, so its two items cannot measure a starting point; they are removed from both tests. The report states: "The inventory covers Chapters 13–20; Chapter 12 was taught before the pre-test and is not included."
 
 ## 3. Instruments
 
 | Instrument | Where | Who keeps it |
 |---|---|---|
-| Concept inventory, 14 items (pre and post) | Blackboard test | Instructor (private, not in the repository) |
+| Concept inventory, 12 items on Chapters 13–20 (pre and post) | Blackboard test | Instructor (private, not in the repository) |
 | Class votes, rounds 1 and 2 | Lecture presenter mode → *Export class evidence (CSV)* | Instructor |
 | Build record (course checks, own tests, known bugs caught, viva request) | In each student's final export | Student submission |
 | Boundary status and REFIT choice | In each student's final export | Student submission |
@@ -100,7 +98,7 @@ Report intervals and N with every estimate. With one or two sections, N is small
 
 | When | Step |
 |---|---|
-| Now | Ethics application; Blackboard research notice; pre-test (see the timing note) |
+| Now | Ethics application; Blackboard research notice; pre-test before the Chapter 13 lecture |
 | Every lecture | Run the votes in two rounds; export class evidence at the episode close |
 | After each assignment | Micro-viva for 3–5 random students per section; keep the record sheet |
 | After Assignment 9 | Post-test; perception survey |
