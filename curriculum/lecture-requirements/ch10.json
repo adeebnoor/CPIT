@@ -3,7 +3,8 @@
  "case": {
   "fictional": true,
   "answerKey": "an independently verified pressure reading",
-  "lens": "The plant supplies drinking water to a coastal city. The upgrade also installed a vendor's AI alarm assistant. It is a learned anomaly detector. It labels each pressure alarm “likely sensor fault” or “likely real excursion” with a confidence score. Tonight it labels the alarms “likely sensor fault, 0.91”. Two operators have started treating that label as a second opinion. Keep asking: does the label count as evidence?"
+  "lens": "The plant supplies drinking water to a coastal city. The upgrade also installed a vendor's AI alarm assistant. It is a learned anomaly detector. It labels each pressure alarm “likely sensor fault” or “likely real excursion” with a confidence score. Tonight it labels the alarms “likely sensor fault, 0.91”. Two operators have started treating that label as a second opinion. Keep asking: does the label count as evidence?",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -101,7 +102,21 @@
   "answer": "Simplicity and extensive verification and validation. The textbook notes that diversity adds complexity and new interactions. Both routes are accepted by regulators. Each needs its own evidence.",
   "concept": "simplicity versus diversity as dependability strategies",
   "answerKey": "simplicity with extensive V&V",
-  "at": "R08"
+  "at": "R08",
+  "kind": "source",
+  "check": {
+   "options": [
+    "Simplicity and extensive verification and validation",
+    "A second copy of the same software on spare hardware",
+    "An AI monitor that votes on every output"
+   ],
+   "answer": 0,
+   "why": [
+    "Right. Without diversity, the design relies on keeping the software simple and checking it thoroughly.",
+    "A second identical copy shares every software fault, so it adds no protection against design errors.",
+    "The textbook case has no AI monitor; and a monitor reading the same inputs would share their faults."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -249,6 +264,20 @@
       "Different activities that complement each other allow cross-checking and avoid process errors"
      ]
     }
+   ],
+   "bullets": [
+    [
+     "Defined and repeatable",
+     "A process model drives the work; it does not depend on one person's skill."
+    ],
+    [
+     "Five attributes",
+     "Auditable, diverse, documentable, robust and standardized."
+    ],
+    [
+     "Evidence",
+     "Each attribute needs its own record that another engineer can inspect."
+    ]
    ]
   },
   "R18": {
@@ -758,7 +787,6 @@
   },
   "10": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X02"
   },
   "11": {
@@ -775,7 +803,6 @@
   },
   "14": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X04"
   },
   "15": {
@@ -821,7 +848,6 @@
   },
   "25": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X03"
   },
   "26": {
@@ -831,7 +857,6 @@
   },
   "27": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "list",
    "items": [
     "Redundancy: keep more than a single version of critical components so that a backup is available",
@@ -842,7 +867,6 @@
   },
   "28": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "list",
    "items": [
     "Redundancy: backup servers with automatic switch-over where availability is critical",
@@ -852,7 +876,6 @@
   },
   "29": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "list",
    "items": [
     "Validation should not depend on a single approach such as testing",
@@ -931,7 +954,6 @@
   },
   "42": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "prose",
    "items": [
     " The principal benefits of formal methods are in reducing",
@@ -948,7 +970,6 @@
   },
   "43": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "list",
    "items": [
     "Specification and design errors and omissions",
@@ -962,7 +983,6 @@
   },
   "45": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X06B"
   },
   "46": {
@@ -983,7 +1003,11 @@
     14,
     16
    ],
-   "note": "Be able to explain the four reasons failures matter and why higher dependability costs rise steeply."
+   "note": "Be able to explain the four reasons failures matter and why higher dependability costs rise steeply.",
+   "book": {
+    "label": "10 (introduction)",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   },
   {
    "topic": "The five principal properties and the other properties",
@@ -993,7 +1017,11 @@
     10,
     11
    ],
-   "note": "Which are probabilities and which are judgments; how the properties depend on each other."
+   "note": "Which are probabilities and which are judgments; how the properties depend on each other.",
+   "book": {
+    "label": "10.1",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   },
   {
    "topic": "Causes of failure and the six ways to achieve dependability",
@@ -1002,7 +1030,11 @@
     12,
     13
    ],
-   "note": "Hardware, software and operational causes; avoid, detect, tolerate, protect, configure, recover."
+   "note": "Hardware, software and operational causes; avoid, detect, tolerate, protect, configure, recover.",
+   "book": {
+    "label": "10.1",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   },
   {
    "topic": "The sociotechnical stack, regulation and compliance",
@@ -1015,7 +1047,11 @@
     24,
     25
    ],
-   "note": "Name the seven layers and explain why certification covers the whole system, not only the software."
+   "note": "Name the seven layers and explain why certification covers the whole system, not only the software.",
+   "book": {
+    "label": "10.2",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   },
   {
    "topic": "Redundancy, diversity and their problems",
@@ -1025,7 +1061,11 @@
     29,
     30
    ],
-   "note": "Required reading. Define both terms, give one example each and state why complexity can cancel the benefit."
+   "note": "Required reading. Define both terms, give one example each and state why complexity can cancel the benefit.",
+   "book": {
+    "label": "10.3",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   },
   {
    "topic": "Dependable processes: attributes, activities and agility",
@@ -1038,7 +1078,11 @@
     37,
     38
    ],
-   "note": "The five attributes and the process activities; what agile methods must keep for critical systems."
+   "note": "The five attributes and the process activities; what agile methods must keep for critical systems.",
+   "book": {
+    "label": "10.4",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   },
   {
    "topic": "Formal methods: activities, approaches, classes of error and acceptance",
@@ -1050,7 +1094,11 @@
     44,
     45
    ],
-   "note": "Required reading for 40–43. Know the four activities, the two approaches and the five reasons for limited adoption."
+   "note": "Required reading for 40–43. Know the four activities, the two approaches and the five reasons for limited adoption.",
+   "book": {
+    "label": "10.5",
+    "where": "Sommerville, Software Engineering, Chapter 10; the PDF for this chapter is not in the course pack"
+   }
   }
  ],
  "aiAssignment": {
@@ -1198,5 +1246,9 @@
    },
    "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions is as strong as the strong example."
   }
+ },
+ "bound": {
+  "model": "Adding a redundant channel is the wrong choice when it reads the same sensor or power supply as the first.",
+  "condition": "the second channel shares a sensor or power supply"
  }
 }

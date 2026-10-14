@@ -1,6 +1,6 @@
 {
   "version": "20260921-navigation-v1",
-  "base": "http://127.0.0.1:38189/",
+  "base": "http://127.0.0.1:34207/",
   "cases": [
     {
       "chapter": 10,
@@ -17,6 +17,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -49,6 +50,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -81,6 +83,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -113,6 +116,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -145,6 +149,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -177,6 +182,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -209,6 +215,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -241,6 +248,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -273,6 +281,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -305,6 +314,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -337,6 +347,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -369,6 +380,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -401,6 +413,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -433,6 +446,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -465,6 +479,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -497,6 +512,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -529,6 +545,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -561,6 +578,7 @@
         "Previously handled keyboard event respected",
         "Enter activates focused native button only",
         "Dialog does not move underlying slide",
+        "Model answer locked until the student writes (COMMIT-2)",
         "Model answer click does not advance",
         "Editing Backspace and Enter remain native",
         "Card draft persists through reload",
@@ -583,59 +601,59 @@
     {
       "chapter": 10,
       "file": "Ch10-iSCARB.zip",
-      "bytes": 7058174,
-      "sha256": "cac05543c8a6a29a155780f1521d7a46586699f0f06eeb42e86b66813c2e11b5"
+      "bytes": 7064742,
+      "sha256": "40f29442086f527346431410443ff06ed02c6171d9fefbcde39f49ecb2aba63b"
     },
     {
       "chapter": 11,
       "file": "Ch11-iSCARB.zip",
-      "bytes": 7831245,
-      "sha256": "a64b862dd537fb5ed7570ac9ce4332f67fc8798fd4ec51dd81bae50ab64fcdff"
+      "bytes": 7837617,
+      "sha256": "9c0258bc2600e5f326b6eb4eab7badad69eb753e57e7ef885c5fb23d1c35f7c3"
     },
     {
       "chapter": 12,
       "file": "Ch12-iSCARB.zip",
-      "bytes": 7841653,
-      "sha256": "ef1d807f99a00b0f570f3fa8f39f4c64f72a9dcee01746383f54046132d3a6fb"
+      "bytes": 7848037,
+      "sha256": "0b1db0ef65ab94630a334b3b37a6febf27ff2048988baa1a8d14f4ec81805626"
     },
     {
       "chapter": 13,
       "file": "Ch13-iSCARB.zip",
-      "bytes": 7962781,
-      "sha256": "1163ab220408a3343cfd89d7dc230199674c9b981deb74c7aa679162bcb7eb39"
+      "bytes": 7969161,
+      "sha256": "722225d27c969c937589b8461df546a3861a115ce31f139947bf8abb65fad5ff"
     },
     {
       "chapter": 14,
       "file": "Ch14-iSCARB.zip",
-      "bytes": 7949732,
-      "sha256": "29de7ad54ceed8cd9f78df565b52fbfd48dac939246a2a540f7cfe8013524af2"
+      "bytes": 7956078,
+      "sha256": "73066cb37e70da45ba24486874bfc5fffd9ddd76b1cba5d00ad064508ea4487f"
     },
     {
       "chapter": 15,
       "file": "Ch15-iSCARB.zip",
-      "bytes": 7824477,
-      "sha256": "bbb1c69e1df4d7114a9d4faabe3025273eb96f8f2af91d72bea3387fd1e19925"
+      "bytes": 7830910,
+      "sha256": "d8bab52e295c29ce7dda951aa0b8e0009b1272f399b1ada10391cd5b86c0e4aa"
     },
     {
       "chapter": 16,
       "file": "Ch16-iSCARB.zip",
-      "bytes": 8014890,
-      "sha256": "887ac0c704fb987b7698482f9d8cef7792481b228c0d982cd4230e262b953275"
+      "bytes": 8021292,
+      "sha256": "cbbec05a3e781d324ae0406f9ba9b955d445c2ddac356b89109583d70f0acd2a"
     },
     {
       "chapter": 17,
       "file": "Ch17-iSCARB.zip",
-      "bytes": 8062261,
-      "sha256": "d995fd97e721685b4f39a821b30ad41b02ac4235aeb5519b94cd99c7698c6e32"
+      "bytes": 8068611,
+      "sha256": "2b34e9e8639af923840aaf96cc22259aa0cd93a5d75ca8502d28d0a76eb98c97"
     },
     {
       "chapter": 20,
       "file": "Ch20-iSCARB.zip",
-      "bytes": 7968495,
-      "sha256": "67a216fd91de013518b4eacb2aa182e0741064ce2db28f344b7229d4927195ce"
+      "bytes": 7974883,
+      "sha256": "3b959a212f42d2c7a46e9de3d086e6562f23c292118aa391333e33b94948afb0"
     }
   ],
   "status": "passed",
   "total_layout_checks": 720,
-  "total_behavior_checks": 450
+  "total_behavior_checks": 468
 }

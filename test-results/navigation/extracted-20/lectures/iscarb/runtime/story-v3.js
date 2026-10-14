@@ -244,6 +244,7 @@ window.ISCARB_STORY = {
           ['Scope of the safety case', 'The argument covered one 0.6° activation, not repeated 2.5° ones.']
         ],
         lesson: 'The fix compares both sensors, activates once per event and never commands more than pilots can counter. The safety claim now matches what the system can actually do.',
+        differs: 'In the training story the fix is a cumulative limit outside the assistant. At Boeing it also needed both sensors, because one wrong reading started every activation.',
         sources: [['Seattle Times investigation (Gates & Baker, 2019)', 'https://afacwa.org/?p=1143'], ['MCAS overview', 'https://en.wikipedia.org/wiki/Maneuvering_Characteristics_Augmentation_System']]
       }
     },
@@ -265,6 +266,7 @@ window.ISCARB_STORY = {
           ['Over-broad identity', 'Like the assistant’s service account in the story: access was not limited to the asker.']
         ],
         lesson: 'Hiding is not authorising. The server must check every request, on every path, for the person who is asking.',
+        differs: 'In the training story the leak runs through an AI assistant’s broad account. At First American there was no AI: the web server itself served any number.',
         sources: [['KrebsOnSecurity, 24 May 2019', 'https://krebsonsecurity.com/2019/05/first-american-financial-corp-leaked-hundreds-of-millions-of-title-insurance-records/']]
       }
     },
@@ -286,6 +288,7 @@ window.ISCARB_STORY = {
           ['Rehearse the whole service', 'A rehearsal without the identity service would have shown the gap.']
         ],
         lesson: 'Recovery means the essential service works again, not that a server is running. Find what everything depends on before the outage.',
+        differs: 'In the training story an audited emergency route restores identity. Maersk had no such route; one copy survived only because of a power cut.',
         sources: [['Redmond Magazine: “Domain controller nightmare” (2018)', 'https://redmondmag.com/blogs/scott-bekker/2018/08/domain-controller-nightmare.aspx']]
       }
     },
@@ -307,6 +310,7 @@ window.ISCARB_STORY = {
           ['Evaluate before you commit', 'The new trajectory was never used to test the reused unit.']
         ],
         lesson: 'A reused component brings its old assumptions. Check them against the new system, not against its past success.',
+        differs: 'In the training story the risk is a supplier retiring versions. At Ariane the reused code did not change; the system around it did.',
         sources: [['Ariane flight V88', 'https://en.wikipedia.org/wiki/Ariane_flight_V88']]
       }
     },
@@ -328,6 +332,7 @@ window.ISCARB_STORY = {
           ['Someone owns the seam', 'NASA: the problem was not the error, but the failure to detect it.']
         ],
         lesson: 'A component contract is more than a data type. State units, ranges and meaning, and test across the seam.',
+        differs: 'In the training story a precondition at the adapter rejects the wrong unit. The orbiter had no such check, so nothing stopped the wrong values.',
         sources: [['Mars Climate Orbiter', 'https://en.wikipedia.org/wiki/Mars_Climate_Orbiter']]
       }
     },
@@ -349,6 +354,7 @@ window.ISCARB_STORY = {
           ['Make repeats safe', 'A safe retry needs the same request identity, as in the story.']
         ],
         lesson: 'A retry is a new request. Bound it, back off, and make repeated requests safe to run twice.',
+        differs: 'In the training story one repeated request must be made safe. At AWS, retries from many clients flooded the network, so the fix limited them.',
         sources: [['AWS post-event summary', 'https://aws.amazon.com/message/12721/']]
       }
     },
@@ -370,6 +376,7 @@ window.ISCARB_STORY = {
           ['Narrow the claim', 'Knowing which feed is stale lets others act on what is still true.']
         ],
         lesson: 'In a system of systems, show the age of every feed and say when a view is degraded. Silence looks like normal.',
+        differs: 'In the training story the dashboard labels another owner’s AI feed as unverified. In 2003 nobody labelled the stale view, so operators did not know.',
         sources: [['Northeast blackout of 2003', 'https://en.wikipedia.org/wiki/Northeast_blackout_of_2003']]
       }
     }

@@ -3,7 +3,8 @@
  "case": {
   "fictional": true,
   "answerKey": "a configured instance demonstrated on the full workflow",
-  "mutation": "The supplier changes a required interface and will not support the earlier version throughout the planned lifetime. The supplier also announces that the language-model version the team tested will be retired. Its replacement answers the same prompts differently."
+  "mutation": "The supplier changes a required interface and will not support the earlier version throughout the planned lifetime. The supplier also announces that the language-model version the team tested will be retired. Its replacement answers the same prompts differently.",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -61,6 +62,11 @@
    "short": "depending on a supplier's versions, data terms and roadmap that you do not control",
    "ar": "الارتهان للمورّد",
    "added": true
+  },
+  {
+   "term": "contract",
+   "short": "a written agreement on what each side provides and expects: data, steps, errors and changes",
+   "ar": "عقد الواجهة"
   }
  ],
  "transfer": {
@@ -72,7 +78,21 @@
   "answer": "The vehicle-location component at the resource-management level, because the radio system changes how location data arrives. Validate the dispatch workflow end to end on the new instance, not only the adapted component.",
   "concept": "adapting and validating a product instance",
   "answerKey": "adapt vehicle location, then validate the whole dispatch instance",
-  "at": "X05"
+  "at": "X05",
+  "kind": "source",
+  "check": {
+   "options": [
+    "Rewrite the whole product line for the police force",
+    "Adapt the vehicle-location component, then validate the whole dispatch instance",
+    "Test only the adapted component, because the rest is reused"
+   ],
+   "answer": 1,
+   "why": [
+    "The product line exists so that only the variation needs new work.",
+    "Right. The radio change affects vehicle location; the whole instance must then be validated.",
+    "Reused parts can interact differently with the new component, so testing it alone is not enough."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -105,7 +125,7 @@
    "minutes": 1.5,
    "tier": "core",
    "concept": "matching reuse level to need",
-   "answerKey": "a component for authentication; a configurable product for the workflow",
+   "answerKey": "a component for authentication; a configurable product for appointments",
    "commonError": "Students pick one reuse level for every need. One system can combine a library, a framework and a configured product.",
    "sourceFigs": [
     12,
@@ -186,28 +206,28 @@
    "minutes": 1.5,
    "tier": "core",
    "concept": "evidence for an integrated solution",
-   "answerKey": "interface, data and workflow compatibility across products",
+   "answerKey": "interface, data and process compatibility across products",
    "commonError": "Students accept two separate demonstrations as proof of integration. Ask for the test that crosses the product boundary."
   },
   "CHECK2": {
    "minutes": 1,
    "tier": "core",
    "concept": "what reverses an integration decision",
-   "answerKey": "a failed data or workflow contract",
+   "answerKey": "a failed data or interface agreement between the products",
    "commonError": "Students cannot name what would reverse their choice. Ask for one specific contract failure or support gap."
   },
   "R18": {
    "minutes": 1.5,
    "tier": "optional",
    "concept": "shared data and rules in ERP",
-   "answerKey": "a local change alters a dependent workflow",
+   "answerKey": "a local change alters another department",
    "commonError": "Students configure one module as if it were isolated. Ask which other department reads the same record or rule."
   },
   "R09": {
    "minutes": 2,
    "tier": "core",
    "concept": "API call versus business transaction",
-   "answerKey": "verify the complete workflow outcome",
+   "answerKey": "verify the end-to-end business outcome",
    "commonError": "Students take a successful API call as integration proof. Ask what the whole transaction needs: state, ordering, failure and data semantics.",
    "concept2": "planning for supplier change",
    "answerKey2": "documented interface assumption, compatibility check and fallback",
@@ -228,13 +248,14 @@
   "APPLY": {
    "minutes": 1,
    "tier": "core",
-   "concept": "revising under new evidence",
-   "answerKey": "pin the version and re-run the workflow evaluation",
+   "concept": "ownership after the change",
+   "answerKey": "the product owner approves versions; clinic staff are told",
    "commonError": "Students keep the plan and hope the replacement model behaves the same. Treat version retirement as a supplier change with an owner.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the language model, treat version retirement as the same kind of supplier change. Pin the tested version. Re-run the workflow evaluation on its replacement. Name who decides whether the replacement is accepted.",
-   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
+   "answer": "The product owner owns them and approves each replacement version after the evaluation is re-run. Clinic staff are told before a version changes, and what to check afterwards.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case",
+   "question": "Who owns supplier version changes from now on?"
   },
   "END": {
    "minutes": 2,
@@ -247,7 +268,7 @@
    "minutes": 3,
    "tier": "core",
    "concept": "evidence of fit",
-   "answerKey": "the demo is not evidence for the full workflow",
+   "answerKey": "a ten-request demo is not fit evidence",
    "think": "Devices down. Configure, integrate or replace, and what evidence decides?",
    "pair": "Name one assumption and one given fact you need to support your answer.",
    "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
@@ -662,7 +683,6 @@
   },
   "20": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "prose",
    "items": [
     "System infrastructure framework for GUI design.",
@@ -726,7 +746,6 @@
   },
   "34": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X05"
   },
   "35": {
@@ -1140,5 +1159,9 @@
    }
   ],
   "other": "the answer names the planning factor that decides, uses only the facts given in the task, compares at least two routes on the same factor, and names evidence from an evaluation or record that someone else can check. A different route that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "Reusing a product is the wrong choice when supplier support ends before your system's planned lifetime.",
+  "condition": "the supplier's support end date is earlier than your planned lifetime"
  }
 }

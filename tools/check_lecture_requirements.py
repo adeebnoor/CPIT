@@ -1,6 +1,6 @@
 """Check every lecture against the lecture design requirements (curriculum/lecture-requirements/README.md).
 
-Codes: KEEP-1..8, COV-1..6, LANG-1..6, CASE-1..5, TIME-1..6, RUB-1..6.
+Codes: KEEP-1..8, COV-1..6, LANG-1..6, CASE-1..5, TIME-1..6, RUB-1..6, COMMIT-1..3, REAL-1..3, GATE-1..5, BOUND-1..4.
 MUST items fail the build; PREFERRED items print a warning; MANUAL items are listed for human review.
 Writes docs/lecture-requirements-status.md (the per-lecture acceptance list) and exits 1 on any MUST failure.
 Run:  python3 tools/check_lecture_requirements.py [--quiet]
@@ -11,9 +11,10 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from apply_lecture_requirements import BOUND_MARK
 from lecture_requirements_lib import (ROOT, CHAPTERS, LECTURES, FORBIDDEN, MAX_WORDS, MAX_GRADE, NON_CONTENT, RUNTIME_PATH,
                                       common, load_lecture, load_ledger, load_story, student_texts, sentences, words,
-                                      fk_grade, term_re, parse_range, strip_html)
+                                      fk_grade, term_re, parse_range, strip_html, load_req, STORY_PATH)
 
 LEVEL = {  # must | pref | manual
  'KEEP-1': 'must', 'KEEP-2': 'must', 'KEEP-3': 'manual', 'KEEP-4': 'must', 'KEEP-5': 'manual', 'KEEP-6': 'must', 'KEEP-7': 'must', 'KEEP-8': 'pref',
@@ -22,6 +23,11 @@ LEVEL = {  # must | pref | manual
  'CASE-1': 'must', 'CASE-2': 'must', 'CASE-3': 'must', 'CASE-4': 'must', 'CASE-5': 'must',
  'TIME-1': 'must', 'TIME-2': 'must', 'TIME-3': 'must', 'TIME-4': 'must', 'TIME-5': 'pref', 'TIME-6': 'pref',
  'RUB-1': 'must', 'RUB-2': 'must', 'RUB-3': 'manual', 'RUB-4': 'must', 'RUB-5': 'must', 'RUB-6': 'pref',
+ 'COMMIT-1': 'must', 'COMMIT-2': 'must', 'COMMIT-3': 'must',
+ 'REAL-1': 'must', 'REAL-2': 'must', 'REAL-3': 'manual',
+ 'GATE-1': 'must', 'GATE-2': 'must', 'GATE-3': 'must', 'GATE-4': 'must', 'GATE-5': 'must',
+ 'BOUND-1': 'must', 'BOUND-2': 'manual', 'BOUND-3': 'must', 'BOUND-4': 'must',
+ 'DATA-1': 'must',
 }
 TITLES = {
  'KEEP-1': 'Every content slide has title, 2–4 points, question with model answer, one-sentence takeaway, full explanation, source scope and instructor notes',
@@ -61,8 +67,42 @@ TITLES = {
  'RUB-4': 'Conditions for accepting other answers are written explicitly',
  'RUB-5': 'The student sees the assignment rubric before submitting',
  'RUB-6': 'One rubric template across all lectures',
+ 'COMMIT-1': 'The student’s own sentence appears beside the model answer (“You wrote: …”)',
+ 'COMMIT-2': 'No model answer before the student writes or explicitly skips; a skip shows “You did not write a decision”',
+ 'COMMIT-3': 'The sentence is saved on the device only and the commit step is absent in presenter mode',
+ 'REAL-1': 'One line on the cover separates the training story from the real incident',
+ 'REAL-2': 'Every story or incident mention carries a fixed tag (training story / real incident), checked against a case-kind field',
+ 'REAL-3': 'A real incident states its actual lesson and how it differs from the training story’s answer',
+ 'GATE-1': 'In self-study the chapter cannot be marked complete before the transfer question is answered',
+ 'GATE-2': 'The student writes a justification line before the answer is revealed',
+ 'GATE-3': 'A wrong answer shows an explanation and allows another try',
+ 'GATE-4': 'The progress bar shows “Transfer case not solved” until it is solved',
+ 'GATE-5': 'The gate is off in presenter mode',
+ 'BOUND-1': 'Each chapter ends with one sentence on when its mechanism is the wrong choice',
+ 'BOUND-2': 'That sentence names an observable condition',
+ 'BOUND-3': 'The student writes first; the model sentence is revealed after',
+ 'BOUND-4': 'The student’s sentence travels with the assignment and appears in its export',
+ 'DATA-1': 'No TODO placeholder in lecture data, authored requirements or coverage reasons; source lists on a slide are classified on-slide',
 }
-GROUP_ORDER = ['KEEP', 'COV', 'LANG', 'CASE', 'TIME', 'RUB']
+GROUP_ORDER = ['KEEP', 'COV', 'LANG', 'CASE', 'TIME', 'RUB', 'COMMIT', 'REAL', 'GATE', 'BOUND', 'DATA']
+
+
+def load_real() -> dict:
+    """Real incidents per story chapter: {chapter: {'lesson':..., 'differs':...}} parsed from story-v3.js."""
+    s = STORY_PATH.read_text(encoding='utf-8')
+    out, cur, inreal = {}, None, False
+    for line in s.split('\n'):
+        m = re.match(r'\s{4}(\d+): \{', line)
+        if m:
+            cur, inreal = int(m.group(1)), False
+            continue
+        if cur is not None and re.match(r'\s*real: \{', line):
+            inreal = True; out[cur] = {}
+            continue
+        if inreal:
+            for key, txt in re.findall(r"(lesson|differs): '((?:[^'\\]|\\.)*)'", line):
+                out[cur][key] = txt
+    return out
 
 
 class Report:
@@ -97,7 +137,7 @@ def all_questions(data):
     return qs
 
 
-def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, figmap: dict):
+def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, figmap: dict, story_real: dict, hub_js: str):
     data, source, path = load_lecture(ch)
     ledger = load_ledger(ch)
     story = story_all.get(ch, []) if ch >= cfg.get('storyFirstChapter', 12) else []
@@ -428,6 +468,78 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
     ok_r5 = 'aixRubric(A,!locked)' in runtime and runtime.index('aixRubric(A,!locked)') < runtime.index("id=\"aix-commit\"")
     R.set(ch, 'RUB-5', ok_r5, [] if ok_r5 else ['AI assignment rubric is not shown before the commit step'])
     R.set(ch, 'RUB-6', True, [])
+
+    # ---- COMMIT / REAL / GATE / BOUND (fourth review) ----
+    need = lambda *xs: [f'runtime lacks {x}' for x in xs if x not in runtime]
+    bad = need('function youWrote', 'You wrote:', 'you-wrote-slot')
+    R.set(ch, 'COMMIT-1', not bad, bad)
+    bad = need('function commitReady', 'data-commit-for', 'function skipBtn', 'You did not write a decision', 'stationReady')
+    R.set(ch, 'COMMIT-2', not bad, bad)
+    bad = need('const COMMIT=!PRESENTER', "if(!COMMIT)return ''")
+    if 'fetch(' in runtime[runtime.find('function commitBox'):runtime.find('function commitBox') + 600]:
+        bad.append('the commit box must not send the sentence anywhere')
+    R.set(ch, 'COMMIT-3', not bad, bad)
+    bad = need('function kindLine', 'kind-line')
+    R.set(ch, 'REAL-1', not bad, bad)
+    bad = need('function kindTag', 'TRAINING STORY', 'REAL INCIDENT')
+    if (data.get('case') or {}).get('kind') != 'training':
+        bad.append("case.kind must be 'training'")
+    if tr.get('kind') not in ('source', 'fictional'):
+        bad.append("transfer.kind must be 'source' or 'fictional'")
+    elif (tr['kind'] == 'source') != bool(tr.get('source')) and not (tr['kind'] == 'fictional' and tr.get('fictional')):
+        bad.append('transfer.kind disagrees with transfer.source/fictional')
+    R.set(ch, 'REAL-2', not bad, bad)
+    real = story_real.get(ch)
+    bad = []
+    if real is not None:
+        if words(real.get('lesson') or '') < 6:
+            bad.append('real incident without its lesson')
+        if words(real.get('differs') or '') < 6:
+            bad.append('real incident without how it differs from the training story')
+        if 'real-differs' not in runtime:
+            bad.append('runtime does not show how the real incident differs')
+    R.set(ch, 'REAL-3', not bad, bad or (['No real incident in this lecture'] if real is None else ['Lesson and difference sentences reviewed by the instructor']))
+    chk = tr.get('check') or {}
+    opts, why = chk.get('options') or [], chk.get('why') or []
+    bad = []
+    if len(opts) < 2 or len(why) != len(opts) or not isinstance(chk.get('answer'), int) or not (0 <= chk['answer'] < len(opts)):
+        bad.append('transfer.check needs options, an answer index and one explanation per option')
+    bad += need('function gateOn', 'function gateSolved', 'gate_solved')
+    if 'gate_solved' not in hub_js or 'Solve the transfer case' not in hub_js:
+        bad.append('the hub does not hold the review checkbox until the transfer case is solved')
+    R.set(ch, 'GATE-1', not bad, bad)
+    bad = need('data-gate-line', 'gate_line')
+    R.set(ch, 'GATE-2', not bad, bad)
+    bad = [f'transfer.check why[{i}] too short' for i, w in enumerate(why) if words(w) < 4] + need('gate_tries', 'you can try again', 'Try another option')
+    R.set(ch, 'GATE-3', not bad, bad)
+    bad = need('Transfer case not solved')
+    R.set(ch, 'GATE-4', not bad, bad)
+    bad = need('return !PRESENTER&&!!D.transfer?.check')
+    R.set(ch, 'GATE-5', not bad, bad)
+    B = data.get('bound') or {}
+    bad = []
+    if not B.get('model') or len(sentences(B['model'])) != 1:
+        bad.append('bound.model must be one sentence')
+    if not re.search(r'\bwrong\b', B.get('model') or '') or not re.search(r'\bwhen(ever)?\b', B.get('model') or ''):
+        bad.append("bound.model must say when the mechanism is the wrong choice")
+    bad += need('function boundBlock', 'boundBlock()')
+    R.set(ch, 'BOUND-1', not bad, bad)
+    R.set(ch, 'BOUND-2', bool(B.get('condition')), [f"Observable condition: {B.get('condition') or 'missing'}"])
+    bad = need("data-bound-reveal data-commit-for=", 'bound-answer" hidden')
+    R.set(ch, 'BOUND-3', not bad, bad)
+    R.set(ch, 'BOUND-4', True, [] if ch >= cfg.get('assignmentRubricFromChapter', 12) else ['Assignments 1–2 (Chapters 10–11) are frozen; the boundary sentence is saved in the lecture only'])
+    # DATA-1: placeholders never ship; a source list shown on a slide is classified on-slide at that slide
+    bad = []
+    if 'TODO' in json.dumps(data) or 'TODO' in json.dumps(load_req(ch) or {}):
+        bad.append('TODO placeholder in lecture data or authored requirements')
+    for s0 in slides:
+        for L in s0.get('lists') or []:
+            c = cov.get(int(L['source'])) or {}
+            if c.get('cls') != 'slide':
+                bad.append(f"source slide {L['source']}: list shown on {s0['id']} but classified '{c.get('cls')}'")
+            elif c.get('unit') != s0['id'] and not any(int(L2['source']) == int(L['source']) for s1 in slides if s1['id'] == c.get('unit') for L2 in s1.get('lists') or []):
+                bad.append(f"source slide {L['source']}: list shown on {s0['id']} but classified at {c.get('unit')}")
+    R.set(ch, 'DATA-1', not bad, bad)
     return names_by_no
 
 
@@ -463,7 +575,8 @@ def check_assignments(R: Report, cfg: dict):
             ci = s.find('Review &amp; commit')
         if not (0 <= ri < ci):
             bad5.append('rubric must appear before the commit control')
-        for code, bad in (('RUB-1', bad1), ('RUB-2', bad2), ('RUB-4', bad4), ('RUB-5', bad5)):
+        bad_b4 = [] if (BOUND_MARK in s and "lines.push('## Chapter boundary sentence" in s and 'id="bound"' in s) else ['the lecture boundary sentence is not carried into the assignment export']
+        for code, bad in (('RUB-1', bad1), ('RUB-2', bad2), ('RUB-4', bad4), ('RUB-5', bad5), ('BOUND-4', bad_b4)):
             st, det = R.rows[ch][code]
             if bad:
                 R.rows[ch][code] = ('FAIL', det + [f'assignment page: {b}' for b in bad])
@@ -495,13 +608,15 @@ def run(quiet: bool = False) -> list[str]:
     cfg = common()
     R = Report()
     story_all = load_story()
+    story_real = load_real()
+    hub_js = (ROOT / 'iscarb-hub.js').read_text(encoding='utf-8')
     runtime = RUNTIME_PATH.read_text(encoding='utf-8')
     figsrc = (ROOT / 'lectures/iscarb/runtime/source-figures.js').read_text(encoding='utf-8')
     figjson = json.loads(figsrc[figsrc.index('{'):figsrc.rindex('}') + 1])
     figmap = {k: {int(v['sourceSlide']) for v in e['variants'] if v.get('sourceSlide')} for k, e in figjson.items()}
     templates = {}
     for ch in CHAPTERS:
-        names = check_chapter(ch, R, story_all, runtime, cfg, figmap)
+        names = check_chapter(ch, R, story_all, runtime, cfg, figmap, story_real, hub_js)
         for no, lst in names.items():
             templates.setdefault(no, set()).update(lst)
     check_assignments(R, cfg)

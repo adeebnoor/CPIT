@@ -42,6 +42,8 @@ async def run_case(browser,url,ch,offline,out,kind):
  await check('Enter activates focused native button only',not await page.locator('#modal').is_hidden() and await idx(page)==3)
  await page.keyboard.press('Backspace');await check('Dialog does not move underlying slide',await idx(page)==3)
  await page.keyboard.press('Escape');await blur(page)
+ await check('Model answer locked until the student writes (COMMIT-2)',await page.locator('[data-answer]').first.is_disabled())
+ await page.locator('#chapter-main textarea[data-commit]').first.fill('Keep the decision; one reason.');await blur(page)
  await page.locator('[data-answer]').first.click();await check('Model answer click does not advance',await idx(page)==3)
  await page.keyboard.press('Escape');await blur(page)
  await page.evaluate("iscarb.open('CARD')")

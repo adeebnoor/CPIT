@@ -4,7 +4,8 @@
   "fictional": true,
   "answerKey": "cumulative limit enforced outside the assistant",
   "headline": "The protection claim covers one command. Is that enough?",
-  "question": "What claim is supported, and what extra hazard analysis is needed?"
+  "question": "What claim is supported, and what extra hazard analysis is needed?",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -88,7 +89,21 @@
   "answer": "The pump shall not deliver insulin when the measured sugar level is below the set threshold. It shall raise an alarm instead. Verify with tests that feed low readings and check that no dose is delivered.",
   "concept": "hazard-driven safety requirement",
   "answerKey": "no delivery below the threshold plus an alarm",
-  "at": "X03"
+  "at": "X03",
+  "kind": "source",
+  "check": {
+   "options": [
+    "Deliver a smaller dose when sugar is low",
+    "Do not deliver below the threshold, raise an alarm, and test with low readings",
+    "Check that the sensor reading is correct before each dose"
+   ],
+   "answer": 1,
+   "why": [
+    "Any dose below the threshold is the hazard; a smaller one still causes harm.",
+    "Right. The requirement removes the hazardous action and names a test that feeds low readings.",
+    "The reading is correct in this case; the hazard is what the pump does with it."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -299,7 +314,7 @@
    "minutes": 3,
    "tier": "core",
    "concept": "missing cumulative requirement and its checker",
-   "answerKey": "reject commands that take the total over the limit; safe state on lost sensing",
+   "answerKey": "a safe state when sensing is lost, verified without the assistant",
    "commonError": "Students look for the row where a single command failed its check. None did. The first unsafe row is C3, where the total passes 10 while every check passed.",
    "added": true,
    "answer": "Requirement: the controller shall reject any command that takes the total within a stated window above the modelled limit. This holds whatever proposed the command. On loss of sensing, it enters a defined safe state and accepts no assistant sequence. Verification: test many small commands, including sequences built to probe the bound, and loss-of-sensing cases. Where feasible, model-check them too. Record version, conditions and reviewer in the hazard log. Neither step depends on the assistant being right. Both depend on the checker seeing every command and on its own sensing. The window and limit shown are illustrative. An optimiser that exploits what the rules forgot is doing specification gaming.",
@@ -308,13 +323,14 @@
   "APPLY": {
    "minutes": 1,
    "tier": "core",
-   "concept": "revising under new evidence",
-   "answerKey": "restrict assistant sequences until the cumulative limit is verified",
+   "concept": "ownership after the change",
+   "answerKey": "the plant safety authority owns it; operators are told",
    "commonError": "Students ask the assistant to “be more careful”. Reject that: the control must be enforced outside the assistant, with its own verification.",
    "twist": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. The cumulative limit must hold whatever proposes the commands. Until it is specified and verified, restrict or withdraw assistant sequences. Tell the operators why.",
+   "answer": "The plant's safety authority owns it, not the assistant's developers. It accepts the restriction until the cumulative limit is verified. Operators and the shift supervisor are told which mode is blocked, and why.",
    "added": true,
-   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case",
+   "question": "Who owns the revised decision about the repeated-command mode?"
   },
   "END": {
    "minutes": 2,
@@ -680,7 +696,6 @@
   },
   "11": {
    "cls": "slide",
-   "reason": "TODO",
    "unit": "X02A"
   },
   "12": {
@@ -774,7 +789,6 @@
   },
   "29": {
    "cls": "slide",
-   "reason": "TODO",
    "kind": "list",
    "items": [
     "Hazard avoidance;",
@@ -843,7 +857,6 @@
   },
   "43": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X09"
   },
   "44": {
@@ -939,7 +952,6 @@
   },
   "62": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "B01"
   },
   "63": {
@@ -1270,5 +1282,9 @@
    }
   ],
   "other": "the answer uses a chapter concept correctly, rests only on the facts given in the task, separates done from proposed evidence, and names a trigger that someone could observe. A different decision that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "A limit on each command is the wrong safety control when commands can repeat, because their total can pass it.",
+  "condition": "commands can repeat within the same period"
  }
 }

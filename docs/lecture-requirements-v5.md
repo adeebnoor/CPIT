@@ -74,3 +74,22 @@ Authored data: `curriculum/lecture-requirements/` (one JSON per lecture, applied
 | RUB-5 | The in-lecture AI challenge says "Practice only · not graded · this is not Assignment N" and names the graded assignment and its points (e.g. Assignment 5, 5 points) as a separate case on its own page. |
 | TIME-1 | A station's timer equals its budget: 180 s for 3 minutes, 210 s for the station that carries the 30-second transfer step. The checker compares them. Actual durations are logged at the close slide in presenter mode (TIME-6); recalibrate the 1.5-minute concept slides after the first deliveries. |
 | TIME-2 (Ch10, Ch11) | These two lectures are not story lectures and have no class vote, so the two 3-minute votes were removed from their plans. The freed time returns slides to core: Ch10 has no optional slide (42 min); Ch11 keeps PROFILE optional (41.5 min). |
+
+## Fourth review (14 October 2026) · commitment, real versus training, transfer gate, boundary sentence
+
+| Item | What changed |
+|---|---|
+| COMMIT-1 | Every revealed answer (your-call, second question, station discussion, boundary sentence) shows **You wrote: …** above the model answer. |
+| COMMIT-2 | Reveal and model-answer buttons stay disabled until the student writes one sentence or presses **Skip writing**; a skip shows "You did not write a decision." |
+| COMMIT-3 | The sentence is saved only in this browser (the lecture's `localStorage` state). Presenter mode (`?presenter=1`) has no commit boxes and reveals directly. |
+| REAL-1 | The cover carries one line: the training story is fictional; the real incident is documented and shown separately (or: no real incident is used). |
+| REAL-2 | Fixed tags **TRAINING STORY**, **REAL INCIDENT**, **FROM THE TEXTBOOK** and **FICTIONAL CASE** on every case, story, incident and transfer mention. The checker requires `case.kind = training` and `transfer.kind = source / fictional`. |
+| REAL-3 | Each real incident (Chapters 12–20) ends with its actual lesson and one sentence on how it differs from the training story's answer (`differs` in `story-v3.js`). |
+| GATE-1..5 | Self-study only: a transfer check (`transfer.check`: three options, one explanation each). The student writes a reason line, then chooses; a wrong choice shows why and allows another try. Until solved, the progress bar shows **Transfer case not solved**, the END slide reads "Not complete yet", and the course page keeps the "I have reviewed this chapter" box disabled. Presenter mode has no gate. |
+| BOUND-1..3 | The END slide asks **When is this chapter's mechanism the wrong choice?** The student writes one sentence, then compares it with the model sentence (`bound.model`), which names an observable condition (`bound.condition`, reviewed manually). |
+| BOUND-4 | Assignments 3–9 show the sentence written in the lecture under the boundary field and add it to the export as "Chapter boundary sentence (written in the lecture)". Assignments 1–2 (Chapters 10–11) are frozen and already submitted, so the sentence stays in the lecture there. |
+| COV-2 | Source lists that sit on a slide are now classified **on a classroom slide** at that slide (Ch11 71, Ch16 41, Ch17 30, Ch20 43). The checker (DATA-1) fails any mismatch. |
+| KEEP-1, COV-3 (Ch10) | X05 has three bullets. The Chapter 10 study list names textbook sections; the Chapter 10 textbook PDF is not in the course pack, so no page numbers are given until it is added. |
+| LANG-2 | "contract" is defined in the Chapter 15, 16 and 20 glossaries (Arabic: عقد الواجهة) and is now a checked term. |
+| CASE-2 | APPLY in Chapters 12, 14, 15, 16, 17 and 20 asks one ownership question, so "workflow", "cumulative limit" and "assistant" are no longer the answer to more than two questions. |
+| DATA-1 | No TODO placeholder may remain in lecture data or authored requirements; the build fails on one. |

@@ -2,7 +2,8 @@
  "chapter": 20,
  "case": {
   "fictional": true,
-  "answerKey": "promise only what the dashboard controls and label the rest"
+  "answerKey": "promise only what the dashboard controls and label the rest",
+  "kind": "training"
  },
  "glossary": [
   {
@@ -75,6 +76,11 @@
    "short": "the identifier of the AI model a producer used; a change can alter meaning without changing the data shape",
    "ar": "إصدار النموذج",
    "added": true
+  },
+  {
+   "term": "contract",
+   "short": "a written agreement between owners on data meaning, timing, failures and who announces changes",
+   "ar": "عقد الواجهة"
   }
  ],
  "transfer": {
@@ -86,7 +92,21 @@
   "answer": "A coalition, Maier's virtual class. No formal governance body spans the authorities. Each manages its own systems and collaborates informally. Its technical complexity is modest, but its governance complexity is high.",
   "concept": "classifying a system of systems by governance",
   "answerKey": "a coalition, because no shared governance exists",
-  "at": "X02A"
+  "at": "X02A",
+  "kind": "source",
+  "check": {
+   "options": [
+    "Organizational, because it is a national initiative",
+    "Federated, because the authorities share data",
+    "A coalition, because no shared governance spans the authorities"
+   ],
+   "answer": 2,
+   "why": [
+    "A national initiative does not give one organisation control over every authority's systems.",
+    "Sharing data is not governance; there is no voluntary body that all owners join.",
+    "Right. Each authority manages its own systems and collaborates informally."
+   ]
+  }
  },
  "slides": {
   "TITLE": {
@@ -314,13 +334,14 @@
   "APPLY": {
    "minutes": 1,
    "tier": "core",
-   "concept": "revising under new evidence",
-   "answerKey": "label freshness and model version; mark changed data unverified",
+   "concept": "ownership after the change",
+   "answerKey": "the dashboard owner leads it; users are told",
    "commonError": "Students fix the schedule and miss the model change. Same interface shape does not mean the same meaning.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the AI-produced feed, show its declared model version. Flag data produced since the change as unverified until the agency confirms how its classifications changed.",
-   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
+   "answer": "The dashboard owner leads it with the agency's owner, through the joint group if one exists. Dashboard users and the public are told which data is unverified, and why.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case",
+   "question": "Who owns the agreement on how AI model changes are announced?"
   },
   "END": {
    "minutes": 2,
@@ -333,7 +354,7 @@
    "minutes": 3.5,
    "tier": "core",
    "concept": "promise what you observe",
-   "answerKey": "source, timestamp and declared model version, not correctness",
+   "answerKey": "promise only what the dashboard itself observes",
    "think": "Devices down. What useful service can be promised without pretending to control every owner?",
    "pair": "Name one assumption and one given fact you need to support your answer.",
    "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
@@ -510,7 +531,7 @@
    "minutes": 3,
    "tier": "core",
    "concept": "revising after the twist",
-   "answerKey": "label what the dashboard cannot vouch for and agree how model changes are announced",
+   "answerKey": "model changes announced as interface changes",
    "think": "One feed moves to a slower update schedule while keeping the same interface shape. The same agency also changed its AI model version. The shape is unchanged, but incidents are now classified differently. Does your first decision still hold?",
    "pair": "Explain what changes in your claim, your evidence or its scope.",
    "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
@@ -755,7 +776,6 @@
   },
   "22": {
    "cls": "full",
-   "reason": "TODO",
    "unit": "X03"
   },
   "23": {
@@ -839,7 +859,7 @@
    "unit": "X09"
   },
   "43": {
-   "cls": "full",
+   "cls": "slide",
    "unit": "X09"
   },
   "44": {
@@ -1259,5 +1279,9 @@
    }
   ],
   "other": "the answer names the chapter concept that decides, uses only the facts given in the task, separates what the dashboard controls from what it receives, and names evidence from a baseline or record that someone else can check. A different integration that meets these conditions earns the same marks as the model answer."
+ },
+ "bound": {
+  "model": "Showing a partner's feed as live is the wrong choice when the dashboard cannot see how old the data is.",
+  "condition": "the feed carries no timestamp the dashboard can check"
  }
 }
