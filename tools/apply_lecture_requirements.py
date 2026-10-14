@@ -14,8 +14,8 @@ from lecture_requirements_lib import ROOT, PUB, CHAPTERS, LECTURES, common, load
 
 SLIDE_KEYS = ('minutes', 'tier', 'concept', 'answerKey', 'concept2', 'answerKey2', 'commonError', 'question', 'answer',
               'question2', 'answer2', 'bullets', 'takeaway', 'extra', 'lists', 'added', 'twist', 'transfer', 'sourceFigs',
-              'rows', 'heads', 'notes', 'title', 'sourceRange')
-STATION_KEYS = ('minutes', 'tier', 'concept', 'answerKey', 'think', 'pair', 'write', 'hint', 'answer', 'note', 'rubric', 'title')
+              'rows', 'heads', 'notes', 'title', 'sourceRange', 'sourceLabel')
+STATION_KEYS = ('minutes', 'tier', 'concept', 'answerKey', 'transfer', 'think', 'pair', 'write', 'hint', 'answer', 'note', 'rubric', 'title')
 QUIZ_KEYS = ('concept', 'answerKey', 'beyondCase', 'q', 'options', 'why', 'answer')
 LECTURE_KEYS = ('glossary', 'transfer', 'studyList', 'activities', 'hook', 'timeRule')
 RUB_START, RUB_END = '<!-- rubric-examples:start -->', '<!-- rubric-examples:end -->'

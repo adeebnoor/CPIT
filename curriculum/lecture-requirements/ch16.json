@@ -85,7 +85,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -93,7 +93,7 @@
    "tier": "core"
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "X01": {
@@ -111,7 +111,7 @@
    "commonError": "Students read “independent” as “needs nothing”. Independent means the needs are written down so another provider can meet them."
   },
   "X03": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "provides and requires contract",
    "answerKey": "types, units, pre- and postconditions and errors can still differ",
@@ -132,7 +132,7 @@
    "commonError": "Students treat middleware as free fault removal. It is a shared dependency whose behaviour still needs verification."
   },
   "CHECK1": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "syntax versus meaning",
    "answerKey": "unit, range and meaning make numbers incompatible",
@@ -140,7 +140,7 @@
   },
   "X05": {
    "minutes": 1.5,
-   "tier": "core",
+   "tier": "optional",
    "concept": "development for reuse versus with reuse",
    "answerKey": "the team developing with reuse discovers components",
    "commonError": "Students merge the two processes. One generalises what it already has; the other searches for what it can fit."
@@ -192,7 +192,7 @@
    ]
   },
   "CHECK2": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "adapter contract",
    "answerKey": "range, rounding, invalid input and failures belong in the contract",
@@ -245,25 +245,26 @@
    "answer": "The precondition. State unit = 'Celsius' with a plausible range, checked at the adapter. That rejects Fahrenheit values a model trained on Celsius would otherwise accept. A value plausible in both units still needs the unit declared, not inferred. OCL pre- and postconditions constrain each individual call. The forecast-error limit cannot be one: no single call satisfies or violates it. It belongs in a separate quality requirement. Verify it on a held-out evaluation set. Re-check it when the input distribution or the model version changes. Record the approved model version in the postcondition or as an invariant. A version change then becomes a contract change that needs re-validation."
   },
   "APPLY": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "unit precondition at the adapter; re-validate past forecasts",
    "commonError": "Students fix the adapter and forget the forecasts already produced. Ask what was issued since the mismatch began.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the forecaster, state the unit and range as a precondition at the adapter. Re-validate the forecasts produced since the mismatch began before anyone relies on them."
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the forecaster, state the unit and range as a precondition at the adapter. Re-validate the forecasts produced since the mismatch began before anyone relies on them.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "precondition for an AI input",
    "answerKey": "nothing rejects a wrong unit without a stated precondition",
    "think": "Devices down. Which assumption must be explicit before composition?",
@@ -345,12 +346,13 @@
      "why": "Confuses syntactic with semantic compatibility; no test proposed."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "testable boundary versus untestable coping",
    "answerKey": "an explicit adapter can be tested; coping cannot",
    "think": "Compare two mechanisms: an adapter that converts units explicitly, or trusting the AI component to cope with any input. Which one would you choose?",
@@ -431,12 +433,13 @@
      "why": "No property, no limit, treats confidence as correctness."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "confidence is not evidence that the input meant what the model assumed",
    "think": "The provider documents Fahrenheit, not Celsius. Matching numeric types did not establish compatible meaning. The AI forecaster, trained on Celsius, accepted the values without error and returned confident but wrong forecasts. Does your first decision still hold?",
@@ -518,7 +521,8 @@
      "why": "Treats confidence as evidence; names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -986,7 +990,146 @@
   "hints": {
    "bound": "An observable condition, something you would see, that ends the claim."
   },
-  "scenario": "A clinic composes two components. An OCR component reads scanned lab reports. An AI summariser writes a short summary for the doctor. The OCR interface returns text lines, each with a confidence value; the summariser accepts plain text."
+  "scenario": "A clinic composes two components. An OCR component reads scanned lab reports. An AI summariser writes a short summary for the doctor. The OCR interface returns text lines, each with a confidence value; the summariser accepts plain text.",
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "The composition must state the number format and keep the OCR confidence. The adapter flags lines below 0.9 instead of dropping the value. The design ends if a report uses an undeclared script. Action: the integration engineer adds the flag. Evidence: a boundary test with a low-confidence Arabic-Indic value, proposed. After the 5.8 read as 3.8 I revise the adapter contract.",
+    "why": "Writes a testable contract at the boundary, gives an observable limit, an owner and a test, and revises the contract."
+   },
+   "weak": {
+    "text": "Both components passed their tests, so the composition works.",
+    "why": "Supplier tests cover each part, not the composition; no contract, no evidence."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+  }
  },
  "assignmentRubric": {
   "criteria": [

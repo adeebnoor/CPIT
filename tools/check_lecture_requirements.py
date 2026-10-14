@@ -143,6 +143,9 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
         bad.append(f'{len(new_terms)} new terms from added content: {new_terms}')
     if 'NOT ASSESSED' not in runtime.upper() or 'COURSE ADDITION' not in runtime:
         bad.append('runtime must label course additions and not-assessed parts')
+    for s0 in added:
+        if 'not from' not in (s0.get('sourceLabel') or '').lower() and 'course-added' not in (s0.get('sourceLabel') or '').lower():
+            bad.append(f"{s0['id']}: course addition without a sourceLabel saying it is not from the textbook")
     R.set(ch, 'KEEP-6', not bad, bad)
     bad = []
     for key in ('original', 'textbook'):
@@ -243,6 +246,8 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
         for n in range(a, b + 1):
             if (cov.get(n) or {}).get('kind') == 'figure' and n not in shown:
                 bad.append(f'figure on reading slide {n} is neither shown nor linked (sourceFigs)')
+    if any(s0.get('sourceFigs') for s0 in slides) and 'figsBlock' not in runtime:
+        bad.append('runtime does not render sourceFigs')
     R.set(ch, 'COV-4', not bad, bad)
     ok5 = 'coverageTable' in runtime and "'STUDY'" in runtime and 'What to study for the exam' in runtime
     R.set(ch, 'COV-5', ok5, [] if ok5 else ['runtime lacks the coverage table or the student study list'])
@@ -263,6 +268,11 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
             bad.append(f"'{term}' used in {len(hits)} places without a glossary definition (e.g. {hits[0]})")
     if 'firstUse' not in runtime or "className='gl'" not in runtime:
         bad.append('runtime does not define terms at first use')
+    m_lab = re.search(r"const labels=\{(.*?)\};", runtime)
+    for lab in re.findall(r":'([^']*)'", m_lab.group(1) if m_lab else ''):
+        for term in FORBIDDEN:
+            if term_re(term).search(lab) and term not in gl:
+                bad.append(f"station field label uses '{term}' without a glossary definition: {lab}")
     R.set(ch, 'LANG-2', not bad, bad)
     bad = []
     if not gl:
@@ -312,7 +322,9 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
     R.set(ch, 'CASE-2', not bad, bad)
     at = next((s for s in slides if s['id'] == tr.get('at')), None)
     ok3 = bool(at and at.get('transfer') and at.get('question') == tr.get('question') and at.get('answer') == tr.get('answer'))
-    R.set(ch, 'CASE-3', ok3, [] if ok3 else ['the transfer slide must carry the transfer question as its think point'])
+    st_tr = [x for x in data.get('stations', []) if x.get('transfer')]
+    ok3 = ok3 and len(st_tr) >= 1 and all(ids.index(x['at']) > ids.index(tr['at']) for x in st_tr) and 'station-transfer' in runtime
+    R.set(ch, 'CASE-3', ok3, [] if ok3 else ['the transfer slide must carry the transfer question, and a later station must apply the transfer case as a step'])
     ok4 = any(q.get('beyondCase') for q in data.get('quiz', []))
     R.set(ch, 'CASE-4', ok4, [] if ok4 else ['no quiz item tagged beyondCase'])
     ok5 = bool((data.get('case') or {}).get('fictional')) and 'FICTIONAL TEACHING CASE' in runtime
@@ -350,7 +362,9 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
     R.set(ch, 'TIME-3', not bad, bad)
     rule = (data.get('timeRule') or '').lower()
     ok4 = 'optional' in rule and 'think' in rule and 'never' in rule and 'timeRule' in runtime
-    R.set(ch, 'TIME-4', ok4, [] if ok4 else ['timeRule must say optional slides go first and think points and the assumption-change slide are never dropped; runtime shows it in instructor notes'])
+    st_opt = [x['no'] for x in data.get('stations', []) if x.get('tier') != 'core']
+    ok4 = ok4 and not st_opt and 'separate from slide minutes' in rule
+    R.set(ch, 'TIME-4', ok4, [] if ok4 else [f'stations {st_opt} must be core (think points)'] if st_opt else ['timeRule must say optional slides go first and think points and the assumption-change slide are never dropped; runtime shows it in instructor notes'])
     R.set(ch, 'TIME-5', 'planned' in runtime and 'actual' in runtime and 'pace-chip' in runtime, [])
     R.set(ch, 'TIME-6', 'iscarb-pace-log' in runtime, [])
 
@@ -370,6 +384,19 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
                 if not (isinstance(l, list) and len(l) == 3 and isinstance(l[0], (int, float)) and l[1] and words(l[2]) >= 3):
                     bad.append(f"station {st.get('no')}: level must be [marks, label, description]")
         names_by_no.setdefault(st.get('no'), []).append(tuple(c.get('name') for c in crit))
+    A = data.get('aiAssignment') or {}
+    if A:
+        ar = A.get('rubric') or {}
+        crit = ar.get('criteria') if isinstance(ar, dict) else None
+        if not crit or len(crit) < 2:
+            bad.append('AI assignment: no rubric with named criteria')
+        else:
+            for c in crit:
+                lv = c.get('levels') or []
+                if not (3 <= len(lv) <= 4) or not all(isinstance(l, list) and len(l) == 3 and isinstance(l[0], (int, float)) for l in lv):
+                    bad.append(f"AI assignment: criterion '{c.get('name')}' needs 3–4 levels with marks")
+            if not ar.get('marks'):
+                bad.append('AI assignment: rubric marks missing')
     R.set(ch, 'RUB-1', not bad, bad)
     bad = []
     for st in data.get('stations', []):
@@ -378,11 +405,20 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
             ex = rb.get(k) or {}
             if words(ex.get('text') or '') < 8 or words(ex.get('why') or '') < 4:
                 bad.append(f"station {st.get('no')}: {k} example needs text and why")
+    ar = (data.get('aiAssignment') or {}).get('rubric') or {}
+    if data.get('aiAssignment'):
+        for k in ('strong', 'weak'):
+            ex = ar.get(k) or {} if isinstance(ar, dict) else {}
+            if words(ex.get('text') or '') < 8 or words(ex.get('why') or '') < 4:
+                bad.append(f'AI assignment: {k} example needs text and why')
     R.set(ch, 'RUB-2', not bad, bad)
     R.set(ch, 'RUB-3', True, ['Criteria name reasoning moves (mechanism, limit, evidence, revision); no criterion counts words or time'])
     bad = [f"station {st.get('no')}" for st in data.get('stations', []) if words(((st.get('rubric') or {}).get('other') or '')) < 6]
+    if data.get('aiAssignment') and words(((data['aiAssignment'].get('rubric') or {}).get('other') or '') if isinstance(data['aiAssignment'].get('rubric'), dict) else '') < 6:
+        bad.append('AI assignment: other-answer conditions missing')
     R.set(ch, 'RUB-4', not bad, bad)
-    R.set(ch, 'RUB-5', True, ['checked on the assignment page (see assignments section)'])
+    ok_r5 = 'aixRubric(A,!locked)' in runtime and runtime.index('aixRubric(A,!locked)') < runtime.index("id=\"aix-commit\"")
+    R.set(ch, 'RUB-5', ok_r5, [] if ok_r5 else ['AI assignment rubric is not shown before the commit step'])
     R.set(ch, 'RUB-6', True, [])
     return names_by_no
 

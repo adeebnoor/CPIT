@@ -87,7 +87,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -95,7 +95,7 @@
    "tier": "core"
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "X01": {
@@ -121,14 +121,14 @@
    "commonError": "Students assume a hardened server settles who may read which record. Infrastructure security does not express the application's ownership rule."
   },
   "X03": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "optional",
    "concept": "policy versus requirements",
    "answerKey": "policy states goals and responsibilities; settings implement them",
    "commonError": "Students write a policy sentence that is really a product setting. Ask for the goal and the responsible role first, then the testable requirement."
   },
   "CHECK1": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "first negative test",
    "answerKey": "request the object as a different test user and inspect the response",
@@ -144,14 +144,14 @@
    "answer": "Operational assumptions about unattended sessions, user switching and access boundaries. These may create new requirements even when the code is unchanged."
   },
   "X05": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "authentication versus authorization",
    "answerKey": "authentication identifies; authorization permits",
    "commonError": "Students stop at authorization. Push for auditing as the second requirement type, because it produces the evidence the negative test inspects."
   },
   "X06": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "commonError": "Pairs write a mitigation that lives in the interface. Check that the control is a server-side rule and that the test has an observable pass or fail.",
    "sourceFigs": [
@@ -186,7 +186,7 @@
    ]
   },
   "CHECK2": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "testing the forbidden relationship",
    "answerKey": "change the actor or object, not the URL spelling",
@@ -220,7 +220,7 @@
    "answer2": "Its authorized scope, its input validity, its audit trail and the integrity of the restored state. Recovery must not become an unexamined privileged bypass."
   },
   "B01": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "independent protection layers",
    "answerKey": "three identical checks share one weakness",
@@ -235,7 +235,7 @@
   },
   "R18": {
    "minutes": 1.5,
-   "tier": "core",
+   "tier": "optional",
    "concept": "scope of a passed security test",
    "answerKey": "one endpoint, one version, one scenario",
    "commonError": "Students conclude “the system is secure” from one rejected cross-user request. Stop any answer that claims 100% security.",
@@ -253,25 +253,26 @@
    "answer": "Server-side, permission-aware retrieval supports the claim. It is deterministic and can be tested per actor and object. The model cannot obtain through retrieval what it never receives. The instruction can stay as a second layer that discourages bad answers. But it is a request, not an enforcement boundary. Text an attacker plants in a document can override it; this is prompt injection. A broad service account makes the assistant a confused deputy. State the tested version, actors and prompts. Tests of model refusals only sample an endless space of phrasings."
   },
   "APPLY": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "restrict the assistant until retrieval uses the asker's rights",
    "commonError": "Students fix the assistant's instructions instead of its access path. Ask who must be told if records may already have crossed the boundary: the data owner.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. Restrict or disable the assistant until retrieval enforces the asker's permissions. Run cross-team negative tests against it. If records may already have crossed a boundary, the data owner must be told."
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. Restrict or disable the assistant until retrieval enforces the asker's permissions. Run cross-team negative tests against it. If records may already have crossed a boundary, the data owner must be told.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "enforcement boundary",
    "answerKey": "the server must enforce before data reaches the model",
    "think": "Devices down. Which boundary should enforce access, and how would you check it?",
@@ -353,12 +354,13 @@
      "why": "Treats interface hiding and an instruction as controls; no test anyone could run."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "testable control",
    "answerKey": "server-side filtering is testable; an instruction is not",
    "think": "Compare two mechanisms: an instruction that limits the assistant to the asker's team, or server-side filtering by the asker's rights. Which one would you choose?",
@@ -439,12 +441,13 @@
      "why": "No link to the property, no limit named, user satisfaction treated as evidence."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "the assistant is a second path with its own account",
    "think": "A second access path uses a different authorization check, so the first endpoint's passed test does not cover it. That path is the AI assistant: it reads documents with its own service account, not the asker's permissions. Does your first decision still hold?",
@@ -526,7 +529,8 @@
      "why": "Ignores the second path, keeps the control inside the model, names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -1039,6 +1043,145 @@
  "aiAssignment": {
   "hints": {
    "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "Claim: the office cannot say the assistant only discloses to the student. Its service account can read every record. Control: retrieval with the asker's own rights, enforced by the server. The claim ends if any reply reaches an outside address. Evidence: a negative test asking for another student's record, proposed. After the injected email I replace the design; the instruction was not a control.",
+    "why": "Separates an instruction from an enforced control, names a checkable negative test, and revises with the broken assumption."
+   },
+   "weak": {
+    "text": "The assistant is safe because its instructions forbid disclosure and the portal passed a penetration test.",
+    "why": "Treats an instruction and an unrelated test as controls; no boundary, no owner."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
   }
  },
  "assignmentRubric": {
