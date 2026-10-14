@@ -80,8 +80,12 @@ async def run_case(browser,url,ch,offline,out,kind):
   await page.keyboard.press('Escape');await blur(page)
  for i in range(20):
   await page.evaluate('i=>iscarb.go(i)',i)
+  # the runtime fits text one animation frame after rendering; measure the settled slide
+  await page.evaluate('()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))')
   bad=await page.evaluate("(()=>{const m=document.getElementById('chapter-main'),r=m.getBoundingClientRect(),f=document.querySelector('.footerbar').getBoundingClientRect();const dense=m.classList.contains('dense');return (!dense&&m.scrollHeight>m.clientHeight+3)||r.bottom>f.top+3||m.scrollWidth>m.clientWidth+3||document.documentElement.scrollWidth>innerWidth+3})()")
-  assert not bad,f'{ch} {kind} overflow at {i}'
+  if bad:
+   bad=await page.evaluate("(()=>{const m=document.getElementById('chapter-main'),r=m.getBoundingClientRect(),f=document.querySelector('.footerbar').getBoundingClientRect();return {dense:m.classList.contains('dense'),v:m.scrollHeight-m.clientHeight,bottom:r.bottom-f.top,h:m.scrollWidth-m.clientWidth,page:document.documentElement.scrollWidth-innerWidth,cls:m.className}})()")
+  assert not bad,f'{ch} {kind} overflow at {i}: {bad}'
  await page.evaluate('iscarb.go(3)');await page.wait_for_timeout(100)
  if ch==11:await page.screenshot(path=str(out/f'ch11-{kind}-desktop.png'))
  await page.set_viewport_size({'width':390,'height':844});await canvas_click(page)

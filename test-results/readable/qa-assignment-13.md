@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-14  
-**Commit ID:** 43f42e5c-f224-4823-a36c-52ded782153d  
-**Part A committed:** 2026-10-14T20:26:06.442Z  
-**STRESS revealed:** 2026-10-14T20:26:06.454Z
+**Commit ID:** 399de73d-5e06-4348-b119-7affbfc748af  
+**Part A committed:** 2026-10-14T21:14:32.543Z  
+**STRESS revealed:** 2026-10-14T21:14:32.553Z
 
 ## Scenario
 A fictional university website stores student project files. It has two user roles: student and staff.
@@ -18,6 +18,9 @@ Each request sent to the server includes a project ID (the value that identifies
 The system is set up to keep activity logs (records of what happened). Nobody has checked a sample for private information.
 
 Your decision: release the service, allow only limited access, or hold the release. Explain your choice using the facts above.
+
+## Chapter boundary sentence (written in the lecture)
+Not written in the lecture on this device.
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -49,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-14T20:26:06.258Z
+BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-14T21:14:32.341Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove your malformed-input handling and run again. Which known bug is no longer caught, and why?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

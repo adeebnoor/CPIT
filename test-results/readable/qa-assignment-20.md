@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-14  
-**Commit ID:** abe7d78b-c162-4ed4-ac4e-f231c53b07e0  
-**Part A committed:** 2026-10-14T20:26:24.557Z  
-**STRESS revealed:** 2026-10-14T20:26:24.570Z
+**Commit ID:** d87eaf48-bd04-4b16-a1ce-c1fe6b64f009  
+**Part A committed:** 2026-10-14T21:14:48.708Z  
+**STRESS revealed:** 2026-10-14T21:14:48.720Z
 
 ## Scenario
 A fictional university wants one screen showing incidents using information from security, transport and facilities.
@@ -18,6 +18,9 @@ The owners agree to a limited daytime trial. They have not agreed how old inform
 
 Each system passed its own API tests (tests of its program-to-program connection). Nobody has tested a failure involving the systems working together.
 The transport team's proposed design — review it before the trial: “The screen asks all three systems for data every minute. It labels the latest value received from each as live. If a system stops sending data, it keeps displaying that system's last value so the screen is never empty. Each owner signs a one-page promise of 99.9% availability. To accept the design, check that every API returns HTTP 200 (a successful response code) and uses the agreed JSON data structure.”
+
+## Chapter boundary sentence (written in the lecture)
+Not written in the lecture on this device.
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -49,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-14T20:26:24.356Z
+BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-14T21:14:48.523Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

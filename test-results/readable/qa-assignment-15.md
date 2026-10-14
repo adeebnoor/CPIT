@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-14  
-**Commit ID:** 9bdc99c2-e78a-497c-b0be-f89bdc90256f  
-**Part A committed:** 2026-10-14T20:26:13.670Z  
-**STRESS revealed:** 2026-10-14T20:26:13.683Z
+**Commit ID:** 53c34057-6132-4d97-9e31-aa9a7fd10c90  
+**Part A committed:** 2026-10-14T21:14:37.958Z  
+**STRESS revealed:** 2026-10-14T21:14:37.971Z
 
 ## Scenario
 A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.
@@ -18,6 +18,9 @@ Neither option has a reliable estimate of the full cost over its use, including 
 
 The goal is a trial next term, not replacing the faculty's whole system. Recommend an option, a limited evaluation, or a hold.
 A colleague's draft recommendation — review it; do not copy it: “Choose Option A for the whole faculty next term. It already has all the booking features, so changing its settings will be enough. Two years of support is fine for a three-year trial: we can simply renew it. Finishing Option B would take too long; the team's knowledge of its code makes no difference. Option A clearly costs less overall because it is ready-made.”
+
+## Chapter boundary sentence (written in the lecture)
+Not written in the lecture on this device.
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -49,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-14T20:26:13.457Z
+BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-14T21:14:37.759Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
