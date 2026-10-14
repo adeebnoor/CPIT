@@ -1,0 +1,1077 @@
+{
+ "chapter": 13,
+ "case": {
+  "fictional": true,
+  "answerKey": "server-side ownership check for each actor and object",
+  "lens": "The application also adds an AI assistant that answers questions about team documents. It retrieves documents through a service account that can read every team's files. It relies on its instructions to answer only from the asker's team. Pilot users rated its answers highly. Hold that question: after the testing slides, one slide shows how this chapter's methods apply to the assistant."
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "asset",
+   "short": "something of value that needs protection, such as a record",
+   "ar": "أصل"
+  },
+  {
+   "term": "vulnerability",
+   "short": "a weakness an attacker could use",
+   "ar": "ثغرة"
+  },
+  {
+   "term": "threat",
+   "short": "a possible harm to an asset",
+   "ar": "تهديد"
+  },
+  {
+   "term": "attack",
+   "short": "an actual attempt to use a weakness",
+   "ar": "هجوم"
+  },
+  {
+   "term": "control",
+   "short": "a protective measure that stops or limits an attack",
+   "ar": "ضابط حماية"
+  },
+  {
+   "term": "misuse case",
+   "short": "a description of how an attacker would abuse a use case",
+   "ar": "حالة سوء استخدام"
+  },
+  {
+   "term": "authentication",
+   "short": "checking who the user is",
+   "ar": "توثيق الهوية"
+  },
+  {
+   "term": "authorization",
+   "short": "checking what that user may do",
+   "ar": "التفويض"
+  },
+  {
+   "term": "negative test",
+   "short": "a test that an unauthorized action is refused",
+   "ar": "اختبار سلبي"
+  },
+  {
+   "term": "layered protection",
+   "short": "several different defences, each guarding a different boundary",
+   "ar": "حماية متعددة الطبقات"
+  },
+  {
+   "term": "prompt injection",
+   "short": "text planted in data that makes an AI assistant follow an attacker's instruction",
+   "ar": "حقن الأوامر",
+   "added": true
+  },
+  {
+   "term": "confused deputy",
+   "short": "a trusted program tricked into using its own rights for someone else",
+   "ar": "الوكيل المخدوع",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the Mentcare transfer",
+  "text": "The textbook's Mentcare system sends patient records from one clinic to another. The misuse case: an attacker intercepts the transfer and reads the records. Nobody signed in wrongly; the records left the building in the clear.",
+  "source": "Source slides 41–43 (Mentcare transfer-data use case and misuse case)",
+  "fictional": false,
+  "question": "What requirement and test would address the intercepted transfer?",
+  "answer": "A privacy requirement: records are encrypted while in transit between clinics. The negative test captures a transfer on the network in an authorized environment and checks that no readable record appears.",
+  "concept": "misuse case to requirement and test",
+  "answerKey": "encrypt records in transit; capture test shows no readable record",
+  "at": "X06"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "security dimensions after an incident",
+   "answerKey": "integrity and confidentiality still need checking",
+   "commonError": "Students say the incident is over once the service is back up. Ask which dimension the cross-team read violated: confidentiality, even though availability never failed."
+  },
+  "X02": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "asset, vulnerability and attack",
+   "answerKey": "record is the asset; missing check is the vulnerability; request is the attack",
+   "commonError": "The most common confusion is threat versus attack. A threat is a possible harm; an attack is an actual attempt. Use the Mentcare row to separate them.",
+   "answer": "The record is the asset. The missing check is a vulnerability. The cross-user request is an attack attempt in this teaching example."
+  },
+  "X02A": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "security levels and threat types",
+   "answerKey": "application-level authorization is not settled by the platform",
+   "commonError": "Students assume a hardened server settles who may read which record. Infrastructure security does not express the application's ownership rule."
+  },
+  "X03": {
+   "minutes": 2,
+   "tier": "optional",
+   "concept": "policy versus requirements",
+   "answerKey": "policy states goals and responsibilities; settings implement them",
+   "commonError": "Students write a policy sentence that is really a product setting. Ask for the goal and the responsible role first, then the testable requirement."
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "first negative test",
+   "answerKey": "request the object as a different test user and inspect the response",
+   "commonError": "Students propose a test that an independent tester could not run tomorrow. Collect two claims and ask which one is executable in an authorized environment.",
+   "answer": "In an authorized teaching environment, request the same protected object as a different permitted test user. Inspect the server response and the audit record."
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "risk assessment through the lifecycle",
+   "answerKey": "operational assumptions change the requirements",
+   "commonError": "Students treat risk assessment as a one-off design document. The shared-terminal change creates a new requirement with no code change: session time-out.",
+   "answer": "Operational assumptions about unattended sessions, user switching and access boundaries. These may create new requirements even when the code is unchanged."
+  },
+  "X05": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "authentication versus authorization",
+   "answerKey": "authentication identifies; authorization permits",
+   "commonError": "Students stop at authorization. Push for auditing as the second requirement type, because it produces the evidence the negative test inspects."
+  },
+  "X06": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Pairs write a mitigation that lives in the interface. Check that the control is a server-side rule and that the test has an observable pass or fail.",
+   "sourceFigs": [
+    41,
+    42,
+    43
+   ]
+  },
+  "R11": {
+   "minutes": 2,
+   "tier": "optional",
+   "concept": "reassessing reused components",
+   "answerKey": "review privileges, interfaces, dependencies and negative tests",
+   "commonError": "Students test only the new function after a component update. Ask what else changed: privileges, interfaces and dependencies.",
+   "lists": [
+    {
+     "source": 45,
+     "title": "Secure systems design",
+     "items": [
+      "Architectural design: how design decisions affect security",
+      "Good practice: accepted ways to design secure systems"
+     ]
+    },
+    {
+     "source": 46,
+     "title": "Design compromises",
+     "items": [
+      "Performance: extra checks slow the system down",
+      "Usability: extra steps and things to remember frustrate users"
+     ]
+    }
+   ]
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "testing the forbidden relationship",
+   "answerKey": "change the actor or object, not the URL spelling",
+   "commonError": "Pairs propose one more URL variant as the bypass. The list to collect is: a direct API call, a different endpoint, a cached copy, a bulk export.",
+   "bullets": [
+    [
+     "Think",
+     "Compare UI hiding with a server-side ownership rule."
+    ],
+    [
+     "Pair",
+     "Explain the enforcement boundary and a bypass to test."
+    ],
+    [
+     "Record",
+     "Add the chosen control, why it supports your claim, and what you are unsure of."
+    ]
+   ]
+  },
+  "R09": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "fail securely",
+   "answerKey": "deny when authorization cannot be established",
+   "commonError": "Guideline 3 is the one students get backwards: an authorization timeout must deny access, not allow it so that users can keep working.",
+   "concept2": "elevated recovery procedure",
+   "answerKey2": "authorized scope, input validity, auditability, restored integrity",
+   "question": "Which design choice prevents an authorization timeout from becoming access?",
+   "answer": "A defined failure response that does not grant the protected action when authorization cannot be established.",
+   "question2": "What must be checked when a recovery procedure runs under an elevated account?",
+   "answer2": "Its authorized scope, its input validity, its audit trail and the integrity of the restored state. Recovery must not become an unexamined privileged bypass."
+  },
+  "B01": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "independent protection layers",
+   "answerKey": "three identical checks share one weakness",
+   "commonError": "Students count three checks as three defences. Draw the three protection levels and ask what each one protects; hiding links sits in none of them."
+  },
+  "X09": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "scope of secure programming",
+   "answerKey": "memory safety does not decide who may read a record",
+   "commonError": "Students expect a memory-safe language to remove the authorization gap. Ask for one vulnerability it removes and one it cannot."
+  },
+  "R18": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "scope of a passed security test",
+   "answerKey": "one endpoint, one version, one scenario",
+   "commonError": "Students conclude “the system is secure” from one rejected cross-user request. Stop any answer that claims 100% security.",
+   "takeaway": "Security testing supports a limited claim: this version, these actors, these paths.",
+   "title": "Security testing supports claims with limits"
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "instruction versus enforcement boundary",
+   "answerKey": "permission-aware retrieval enforces; the instruction only asks",
+   "commonError": "Students treat the assistant's instruction as a control because it worked in the pilot. An instruction is a request; planted text can override it.",
+   "added": true,
+   "takeaway": "Two teams, one minute per round; the judge rewards what can be tested.",
+   "answer": "Server-side, permission-aware retrieval supports the claim. It is deterministic and can be tested per actor and object. The model cannot obtain through retrieval what it never receives. The instruction can stay as a second layer that discourages bad answers. But it is a request, not an enforcement boundary. Text an attacker plants in a document can override it; this is prompt injection. A broad service account makes the assistant a confused deputy. State the tested version, actors and prompts. Tests of model refusals only sample an endless space of phrasings."
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "restrict the assistant until retrieval uses the asker's rights",
+   "commonError": "Students fix the assistant's instructions instead of its access path. Ask who must be told if records may already have crossed the boundary: the data owner.",
+   "twist": true,
+   "added": true,
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. Restrict or disable the assistant until retrieval enforces the asker's permissions. Run cross-team negative tests against it. If records may already have crossed a boundary, the data owner must be told."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "enforcement boundary",
+   "answerKey": "the server must enforce before data reaches the model",
+   "think": "Devices down. Which boundary should enforce access, and how would you check it?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide whether the assistant's instruction to answer only from your team counts as a control.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional deployment passed a test. An instruction to the assistant is like hiding a link in the interface. It asks for good behaviour but enforces nothing. The boundary must be enforced by the server before data reaches the model.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "The server must enforce ownership on every read, including the assistant's. Claim limited to the tested endpoint. Evidence: a negative test as another team's user, proposed; the instruction is not evidence.",
+     "why": "Names the mechanism (server-side authorization), stays within the facts and proposes a checkable negative test."
+    },
+    "weak": {
+     "text": "Access is safe because the links are hidden and the assistant was told to keep secrets.",
+     "why": "Treats interface hiding and an instruction as controls; no test anyone could run."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "testable control",
+   "answerKey": "server-side filtering is testable; an instruction is not",
+   "think": "Compare two mechanisms: an instruction that limits the assistant to the asker's team, or server-side filtering by the asker's rights. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. A shared dependency or a mismatched assumption can defeat a design that looks stronger. Server-side filtering can be tested object by object. An instruction can be overridden by text the attacker controls, so testing it only samples an endless space of phrasings.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Server-side filtering by the asker's rights: it can be tested per actor and object. Its limit: it needs the asker's identity passed correctly to retrieval. The instruction costs nothing but cannot be tested completely.",
+     "why": "Links the mechanism to confidentiality, names its limit and states the trade-off with the alternative."
+    },
+    "weak": {
+     "text": "The instruction is better because it is simpler and the pilot users liked the answers.",
+     "why": "No link to the property, no limit named, user satisfaction treated as evidence."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "the assistant is a second path with its own account",
+   "think": "A second access path uses a different authorization check, so the first endpoint's passed test does not cover it. That path is the AI assistant: it reads documents with its own service account, not the asker's permissions. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The assistant is a privileged deputy acting for a less-privileged user. Until retrieval runs with the asker's rights and has its own negative tests, the access claim cannot extend to it.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed one access path; there are two. Revise: disable the assistant until retrieval runs with the asker's rights and passes cross-team negative tests. The product owner decides; the data owners are told today.",
+     "why": "Names the broken assumption, revises with a test, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep my decision and update the assistant's instructions to be stricter.",
+     "why": "Ignores the second path, keeps the control inside the model, names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "asset, threat and vulnerability",
+   "answerKey": "the missing ownership check is the vulnerability"
+  },
+  {
+   "concept": "testable security requirement",
+   "answerKey": "protected action, permitted actor and observable enforcement",
+   "beyondCase": true
+  },
+  {
+   "concept": "misuse case",
+   "answerKey": "a malicious interaction to address",
+   "beyondCase": true
+  },
+  {
+   "concept": "fail securely",
+   "answerKey": "deny and report on timeout"
+  },
+  {
+   "concept": "scope of a passed negative test",
+   "answerKey": "one boundary, one version",
+   "why": "A passed negative test supports a claim limited to the tested actor, object, path and version."
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "X04",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "X09",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "6": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "7": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "8": {
+   "cls": "full",
+   "unit": "X02A"
+  },
+  "9": {
+   "cls": "no",
+   "reason": "Operational security examples; in the study list"
+  },
+  "10": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "11": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "12": {
+   "cls": "no",
+   "reason": "Textbook introduction to fundamental security; in the study list"
+  },
+  "13": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "14": {
+   "cls": "full",
+   "reason": "Section heading or figure-only slide; TODO",
+   "unit": "X02"
+  },
+  "15": {
+   "cls": "full",
+   "unit": "X02A"
+  },
+  "16": {
+   "cls": "full",
+   "unit": "X02A"
+  },
+  "17": {
+   "cls": "no",
+   "reason": "Security assurance; in the study list"
+  },
+  "18": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "19": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "X01"
+  },
+  "20": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "21": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "22": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "23": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "24": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "25": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "26": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "27": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "28": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "29": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "30": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "X05"
+  },
+  "31": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "32": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "33": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "34": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "35": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "X06"
+  },
+  "36": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "37": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "38": {
+   "cls": "no",
+   "reason": "Mentcare example requirements; in the study list"
+  },
+  "39": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "40": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "figure"
+  },
+  "41": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "figure"
+  },
+  "42": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "figure"
+  },
+  "43": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "figure"
+  },
+  "44": {
+   "cls": "no",
+   "unit": "R09",
+   "kind": "title",
+   "reason": "Section divider slide with no content"
+  },
+  "45": {
+   "cls": "slide",
+   "unit": "R11",
+   "kind": "list",
+   "items": [
+    "Architectural design",
+    "Good practice"
+   ]
+  },
+  "46": {
+   "cls": "slide",
+   "unit": "R11",
+   "kind": "list",
+   "items": [
+    "Performance",
+    "Usability"
+   ]
+  },
+  "47": {
+   "cls": "full",
+   "unit": "R11",
+   "kind": "prose",
+   "items": [
+    "Risk assessment while the system is being developed and after it has been deployed",
+    "More information is available - system platform, middleware and the system architecture and data organisation.",
+    "Vulnerabilities that arise from design choices may therefore be identified."
+   ]
+  },
+  "48": {
+   "cls": "slide",
+   "unit": "R11"
+  },
+  "49": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "R11"
+  },
+  "50": {
+   "cls": "slide",
+   "unit": "R11"
+  },
+  "51": {
+   "cls": "full",
+   "unit": "R11"
+  },
+  "52": {
+   "cls": "slide",
+   "unit": "R11"
+  },
+  "53": {
+   "cls": "full",
+   "unit": "R11"
+  },
+  "54": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "55": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "56": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "57": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "58": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "59": {
+   "cls": "full",
+   "unit": "R09"
+  },
+  "60": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "61": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "62": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "63": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "64": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "65": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "66": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "67": {
+   "cls": "slide",
+   "unit": "R18"
+  },
+  "68": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "69": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "70": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "R18"
+  },
+  "71": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "72": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Operational security and system security management",
+   "sources": [
+    8,
+    9
+   ],
+   "book": {
+    "page": 4,
+    "label": "13.1"
+   },
+   "note": "The three security levels on the slides come with examples of operational security that are examinable."
+  },
+  {
+   "topic": "Fundamental security, security assurance and the link to dependability",
+   "sources": [
+    12,
+    17,
+    18,
+    19
+   ],
+   "book": {
+    "page": 4,
+    "label": "13.1"
+   },
+   "note": "Why security is a precondition for reliability, availability and safety."
+  },
+  {
+   "topic": "Security as a business issue and organisational security policies",
+   "sources": [
+    21,
+    22,
+    23,
+    24
+   ],
+   "book": {
+    "page": 8,
+    "label": "13.2"
+   },
+   "note": "What a policy contains and why it is not a list of product settings."
+  },
+  {
+   "topic": "Preliminary, design and operational risk assessment",
+   "sources": [
+    25,
+    26,
+    27,
+    28
+   ],
+   "book": {
+    "page": 9,
+    "label": "13.2.1"
+   },
+   "note": "Know the three stages and what information each one has."
+  },
+  {
+   "topic": "Security specification, the ten requirement types and the Mentcare requirements",
+   "sources": [
+    30,
+    31,
+    32,
+    38
+   ],
+   "book": {
+    "page": 10,
+    "label": "13.3"
+   },
+   "note": "Be able to name the ten types and give a Mentcare example."
+  },
+  {
+   "topic": "Asset, threat and control analysis in the preliminary risk assessment",
+   "sources": [
+    34,
+    35,
+    36,
+    37
+   ],
+   "book": {
+    "page": 10,
+    "label": "13.3"
+   },
+   "note": "The Mentcare tables of assets, threats and controls."
+  },
+  {
+   "topic": "Design compromises, COTS design decisions and protection requirements",
+   "sources": [
+    46,
+    49,
+    51,
+    52,
+    53
+   ],
+   "book": {
+    "page": 17,
+    "label": "13.4.1"
+   },
+   "note": "Performance and usability compromises; vulnerabilities that come from technology choices."
+  },
+  {
+   "topic": "Architectural design: protection levels and distribution",
+   "sources": [
+    54,
+    55,
+    57,
+    58
+   ],
+   "book": {
+    "page": 20,
+    "label": "13.4.2"
+   },
+   "note": "The equity trading example of distributed assets."
+  },
+  {
+   "topic": "The ten design guidelines for secure systems engineering",
+   "sources": [
+    59,
+    61,
+    62,
+    63
+   ],
+   "book": {
+    "page": 24,
+    "label": "13.4.3"
+   },
+   "note": "Only three guidelines are on the slides; all ten are examinable."
+  },
+  {
+   "topic": "Secure programming, security testing, validation and the security checklist",
+   "sources": [
+    65,
+    68,
+    69,
+    70
+   ],
+   "book": {
+    "page": 30,
+    "label": "13.5"
+   },
+   "note": "Experience-based testing, tool-based analysis and penetration testing; checklist examples."
+  }
+ ],
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  }
+ },
+ "assignmentRubric": {
+  "criteria": [
+   {
+    "name": "FIT",
+    "strong": "Asset: the booking record. Vulnerability: the API returns any record whose ID is in the request. Attack: a signed-in user asks for another user's ID. Given facts only.",
+    "strongWhy": "Separates asset, vulnerability and attack and uses only the task's facts.",
+    "weak": "The system is insecure because hackers can get in.",
+    "weakWhy": "No asset, no weakness, no case fact."
+   },
+   {
+    "name": "TEST",
+    "strong": "Negative test: user A requests user B's record directly from the API. Expected: denial, no record content, an audit entry naming A. Status: proposed.",
+    "strongWhy": "Observable pass condition, the actor and object are named, and the test is marked proposed.",
+    "weak": "Test that the page hides other users' links.",
+    "weakWhy": "Tests the interface, not the server boundary; no observable denial."
+   },
+   {
+    "name": "BOUND",
+    "strong": "The claim covers the records API only. A second endpoint, a bulk export or an assistant with its own account is outside it and reopens the decision.",
+    "strongWhy": "Names the covered path and an observable trigger.",
+    "weak": "The claim holds as long as the system is secure.",
+    "weakWhy": "Circular; no path and no trigger."
+   },
+   {
+    "name": "ACT + EVIDENCE",
+    "strong": "Action: add a server-side ownership check to the records API. Owner: the backend lead. Evidence: the negative test above, run and recorded, proposed.",
+    "strongWhy": "Feasible action, a named role, and evidence with its status.",
+    "weak": "Make the system more secure and test it.",
+    "weakWhy": "No specific action, owner or inspectable evidence."
+   },
+   {
+    "name": "REFIT",
+    "strong": "The new evidence shows the preview endpoint skips the check. I revise: the claim now covers only the records API, and the preview endpoint gets the same check and test before release.",
+    "strongWhy": "Says what changed, chooses REVISE with a reason, keeps the record consistent.",
+    "weak": "My answer still stands because the main endpoint passed.",
+    "weakWhy": "Ignores the new path and gives no reason."
+   }
+  ],
+  "other": "the answer uses a chapter concept correctly, rests only on the facts given in the task, names a negative test with an observable result, and states which paths the claim covers. A different decision that meets these conditions earns the same marks as the model answer."
+ }
+}

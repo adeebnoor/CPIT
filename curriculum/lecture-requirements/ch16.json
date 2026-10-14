@@ -1,0 +1,1024 @@
+{
+ "chapter": 16,
+ "case": {
+  "fictional": true,
+  "answerKey": "the unit stated as a precondition at the boundary"
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "component",
+   "short": "an independently deployable unit used only through the interfaces it publishes",
+   "ar": "مكوّن"
+  },
+  {
+   "term": "provides interface",
+   "short": "the services a component offers: its API",
+   "ar": "واجهة التقديم"
+  },
+  {
+   "term": "requires interface",
+   "short": "the services a component needs from its environment to run",
+   "ar": "واجهة الاحتياج"
+  },
+  {
+   "term": "component model",
+   "short": "the standards for how components are defined, used and deployed",
+   "ar": "نموذج المكوّنات"
+  },
+  {
+   "term": "middleware",
+   "short": "shared software that lets components communicate and gives them common services",
+   "ar": "البرمجيات الوسيطة"
+  },
+  {
+   "term": "glue code",
+   "short": "code written to make two components work together",
+   "ar": "شفرة الربط"
+  },
+  {
+   "term": "adapter",
+   "short": "a component that converts one interface into the interface another component expects",
+   "ar": "مهايئ"
+  },
+  {
+   "term": "precondition",
+   "short": "what must be true before an operation runs",
+   "ar": "شرط مسبق"
+  },
+  {
+   "term": "postcondition",
+   "short": "what must be true after an operation runs",
+   "ar": "شرط لاحق"
+  },
+  {
+   "term": "invariant",
+   "short": "a condition that must stay true for the object the whole time",
+   "ar": "ثابت"
+  },
+  {
+   "term": "OCL",
+   "short": "the Object Constraint Language: a way to write pre- and postconditions for UML models",
+   "ar": "لغة قيود الكائنات"
+  },
+  {
+   "term": "quality requirement",
+   "short": "a property, such as an error rate, that only many calls together can show",
+   "ar": "متطلب جودة",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook's Ariane 5 launcher",
+  "text": "Software from the Ariane 4 launcher was reused in Ariane 5. It had worked reliably for years. Ariane 5 flies a different trajectory, so one value reached a range the reused software never had to handle. The launcher was lost. This is a different system from the heat-alert service.",
+  "source": "Source slide 39 (Ariane launcher failure)",
+  "fictional": false,
+  "question": "Which validation step would have shown that the reused software did not fit Ariane 5?",
+  "answer": "A test of the reused component against Ariane 5's input ranges, not Ariane 4's. The earlier success was evidence for the earlier context only. The source case is historical, not a new experiment.",
+  "concept": "validation in the new context",
+  "answerKey": "test against the new system's input ranges",
+  "at": "VALIDATE"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "class versus component",
+   "answerKey": "a component is deployed independently through its interfaces",
+   "commonError": "Students call every class a component. Ask whether it can be deployed on its own and used without reading its code."
+  },
+  "X02A": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "independence with explicit dependencies",
+   "answerKey": "dependencies may exist but must be stated",
+   "commonError": "Students read “independent” as “needs nothing”. Independent means the needs are written down so another provider can meet them."
+  },
+  "X03": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "provides and requires contract",
+   "answerKey": "types, units, pre- and postconditions and errors can still differ",
+   "commonError": "Students stop at matching operation names. Ask for the unit, range and error behaviour the name does not carry."
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "component model standards",
+   "answerKey": "platform, interfaces, configuration, dependencies and versions",
+   "commonError": "Students think a binary component is self-describing. Ask which model it conforms to and what it requires at deployment."
+  },
+  "MIDDLEWARE": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "shared services via a container",
+   "answerKey": "one shared implementation avoids duplicated, inconsistent code",
+   "commonError": "Students treat middleware as free fault removal. It is a shared dependency whose behaviour still needs verification."
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "syntax versus meaning",
+   "answerKey": "unit, range and meaning make numbers incompatible",
+   "commonError": "Students accept a matching numeric type as compatibility. Ask what the number means: unit, range and what a missing value looks like."
+  },
+  "X05": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "development for reuse versus with reuse",
+   "answerKey": "the team developing with reuse discovers components",
+   "commonError": "Students merge the two processes. One generalises what it already has; the other searches for what it can fit."
+  },
+  "X06": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "when to generalise",
+   "answerKey": "only stable abstractions repay generalisation",
+   "commonError": "Students want to generalise everything. Ask whether the module models a stable domain abstraction and who pays the cost."
+  },
+  "VALIDATE": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Students treat a supplier's passed test as proof for this application. Ask which input ranges and functions the test covered.",
+   "concept2": "questions before trusting prior success",
+   "answerKey2": "which assumptions still hold in the new system",
+   "question2": "What question should precede “it worked reliably in the previous system”?",
+   "answer2": "Which assumptions about inputs, ranges, activated functionality and failure handling remain valid in the new system? A supplier's passed test shows only the tested conditions."
+  },
+  "B01": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "composition forms",
+   "answerKey": "sequential composition coordinated by the application",
+   "commonError": "Students name hierarchical composition whenever two components are involved. Ask who calls whom.",
+   "sourceFigs": [
+    43
+   ],
+   "lists": [
+    {
+     "source": 41,
+     "title": "Component composition",
+     "items": [
+      "The process of assembling components to create a system",
+      "Composition integrates components with each other and with the component infrastructure",
+      "Normally you have to write glue code to integrate components"
+     ]
+    },
+    {
+     "source": 42,
+     "title": "Types of composition",
+     "items": [
+      "Sequential: the composed components run in sequence; their provides interfaces are composed",
+      "Hierarchical: one component calls the services of another; a provides interface is composed with a requires interface",
+      "Additive: the interfaces of two components are put together to create a new component with the combined interfaces"
+     ]
+    }
+   ]
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "adapter contract",
+   "answerKey": "range, rounding, invalid input and failures belong in the contract",
+   "commonError": "Students write the formula and stop. Ask what the adapter returns for an invalid reading or a provider failure."
+  },
+  "R09": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "what an adapter can and cannot do",
+   "answerKey": "it converts interfaces; it cannot invent meaning",
+   "commonError": "Students expect the adapter to guess the unit. An adapter cannot supply semantics nobody specified."
+  },
+  "D16": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "reading an OCL postcondition",
+   "answerKey": "size is one greater than before",
+   "commonError": "Students read @pre as a precondition keyword. It refers to the value before the operation inside a postcondition.",
+   "sourceFigs": [
+    54
+   ],
+   "lists": [
+    {
+     "source": 55,
+     "title": "Photo library conditions",
+     "items": [
+      "No photograph in the library may have the same identifier as the one being entered",
+      "The library must exist; creating a library is assumed to add one item",
+      "Each new entry increases the size of the library by one",
+      "Retrieving with the same identifier returns the photo that was added",
+      "Looking up the catalogue with that identifier returns the catalogue entry that was made"
+     ]
+    }
+   ]
+  },
+  "D16B": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "emergent properties of composition",
+   "answerKey": "latency and state assumptions belong to the composition",
+   "commonError": "Students assess components one by one. Ask for a property that only the assembled system shows, such as latency."
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "contract clauses for an AI component",
+   "answerKey": "a unit precondition; the error rate is a quality requirement",
+   "commonError": "Students try to write the forecast-error limit as a postcondition. No single call can satisfy or violate it.",
+   "added": true,
+   "answer": "The precondition. State unit = 'Celsius' with a plausible range, checked at the adapter. That rejects Fahrenheit values a model trained on Celsius would otherwise accept. A value plausible in both units still needs the unit declared, not inferred. OCL pre- and postconditions constrain each individual call. The forecast-error limit cannot be one: no single call satisfies or violates it. It belongs in a separate quality requirement. Verify it on a held-out evaluation set. Re-check it when the input distribution or the model version changes. Record the approved model version in the postcondition or as an invariant. A version change then becomes a contract change that needs re-validation."
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "unit precondition at the adapter; re-validate past forecasts",
+   "commonError": "Students fix the adapter and forget the forecasts already produced. Ask what was issued since the mismatch began.",
+   "twist": true,
+   "added": true,
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the forecaster, state the unit and range as a precondition at the adapter. Re-validate the forecasts produced since the mismatch began before anyone relies on them."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "precondition for an AI input",
+   "answerKey": "nothing rejects a wrong unit without a stated precondition",
+   "think": "Devices down. Which assumption must be explicit before composition?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide what the AI forecasting component would need stated to reject a wrong unit.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional deployment passed a test. A model accepts almost any number. Unless a precondition states the unit and a plausible range, nothing rejects a value in the wrong unit.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Claim: the unit of the temperature must be stated in the contract before composition. Given: the provider returns a number with no unit; normal values look plausible. Proposed: a precondition unit = Celsius with a range, and a boundary test with a Fahrenheit value.",
+     "why": "Names the mechanism (interface semantics), keeps to the given facts and proposes a checkable test."
+    },
+    "weak": {
+     "text": "The types match and the numbers look normal, so the components are compatible.",
+     "why": "Confuses syntactic with semantic compatibility; no test proposed."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "testable boundary versus untestable coping",
+   "answerKey": "an explicit adapter can be tested; coping cannot",
+   "think": "Compare two mechanisms: an adapter that converts units explicitly, or trusting the AI component to cope with any input. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. Evidence of a shared dependency or mismatched assumption can defeat an apparently stronger design. An explicit adapter with a stated unit contract can be tested at its boundary. A model that “copes” is untestable behaviour. It may simply produce confident wrong output.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "An explicit adapter, because semantic compatibility is the property and the adapter's contract can be tested at the boundary. Its limit: it only checks what the contract names, so an undeclared unit still passes. Relying on the model is cheaper and untestable.",
+     "why": "Links the mechanism to the property, names the limit and states the trade-off."
+    },
+    "weak": {
+     "text": "Let the model handle it; AI is good with messy data.",
+     "why": "No property, no limit, treats confidence as correctness."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "confidence is not evidence that the input meant what the model assumed",
+   "think": "The provider documents Fahrenheit, not Celsius. Matching numeric types did not establish compatible meaning. The AI forecaster, trained on Celsius, accepted the values without error and returned confident but wrong forecasts. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The forecasts inherited the unit error silently. The model's confidence is not evidence that its input meant what it assumed.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed plausible values meant a matching unit; they did not. Revise: add the unit precondition at the adapter and re-validate every forecast since the mismatch began. The service owner decides; the operations team and alert recipients are told.",
+     "why": "Names the broken assumption, revises with a reason, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep my design; the forecasts looked confident, so most were probably fine.",
+     "why": "Treats confidence as evidence; names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "requires interface",
+   "answerKey": "services other components must provide",
+   "why": "The provides interface is the component's API. The requires interface states the services it needs, without saying how they are provided."
+  },
+  {
+   "concept": "development for reuse",
+   "answerKey": "generalising an existing component",
+   "beyondCase": true
+  },
+  {
+   "concept": "hierarchical composition",
+   "answerKey": "A calls B directly",
+   "beyondCase": true
+  },
+  {
+   "concept": "semantic compatibility",
+   "answerKey": "units and ranges remain unknown"
+  },
+  {
+   "concept": "OCL postcondition",
+   "answerKey": "size increased by one",
+   "beyondCase": true
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "MIDDLEWARE",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "R09",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "6": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "7": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "8": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "9": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "10": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "11": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "12": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "13": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "14": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "15": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "16": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "17": {
+   "cls": "no",
+   "reason": "Component access through RPC and URLs; in the study list"
+  },
+  "18": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "19": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "20": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "21": {
+   "cls": "slide",
+   "unit": "MIDDLEWARE"
+  },
+  "22": {
+   "cls": "slide",
+   "unit": "MIDDLEWARE"
+  },
+  "23": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "24": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "25": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "26": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "27": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "28": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "29": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "30": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "31": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "32": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X06"
+  },
+  "33": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "34": {
+   "cls": "full",
+   "unit": "VALIDATE"
+  },
+  "35": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "36": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "37": {
+   "cls": "full",
+   "unit": "VALIDATE"
+  },
+  "38": {
+   "cls": "full",
+   "unit": "VALIDATE"
+  },
+  "39": {
+   "cls": "full",
+   "unit": "VALIDATE"
+  },
+  "40": {
+   "cls": "slide",
+   "unit": "B01",
+   "kind": "title"
+  },
+  "41": {
+   "cls": "full",
+   "unit": "B01",
+   "kind": "list",
+   "items": [
+    "The process of assembling components to create a system",
+    "Composition involves integrating components with each other and with the component infrastructure",
+    "Normally you have to write glue code to integrate components"
+   ]
+  },
+  "42": {
+   "cls": "slide",
+   "unit": "B01",
+   "kind": "list",
+   "items": [
+    "Sequential composition",
+    "Hierarchical composition",
+    "Additive composition"
+   ]
+  },
+  "43": {
+   "cls": "slide",
+   "unit": "B01",
+   "kind": "figure"
+  },
+  "44": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "45": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "46": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "47": {
+   "cls": "full",
+   "unit": "R09"
+  },
+  "48": {
+   "cls": "full",
+   "unit": "R09"
+  },
+  "49": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "50": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "51": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "prose",
+   "unit": "D16"
+  },
+  "52": {
+   "cls": "full",
+   "unit": "D16",
+   "kind": "prose",
+   "items": [
+    "“This method adds a photograph to the library and associates the photograph identifier and catalogue descriptor with the photograph.”",
+    "“what happens if the photograph identifier is already associated with a photograph in the library?”",
+    "“is the photograph descriptor associated with the catalogue entry as well as the photograph i.e. if I delete the photograph, do I also delete the catalogue information?”"
+   ]
+  },
+  "53": {
+   "cls": "full",
+   "unit": "D16",
+   "kind": "prose"
+  },
+  "54": {
+   "cls": "slide",
+   "unit": "D16",
+   "kind": "figure",
+   "items": [
+    "-- The context keyword names the component to which the conditions apply",
+    "context addItem",
+    "-- The preconditions specify what must be true before execution of addItem",
+    "pre: PhotoLibrary.libSize() > 0",
+    "PhotoLibrary.retrieve(pid) = null",
+    "-- The postconditions specify what is true after execution",
+    "post:libSize () = libSize()@pre + 1",
+    "PhotoLibrary.retrieve(pid) = p",
+    "PhotoLibrary.catEntry(pid) = photodesc",
+    "context delete",
+    "pre: PhotoLibrary.retrieve(pid) <> null ;",
+    "post: PhotoLibrary.retrieve(pid) = null",
+    "PhotoLibrary.catEntry(pid) = PhotoLibrary.catEntry(pid)@pre",
+    "PhotoLibrary.libSize() = libSize()@pre—1"
+   ]
+  },
+  "55": {
+   "cls": "slide",
+   "unit": "D16",
+   "kind": "list",
+   "items": [
+    "No photograph with the same identifier",
+    "The library must exist",
+    "Each new entry increases the size by 1",
+    "Retrieve with the same identifier returns the added photo",
+    "The catalogue lookup returns the catalogue entry made"
+   ]
+  },
+  "56": {
+   "cls": "full",
+   "unit": "D16B"
+  },
+  "57": {
+   "cls": "slide",
+   "unit": "D16B"
+  },
+  "58": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "59": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Component-based development, CBSE essentials and design principles",
+   "sources": [
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "book": {
+    "page": 4,
+    "label": "16.1"
+   },
+   "note": "Why object classes were not enough and what component standards cover."
+  },
+  {
+   "topic": "Component definitions, characteristics, interfaces and access",
+   "sources": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   "book": {
+    "page": 4,
+    "label": "16.1"
+   },
+   "note": "The five characteristics; provides versus requires; the data-collector example."
+  },
+  {
+   "topic": "Component models and middleware support",
+   "sources": [
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "book": {
+    "page": 7,
+    "label": "16.1.1"
+   },
+   "note": "The three groups of model elements and the platform and support services."
+  },
+  {
+   "topic": "CBSE processes and development for reuse",
+   "sources": [
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33
+   ],
+   "book": {
+    "page": 10,
+    "label": "16.2"
+   },
+   "note": "Changes for reusability, exception handling and the cost of generic components."
+  },
+  {
+   "topic": "CBSE with reuse: identification, validation and the Ariane case",
+   "sources": [
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+   ],
+   "book": {
+    "page": 14,
+    "label": "16.2.2"
+   },
+   "note": "Why prior success is evidence only for its earlier context."
+  },
+  {
+   "topic": "Component composition, glue code and adapters",
+   "sources": [
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50
+   ],
+   "book": {
+    "page": 17,
+    "label": "16.3"
+   },
+   "note": "Required reading for 40–43. The three composition types and three kinds of incompatibility."
+  },
+  {
+   "topic": "Interface semantics, OCL and composition trade-offs",
+   "sources": [
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57
+   ],
+   "book": {
+    "page": 17,
+    "label": "16.3"
+   },
+   "note": "Required reading for 51–55. Be able to read the Photo Library OCL and explain @pre."
+  }
+ ],
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "scenario": "A clinic composes two components. An OCR component reads scanned lab reports. An AI summariser writes a short summary for the doctor. The OCR interface returns text lines, each with a confidence value; the summariser accepts plain text."
+ },
+ "assignmentRubric": {
+  "criteria": [
+   {
+    "name": "FIT",
+    "strong": "The concept is interface semantics: the OCR and summariser interfaces match in syntax but not in meaning. Given: lines carry confidence values; the adapter drops them. Assumption, marked: the summariser treats every line as true.",
+    "strongWhy": "Names the chapter concept, keeps to the given facts and marks the assumption.",
+    "weak": "Both passed their tests, so the composition is fine.",
+    "weakWhy": "Supplier tests cover each component, not the composition; no case fact used."
+   },
+   {
+    "name": "CONTRACT",
+    "strong": "Precondition for the summariser: every line has confidence ≥ 0.9 and a declared number format. Postcondition for the adapter: low-confidence lines are marked uncertain, never dropped silently.",
+    "strongWhy": "Writes testable pre- and postconditions at the boundary.",
+    "weak": "The adapter should be careful with numbers.",
+    "weakWhy": "No condition anyone could test."
+   },
+   {
+    "name": "BOUND",
+    "strong": "The composition is trusted while the OCR confidence threshold holds and reports use Western or Arabic-Indic digits as declared. A report in another script reopens it.",
+    "strongWhy": "Names the dependency and an observable trigger.",
+    "weak": "It works for normal reports.",
+    "weakWhy": "No dependency and no observable trigger."
+   },
+   {
+    "name": "ACT + EVIDENCE",
+    "strong": "Action: the adapter rejects or flags lines below the threshold, owned by the integration engineer. Evidence: a boundary test with a low-confidence Arabic-Indic value, proposed, showing the flag reaches the doctor.",
+    "strongWhy": "Feasible action, a named role, evidence with its status.",
+    "weak": "Test it with more reports.",
+    "weakWhy": "No specific action, owner or inspectable evidence."
+   },
+   {
+    "name": "REFIT",
+    "strong": "The 5.8 read as 3.8 shows my adapter contract was missing the confidence precondition. I replace the adapter postcondition: low-confidence numeric lines are passed as uncertain and the summariser must not state them as fact. My first plan assumed dropping confidence was safe.",
+    "strongWhy": "Names what changed, chooses REPLACE with a reason, admits the first assumption.",
+    "weak": "I keep the adapter; the doctor would notice a wrong value.",
+    "weakWhy": "Moves the check to a person without evidence; ignores the given fact."
+   }
+  ],
+  "other": "the answer names the chapter concept that decides, uses only the facts given in the task, writes at least one testable condition at the component boundary, and names evidence from a boundary test or record that someone else can check. A different contract that meets these conditions earns the same marks as the model answer."
+ }
+}

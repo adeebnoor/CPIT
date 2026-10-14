@@ -524,3 +524,40 @@ html[data-stage="v4"] .extra-x-lab2 .cb-map li code{display:block;margin-top:4px
 html[data-stage="v4"] :is(.extra-x-lab,.extra-x-lab2) pre{white-space:pre;overflow-wrap:normal;font-size:calc(clamp(.8rem,1.05vw,1.1rem) * var(--fit,1))}
 html[data-stage="v4"] .extra-x-lab .extra-q{font-size:clamp(1.15rem,1.7vw,1.75rem);line-height:1.25}
 @media (max-width:1000px){html[data-stage="v4"] :is(.extra-x-lab,.extra-x-lab2) pre{white-space:pre-wrap;overflow-wrap:anywhere}}
+
+/* 20261013 · AI practice slides are working notes, not a neon poster.
+   The banner image is the same on every chapter and is not evidence. */
+html[data-stage="v4"] body:not(.day){
+  --bg:#12161c;--panel:#1b212b;--line:#2e3946;--ink:#e7eef4;--dim:#a9b4c0;
+  --gold:#d7c4a4;--teal:#8ecfc6;--pink:#d7c4a4;--violet:#b7c2ce;
+}
+html[data-stage="v4"] body:not(.day) #app{background:#12161c}
+html[data-stage="v4"] .ai-banner{
+  height:auto!important;min-height:0;border-radius:8px;border:1px solid var(--rule);
+  box-shadow:none;background:var(--card);overflow:visible;
+}
+html[data-stage="v4"] .ai-banner img{display:none!important}
+html[data-stage="v4"] .ai-banner figcaption{
+  position:static;max-width:none;display:block;padding:8px 12px;
+  background:transparent;color:var(--ink-strong);font-size:.95rem;line-height:1.4;
+}
+html[data-stage="v4"] .ai-banner figcaption span{
+  display:block;margin-bottom:2px;color:var(--act);font-size:.68rem;font-weight:750;letter-spacing:.08em;
+}
+html[data-stage="v4"] body:not(.day) .chapter-main.skin-genai{
+  background:transparent;animation:none;color:var(--ink);
+}
+html[data-stage="v4"] body:not(.day) .chapter-main.skin-genai::before{content:none;display:none}
+html[data-stage="v4"] body:not(.day) .chapter-main.skin-genai .heading h1,
+html[data-stage="v4"] body:not(.day) .chapter-main.skin-genai .takeaway{text-shadow:none;color:var(--ink-strong)}
+html[data-stage="v4"] body:not(.day) .chapter-main.skin-genai .meaning,
+html[data-stage="v4"] body:not(.day) .chapter-main.skin-genai .table-main{
+  box-shadow:none;background:var(--card);
+}
+html[data-stage="v4"] .ai-tag{color:#10211f;background:var(--act);box-shadow:none}
+html[data-stage="v4"] body:not(.day) .ai-tag{color:#10211f}
+html[data-stage="v4"] .hero-hook{
+  border:1px solid var(--rule);background:var(--card);
+  background-image:none;
+}
+html[data-stage="v4"] .ai-cta{border-color:var(--rule)!important;background:var(--card)!important}

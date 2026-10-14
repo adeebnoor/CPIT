@@ -1,0 +1,1066 @@
+{
+ "chapter": 17,
+ "case": {
+  "fictional": true,
+  "answerKey": "an idempotency key checked before any external effect"
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "distributed system",
+   "short": "independent computers that appear to the user as one system",
+   "ar": "نظام موزّع"
+  },
+  {
+   "term": "partial failure",
+   "short": "one part of the system fails while the other parts keep running",
+   "ar": "فشل جزئي"
+  },
+  {
+   "term": "timeout",
+   "short": "the caller stops waiting after a set time; it says nothing about what the server did",
+   "ar": "انتهاء المهلة"
+  },
+  {
+   "term": "RPC",
+   "short": "remote procedure call: one computer calls a known operation on another and waits for the result",
+   "ar": "نداء الإجراء البعيد"
+  },
+  {
+   "term": "message-based interaction",
+   "short": "the sender describes the work in a message that middleware delivers, possibly later",
+   "ar": "التفاعل بالرسائل"
+  },
+  {
+   "term": "middleware",
+   "short": "software between components that carries calls and messages and gives common services",
+   "ar": "البرمجيات الوسيطة"
+  },
+  {
+   "term": "layer",
+   "short": "a logical responsibility such as presentation, data handling or the database",
+   "ar": "طبقة"
+  },
+  {
+   "term": "tier",
+   "short": "where a layer is deployed: a separate process or computer",
+   "ar": "مستوى نشر"
+  },
+  {
+   "term": "master–slave",
+   "short": "one coordinating process controls processes that only acquire data or drive equipment",
+   "ar": "سيد وتابع"
+  },
+  {
+   "term": "thin client",
+   "short": "the client only presents information; the server does the rest",
+   "ar": "عميل خفيف"
+  },
+  {
+   "term": "fat client",
+   "short": "the client runs some of the application processing itself",
+   "ar": "عميل ثقيل"
+  },
+  {
+   "term": "SaaS",
+   "short": "software as a service: the provider hosts, runs and changes the software you use over the network",
+   "ar": "البرمجيات كخدمة"
+  },
+  {
+   "term": "multi-tenancy",
+   "short": "many customers share one running system but each sees only its own data and settings",
+   "ar": "تعدد المستأجرين"
+  },
+  {
+   "term": "SOA",
+   "short": "service-oriented architecture: the system is built from separate, stateless services",
+   "ar": "معمارية موجهة بالخدمات"
+  },
+  {
+   "term": "idempotency key",
+   "short": "an identifier sent with a request so that a repeat of it returns the first outcome instead of acting again",
+   "ar": "مفتاح تكرار آمن",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook's traffic management system",
+  "text": "The textbook's traffic management system has a control process that polls separate sensor processes and traffic-light control processes. One sensor process stops replying. This is a different system from the booking service.",
+  "source": "Source slides 31–32 (master–slave architectures and the traffic management example)",
+  "fictional": false,
+  "question": "In this pattern, which process must detect the missing reply, and why?",
+  "answer": "The master. In the master–slave pattern the master computes, coordinates and communicates, and it controls the slaves. The slave processes only acquire data or drive equipment, so they cannot judge the whole system.",
+  "concept": "responsibility in the master–slave pattern",
+  "answerKey": "the master detects and decides",
+  "at": "X06"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "hidden distribution",
+   "answerKey": "it depends on remote services",
+   "commonError": "Students call an app “local” because it runs on the phone. Ask what happens to it when the network is down."
+  },
+  "X02": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "transparency can mislead",
+   "answerKey": "hide distribution only when the delay does not change what users should do",
+   "commonError": "Students want full transparency. Ask what a user should do during a pending remote operation if nothing shows it is pending."
+  },
+  "SCALE": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "scaling out needs parallel work",
+   "answerKey": "the serialized database stays the bottleneck",
+   "commonError": "Students add servers for every slowdown. Ask which resource is constrained and whether the work can run in parallel."
+  },
+  "X02A": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "what a lost response leaves unknown",
+   "answerKey": "whether the operation executed or committed",
+   "commonError": "Students equate a timeout with failure. Draw the three histories that fit one lost response."
+  },
+  "X03": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "queueing versus duplicate handling",
+   "answerKey": "a queue does not prevent duplicate effects",
+   "commonError": "Students believe a message queue delivers exactly once. Ask what happens when the receiver crashes after acting but before acknowledging."
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "evidence before retrying",
+   "answerKey": "a status query or durable record by operation identity",
+   "commonError": "Students write “the server did nothing” after a timeout. Make them narrow the claim to “no response arrived in time”."
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "middleware and meaning",
+   "answerKey": "the meaning of values, operations and errors",
+   "commonError": "Students expect middleware to settle compatibility. Representation conversion does not agree what the data means."
+  },
+  "X05": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "client and server as roles",
+   "answerKey": "yes, the model is logical",
+   "commonError": "Students equate four layers with four machines. Layers are responsibilities; tiers are where they run.",
+   "concept2": "layers versus tiers",
+   "answerKey2": "layers are logical; tiers are deployment",
+   "question": "Can client and server processes run on the same computer?",
+   "answer": "Yes. The logical interaction model is distinct from deployment across machines.",
+   "question2": "Why is a four-layer design not automatically a four-tier deployment?",
+   "answer2": "Layers are logical responsibilities. Several layers may share one process or computer. Tiers describe deployment boundaries."
+  },
+  "X06": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Students pick one pattern as the universal answer. Ask which non-functional requirement decided it.",
+   "sourceFigs": [
+    32
+   ],
+   "lists": [
+    {
+     "source": 30,
+     "title": "Architectural patterns",
+     "items": [
+      "Master–slave: real-time systems that need guaranteed interaction response times",
+      "Two-tier client–server: simple systems, or systems centralised for security reasons",
+      "Multi-tier client–server: a high volume of transactions processed by the server",
+      "Distributed component: resources from different systems and databases must be combined",
+      "Peer-to-peer: computation or information exchange across many nodes without central control"
+     ]
+    }
+   ]
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "failure responsibility on the diagram",
+   "answerKey": "who detects failure and what is retried",
+   "commonError": "Students add boxes instead of responsibilities. Ask who detects failure, who retries and who reconciles duplicates."
+  },
+  "B01": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "distribution versus complexity",
+   "answerKey": "coordination and failure-handling costs can exceed the benefit",
+   "commonError": "Students assume more distributed is always better. Ask what the extra coordination costs for a simple application."
+  },
+  "X07": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "thin versus fat clients",
+   "answerKey": "unreliable connectivity favours local processing, with synchronisation designed",
+   "commonError": "Students choose a fat client for speed and forget synchronisation. Ask how conflicts and stale data are handled.",
+   "sourceFigs": [
+    34
+   ],
+   "lists": [
+    {
+     "source": 33,
+     "title": "Two-tier client–server architectures",
+     "items": [
+      "A single logical server plus an indefinite number of clients that use it",
+      "Thin-client model: the presentation layer runs on the client; data management, application processing and the database run on the server",
+      "Fat-client model: some or all application processing runs on the client; data management and the database stay on the server"
+     ]
+    }
+   ]
+  },
+  "X09": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "engineering work under SaaS",
+   "answerKey": "configuration, integration and change impacts remain",
+   "commonError": "Students think a subscription removes engineering. List what still needs design: configuration, access control, data handling, change impact.",
+   "lists": [
+    {
+     "source": 56,
+     "title": "Software as a service",
+     "items": [
+      "Hosting the software remotely and providing access over the Internet",
+      "Deployed on one or more servers and accessed through a web browser, not installed locally",
+      "Owned and managed by a software provider, not by the organisations using it",
+      "Paid for by usage or by subscription"
+     ]
+    }
+   ]
+  },
+  "X10": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "SaaS versus SOA",
+   "answerKey": "a delivery model versus an internal organisation",
+   "commonError": "Students use SaaS and SOA as synonyms. One says how the software is supplied; the other says how it is built."
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "retry safety with an external AI effect",
+   "answerKey": "check the key before any external effect; do not re-ask the model",
+   "commonError": "Students retry the AI call to “confirm” the first one. A retry is a new request; a model may answer it differently.",
+   "added": true,
+   "answer": "Before any external effect. The service records the key with the committed operation and its outcome. A retry with the same key returns that stored outcome instead of executing again. Calling the AI service again cannot confirm what happened the first time. It is a new request. A non-deterministic model may produce a different draft, so repeating it creates a second, different effect. Time out the AI call with a defined action. Never let model output trigger an effect that has not been recorded against the key."
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "send only the recorded message; never re-ask the model for a past effect",
+   "commonError": "Students fix the retry and forget the two messages already sent. Ask who tells the customer and how support tells a duplicate from a real second booking.",
+   "twist": true,
+   "added": true,
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the AI step, record the drafted message against the operation's key. Send only that recorded message. A retry must never ask the model again for an effect that already happened."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "a retry is a new request",
+   "answerKey": "a second AI call is a new effect, not a check",
+   "think": "Devices down. What may happen on retry, and what evidence resolves the uncertainty?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide what the user could receive if the retry calls the AI service again.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional deployment passed a test. Calling the AI service again is a new request, not a check on the first one. A non-deterministic model may draft a different message. That produces a second, different effect.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Claim: after the timeout the outcome is unknown; the operation may have committed. Given: the caller timed out; the trace does not show the durable effect. Proposed: a status query by operation identifier before any retry. A retry that calls the AI again may send a second, different message.",
+     "why": "Names the mechanism (partial failure), keeps to the given facts and proposes a checkable query."
+    },
+    "weak": {
+     "text": "The server did nothing because we got no reply, so just retry.",
+     "why": "Treats a timeout as evidence of no execution; no check proposed."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "idempotency key versus blind retry",
+   "answerKey": "the key returns the recorded outcome instead of acting again",
+   "think": "Compare two mechanisms: a blind retry after timeout, or a retry carrying an idempotency key checked before any external effect. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. Evidence of a shared dependency or mismatched assumption can defeat an apparently stronger design. An idempotency key lets the service return the recorded outcome instead of executing again. That also stops a second, different AI-drafted message.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "The idempotency key, because the property is at-most-once effect per user operation. Its limit: the key must be checked and recorded before the AI call and the send, or the window reopens. A blind retry is simpler and can double every effect.",
+     "why": "Links the mechanism to the property, names where it can still fail and states the trade-off."
+    },
+    "weak": {
+     "text": "Retry three times; most timeouts are just slow networks.",
+     "why": "No property, no shared cause, treats duplicates as harmless."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "the key must be checked before the AI call and before sending",
+   "think": "A later trace shows that the original operation committed before its response was lost. The client's retry also called the AI service again. It drafted a different message, and both were sent. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The timeout hid a committed operation. The retry turned one effect into two different ones. The key must be checked before the AI call and before sending.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed no reply meant no effect; the operation had committed. Revise: check the idempotency key before the AI call and before sending, and store the first draft against it. The service owner decides; support and the affected customers are told.",
+     "why": "Names the broken assumption, revises with a reason, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep the retry; two messages are better than none.",
+     "why": "Ignores the committed operation and the duplicate effect; names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "what a timeout tells the client",
+   "answerKey": "only that no response arrived in time"
+  },
+  {
+   "concept": "message queueing",
+   "answerKey": "the message waits for the receiver"
+  },
+  {
+   "concept": "layers versus tiers",
+   "answerKey": "layers are logical, tiers are deployment",
+   "beyondCase": true,
+   "why": "Several layers can run in one process or on one computer. A multi-tier architecture runs layers as separate processes that may be on different processors."
+  },
+  {
+   "concept": "master–slave pattern",
+   "answerKey": "master–slave architecture",
+   "beyondCase": true
+  },
+  {
+   "concept": "SaaS versus SOA",
+   "answerKey": "SaaS is delivery; SOA is one way to build",
+   "beyondCase": true
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "X04",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "B01",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "6": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "7": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "8": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "9": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "10": {
+   "cls": "full",
+   "unit": "SCALE"
+  },
+  "11": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "12": {
+   "cls": "no",
+   "reason": "Types of attack on distributed systems; in the study list"
+  },
+  "13": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "14": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "15": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "16": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "17": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "18": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "19": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "20": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "21": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "22": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "23": {
+   "cls": "no",
+   "reason": "Section divider slide with no content"
+  },
+  "24": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "25": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "26": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "27": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "28": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "29": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "title"
+  },
+  "30": {
+   "cls": "full",
+   "unit": "X06",
+   "kind": "list",
+   "items": [
+    "Master-slave architecture",
+    "Two-tier client-server architecture",
+    "Multi-tier client-server architecture",
+    "Distributed component architecture",
+    "Peer-to-peer architecture"
+   ]
+  },
+  "31": {
+   "cls": "full",
+   "unit": "X06",
+   "kind": "prose",
+   "items": [
+    "Master-slave architectures are commonly used in real-time systems where there may be separate processors associated with data acquisition from the system’s environment, data processing and computation and actuator management.",
+    "The ‘master’ process is usually responsible for computation, coordination and communications and it controls the ‘slave’ processes.",
+    "‘Slave’ processes are dedicated to specific actions, such as the acquisition of data from an array of sensors."
+   ]
+  },
+  "32": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "figure"
+  },
+  "33": {
+   "cls": "slide",
+   "unit": "X07",
+   "kind": "list",
+   "items": [
+    "A single logical server plus an indefinite number of clients",
+    "Thin-client model",
+    "Fat-client model"
+   ]
+  },
+  "34": {
+   "cls": "slide",
+   "reason": "Section heading or figure-only slide; TODO",
+   "kind": "figure",
+   "unit": "X07"
+  },
+  "35": {
+   "cls": "full",
+   "unit": "X07"
+  },
+  "36": {
+   "cls": "slide",
+   "unit": "X07"
+  },
+  "37": {
+   "cls": "full",
+   "unit": "X07"
+  },
+  "38": {
+   "cls": "full",
+   "unit": "X07"
+  },
+  "39": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "40": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "41": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "42": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "43": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "44": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "45": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "46": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "47": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "48": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X06"
+  },
+  "49": {
+   "cls": "no",
+   "reason": "Examples of peer-to-peer systems; in the study list"
+  },
+  "50": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "51": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "52": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "53": {
+   "cls": "slide",
+   "unit": "X09",
+   "kind": "title"
+  },
+  "54": {
+   "cls": "full",
+   "reason": "TODO",
+   "kind": "prose",
+   "unit": "B01"
+  },
+  "55": {
+   "cls": "full",
+   "reason": "TODO",
+   "kind": "prose",
+   "items": [
+    "Security concerns are the principal reason why p2p architectures are not widely used.",
+    "The lack of central management means that malicious nodes can be set up to deliver spam and malware to other nodes in the network.",
+    "P2P communications require careful setup to protect local information and if not done correctly, then this is exposed to othe peers."
+   ],
+   "unit": "B01"
+  },
+  "56": {
+   "cls": "slide",
+   "unit": "X09",
+   "kind": "list",
+   "items": [
+    "Hosting the software remotely with access over the Internet",
+    "Deployed on servers and accessed through a web browser",
+    "Owned and managed by a software provider",
+    "Paid by usage or subscription"
+   ]
+  },
+  "57": {
+   "cls": "full",
+   "unit": "X09",
+   "kind": "prose",
+   "items": [
+    "Software is deployed on a server (or more commonly a number of servers) and is accessed through a web browser. It is not deployed on a local PC.",
+    "The software is owned and managed by a software provider, rather than the organizations using the software.",
+    "Users may pay for the software according to the amount of use they make of it or through an annual or monthly subscription. Sometimes, the software is free for anyone to use but users must then agree to accept advertisements, which fund the software service."
+   ]
+  },
+  "58": {
+   "cls": "full",
+   "unit": "X10",
+   "kind": "prose"
+  },
+  "59": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "60": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "61": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "62": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "63": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "64": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "65": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "66": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Distributed systems: characteristics, benefits and design issues",
+   "sources": [
+    3,
+    4,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "book": {
+    "page": 3,
+    "label": "17.1"
+   },
+   "note": "The six design issues, the three scaling dimensions and the four types of attack."
+  },
+  {
+   "topic": "Models of interaction: RPC, message passing and middleware",
+   "sources": [
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "book": {
+    "page": 7,
+    "label": "17.1.1"
+   },
+   "note": "The diner-and-waiter examples; what middleware does and does not provide."
+  },
+  {
+   "topic": "Client–server computing and the layered model",
+   "sources": [
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   "book": {
+    "page": 10,
+    "label": "17.2"
+   },
+   "note": "The four layers and how they map onto processes and computers."
+  },
+  {
+   "topic": "Architectural patterns: master–slave, two-tier, thin and fat clients, multi-tier",
+   "sources": [
+    30,
+    31,
+    32,
+    33,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42
+   ],
+   "book": {
+    "page": 12,
+    "label": "17.3"
+   },
+   "note": "Required reading for 29–34. Know when each pattern is used and its trade-off."
+  },
+  {
+   "topic": "Distributed component and peer-to-peer architectures",
+   "sources": [
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    54,
+    55
+   ],
+   "book": {
+    "page": 17,
+    "label": "17.3.4"
+   },
+   "note": "Benefits and disadvantages of distributed components; when p2p fits and its security issues."
+  },
+  {
+   "topic": "Software as a service, SOA, configuration, multi-tenancy and scalability",
+   "sources": [
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64
+   ],
+   "book": {
+    "page": 23,
+    "label": "17.4"
+   },
+   "note": "Required reading for 53–58. The four configuration areas and the four scalability rules."
+  }
+ ],
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "scenario": "Farmers photograph diseased leaves in a mobile app. The app queues each photo while offline and sends it to a cloud AI service when connectivity returns. The service replies with a diagnosis and a recommended treatment."
+ },
+ "assignmentRubric": {
+  "criteria": [
+   {
+    "name": "FIT",
+    "strong": "The concept is partial failure with at-least-once delivery: a lost reply does not mean the diagnosis was not made. Given: intermittent connectivity; the queue redelivers; the service can take 20 seconds. Assumption, marked: the service is non-deterministic.",
+    "strongWhy": "Names the chapter concept, keeps to the given facts and marks the assumption.",
+    "weak": "The app just needs a better network.",
+    "weakWhy": "No chapter concept; ignores the given queue guarantee."
+   },
+   {
+    "name": "FAILURE",
+    "strong": "After a timeout the app knows only that no reply arrived. The photo may have been diagnosed already. A redelivery is a new request and may get a different answer.",
+    "strongWhy": "Separates no reply from no execution and names the duplicate risk.",
+    "weak": "If there is no reply, the service failed, so resend.",
+    "weakWhy": "Treats a timeout as evidence of failure."
+   },
+   {
+    "name": "BOUND",
+    "strong": "The design holds while every photo carries an idempotency key and the service returns the stored result for a repeated key. Two different diagnoses for one key reopen it.",
+    "strongWhy": "Names the dependency and an observable trigger.",
+    "weak": "It works unless the outage is very long.",
+    "weakWhy": "No dependency and no observable trigger."
+   },
+   {
+    "name": "ACT + EVIDENCE",
+    "strong": "Action: the app attaches a photo key; the service stores the first diagnosis per key and returns it on redelivery, owned by the backend lead. Evidence: a replay test that delivers 100 photos twice and shows one diagnosis each, proposed.",
+    "strongWhy": "Feasible action, a named role, evidence with its status.",
+    "weak": "Retry less often.",
+    "weakWhy": "No specific action, owner or inspectable evidence."
+   },
+   {
+    "name": "REFIT",
+    "strong": "The 9% double diagnoses show my design let the model answer the same photo twice. I replace the retry path: the key is checked before the model is called, and only the stored diagnosis is shown. My first plan assumed the model would answer the same way.",
+    "strongWhy": "Names what changed, chooses REPLACE with a reason, admits the first assumption.",
+    "weak": "I keep the design; the farmer can choose between the two treatments.",
+    "weakWhy": "Pushes the duplicate onto the user; ignores the given fact."
+   }
+  ],
+  "other": "the answer names the chapter concept that decides, uses only the facts given in the task, separates no reply from no execution, and names evidence from a replay test or record that someone else can check. A different design that meets these conditions earns the same marks as the model answer."
+ }
+}

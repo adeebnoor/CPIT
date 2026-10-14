@@ -26,14 +26,14 @@ window.ISCARB_STORY = {
    stakes: 'Keep running through a real excursion and the city may wake up without water. Stop for a false alarm and the plant goes dark at peak demand for nothing.',
    gut: {q: 'Right now, with what you know, what do you tell Huda?', options: ['Keep running: the AI says sensor fault', 'Shut down: an alarm is an alarm', 'Neither yet: I need different evidence first']},
    acts: [
-    'Huda wants one word: “safe?” Layan realises the alarms threaten more than one property at once, and each needs its own answer.',
+    'Huda wants one word: “safe?” Layan realises the alarms threaten more than one property at once. Each needs its own answer.',
     'Layan pulls the log: three alarms, one failover. Khalid, on the phone: “Fault, error or failure? Each one needs different evidence.”',
     'The upgrade spec promises “redundant pressure sensing.” Two readings sit side by side on the screen. Layan asks: are they really two paths?',
     'Huda asks for the decision in writing. Khalid: “Which process evidence would let you sign it?”',
     'The vendor emails a verified model of the failover logic. Layan wonders what that proof says about tonight’s transmitter.'
    ],
-   twist: '03:30. Layan opens the vendor’s integration notes. The two “separate” readings share one transmitter and one power supply, and the AI detector scores the signal from that same transmitter.',
-   epilogue: '05:00 arrives. Whatever Layan advised, Khalid’s first question in the morning review is the one you will face too: what did you claim, where does the claim stop, and what evidence would another engineer accept?'
+   twist: '03:30. Layan opens the vendor’s integration notes. The two “separate” readings share one transmitter and one power supply. The AI detector scores the signal from that same transmitter.',
+   epilogue: '05:00 arrives. Whatever Layan advised, Khalid’s first question in the morning review is the one you will face too. What did you claim? Where does the claim stop? What evidence would another engineer accept?'
   },
   11: {
    practice: 'Layan has an AI tutor quiz her on POFOD and ROCOF before the board meets. The release scope she recommends, and the evidence behind it, are hers.',
@@ -41,7 +41,7 @@ window.ISCARB_STORY = {
    setting: 'A university is about to release a new communications gateway that also relays every student’s and staff member’s email. Layan’s team ran the pilot.',
    client: {name: 'Nouf', role: 'IT services director · promised the deans “99.99%”'},
    clock: 'Release board: Thursday 10:00',
-   coldOpen: 'The dashboard has been green all pilot. Nouf wants to release on Thursday. Then Layan rereads the vendor slide, “98% accurate,” and the pilot log: the phishing filter missed 10 of the 50 phishing emails it saw.',
+   coldOpen: 'The dashboard has been green all pilot. Nouf wants to release on Thursday. Then Layan rereads the vendor slide: “98% accurate.” The pilot log says the phishing filter missed 10 of the 50 phishing emails it saw.',
    stakes: 'Release too widely and phishing reaches every inbox while the 99.99% promise breaks in public. Hold without a reason and a service the deans are waiting for slips a whole term.',
    gut: {q: 'Thursday’s call: what do you recommend?', options: ['Release: it was available all pilot', 'Restrict: release to a limited scope', 'Hold: the evidence is not there yet']},
    acts: [
@@ -58,7 +58,7 @@ window.ISCARB_STORY = {
    lab: {"question": "Assignment 3’s loading-bay barrier: will it close when the camera has no usable image?", "cases": [{"name": "zone occupied", "frames": ["empty", "occupied"], "expectedAction": "hold"}, {"name": "zone clear", "frames": ["empty"], "expectedAction": "close"}, {"name": "camera covered", "frames": ["occupied", "missing"], "expectedAction": "hold"}]},
    practice: 'Layan asks an AI chat to play Tariq and argue for Monday. It helps her rehearse the conversation. The hazard analysis and the safety claim she signs are her own.',
    episode: 'Episode 1 · Every command within limits',
-   setting: 'A plant is about to switch on a repeated-command mode for a controller whose safety argument Layan’s team prepared last year.',
+   setting: 'A plant is about to switch on a repeated-command mode for a controller. Layan’s team prepared its safety argument last year.',
    client: {name: 'Tariq', role: 'Operations manager · measured on throughput'},
    clock: 'New mode goes live: Monday, first shift',
    coldOpen: 'Tariq is delighted. The AI assistant’s command sequences raise throughput, and every single command passed the limiter. Operators now accept the sequences without editing them. Layan opens the safety case. It argues about one command at a time.',
@@ -66,12 +66,12 @@ window.ISCARB_STORY = {
    gut: {q: 'Can the new mode go live on Monday?', options: ['Yes: every command passed its check', 'No: switch the AI assistant off', 'Not until the safety argument covers repeated commands']},
    acts: [
     'Tariq: “The software meets its specification. How can it be unsafe?” Layan has to answer that first.',
-    'Layan sketches the line on a whiteboard: what happens when many small commands add up, and how bad could it be?',
+    'Layan sketches the line on a whiteboard. What happens when many small commands add up, and how bad could it be?',
     'Khalid wants a requirement, not a worry: exactly what must the controller never allow?',
     'The test report checks one command at a time. Layan lists the evidence that would show the protection works.',
     'The safety case is due for sign-off. Does its argument even reach the new mode, or loss of sensing?'
    ],
-   twist: 'Friday 16:00. A pilot trace: in repeated mode, the cumulative value went past the modelled limit while every individual command stayed within its bound. The sequences came from the AI assistant, which had found that many small commands raise throughput.',
+   twist: 'Friday 16:00. A pilot trace: in repeated mode, the total went past the modelled limit. Every individual command stayed within its own limit. The sequences came from the AI assistant, which had found that many small commands raise throughput.',
    epilogue: 'Monday’s first shift is waiting. Khalid will sign only a claim with a stated boundary and the evidence behind it. What exactly would your safety claim cover, and what would it not?'
   },
   13: {
@@ -85,13 +85,13 @@ window.ISCARB_STORY = {
    stakes: 'Ship it wrong and one client reads another client’s files: the startup loses all three. Hold it without evidence and the assistant pilot users loved misses its launch.',
    gut: {q: 'Sunday 09:00: can it ship?', options: ['Ship: the interface hides other teams’ links', 'Ship: the assistant is told to answer only from your team', 'Hold until a test shows the server refuses']},
    acts: [
-    'Majed: “Nobody can even see other teams’ links, so where is the risk?” Layan starts by naming what is actually at stake.',
+    'Majed: “Nobody can even see other teams’ links, so where is the risk?” Layan names what is at stake first.',
     'Who decides how much cross-team risk is acceptable: Majed, Khalid or the clients? Layan finds that the policy is silent.',
     'Khalid, who signs security releases, wants a requirement he could test, not “the system should be secure.”',
     'Layan traces where authorization really happens: in the interface, the API or the data layer.',
     'Time to write the negative test, and to say honestly what it does not cover.'
    ],
-   twist: 'Saturday night, Layan reads the assistant’s integration notes. It never calls the API she tested. It reads documents through its own service account, one that can open every team’s files, and relies on an instruction to answer only from the asker’s team.',
+   twist: 'Saturday night, Layan reads the assistant’s integration notes. It never calls the API she tested. It reads documents through its own service account, which can open every team’s files. It relies on an instruction to answer only from the asker’s team.',
    epilogue: 'Sunday 09:00. Khalid signs only what is tested. Layan’s note has three lines: claim, boundary, evidence. What would yours say?'
   },
   14: {
@@ -112,7 +112,7 @@ window.ISCARB_STORY = {
     'Before 08:00, Layan must show what restores usable service, not just running servers, and how she would know.'
    ],
    twist: '04:20. The alternate data copy comes up, but it signs in through the same identity service that is down. So does the AI recovery assistant, and its instructions assume the primary copy anyway.',
-   epilogue: '08:00. Amal will announce something to the public. Khalid, back in the morning, will ask Layan which part of the service was restored, which was not, and who knew.'
+   epilogue: '08:00. Amal will announce something to the public. Khalid is back in the morning. He will ask Layan which part of the service was restored, which was not, and who knew.'
   },
   15: {
    lab: {"question": "Assignment 6’s two options: which needs do the facts actually settle?", "cases": [{"name": "A has recurring bookings", "option": "A", "requirement": "recurring", "expected": "met"}, {"name": "B has recurring bookings", "option": "B", "requirement": "recurring", "expected": "gap"}, {"name": "A supported for three years", "option": "A", "requirement": "support-3-years", "expected": "gap"}, {"name": "A’s export is complete", "option": "A", "requirement": "export-api", "expected": "unknown"}]},
@@ -121,7 +121,7 @@ window.ISCARB_STORY = {
    setting: 'A clinic group bought an appointment product to replace its old booking system. Layan’s team must make it work for the clinics.',
    client: {name: 'Dr. Sara', role: 'Clinic operations lead · knows the real workflow'},
    clock: 'Contract decision: end of the month',
-   coldOpen: 'Ordinary bookings work well. Then Dr. Sara shows Layan what the clinics do every day: follow-ups that must wait a set period, linked to the first visit. The product has no such thing. The supplier says “configure it.” The team also wants a hosted language model to draft replies; it handled a ten-request demo perfectly.',
+   coldOpen: 'Ordinary bookings work well. Then Dr. Sara shows Layan what the clinics do every day. Follow-ups must wait a set period and stay linked to the first visit. The product has no such thing. The supplier says “configure it.” The team also wants a hosted language model to draft replies. It handled a ten-request demo perfectly.',
    stakes: 'Commit to the wrong route and the clinics live with a mismatched workflow for years. Replace too fast and months of purchased software and data migration are thrown away.',
    gut: {q: 'First instinct for the clinic group?', options: ['Configure the product: the supplier says it can', 'Integrate the language model to fill the gaps', 'Not yet: test the full workflow before choosing']},
    acts: [
@@ -131,14 +131,14 @@ window.ISCARB_STORY = {
     'Could a product line or configuration handle waiting periods and linked appointments?',
     'Configure, integrate, wrap or replace: Layan has to choose, and to show what evidence decides.'
    ],
-   twist: 'Week three. The supplier announces it will change a required interface and stop supporting the earlier version long before the planned lifetime ends. The same week, the language-model version the team tested is scheduled for retirement; its replacement answers the same prompts differently.',
-   epilogue: 'The contract decision is due. Dr. Sara does not need a perfect product; she needs to know which route survives the next five years, and what would make Layan change her mind.'
+   twist: 'Week three. The supplier announces a change to a required interface. It will stop supporting the earlier version long before the planned lifetime ends. The same week, the language-model version the team tested is scheduled for retirement; its replacement answers the same prompts differently.',
+   epilogue: 'The contract decision is due. Dr. Sara does not need a perfect product. She needs to know which route survives the next five years, and what would make Layan change her mind.'
   },
   16: {
    lab: {"question": "Assignment 7’s adapter: what does “30 minutes” become inside the component?", "cases": [{"name": "normal booking", "durationMinutes": 30, "expectedStatus": "accepted", "expectedSeconds": 1800}, {"name": "upper boundary", "durationMinutes": 120, "expectedStatus": "accepted", "expectedSeconds": 7200}, {"name": "zero length", "durationMinutes": 0, "expectedStatus": "rejected", "expectedSeconds": null}]},
    practice: 'Layan has an AI generate test values for the adapter. She still decides which boundaries matter and writes the contract Rakan relies on.',
    episode: 'Episode 5 · Ninety-five degrees',
-   setting: 'A city operations team is composing a heat-alert service from reusable parts: a sensor data component and a vendor’s AI forecasting component. Layan is the integrator.',
+   setting: 'A city operations team is composing a heat-alert service from reusable parts. One is a sensor data component; the other is a vendor’s AI forecasting component. Layan is the integrator.',
    client: {name: 'Rakan', role: 'Operations lead · issues public heat alerts'},
    clock: 'Heat-alert season starts next week',
    coldOpen: 'The interfaces connected the first time: number in, number out. The readings look plausible. Nobody has written down what the number means, and the forecaster’s documentation just says “temperature,” no unit.',
@@ -152,7 +152,7 @@ window.ISCARB_STORY = {
     'Khalid asks for the contract, and for the test that would fail on a wrong unit or an invalid value.'
    ],
    twist: 'The provider’s updated documentation arrives: the values are Fahrenheit. 95 was never Celsius. The forecaster, trained on Celsius, accepted every value without error and returned confident, wrong forecasts.',
-   epilogue: 'Rakan asks Layan one question before the season opens: “What stops this happening with the next component?” Her answer has to be a contract and a test, not a promise.'
+   epilogue: 'Rakan asks Layan one question before the season opens. Her answer must be a contract and a test, not a promise. The question: “What stops this happening with the next component?”'
   },
   17: {
    lab: {"question": "Assignment 8’s booking service: what happens when the reply is lost and the service restarts?", "cases": [{"name": "restart, same request identity", "events": ["send:a", "lose-response", "restart", "retry:a"], "expectedReservations": 1}, {"name": "retry with a new identity", "events": ["send:b", "lose-response", "retry:c"], "expectedReservations": 2}]},
@@ -172,21 +172,21 @@ window.ISCARB_STORY = {
     'Part of the system is someone else’s hosted service. Layan asks what evidence that ownership leaves her.'
    ],
    twist: 'A later trace arrives. The original booking committed before its reply was lost. The retry ran it again, and called the AI service again, which drafted a different confirmation. The customer received both.',
-   epilogue: '20:00 is coming. Hessa needs to know what happens on a retry, and how support will tell a duplicate from a real second booking. What would Layan’s design guarantee, and what would it only detect?'
+   epilogue: '20:00 is coming. Hessa needs to know what happens on a retry. She also needs to know how support will tell a duplicate from a real second booking. What would Layan’s design guarantee, and what would it only detect?'
   },
   20: {
    lab: {"question": "Assignment 9’s dashboard: what should a slow or missing feed look like?", "cases": [{"name": "security, updated a minute ago", "feed": "security", "minutesSinceUpdate": 1, "available": true, "expectedDisplay": "live"}, {"name": "transport, 12 minutes old", "feed": "transport", "minutesSinceUpdate": 12, "available": true, "expectedDisplay": "stale"}, {"name": "facilities, feed down", "feed": "facilities", "minutesSinceUpdate": 3, "available": false, "expectedDisplay": "unavailable"}]},
-   practice: 'Layan uses an AI chat to role-play the three agency owners. It is rehearsal. The bounded promise Faisal reads aloud is Layan’s, with her name on it.',
+   practice: 'Layan uses an AI chat to role-play the three agency owners. It is rehearsal. The limited promise Faisal reads aloud is Layan’s, with her name on it.',
    episode: 'Episode 7 · Whose dashboard is it?',
    setting: 'A multi-agency incident dashboard combines data feeds from agencies Layan’s team does not control. Officials will rely on it.',
    client: {name: 'Faisal', role: 'Coordinator · briefs officials every morning'},
    clock: 'Officials’ briefing: tomorrow 07:30',
-   coldOpen: 'The dashboard looks complete. Faisal wants to call it “real-time” in tomorrow’s briefing. Layan knows it can validate and display each feed, but it cannot tell any agency when to update, and one agency now produces its feed with an AI model nobody outside can inspect.',
+   coldOpen: 'The dashboard looks complete. Faisal wants to call it “real-time” in tomorrow’s briefing. Layan knows it can validate and display each feed. It cannot tell any agency when to update. One agency now produces its feed with an AI model nobody outside can inspect.',
    stakes: 'Promise too much and officials act on stale or reclassified data they think is live. Promise nothing and a useful shared picture goes unused.',
-   gut: {q: 'Can the dashboard promise “real-time and complete”?', options: ['Yes: every feed is connected and valid', 'Yes, once each agency signs an agreement', 'Only a bounded promise the dashboard can check itself']},
+   gut: {q: 'Can the dashboard promise “real-time and complete”?', options: ['Yes: every feed is connected and valid', 'Yes, once each agency signs an agreement', 'Only a limited promise the dashboard can check itself']},
    acts: [
     'Layan lists who owns what. Every agency runs its own system, for its own reasons.',
-    'Faisal: “We are the principal system, so we are in charge.” Layan checks what authority the dashboard really has over each feed.',
+    'Faisal: “We are the principal system, so we are in charge.” Layan checks the dashboard’s real authority over each feed.',
     'Every feed passes its own checks. Layan explains why that still does not guarantee the shared picture.',
     'The owners must coordinate interfaces, staged changes and cross-system tests, without anyone being the boss.',
     'Khalid asks for an architecture that keeps the dashboard useful when one feed slows or changes.'
@@ -212,17 +212,17 @@ window.ISCARB_STORY = {
       setting: 'An aircraft maker is adding an automatic trim function to a new airliner. The flight-control computer limits each nose-down trim command to a set maximum. Layan’s team wrote the safety argument last year.',
       client: {name: 'Tariq', role: 'Programme manager · measured on the certification date'},
       clock: 'Certification review: Monday, 09:00',
-      coldOpen: 'Tariq is delighted. A new AI assistant proposes trim sequences that cut fuel burn, and every single command passed the limiter in the simulator. Test crews now accept its sequences without editing them. Layan opens the safety case. It argues about one command at a time.',
+      coldOpen: 'Tariq is delighted. A new AI assistant proposes trim sequences that cut fuel burn. Every single command passed the limiter in the simulator. Test crews now accept its sequences without editing them. Layan opens the safety case. It argues about one command at a time.',
       stakes: 'Certify without analysis and the jet flies on trim authority nobody has modelled. Block without evidence and a real fuel saving is lost for a reason no one can inspect.',
       gut: {q: 'Can the new trim mode be certified on Monday?', options: ['Yes: every command passed its check', 'No: switch the AI assistant off', 'Not until the safety argument covers repeated commands']},
       acts: [
         'Tariq: “The software meets its specification. How can it be unsafe?” Layan has to answer that first.',
-        'Layan sketches it on the whiteboard: what happens when many small trim commands add up, and how bad could it be?',
+        'Layan sketches it on the whiteboard. What happens when many small trim commands add up, and how bad could it be?',
         'Khalid wants a requirement, not a worry: exactly what must the flight-control computer never allow?',
         'The simulator report checks one command at a time. Layan lists the evidence that would show the protection works.',
         'The safety case is due for sign-off. Does its argument even reach repeated trim, or a failed angle-of-attack sensor?'
       ],
-      twist: 'Friday 16:00. A simulator trace: in repeated mode, total nose-down trim went past the modelled limit while every individual command stayed within its bound. The sequences came from the AI assistant, which had found that many small commands save fuel.',
+      twist: 'Friday 16:00. A simulator trace: in repeated mode, total nose-down trim went past the modelled limit. Every individual command stayed within its own limit. The sequences came from the AI assistant, which had found that many small commands save fuel.',
       epilogue: 'Monday’s review is waiting. Khalid will sign only a claim with a stated boundary and the evidence behind it. What exactly would your safety claim cover, and what would it not?',
       practice: 'Layan asks an AI chat to play the certification reviewer and attack her argument. It helps her rehearse. The hazard analysis and the safety claim she signs are her own.',
       hook: 'Every command the AI proposed passed its check. Total trim still crossed the line.',
@@ -275,7 +275,7 @@ window.ISCARB_STORY = {
         title: 'Maersk · NotPetya', when: '2017',
         facts: [
           'On 27 June 2017, NotPetya malware spread through the network of Maersk, one of the world’s largest shipping companies.',
-          'It wiped every domain controller, the identity service that every sign-in depends on, and made about 4,000 servers and 45,000 PCs unusable.',
+          'It wiped every domain controller, the identity service that every sign-in depends on. About 4,000 servers and 45,000 PCs became unusable.',
           'One domain controller in Ghana survived only because a local power cut had taken it offline. Its copy was carried to the recovery team.',
           'Maersk rebuilt in about ten days. The attack cost it an estimated 300 million US dollars.'
         ],
@@ -337,7 +337,7 @@ window.ISCARB_STORY = {
       real: {
         title: 'AWS us-east-1 outage', when: '2021',
         facts: [
-          'On 7 December 2021, an automated scaling activity in AWS’s main network triggered unexpected behaviour from a large number of clients on its internal network.',
+          'On 7 December 2021, an automated scaling activity in AWS’s main network triggered unexpected behaviour. A large number of clients on its internal network were affected.',
           'A latent issue stopped those clients from backing off. Their retries created a surge of connections that overwhelmed networking devices.',
           'Many services and customer applications in the region were degraded for about seven hours.',
           'AWS disabled the scaling activity and changed the clients’ back-off behaviour.'

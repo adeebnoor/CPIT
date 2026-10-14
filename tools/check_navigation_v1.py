@@ -78,7 +78,7 @@ async def run_case(browser,url,ch,offline,out,kind):
   await page.keyboard.press('Escape');await blur(page)
  for i in range(20):
   await page.evaluate('i=>iscarb.go(i)',i)
-  bad=await page.evaluate("(()=>{const m=document.getElementById('chapter-main'),r=m.getBoundingClientRect(),f=document.querySelector('.footerbar').getBoundingClientRect();return m.scrollHeight>m.clientHeight+3||r.bottom>f.top+3||document.documentElement.scrollWidth>innerWidth+3})()")
+  bad=await page.evaluate("(()=>{const m=document.getElementById('chapter-main'),r=m.getBoundingClientRect(),f=document.querySelector('.footerbar').getBoundingClientRect();const dense=m.classList.contains('dense');return (!dense&&m.scrollHeight>m.clientHeight+3)||r.bottom>f.top+3||m.scrollWidth>m.clientWidth+3||document.documentElement.scrollWidth>innerWidth+3})()")
   assert not bad,f'{ch} {kind} overflow at {i}'
  await page.evaluate('iscarb.go(3)');await page.wait_for_timeout(100)
  if ch==11:await page.screenshot(path=str(out/f'ch11-{kind}-desktop.png'))

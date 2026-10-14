@@ -1,0 +1,1121 @@
+{
+ "chapter": 12,
+ "case": {
+  "fictional": true,
+  "answerKey": "cumulative limit enforced outside the assistant",
+  "headline": "The protection claim covers one command. Is that enough?",
+  "question": "What claim is supported, and what extra hazard analysis is needed?"
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "hazard",
+   "short": "a condition that can lead to an accident",
+   "ar": "خطر"
+  },
+  {
+   "term": "accident",
+   "short": "the harmful event itself, when the hazard causes damage",
+   "ar": "حادث"
+  },
+  {
+   "term": "risk",
+   "short": "how likely the hazard is and how bad its damage would be",
+   "ar": "مخاطرة"
+  },
+  {
+   "term": "safety-critical",
+   "short": "a system whose failure can hurt people or the environment",
+   "ar": "حرج للسلامة"
+  },
+  {
+   "term": "ALARP",
+   "short": "as low as reasonably practicable: reduce the risk until more reduction costs too much",
+   "ar": "أقل ما يمكن عملياً"
+  },
+  {
+   "term": "fault tree",
+   "short": "a diagram that starts from a hazard and works down to its causes",
+   "ar": "شجرة الأعطال"
+  },
+  {
+   "term": "common cause",
+   "short": "one shared cause that can make two protections fail together",
+   "ar": "سبب مشترك"
+  },
+  {
+   "term": "hazard log",
+   "short": "the record of each hazard, its control, its owner and its verification",
+   "ar": "سجل الأخطار"
+  },
+  {
+   "term": "safety case",
+   "short": "a written argument that links a safety claim to its evidence",
+   "ar": "حجة السلامة"
+  },
+  {
+   "term": "static analysis",
+   "short": "a tool that reads the code without running it to find defined error patterns",
+   "ar": "التحليل الساكن"
+  },
+  {
+   "term": "model checking",
+   "short": "a tool that explores every state of a model to test a stated property",
+   "ar": "فحص النماذج"
+  },
+  {
+   "term": "cumulative",
+   "short": "added up over several commands or doses",
+   "ar": "تراكمي"
+  },
+  {
+   "term": "specification gaming",
+   "short": "an optimiser reaches its goal by exploiting what the rules forgot to say",
+   "ar": "التلاعب بالمواصفات",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook insulin pump",
+  "text": "The textbook's insulin pump. Hazard: insulin is delivered when blood sugar is already low. The sensor reading is correct. This is a different hazard from the controller case.",
+  "source": "Source slides 19 and 32 (insulin pump risks and requirements)",
+  "fictional": false,
+  "question": "Which safety requirement controls the low-sugar hazard, and how would you verify it?",
+  "answer": "The pump shall not deliver insulin when the measured sugar level is below the set threshold. It shall raise an alarm instead. Verify with tests that feed low readings and check that no dose is delivered.",
+  "concept": "hazard-driven safety requirement",
+  "answerKey": "no delivery below the threshold plus an alarm",
+  "at": "X03"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "safety versus specification conformance",
+   "answerKey": "incomplete specification",
+   "commonError": "Students label every medical system “primary” safety-critical. Keep primary (software failure directly causes harm) and secondary (software misleads a person) apart.",
+   "question": "Can a program obey its specification and still be unsafe?",
+   "answer": "Yes. The specification may leave out a hazardous condition. Conformance only supports the specified behaviour, not every condition of use."
+  },
+  "X02": {
+   "minutes": 2,
+   "tier": "optional",
+   "concept": "four ways a reliable system is unsafe",
+   "answerKey": "define the hazard first, then compare behaviour with the requirement",
+   "commonError": "Students answer “test more” for all four causes. Only dormant faults are mainly a testing problem; a missing requirement cannot be found by more tests of the written ones."
+  },
+  "X02A": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "hazard, accident and damage",
+   "answerKey": "hazard: occupied zone unprotected; accident: barrier strikes",
+   "commonError": "Students use hazard and accident as one word. Draw hazard → accident → damage and ask where the repeated commands sit: a hazardous condition before any harm.",
+   "lists": [
+    {
+     "source": 29,
+     "title": "Risk reduction strategies",
+     "items": [
+      "Hazard avoidance",
+      "Hazard detection and removal",
+      "Damage limitation"
+     ]
+    }
+   ],
+   "takeaway": "A hazard is a condition and an accident is the harm; safety engineering breaks the path between them."
+  },
+  "X03": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "First drafts write “make it safe” as the requirement. Nobody can verify it. Insist on the hazardous condition, the required response and a named verification.",
+   "lists": [
+    {
+     "source": 25,
+     "title": "Hazard analysis techniques",
+     "items": [
+      "Inductive, bottom-up: start from a possible failure and find the hazards it could cause",
+      "Deductive, top-down: start from a hazard and work out its causes"
+     ]
+    }
+   ]
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "scope of test evidence",
+   "answerKey": "only tested conditions are supported",
+   "commonError": "Students treat “all routine tests passed” as evidence for the untested obscured-sensor case. Ask which condition the tests actually covered.",
+   "bullets": [
+    [
+     "Think",
+     "A sensor is obscured, but the controller continues its specified routine."
+    ],
+    [
+     "Pair",
+     "Separate conformance, hazardous condition and possible accident."
+    ],
+    [
+     "Record",
+     "Write a claim with its limits and name the missing evidence."
+    ]
+   ]
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "risk regions and ALARP",
+   "answerKey": "hazard, consequences, likelihood evidence, reduction options and justification",
+   "commonError": "Students invent a probability to place the hazard in a region. The chapter says estimates are relative; stop any number that has no source."
+  },
+  "X05": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "fault-tree gates and independence",
+   "answerKey": "shared supply is a common cause; no multiplication",
+   "commonError": "Students believe an AND gate proves the two causes are independent. Ask what happens to the gate when both checks read the same sensor.",
+   "lists": [
+    {
+     "source": 26,
+     "title": "Fault-tree analysis",
+     "items": [
+      "A deductive, top-down technique",
+      "Put the hazard at the root and find the system states that lead to it",
+      "Link the states with AND or OR conditions",
+      "Aim to minimise the number of single causes of failure"
+     ]
+    },
+    {
+     "source": 28,
+     "title": "Insulin pump fault tree",
+     "items": [
+      "Incorrect measurement of blood sugar level",
+      "Failure of the delivery system",
+      "Dose delivered at the wrong time",
+      "Root cause: algorithm error",
+      "Root cause: arithmetic error"
+     ]
+    }
+   ]
+  },
+  "X06": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "verifiable safety requirement",
+   "answerKey": "detection, inhibited command and behaviour when detection fails",
+   "commonError": "Most first drafts forget the behaviour when the sensor is unavailable. Point to SR1 and SR2 side by side: the textbook already has the cumulative lesson."
+  },
+  "X09": {
+   "minutes": 2,
+   "tier": "optional",
+   "concept": "hazard log evidence",
+   "answerKey": "executed verification record with version and reviewer",
+   "commonError": "Students point to the control description as proof the control was checked. Only an executed verification record, with version and reviewer, shows execution.",
+   "concept2": "traceable change of a protection rule",
+   "answerKey2": "changed requirement, reviewed design, version, verification result, reviewer",
+   "question": "Which hazard-log entry proves that a proposed control was actually checked?",
+   "answer": "A linked record of an executed verification: version, conditions, outcome and reviewer. The control description alone does not show execution.",
+   "question2": "What evidence should a changed protection rule leave behind?",
+   "answer2": "The changed requirement and its hazard link, the reviewed design, the software version, the verification result and the responsible reviewer."
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "independence of protection paths",
+   "answerKey": "shared input, power, assumption or bypass",
+   "commonError": "Pairs claim full independence between two protection paths. Ask what evidence would falsify it: a shared sensor, supply or assumption.",
+   "bullets": [
+    [
+     "Think",
+     "Compare a software-only check with a separately monitored protective path."
+    ],
+    [
+     "Pair",
+     "Identify one common cause and one cost or usability trade-off."
+    ],
+    [
+     "Record",
+     "Add the mechanism, why it supports your claim, and what you are unsure of."
+    ]
+   ]
+  },
+  "R18": {
+   "minutes": 2,
+   "tier": "optional",
+   "concept": "scope of model checking",
+   "answerKey": "the model, not the sensor",
+   "commonError": "Students take a clean model check as proof about the physical sensor. The check covers the model; sensor behaviour needs its own evidence."
+  },
+  "D12": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "scope of static analysis",
+   "answerKey": "different evidence and failure modes",
+   "commonError": "Students expect static analysis to find a missing requirement. It can catch an unchecked input or an overflow, not a requirement nobody wrote.",
+   "lists": [
+    {
+     "source": 52,
+     "title": "Levels of static analysis",
+     "items": [
+      "Characteristic error checking: patterns typical of the language",
+      "User-defined error checking: rules the team adds",
+      "Assertion checking: formal assertions in the code"
+     ]
+    }
+   ],
+   "sourceFigs": [
+    51
+   ]
+  },
+  "B01": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "safety case structure",
+   "answerKey": "argument linking evidence to a scoped claim",
+   "commonError": "Students present a folder of test reports as the safety case. Ask for the argument: this claim, this evidence, and why it is enough for this scope.",
+   "title": "A safety case connects evidence to a claim with limits"
+  },
+  "X10": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "every path to the unsafe exit",
+   "answerKey": "a separate cumulative limit",
+   "commonError": "Students extend the single-command argument to repeated commands in their heads. Make them say the cumulative claim out loud; it was never written."
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "missing cumulative requirement and its checker",
+   "answerKey": "reject commands that take the total over the limit; safe state on lost sensing",
+   "commonError": "Students look for the row where a single command failed its check. None did. The first unsafe row is C3, where the total passes 10 while every check passed.",
+   "added": true,
+   "answer": "Requirement: the controller shall reject any command that takes the total within a stated window above the modelled limit. This holds whatever proposed the command. On loss of sensing, it enters a defined safe state and accepts no assistant sequence. Verification: test many small commands, including sequences built to probe the bound, and loss-of-sensing cases. Where feasible, model-check them too. Record version, conditions and reviewer in the hazard log. Neither step depends on the assistant being right. Both depend on the checker seeing every command and on its own sensing. The window and limit shown are illustrative. An optimiser that exploits what the rules forgot is doing specification gaming.",
+   "takeaway": "Every command passed its check, yet the total still left the modelled limit."
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "restrict assistant sequences until the cumulative limit is verified",
+   "commonError": "Students ask the assistant to “be more careful”. Reject that: the control must be enforced outside the assistant, with its own verification.",
+   "twist": true,
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. The cumulative limit must hold whatever proposes the commands. Until it is specified and verified, restrict or withdraw assistant sequences. Tell the operators why.",
+   "added": true
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "scope of the pilot evidence",
+   "answerKey": "pilot record covers single commands only",
+   "think": "Devices down. What claim does the pilot record support?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide whether the assistant's clean pilot record counts as evidence.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional deployment passed a test. The clean pilot record shows only that each command passed the per-command check. It says nothing about cumulative actuation or loss of sensing. The argument never covered those.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "The pilot record supports one claim: each single command stayed within its limit. It says nothing about the total over a window or about a lost sensor. Evidence still needed: a test of repeated sequences and a loss-of-sensing test, both proposed.",
+     "why": "Names the mechanism (per-command limit), uses only given facts, and marks the missing tests as proposed."
+    },
+    "weak": {
+     "text": "The system is safe because every command passed and the pilot had no incident.",
+     "why": "No limit on the claim, treats absence of incidents as evidence, names no test anyone could check."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "independent protective path",
+   "answerKey": "a check that trusts the assistant shares its blind spot",
+   "think": "Compare two mechanisms: a software-only check inside the controller, or a separate protective path that ignores the assistant. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. A shared dependency or a mismatched assumption can defeat a design that looks stronger. A protective path that checks every command against stated limits does not depend on the assistant being right. A check that trusts the assistant's own plan shares its blind spot.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "A separate protective path that checks every command against the cumulative limit, whatever its source. It costs a second sensing path and more verification. If both paths read the same sensor, the independence claim fails.",
+     "why": "Links the mechanism to the property, names the shared-sensor limit and states the cost."
+    },
+    "weak": {
+     "text": "The software-only check is enough because it is simpler and already passed the pilot.",
+     "why": "No link to the cumulative property, no shared cause named, no trade-off."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "cumulative requirement outside the assistant with its own verification",
+   "think": "The repeated-command mode let the total pass the modelled limit while each command stayed within its bound. The sequences came from the assistant, which found that many small commands raise throughput. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. An optimiser rewarded for throughput exploited the limit that was never stated. The fix is a cumulative requirement enforced outside the assistant, with its own verification. Asking the assistant to behave is not a fix.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed the single-command argument covered the new mode; it did not. Revise: block the mode until a cumulative limit is written, enforced outside the assistant and tested with repeated sequences. The safety lead decides; operators and Tariq are told today.",
+     "why": "Names the broken assumption, revises with a reason and a test, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep my decision, but tell the assistant to send fewer commands.",
+     "why": "Ignores what the new fact breaks, puts the control inside the assistant, names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "hazard versus accident",
+   "answerKey": "hazard: a condition that could lead to an accident"
+  },
+  {
+   "concept": "risk reduction strategies",
+   "answerKey": "hazard avoidance",
+   "why": "Avoidance designs the system so the hazard cannot arise. Detection removes it before an accident. Damage limitation reduces harm afterwards."
+  },
+  {
+   "concept": "AND gate and independence",
+   "answerKey": "independence must be shown",
+   "beyondCase": true
+  },
+  {
+   "concept": "safety trace",
+   "answerKey": "hazard → requirement → verification"
+  },
+  {
+   "concept": "scope of static analysis",
+   "answerKey": "checked fault classes are absent",
+   "beyondCase": true
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "X05",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "D12",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "no",
+   "reason": "Textbook examples of software roles; in the study list"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "6": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "7": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "8": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "9": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "10": {
+   "cls": "full",
+   "unit": "X02A"
+  },
+  "11": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X02A"
+  },
+  "12": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "13": {
+   "cls": "no",
+   "reason": "Normal accidents: textbook discussion; in the study list"
+  },
+  "14": {
+   "cls": "no",
+   "reason": "Software safety benefits: textbook discussion; in the study list"
+  },
+  "15": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "16": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "17": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "18": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "19": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "20": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "21": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "22": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "23": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "24": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "25": {
+   "cls": "slide",
+   "unit": "X03",
+   "kind": "list",
+   "items": [
+    "Inductive, bottom-up techniques",
+    "Deductive, top-down techniques"
+   ]
+  },
+  "26": {
+   "cls": "slide",
+   "unit": "X05",
+   "kind": "list",
+   "items": [
+    "A deductive top-down technique.",
+    "Put the risk or hazard at the root of the tree and identify the system states that could lead to that hazard.",
+    "Where appropriate, link these with ‘and’ or ‘or’ conditions.",
+    "A goal should be to minimise the number of single causes of system failure."
+   ]
+  },
+  "27": {
+   "cls": "slide",
+   "unit": "X05",
+   "kind": "figure"
+  },
+  "28": {
+   "cls": "slide",
+   "unit": "X05",
+   "kind": "list",
+   "items": [
+    "Incorrect measurement of blood sugar level",
+    "Failure of delivery system",
+    "Dose delivered at wrong time",
+    "Algorithm error",
+    "Arithmetic error"
+   ]
+  },
+  "29": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "list",
+   "items": [
+    "Hazard avoidance;",
+    "Hazard detection and removal;",
+    "Damage limitation."
+   ],
+   "unit": "X02A"
+  },
+  "30": {
+   "cls": "no",
+   "reason": "Chemical-plant example of mixed strategies; in the study list",
+   "kind": "prose",
+   "items": [
+    "Normally, in critical systems, a mix of risk reduction strategies are used.",
+    "In a chemical plant control system, the system will include sensors to detect and correct excess pressure in the reactor.",
+    "However, it will also include an independent protection system that opens a relief valve if dangerously high pressure is detected."
+   ]
+  },
+  "31": {
+   "cls": "no",
+   "reason": "Insulin pump software risks; in the study list"
+  },
+  "32": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "33": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "34": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "35": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "36": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "37": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "38": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "39": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "40": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "41": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "42": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "43": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "X09"
+  },
+  "44": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "45": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "46": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "47": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "48": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "49": {
+   "cls": "slide",
+   "unit": "R18"
+  },
+  "50": {
+   "cls": "full",
+   "unit": "D12",
+   "kind": "prose",
+   "items": [
+    "Static analysers are software tools for source text processing.",
+    "They parse the program text and try to discover potentially erroneous conditions and bring these to the attention of the V & V team.",
+    "They are very effective as an aid to inspections - they are a supplement to but not a replacement for inspections."
+   ]
+  },
+  "51": {
+   "cls": "slide",
+   "unit": "D12",
+   "kind": "figure"
+  },
+  "52": {
+   "cls": "slide",
+   "unit": "D12",
+   "kind": "list",
+   "items": [
+    "Characteristic error checking",
+    "User-defined error checking",
+    "Assertion checking"
+   ]
+  },
+  "53": {
+   "cls": "full",
+   "unit": "D12",
+   "kind": "prose",
+   "items": [
+    "Particularly valuable when a language such as C is used which has weak typing and hence many errors are undetected by the compiler.",
+    "Particularly valuable for security checking – the static analyzer can discover areas of vulnerability such as buffer overflows or unchecked inputs.",
+    "Static analysis is now routinely used in the development of many safety and security critical systems."
+   ]
+  },
+  "54": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "55": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "56": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "57": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "58": {
+   "cls": "no",
+   "reason": "Section divider slide with no content"
+  },
+  "59": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "60": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "61": {
+   "cls": "full",
+   "unit": "B01"
+  },
+  "62": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "B01"
+  },
+  "63": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "64": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "65": {
+   "cls": "slide",
+   "unit": "X10"
+  },
+  "66": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "67": {
+   "cls": "slide",
+   "unit": "B01"
+  },
+  "68": {
+   "cls": "full",
+   "unit": "X10"
+  },
+  "69": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "70": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Software roles in safety-critical systems, normal accidents and the benefits of software for safety",
+   "sources": [
+    4,
+    13,
+    14
+   ],
+   "book": {
+    "page": 3,
+    "label": "12.1"
+   },
+   "note": "Not on the slides. Exam questions can ask for the two software roles and why complex systems have normal accidents."
+  },
+  {
+   "topic": "Hazard identification and the insulin pump risk list",
+   "sources": [
+    18,
+    19
+   ],
+   "book": {
+    "page": 7,
+    "label": "12.2.1"
+   },
+   "note": "Know the example hazards of the insulin pump."
+  },
+  {
+   "topic": "Social acceptability of risk, hazard assessment and the insulin pump risk classification",
+   "sources": [
+    22,
+    23,
+    24
+   ],
+   "book": {
+    "page": 8,
+    "label": "12.2.2"
+   },
+   "note": "The table of hazards with probability, severity and risk class."
+  },
+  {
+   "topic": "Mixed risk-reduction strategies, insulin pump software risks and the safety requirements SR1–SR5",
+   "sources": [
+    30,
+    31,
+    32
+   ],
+   "book": {
+    "page": 13,
+    "label": "12.2.4"
+   },
+   "note": "SR1 limits a single dose; SR2 limits the daily total. Be able to explain why both exist."
+  },
+  {
+   "topic": "Safety engineering processes: regulation, agile methods, assurance processes and the safety review",
+   "sources": [
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    43
+   ],
+   "book": {
+    "page": 14,
+    "label": "12.3"
+   },
+   "note": "Only the hazard log is on the slides; the process list is examinable."
+  },
+  {
+   "topic": "Arguments for and against formal methods",
+   "sources": [
+    45,
+    46,
+    47
+   ],
+   "book": {
+    "page": 18,
+    "label": "12.3.2"
+   },
+   "note": "Three arguments each way, and why formal methods cannot guarantee safety."
+  },
+  {
+   "topic": "Structured safety arguments and the insulin pump claim hierarchy",
+   "sources": [
+    59,
+    61,
+    62,
+    63
+   ],
+   "book": {
+    "page": 23,
+    "label": "12.4"
+   },
+   "note": "Be able to draw the claim hierarchy from the textbook example."
+  },
+  {
+   "topic": "Insulin dose computation with safety checks and its program paths",
+   "sources": [
+    66,
+    68
+   ],
+   "book": {
+    "page": 24,
+    "label": "12.4"
+   },
+   "note": "Follow each path of the dose code to the unsafe exit."
+  }
+ ],
+ "roadmap": {
+  "question": "What supports a claim, with limits, that a system is safe?"
+ },
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  }
+ },
+ "assignmentRubric": {
+  "criteria": [
+   {
+    "name": "FIT",
+    "strong": "Hazard: the barrier closes on an occupied zone. Facts given: one camera, no second sensor. Assumption, marked: the camera sees the whole zone.",
+    "strongWhy": "Names the chapter concept, separates a fact from a marked assumption and links both to the action.",
+    "weak": "The barrier is a safety-critical system, so it must be safe.",
+    "weakWhy": "Repeats a definition; no case fact and no assumption."
+   },
+   {
+    "name": "TRACE",
+    "strong": "Hazard → requirement “do not close while the zone is occupied or the camera is blind” → interlock control → proposed test with a covered camera.",
+    "strongWhy": "Every link is present and the test is marked proposed, not done.",
+    "weak": "The hazard is handled by testing.",
+    "weakWhy": "No requirement, no control, and the test is not named."
+   },
+   {
+    "name": "BOUND",
+    "strong": "The claim holds while the camera reports a frame every second. A missing frame for two seconds is the trigger to reopen the decision.",
+    "strongWhy": "An observable trigger that another engineer could watch for.",
+    "weak": "The claim holds unless something goes wrong.",
+    "weakWhy": "The trigger cannot be observed as written."
+   },
+   {
+    "name": "ACT + EVIDENCE",
+    "strong": "Action: hold the barrier open when no frame arrives. Owner: the site safety engineer. Evidence: a recorded test with the camera covered, proposed.",
+    "strongWhy": "Feasible action, a named role and inspectable evidence with its status.",
+    "weak": "Run more tests and make sure it is safe.",
+    "weakWhy": "No specific action, no owner, no evidence anyone could inspect."
+   },
+   {
+    "name": "REFIT",
+    "strong": "The new evidence shows a missing frame was treated as “clear”. I replace my action: the default on a missing frame is hold. My first boundary assumed the camera failed loudly; it did not.",
+    "strongWhy": "Says what the new evidence changed, chooses REPLACE with a reason and keeps the record consistent.",
+    "weak": "I keep my answer because it was already careful.",
+    "weakWhy": "Ignores the new evidence and gives no reason."
+   }
+  ],
+  "other": "the answer uses a chapter concept correctly, rests only on the facts given in the task, separates done from proposed evidence, and names a trigger that someone could observe. A different decision that meets these conditions earns the same marks as the model answer."
+ }
+}

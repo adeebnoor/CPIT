@@ -1,0 +1,1191 @@
+{
+ "chapter": 11,
+ "case": {
+  "fictional": true,
+  "answerKey": "hold or restrict: observed availability is below the target",
+  "text": "A fictional university communications gateway records 20 failed demands out of 10,000. It also records two outages in a 1,000-hour window, with one unavailable hour in total. The proposed availability target is 99.99%. The test assumes 10% external traffic; no new profile test is supplied.",
+  "lens": "The gateway also relays the university's email. Its upgrade added a vendor's learned message classifier that flags phishing and routes messages. The vendor reports 98% accuracy on its own benchmark. In the pilot's 1,000 external messages, 50 were phishing. The classifier missed 10 and wrongly flagged 19 legitimate messages. Hold that question: after the measurement slides, one slide shows how this chapter's metrics and tests apply to the classifier."
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "reliability",
+   "short": "the probability of failure-free operation over a stated time, in a given environment",
+   "ar": "الموثوقية"
+  },
+  {
+   "term": "availability",
+   "short": "the probability that the system is operational and can deliver service at a point in time",
+   "ar": "التوافر"
+  },
+  {
+   "term": "fault",
+   "short": "a system characteristic that can cause an erroneous state",
+   "ar": "عيب"
+  },
+  {
+   "term": "error",
+   "short": "an incorrect state during execution",
+   "ar": "خطأ"
+  },
+  {
+   "term": "failure",
+   "short": "the user-visible event when the service deviates from what is required",
+   "ar": "فشل"
+  },
+  {
+   "term": "POFOD",
+   "short": "probability of failure on demand: failed demands divided by all demands",
+   "ar": "احتمال الفشل عند الطلب"
+  },
+  {
+   "term": "ROCOF",
+   "short": "rate of occurrence of failures: failures divided by the time or transactions observed",
+   "ar": "معدل حدوث الفشل"
+  },
+  {
+   "term": "MTTF",
+   "short": "mean time to failure: in this chapter, one divided by ROCOF",
+   "ar": "متوسط الزمن حتى الفشل"
+  },
+  {
+   "term": "denominator",
+   "short": "the count of demands or hours that a failure number is divided by",
+   "ar": "المقام"
+  },
+  {
+   "term": "operational profile",
+   "short": "the input classes and how often each occurs in normal use",
+   "ar": "ملف الاستخدام التشغيلي"
+  },
+  {
+   "term": "statistical testing",
+   "short": "running the program on inputs that match real use, to measure reliability",
+   "ar": "الاختبار الإحصائي"
+  },
+  {
+   "term": "protection system",
+   "short": "a simpler, independent monitor that moves the process to a safe state",
+   "ar": "نظام الحماية"
+  },
+  {
+   "term": "N-version programming",
+   "short": "separate teams build versions of one specification; a voter compares their outputs",
+   "ar": "البرمجة متعددة النسخ"
+  },
+  {
+   "term": "diversity",
+   "short": "providing the same function in different ways so copies do not fail together",
+   "ar": "التنوع"
+  },
+  {
+   "term": "confusion matrix",
+   "short": "a table of what each message really was against what the classifier did",
+   "ar": "مصفوفة الالتباس",
+   "added": true
+  },
+  {
+   "term": "distribution shift",
+   "short": "the inputs in use no longer match the inputs the model was trained and tested on",
+   "ar": "انزياح التوزيع",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook's bank ATM network",
+  "text": "In the textbook's ATM example, a bank runs many cash machines. All of them use one customer account database. Database transaction mechanisms can correct problems in individual ATM transactions. This is a different system from the communications gateway.",
+  "source": "Source slides 27–29 (ATM reliability and availability specification)",
+  "fictional": false,
+  "question": "Which metric should the specification use for the shared account database service, and at what level?",
+  "answer": "Availability, around 0.9999 between 7 am and 11 pm. If the database fails, every ATM stops, so availability matters more than reliability. Transaction mechanisms correct individual ATM errors, so a lower ATM availability of 0.999 is acceptable.",
+  "concept": "matching the metric and level to the service",
+  "answerKey": "availability of 0.9999 for the shared database",
+  "at": "REQ"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core",
+   "takeaway": "Five source sections, five measurable outcomes, one decision with limits."
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "FAULT": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "fault, error and failure chain",
+   "answerKey": "24:xx state error; missed transmission is the failure",
+   "commonError": "Students answer “a bug” for all three terms. Have one student name the cause, one the state and one the lost service."
+  },
+  "MANAGE": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "avoid, detect, tolerate",
+   "answerKey": "analyzer detects; standby tolerates if service continues",
+   "commonError": "Students treat a standby server as proof of fault tolerance. A design intention is not evidence that failover preserved the service."
+  },
+  "RELAV": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "availability versus reliability",
+   "answerKey": "B has less downtime: 60 minutes versus 360",
+   "commonError": "Students pick A because it fails less often. Ask them to compute total downtime, then ask who was affected and when."
+  },
+  "METRICS": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "metric with units and exposure",
+   "answerKey": "0.002 failures per hour; 500 hours",
+   "commonError": "Students write 0.002 with no unit. Write the unit beside every number and separate outage events from failed requests.",
+   "lists": [
+    {
+     "source": 19,
+     "title": "Reliability metrics",
+     "items": [
+      "Probability of failure on demand",
+      "Rate of occurrence of failures, with mean time to failure as its reciprocal",
+      "Availability as a fraction of time"
+     ]
+    }
+   ]
+  },
+  "AVAIL": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "availability as a time budget",
+   "answerKey": "99.9 per cent: one lost hour in 1,000",
+   "commonError": "Students switch between a 16-hour and a 24-hour window without saying so. Fix the service window before any arithmetic.",
+   "sourceFigs": [
+    23
+   ]
+  },
+  "REQ": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Students write “the system shall be reliable” as a requirement. Ask for a target and a mechanism as two separate sentences.",
+   "concept2": "functional versus quantitative reliability requirements",
+   "answerKey2": "functional recovery requirement; the availability target is missing",
+   "question2": "“Store recoverable copies on separate servers” is which kind of requirement, and what target is still missing?",
+   "answer2": "It is a functional recovery and redundancy requirement. It still needs a service-level target and verification conditions. For example, an explicit availability requirement, a service window and a recovery test. Copies alone do not establish the achieved target."
+  },
+  "PROTECT": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "replication versus protection",
+   "answerKey": "identical copies share the software fault",
+   "commonError": "Students trace the protection sensors and the control sensors as one path. Trace them separately and ask which service is deliberately stopped."
+  },
+  "SELFCHECK": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "what a comparator establishes",
+   "answerKey": "a mismatch, not which channel is right",
+   "commonError": "Students read the status line as the result line. The comparator reports disagreement; the architecture must decide what happens next."
+  },
+  "VOTE": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "majority voting",
+   "answerKey": "the voter selects 18",
+   "commonError": "Students take a 2-to-1 vote as proof that 18 is correct. Ask whether two copies of the same misconception can agree.",
+   "concept2": "limits of agreement",
+   "answerKey2": "a shared specification fault",
+   "question": "Outputs are 18, 18 and 24. What does majority voting select?",
+   "answer": "The voter selects 18. Late outputs must also be handled by the specified timing rule.",
+   "question2": "What fact would defeat the claim that 18 is correct?",
+   "answer2": "A common specification or algorithm fault could make both agreeing versions wrong. Agreement alone does not establish correctness."
+  },
+  "DIVERSITY": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "shared failures that diversity does not remove",
+   "answerKey": "a wrong requirement survives every language",
+   "commonError": "Students list languages as evidence of independence. Ask for a common-cause counterexample before allowing an independence claim."
+  },
+  "CODE1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "input validity checks",
+   "answerKey": "a reasonableness check across the series",
+   "commonError": "Students insert try/catch or a retry and stop. Ask what happens after the timeout and which state can be safely restored.",
+   "concept2": "limiting loss from a silent external failure",
+   "answerKey2": "timeout plus a saved checkpoint",
+   "question": "A sensor value passes a numeric type check but is implausible compared with its earlier readings. Which check is missing?",
+   "answer": "A reasonableness check using the expected relationship across the series. A range check may also be relevant. A valid range and representation alone do not show that the sequence is plausible.",
+   "question2": "A remote service never replies during a long task. Name two mechanisms that limit the resulting loss.",
+   "answer2": "An external-call timeout returns control so a defined failure action can run. A valid saved checkpoint allows work to restart without losing the whole long transaction. State what is saved and what action follows the timeout."
+  },
+  "MEASURE": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "purpose of the test dataset",
+   "answerKey": "a defect-hunting dataset distorts the input distribution",
+   "commonError": "Students assume one test suite answers both “can I break it?” and “how often does service fail in use?”. Contrast the two purposes.",
+   "lists": [
+    {
+     "source": 71,
+     "title": "Data needed to measure reliability",
+     "items": [
+      "The number of failures for a number of service requests; this measures POFOD, whatever the time span",
+      "The time or transactions between failures plus the total elapsed time or transactions; this measures ROCOF and MTTF",
+      "The repair or restart time after a failure that loses service; this measures availability"
+     ]
+    }
+   ]
+  },
+  "PROFILE": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "operational profile arithmetic and drift",
+   "answerKey": "700, 200 and 100; the estimate stays with its profile",
+   "commonError": "Students read percentages off the source histogram. It has none; the 70/20/10 split is a labelled course calculation.",
+   "answer": "700, 200 and 100. If actual use shifts, update the class probabilities and the representative test dataset. The previous estimate stays limited to its previous profile."
+  },
+  "LIMITS": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "reporting a zero-failure run",
+   "answerKey": "profile, exposure, definitions and uncertainty",
+   "commonError": "Students invent a confidence interval or a certification rule from a zero-failure run. Keep the limitation visible beside the number.",
+   "answer": "The profile, the exposure or sample size, the service and failure definition, the operating conditions and the statistical uncertainty. No observed failure in one limited test is not proof of zero future failure probability.",
+   "lists": [
+    {
+     "source": 75,
+     "title": "Reliability measurement problems",
+     "items": [
+      "Operational profile uncertainty: the profile may not reflect real use",
+      "High costs of test data generation when data cannot be generated automatically",
+      "Statistical uncertainty: highly reliable systems rarely fail, so significant failure counts are hard to get",
+      "Recognizing failure: a specification can be read in conflicting ways"
+     ]
+    }
+   ]
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "the denominator that matters",
+   "answerKey": "phishing POFOD of 0.2 on 50 demands",
+   "commonError": "Students report 97.1% accuracy as the reliability. Accuracy averages over messages that are not protection demands and hides the misses.",
+   "added": true,
+   "bullets": [
+    [
+     "Compute accuracy",
+     "All correct labels ÷ all messages."
+    ],
+    [
+     "Compute phishing POFOD",
+     "Missed phishing ÷ phishing demands."
+    ],
+    [
+     "Read the table",
+     "The confusion matrix rows are what each message really was; its columns are what the classifier did."
+    ],
+    [
+     "Check the exposure",
+     "How many demands support that estimate?"
+    ]
+   ],
+   "takeaway": "Ninety-seven per cent correct and still missing phishing: find the denominator that matters.",
+   "question": "Compute both numbers. Which one can support a protection claim, and what caveat do 50 demands require?",
+   "answer": "Accuracy = (40 + 931) / 1,000 = 97.1%. Phishing POFOD = 10 / 50 = 0.2 per phishing demand. False-alarm rate = 19 / 950 = 2.0%. Only the POFOD for the protection demand can support a protection claim. State it with its exposure (50 demands) and its profile (10% external traffic). Accuracy averages over messages that are not protection demands and hides the misses. With 50 demands the estimate is uncertain. A standard 95% interval for 10/50 runs from roughly 11% to 33%."
+  },
+  "REVISE": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "re-measure on the new profile before any protection claim",
+   "commonError": "Students keep the verdict and the old explanation. A student may keep the same verdict only with a new explanation of its scope.",
+   "twist": true,
+   "bullets": [
+    [
+     "Think",
+     "External traffic rises from 10% to 60%; the classifier learned mostly internal mail."
+    ],
+    [
+     "Pair",
+     "The POFOD estimates belong to the old profile: explain what changes."
+    ],
+    [
+     "Record",
+     "Restrict the release claim, re-measure on a representative mix, and name who accepts the restricted scope."
+    ]
+   ],
+   "answer": "Revise the profile and the representative test dataset before transferring the old measured ratio to the new traffic mix. Keep the claim limited while testing. Name the decision owner and reviewer. Disclose AI use and verify any calculation or generated tests independently. Do not mark a proposed test as completed evidence. For the classifier, the profile change is also a distribution shift. Re-measure its phishing POFOD on a representative external mix before claiming protection. If protection is reduced meanwhile, tell the users whose mail it screens."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "metric that fits the service",
+   "answerKey": "availability for the gateway; POFOD for the phishing demand",
+   "think": "Devices down. Hold, restrict or release, and which metric supports that scope?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide which metric fits the classifier's phishing demand.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. The example gives POFOD 0.002 per demand, ROCOF 0.002 outages per hour and availability 99.9%. These describe different events and exposures. For the classifier, overall accuracy of 97.1% hides the protection demand. It missed 10 of 50 phishing messages: a POFOD of 0.2 per phishing demand, measured on only 50 demands.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Hold full release. Availability is the metric for a continuous gateway: one lost hour in 1,000 is 99.9%, below the 99.99% target. For the classifier, the phishing POFOD is 10/50 = 0.2, on only 50 demands. A profile test under the real traffic mix is proposed.",
+     "why": "Names the right metric for each service, computes from the given numbers and marks the proposed test."
+    },
+    "weak": {
+     "text": "Release: the vendor says 98% accurate and the servers were up almost all the time.",
+     "why": "Uses the vendor's benchmark instead of the given facts; no metric, no denominator, no test."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "diversity in failure causes",
+   "answerKey": "a rule-based check fails for different reasons than the classifier",
+   "think": "Compare two mechanisms: an identical second server, or a second AI classifier as a diverse version. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. Evidence of a shared dependency or mismatched assumption can defeat an apparently stronger design. A second classifier trained on similar data may share the same blind spots. N-version teams can share a specification error in the same way. A rule-based check or human review is more likely to fail for different reasons. That too needs a reason you can state.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Neither as given. A second identical server improves availability against hardware faults but shares every software fault. A second classifier trained on similar mail shares its blind spots. A rule-based check fails for different reasons, at the cost of more false alarms.",
+     "why": "Links each mechanism to its property, names the shared cause and states the trade-off."
+    },
+    "weak": {
+     "text": "Add the second classifier: two AIs are better than one.",
+     "why": "No property named, no shared cause, no cost."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "the miss rate does not travel to the new traffic mix",
+   "think": "External traffic changes from the assumed 10% to 60%. No representative result under that mix is supplied. The classifier was trained mostly on internal messages. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The classifier's miss rate was measured on a mostly internal mix. Under 60% external traffic it faces inputs unlike its training data. Its phishing POFOD must be re-measured before any protection claim.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed the 10% external mix would hold; it will not. Revise: restrict the release to internal mail and re-measure the phishing POFOD on an external sample. The service owner decides; the mail users are told that screening is reduced.",
+     "why": "Names the broken assumption, revises with a reason, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep my decision; 0.2 was measured, so it still applies.",
+     "why": "Ignores the profile change; names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "availability versus failure frequency",
+   "answerKey": "B loses less time in total"
+  },
+  {
+   "concept": "metric units",
+   "answerKey": "0.002 failures per hour and 500 hours",
+   "beyondCase": true
+  },
+  {
+   "concept": "independence of N versions",
+   "answerKey": "shared requirements defeat team separation",
+   "beyondCase": true
+  },
+  {
+   "concept": "timeouts on external calls",
+   "answerKey": "timeout with a defined recovery action",
+   "beyondCase": true
+  },
+  {
+   "concept": "transferring a reliability estimate",
+   "answerKey": "review the profile before transferring the claim"
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "REQ",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "CODE1",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "no",
+   "reason": "Why customers accept failures in non-critical systems; in the study list"
+  },
+  "4": {
+   "cls": "slide",
+   "unit": "MANAGE"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "FAULT"
+  },
+  "6": {
+   "cls": "full",
+   "unit": "MANAGE"
+  },
+  "7": {
+   "cls": "slide",
+   "unit": "MANAGE"
+  },
+  "8": {
+   "cls": "full",
+   "unit": "MANAGE"
+  },
+  "9": {
+   "cls": "slide",
+   "unit": "RELAV"
+  },
+  "10": {
+   "cls": "slide",
+   "unit": "RELAV"
+  },
+  "11": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "RELAV"
+  },
+  "12": {
+   "cls": "full",
+   "unit": "RELAV"
+  },
+  "13": {
+   "cls": "full",
+   "unit": "RELAV"
+  },
+  "14": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "RELAV"
+  },
+  "15": {
+   "cls": "no",
+   "reason": "Section divider slide with no content",
+   "kind": "title"
+  },
+  "16": {
+   "cls": "full",
+   "unit": "RELAV"
+  },
+  "17": {
+   "cls": "slide",
+   "unit": "REQ"
+  },
+  "18": {
+   "cls": "slide",
+   "unit": "REQ"
+  },
+  "19": {
+   "cls": "slide",
+   "unit": "METRICS",
+   "kind": "list",
+   "items": [
+    "Probability of failure on demand",
+    "Rate of occurrence of failures / Mean time to failure",
+    "Availability"
+   ]
+  },
+  "20": {
+   "cls": "full",
+   "unit": "METRICS",
+   "kind": "prose",
+   "items": [
+    "This is the probability that the system will fail when a service request is made. Useful when demands for service are intermittent and relatively infrequent.",
+    "Appropriate for protection systems where services are demanded occasionally and where there are serious consequence if the service is not delivered.",
+    "Relevant for many safety-critical systems with exception management components",
+    "Emergency shutdown system in a chemical plant."
+   ]
+  },
+  "21": {
+   "cls": "slide",
+   "unit": "METRICS",
+   "kind": "prose",
+   "items": [
+    "Reflects the rate of occurrence of failure in the system.",
+    "ROCOF of 0.002 means 2 failures are likely in each 1000 operational time units e.g. 2 failures per 1000 hours of operation.",
+    "Relevant for systems where the system has to process a large number of similar requests in a short time",
+    "Credit card processing system, airline booking system.",
+    "Reciprocal of ROCOF is Mean time to Failure (MTTF)",
+    "Relevant for systems with long transactions i.e. where system processing takes a long time (e.g. CAD systems). MTTF should be longer than expected transaction length."
+   ]
+  },
+  "22": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "prose",
+   "items": [
+    "Measure of the fraction of the time that the system is available for use.",
+    "Takes repair and restart time into account",
+    "Availability of 0.998 means software is available for 998 out of 1000 time units.",
+    "Relevant for non-stop, continuously running systems",
+    "telephone switching systems, railway signalling systems."
+   ],
+   "unit": "AVAIL"
+  },
+  "23": {
+   "cls": "slide",
+   "unit": "AVAIL",
+   "kind": "figure"
+  },
+  "24": {
+   "cls": "full",
+   "unit": "REQ",
+   "kind": "prose",
+   "items": [
+    "Non-functional reliability requirements are specifications of the required reliability and availability of a system using one of the reliability metrics (POFOD, ROCOF or AVAIL).",
+    "Quantitative reliability and availability specification has been used for many years in safety-critical systems but is uncommon for business critical systems.",
+    "However, as more and more companies demand 24/7 service from their systems, it makes sense for them to be precise about their reliability and availability expectations."
+   ]
+  },
+  "25": {
+   "cls": "full",
+   "unit": "REQ"
+  },
+  "26": {
+   "cls": "slide",
+   "unit": "REQ"
+  },
+  "27": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "REQ"
+  },
+  "28": {
+   "cls": "full",
+   "unit": "REQ"
+  },
+  "29": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "REQ"
+  },
+  "30": {
+   "cls": "full",
+   "unit": "METRICS"
+  },
+  "31": {
+   "cls": "slide",
+   "unit": "REQ"
+  },
+  "32": {
+   "cls": "full",
+   "unit": "REQ"
+  },
+  "33": {
+   "cls": "slide",
+   "unit": "SELFCHECK"
+  },
+  "34": {
+   "cls": "full",
+   "unit": "SELFCHECK"
+  },
+  "35": {
+   "cls": "no",
+   "reason": "Examples of where fault-tolerant architectures are used; in the study list"
+  },
+  "36": {
+   "cls": "full",
+   "unit": "PROTECT"
+  },
+  "37": {
+   "cls": "slide",
+   "unit": "PROTECT"
+  },
+  "38": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "PROTECT"
+  },
+  "39": {
+   "cls": "full",
+   "unit": "SELFCHECK"
+  },
+  "40": {
+   "cls": "slide",
+   "unit": "SELFCHECK"
+  },
+  "41": {
+   "cls": "slide",
+   "unit": "SELFCHECK"
+  },
+  "42": {
+   "cls": "slide",
+   "unit": "SELFCHECK"
+  },
+  "43": {
+   "cls": "full",
+   "unit": "SELFCHECK"
+  },
+  "44": {
+   "cls": "slide",
+   "unit": "VOTE"
+  },
+  "45": {
+   "cls": "full",
+   "unit": "VOTE"
+  },
+  "46": {
+   "cls": "full",
+   "unit": "VOTE"
+  },
+  "47": {
+   "cls": "slide",
+   "unit": "VOTE"
+  },
+  "48": {
+   "cls": "full",
+   "unit": "DIVERSITY"
+  },
+  "49": {
+   "cls": "full",
+   "unit": "DIVERSITY"
+  },
+  "50": {
+   "cls": "slide",
+   "unit": "DIVERSITY"
+  },
+  "51": {
+   "cls": "full",
+   "unit": "PROTECT"
+  },
+  "52": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "DIVERSITY"
+  },
+  "53": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "54": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "CODE1"
+  },
+  "55": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "56": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "57": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "58": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "59": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "60": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "61": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "62": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "63": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "64": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "CODE1"
+  },
+  "65": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "66": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "67": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "68": {
+   "cls": "slide",
+   "unit": "CODE1"
+  },
+  "69": {
+   "cls": "full",
+   "unit": "CODE1"
+  },
+  "70": {
+   "cls": "slide",
+   "unit": "LIMITS",
+   "kind": "title"
+  },
+  "71": {
+   "cls": "full",
+   "unit": "METRICS",
+   "kind": "list",
+   "items": [
+    "Number of failures given a number of requests (POFOD)",
+    "Time or transactions between failures plus the total (ROCOF and MTTF)",
+    "Repair or restart time after a failure (availability)"
+   ]
+  },
+  "72": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "prose",
+   "items": [
+    "Reliability testing (Statistical testing) involves running the program to assess whether or not it has reached the required level of reliability.",
+    "This cannot normally be included as part of a normal defect testing process because data for defect testing is (usually) atypical of actual usage data.",
+    "Reliability measurement therefore requires a specially designed data set that replicates the pattern of inputs to be processed by the system."
+   ],
+   "unit": "MEASURE"
+  },
+  "73": {
+   "cls": "full",
+   "reason": "TODO",
+   "kind": "prose",
+   "items": [
+    "Testing software for reliability rather than fault detection.",
+    "Measuring the number of errors allows the reliability of the software to be predicted. Note that, for statistical reasons, more errors than are allowed for in the reliability specification must be induced.",
+    "An acceptable level of reliability should be",
+    "specified and the software tested and amended until that level of reliability is reached."
+   ],
+   "unit": "MEASURE"
+  },
+  "74": {
+   "cls": "slide",
+   "unit": "LIMITS",
+   "kind": "title"
+  },
+  "75": {
+   "cls": "slide",
+   "unit": "LIMITS",
+   "kind": "list",
+   "items": [
+    "Operational profile uncertainty",
+    "High costs of test data generation",
+    "Statistical uncertainty",
+    "Recognizing failure"
+   ]
+  },
+  "76": {
+   "cls": "slide",
+   "unit": "PROFILE"
+  },
+  "77": {
+   "cls": "slide",
+   "unit": "MEASURE"
+  },
+  "78": {
+   "cls": "slide",
+   "unit": "PROFILE"
+  },
+  "79": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "80": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "81": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Software reliability, faults, errors and failures, and fault management",
+   "sources": [
+    3,
+    5,
+    6,
+    7
+   ],
+   "book": {
+    "page": 4,
+    "label": "11.1"
+   },
+   "note": "The weather-station example: mistake, fault, erroneous state, failure; avoid, detect, tolerate."
+  },
+  {
+   "topic": "Availability versus reliability, specifications and perception",
+   "sources": [
+    10,
+    11,
+    12,
+    14,
+    16
+   ],
+   "book": {
+    "page": 4,
+    "label": "11.1"
+   },
+   "note": "Why perceived reliability matters and why availability percentages hide who was affected."
+  },
+  {
+   "topic": "Reliability metrics: POFOD, ROCOF, MTTF and availability",
+   "sources": [
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "book": {
+    "page": 8,
+    "label": "11.2.1"
+   },
+   "note": "Required reading. Know which metric fits which system and the units of each."
+  },
+  {
+   "topic": "Non-functional reliability requirements and the ATM and insulin pump examples",
+   "sources": [
+    24,
+    26,
+    27,
+    28,
+    29,
+    30
+   ],
+   "book": {
+    "page": 9,
+    "label": "11.2.2"
+   },
+   "note": "Required reading for 24. Be able to justify a metric and a level for a given service."
+  },
+  {
+   "topic": "Functional reliability requirements",
+   "sources": [
+    18,
+    31,
+    32
+   ],
+   "book": {
+    "page": 12,
+    "label": "11.2.3"
+   },
+   "note": "Checking, recovery, redundancy and process requirements, with the four examples."
+  },
+  {
+   "topic": "Fault-tolerant architectures: protection, self-monitoring, TMR and N-version programming",
+   "sources": [
+    34,
+    35,
+    36,
+    38,
+    39,
+    41,
+    43,
+    44,
+    45,
+    48
+   ],
+   "book": {
+    "page": 13,
+    "label": "11.3"
+   },
+   "note": "Which problem each architecture solves and what it assumes about independence."
+  },
+  {
+   "topic": "Software diversity, its problems and improvements in practice",
+   "sources": [
+    49,
+    50,
+    51,
+    52
+   ],
+   "book": {
+    "page": 18,
+    "label": "11.3.4"
+   },
+   "note": "The 5–9 times figure is a historical observation, not a guarantee."
+  },
+  {
+   "topic": "The eight dependable programming guidelines",
+   "sources": [
+    54,
+    56,
+    57,
+    58,
+    59,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69
+   ],
+   "book": {
+    "page": 20,
+    "label": "11.4"
+   },
+   "note": "Name all eight and the mechanism behind each; the error-prone constructs list is examinable."
+  },
+  {
+   "topic": "Reliability measurement, statistical testing and operational profiles",
+   "sources": [
+    71,
+    72,
+    73,
+    75,
+    76,
+    78
+   ],
+   "book": {
+    "page": 26,
+    "label": "11.5"
+   },
+   "note": "Required reading for 70–75. The four measurement problems and why profiles drift."
+  }
+ ],
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  }
+ }
+}

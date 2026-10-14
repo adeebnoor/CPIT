@@ -4,6 +4,7 @@ import json, shutil, os, sys
 from sanitize_static_site import main as sanitize
 from audit_classroom import audit, publication
 from build_llm_index import main as build_llm_index
+from check_lecture_requirements import run as check_lecture_requirements
 ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
 VERSION=publication()['release']
@@ -11,6 +12,9 @@ PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-st
 def main():
     spec=publication(); errors=audit(ROOT)
     if errors: raise SystemExit('\n'.join(errors))
+    # Lecture design requirements (curriculum/lecture-requirements): every mandatory item must pass before staging.
+    errors=check_lecture_requirements(quiet=True)
+    if errors: raise SystemExit('Lecture requirements failed:\n'+'\n'.join(errors))
     if DEST.exists(): shutil.rmtree(DEST)
     DEST.mkdir()
     for name in PUBLIC + ['course-shell.css', 'course-shell.js']:

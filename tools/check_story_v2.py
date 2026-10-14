@@ -45,7 +45,8 @@ def static_audit(root,pub):
     return report
 
 async def no_overflow(page):
-    return await page.evaluate("""()=>{const m=document.getElementById('chapter-main'),f=document.querySelector('.footerbar')?.getBoundingClientRect();if(innerWidth<=1000)return [];return [...m.querySelectorAll('h1,h2,h3,p,button,section,span')].filter(e=>{const r=e.getBoundingClientRect();return r.width&&(r.left<-2||r.right>innerWidth+2||(f&&r.bottom>f.top+3));}).map(e=>e.textContent.trim().slice(0,100));}""")
+    # Slides marked dense (full source lists, transfer case, second question) scroll vertically inside the stage by design.
+    return await page.evaluate("""()=>{const m=document.getElementById('chapter-main'),f=document.querySelector('.footerbar')?.getBoundingClientRect();if(innerWidth<=1000)return [];const dense=m.classList.contains('dense');return [...m.querySelectorAll('h1,h2,h3,p,button,section,span')].filter(e=>{const r=e.getBoundingClientRect();return r.width&&(r.left<-2||r.right>innerWidth+2||(!dense&&f&&r.bottom>f.top+3));}).map(e=>e.textContent.trim().slice(0,100));}""")
 
 async def check_page(browser,url,ch,mode,out):
     ctx=await browser.new_context(viewport={'width':1440,'height':900},offline=mode=='offline')

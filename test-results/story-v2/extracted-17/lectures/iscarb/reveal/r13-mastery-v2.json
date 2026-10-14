@@ -2,5 +2,5 @@
   "chapter": "13",
   "version": "2026-09-ch13-mastery-v2",
   "label": "STRESS · new evidence",
-  "text": "A reviewer supplies synthetic-account tests of both preview and bulk-export endpoints. Cross-user requests are rejected server-side on both paths; allowed requests succeed. The report identifies the tested release and roles, but does not include a review of sensitive information in logs. Explain which concern is resolved, which remains, and whether your original action should be retained, relaxed or narrowed."
+  "text": "A reviewer uses test accounts to check two API operations: file preview and bulk export (downloading several records together). Both operations refuse requests for another user's files at the server. Allowed requests succeed. The report names the software version and user roles tested. It does not check whether the activity logs contain private information. Explain which concern these results address, which concern remains, and whether to keep, relax or narrow your original action."
 }
