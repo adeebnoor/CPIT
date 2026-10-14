@@ -4,13 +4,20 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-04  
-**Commit ID:** 83fe2b46-608f-4235-ab5e-674fb4581443  
-**Part A committed:** 2026-10-04T22:06:12.426Z  
-**STRESS revealed:** 2026-10-04T22:06:12.439Z
+**Date:** 2026-10-14  
+**Commit ID:** 9bdc99c2-e78a-497c-b0be-f89bdc90256f  
+**Part A committed:** 2026-10-14T20:26:13.670Z  
+**STRESS revealed:** 2026-10-14T20:26:13.683Z
 
 ## Scenario
-A fictional faculty needs a room-booking service for a three-year pilot. Option A is a configurable commercial product with the required booking functions and an export API; its support commitment ends after two years. Option B is an existing university application with an owned codebase, but it lacks recurring bookings and has no measured peak-load results. The team knows the university codebase. No reliable total-cost estimates have been supplied. The target is a pilot next term, not a complete enterprise replacement. Recommend an option, a restricted evaluation or a hold.Colleague’s draft recommendation · review it, do not copy it: “Choose Option A for the whole faculty from next term. It already has every booking function we need, so configuration is enough. Support ending after two years is not a problem for a three-year pilot: we will simply renew. Option B would take too long to finish, and the team’s knowledge of it does not change that. Total cost is clearly lower for A because it is ready.”
+A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.
+
+Option A is a ready-made commercial product that the team can configure. It has the required booking features and an export API (a way for another program to retrieve data). The supplier promises support for two years.
+Option B is an existing university application. The university owns its source code, and the team knows that code. It cannot yet create repeating bookings. There are no measurements of how it performs at the busiest times.
+Neither option has a reliable estimate of the full cost over its use, including support and later changes.
+
+The goal is a trial next term, not replacing the faculty's whole system. Recommend an option, a limited evaluation, or a hold.
+A colleague's draft recommendation — review it; do not copy it: “Choose Option A for the whole faculty next term. It already has all the booking features, so changing its settings will be enough. Two years of support is fine for a three-year trial: we can simply renew it. Finishing Option B would take too long; the team's knowledge of its code makes no difference. Option A clearly costs less overall because it is ready-made.”
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -42,7 +49,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-04T22:06:12.258Z
+BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-14T20:26:13.457Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
