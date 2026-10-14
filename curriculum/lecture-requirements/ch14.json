@@ -81,7 +81,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -89,18 +89,18 @@
    "tier": "core"
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "X01": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "resilience as service continuity",
    "answerKey": "a running backup is not a recovered service",
    "commonError": "Students equate resilience with redundancy. The definition is about continuing the critical service; make them define that service in one sentence first."
   },
   "X02": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "commonError": "Students merge recovery and reinstatement, and say the story is already in recovery. Recovery is not achieved while staff cannot sign in."
   },
@@ -109,7 +109,7 @@
    "tier": "core",
    "concept": "backups versus proven recovery",
    "answerKey": "an executed, recorded recovery of a stated version",
-   "commonError": "Students accept a backup inventory as proof of recovery. Ask for the executed recovery record, and ask which of our assets is critical: the identity service surprises them.",
+   "commonError": "Students accept a backup inventory as proof of recovery. Ask for the executed recovery record, and ask which asset the critical task cannot run without.",
    "concept2": "asset classification before tools",
    "answerKey2": "the required service sets the priorities",
    "question": "Which evidence distinguishes “we have backups” from “we can recover”?",
@@ -132,17 +132,29 @@
    ]
   },
   "X03": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "human dependency in recovery",
    "answerKey": "the specialist's availability, knowledge and authority",
    "commonError": "Students list only technical dependencies. The one specialist who can restore access is a dependency too: availability, knowledge and authority.",
    "sourceFigs": [
     23
+   ],
+   "lists": [
+    {
+     "source": 24,
+     "title": "Organizational resilience · slides 24–25",
+     "items": [
+      "The ability to respond: adapt processes and procedures to anticipated risks and detected threats",
+      "The ability to monitor: watch internal operations and the external environment for threats before they arise",
+      "The ability to anticipate: look beyond current operations to future events and changes",
+      "The ability to learn: learn from experience, especially from successful responses to adverse events"
+     ]
+    }
    ]
   },
   "CHECK1": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "recovery judged at the user boundary",
    "answerKey": "an authorized user completes the critical task on checked data",
@@ -150,21 +162,21 @@
    "question": "Which check shows recovery better than “the server process is running”?"
   },
   "X04": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "defensive layers that fail together",
    "answerKey": "shared credentials expose both copies",
    "commonError": "Students answer compromised credentials with another identical backup. Draw the slices and ask which hole runs through both: the shared identity service."
   },
   "X05": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "optional",
    "concept": "efficiency versus resilience",
    "answerKey": "cross-training when one absence blocks recovery",
    "commonError": "Students call redundancy good without a reason. Make them state the risk that justifies the training cost: one absent specialist blocks recovery."
   },
   "D14": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "optional",
    "concept": "systems approach to human error",
    "answerKey": "investigate interface, workload and training; propose a checkable change",
@@ -183,7 +195,7 @@
    "tier": "core",
    "concept": "softspots in survivability analysis",
    "answerKey": "essential and vulnerable component",
-   "commonError": "Students name the backup server as the softspot. The identity service is essential to the critical task and it is what failed; the absent specialist is a human softspot.",
+   "commonError": "Students name the backup server as the softspot. Ask which component the critical task cannot run without, and which one an attacker can reach. The absent specialist is a human softspot.",
    "lists": [
     {
      "source": 43,
@@ -212,11 +224,13 @@
    ]
   },
   "CHECK2": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
-   "concept": "independence of the second recovery path",
-   "answerKey": "shared credentials, data, dependency or specialist",
-   "commonError": "Pairs cannot name a fact that would defeat their chosen path. Ask whether the new path signs in through the same identity service."
+   "concept": "independence of the recovery data",
+   "answerKey": "the corrupted data copied by synchronisation",
+   "commonError": "Pairs assume any second copy is independent. Ask when the copy was taken, and whether the bad records were already in it.",
+   "question": "The second path restores from a copy synchronised after the bad records arrived. What does it still share with the first path?",
+   "answer": "The corrupted data. Synchronisation copied the bad records, so both paths would restore the same wrong state. The second path needs a copy from before the fault, checked for integrity."
   },
   "R18": {
    "minutes": 1.5,
@@ -227,14 +241,14 @@
    "answer": "A limited degraded mode can preserve the primary purpose with fewer dependencies. The deferred function and the restoration conditions must stay explicit."
   },
   "B01": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "continuity architecture",
    "answerKey": "data state, access paths, detection, transfer, authority and usability checks",
    "commonError": "Students think two servers on a diagram are a recovery plan. Write around the diagram what is missing: data state, access, detection, authority."
   },
   "R09": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "optional",
    "concept": "confidentiality during fallback",
    "answerKey": "access control, secure handling and reconciliation for the paper fallback",
@@ -244,31 +258,32 @@
    "minutes": 3,
    "tier": "core",
    "concept": "recovery without the assistant",
-   "answerKey": "independent identity route, exercised runbook, cross-trained person, rehearsal record",
+   "answerKey": "a rehearsal in which recovery succeeded without the assistant",
    "commonError": "Students let the assistant hold standing emergency credentials. It must not sit on the critical path; plan for the night it is down too.",
    "added": true,
-   "answer": "An independent emergency route to identity, with named, limited and audited authority. A versioned offline runbook that has been exercised. A second cross-trained person. A defined degraded mode. Integrity checks and reconciliation for fallback data. A rehearsal record in which recovery succeeded with the assistant unavailable. The assistant can help when it is up. It must not sit on the critical path or hold standing emergency credentials. This is one defensible answer; others can be defensible if their dependencies and limits are explicit."
+   "answer": "A rehearsal record in which recovery succeeded with the assistant unavailable. Before that rehearsal can pass, the plan needs a versioned offline runbook that has been exercised. It needs a second cross-trained person and a defined degraded mode. It needs integrity checks and reconciliation for fallback data. It needs an emergency access route with named, limited and audited authority. The assistant can help when it is up. It must not sit on the critical path or hold standing emergency credentials. This is one defensible answer; others can be defensible if their dependencies and limits are explicit."
   },
   "APPLY": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "take the assistant off the critical path",
    "commonError": "Students keep the assistant in the plan and add a backup copy. Ask who tells the users of the critical service what is degraded and for how long.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. Take the assistant off the critical path. Restore identity through an independent, audited emergency route. Tell the users of the critical service what is degraded and for how long."
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. Take the assistant off the critical path. Restore identity through an independent, audited emergency route. Tell the users of the critical service what is degraded and for how long.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "what has recovered",
    "answerKey": "nothing has recovered until an authorized user completes the task",
    "think": "Devices down. What has recovered, and what must still be restored?",
@@ -350,19 +365,20 @@
      "why": "Confuses a running process with a recovered service; treats the assistant as authority."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "independent recovery path",
-   "answerKey": "the assistant shares the runbook's holes and the identity service",
+   "answerKey": "the assistant shares the runbooks' assumptions",
    "think": "Compare two mechanisms: a separately controlled recovery path, or following the AI assistant's recovery steps. Which one would you choose?",
    "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
    "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
    "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
-   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. A shared dependency or a mismatched assumption can defeat a design that looks stronger. An assistant trained on the same runbooks shares their assumptions, so its holes line up with the plan's. That is the Swiss Cheese warning. A separately controlled, rehearsed path is more likely to fail for different reasons. That holds only if it does not use the same identity service.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. A shared dependency or a mismatched assumption can defeat a design that looks stronger. An assistant trained on the same runbooks shares their assumptions, so its holes line up with the plan's. That is the Swiss Cheese warning. A separately controlled path, rehearsed without the assistant, is more likely to fail for different reasons.",
    "rubric": {
     "criteria": [
      {
@@ -428,20 +444,21 @@
     ],
     "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
     "strong": {
-     "text": "A separately controlled, rehearsed recovery path, because it fails for different reasons than the primary plan. Its limit: it must not sign in through the same identity service. It costs rehearsal time and a second trained person.",
-     "why": "Links the mechanism to continuity, names the shared identity service as the limit, states the cost."
+     "text": "A separately controlled, rehearsed recovery path, because it fails for different reasons than the primary plan. Its limit: it helps only if it was rehearsed without the assistant. It costs rehearsal time and a second trained person.",
+     "why": "Links the mechanism to continuity, names the shared runbook assumptions as the limit, states the cost."
     },
     "weak": {
      "text": "Follow the assistant; it is faster and knows every runbook.",
      "why": "No link to the property, ignores that the assistant shares the runbooks' assumptions, no trade-off."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "plan and rehearse recovery with the assistant unavailable",
    "think": "The alternate data copy is available, but it depends on the same unavailable identity service. Staff sign in to the AI recovery assistant through that service too, and its instructions assume the primary copy. Does your first decision still hold?",
@@ -523,7 +540,8 @@
      "why": "Ignores that the assistant also needs the failed service; names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -691,11 +709,11 @@
    "kind": "figure"
   },
   "24": {
-   "cls": "full",
+   "cls": "slide",
    "unit": "X03"
   },
   "25": {
-   "cls": "full",
+   "cls": "slide",
    "unit": "X03"
   },
   "26": {
@@ -890,7 +908,7 @@
     "page": 5,
     "label": "14.1"
    },
-   "note": "Three factors, three threat types and the control examples; redundancy and diversity for cyber-resilience."
+   "note": "Four failure factors, three threat types and the control examples; redundancy and diversity for cyber-resilience."
   },
   {
    "topic": "The Mentcare resilience example: organisational policies instead of harder authentication",
@@ -982,7 +1000,146 @@
   "hints": {
    "bound": "An observable condition, something you would see, that ends the claim."
   },
-  "stress": "Ransomware encrypts the knowledge base. The only clean backup is three weeks old. The restored chatbot now states outdated fees and an old card-blocking number with full confidence."
+  "stress": "Ransomware encrypts the knowledge base. The only clean backup is three weeks old. The restored chatbot now states outdated fees and an old card-blocking number with full confidence.",
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "Critical service: card blocking after hours. The plan must work without the chatbot: a staffed phone line and an offline procedure. The claim ends if the knowledge base cannot be restored to a checked version. Action: the operations lead rehearses a night without the chatbot. Evidence: the rehearsal record, proposed. After the ransomware I revise: a three-week-old backup gives wrong fees, so answers stay offline until checked.",
+    "why": "Names the critical service and covers recovery without the AI. Gives an observable limit and an owner, and revises for stale data."
+   },
+   "weak": {
+    "text": "Resilience means having a backup of the chatbot, so the plan is to restore it quickly.",
+    "why": "Equates a backup with resilience; ignores the critical service, stale data and who acts."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+  }
  },
  "assignmentRubric": {
   "criteria": [

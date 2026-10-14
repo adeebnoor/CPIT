@@ -92,7 +92,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -100,7 +100,7 @@
    "tier": "core"
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "X01": {
@@ -113,7 +113,7 @@
    "answer": "Yes. The specification may leave out a hazardous condition. Conformance only supports the specified behaviour, not every condition of use."
   },
   "X02": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "optional",
    "concept": "four ways a reliable system is unsafe",
    "answerKey": "define the hazard first, then compare behaviour with the requirement",
@@ -154,7 +154,7 @@
    ]
   },
   "CHECK1": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "scope of test evidence",
    "answerKey": "only tested conditions are supported",
@@ -232,7 +232,7 @@
    "answer2": "The changed requirement and its hazard link, the reviewed design, the software version, the verification result and the responsible reviewer."
   },
   "CHECK2": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "independence of protection paths",
    "answerKey": "shared input, power, assumption or bypass",
@@ -253,7 +253,7 @@
    ]
   },
   "R18": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "optional",
    "concept": "scope of model checking",
    "answerKey": "the model, not the sensor",
@@ -281,7 +281,7 @@
    ]
   },
   "B01": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "safety case structure",
    "answerKey": "argument linking evidence to a scoped claim",
@@ -289,8 +289,8 @@
    "title": "A safety case connects evidence to a claim with limits"
   },
   "X10": {
-   "minutes": 2,
-   "tier": "core",
+   "minutes": 1.5,
+   "tier": "optional",
    "concept": "every path to the unsafe exit",
    "answerKey": "a separate cumulative limit",
    "commonError": "Students extend the single-command argument to repeated commands in their heads. Make them say the cumulative claim out loud; it was never written."
@@ -306,25 +306,26 @@
    "takeaway": "Every command passed its check, yet the total still left the modelled limit."
   },
   "APPLY": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "restrict assistant sequences until the cumulative limit is verified",
    "commonError": "Students ask the assistant to “be more careful”. Reject that: the control must be enforced outside the assistant, with its own verification.",
    "twist": true,
    "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. The cumulative limit must hold whatever proposes the commands. Until it is specified and verified, restrict or withdraw assistant sequences. Tell the operators why.",
-   "added": true
+   "added": true,
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "scope of the pilot evidence",
    "answerKey": "pilot record covers single commands only",
    "think": "Devices down. What claim does the pilot record support?",
@@ -406,12 +407,13 @@
      "why": "No limit on the claim, treats absence of incidents as evidence, names no test anyone could check."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "independent protective path",
    "answerKey": "a check that trusts the assistant shares its blind spot",
    "think": "Compare two mechanisms: a software-only check inside the controller, or a separate protective path that ignores the assistant. Which one would you choose?",
@@ -492,12 +494,13 @@
      "why": "No link to the cumulative property, no shared cause named, no trade-off."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "cumulative requirement outside the assistant with its own verification",
    "think": "The repeated-command mode let the total pass the modelled limit while each command stayed within its bound. The sequences came from the assistant, which found that many small commands raise throughput. Does your first decision still hold?",
@@ -579,7 +582,8 @@
      "why": "Ignores what the new fact breaks, puts the control inside the assistant, names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -1083,6 +1087,145 @@
  "aiAssignment": {
   "hints": {
    "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "Hazard: a pedestrian unseen in the path. Requirement: the shuttle stops when detection is degraded. The attendant stays until it is verified. The claim ends in rain or darkness, which the pilot never covered. Action: the safety manager adds a rain test campaign. Evidence: logged braking tests with dummies in rain, proposed. After the rain report I revise: the advisor is not a safety function.",
+    "why": "Starts from the hazard, writes a verifiable requirement, limits the claim to tested conditions, and revises with the new evidence."
+   },
+   "weak": {
+    "text": "Remove the attendant: 1,200 trips without a collision prove the shuttle is safe.",
+    "why": "Treats a clean pilot as proof for untested conditions; no hazard, requirement or verification."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
   }
  },
  "assignmentRubric": {

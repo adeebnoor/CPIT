@@ -108,7 +108,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -117,12 +117,12 @@
    "takeaway": "Five source sections, five measurable outcomes, one decision with limits."
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "FAULT": {
    "minutes": 1.5,
-   "tier": "core",
+   "tier": "optional",
    "concept": "fault, error and failure chain",
    "answerKey": "24:xx state error; missed transmission is the failure",
    "commonError": "Students answer “a bug” for all three terms. Have one student name the cause, one the state and one the lost service."
@@ -135,7 +135,7 @@
    "commonError": "Students treat a standby server as proof of fault tolerance. A design intention is not evidence that failover preserved the service."
   },
   "RELAV": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "availability versus reliability",
    "answerKey": "B has less downtime: 60 minutes versus 360",
@@ -160,7 +160,7 @@
    ]
   },
   "AVAIL": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "availability as a time budget",
    "answerKey": "99.9 per cent: one lost hour in 1,000",
@@ -180,7 +180,7 @@
   },
   "PROTECT": {
    "minutes": 1.5,
-   "tier": "core",
+   "tier": "optional",
    "concept": "replication versus protection",
    "answerKey": "identical copies share the software fault",
    "commonError": "Students trace the protection sensors and the control sensors as one path. Trace them separately and ask which service is deliberately stopped."
@@ -301,7 +301,7 @@
    "answer": "Accuracy = (40 + 931) / 1,000 = 97.1%. Phishing POFOD = 10 / 50 = 0.2 per phishing demand. False-alarm rate = 19 / 950 = 2.0%. Only the POFOD for the protection demand can support a protection claim. State it with its exposure (50 demands) and its profile (10% external traffic). Accuracy averages over messages that are not protection demands and hides the misses. With 50 demands the estimate is uncertain. A standard 95% interval for 10/50 runs from roughly 11% to 33%."
   },
   "REVISE": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "re-measure on the new profile before any protection claim",
@@ -324,15 +324,15 @@
    "answer": "Revise the profile and the representative test dataset before transferring the old measured ratio to the new traffic mix. Keep the claim limited while testing. Name the decision owner and reviewer. Disclose AI use and verify any calculation or generated tests independently. Do not mark a proposed test as completed evidence. For the classifier, the profile change is also a distribution shift. Re-measure its phishing POFOD on a representative external mix before claiming protection. If protection is reduced meanwhile, tell the users whose mail it screens."
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "metric that fits the service",
    "answerKey": "availability for the gateway; POFOD for the phishing demand",
    "think": "Devices down. Hold, restrict or release, and which metric supports that scope?",
@@ -414,12 +414,13 @@
      "why": "Uses the vendor's benchmark instead of the given facts; no metric, no denominator, no test."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "diversity in failure causes",
    "answerKey": "a rule-based check fails for different reasons than the classifier",
    "think": "Compare two mechanisms: an identical second server, or a second AI classifier as a diverse version. Which one would you choose?",
@@ -500,12 +501,13 @@
      "why": "No property named, no shared cause, no cost."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "the miss rate does not travel to the new traffic mix",
    "think": "External traffic changes from the assumed 10% to 60%. No representative result under that mix is supplied. The classifier was trained mostly on internal messages. Does your first decision still hold?",
@@ -587,7 +589,8 @@
      "why": "Ignores the profile change; names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -1186,6 +1189,145 @@
  "aiAssignment": {
   "hints": {
    "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "The metric is POFOD on deadline questions: 30 of 200 wrong, so 0.15 per demand. It does not cover Arabic dialect questions. Action: staff review every deadline answer until an Arabic evaluation passes, owned by the admissions lead. Evidence: a scored test set of 200 Arabic deadline questions, proposed. After the new mix I restrict: the profile changed.",
+    "why": "Picks the right metric and denominator and states what it does not cover. Names an owner and a test, and revises for the new profile."
+   },
+   "weak": {
+    "text": "The chatbot is 94% correct, so it can answer deadline questions alone.",
+    "why": "Uses overall accuracy instead of the demand that matters; no limit, no evidence, no owner."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
   }
  }
 }

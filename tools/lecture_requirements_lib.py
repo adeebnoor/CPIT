@@ -175,6 +175,15 @@ def student_texts(data: dict, story: list | None = None) -> list[tuple[str, str]
         add('aiAssignment.fact', f)
     for k, v in (A.get('hints') or {}).items():
         add(f'aiAssignment.hint.{k}', v)
+    ar = A.get('rubric') if isinstance(A.get('rubric'), dict) else {}
+    for c in ar.get('criteria', []):
+        add('aiAssignment.rubric.criterion', c.get('name'))
+        for lv in c.get('levels', []):
+            add('aiAssignment.rubric.level', lv[2] if isinstance(lv, list) and len(lv) > 2 else '')
+    for k in ('strong', 'weak'):
+        add(f'aiAssignment.rubric.{k}', (ar.get(k) or {}).get('text'))
+        add(f'aiAssignment.rubric.{k}.why', (ar.get(k) or {}).get('why'))
+    add('aiAssignment.rubric.other', ar.get('other'))
     r = data.get('roadmap') or {}
     for k in ('question', 'connection', 'inClass', 'deliverable', 'success'):
         add(f'roadmap.{k}', r.get(k))

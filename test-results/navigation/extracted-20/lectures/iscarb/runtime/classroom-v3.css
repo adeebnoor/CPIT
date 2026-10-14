@@ -256,3 +256,14 @@ dfn.gl[data-ar]:hover::after,dfn.gl[data-ar]:focus::after{content:attr(data-def)
 .study-list li{margin:6px 0}
 .study-list p{margin:2px 0}
 @media (max-width:1000px){.src-lists{grid-template-columns:1fr}dfn.gl:hover::after,dfn.gl:focus::after{left:auto;right:0}}
+
+/* req-v6 · second report: station transfer step, source figure links, AI assignment rubric */
+.station-transfer{margin:8px 0;padding:6px 12px;border:1px dashed var(--gold);border-radius:10px;background:var(--panel)}
+.station-transfer b{display:block;font-size:11px;letter-spacing:.08em;color:var(--gold)}
+.station-transfer span{display:block;font-weight:600;margin-top:2px}
+.station-transfer p{margin:2px 0 0}
+.src-figs .src-fig-row{display:flex;flex-wrap:wrap;gap:8px}
+.src-fig{display:flex;flex-direction:column;gap:2px;max-width:220px;font-size:12px;color:var(--teal)}
+.src-fig img{max-width:100%;max-height:120px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:6px}
+.aix-rubric table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+.aix-rubric th,.aix-rubric td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}

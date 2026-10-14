@@ -105,7 +105,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -113,18 +113,18 @@
    "tier": "core"
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "X01": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "dependability properties",
    "answerKey": "reliability and safety, not availability alone",
    "commonError": "Students answer “availability” because the service responds. Ask which property covers a correct result, and which covers harm."
   },
   "X02": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "failure mechanism before the fix",
    "answerKey": "an observation that separates two hypotheses",
@@ -133,11 +133,12 @@
   },
   "X07": {
    "minutes": 1.5,
-   "tier": "core",
+   "tier": "optional",
    "concept": "fault, error and failure chain",
    "answerKey": "fault activated, wrong state, visible deviation",
    "commonError": "Students write “the system failed because of a software error”, which names two terms and explains neither. Correct the order: fault, error, failure.",
-   "added": true
+   "added": true,
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "X02A": {
    "minutes": 1.5,
@@ -147,7 +148,7 @@
    "commonError": "Students merge tolerance and recovery. Tolerance keeps service going while faults occur; recovery restores service after a failure."
   },
   "X03": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core",
    "concept": "layers of the sociotechnical system",
    "answerKey": "a correct controller inside an undependable service",
@@ -158,14 +159,15 @@
    ]
   },
   "CHECK1": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "property that failed",
    "answerKey": "reliability failed; safety depends on harm",
    "commonError": "Students answer “availability” for a reachable service with wrong results. Ask which property is about a correct result.",
    "added": true,
    "takeaway": "A reachable service that returns the wrong result has failed in reliability, not availability.",
-   "question": "A service is reachable but returns the wrong result. Which property failed?"
+   "question": "A service is reachable but returns the wrong result. Which property failed?",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "R08": {
    "minutes": 2,
@@ -257,14 +259,15 @@
    "commonError": "Students answer “we would have tested more”. Ask which of three they mean: a named approver, an exercised rollback, or a staged release."
   },
   "CHECK2": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "what a second identical server protects against",
    "answerKey": "independent hardware faults only",
    "commonError": "Students say the second server doubles reliability. Ask which failures it shares with the first: the faulty requirements.",
    "added": true,
    "takeaway": "A second identical server protects against independent hardware faults, not against the requirements both share.",
-   "question": "Two identical servers share the same faulty requirements. What does the second server protect against?"
+   "question": "Two identical servers share the same faulty requirements. What does the second server protect against?",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "X06": {
    "minutes": 2,
@@ -388,10 +391,11 @@
    ],
    "takeaway": "A decision with limits needs evidence, a stated limit and an owner, not another opinion.",
    "answer": "One defensible request is an independently verified pressure reading matched to the alarm and switch-over log. It helps separate a real pressure excursion from a sensor fault. Pending that evidence, state a hold or revert decision with its owner and the condition for resuming operation. This is one defensible approach, not the only acceptable decision. Separate facts from requested evidence and name the limit of the claim. Name who must be told: the next shift, the utility and, if drinking water could be affected, the public. The detector may help operators rank alarms. It must not by itself suppress protection. Count it as evidence only with an independent input and plant-specific evidence that its scores mean what they claim.",
-   "title": "Apply it · defend one decision with limits"
+   "title": "Apply it · defend one decision with limits",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "CHALLENGE": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "agreement from one transmitter is not independence",
@@ -412,18 +416,19 @@
      "Limit the claim, request an independently verified reading and name who accepts the revised scope."
     ]
    ],
-   "answer": "The two readings share one cause, so agreement cannot establish independence. A defensible revision withholds an unqualified approval. It requests an independently verified pressure reading matched to the logs. Name the observation that could change that decision and a human reviewer. When AI is used, its draft is not completed verification evidence. The detector's 0.91 adds no independent evidence either: it reads the same transmitter. Remove it from the evidence for this claim, or give it an independent input, and say so in the revision. Other decisions with limits can be defensible if their assumptions are explicit. Saying plainly what changed in your reasoning is part of the answer, not a weakness in it."
+   "answer": "The two readings share one cause, so agreement cannot establish independence. A defensible revision withholds an unqualified approval. It requests an independently verified pressure reading matched to the logs. Name the observation that could change that decision and a human reviewer. When AI is used, its draft is not completed verification evidence. The detector's 0.91 adds no independent evidence either: it reads the same transmitter. Remove it from the evidence for this claim, or give it an independent input, and say so in the revision. Other decisions with limits can be defensible if their assumptions are explicit. Saying plainly what changed in your reasoning is part of the answer, not a weakness in it.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "evidence versus inference",
    "answerKey": "the detector's label is a hypothesis, not evidence",
    "think": "Devices down. Which evidence separates a real pressure excursion from a sensing fault, and does the AI label count?",
@@ -505,12 +510,13 @@
      "why": "Treats an inference as evidence; the upgrade is a hypothesis presented as a fact."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "diversity in input, not only algorithm",
    "answerKey": "a second transmitter is diverse in sensing; the detector may not be",
    "think": "Compare two mechanisms: a physically separate second transmitter, or the AI detector as a diverse check. Which one would you choose?",
@@ -591,12 +597,13 @@
      "why": "Confuses algorithm diversity with input diversity; no limit and no trade-off."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "three readings of one transmitter count as one",
    "think": "Two nominally separate readings use the same transmitter and power supply. The vendor's notes show the AI detector scores the signal from that same transmitter. Does your first decision still hold?",
@@ -678,7 +685,8 @@
      "why": "Ignores the shared transmitter; names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -1062,6 +1070,145 @@
    "bound": "An observable condition, something you would see, that ends the claim."
   },
   "scenario": "A hospital adds an AI dose-check assistant to its medication cabinets. Before a nurse dispenses a drug, the assistant flags doses it predicts are unusual. The pharmacy's rule engine also checks each dose against the drug library. Management wants to report that dispensing is now “highly dependable”.",
-  "stress": "An audit finds that the AI assistant and the rule engine both read the same drug-library file. That file lists one high-risk drug in the wrong unit. Both checks agreed that a tenfold overdose was normal."
+  "stress": "An audit finds that the AI assistant and the rule engine both read the same drug-library file. That file lists one high-risk drug in the wrong unit. Both checks agreed that a tenfold overdose was normal.",
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "Claim: dispensing is not shown to be highly dependable. Both checks read the same drug library, so they are not independent. The claim ends if a library error reaches a dispensed dose. Action: the pharmacy lead adds a second, separately maintained unit check. Evidence: a test log with a planted wrong-unit entry, proposed. After the audit I revise: the two checks share one cause.",
+    "why": "Names common cause and independence, gives an observable limit, an owner and checkable evidence, and revises with a reason."
+   },
+   "weak": {
+    "text": "The system is dependable because no patient was harmed in three months and both checks passed the vendor tests.",
+    "why": "Treats absence of harm and vendor tests as proof; no limit, no owner, ignores the shared library."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+  }
  }
 }

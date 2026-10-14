@@ -51,3 +51,16 @@ Authored data: `curriculum/lecture-requirements/` (one JSON per lecture, applied
   20% before the slide scrolls.
 - The glossary wrapper skips the case strip, code, buttons and links. Definitions appear inline only in modals
   (stations, quiz); on slides they appear in the **NEW TERMS** strip and on hover.
+
+## Second report (14 October 2026) · Chapter 14 fix list, applied to every lecture
+
+| Item | What changed |
+|---|---|
+| TIME-2, TIME-4 | Stations are think points, so all 27 are **core**. Time model, stated in the time rule shown in the presenter notes: station and vote minutes are **separate** from slide minutes. A checkpoint or twist slide keeps 1 minute to show its question; its station adds 3 minutes (the 30 + 60 + 90 second timer), 3.5 when it carries the transfer step. Plain concept slides take 1.5 minutes. Core totals are 41.5–42.5 of the 42.5 allowed; the least central slides are optional (course additions first). The optional extras after slide 19 are a 7-minute optional activity. The checker fails any optional station. |
+| COV-2, COV-4 | `sourceFigs` is now rendered: a **FROM THE SOURCE · FIGURE** box shows the source vector when one exists, otherwise a link to that slide in the source ledger. Ch14 X03 also shows Hollnagel's four characteristics with their definitions (source slides 24–25). |
+| studyList (Ch14) | Corrected to **four** cybersecurity failure factors (source slide 11, X02A). |
+| RUB-1, RUB-2, RUB-4, RUB-5 | Every AI assignment has a 5-point rubric (5 criteria × 4 levels: 1, 0.75, 0.5, 0), a strong and a weak example with reasons, and the other-answer rule. It is open and placed **before** the commit button. The checker covers it. |
+| CASE-3 | The first station after the transfer slide carries the transfer case as a 30-second step; its discussion shows the transfer answer. |
+| CASE-2 (Ch14) | The identity service was the answer to four questions. CHECK2 now asks what a synchronised copy still shares (the corrupted data), station 2 turns on the runbooks' shared assumptions, and AISYS on the rehearsal record. The X06 and X02A common-error notes no longer point to the identity service. |
+| LANG-2 | The station field label **WARRANT** is now **REASON · why the mechanism supports your claim**. The checker scans field labels. |
+| KEEP-6 | Every course-added slide carries a source label: "Course addition · not from the textbook · applies the chapter to the case". The checker requires it. |

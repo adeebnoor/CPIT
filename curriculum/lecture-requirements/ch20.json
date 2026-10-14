@@ -90,7 +90,7 @@
  },
  "slides": {
   "TITLE": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   },
   "MAP": {
@@ -98,7 +98,7 @@
    "tier": "core"
   },
   "START": {
-   "minutes": 2,
+   "minutes": 1.5,
    "tier": "core"
   },
   "X01": {
@@ -173,7 +173,7 @@
    "commonError": "Students trust a correct interface specification as a guarantee. Ask who can change the meaning behind it without telling anyone."
   },
   "CHECK1": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "what the dashboard can promise",
    "answerKey": "its own display, validation and fallback",
@@ -228,7 +228,7 @@
    "commonError": "Students record only the result. Ask which participant versions and data assumptions the result depended on."
   },
   "CHECK2": {
-   "minutes": 2,
+   "minutes": 1,
    "tier": "core",
    "concept": "stale versus unavailable",
    "answerKey": "old data shown as current hides uncertainty",
@@ -312,25 +312,26 @@
    "answer": "Not that the classifications are correct. The dashboard cannot inspect or version the model. It can promise to show each item with its source, timestamp and the producer's declared model version. It can flag detected shifts, such as a sudden change in the share of high-severity incidents. It can label affected data as unverified. It can seek an agreement that participants announce model changes as interface changes, with a trial period. The promise is limited to what the dashboard observes. Governance covers the rest."
   },
   "APPLY": {
-   "minutes": 3,
+   "minutes": 1,
    "tier": "core",
    "concept": "revising under new evidence",
    "answerKey": "label freshness and model version; mark changed data unverified",
    "commonError": "Students fix the schedule and miss the model change. Same interface shape does not mean the same meaning.",
    "twist": true,
    "added": true,
-   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the AI-produced feed, show its declared model version. Flag data produced since the change as unverified until the agency confirms how its classifications changed."
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the AI-produced feed, show its declared model version. Flag data produced since the change as unverified until the agency confirms how its classifications changed.",
+   "sourceLabel": "Course addition · not from the textbook · applies the chapter to the case"
   },
   "END": {
-   "minutes": 3,
+   "minutes": 2,
    "tier": "core"
   }
  },
  "stations": [
   {
    "no": 1,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3.5,
+   "tier": "core",
    "concept": "promise what you observe",
    "answerKey": "source, timestamp and declared model version, not correctness",
    "think": "Devices down. What useful service can be promised without pretending to control every owner?",
@@ -412,12 +413,13 @@
      "why": "Promises what other owners control; no evidence."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": true
   },
   {
    "no": 2,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "shape validation versus content monitoring",
    "answerKey": "monitoring can flag a shift but not prove which classification is right",
    "think": "Compare two mechanisms: validating feed shape only, or also monitoring each feed's content for sudden shifts and labelling it. Which one would you choose?",
@@ -498,12 +500,13 @@
      "why": "Equates schema with meaning; no limit, no trade-off."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   },
   {
    "no": 3,
-   "minutes": 4,
-   "tier": "optional",
+   "minutes": 3,
+   "tier": "core",
    "concept": "revising after the twist",
    "answerKey": "label what the dashboard cannot vouch for and agree how model changes are announced",
    "think": "One feed moves to a slower update schedule while keeping the same interface shape. The same agency also changed its AI model version. The shape is unchanged, but incidents are now classified differently. Does your first decision still hold?",
@@ -585,7 +588,8 @@
      "why": "Ignores the meaning change; names nobody."
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
-   }
+   },
+   "transfer": false
   }
  ],
  "quiz": [
@@ -1072,7 +1076,146 @@
   "hints": {
    "bound": "An observable condition, something you would see, that ends the claim."
   },
-  "scenario": "A city dashboard coordinates ambulances from three independent owners: two public hospitals and a private ambulance company. Each owner runs its own AI system to rank incoming calls by urgency. Each publishes its ranked queue to the dashboard."
+  "scenario": "A city dashboard coordinates ambulances from three independent owners: two public hospitals and a private ambulance company. Each owner runs its own AI system to rank incoming calls by urgency. Each publishes its ranked queue to the dashboard.",
+  "rubric": {
+   "criteria": [
+    {
+     "name": "FIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the chapter concept that decides the case and shows why it fits these facts."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names the right concept, with only a partial link to the facts."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names a concept but does not connect it to the case."
+      ],
+      [
+       0,
+       "Missing",
+       "No chapter concept, or the wrong one."
+      ]
+     ]
+    },
+    {
+     "name": "BOUND",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "States an observable condition that would end the claim."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a condition, but nobody could easily observe it."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Gives a vague limit, such as “if it fails”."
+      ],
+      [
+       0,
+       "Missing",
+       "Gives no limit."
+      ]
+     ]
+    },
+    {
+     "name": "ACT + EVIDENCE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "One concrete action with an owner, and evidence another engineer could inspect even if the AI is wrong."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "A concrete action, but the evidence is weak or its status is unclear."
+      ],
+      [
+       0.5,
+       "Developing",
+       "General advice, or evidence that relies on the AI's own output."
+      ],
+      [
+       0,
+       "Missing",
+       "No action and no evidence."
+      ]
+     ]
+    },
+    {
+     "name": "REFIT",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Uses the new information, names the assumption it broke and justifies retain, revise or replace."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Uses the new information but does not name the broken assumption."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Keeps or changes the answer without a reason."
+      ],
+      [
+       0,
+       "Missing",
+       "Ignores the new information."
+      ]
+     ]
+    },
+    {
+     "name": "OWNER + AI USE",
+     "levels": [
+      [
+       1,
+       "Strong",
+       "Names the role that accepts the risk and who must be told. Declares any AI help and how it was checked."
+      ],
+      [
+       0.75,
+       "Adequate",
+       "Names a role, but not who must be told, or the AI declaration is incomplete."
+      ],
+      [
+       0.5,
+       "Developing",
+       "Names “the team” or “the system” as owner."
+      ],
+      [
+       0,
+       "Missing",
+       "No owner and no AI declaration."
+      ]
+     ]
+    }
+   ],
+   "marks": "5 points · 1 per criterion",
+   "strong": {
+    "text": "The dashboard can promise only what it observes: each owner's queue, its time and its declared model version. It must not merge the rankings. The promise ends if one owner's share of urgent calls shifts without notice. Action: the city lead seeks an agreement to announce model changes. Evidence: a per-owner baseline with a drift alert, proposed. After the weighting change I replace the merged list with per-owner queues.",
+    "why": "Separates what the dashboard controls from what it receives, names an observable limit, an owner and evidence, and revises."
+   },
+   "weak": {
+    "text": "The dashboard is in charge, so it sorts all calls by urgency score.",
+    "why": "Assumes scores mean the same across owners and that display gives authority."
+   },
+   "other": "they use a chapter concept, rest on the given facts and name evidence someone else can check. A different verdict that meets these conditions earns the same marks as the strong example."
+  }
  },
  "assignmentRubric": {
   "criteria": [
