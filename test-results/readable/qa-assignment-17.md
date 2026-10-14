@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-14  
-**Commit ID:** d9df9bf5-4f5b-4d91-ba17-26ffb3f10219  
-**Part A committed:** 2026-10-14T21:14:45.125Z  
-**STRESS revealed:** 2026-10-14T21:14:45.136Z
+**Commit ID:** d3d246fe-0e70-4146-93e2-ef45dbd2fdff  
+**Part A committed:** 2026-10-14T21:59:57.375Z  
+**STRESS revealed:** 2026-10-14T21:59:57.386Z
 
 ## Scenario
 A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.
@@ -51,7 +51,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-14T21:14:44.924Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-14T21:59:57.209Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

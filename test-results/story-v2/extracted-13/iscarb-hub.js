@@ -1,6 +1,12 @@
 (()=>{'use strict';
 const prefs={get(key){try{return localStorage.getItem(key)}catch{return null}},set(key,value){try{localStorage.setItem(key,value);return true}catch{return false}}};
-document.querySelectorAll('.review-check[data-review-chapter]').forEach(check=>{const chapter=check.dataset.reviewChapter,key='iscarb-ch'+chapter+'-reviewed',status=check.closest('.lesson')?.querySelector('.review-status');check.checked=prefs.get(key)==='1';const solved=(()=>{try{const x=JSON.parse(localStorage.getItem('iscarb:classroom:ch'+chapter+':v3')||'null');return x?.state?.fields?.gate_solved==='1';}catch(e){return false;}})();/* GATE-1: a chapter is complete only after its transfer case is solved in the lecture */if(!solved&&!check.checked){check.disabled=true;}const render=()=>{if(status)status.textContent=check.disabled?'Solve the transfer case in this chapter’s lecture first; then you can mark it as reviewed.':check.checked?'Marked as reviewed on this device.':'Your review status stays on this device.'};render();check.addEventListener('change',()=>{if(prefs.set(key,check.checked?'1':'0'))render();else if(status)status.textContent='Browser storage is unavailable. This mark will reset when the page closes.'})});
+/* GATE-1: a chapter counts as reviewed only when its transfer case is solved in the lecture (same browser).
+   The box is re-checked whenever this page regains focus or another tab saves lecture progress. */
+const transferSolved=chapter=>{try{const x=JSON.parse(localStorage.getItem('iscarb:classroom:ch'+chapter+':v3')||'null');return x?.state?.fields?.gate_solved==='1';}catch(e){return false;}};
+const reviewChecks=[...document.querySelectorAll('.review-check[data-review-chapter]')];
+const syncReview=()=>{reviewChecks.forEach(check=>{const chapter=check.dataset.reviewChapter,key='iscarb-ch'+chapter+'-reviewed',status=check.closest('.lesson')?.querySelector('.review-status'),solved=transferSolved(chapter),marked=prefs.get(key)==='1';check.disabled=!solved;check.checked=solved&&marked;check.closest('.lesson')?.classList.toggle('transfer-open',!solved);if(status)status.textContent=!solved?(marked?'Your earlier mark is kept, but it counts only after you solve the transfer case in this chapter’s lecture.':'Solve the transfer case in this chapter’s lecture first; then you can mark it as reviewed.'):check.checked?'Marked as reviewed on this device.':'Transfer case solved. You can now mark this chapter as reviewed.';});document.dispatchEvent(new Event('iscarb:review-sync'));};
+reviewChecks.forEach(check=>check.addEventListener('change',()=>{const chapter=check.dataset.reviewChapter,key='iscarb-ch'+chapter+'-reviewed',status=check.closest('.lesson')?.querySelector('.review-status');if(!transferSolved(chapter)){check.checked=false;syncReview();return;}if(prefs.set(key,check.checked?'1':'0'))syncReview();else if(status)status.textContent='Browser storage is unavailable. This mark will reset when the page closes.'}));
+syncReview();addEventListener('storage',e=>{if(!e.key||/^iscarb(:classroom:ch|-ch)/.test(e.key))syncReview()});addEventListener('pageshow',syncReview);addEventListener('focus',syncReview);document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncReview()});
 const legacy=document.getElementById('reviewed'),legacyStatus=document.getElementById('reviewStatus');if(legacy){const key='iscarb-ch10-v7-reviewed';legacy.checked=prefs.get(key)==='1';const render=()=>{if(legacyStatus)legacyStatus.textContent=legacy.checked?'Marked as reviewed on this device.':'Your review status stays on this device.'};render();legacy.addEventListener('change',()=>{if(prefs.set(key,legacy.checked?'1':'0'))render()})}
 })();
 
@@ -14,6 +20,7 @@ const legacy=document.getElementById('reviewed'),legacyStatus=document.getElemen
   else if(link){link.href='course-resources.html#outcomes';link.textContent='All chapters reviewed · See the outcome map'}
  };
  document.querySelectorAll('.review-check').forEach(x=>x.addEventListener('change',render));
+ document.addEventListener('iscarb:review-sync',render);
  render();
 })();
 

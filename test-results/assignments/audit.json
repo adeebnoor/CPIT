@@ -1,0 +1,81 @@
+{
+ "checked": "2026-10-14",
+ "pass": 109,
+ "fail": 0,
+ "assignments": [
+  {
+   "assignment": 1,
+   "chapter": 10,
+   "criteria": 4,
+   "points": 4,
+   "examples": 0,
+   "bound": "frozen (lecture only)",
+   "note": "no per-criterion examples (frozen page)"
+  },
+  {
+   "assignment": 2,
+   "chapter": 11,
+   "criteria": 5,
+   "points": 5,
+   "examples": 0,
+   "bound": "frozen (lecture only)",
+   "note": "no per-criterion examples (frozen page)"
+  },
+  {
+   "assignment": 3,
+   "chapter": 12,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  },
+  {
+   "assignment": 4,
+   "chapter": 13,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  },
+  {
+   "assignment": 5,
+   "chapter": 14,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  },
+  {
+   "assignment": 6,
+   "chapter": 15,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  },
+  {
+   "assignment": 7,
+   "chapter": 16,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  },
+  {
+   "assignment": 8,
+   "chapter": 17,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  },
+  {
+   "assignment": 9,
+   "chapter": 20,
+   "criteria": 5,
+   "points": 5,
+   "examples": 5,
+   "bound": "in export"
+  }
+ ]
+}

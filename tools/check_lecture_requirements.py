@@ -108,6 +108,7 @@ def load_real() -> dict:
 class Report:
     def __init__(self):
         self.rows: dict[int, dict[str, tuple[str, list[str]]]] = {}
+        self.assignments: list[dict] = []
     def set(self, ch, code, ok, details=None):
         status = ('PASS' if ok else ('FAIL' if LEVEL[code] == 'must' else 'WARN')) if LEVEL[code] != 'manual' else 'MANUAL'
         self.rows.setdefault(ch, {})[code] = (status, details or [])
@@ -471,7 +472,7 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
 
     # ---- COMMIT / REAL / GATE / BOUND (fourth review) ----
     need = lambda *xs: [f'runtime lacks {x}' for x in xs if x not in runtime]
-    bad = need('function youWrote', 'You wrote:', 'you-wrote-slot')
+    bad = need('function youWrote', 'You wrote:', 'you-wrote-slot', 'function fieldLabel', "'## '+fieldLabel(k)")
     R.set(ch, 'COMMIT-1', not bad, bad)
     bad = need('function commitReady', 'data-commit-for', 'function skipBtn', 'You did not write a decision', 'stationReady')
     R.set(ch, 'COMMIT-2', not bad, bad)
@@ -505,8 +506,8 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
     if len(opts) < 2 or len(why) != len(opts) or not isinstance(chk.get('answer'), int) or not (0 <= chk['answer'] < len(opts)):
         bad.append('transfer.check needs options, an answer index and one explanation per option')
     bad += need('function gateOn', 'function gateSolved', 'gate_solved')
-    if 'gate_solved' not in hub_js or 'Solve the transfer case' not in hub_js:
-        bad.append('the hub does not hold the review checkbox until the transfer case is solved')
+    if 'gate_solved' not in hub_js or 'Solve the transfer case' not in hub_js or 'check.checked=solved&&marked' not in hub_js or "addEventListener('storage'" not in hub_js:
+        bad.append('the hub must count a chapter only when its transfer case is solved (earlier marks included) and re-check when lecture progress changes')
     R.set(ch, 'GATE-1', not bad, bad)
     bad = need('data-gate-line', 'gate_line')
     R.set(ch, 'GATE-2', not bad, bad)
@@ -549,6 +550,16 @@ def check_assignments(R: Report, cfg: dict):
         ch = int(a['chapter'])
         p = ROOT / a['path']
         s = p.read_text(encoding='utf-8')
+        rt = s[s.find('id="rubric-heading"'):]
+        rt = rt[:rt.find('</table>')]
+        names = re.findall(r'<th scope="row">([^<]+)</th>', rt)
+        tot = re.search(r'How your work is assessed · ([\d.]+) points', s)
+        ex = s[s.find('id="rubricExamples"'):] if 'id="rubricExamples"' in s else ''
+        ci = s.find('id="commitBtn"') if 'id="commitBtn"' in s else s.find('Review &amp; commit')
+        R.assignments.append({'no': len(R.assignments) + 1, 'chapter': ch, 'criteria': len(names), 'points': tot.group(1) if tot else '?',
+                              'levels': all(all(f'<b>{l}</b>' in rt[rt.find(n):][:rt[rt.find(n):].find('</tr>')] for l in ('1:', '0.75:', '0.5:', '0:')) for n in names) and '<details class="levels">' not in rt,
+                              'before': 0 <= s.find('id="rubric-heading"') < ci, 'examples': ex.count('data-criterion='), 'other': 'Other answers are accepted when' in ex,
+                              'bound': BOUND_MARK in s, 'frozen': ch < cfg.get('assignmentRubricFromChapter', 12)})
         if ch < cfg.get('assignmentRubricFromChapter', 12):
             continue
         bad1, bad2, bad4, bad5 = [], [], [], []
@@ -557,6 +568,20 @@ def check_assignments(R: Report, cfg: dict):
             bad1.append('rubric table missing')
         if 'Partial credit' not in s:
             bad1.append('rubric levels (partial credit) missing')
+        table = s[s.find('id="rubric-heading"'):]
+        table = table[:table.find('</table>')]
+        for c in re.findall(r'<th scope="row">([^<]+)</th>', table):
+            row = table[table.find(f'<th scope="row">{c}</th>'):]
+            row = row[:row.find('</tr>')]
+            got = [l for l in ('1:', '0.75:', '0.5:', '0:') if f'<b>{l}</b>' in row]
+            if len(got) != 4:
+                bad1.append(f'{c}: levels {got} (need 1 · 0.75 · 0.5 · 0 with descriptions)')
+        if '<details class="levels">' in table:
+            bad5.append('partial-credit levels are folded closed; the student must see every level before submitting')
+        total = re.search(r'How your work is assessed · ([\d.]+) points', s)
+        pts = [float(x) for x in re.findall(r'· ([\d.]+) points?</th>', table)]
+        if not total or abs(sum(pts) - float(total.group(1))) > 1e-9:
+            bad1.append(f'criterion points {pts} do not add up to the stated total')
         if 'id="rubricExamples"' not in s:
             bad2.append('rubricExamples block missing')
         else:
@@ -591,7 +616,16 @@ def write_status(R: Report, grade_note: str) -> None:
     for c in codes:
         cells = [R.rows[ch].get(c, ('—', []))[0] for ch in sorted(R.rows)]
         out.append(f'| {c} | {TITLES[c]} | {LEVEL[c]} | ' + ' | '.join(cells) + ' |')
-    out += ['', '## Acceptance list per lecture', '']
+    out += ['', '## Assessed assignment pages', '',
+            'Static check of every assessed page; the browser audit (`tools/check-assignment-pages.cjs`, results in `test-results/assignments/audit.json`) repeats it on the rendered pages at 1366 and 390 px.', '',
+            '| Assignment | Chapter | Criteria | Points | All levels visible (1 · 0.75 · 0.5 · 0) | Rubric before commit | Strong/weak examples | Other answers | Boundary sentence in export |',
+            '|---|---|---|---|---|---|---|---|---|']
+    yn = lambda b: 'yes' if b else 'no'
+    for a in R.assignments:
+        fz = ' (frozen)' if a['frozen'] else ''
+        out.append(f"| A{a['no']}{fz} | {a['chapter']} | {a['criteria']} | {a['points']} | {yn(a['levels'])} | {yn(a['before'])} | "
+                   f"{a['examples'] or ('—' if a['frozen'] else 'no')} | {yn(a['other']) if not a['frozen'] else '—'} | {yn(a['bound']) if not a['frozen'] else 'lecture only'} |")
+    out += ['', 'Assignments 1–2 were published and submitted before the review; they are kept unchanged.', '', '## Acceptance list per lecture', '']
     for ch in sorted(R.rows):
         fails = [f'{c}: {"; ".join(d[:3])}' for c, (st, d) in R.rows[ch].items() if st == 'FAIL']
         warns = [f'{c}: {"; ".join(d[:3])}' for c, (st, d) in R.rows[ch].items() if st == 'WARN']
