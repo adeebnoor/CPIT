@@ -64,3 +64,13 @@ Authored data: `curriculum/lecture-requirements/` (one JSON per lecture, applied
 | CASE-2 (Ch14) | The identity service was the answer to four questions. CHECK2 now asks what a synchronised copy still shares (the corrupted data), station 2 turns on the runbooks' shared assumptions, and AISYS on the rehearsal record. The X06 and X02A common-error notes no longer point to the identity service. |
 | LANG-2 | The station field label **WARRANT** is now **REASON · why the mechanism supports your claim**. The checker scans field labels. |
 | KEEP-6 | Every course-added slide carries a source label: "Course addition · not from the textbook · applies the chapter to the case". The checker requires it. |
+
+## Third review (14 October 2026) · the four remaining items
+
+| Item | What changed |
+|---|---|
+| CASE-3 | A class vote held on the transfer slide now asks the **transfer case** itself (Ch14 X02: the ambulance watchdog timer). The vote is labelled "transfer case" and its counts go into the class-evidence export under the transfer question. The checker requires `transfer.vote` whenever a vote sits on the transfer slide. |
+| CASE-2 (Ch14) | Station 3 now turns on dependency order: restore identity through the audited emergency route before using the copy. The AI assistant remains the subject of station 2, AISYS and APPLY **by design** (the course-added AI thread), but each has a different answer element: the runbooks' shared assumptions, a rehearsal record, and taking the assistant off the critical path. |
+| RUB-5 | The in-lecture AI challenge says "Practice only · not graded · this is not Assignment N" and names the graded assignment and its points (e.g. Assignment 5, 5 points) as a separate case on its own page. |
+| TIME-1 | A station's timer equals its budget: 180 s for 3 minutes, 210 s for the station that carries the 30-second transfer step. The checker compares them. Actual durations are logged at the close slide in presenter mode (TIME-6); recalibrate the 1.5-minute concept slides after the first deliveries. |
+| TIME-2 (Ch10, Ch11) | These two lectures are not story lectures and have no class vote, so the two 3-minute votes were removed from their plans. The freed time returns slides to core: Ch10 has no optional slide (42 min); Ch11 keeps PROFILE optional (41.5 min). |

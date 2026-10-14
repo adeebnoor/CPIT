@@ -122,14 +122,14 @@
   },
   "FAULT": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "fault, error and failure chain",
    "answerKey": "24:xx state error; missed transmission is the failure",
    "commonError": "Students answer “a bug” for all three terms. Have one student name the cause, one the state and one the lost service."
   },
   "MANAGE": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "avoid, detect, tolerate",
    "answerKey": "analyzer detects; standby tolerates if service continues",
    "commonError": "Students treat a standby server as proof of fault tolerance. A design intention is not evidence that failover preserved the service."
@@ -180,14 +180,14 @@
   },
   "PROTECT": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "replication versus protection",
    "answerKey": "identical copies share the software fault",
    "commonError": "Students trace the protection sensors and the control sensors as one path. Trace them separately and ask which service is deliberately stopped."
   },
   "SELFCHECK": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "what a comparator establishes",
    "answerKey": "a mismatch, not which channel is right",
    "commonError": "Students read the status line as the result line. The comparator reports disagreement; the architecture must decide what happens next."
@@ -415,7 +415,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   },
   {
    "no": 2,
@@ -502,7 +503,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": true
+   "transfer": true,
+   "seconds": 210
   },
   {
    "no": 3,
@@ -590,7 +592,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   }
  ],
  "quiz": [
@@ -618,22 +621,7 @@
    "answerKey": "review the profile before transferring the claim"
   }
  ],
- "activities": [
-  {
-   "id": "VOTE2",
-   "label": "Class vote · Act 2",
-   "at": "REQ",
-   "minutes": 3,
-   "tier": "core"
-  },
-  {
-   "id": "VOTE4",
-   "label": "Class vote · Act 4",
-   "at": "CODE1",
-   "minutes": 3,
-   "tier": "core"
-  }
- ],
+ "activities": [],
  "coverage": {
   "1": {
    "cls": "no",
