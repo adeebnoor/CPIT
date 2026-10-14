@@ -33,7 +33,7 @@
  "lectures": {
   "10": {
    "path": "lectures/iscarb/Ch10-Dependable-Systems.html",
-   "lecture_data_sha256": "0524174c7dad22f6c51325a4d42b10ab73298cd04601ce227631255bf37c2e80",
+   "lecture_data_sha256": "a8ab7a332b880e3434e65e291cfdd326241b67960dc7175e396cf998017a2632",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -59,7 +59,7 @@
   },
   "11": {
    "path": "lectures/iscarb/Ch11-Reliability-Engineering.html",
-   "lecture_data_sha256": "122791a9a319ea06674f66dd6a42648b394ec8ac2e43b7473f11e730bfee630f",
+   "lecture_data_sha256": "563f708114e0fcb5b991ca3c26b5f79ee7abbc4915ddbe178ad24d2ffd8bca07",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -85,7 +85,7 @@
   },
   "12": {
    "path": "lectures/iscarb/Ch12-Safety-Engineering.html",
-   "lecture_data_sha256": "8c9a50438718de14055a445f3c1ce8511023acae8ede710b5724ed1b5f333f05",
+   "lecture_data_sha256": "d6f509e93c4da1808f37f4b2d2f94ebf2e5fecde76ae5402bddb828479f51515",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -111,7 +111,7 @@
   },
   "13": {
    "path": "lectures/iscarb/Ch13-Security-Engineering.html",
-   "lecture_data_sha256": "331d4ea20f4865249e75f7b0255ad3b3333d7493126cfc9ebf781fa43a76c887",
+   "lecture_data_sha256": "0de7c1ca0ece51e9ae58a64c2ca376575b11f949dbc84b8ecd438391c3713890",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -137,7 +137,7 @@
   },
   "14": {
    "path": "lectures/iscarb/Ch14-Resilience-Engineering.html",
-   "lecture_data_sha256": "c15291b2a97a133e73d69e9f43a179b8de9de0c72c67df79101b691bf412e862",
+   "lecture_data_sha256": "f2e5786c79cf19da137174a252db2623b5f55ac55c89c9dc61ba4e5116cf73ed",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -163,7 +163,7 @@
   },
   "15": {
    "path": "lectures/iscarb/Ch15-Software-Reuse.html",
-   "lecture_data_sha256": "3349324b6a9a8de8024f7776796e2e9312c5281de50a18bba0b62219f28d3ff3",
+   "lecture_data_sha256": "7c511398a9b100400799d1130289d74ab6169fbcf4d5ee947121d0aafc8d2b75",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -189,7 +189,7 @@
   },
   "16": {
    "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
-   "lecture_data_sha256": "9ea9ac4ef2aea26b7b050f67cbc1d2b325788cb6f81ec669c04b93a30fdc0e29",
+   "lecture_data_sha256": "a64c293ccd59640c221f1397720714519520e6edd2a7d34afeb7e64a24138620",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -215,7 +215,7 @@
   },
   "17": {
    "path": "lectures/iscarb/Ch17-Distributed-SE.html",
-   "lecture_data_sha256": "f7ed2dbad0062d3c95901fc70cf779ee550039882a752b01fa0870917dbf2438",
+   "lecture_data_sha256": "7f25ab18179d150a7c477a25f4f4dccc19b062e4f96177bf59f52361648bbf31",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -241,7 +241,7 @@
   },
   "20": {
    "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
-   "lecture_data_sha256": "ca9c27dc540ba8d33b0a08b99908cbd3b07f086e225bd0289afc5ff35fb42f90",
+   "lecture_data_sha256": "50f44ebdcc564a77114885746e6cd57f567a6b0ca428f3bd0d3d8b392ee33fd8",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "bf3dff510328e857fe9c346c79e9479756b9b06eb592de6e731a86a68f7c0e3a",
+   "assignment_sha256_lf": "7bf209a4bcf022d692bbb0ba8850a3ea2e5a58a6eb1b5ab7eb07807179687aac",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "6055959efa3f52c49dd138494759e798c32a57da494f9e055f80a267c733edc1",
+   "assignment_sha256_lf": "a516fa327f3a9c37b8fff847378bf87598d2072fe653f697fbbdd972c3d5f1c4",
    "stress_sha256_lf": "94696ea2bc67547ac2520a923ff23fd281bdaae01514ae89637b64e6fe8e23f1"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "ec71b969fd9fd8e5f0931a3cb6259d39382a2d41b514991adebb0957f3dcc086",
+   "assignment_sha256_lf": "643957bebe40667e48c22ff066e51f719c706a2f6f74e60038ea76ada27c1dc4",
    "stress_sha256_lf": "6e4f43415cd427fbad9eadd34d0cc23b27e2f6755e8c26e5c4bcf29f54cd4802"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "35bf6184f62bfb26cd44eb00bb981888c6888a39e28caf01e2deff530f7ebddc",
+   "assignment_sha256_lf": "4b1b29a325fe39f0912da25fd08dd2182e58ba79b83a145d75e6a79e9d798b93",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "575b35f8312641e5ffe3d9a4168e12f4d1a5dbf24779c595c6e355ce1fd3cfa8",
+   "assignment_sha256_lf": "e4fd47717e95afa4448a4dbba830af31e1ccb7f74f80c44cf12d9fadadfed0d4",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "9cdfae013ddfa57e9da8199fd056d9185bfee8196dd3125b5bd5084f76bbbddc",
+   "assignment_sha256_lf": "773f5bd7693c4ad17d882e84d88519c389959498ecdc92d564147c4918f6f820",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "18d12ce4d765614502608af145336cce66b2a687ac36cec758f9610b45eea4a3",
+   "assignment_sha256_lf": "2caff0a6d408fd85c76fe56849beb1a6953dde08103aa365129dd3b216261e4d",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -699,6 +699,30 @@
     "stress 16",
     "stress 17",
     "stress 20"
+   ]
+  },
+  {
+   "revision": "20261014-lecture-requirements-v5",
+   "date": "2026-10-14",
+   "base_release": "20260926-genai-v12",
+   "summary": "Lecture design requirements (KEEP/COV/LANG/CASE/TIME/RUB): glossary with Arabic, transfer cases, coverage maps, study lists, minutes and tiers, station and assignment rubrics, runtime req-v5",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20",
+    "lecture 10",
+    "lecture 11",
+    "lecture 12",
+    "lecture 13",
+    "lecture 14",
+    "lecture 15",
+    "lecture 16",
+    "lecture 17",
+    "lecture 20"
    ]
   }
  ]

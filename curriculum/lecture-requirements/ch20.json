@@ -1,0 +1,1110 @@
+{
+ "chapter": 20,
+ "case": {
+  "fictional": true,
+  "answerKey": "promise only what the dashboard controls and label the rest"
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "system of systems",
+   "short": "a system that contains two or more independently managed elements",
+   "ar": "نظام الأنظمة"
+  },
+  {
+   "term": "constituent",
+   "short": "one of the independently managed systems inside a system of systems",
+   "ar": "نظام مكوِّن"
+  },
+  {
+   "term": "operational independence",
+   "short": "each constituent stays useful as a system on its own",
+   "ar": "الاستقلال التشغيلي"
+  },
+  {
+   "term": "managerial independence",
+   "short": "each constituent's owner keeps the authority to decide about it",
+   "ar": "الاستقلال الإداري"
+  },
+  {
+   "term": "governance",
+   "short": "the policies and decision structures that constrain the managers of the constituents",
+   "ar": "الحوكمة"
+  },
+  {
+   "term": "federated",
+   "short": "a system of systems governed by a voluntary body in which every owner is represented",
+   "ar": "اتحادي"
+  },
+  {
+   "term": "coalition",
+   "short": "a system of systems with no formal governance, where owners collaborate informally",
+   "ar": "ائتلاف"
+  },
+  {
+   "term": "reductionism",
+   "short": "the assumption that the whole can be understood from its parts, one owner and clear boundaries",
+   "ar": "الاختزالية"
+  },
+  {
+   "term": "principal system",
+   "short": "the system that queries or hosts the others in a data-feed or container pattern",
+   "ar": "النظام الرئيس"
+  },
+  {
+   "term": "data feed",
+   "short": "a system that supplies data to a principal system on request",
+   "ar": "تغذية بيانات"
+  },
+  {
+   "term": "container",
+   "short": "a pattern in which one system offers common services such as sign-in and storage to approved systems",
+   "ar": "حاوية"
+  },
+  {
+   "term": "trading",
+   "short": "a pattern with no principal system, in which participants exchange information directly",
+   "ar": "تبادل تجاري"
+  },
+  {
+   "term": "model version",
+   "short": "the identifier of the AI model a producer used; a change can alter meaning without changing the data shape",
+   "ar": "إصدار النموذج",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook's iLearn digital learning environment",
+  "text": "The textbook's iLearn system is a national initiative for schools. To create a digital learning environment, it must integrate with each local authority's network management and school administration systems. There is no common governance process across the authorities. This is a different system from the incident dashboard.",
+  "source": "Source slide 19 (iLearn as a system of systems)",
+  "fictional": false,
+  "question": "Which class of system of systems is iLearn, and why?",
+  "answer": "A coalition, Maier's virtual class. No formal governance body spans the authorities. Each manages its own systems and collaborates informally. Its technical complexity is modest, but its governance complexity is high.",
+  "concept": "classifying a system of systems by governance",
+  "answerKey": "a coalition, because no shared governance exists",
+  "at": "X02A"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "independent management as the test",
+   "answerKey": "independent management, not size",
+   "commonError": "Students judge a system of systems by code size. Ask who can change each part without asking anyone else.",
+   "bullets": [
+    [
+     "Operational independence",
+     "Operational independence: constituents remain useful as systems in their own right."
+    ],
+    [
+     "Managerial independence",
+     "Managerial independence: constituent owners retain decision authority."
+    ],
+    [
+     "Evolution / emergence",
+     "Independent changes and interactions affect shared behavior."
+    ],
+    [
+     "Other characteristics",
+     "Geographic distribution, heterogeneity and large data volumes."
+    ]
+   ]
+  },
+  "X02": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "three kinds of complexity",
+   "answerKey": "a governance constraint, not a defect",
+   "commonError": "Students file every obstacle under technical complexity. Ask whether a better design could remove it; if not, it is managerial or governance."
+  },
+  "X02A": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Students classify by network links. Classify by authority: who can set priorities and resolve disputes.",
+   "concept2": "federated versus coalition",
+   "answerKey2": "federated: a joint body whose decisions owners implement",
+   "question2": "Which classification fits an agreed joint governing body whose decisions participants implement?",
+   "answer2": "The author's federated system of systems, Maier's collaborative category. A coalition without that formal body is different.",
+   "sourceFigs": [
+    18
+   ],
+   "lists": [
+    {
+     "source": 16,
+     "title": "Maier's classification",
+     "items": [
+      "Directed: owned by a single organisation and built from systems that organisation also owns; parts may be independently managed",
+      "Collaborative: no central authority sets priorities or resolves disputes; elements are owned by different organisations",
+      "Virtual: no central governance; participants may not agree on the purpose and may enter or leave"
+     ]
+    },
+    {
+     "source": 17,
+     "title": "More intuitive terms",
+     "items": [
+      "Organizational: governance and management lie within one organisation",
+      "Federated: governance depends on a voluntary body in which all owners are represented",
+      "Coalition: no formal governance; organisations collaborate informally and manage their own systems"
+     ]
+    }
+   ]
+  },
+  "X03": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "reductionist assumptions",
+   "answerKey": "owners evolve systems independently",
+   "commonError": "Students trust a correct interface specification as a guarantee. Ask who can change the meaning behind it without telling anyone."
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "what the dashboard can promise",
+   "answerKey": "its own display, validation and fallback",
+   "commonError": "Students promise on behalf of the providers. Separate what the dashboard controls from what it only receives.",
+   "answer": "Not without the corresponding authority, agreement and evidence. It can promise its own display, validation and fallback behaviour, with limits."
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "governance alongside engineering",
+   "answerKey": "authority and acceptance decide what is feasible",
+   "commonError": "Students leave governance to the end. Agreements on authority and change can take longer than the interface itself.",
+   "answer": "Authority, participation, change handling and acceptance decide which integrations are feasible. They can take longer to agree than an interface takes to implement."
+  },
+  "X05": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "service interfaces versus unified UI",
+   "answerKey": "different workflows can make unification costly",
+   "commonError": "Students assume one unified interface is always better. Ask whose daily workflow it slows down."
+  },
+  "DEPLOY": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "useful intermediate forms",
+   "answerKey": "a defined capability with acceptance evidence",
+   "commonError": "Students describe a stage as “the parts done so far”. Ask what useful work it does and how acceptance is shown.",
+   "bullets": [
+    [
+     "Staged value",
+     "An incomplete SoS should still perform useful, limited work."
+    ],
+    [
+     "Existing operation",
+     "Constituents may already be deployed and cannot all be frozen."
+    ],
+    [
+     "Increment",
+     "Add a coherent capability with explicit acceptance conditions."
+    ],
+    [
+     "People",
+     "Plan training, equipment and operational transition as well as code."
+    ]
+   ]
+  },
+  "X06": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "repeatable cross-system results",
+   "answerKey": "record participant versions, inputs and assumptions",
+   "commonError": "Students record only the result. Ask which participant versions and data assumptions the result depended on."
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "stale versus unavailable",
+   "answerKey": "old data shown as current hides uncertainty",
+   "commonError": "Students show the last values to keep the screen full. Ask what a user would do differently if they saw “unavailable”.",
+   "answer": "It presents unsupported certainty. A service with limits must preserve freshness and uncertainty information so users can interpret the result."
+  },
+  "X09": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "incentives as architecture",
+   "answerKey": "the capability depends on continued participation",
+   "commonError": "Students treat an architecture framework as a solution. It offers views and a checklist; it cannot create authority.",
+   "concept2": "what a framework offers",
+   "answerKey2": "a checklist and vocabulary, not authority",
+   "question": "Why is an incentive to maintain a data feed an architectural concern?",
+   "answer": "The capability depends on continued participation. An elegant interface cannot sustain the service when an independent owner has no reason to maintain it.",
+   "question2": "When can a framework remain useful despite its limitations?",
+   "answer2": "As a checklist and shared vocabulary for architectural concerns. The team must not assume it solves independent ownership or uncertain boundaries.",
+   "extra": "The chapter's seven principles are Maier's four and Sillitto's three. Deliver value when incomplete. Be realistic about control. Focus on interfaces. Provide collaboration incentives. Design as nodes and a web. Specify behaviour as services exchanged between nodes. Understand and manage vulnerabilities.",
+   "lists": [
+    {
+     "source": 43,
+     "title": "General principles for architecting a system of systems",
+     "items": [
+      "Design systems so that they can deliver value if they are incomplete",
+      "Be realistic about what can be controlled",
+      "Focus on the system interfaces",
+      "Provide collaboration incentives",
+      "Design a system of systems as a node and web architecture",
+      "Specify behaviour as services exchanged between nodes",
+      "Understand and manage system vulnerabilities"
+     ]
+    }
+   ]
+  },
+  "X08": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "timeouts and partial results",
+   "answerKey": "no unbounded wait and no misleading substitute value",
+   "commonError": "Students let one slow feed delay the whole display. Define the timeout and what the missing cell shows.",
+   "sourceFigs": [
+    50,
+    52
+   ],
+   "lists": [
+    {
+     "source": 49,
+     "title": "Systems as data feeds",
+     "items": [
+      "A principal system requires data of different types",
+      "The data is available from other systems, which the principal system queries",
+      "The systems that provide data generally do not interact with each other",
+      "Often seen in organizational or federated systems where some governance exists"
+     ]
+    }
+   ]
+  },
+  "CONTAINER": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "integration versus inclusion",
+   "answerKey": "a link does not give common sign-in or storage",
+   "commonError": "Students think adding a tool to the menu integrates it. Each approved system needs its own interface to the common services."
+  },
+  "TRADING": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "trading versus data feeds",
+   "answerKey": "no principal system; participants exchange directly",
+   "commonError": "Students describe trading as a two-way data feed. The difference is the missing principal system and the missing governance.",
+   "answer": "In a trading system of systems there is no principal system. Participants exchange information with one another, one-to-one or one-to-many. Each publishes its own interface. In the data-feed pattern, a principal system queries providers that do not interact with each other."
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "promising about another owner's AI feed",
+   "answerKey": "show source, timestamp and model version; label the rest unverified",
+   "commonError": "Students promise that the classifications are correct. The dashboard cannot inspect or version the agency's model.",
+   "added": true,
+   "answer": "Not that the classifications are correct. The dashboard cannot inspect or version the model. It can promise to show each item with its source, timestamp and the producer's declared model version. It can flag detected shifts, such as a sudden change in the share of high-severity incidents. It can label affected data as unverified. It can seek an agreement that participants announce model changes as interface changes, with a trial period. The promise is limited to what the dashboard observes. Governance covers the rest."
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "label freshness and model version; mark changed data unverified",
+   "commonError": "Students fix the schedule and miss the model change. Same interface shape does not mean the same meaning.",
+   "twist": true,
+   "added": true,
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the AI-produced feed, show its declared model version. Flag data produced since the change as unverified until the agency confirms how its classifications changed."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "promise what you observe",
+   "answerKey": "source, timestamp and declared model version, not correctness",
+   "think": "Devices down. What useful service can be promised without pretending to control every owner?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide what can be promised about a feed produced by another owner's AI model.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional deployment passed a test. The dashboard can promise what it observes: source, timestamp and declared model version. It cannot promise the correctness of classifications made by a model it cannot inspect.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Claim: the dashboard shows each item with its source and timestamp and marks any feed older than its agreed interval. Given: it validates and displays; it cannot set update schedules. Proposed: a staleness check per feed. Nothing is promised about the agency's model.",
+     "why": "Names the mechanism (managerial independence), keeps to the given facts and proposes a checkable test."
+    },
+    "weak": {
+     "text": "The dashboard guarantees all incidents are current and correctly classified.",
+     "why": "Promises what other owners control; no evidence."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "shape validation versus content monitoring",
+   "answerKey": "monitoring can flag a shift but not prove which classification is right",
+   "think": "Compare two mechanisms: validating feed shape only, or also monitoring each feed's content for sudden shifts and labelling it. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. Evidence of a shared dependency or mismatched assumption can defeat an apparently stronger design. Shape validation cannot see a change in meaning. Monitoring distributions, for example the share of high-severity incidents, can flag a shift. It cannot prove which classification is right.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Shape validation plus content monitoring, because the property is honest display and a model change alters meaning without altering shape. Its limit: a flagged shift shows that something changed, not which classification is right. It costs a baseline per feed.",
+     "why": "Links the mechanism to the property, names the limit and states the cost."
+    },
+    "weak": {
+     "text": "Shape validation is enough; if the schema passes, the data is fine.",
+     "why": "Equates schema with meaning; no limit, no trade-off."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "label what the dashboard cannot vouch for and agree how model changes are announced",
+   "think": "One feed moves to a slower update schedule while keeping the same interface shape. The same agency also changed its AI model version. The shape is unchanged, but incidents are now classified differently. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. Freshness and meaning both changed with no schema change. The dashboard must label what it cannot vouch for. It must agree with the agency how model changes are announced.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed an unchanged shape meant unchanged meaning; it did not. Revise: show model version and freshness per feed, mark data since the change as unverified, and seek an announcement agreement. The dashboard owner decides; the agencies and the public are told.",
+     "why": "Names the broken assumption, revises with a reason, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep my promise as it is; the schema still validates.",
+     "why": "Ignores the meaning change; names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "definition of a system of systems",
+   "answerKey": "two or more independently managed elements"
+  },
+  {
+   "concept": "federated classification",
+   "answerKey": "federated, Maier's collaborative",
+   "beyondCase": true,
+   "why": "Federated systems depend on a voluntary governance body of all owners. Coalitions have no formal governance. Organizational systems of systems are governed within one organisation."
+  },
+  {
+   "concept": "failed reductionist assumption",
+   "answerKey": "one owner controls the system",
+   "beyondCase": true,
+   "why": "Reductionism assumes a single controlling authority, rational technical decisions and clear boundaries. A system of systems has several owners, and decisions are often political."
+  },
+  {
+   "concept": "difficulty of testing",
+   "answerKey": "constituents change during testing",
+   "beyondCase": true,
+   "why": "There may be no detailed specification. Constituents may change during testing. Problems may need intermediate software rather than changes to a constituent."
+  },
+  {
+   "concept": "trading pattern",
+   "answerKey": "trading systems have no principal system",
+   "why": "In a trading system of systems, processing can happen in any system and participants exchange information directly. Data feeds and containers both have a principal system."
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "CHECK1",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "CHECK2",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "6": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "7": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "8": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "9": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "10": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "11": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "12": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "13": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "14": {
+   "cls": "full",
+   "unit": "X02"
+  },
+  "15": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "title"
+  },
+  "16": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "list",
+   "items": [
+    "Directed SoS",
+    "Collaborative SoS",
+    "Virtual systems"
+   ]
+  },
+  "17": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "list",
+   "items": [
+    "Organizational systems of systems",
+    "Federated systems",
+    "System of system coalitions"
+   ]
+  },
+  "18": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "figure"
+  },
+  "19": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "prose",
+   "items": [
+    "iLearn is a relatively simple technical system but it has a high level of governance complexity.",
+    "The development of a digital learning system is a national initiative but to create a digital learning environment, it has to be integrated with network management and school administration systems.",
+    "There is no common governance process across authorities so, according to the classification scheme, this is a coalition of systems."
+   ]
+  },
+  "20": {
+   "cls": "slide",
+   "unit": "X03",
+   "kind": "title"
+  },
+  "21": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "22": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "X03"
+  },
+  "23": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "24": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "25": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "26": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "27": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "28": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "29": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "30": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "31": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "32": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "33": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "34": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "35": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "36": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "37": {
+   "cls": "slide",
+   "unit": "DEPLOY"
+  },
+  "38": {
+   "cls": "full",
+   "unit": "DEPLOY"
+  },
+  "39": {
+   "cls": "full",
+   "unit": "DEPLOY"
+  },
+  "40": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "41": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "42": {
+   "cls": "slide",
+   "unit": "X09"
+  },
+  "43": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "44": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "45": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "46": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "47": {
+   "cls": "full",
+   "unit": "X09"
+  },
+  "48": {
+   "cls": "no",
+   "reason": "Definition of an architectural pattern; in the study list",
+   "kind": "prose"
+  },
+  "49": {
+   "cls": "slide",
+   "unit": "X08",
+   "kind": "list",
+   "items": [
+    "A principal system requires data of different types",
+    "The principal system queries other systems to get the data",
+    "The providing systems generally do not interact with each other",
+    "Often observed in organizational or federated systems with some governance"
+   ]
+  },
+  "50": {
+   "cls": "slide",
+   "unit": "X08",
+   "kind": "figure"
+  },
+  "51": {
+   "cls": "full",
+   "unit": "X08",
+   "kind": "prose",
+   "items": [
+    "The ‘systems as data feeds’ architecture is an appropriate architecture to use when it is possible to identify entities in a unique way and create relatively simple queries about these entities.",
+    "A variant of the ‘systems as data feeds’ architecture arises when there are a number of systems involved which provide similar data but which are not identical.",
+    "The architecture has to include an intermediate layer to translate the general query from the principal system into the specific query required by the individual information system."
+   ]
+  },
+  "52": {
+   "cls": "slide",
+   "unit": "X08",
+   "kind": "figure"
+  },
+  "53": {
+   "cls": "slide",
+   "unit": "CONTAINER",
+   "kind": "prose",
+   "items": [
+    "Systems in a container are systems of systems where one of the systems acts as a virtual container and provides a set of common services such as an authentication and a storage service.",
+    "Conceptually, other systems are then placed into this container to make their functionality accessible to system users.",
+    "You don’t place systems into a real container to implement these systems of systems. Rather, for each approved system, there is a separate interface that allows it to be integrated with the common services."
+   ]
+  },
+  "54": {
+   "cls": "slide",
+   "unit": "CONTAINER"
+  },
+  "55": {
+   "cls": "slide",
+   "unit": "CONTAINER"
+  },
+  "56": {
+   "cls": "slide",
+   "unit": "CONTAINER"
+  },
+  "57": {
+   "cls": "slide",
+   "unit": "CONTAINER"
+  },
+  "58": {
+   "cls": "slide",
+   "unit": "TRADING"
+  },
+  "59": {
+   "cls": "slide",
+   "unit": "TRADING"
+  },
+  "60": {
+   "cls": "full",
+   "unit": "TRADING"
+  },
+  "61": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "62": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "63": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Systems of systems: definition, examples and essential characteristics",
+   "sources": [
+    3,
+    4,
+    5,
+    13
+   ],
+   "book": {
+    "page": 5,
+    "label": "20.1"
+   },
+   "note": "The five characteristics and why independent management is the test."
+  },
+  {
+   "topic": "Technical, managerial and governance complexity",
+   "sources": [
+    7,
+    9,
+    11,
+    12,
+    14
+   ],
+   "book": {
+    "page": 5,
+    "label": "20.1"
+   },
+   "note": "Static versus dynamic relationships; why complexity drives project failure."
+  },
+  {
+   "topic": "Classification of systems of systems and the iLearn example",
+   "sources": [
+    16,
+    17,
+    18,
+    19
+   ],
+   "book": {
+    "page": 8,
+    "label": "20.2"
+   },
+   "note": "Required reading for 15–20. Map Maier's names to the chapter's names."
+  },
+  {
+   "topic": "Reductionism, its assumptions and software systems of systems",
+   "sources": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26
+   ],
+   "book": {
+    "page": 11,
+    "label": "20.3"
+   },
+   "note": "The three reductionist assumptions and why each fails."
+  },
+  {
+   "topic": "Systems of systems engineering: problems, processes and interfaces",
+   "sources": [
+    28,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36
+   ],
+   "book": {
+    "page": 14,
+    "label": "20.4"
+   },
+   "note": "The five activities; service interfaces versus a unified user interface."
+  },
+  {
+   "topic": "Integration, deployment and testing",
+   "sources": [
+    37,
+    38,
+    39,
+    40,
+    41
+   ],
+   "book": {
+    "page": 18,
+    "label": "20.4.2"
+   },
+   "note": "Staged deployment of iLearn; why testing borrows agile practices."
+  },
+  {
+   "topic": "Architecture principles, frameworks and TOGAF",
+   "sources": [
+    43,
+    44,
+    45,
+    46,
+    47
+   ],
+   "book": {
+    "page": 20,
+    "label": "20.5"
+   },
+   "note": "The seven principles; what a framework can and cannot provide."
+  },
+  {
+   "topic": "Architectural patterns: data feeds, containers and trading",
+   "sources": [
+    48,
+    49,
+    51,
+    53,
+    55,
+    57,
+    58,
+    60
+   ],
+   "book": {
+    "page": 23,
+    "label": "20.5.1"
+   },
+   "note": "Required reading for 48–53. Know which pattern has a principal system and which has governance."
+  }
+ ],
+ "roadmap": {
+  "connection": "Independence creates complexity; classification exposes authority; engineering and architecture coordinate useful cooperation with limits."
+ },
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "scenario": "A city dashboard coordinates ambulances from three independent owners: two public hospitals and a private ambulance company. Each owner runs its own AI system to rank incoming calls by urgency. Each publishes its ranked queue to the dashboard."
+ },
+ "assignmentRubric": {
+  "criteria": [
+   {
+    "name": "FIT",
+    "strong": "The concept is managerial independence: three owners, three models, one interface. Given: the dashboard can read but not change any model; no agreement on announcing changes. Assumption, marked: the owners rank by the same idea of urgency.",
+    "strongWhy": "Names the chapter concept, keeps to the given facts and marks the assumption.",
+    "weak": "The dashboard is in charge because it shows everything.",
+    "weakWhy": "Confuses display with authority; no case fact."
+   },
+   {
+    "name": "INTEGRATE",
+    "strong": "Treat each queue as a data feed. Show each call with its owner, timestamp and the owner's declared model version. Never merge the three rankings into one city-wide order without an agreed scale.",
+    "strongWhy": "Applies the data-feed pattern and keeps the owners' meanings separate.",
+    "weak": "Merge the three queues and sort by urgency score.",
+    "weakWhy": "Assumes the scores mean the same thing across owners."
+   },
+   {
+    "name": "BOUND",
+    "strong": "The promise holds while each owner's ranking rule and model version are unchanged and declared. An undeclared change in the share of high-urgency calls from one owner reopens it.",
+    "strongWhy": "Names the dependency and an observable trigger.",
+    "weak": "It works as long as everyone is honest.",
+    "weakWhy": "No dependency and no observable trigger."
+   },
+   {
+    "name": "ACT + EVIDENCE",
+    "strong": "Action: an agreement that model changes are announced as interface changes with a trial period, owned by the city dispatch lead. Evidence: a per-owner baseline of urgency shares with a drift alert, proposed.",
+    "strongWhy": "Feasible action, a named role, evidence with its status.",
+    "weak": "Ask the owners to be careful.",
+    "weakWhy": "No specific action, owner or inspectable evidence."
+   },
+   {
+    "name": "REFIT",
+    "strong": "The private company's weighting shows my merged view was promising a fairness it could not check. I replace it: rankings are shown per owner with the model version, and the drift alert fires. My first plan assumed one shared idea of urgency.",
+    "strongWhy": "Names what changed, chooses REPLACE with a reason, admits the first assumption.",
+    "weak": "I keep the merged list; the dashboard cannot control the owners anyway.",
+    "weakWhy": "Uses lack of control as an excuse; ignores the given fact."
+   }
+  ],
+  "other": "the answer names the chapter concept that decides, uses only the facts given in the task, separates what the dashboard controls from what it receives, and names evidence from a baseline or record that someone else can check. A different integration that meets these conditions earns the same marks as the model answer."
+ }
+}

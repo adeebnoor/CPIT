@@ -1,0 +1,991 @@
+{
+ "chapter": 15,
+ "case": {
+  "fictional": true,
+  "answerKey": "a configured instance demonstrated on the full workflow",
+  "mutation": "The supplier changes a required interface and will not support the earlier version throughout the planned lifetime. The supplier also announces that the language-model version the team tested will be retired. Its replacement answers the same prompts differently."
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "reuse",
+   "short": "building a system from existing software instead of writing everything new",
+   "ar": "إعادة الاستخدام"
+  },
+  {
+   "term": "framework",
+   "short": "a reusable architecture of classes that you extend to build an application",
+   "ar": "إطار عمل"
+  },
+  {
+   "term": "inversion of control",
+   "short": "the framework owns the flow of control and calls your code when events happen",
+   "ar": "عكس التحكم"
+  },
+  {
+   "term": "callback",
+   "short": "application code the framework calls in response to an event",
+   "ar": "دالة رد النداء"
+  },
+  {
+   "term": "product line",
+   "short": "a family of applications sharing one architecture with controlled variation",
+   "ar": "خط إنتاج برمجي"
+  },
+  {
+   "term": "configuration",
+   "short": "settings that change what the system does without changing its code",
+   "ar": "التهيئة"
+  },
+  {
+   "term": "ERP",
+   "short": "a large configurable application whose modules share one database and rule set",
+   "ar": "نظام تخطيط موارد المؤسسة"
+  },
+  {
+   "term": "wrapper",
+   "short": "code that hides an existing system behind the interface you need",
+   "ar": "غلاف برمجي"
+  },
+  {
+   "term": "planning factor",
+   "short": "one of the six conditions that decide which reuse approach fits",
+   "ar": "عامل تخطيط"
+  },
+  {
+   "term": "lock-in",
+   "short": "depending on a supplier's versions, data terms and roadmap that you do not control",
+   "ar": "الارتهان للمورّد",
+   "added": true
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook's vehicle dispatcher",
+  "text": "A police force wants an instance of the textbook's vehicle-dispatching product line. It needs route planning and incident logging. Its vehicles report their location over a different radio system. This is a different system from the appointment product.",
+  "source": "Source slides 33–37 (vehicle dispatcher product line and product instance development)",
+  "fictional": false,
+  "question": "Which product-line component must be adapted, and what must be validated afterwards?",
+  "answer": "The vehicle-location component at the resource-management level, because the radio system changes how location data arrives. Validate the dispatch workflow end to end on the new instance, not only the adapted component.",
+  "concept": "adapting and validating a product instance",
+  "answerKey": "adapt vehicle location, then validate the whole dispatch instance",
+  "at": "X05"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "levels of reuse",
+   "answerKey": "a concept adapts; copied code carries its assumptions",
+   "commonError": "Students treat an existing component as suitable by default. Ask which assumption of the old context the new one breaks."
+  },
+  "X02": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "lifecycle cost of reuse",
+   "answerKey": "integration, validation and maintenance dominate",
+   "commonError": "Students compare purchase prices only. List the costs after purchase: finding, understanding, adapting, validating and maintaining."
+  },
+  "X02A": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "matching reuse level to need",
+   "answerKey": "a component for authentication; a configurable product for the workflow",
+   "commonError": "Students pick one reuse level for every need. One system can combine a library, a framework and a configured product.",
+   "sourceFigs": [
+    12,
+    13,
+    14
+   ]
+  },
+  "D15": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "planning factors",
+   "answerKey": "lifetime raises the weight of maintainability and support",
+   "commonError": "Students choose the fastest route and ignore lifetime. Ask who maintains the reused software in year five.",
+   "lists": [
+    {
+     "source": 15,
+     "title": "Reuse planning factors",
+     "items": [
+      "The development schedule for the software",
+      "The expected software lifetime",
+      "The background, skills and experience of the development team",
+      "The criticality of the software and its non-functional requirements",
+      "The application domain",
+      "The execution platform for the software"
+     ]
+    }
+   ]
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "capability versus demonstrated fit",
+   "answerKey": "a demonstrated configured instance with tests",
+   "commonError": "Students accept “configurable” from the brochure as evidence. Ask for the configured instance that ran the waiting-period workflow."
+  },
+  "X03": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "framework as architecture",
+   "answerKey": "it supplies the structure the application extends",
+   "commonError": "Students describe a framework as a big library. A library leaves the control structure to you; a framework supplies it.",
+   "sourceFigs": [
+    21
+   ]
+  },
+  "IOC": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "inversion of control",
+   "answerKey": "the framework calls the registered callback",
+   "commonError": "Students say the application calls the framework. In a framework the direction is reversed: the framework calls your code.",
+   "answer": "The framework invokes the registered hook or callback in response to an event. Application code does not own every step of the main control flow."
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "commonality and variation",
+   "answerKey": "copies diverge; a product line keeps variation explicit",
+   "commonError": "Students equate a product line with copy-and-edit. Ask where the shared core lives and who controls the variation points."
+  },
+  "X05": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Students inherit the base tests unchanged. A test whose assumptions changed with the variation must be rewritten.",
+   "concept2": "validating the new instance",
+   "answerKey2": "tests whose assumptions changed with the variation",
+   "question2": "Which test cannot simply be inherited from the base application?",
+   "answer2": "A test whose assumptions, configuration, integration or expected behaviour changed in the new instance. Reuse the relevant tests, but validate the new variation."
+  },
+  "CONFIG": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "configuration as versioned behaviour",
+   "answerKey": "behaviour depends on code and settings together",
+   "commonError": "Students treat a settings change as risk-free because the binary is unchanged. The earlier test evidence may no longer apply."
+  },
+  "X06": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "evidence for an integrated solution",
+   "answerKey": "interface, data and workflow compatibility across products",
+   "commonError": "Students accept two separate demonstrations as proof of integration. Ask for the test that crosses the product boundary."
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "what reverses an integration decision",
+   "answerKey": "a failed data or workflow contract",
+   "commonError": "Students cannot name what would reverse their choice. Ask for one specific contract failure or support gap."
+  },
+  "R18": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "shared data and rules in ERP",
+   "answerKey": "a local change alters a dependent workflow",
+   "commonError": "Students configure one module as if it were isolated. Ask which other department reads the same record or rule."
+  },
+  "R09": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "API call versus business transaction",
+   "answerKey": "verify the complete workflow outcome",
+   "commonError": "Students take a successful API call as integration proof. Ask what the whole transaction needs: state, ordering, failure and data semantics.",
+   "concept2": "planning for supplier change",
+   "answerKey2": "documented interface assumption, compatibility check and fallback",
+   "question": "Why does a successful API call not prove a successful integrated business transaction?",
+   "answer": "The call may have different state, ordering, failure or data semantics from the whole workflow. Verify the complete required outcome.",
+   "question2": "What belongs in the decision before the supplier changes its interface?",
+   "answer2": "A documented interface and version assumption. A compatibility check. A support and ownership path. A feasible response such as migration, adaptation or a limited fallback."
+  },
+  "AISYS": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "reusing a model brings its supplier",
+   "answerKey": "lifetime and data location decide; the demo is not fit evidence",
+   "commonError": "Students count the ten-request demo as fit evidence. Ask for an evaluation set drawn from the real workflow and re-run per version.",
+   "added": true,
+   "answer": "Either option can be defensible. A hosted API wins on schedule and expertise. It binds the product to the supplier's version timetable and data terms. A locally hosted model gives control of versions and data location. It needs operational skill and its own evaluation. For a long-lived product handling personal booking data, lifetime and data location often dominate. In every case a ten-request demo is not evidence of fit. Require an evaluation set drawn from the real workflow: waiting periods and linked appointments. Re-run it on every model version. Keep a documented plan for version retirement."
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "pin the version and re-run the workflow evaluation",
+   "commonError": "Students keep the plan and hope the replacement model behaves the same. Treat version retirement as a supplier change with an owner.",
+   "twist": true,
+   "added": true,
+   "answer": "A defensible revision responds to the changed assumption, keeps missing evidence visible and names a responsible role. For the language model, treat version retirement as the same kind of supplier change. Pin the tested version. Re-run the workflow evaluation on its replacement. Name who decides whether the replacement is accepted."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "evidence of fit",
+   "answerKey": "the demo is not evidence for the full workflow",
+   "think": "Devices down. Configure, integrate or replace, and what evidence decides?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide whether the ten-request demo counts as evidence of fit.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional deployment passed a test. A ten-request demo shows the model can produce plausible replies. It does not show it handles waiting periods and linked appointments across the full workflow.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Claim: neither route is supported yet. Given: the product handles ordinary bookings; waiting periods and linked appointments are not demonstrated. Proposed: a configured instance run on the real workflow, with tests. The demo is not fit evidence.",
+     "why": "Names the mechanism (fit evidence), keeps to the given facts and proposes a checkable test."
+    },
+    "weak": {
+     "text": "Configure it: the vendor says it is configurable and the model demo was perfect.",
+     "why": "Takes a capability claim and a ten-request demo as evidence; no test proposed."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "what a wrapper hides",
+   "answerKey": "a wrapper hides the interface, not the supplier's roadmap",
+   "think": "Compare two mechanisms: configuring the purchased product, or integrating a hosted language model through a wrapper. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. Evidence of a shared dependency or mismatched assumption can defeat an apparently stronger design. A wrapped model API hides the interface, not the supplier's version timetable or data terms. That is the same limit the chapter gives for any wrapped system.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Configure the purchased product, because workflow fit is the property at stake and one vendor keeps one data model. Its limit: configuration may not reach linked appointments. The wrapped model is faster but adds a second supplier's roadmap.",
+     "why": "Links the mechanism to fit, names the limit and states the trade-off."
+    },
+    "weak": {
+     "text": "Wrap the model: a wrapper means we can swap it any time.",
+     "why": "Treats the wrapper as removing lock-in; no property, no limit, no cost."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "fit evidence belongs to a version that will not exist",
+   "think": "The supplier changes a required interface and will not support the earlier version for the planned lifetime. It also retires the model version the team tested. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The fit evidence belonged to a model version that will not exist. Every version change needs the same workflow evaluation re-run.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card assumed the tested versions would last the planned lifetime; they will not. Revise: pin versions, re-run the workflow evaluation on each replacement, and plan migration. The product owner decides; clinic staff are told what changes.",
+     "why": "Names the broken assumption, revises with a reason, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep the plan; the replacement model will probably answer the same.",
+     "why": "Ignores the retired version; names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "costs of reuse",
+   "answerKey": "adapting and integrating reused software"
+  },
+  {
+   "concept": "planning factors",
+   "answerKey": "expected software lifetime"
+  },
+  {
+   "concept": "inversion of control",
+   "answerKey": "the framework calls the handler",
+   "beyondCase": true
+  },
+  {
+   "concept": "product line",
+   "answerKey": "common features with controlled variation",
+   "beyondCase": true
+  },
+  {
+   "concept": "ERP",
+   "answerKey": "integrated processes over a shared database",
+   "beyondCase": true
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "CHECK1",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "CONFIG",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "6": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "7": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "8": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "9": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "10": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "11": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "12": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "figure"
+  },
+  "13": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "figure"
+  },
+  "14": {
+   "cls": "slide",
+   "unit": "X02A",
+   "kind": "figure"
+  },
+  "15": {
+   "cls": "slide",
+   "unit": "D15",
+   "kind": "list",
+   "items": [
+    "The development schedule for the software",
+    "The expected software lifetime",
+    "The background, skills and experience of the development team",
+    "The criticality of the software and its non-functional requirements",
+    "The application domain",
+    "The execution platform for the software"
+   ]
+  },
+  "16": {
+   "cls": "slide",
+   "unit": "X03",
+   "kind": "title"
+  },
+  "17": {
+   "cls": "slide",
+   "unit": "X03",
+   "kind": "prose"
+  },
+  "18": {
+   "cls": "full",
+   "unit": "X03",
+   "kind": "prose",
+   "items": [
+    "Frameworks are moderately large entities that can be reused. They are somewhere between system and component reuse.",
+    "Frameworks are a sub-system design made up of a collection of abstract and concrete classes and the interfaces between them.",
+    "The sub-system is implemented by adding components to fill in parts of the design and by instantiating the abstract classes in the framework."
+   ]
+  },
+  "19": {
+   "cls": "full",
+   "unit": "X03",
+   "kind": "prose",
+   "items": [
+    "Support the construction of dynamic websites as a front-end for web applications.",
+    "WAFs are now available for all of the commonly used web programming languages e.g. Java, Python, Ruby, etc.",
+    "Interaction model is based on the Model-View-Controller composite pattern."
+   ]
+  },
+  "20": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "prose",
+   "items": [
+    "System infrastructure framework for GUI design.",
+    "Allows for multiple presentations of an object and separate interactions with these presentations.",
+    "MVC framework involves the instantiation of a number of patterns (as discussed in Chapter 7)."
+   ],
+   "unit": "X03"
+  },
+  "21": {
+   "cls": "slide",
+   "unit": "X03",
+   "kind": "figure"
+  },
+  "22": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "23": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "24": {
+   "cls": "slide",
+   "unit": "IOC"
+  },
+  "25": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "26": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "27": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "28": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "29": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "30": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "31": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "32": {
+   "cls": "no",
+   "reason": "Generic resource-allocation architecture figure; in the study list"
+  },
+  "33": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "34": {
+   "cls": "full",
+   "reason": "TODO",
+   "unit": "X05"
+  },
+  "35": {
+   "cls": "full",
+   "unit": "X04"
+  },
+  "36": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "37": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "38": {
+   "cls": "full",
+   "unit": "CONFIG"
+  },
+  "39": {
+   "cls": "slide",
+   "unit": "CONFIG"
+  },
+  "40": {
+   "cls": "full",
+   "unit": "CONFIG"
+  },
+  "41": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "42": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "43": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "44": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "45": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "46": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "47": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "48": {
+   "cls": "slide",
+   "unit": "R18"
+  },
+  "49": {
+   "cls": "slide",
+   "unit": "R18"
+  },
+  "50": {
+   "cls": "full",
+   "unit": "R18"
+  },
+  "51": {
+   "cls": "full",
+   "unit": "X06"
+  },
+  "52": {
+   "cls": "full",
+   "unit": "R09"
+  },
+  "53": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "54": {
+   "cls": "full",
+   "unit": "R09"
+  },
+  "55": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "56": {
+   "cls": "slide",
+   "unit": "R09"
+  },
+  "57": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "58": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Reuse-based software engineering, its benefits and problems",
+   "sources": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "book": {
+    "page": 4,
+    "label": "15.1"
+   },
+   "note": "Name three benefits and three problems; know the levels of reuse."
+  },
+  {
+   "topic": "The reuse landscape, the approaches table and the six planning factors",
+   "sources": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "book": {
+    "page": 4,
+    "label": "15.1"
+   },
+   "note": "Required reading for 12–15. Be able to place an approach on the landscape and apply the factors."
+  },
+  {
+   "topic": "Application frameworks, MVC and inversion of control",
+   "sources": [
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+   ],
+   "book": {
+    "page": 7,
+    "label": "15.2"
+   },
+   "note": "Required reading for 16–21. Explain why the framework, not your code, owns control."
+  },
+  {
+   "topic": "Software product lines, base systems and the vehicle dispatcher",
+   "sources": [
+    27,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35
+   ],
+   "book": {
+    "page": 10,
+    "label": "15.3"
+   },
+   "note": "The four ways a product line is specialised and the dispatcher's layers."
+  },
+  {
+   "topic": "Product instance development and configuration",
+   "sources": [
+    36,
+    37,
+    38,
+    39,
+    40
+   ],
+   "book": {
+    "page": 10,
+    "label": "15.3"
+   },
+   "note": "Design-time versus deployment-time configuration and its three levels."
+  },
+  {
+   "topic": "Application system reuse: benefits, problems, configurable systems",
+   "sources": [
+    42,
+    43,
+    44,
+    45,
+    46
+   ],
+   "book": {
+    "page": 17,
+    "label": "15.4"
+   },
+   "note": "Why visible functionality helps and why unmodifiable assumptions constrain fit."
+  },
+  {
+   "topic": "ERP systems and their configuration",
+   "sources": [
+    47,
+    49,
+    50
+   ],
+   "book": {
+    "page": 18,
+    "label": "15.4.1"
+   },
+   "note": "Modules, shared database, business rules; how a local change spreads."
+  },
+  {
+   "topic": "Integrated application systems, wrapping and integration problems",
+   "sources": [
+    51,
+    52,
+    54,
+    55,
+    56
+   ],
+   "book": {
+    "page": 21,
+    "label": "15.4.2"
+   },
+   "note": "The design choices and the four integration problems."
+  }
+ ],
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "stress": "The volunteer maintainers archive the project. A security advisory is published for one of its dependencies. A deaf student reports that Arabic captions in a recorded exam review were wrong."
+ },
+ "assignmentRubric": {
+  "criteria": [
+   {
+    "name": "FIT",
+    "strong": "The planning factor that decides is lifetime: captions must run for years. Given: a five-lecture English demo; no Arabic evaluation; a volunteer-maintained model. Assumption, marked: the licence stays unchanged.",
+    "strongWhy": "Names the chapter factor, keeps to the given facts and marks the assumption.",
+    "weak": "Open source is free, so reuse it.",
+    "weakWhy": "Price is not fit; no case fact and no factor."
+   },
+   {
+    "name": "COMPARE",
+    "strong": "Reuse the open model: fast, no data leaves campus, but support depends on volunteers. Buy: supported versions, data leaves campus. Build: full control, longest schedule.",
+    "strongWhy": "Compares the three routes on the same factors.",
+    "weak": "Buying is always safer.",
+    "weakWhy": "One route, no factor, no evidence."
+   },
+   {
+    "name": "BOUND",
+    "strong": "The reuse decision holds while the project is maintained and the Arabic evaluation passes the agreed error rate. An archived repository or a failed Arabic run reopens it.",
+    "strongWhy": "Names the dependency and an observable trigger.",
+    "weak": "It works unless something goes wrong.",
+    "weakWhy": "No dependency and no observable trigger."
+   },
+   {
+    "name": "ACT + EVIDENCE",
+    "strong": "Action: run an Arabic evaluation set of ten lectures with regional accents before any release, owned by the accessibility lead. Evidence: the scored transcript comparison, proposed.",
+    "strongWhy": "Feasible action, a named role, evidence with its status.",
+    "weak": "Test it more.",
+    "weakWhy": "No specific action, owner or inspectable evidence."
+   },
+   {
+    "name": "REFIT",
+    "strong": "The archived project and the advisory break my support assumption. I replace the route: buy a supported service for Arabic now, keep the open model for English until a maintained fork exists. My first plan assumed volunteers would stay.",
+    "strongWhy": "Names what changed, chooses REPLACE with a reason, admits the first assumption.",
+    "weak": "I keep the open model; the advisory is probably minor.",
+    "weakWhy": "Ignores the lost maintenance and the wrong captions."
+   }
+  ],
+  "other": "the answer names the planning factor that decides, uses only the facts given in the task, compares at least two routes on the same factor, and names evidence from an evaluation or record that someone else can check. A different route that meets these conditions earns the same marks as the model answer."
+ }
+}

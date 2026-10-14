@@ -1,0 +1,1067 @@
+{
+ "chapter": 10,
+ "case": {
+  "fictional": true,
+  "answerKey": "an independently verified pressure reading",
+  "lens": "The plant supplies drinking water to a coastal city. The upgrade also installed a vendor's AI alarm assistant. It is a learned anomaly detector. It labels each pressure alarm “likely sensor fault” or “likely real excursion” with a confidence score. Tonight it labels the alarms “likely sensor fault, 0.91”. Two operators have started treating that label as a second opinion. Keep asking: does the label count as evidence?"
+ },
+ "glossary": [
+  {
+   "term": "claim",
+   "short": "a statement you say is true and can defend with evidence",
+   "ar": "ادعاء"
+  },
+  {
+   "term": "dependability",
+   "short": "the user's degree of trust that the system will do what they expect",
+   "ar": "الاعتمادية"
+  },
+  {
+   "term": "availability",
+   "short": "the probability that the system is up and can deliver useful service",
+   "ar": "التوافر"
+  },
+  {
+   "term": "reliability",
+   "short": "the probability that the system delivers correct service",
+   "ar": "الموثوقية"
+  },
+  {
+   "term": "safety",
+   "short": "a judgment of how likely the system is to cause harm",
+   "ar": "السلامة"
+  },
+  {
+   "term": "security",
+   "short": "a judgment of how well the system resists intrusion",
+   "ar": "الأمن"
+  },
+  {
+   "term": "resilience",
+   "short": "a judgment of how well critical services continue during disruption",
+   "ar": "المرونة"
+  },
+  {
+   "term": "fault",
+   "short": "a defect or cause that may stay dormant",
+   "ar": "عيب"
+  },
+  {
+   "term": "error",
+   "short": "an incorrect internal state created by an activated fault",
+   "ar": "خطأ"
+  },
+  {
+   "term": "failure",
+   "short": "delivered service that deviates from what is required",
+   "ar": "فشل"
+  },
+  {
+   "term": "redundancy",
+   "short": "extra copies or capacity so that a backup exists if one part fails",
+   "ar": "التكرار"
+  },
+  {
+   "term": "diversity",
+   "short": "the same function provided in different ways so copies do not fail the same way",
+   "ar": "التنوع"
+  },
+  {
+   "term": "common cause",
+   "short": "one shared cause that can make every copy fail together",
+   "ar": "سبب مشترك"
+  },
+  {
+   "term": "sociotechnical system",
+   "short": "equipment, software, people, procedures and organisation working together",
+   "ar": "نظام اجتماعي تقني"
+  },
+  {
+   "term": "formal methods",
+   "short": "development approaches based on mathematical representation and analysis",
+   "ar": "الطرق الصورية"
+  },
+  {
+   "term": "model checking",
+   "short": "a tool that explores every reachable state of a model against a stated property",
+   "ar": "فحص النماذج"
+  },
+  {
+   "term": "counterexample",
+   "short": "a trace of the model that breaks the stated property",
+   "ar": "مثال مضاد"
+  }
+ ],
+ "transfer": {
+  "title": "Transfer case · the textbook's two flight-control architectures",
+  "text": "The textbook contrasts two certified aircraft. Airbus flight control uses redundant and diverse software. The Boeing 777 flight control has no software diversity. Both aircraft are certified as safe. This is a different system from the desalination plant.",
+  "source": "Source slide 30 (problems with redundancy and diversity)",
+  "fictional": false,
+  "question": "Without software diversity, what does the Boeing 777 design rely on for dependability?",
+  "answer": "Simplicity and extensive verification and validation. The textbook notes that diversity adds complexity and new interactions. Both routes are accepted by regulators. Each needs its own evidence.",
+  "concept": "simplicity versus diversity as dependability strategies",
+  "answerKey": "simplicity with extensive V&V",
+  "at": "R08"
+ },
+ "slides": {
+  "TITLE": {
+   "minutes": 3,
+   "tier": "core"
+  },
+  "MAP": {
+   "minutes": 1,
+   "tier": "core"
+  },
+  "START": {
+   "minutes": 2,
+   "tier": "core"
+  },
+  "X01": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "dependability properties",
+   "answerKey": "reliability and safety, not availability alone",
+   "commonError": "Students answer “availability” because the service responds. Ask which property covers a correct result, and which covers harm."
+  },
+  "X02": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "failure mechanism before the fix",
+   "answerKey": "an observation that separates two hypotheses",
+   "commonError": "Students blame the software because an upgrade happened. Ask which log would separate a sensor fault from a software defect, and whether it exists.",
+   "answer": "Possible hypotheses include a faulty pressure transmitter, a defect in the upgrade, or a misleading alarm or hand-over procedure. Compare an independently verified pressure reading with the alarm and switch-over log. That could separate a true excursion from a sensor problem. These are hypotheses and requested observations, not completed tests."
+  },
+  "X07": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "fault, error and failure chain",
+   "answerKey": "fault activated, wrong state, visible deviation",
+   "commonError": "Students write “the system failed because of a software error”, which names two terms and explains neither. Correct the order: fault, error, failure.",
+   "added": true
+  },
+  "X02A": {
+   "minutes": 1.5,
+   "tier": "core",
+   "concept": "six dependability moves",
+   "answerKey": "recovery restores service after failure",
+   "commonError": "Students merge tolerance and recovery. Tolerance keeps service going while faults occur; recovery restores service after a failure."
+  },
+  "X03": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "layers of the sociotechnical system",
+   "answerKey": "a correct controller inside an undependable service",
+   "commonError": "Traces stop at the application layer. Push upward: the shift hand-over is a business process and the regulator's file is society.",
+   "question": "Trace the alarm from equipment through software to people. Why can a correct controller still be part of an undependable service?",
+   "sourceFigs": [
+    19
+   ]
+  },
+  "CHECK1": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "property that failed",
+   "answerKey": "reliability failed; safety depends on harm",
+   "commonError": "Students answer “availability” for a reachable service with wrong results. Ask which property is about a correct result.",
+   "added": true,
+   "takeaway": "A reachable service that returns the wrong result has failed in reliability, not availability.",
+   "question": "A service is reachable but returns the wrong result. Which property failed?"
+  },
+  "R08": {
+   "minutes": 2,
+   "tier": "core",
+   "commonError": "Students treat two copies as independent by default. Make one student argue the no-diversity position; ask what the copies share.",
+   "lists": [
+    {
+     "source": 27,
+     "title": "Redundancy and diversity",
+     "items": [
+      "Redundancy: keep more than one version of critical components, so a backup is available if one fails",
+      "Diversity: provide the same function in different ways, so components do not fail in the same way",
+      "Independence: redundant and diverse components must not share common-mode failures, for example by using different programming languages"
+     ]
+    },
+    {
+     "source": 28,
+     "title": "Examples",
+     "items": [
+      "Redundancy: where availability is critical, companies keep backup servers and switch to them automatically",
+      "Diversity: different servers run different operating systems to resist external attacks"
+     ]
+    },
+    {
+     "source": 30,
+     "title": "Problems with redundancy and diversity",
+     "items": [
+      "Diversity and redundancy increase system complexity",
+      "Complexity raises the chance of error through unanticipated interactions and dependencies",
+      "Some engineers prefer simplicity and extensive verification and validation instead",
+      "Airbus flight control is redundant and diverse; the Boeing 777 has no software diversity"
+     ]
+    }
+   ]
+  },
+  "X04": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "cost of dependability",
+   "answerKey": "property, service requirement, costs and consequences",
+   "commonError": "Students read a percentage off the curve. It is on no page; the curve shows a trend, not a target."
+  },
+  "X05": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "inspectable process evidence",
+   "answerKey": "a dated change record another engineer can reconstruct",
+   "commonError": "Students treat the five attributes as five names for documentation. Read each row as a different requirement on the process.",
+   "answer": "Choose the auditable row. Request a dated change record for the upgrade. It should link the reviewed requirements, test results, independent reviewer and release decision. The filename, version and owner must let another engineer reconstruct how this release was approved.",
+   "rows": [
+    [
+     "Auditable",
+     "People outside the process can understand it, check that standards are followed and suggest improvements."
+    ],
+    [
+     "Diverse",
+     "The process includes redundant and diverse verification and validation activities."
+    ],
+    [
+     "Documentable",
+     "A defined process model sets out the activities and the documents each activity produces."
+    ],
+    [
+     "Robust",
+     "The process can recover from failures of individual process activities."
+    ],
+    [
+     "Standardized",
+     "A comprehensive set of development standards covers software production and documentation."
+    ]
+   ],
+   "lists": [
+    {
+     "source": 29,
+     "title": "Process diversity and redundancy",
+     "items": [
+      "Validation should not depend on a single approach, such as testing",
+      "Redundant and diverse process activities matter most for verification and validation",
+      "Different activities that complement each other allow cross-checking and avoid process errors"
+     ]
+    }
+   ]
+  },
+  "R18": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "agile practice with traceable evidence",
+   "answerKey": "test-first plus a linked release record",
+   "commonError": "Students answer “we would have tested more”. Ask which of three they mean: a named approver, an exercised rollback, or a staged release."
+  },
+  "CHECK2": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "what a second identical server protects against",
+   "answerKey": "independent hardware faults only",
+   "commonError": "Students say the second server doubles reliability. Ask which failures it shares with the first: the faulty requirements.",
+   "added": true,
+   "takeaway": "A second identical server protects against independent hardware faults, not against the requirements both share.",
+   "question": "Two identical servers share the same faulty requirements. What does the second server protect against?"
+  },
+  "X06": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "formal method activities",
+   "answerKey": "specification analysis and proof",
+   "commonError": "Students ask for model checking here. Keep the four source activities; model checking comes two slides later.",
+   "concept2": "formal method activities",
+   "answerKey2": "program verification",
+   "question": "Which activity checks the specification before any code exists?",
+   "answer": "Specification analysis and proof. It checks properties of the specification before implementation. It cannot show that the requirements captured every real-world need.",
+   "question2": "Which activity checks a program against its specification?",
+   "answer2": "Program verification. It proves that the program conforms to its specification. Agreement with the specification does not show that every user need was captured.",
+   "lists": [
+    {
+     "source": 40,
+     "title": "Formal methods include",
+     "items": [
+      "Formal specification",
+      "Specification analysis and proof",
+      "Transformational development",
+      "Program verification"
+     ]
+    },
+    {
+     "source": 42,
+     "title": "Use of formal methods",
+     "items": [
+      "Their principal benefit is fewer faults in systems",
+      "Their main area is dependable systems engineering, with several successful projects",
+      "They are most likely to pay off where failure costs are high"
+     ]
+    }
+   ]
+  },
+  "X06A": {
+   "minutes": 1.5,
+   "tier": "optional",
+   "concept": "verification versus refinement",
+   "answerKey": "verification-based; refinement transforms step by step",
+   "commonError": "Students think a proof of agreement checks the requirements. Both routes still depend on the specification and its assumptions.",
+   "lists": [
+    {
+     "source": 41,
+     "title": "Formal approaches",
+     "items": [
+      "Verification-based: a specification and a program are proved equivalent, which shows the absence of implementation errors",
+      "Refinement-based: a representation is transformed step by step into a lower-level one, so a correct transformation keeps them equivalent"
+     ]
+    }
+   ],
+   "bullets": [
+    [
+     "Verification-based",
+     "Prove that a specification and a program agree."
+    ],
+    [
+     "Refinement-based",
+     "Transform the specification step by step into an implementation."
+    ],
+    [
+     "Shared limit",
+     "Both depend on the specification and the environment assumptions."
+    ]
+   ]
+  },
+  "X06B": {
+   "minutes": 2,
+   "tier": "core",
+   "concept": "what a model result establishes",
+   "answerKey": "a violating trace in the model",
+   "commonError": "Students take a clean model-checking run as proof the plant is safe. Ask what the model assumes about the sensor and the operator.",
+   "concept2": "limits of a model",
+   "answerKey2": "sensor accuracy needs separate evidence",
+   "question": "For the switch-over model, what would a counterexample show?",
+   "answer": "A reachable sequence that breaks the stated property. For example, both channels unavailable while the model requires supply. That would challenge the modelled switch-over logic. No model-checking run is claimed in this teaching example.",
+   "question2": "Name one real-world assumption that the model cannot establish by itself.",
+   "answer2": "Sensor accuracy. The model also cannot establish a complete model of the environment or actual operator behaviour. Each needs separate evidence.",
+   "lists": [
+    {
+     "source": 43,
+     "title": "Classes of error found by formal methods",
+     "items": [
+      "Specification and design errors: a formal model reveals requirement gaps, and model checking finds bad states such as deadlock",
+      "Inconsistencies between a specification and a program: refinement avoids them and program proving discovers them"
+     ]
+    },
+    {
+     "source": 45,
+     "title": "Acceptance of formal methods",
+     "items": [
+      "Problem owners cannot read a formal specification, so they cannot judge whether it is accurate",
+      "The costs are easy to assess but the benefits are hard to assess, so managers hesitate",
+      "Engineers are unfamiliar with the approach and reluctant to propose it",
+      "Formal methods are still hard to scale up to large systems",
+      "Formal specification does not fit well with agile methods"
+     ]
+    }
+   ]
+  },
+  "APPLY": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "decision with evidence, limit and owner",
+   "answerKey": "hold or revert pending the verified reading, with an owner",
+   "commonError": "Students fill every box with an opinion. Sample the reasoning: which fact is given, which evidence is requested, and who owns the decision.",
+   "added": true,
+   "bullets": [
+    [
+     "Claim",
+     "State what can be justified now."
+    ],
+    [
+     "Evidence",
+     "Name a real source or an observation from the case."
+    ],
+    [
+     "Limit",
+     "Identify what is unknown and what would change the decision."
+    ]
+   ],
+   "takeaway": "A decision with limits needs evidence, a stated limit and an owner, not another opinion.",
+   "answer": "One defensible request is an independently verified pressure reading matched to the alarm and switch-over log. It helps separate a real pressure excursion from a sensor fault. Pending that evidence, state a hold or revert decision with its owner and the condition for resuming operation. This is one defensible approach, not the only acceptable decision. Separate facts from requested evidence and name the limit of the claim. Name who must be told: the next shift, the utility and, if drinking water could be affected, the public. The detector may help operators rank alarms. It must not by itself suppress protection. Count it as evidence only with an independent input and plant-specific evidence that its scores mean what they claim.",
+   "title": "Apply it · defend one decision with limits"
+  },
+  "CHALLENGE": {
+   "minutes": 3,
+   "tier": "core",
+   "concept": "revising under new evidence",
+   "answerKey": "agreement from one transmitter is not independence",
+   "commonError": "Students keep their first answer and add the detector as a third vote. Ask what all three readings share: one transmitter.",
+   "twist": true,
+   "added": true,
+   "bullets": [
+    [
+     "Think",
+     "Both readings and the AI detector depend on one transmitter."
+    ],
+    [
+     "Pair",
+     "Three agreeing sources, one measurement: explain what changes."
+    ],
+    [
+     "Record",
+     "Limit the claim, request an independently verified reading and name who accepts the revised scope."
+    ]
+   ],
+   "answer": "The two readings share one cause, so agreement cannot establish independence. A defensible revision withholds an unqualified approval. It requests an independently verified pressure reading matched to the logs. Name the observation that could change that decision and a human reviewer. When AI is used, its draft is not completed verification evidence. The detector's 0.91 adds no independent evidence either: it reads the same transmitter. Remove it from the evidence for this claim, or give it an independent input, and say so in the revision. Other decisions with limits can be defensible if their assumptions are explicit. Saying plainly what changed in your reasoning is part of the answer, not a weakness in it."
+  },
+  "END": {
+   "minutes": 3,
+   "tier": "core"
+  }
+ },
+ "stations": [
+  {
+   "no": 1,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "evidence versus inference",
+   "answerKey": "the detector's label is a hypothesis, not evidence",
+   "think": "Devices down. Which evidence separates a real pressure excursion from a sensing fault, and does the AI label count?",
+   "pair": "Name one assumption and one given fact you need to support your answer.",
+   "write": "Write your claim and its evidence. Mark any test you only propose as proposed.",
+   "hint": "Name the service or property first. Use a source definition and the given facts. Ask which missing fact would change your claim. Decide whether the AI detector's label is an observation or an inference.",
+   "note": "Think without devices, then pair. Choosing when not to use technology is part of using it well. Use the same card; nobody is marked on field length or a timer.",
+   "answer": "An answer with limits separates the given facts from the needed evidence. A source explanation supports a mechanism. It does not prove the fictional plant passed a test. The detector's label is an inference, not an observation. Until you know its inputs and its validated performance on this plant, record it as a hypothesis, not as evidence.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Names the mechanism",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the chapter mechanism that decides the case and says how it applies."
+       ],
+       [
+        1,
+        "Partial",
+        "Names a mechanism but does not connect it to the case facts."
+       ],
+       [
+        0,
+        "Missing",
+        "No chapter mechanism, or the wrong one."
+       ]
+      ]
+     },
+     {
+      "name": "Uses only the given facts",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Every statement rests on a given fact or is marked as an assumption."
+       ],
+       [
+        1,
+        "Partial",
+        "Mostly given facts, but one invented or unmarked assumption."
+       ],
+       [
+        0,
+        "Missing",
+        "Relies on facts the case does not give."
+       ]
+      ]
+     },
+     {
+      "name": "Evidence another person can check",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names evidence a second engineer could inspect, and marks proposed tests as proposed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names evidence, but it is vague or its status is unclear."
+       ],
+       [
+        0,
+        "Missing",
+        "Opinion or confidence instead of evidence."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "Claim: we cannot yet tell a real excursion from a sensor fault. Evidence: the alarm log and the switch-over log are given; an independently verified pressure reading is proposed. The AI label is a hypothesis until its inputs are known.",
+     "why": "Names the mechanism (failure cause), keeps to the given facts and proposes a checkable observation."
+    },
+    "weak": {
+     "text": "It is a sensor fault because the AI said 0.91 and the software was just upgraded.",
+     "why": "Treats an inference as evidence; the upgrade is a hypothesis presented as a fact."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 2,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "diversity in input, not only algorithm",
+   "answerKey": "a second transmitter is diverse in sensing; the detector may not be",
+   "think": "Compare two mechanisms: a physically separate second transmitter, or the AI detector as a diverse check. Which one would you choose?",
+   "pair": "Ask your partner to argue for the mechanism you rejected. Name one trade-off and one thing both mechanisms share.",
+   "write": "Write why your mechanism supports your claim, and what you are still unsure of.",
+   "hint": "Explain why the mechanism affects your claim. Then name a shared cause, a mismatch or a limit outside its evidence.",
+   "answer": "Tie the chosen mechanism to the required property. Say what the alternative improves or sacrifices. Evidence of a shared dependency or mismatched assumption can defeat an apparently stronger design. The detector is diverse in algorithm but may not be diverse in input. A second, independently powered transmitter is diverse in sensing. It costs installation and validation.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Links the mechanism to the property",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Explains how the chosen mechanism affects the property at stake."
+       ],
+       [
+        1,
+        "Partial",
+        "Names the mechanism without the link to the property."
+       ],
+       [
+        0,
+        "Missing",
+        "No mechanism, or no property."
+       ]
+      ]
+     },
+     {
+      "name": "Names a shared cause or limit",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names a specific shared cause, mismatch or limit that could defeat the mechanism."
+       ],
+       [
+        1,
+        "Partial",
+        "Mentions a limit in general terms only."
+       ],
+       [
+        0,
+        "Missing",
+        "Treats the mechanism as always enough."
+       ]
+      ]
+     },
+     {
+      "name": "States the trade-off",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Says what the alternative improves and what it costs."
+       ],
+       [
+        1,
+        "Partial",
+        "Gives one side of the trade-off only."
+       ],
+       [
+        0,
+        "Missing",
+        "No comparison with the alternative."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "A second, independently powered transmitter, because reliability of the reading needs a different sensing path. Its limit: it still needs calibration and validation. The detector is cheaper but may read the same input.",
+     "why": "Links the mechanism to the property, names the shared-input limit and states the cost."
+    },
+    "weak": {
+     "text": "Use the AI detector: it is a different algorithm, so it is diverse.",
+     "why": "Confuses algorithm diversity with input diversity; no limit and no trade-off."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  },
+  {
+   "no": 3,
+   "minutes": 4,
+   "tier": "optional",
+   "concept": "revising after the twist",
+   "answerKey": "three readings of one transmitter count as one",
+   "think": "Two nominally separate readings use the same transmitter and power supply. The vendor's notes show the AI detector scores the signal from that same transmitter. Does your first decision still hold?",
+   "pair": "Explain what changes in your claim, your evidence or its scope.",
+   "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
+   "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
+   "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The AI detector's agreement is a third reading of the same transmitter. It cannot be counted as independent confirmation.",
+   "rubric": {
+    "criteria": [
+     {
+      "name": "Says what the new fact changes",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the assumption the new fact breaks and what it leaves intact."
+       ],
+       [
+        1,
+        "Partial",
+        "Notes the new fact without saying which assumption it breaks."
+       ],
+       [
+        0,
+        "Missing",
+        "Ignores or restates the new fact."
+       ]
+      ]
+     },
+     {
+      "name": "Revises with a reason",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Keeps, changes or replaces the decision for a reason from the new fact. Says what the first answer got wrong."
+       ],
+       [
+        1,
+        "Partial",
+        "Changes the decision without a clear reason, or hides the first answer."
+       ],
+       [
+        0,
+        "Missing",
+        "Repeats the first answer unchanged."
+       ]
+      ]
+     },
+     {
+      "name": "Names the owner and who is told",
+      "levels": [
+       [
+        2,
+        "Strong",
+        "Names the role that decides and the people who must be informed."
+       ],
+       [
+        1,
+        "Partial",
+        "Names one of the two."
+       ],
+       [
+        0,
+        "Missing",
+        "Names neither the owner nor who is told."
+       ]
+      ]
+     }
+    ],
+    "marks": "2 marks per criterion, 6 in total. Not graded in class. The same reasoning earns the assignment points.",
+    "strong": {
+     "text": "My first card counted the two readings as independent; they share one transmitter and one power supply. Revise: hold the release and request a reading from a separate instrument. The plant manager decides; the next shift and the utility are told.",
+     "why": "Names the broken assumption, revises with a reason, admits the first error, names owner and audience."
+    },
+    "weak": {
+     "text": "Keep my answer: three sources agree, so it is a sensor fault.",
+     "why": "Ignores the shared transmitter; names nobody."
+    },
+    "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
+   }
+  }
+ ],
+ "quiz": [
+  {
+   "concept": "probability versus judgment properties",
+   "answerKey": "safety is a judgment",
+   "beyondCase": true,
+   "why": "Availability and reliability are defined as probabilities that can be measured. Safety, security and resilience are judgments that must be argued from evidence."
+  },
+  {
+   "concept": "sociotechnical investigation",
+   "answerKey": "people, interface, procedures and technology"
+  },
+  {
+   "concept": "common software fault in replicas",
+   "answerKey": "a shared fault affects both"
+  },
+  {
+   "concept": "inspectable process evidence",
+   "answerKey": "a versioned review record",
+   "beyondCase": true
+  },
+  {
+   "concept": "scope of formal verification",
+   "answerKey": "conformance of the model to a property",
+   "beyondCase": true
+  }
+ ],
+ "activities": [
+  {
+   "id": "VOTE2",
+   "label": "Class vote · Act 2",
+   "at": "CHECK1",
+   "minutes": 3,
+   "tier": "core"
+  },
+  {
+   "id": "VOTE4",
+   "label": "Class vote · Act 4",
+   "at": "CHECK2",
+   "minutes": 3,
+   "tier": "core"
+  }
+ ],
+ "coverage": {
+  "1": {
+   "cls": "no",
+   "reason": "Title slide of the source pack"
+  },
+  "2": {
+   "cls": "no",
+   "reason": "Agenda slide; its topics are the chapter map"
+  },
+  "3": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "4": {
+   "cls": "no",
+   "reason": "Why dependability matters; in the study list"
+  },
+  "5": {
+   "cls": "slide",
+   "unit": "X02"
+  },
+  "6": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "7": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "8": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "9": {
+   "cls": "slide",
+   "unit": "X01"
+  },
+  "10": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X02"
+  },
+  "11": {
+   "cls": "full",
+   "unit": "X01"
+  },
+  "12": {
+   "cls": "full",
+   "unit": "X02A"
+  },
+  "13": {
+   "cls": "slide",
+   "unit": "X02A"
+  },
+  "14": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X04"
+  },
+  "15": {
+   "cls": "slide",
+   "unit": "X04"
+  },
+  "16": {
+   "cls": "no",
+   "reason": "Economics of accepting failure costs; in the study list"
+  },
+  "17": {
+   "cls": "no",
+   "reason": "Section divider slide with no content",
+   "kind": "title"
+  },
+  "18": {
+   "cls": "no",
+   "reason": "Systems-engineering context and the weather-station example; in the study list"
+  },
+  "19": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "20": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "21": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "22": {
+   "cls": "slide",
+   "unit": "X03"
+  },
+  "23": {
+   "cls": "no",
+   "reason": "Economic model behind regulation; in the study list"
+  },
+  "24": {
+   "cls": "full",
+   "unit": "X03"
+  },
+  "25": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X03"
+  },
+  "26": {
+   "cls": "slide",
+   "unit": "R08",
+   "kind": "title"
+  },
+  "27": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "list",
+   "items": [
+    "Redundancy: keep more than a single version of critical components so that a backup is available",
+    "Diversity: provide the same functionality in different ways so components do not fail in the same way",
+    "Redundant and diverse components should be independent, free of common-mode failures, e.g. different programming languages"
+   ],
+   "unit": "R08"
+  },
+  "28": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "list",
+   "items": [
+    "Redundancy: backup servers with automatic switch-over where availability is critical",
+    "Diversity: servers on different operating systems to resist external attacks"
+   ],
+   "unit": "R08"
+  },
+  "29": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "list",
+   "items": [
+    "Validation should not depend on a single approach such as testing",
+    "Redundant and diverse process activities are important for verification and validation",
+    "Multiple complementary activities allow cross-checking and avoid process errors"
+   ],
+   "unit": "X05"
+  },
+  "30": {
+   "cls": "slide",
+   "unit": "R08",
+   "kind": "list",
+   "items": [
+    "Diversity and redundancy increase system complexity",
+    "Complexity can increase the chances of error through unanticipated interactions",
+    "Some engineers advocate simplicity and extensive V&V instead",
+    "Airbus FCS is redundant and diverse; Boeing 777 FCS has no software diversity"
+   ]
+  },
+  "31": {
+   "cls": "no",
+   "reason": "Section divider slide with no content",
+   "kind": "title"
+  },
+  "32": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "33": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "34": {
+   "cls": "slide",
+   "unit": "X05"
+  },
+  "35": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "36": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "37": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "38": {
+   "cls": "full",
+   "unit": "X05"
+  },
+  "39": {
+   "cls": "slide",
+   "unit": "R18"
+  },
+  "40": {
+   "cls": "slide",
+   "unit": "X06",
+   "kind": "list",
+   "items": [
+    "Formal specification",
+    "Specification analysis and proof",
+    "Transformational development",
+    "Program verification"
+   ]
+  },
+  "41": {
+   "cls": "slide",
+   "unit": "X06A",
+   "kind": "list",
+   "items": [
+    "Verification-based approaches: representations are proved equivalent",
+    "Refinement-based approaches: a representation is systematically transformed into a lower-level one"
+   ]
+  },
+  "42": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "prose",
+   "items": [
+    " The principal benefits of formal methods are in reducing",
+    "the number of faults in systems.",
+    " Consequently, their main area of applicability is in",
+    "dependable systems engineering. There have been",
+    "several successful projects where formal methods have",
+    "been used in this area.",
+    " In this area, the use of formal methods is most likely to",
+    "be cost-effective because high system failure costs must",
+    "be avoided."
+   ],
+   "unit": "X06"
+  },
+  "43": {
+   "cls": "slide",
+   "reason": "TODO",
+   "kind": "list",
+   "items": [
+    "Specification and design errors and omissions",
+    "Inconsistencies between a specification and a program"
+   ],
+   "unit": "X06B"
+  },
+  "44": {
+   "cls": "slide",
+   "unit": "X06"
+  },
+  "45": {
+   "cls": "slide",
+   "reason": "TODO",
+   "unit": "X06B"
+  },
+  "46": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  },
+  "47": {
+   "cls": "no",
+   "reason": "Summary slide; its points are taught on the slides above"
+  }
+ },
+ "studyList": [
+  {
+   "topic": "Why dependability matters and what failure costs",
+   "sources": [
+    3,
+    4,
+    14,
+    16
+   ],
+   "note": "Be able to explain the four reasons failures matter and why higher dependability costs rise steeply."
+  },
+  {
+   "topic": "The five principal properties and the other properties",
+   "sources": [
+    8,
+    9,
+    10,
+    11
+   ],
+   "note": "Which are probabilities and which are judgments; how the properties depend on each other."
+  },
+  {
+   "topic": "Causes of failure and the six ways to achieve dependability",
+   "sources": [
+    5,
+    12,
+    13
+   ],
+   "note": "Hardware, software and operational causes; avoid, detect, tolerate, protect, configure, recover."
+  },
+  {
+   "topic": "The sociotechnical stack, regulation and compliance",
+   "sources": [
+    18,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+   ],
+   "note": "Name the seven layers and explain why certification covers the whole system, not only the software."
+  },
+  {
+   "topic": "Redundancy, diversity and their problems",
+   "sources": [
+    27,
+    28,
+    29,
+    30
+   ],
+   "note": "Required reading. Define both terms, give one example each and state why complexity can cancel the benefit."
+  },
+  {
+   "topic": "Dependable processes: attributes, activities and agility",
+   "sources": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38
+   ],
+   "note": "The five attributes and the process activities; what agile methods must keep for critical systems."
+  },
+  {
+   "topic": "Formal methods: activities, approaches, classes of error and acceptance",
+   "sources": [
+    40,
+    41,
+    42,
+    43,
+    44,
+    45
+   ],
+   "note": "Required reading for 40–43. Know the four activities, the two approaches and the five reasons for limited adoption."
+  }
+ ],
+ "aiAssignment": {
+  "hints": {
+   "bound": "An observable condition, something you would see, that ends the claim."
+  },
+  "scenario": "A hospital adds an AI dose-check assistant to its medication cabinets. Before a nurse dispenses a drug, the assistant flags doses it predicts are unusual. The pharmacy's rule engine also checks each dose against the drug library. Management wants to report that dispensing is now “highly dependable”.",
+  "stress": "An audit finds that the AI assistant and the rule engine both read the same drug-library file. That file lists one high-risk drug in the wrong unit. Both checks agreed that a tenfold overdose was normal."
+ }
+}

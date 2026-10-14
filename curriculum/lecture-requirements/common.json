@@ -1,0 +1,16 @@
+{
+  "lectureMinutes": 50,
+  "budgetShare": 0.85,
+  "storyFirstChapter": 12,
+  "assignmentRubricFromChapter": 12,
+  "timeRule": "If the lecture runs over time, drop optional slides first, in reverse order. Never drop a think point (checkpoint or Your call) and never drop the assumption-change slide. Say which optional slide was dropped and point students to its full explanation.",
+  "forbiddenTerms": ["claim", "warrant", "bounded", "acceptance check", "contract assumption", "denominator"],
+  "rubricTemplate": {
+    "levels": [[2, "Strong", ""], [1, "Partial", ""], [0, "Missing", ""]],
+    "stations": {
+      "1": ["Names the mechanism", "Uses only the given facts", "Evidence another person can check"],
+      "2": ["Links the mechanism to the property", "Names a shared cause or limit", "States the trade-off"],
+      "3": ["Says what the new fact changes", "Revises with a reason", "Names the owner and who is told"]
+    }
+  }
+}

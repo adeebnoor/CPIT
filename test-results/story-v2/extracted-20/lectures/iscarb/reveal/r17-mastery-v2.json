@@ -2,5 +2,5 @@
   "chapter": "17",
   "version": "2026-09-ch17-mastery-v2",
   "label": "STRESS · new evidence",
-  "text": "A separate reviewed failover trace now shows that request identifiers and their outcomes are stored atomically with reservations in persistent storage. Replaying the same identifier after restart returns the existing outcome without a second reservation. This evidence covers a single booking store; it does not cover external payment side effects. Compare it with your simulator results and state whether retaining a bounded retry policy is justified."
+  "text": "A reviewer checks a separate record of switching to a backup and restarting. It shows that the request ID, its result and the reservation are saved together: either all are saved or none is (an atomic save). They remain in storage after restart. Sending the same ID again after restart returns the saved result without creating a second reservation. This evidence covers one booking store. It does not cover actions in an outside payment service. Compare this evidence with your simulator results and explain whether keeping your retry rule within these limits is justified."
 }
