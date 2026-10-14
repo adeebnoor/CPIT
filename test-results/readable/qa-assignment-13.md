@@ -4,13 +4,20 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-04  
-**Commit ID:** b534f38a-0ce2-4332-b957-149768825a62  
-**Part A committed:** 2026-10-04T22:06:05.625Z  
-**STRESS revealed:** 2026-10-04T22:06:05.638Z
+**Date:** 2026-10-14  
+**Commit ID:** 43f42e5c-f224-4823-a36c-52ded782153d  
+**Part A committed:** 2026-10-14T20:26:06.442Z  
+**STRESS revealed:** 2026-10-14T20:26:06.454Z
 
 ## Scenario
-A fictional university portal has student and staff roles. Students should access only their own project files; staff should access only the groups assigned to them. The interface hides other students’ files. A developer reports that every ordinary upload/download test passed. The API receives a project identifier in the request, but the brief contains no cross-user authorization test. Log retention is configured, but nobody has reviewed a sample for sensitive content. You recommend release, restricted access, or hold.
+A fictional university website stores student project files. It has two user roles: student and staff.
+
+Students may read only their own project files. Staff may read files only for the groups assigned to them.
+The screen hides other students' files. A developer says all normal upload and download tests passed.
+Each request sent to the server includes a project ID (the value that identifies a project). The API is the way the website sends these requests. The brief includes no test of a user requesting someone else's project.
+The system is set up to keep activity logs (records of what happened). Nobody has checked a sample for private information.
+
+Your decision: release the service, allow only limited access, or hold the release. Explain your choice using the facts above.
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -42,7 +49,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-04T22:06:05.459Z
+BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-14T20:26:06.258Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove your malformed-input handling and run again. Which known bug is no longer caught, and why?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

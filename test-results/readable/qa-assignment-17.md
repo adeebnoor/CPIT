@@ -4,13 +4,19 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-04  
-**Commit ID:** d7bfa874-a0b5-4d42-abb7-d38b155cda98  
-**Part A committed:** 2026-10-04T22:06:19.292Z  
-**STRESS revealed:** 2026-10-04T22:06:19.305Z
+**Date:** 2026-10-14  
+**Commit ID:** 6edac557-fb49-4e96-8236-fda867a7d767  
+**Part A committed:** 2026-10-14T20:26:20.925Z  
+**STRESS revealed:** 2026-10-14T20:26:20.936Z
 
 ## Scenario
-A fictional event-registration system uses a browser, an application service and a booking database. The browser sends a reservation request through the service. When the request times out, the browser automatically retries with a new request identifier. The database creates one reservation per new identifier. The brief confirms that normal requests succeed, but contains no test where the response is lost after a database commit. You recommend a pilot architecture and retry policy.
+A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.
+
+The browser sends a booking request through the service. If no reply arrives before the waiting time ends (timeout), the browser sends the request again with a new request ID.
+The database creates one reservation for each new request ID.
+Normal requests have succeeded. Nobody has tested what happens if the database saves a booking but the reply is then lost.
+
+Recommend how these parts should work together in a trial, and the rule for sending a request again (retry).
 
 ## FIT
 QA: Use a chapter mechanism, independent evidence, explicit conditions and a human owner; proposed checks are unmeasured.
@@ -42,7 +48,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-04T22:06:19.124Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-14T20:26:20.725Z
 Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass

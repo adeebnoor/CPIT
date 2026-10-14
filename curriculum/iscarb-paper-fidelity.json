@@ -790,6 +790,13 @@
     "lecture 17",
     "lecture 20"
    ]
+  },
+  {
+   "revision": "20261015-labels-counters",
+   "date": "2026-10-14",
+   "base_release": "20260926-genai-v12",
+   "summary": "AI challenge buttons say practice, not graded; counters reworded; announcement updated; source figure thumbnails load eagerly",
+   "repinned": []
   }
  ]
 }

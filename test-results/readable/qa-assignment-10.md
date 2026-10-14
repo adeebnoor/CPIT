@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-04  
-**Commit ID:** 7e80e874-0ba4-4eed-87b2-afa6bfdb9366  
-**Part A committed:** 2026-10-04T22:05:55.542Z  
-**STRESS revealed:** 2026-10-04T22:05:55.556Z
+**Date:** 2026-10-14  
+**Commit ID:** 6b0083f6-59bb-4f23-8f5a-1f172efcfa5b  
+**Part A committed:** 2026-10-14T20:25:55.810Z  
+**STRESS revealed:** 2026-10-14T20:25:55.825Z
 
 ## Scenario
 At 11:30, a fictional university's course-registration portal is experiencing intermittent errors during peak registration. Registration closes at 12:00. Two application servers support the portal, and automatic failover is enabled. The available failover test passed during a quiet period; no peak-load failover result is available. Current checks show that students can sign in and that confirmed registrations can be retrieved. No lost or duplicate registrations have been confirmed, but this has not yet been comprehensively checked. You are the duty software engineer. The registrar owns the registration deadline and may authorize an alternative submission route; you cannot change either policy yourself.Your decision: Recommend one immediate operating plan: continue with stated controls, limit operation, or pause the affected function. Start with one governing dependability property, one observable boundary, one action with a responsible role, and one inspectable evidence item. Explain any mechanism you rely on. State what is known and what you would still need to verify. Your plan must address students' ability to complete registration and the integrity of confirmed registrations. There is no single required choice.
