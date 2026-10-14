@@ -128,6 +128,19 @@ def apply_assignment(ch: int, req: dict) -> bool:
     return False
 
 
+def apply_levels_open(ch: int) -> bool:
+    """RUB-1/RUB-5: every rubric level (1 · 0.75 · 0.5 · 0) is visible before submission; the partial-credit levels stay
+    collapsible but start open. Assignments 1–2 (Chapters 10–11) are frozen and already show all levels inline."""
+    a = next((x for x in PUB['assignments'] if int(x['chapter']) == ch), None)
+    if not a or ch < int(common().get('assignmentRubricFromChapter', 12)):
+        return False
+    p = ROOT / a['path']; s = p.read_text(encoding='utf-8')
+    new = s.replace('<details class="levels">', '<details class="levels" open>')
+    if new != s:
+        p.write_text(new, encoding='utf-8'); return True
+    return False
+
+
 BOUND_MARK = '/* BOUND-4: the boundary sentence written in the lecture travels with the assignment */'
 
 
@@ -161,6 +174,8 @@ def main(argv: list[str]) -> int:
         apply_chapter(ch)
         if apply_bound_export(ch):
             print(f'Ch{ch} assignment: boundary sentence added to the export')
+        if apply_levels_open(ch):
+            print(f'Ch{ch} assignment: rubric levels shown open')
     pub = json.loads((ROOT / 'curriculum/publication.json').read_text(encoding='utf-8'))
     cfg = common()
     if pub.get('lecture_minutes') != cfg['lectureMinutes']:

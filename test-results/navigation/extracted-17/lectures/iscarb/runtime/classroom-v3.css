@@ -327,3 +327,6 @@ html[data-stage="v4"] .end-page .bound-block>.buttons button{padding:4px 10px;mi
 .act-scene,.twist-scene,.practice-scene{flex-wrap:wrap}
 .act-scene>p,.twist-scene>p,.practice-scene>p{flex:1 1 220px;min-width:0}
 @media (max-height:760px){.end-copy:has(.bound-block)>.end-success{display:none}}
+/* an open inline answer: the slide scrolls; the table / WHAT IT MEANS grid keeps its height instead of being overlapped */
+.chapter-main.answer-open{overflow-y:auto;scrollbar-width:thin}
+.chapter-main.answer-open .body-grid,html[data-stage="v4"] body.single-canvas #app .chapter-main.answer-open .body-grid{flex-shrink:0}

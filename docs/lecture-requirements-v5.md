@@ -93,3 +93,13 @@ Authored data: `curriculum/lecture-requirements/` (one JSON per lecture, applied
 | LANG-2 | "contract" is defined in the Chapter 15, 16 and 20 glossaries (Arabic: عقد الواجهة) and is now a checked term. |
 | CASE-2 | APPLY in Chapters 12, 14, 15, 16, 17 and 20 asks one ownership question, so "workflow", "cumulative limit" and "assistant" are no longer the answer to more than two questions. |
 | DATA-1 | No TODO placeholder may remain in lecture data or authored requirements; the build fails on one. |
+
+### Fourth review · follow-up
+
+| Item | What changed |
+|---|---|
+| GATE-1 | The course page counts a chapter as reviewed only when its transfer case is solved in the lecture (same browser). A mark saved before the gate existed is kept but does not count, and the page says why. The boxes re-check when the page regains focus or another tab saves lecture progress. The hub script has a new cache version so browsers fetch it. |
+| COMMIT export | The lecture's readable export uses headings, not raw field names. Examples: "When this chapter's mechanism is the wrong choice · your sentence", "Your call · ⟨slide title⟩", "Station N · your sentence before the discussion", and "Transfer case · solved / your last choice (option text)". |
+| RUB-1, RUB-5 | Assignments 3–9 show every rubric level (1 · 0.75 · 0.5 · 0) without opening anything; the partial-credit block starts open. The checker fails a folded level. `tools/check-assignment-pages.cjs` audits all nine assessed pages in a browser at 1366 and 390 px. It checks criteria, visible levels, points total, rubric before commit, strong/weak examples, the other-answer rule and the boundary sentence in the export. The status file lists each assignment. |
+| Reveal layout | An opened inline answer never covers the slide. The slide body keeps its height and the slide scrolls inside the stage (fixes Ch12 AISYS, the log slide). A sweep of every reveal in all nine lectures at three sizes passes. |
+| Course page | The 14 October announcement now describes writing before the reveal, the training-story and real-incident tags, the transfer check, and the boundary sentence. |
