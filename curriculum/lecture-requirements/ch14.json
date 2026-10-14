@@ -77,7 +77,17 @@
   "answer": "Recognition: the timer notices that the system has stopped responding. A restart starts recovery, but it does not restore calls lost meanwhile or check that dispatch data is intact. Those need their own evidence.",
   "concept": "the four Rs applied to a mechanism",
   "answerKey": "recognition by the watchdog timer",
-  "at": "X02"
+  "at": "X02",
+  "vote": {
+   "q": "Textbook ambulance dispatch: a watchdog timer restarts the system when it stops responding. Which resilience activity does the timer support?",
+   "options": [
+    "Recognition: it notices that the system has stopped responding",
+    "Reinstatement: it restores every service and normal operation",
+    "Resistance: it prevents the failure from happening"
+   ],
+   "answer": 0,
+   "why": "The timer detects that the system stopped responding. The restart begins recovery, but it does not restore lost calls or check dispatch data."
+  }
  },
  "slides": {
   "TITLE": {
@@ -366,7 +376,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": true
+   "transfer": true,
+   "seconds": 210
   },
   {
    "no": 2,
@@ -453,20 +464,21 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   },
   {
    "no": 3,
    "minutes": 3,
    "tier": "core",
-   "concept": "revising after the twist",
-   "answerKey": "plan and rehearse recovery with the assistant unavailable",
+   "concept": "dependency order in recovery",
+   "answerKey": "restore identity through the audited emergency route before using the copy",
    "think": "The alternate data copy is available, but it depends on the same unavailable identity service. Staff sign in to the AI recovery assistant through that service too, and its instructions assume the primary copy. Does your first decision still hold?",
    "pair": "Explain what changes in your claim, your evidence or its scope.",
    "write": "Record the new evidence and your revised decision with its limits. Say plainly what your first card got wrong. Name the responsible role and who must be told.",
    "hint": "Do not simply repeat your first answer. Name the changed assumption, the next evidence and the condition that would change your decision.",
    "note": "Classroom version only. The assessed assignment has its own new evidence, revealed after you commit.",
-   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The assistant is a third path through the same identity service, so it fails with everything else. Recovery must be planned and rehearsed with the assistant unavailable.",
+   "answer": "The new fact changes the stated assumption, so the original evidence cannot be widened silently. Retain, restrict or revise the decision with a reason, a new verification requirement and a named owner. The copy cannot be used until someone can sign in. So restore identity first, through the audited emergency route, then the copy. The assistant signs in through the same service, so it cannot lead this step.",
    "rubric": {
     "criteria": [
      {
@@ -541,7 +553,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   }
  ],
  "quiz": [

@@ -347,7 +347,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   },
   {
    "no": 2,
@@ -434,7 +435,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": true
+   "transfer": true,
+   "seconds": 210
   },
   {
    "no": 3,
@@ -522,7 +524,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   }
  ],
  "quiz": [

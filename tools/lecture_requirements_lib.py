@@ -163,6 +163,11 @@ def student_texts(data: dict, story: list | None = None) -> list[tuple[str, str]
     tr = data.get('transfer') or {}
     for k in ('title', 'text', 'question', 'answer'):
         add(f'transfer.{k}', tr.get(k))
+    tv = tr.get('vote') or {}
+    add('transfer.vote.q', tv.get('q'))
+    add('transfer.vote.why', tv.get('why'))
+    for o in tv.get('options', []):
+        add('transfer.vote.option', o)
     for g in data.get('glossary') or []:
         add(f'glossary.{g.get("term")}', g.get('short'))
     for it in data.get('studyList') or []:

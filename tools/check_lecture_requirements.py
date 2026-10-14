@@ -323,6 +323,10 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
     at = next((s for s in slides if s['id'] == tr.get('at')), None)
     ok3 = bool(at and at.get('transfer') and at.get('question') == tr.get('question') and at.get('answer') == tr.get('answer'))
     st_tr = [x for x in data.get('stations', []) if x.get('transfer')]
+    vote_on_transfer = any(a.get('at') == tr.get('at') and a.get('id', '').startswith('VOTE') for a in data.get('activities') or [])
+    if vote_on_transfer:
+        v = tr.get('vote') or {}
+        ok3 = ok3 and bool(v.get('q') and len(v.get('options') or []) >= 2 and isinstance(v.get('answer'), int)) and 'voteItem' in runtime
     ok3 = ok3 and len(st_tr) >= 1 and all(ids.index(x['at']) > ids.index(tr['at']) for x in st_tr) and 'station-transfer' in runtime
     R.set(ch, 'CASE-3', ok3, [] if ok3 else ['the transfer slide must carry the transfer question, and a later station must apply the transfer case as a step'])
     ok4 = any(q.get('beyondCase') for q in data.get('quiz', []))
@@ -340,9 +344,13 @@ def check_chapter(ch: int, R: Report, story_all: dict, runtime: str, cfg: dict, 
     for st in data.get('stations', []):
         if not isinstance(st.get('minutes'), (int, float)) or st.get('tier') not in ('core', 'optional'):
             bad.append(f"station {st.get('no')}: minutes/tier")
+        elif int(st.get('seconds') or 180) != round(st['minutes'] * 60):
+            bad.append(f"station {st.get('no')}: timer {st.get('seconds') or 180} s does not match its {st['minutes']} min budget")
     for a in data.get('activities') or []:
         if not isinstance(a.get('minutes'), (int, float)) or a.get('tier') not in ('core', 'optional') or a.get('at') not in ids:
             bad.append(f"activity {a.get('id')}: minutes/tier/at")
+        if a.get('id', '').startswith('VOTE') and ch < cfg.get('storyFirstChapter', 12):
+            bad.append(f"activity {a.get('id')}: class votes appear only in story lectures (Chapter {cfg.get('storyFirstChapter', 12)} onwards)")
     R.set(ch, 'TIME-1', not bad, bad)
     core = sum(s.get('minutes') or 0 for s in slides if s.get('tier') == 'core')
     core += sum(st.get('minutes') or 0 for st in data.get('stations', []) if st.get('tier') == 'core')

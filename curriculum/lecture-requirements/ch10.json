@@ -133,7 +133,7 @@
   },
   "X07": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "fault, error and failure chain",
    "answerKey": "fault activated, wrong state, visible deviation",
    "commonError": "Students write “the system failed because of a software error”, which names two terms and explains neither. Correct the order: fault, error, failure.",
@@ -205,7 +205,7 @@
   },
   "X04": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "cost of dependability",
    "answerKey": "property, service requirement, costs and consequences",
    "commonError": "Students read a percentage off the curve. It is on no page; the curve shows a trend, not a target."
@@ -253,7 +253,7 @@
   },
   "R18": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "agile practice with traceable evidence",
    "answerKey": "test-first plus a linked release record",
    "commonError": "Students answer “we would have tested more”. Ask which of three they mean: a named approver, an exercised rollback, or a staged release."
@@ -305,7 +305,7 @@
   },
   "X06A": {
    "minutes": 1.5,
-   "tier": "optional",
+   "tier": "core",
    "concept": "verification versus refinement",
    "answerKey": "verification-based; refinement transforms step by step",
    "commonError": "Students think a proof of agreement checks the requirements. Both routes still depend on the specification and its assumptions.",
@@ -511,7 +511,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   },
   {
    "no": 2,
@@ -598,7 +599,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": true
+   "transfer": true,
+   "seconds": 210
   },
   {
    "no": 3,
@@ -686,7 +688,8 @@
     },
     "other": "Other answers are accepted when they use a chapter mechanism and rest on the given facts. They must also name evidence someone else can check. A different decision with those three is as strong as the model answer."
    },
-   "transfer": false
+   "transfer": false,
+   "seconds": 180
   }
  ],
  "quiz": [
@@ -715,22 +718,7 @@
    "beyondCase": true
   }
  ],
- "activities": [
-  {
-   "id": "VOTE2",
-   "label": "Class vote · Act 2",
-   "at": "CHECK1",
-   "minutes": 3,
-   "tier": "core"
-  },
-  {
-   "id": "VOTE4",
-   "label": "Class vote · Act 4",
-   "at": "CHECK2",
-   "minutes": 3,
-   "tier": "core"
-  }
- ],
+ "activities": [],
  "coverage": {
   "1": {
    "cls": "no",
