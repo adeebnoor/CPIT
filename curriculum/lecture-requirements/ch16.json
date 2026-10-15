@@ -1196,5 +1196,13 @@
  "bound": {
   "model": "Connecting two components directly is the wrong choice when their interfaces do not state the same unit and range.",
   "condition": "the two interfaces state different or no units"
+ },
+ "their": {
+  "at": "APPLY",
+  "run1": "Run 1 · your adapter tests: 3 of 3 pass ✓",
+  "before": "reserve(room_id, duration)   # duration in seconds, 1..7200",
+  "after": "reserve(room_id, duration)   # duration in milliseconds, 1..7,200,000",
+  "who": "the component team changed this line",
+  "question": "Do your tests still pass, and is the answer still correct? Write your prediction."
  }
 }

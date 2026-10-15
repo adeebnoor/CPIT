@@ -1231,5 +1231,13 @@
  "bound": {
   "model": "Retrying after a timeout is the wrong choice when the operation has an outside effect and no request identity.",
   "condition": "the call sends, charges or writes something and carries no request key"
+ },
+ "their": {
+  "at": "APPLY",
+  "run1": "Run 1 · your retry tests: 3 of 3 pass ✓",
+  "before": "retry after a lost reply: send the same request_id",
+  "after": "retry after a lost reply: send a new request_id",
+  "who": "the remote app team changed this line",
+  "question": "Do your tests still pass, and is the answer still correct? Write your prediction."
  }
 }

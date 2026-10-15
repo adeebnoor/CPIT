@@ -141,3 +141,31 @@ def __run(helpers, student, checks, mutants=""):
         except BaseException as e:
             out["checks"].append([label, False, "your code raised " + __last_line(e)])
     return json.dumps(out)
+
+def __their(helpers, student, their):
+    """Run 3 · their change: a part you did not write changes; your code and tests stay as they are."""
+    ns = {"__name__": "student"}
+    out = {"tests": [], "evidence": [], "correct": None, "error": None}
+    tns = {"__name__": "their"}
+    try:
+        exec(helpers, ns)
+        exec(their, tns)
+        tns["install"](ns)
+        exec(compile(student, "your_code.py", "exec"), ns)
+    except BaseException as e:
+        out["error"] = "Your code did not run: " + __last_line(e)
+        return json.dumps(out)
+    for name in sorted(k for k, v in list(ns.items()) if k.startswith("test_") and callable(v)):
+        try:
+            ns[name]()
+            out["tests"].append([name, True, ""])
+        except AssertionError as e:
+            out["tests"].append([name, False, "assertion failed" + (": " + str(e) if str(e) else "")])
+        except BaseException as e:
+            out["tests"].append([name, False, __last_line(e)])
+    try:
+        lines, correct = tns["scenario"](ns)
+        out["evidence"], out["correct"] = [str(x) for x in lines], bool(correct)
+    except BaseException as e:
+        out["evidence"], out["correct"] = ["your code raised " + __last_line(e) + " on the shared case"], False
+    return json.dumps(out)

@@ -17,7 +17,7 @@ SLIDE_KEYS = ('minutes', 'tier', 'concept', 'answerKey', 'concept2', 'answerKey2
               'rows', 'heads', 'notes', 'title', 'sourceRange', 'sourceLabel')
 STATION_KEYS = ('minutes', 'seconds', 'tier', 'concept', 'answerKey', 'transfer', 'think', 'pair', 'write', 'hint', 'answer', 'note', 'rubric', 'title')
 QUIZ_KEYS = ('concept', 'answerKey', 'beyondCase', 'q', 'options', 'why', 'answer')
-LECTURE_KEYS = ('glossary', 'transfer', 'studyList', 'activities', 'hook', 'timeRule', 'bound')
+LECTURE_KEYS = ('glossary', 'transfer', 'studyList', 'activities', 'hook', 'timeRule', 'bound', 'their')
 RUB_START, RUB_END = '<!-- rubric-examples:start -->', '<!-- rubric-examples:end -->'
 
 

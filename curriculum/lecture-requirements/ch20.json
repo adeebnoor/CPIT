@@ -1283,5 +1283,13 @@
  "bound": {
   "model": "Showing a partner's feed as live is the wrong choice when the dashboard cannot see how old the data is.",
   "condition": "the feed carries no timestamp the dashboard can check"
+ },
+ "their": {
+  "at": "APPLY",
+  "run1": "Run 1 · your display tests: 3 of 3 pass ✓",
+  "before": "\"updated\": minute of the last update        # feed B, version v1",
+  "after": "\"updated\": minutes since the last update    # feed B, version still v1",
+  "who": "owner B changed this line",
+  "question": "Do your tests still pass, and is the answer still correct? Write your prediction."
  }
 }

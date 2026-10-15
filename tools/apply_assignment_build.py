@@ -38,6 +38,9 @@ CLO = {
 }
 CLO11 = 'Design and implement test cases across testing strategies'
 COVERAGE_MARK = '<div class="coverage-step" id="coverageStep">'
+# Run 3 · their change: a part the student did not write changes (Chapters 15, 16, 17, 20 only)
+THEIR_CH = (15, 16, 17, 20)
+THEIR_MARK = '/* THEIR-CHANGE: run 3 */'
 
 TASK = {
  0: ('Practice build: the loan rule', 'Write can_borrow(student, item) for the lab-equipment desk, and tests that try to break the rule. Not assessed: use it to learn the build before your first assignment.'),
@@ -118,6 +121,24 @@ FULL = ' <b>Build:</b> every course check passes, your own tests catch every kno
 OLD_FULL = ' <b>Build:</b> every course check passes, and your own tests (at least three) include a case that must be refused or must fail safely; the text uses what the build showed.'
 COV_A = ('"labEvidence"],M=', '"labEvidence", "coverageNote"],M=')
 COV_LABEL = ('"labEvidence": "BUILD RECORD"}', '"labEvidence": "BUILD RECORD", "coverageNote": "COVERAGE SENTENCE (COURSE OUTCOME 11)"}')
+THEIR_A = ('"labEvidence", "coverageNote"],M=', '"labEvidence", "coverageNote", "theirGreen", "theirCorrect", "theirNote", "theirFacts"],M=')
+THEIR_LABEL = ('"coverageNote": "COVERAGE SENTENCE (COURSE OUTCOME 11)"}',
+               '"coverageNote": "COVERAGE SENTENCE (COURSE OUTCOME 11)", "theirGreen": "THEIR CHANGE · YOUR TESTS", "theirCorrect": "THEIR CHANGE · THE RESULT", '
+               '"theirNote": "THEIR CHANGE · YOUR SENTENCE", "theirFacts": "THEIR CHANGE · RUN 3 RECORD (verified after commitment)"}')
+THEIR_SCRIPT = (THEIR_MARK + "(function(){if(!document.getElementById('theirFacts'))return;"
+ "function dec(v){try{return String(v||'').indexOf('their-v1:')===0?JSON.parse(atob(String(v).slice(9))):null}catch(e){return null}}"
+ "var bV=valA;valA=function(){var i=bV();if(i)return i;var ev=$('labEvidence').value;if(/TECHNICAL RUNNER FAILURE/.test(ev))return'';"
+ "var f=dec($('theirFacts').value),h=((ev.match(/Code fingerprint: ([0-9a-f]{16})/)||[])[1]||'');"
+ "if(!f||f.h!==h||!/THEIR CHANGE · run 3/.test(ev))return'Run 3 · their change: when your tests pass, run their change without editing your code or tests, then answer the two questions.';return''};"
+ "var bM=md;md=function(final=false){var t=bM(final),d=data(),a=d.partA||{},f=dec(a.theirFacts),line;"
+ "if(!d.locked)line='The run 3 verdict is added to this record when Part A is committed.';else if(!f)line='Run 3 was not recorded.';"
+ "else{var g=/^Yes/.test(a.theirGreen||''),c=/^Yes/.test(a.theirCorrect||''),met=g===f.green&&c===f.correct;"
+ "line='The run showed: your tests '+(f.green?'stayed green':'turned red')+'; the result '+(f.correct?'was still correct':'was no longer correct')+'.\\n'"
+ "+'Your answer: tests '+(g?'green':'red')+'; result '+(c?'correct':'not correct')+'.\\n'"
+ "+'THEIR CHANGE row: '+(met?'met':'NOT MET (your answer does not match the run)')+'. This row adds no points.';}"
+ "return t+'\\n\\n## THEIR CHANGE · run 3 verdict\\n'+line+'\\n';};"
+ "var bL=lockedView;lockedView=function(){bL();if(S.locked)['theirGreen','theirCorrect'].forEach(function(x){var e=$(x);if(e)e.disabled=true;});};"
+ "if(S.locked)lockedView();})();\n")
 COV_CHECK = (r"if(V2_CONFIG.lab&&!/TECHNICAL RUNNER FAILURE/.test($('labEvidence').value)&&+((($('labEvidence').value.match(/^Run (\d+) on this device/m))||[])[1]||0)<2)"
              "return'Coverage step: after your three tests pass, change one input in one of your tests and run again. The build record must show Run 2 or later.';")
 HALF = ' Or the build fails course checks that the written record does not explain.'
@@ -130,7 +151,7 @@ var BASE=(typeof window!=='undefined'&&window.ISCARB_PYODIDE_BASE)||__BASE__;
 var HARNESS=__HARNESS__;
 var SPEC=__SPEC__;
 var worker=null,runner=null;
-function workerSource(){return "self.onmessage=async function(e){var m=e.data;try{if(!self.py){importScripts(m.base+'pyodide.js');self.py=await loadPyodide({indexURL:m.base});self.py.runPython(m.harness);}if(m.kind==='load'){postMessage({ok:true});return;}var f=self.py.globals.get('__run');var r=f(m.helpers,m.student,m.checks,m.mutants||'');if(f.destroy)f.destroy();postMessage({ok:true,result:String(r)});}catch(err){postMessage({ok:false,error:String(err&&err.message||err)});}};";}
+function workerSource(){return "self.onmessage=async function(e){var m=e.data;try{if(!self.py){importScripts(m.base+'pyodide.js');self.py=await loadPyodide({indexURL:m.base});self.py.runPython(m.harness);}if(m.kind==='load'){postMessage({ok:true});return;}var their=m.kind==='their',f=self.py.globals.get(their?'__their':'__run');var r=their?f(m.helpers,m.student,m.their):f(m.helpers,m.student,m.checks,m.mutants||'');if(f.destroy)f.destroy();postMessage({ok:true,result:String(r)});}catch(err){postMessage({ok:false,error:String(err&&err.message||err)});}};";}
 function call(msg,ms){return new Promise(function(resolve,reject){
  if(!worker){try{worker=new Worker(URL.createObjectURL(new Blob([workerSource()],{type:'text/javascript'})));}catch(e){reject(Error('This browser cannot start Python here. Use a current Chrome, Edge, Firefox or Safari.'));return;}}
  var w=worker,t=setTimeout(function(){w.terminate();if(worker===w)worker=null;reject(Error(msg.kind==='load'?'Python did not load in time. Check your internet connection and try again.':'Stopped after '+ms/1000+' seconds. Look for an endless loop, then run again.'));},ms);
@@ -139,6 +160,8 @@ function call(msg,ms){return new Promise(function(resolve,reject){
  w.postMessage(Object.assign({base:BASE,harness:HARNESS},msg));});}
 function runOnce(ch,code){var s=SPEC[ch];return call({kind:'load'},120000).then(function(){return call({kind:'run',helpers:s.helpers,student:code,checks:s.checks,mutants:s.mutants||''},20000);}).then(JSON.parse);}
 function runChecks(ch,code){var s=SPEC[ch];if(runner)return Promise.resolve(runner(ch,code,s));return runOnce(ch,code).catch(function(first){if(/^Stopped after /.test(first.message||''))throw first;if(worker){try{worker.terminate();}catch(e){}worker=null;}return runOnce(ch,code).catch(function(second){throw Error('Python build could not start after an automatic retry. Your code is preserved. '+(second.message||second));});});}
+function runTheir(ch,code){var s=SPEC[ch];if(runner)return Promise.resolve(runner(ch,code,s,'their'));return call({kind:'load'},120000).then(function(){return call({kind:'their',helpers:s.helpers,student:code,their:s.their},20000);}).then(JSON.parse);}
+function encodeFacts(f){try{return 'their-v1:'+btoa(JSON.stringify(f));}catch(e){return '';}}
 function fingerprint(text){try{if(typeof crypto!=='undefined'&&crypto.subtle&&typeof TextEncoder!=='undefined')return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}catch(e){}var h=2166136261;for(var i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return Promise.resolve('fnv1a-'+h.toString(16));}
 function lines(list){return list.map(function(r){return '  '+(r[1]?'✓ ':'✗ ')+r[0]+(r[1]||!r[2]?'':' · '+r[2]);}).join('\n');}
 function runKey(ch,sid){return 'fbr:build-runs:ch'+ch+':'+String(sid||'').trim();}
@@ -155,18 +178,31 @@ function mount(ch){
  var el=function(id){return document.getElementById(id);},code=el('labCases'),s=SPEC[ch];if(!code||!s)return;
  var ev=el('labEvidence'),plan=el('labPrediction'),out=el('buildOutput'),run=el('buildRun'),reset=el('buildReset'),status=el('labStatus'),armed=false;
  function changed(){ev.dispatchEvent(new Event('input',{bubbles:true}));}
+ var tf=el('theirFacts');function clearTheir(){if(tf&&tf.value!=='their-v0:run-3-not-recorded'){tf.value='their-v0:run-3-not-recorded';tf.dispatchEvent(new Event('input',{bubbles:true}));}}
  if(!code.value.trim()&&!code.readOnly){code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));}
  out.textContent=ev.value?'Last recorded run:\n\n'+ev.value:'Write your plan, then run your tests and the course checks.';
  if(ev.value)plan.readOnly=true;
  code.addEventListener('keydown',function(e){if(e.key==='Tab'&&!e.shiftKey&&!code.readOnly){e.preventDefault();var a=code.selectionStart,b=code.selectionEnd;code.value=code.value.slice(0,a)+'    '+code.value.slice(b);code.selectionStart=code.selectionEnd=a+4;code.dispatchEvent(new Event('input',{bubbles:true}));}});
- code.addEventListener('input',function(){if(code.readOnly)return;if(plan.readOnly)plan.readOnly=false;if(ev.value){ev.value='';changed();out.textContent='Code changed: run again to record the new result.';}});
+ code.addEventListener('input',function(){if(code.readOnly)return;if(plan.readOnly)plan.readOnly=false;clearTheir();if(ev.value){ev.value='';changed();out.textContent='Code changed: run again to record the new result.';}});
  run.disabled=code.readOnly;if(reset)reset.disabled=code.readOnly;
  run.addEventListener('click',function(){if(code.readOnly)return;
   if(plan.value.trim().length<30){status.textContent='Write your build plan first (at least 30 characters): what your code will do and which cases your tests cover.';return;}
   run.disabled=true;status.textContent=runner?'Running…':'Starting Python… the first run downloads it once (about 10 MB).';
   var src=code.value;
-  runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var sidEl=el('sid'),sid=sidEl?sidEl.value:'';if(code.value!==src)return;var rec=report(ch,r,h,sid,nextRun(ch,sid,h));ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
+  runChecks(ch,src).then(function(r){return fingerprint(src).then(function(h){var sidEl=el('sid'),sid=sidEl?sidEl.value:'';if(code.value!==src)return;var rec=report(ch,r,h,sid,nextRun(ch,sid,h));clearTheir();ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent=summary(r)+'. Explain in your '+s.criterion+' what the build shows.';});})
   .catch(function(e){if(/^Stopped after /.test(e&&e.message||'')){if(code.value===src){if(ev.value){ev.value='';changed();}out.textContent=e.message;status.textContent=e.message;}return;}/* an endless loop is a bug in the code, not a runner failure: no record */return fingerprint(src).then(function(h){var sidEl=el('sid'),r={error:'TECHNICAL RUNNER FAILURE: '+(e.message||e)},rec=report(ch,r,h,sidEl?sidEl.value:'');if(code.value!==src)return;ev.value=rec;changed();plan.readOnly=true;out.textContent=rec;status.textContent='Python runner failed after automatic recovery attempts. A technical-failure Build Record was created so Part A is not blocked; your instructor can review it.';});}).then(function(){run.disabled=code.readOnly;});});
+ var tr=el('theirRun'),ts=el('theirStatus');
+ if(tr&&s.their){tr.disabled=code.readOnly;tr.addEventListener('click',function(){if(code.readOnly)return;var rec=ev.value,m=rec.match(/Your tests: (\d+) of (\d+) pass/),n=+((rec.match(/^Run (\d+) on this device/m)||[])[1]||0);
+  if(!/^BUILD RECORD/.test(rec)||!m){ts.textContent='Run your tests first.';return;}
+  if(m[1]!==m[2]||+m[2]<3){ts.textContent='Make your own tests pass first (at least three). Then run their change without editing them.';return;}
+  if(n<2){ts.textContent='Do the coverage step first (Run 2). Then run their change.';return;}
+  var src=code.value;tr.disabled=true;ts.textContent='Running their change… your code and tests are not edited.';
+  runTheir(ch,src).then(function(r){return fingerprint(src).then(function(h){if(code.value!==src)return;if(r.error){ts.textContent=r.error;return;}
+   var pass=r.tests.filter(function(x){return x[1];}).length,green=r.tests.length>=3&&pass===r.tests.length,base=ev.value.split('\n\nTHEIR CHANGE · run 3')[0];
+   ev.value=base+'\n\nTHEIR CHANGE · run 3 · your code and tests unchanged (fingerprint '+h.slice(0,16)+')\nWhat changed (you did not write it): '+s.theirChange+'\n  - '+s.theirBefore+'\n  + '+s.theirAfter+'\nYour tests after their change: '+pass+' of '+r.tests.length+' pass\n'+lines(r.tests)+'\nWhat the shared case shows:\n'+(r.evidence||[]).map(function(x){return '  '+x;}).join('\n')+'\n';changed();
+   if(tf){tf.value=encodeFacts({h:h.slice(0,16),green:green,correct:r.correct===true});tf.dispatchEvent(new Event('input',{bubbles:true}));}
+   out.textContent=ev.value;ts.textContent='Their change is recorded. Now answer: did your tests stay green, and is the result still correct?';});})
+  .catch(function(e){ts.textContent=(e&&e.message)||String(e);}).then(function(){tr.disabled=code.readOnly;});});}
  if(reset)reset.addEventListener('click',function(){if(code.readOnly)return;if(!armed){armed=true;reset.textContent='Click again to replace your code';setTimeout(function(){armed=false;reset.textContent='Reset to starter code';},4000);return;}armed=false;reset.textContent='Reset to starter code';plan.readOnly=false;code.value=s.starter;code.dispatchEvent(new Event('input',{bubbles:true}));});
 }
 return{SPEC:SPEC,mount:mount,runChecks:runChecks,vivaFor:vivaFor,coverageText:coverageText,nextRun:nextRun,setRunner:function(f){runner=f;}};
@@ -187,6 +223,11 @@ def spec() -> dict:
         part = {k: (SRC / f'ch{ch}_{k}.py').read_text(encoding='utf-8') for k in ('helpers', 'starter', 'checks')}
         mut = SRC / f'ch{ch}_mutants.py'
         if mut.exists(): part['mutants'] = mut.read_text(encoding='utf-8')
+        if ch in THEIR_CH:
+            part['their'] = (SRC / f'ch{ch}_their.py').read_text(encoding='utf-8')
+            t: dict = {}
+            exec(part['their'], t)
+            part.update(theirChange=t['CHANGE'], theirBefore=t['BEFORE'], theirAfter=t['AFTER'])
         labels = check_labels(part['checks']) + (['your tests catch every known bug (mutation test)'] if 'mutants' in part else [])
         out[ch] = dict(part, title=TASK[ch][0], criterion=CRIT[ch] if ch else 'written answers', assignment=number.get(ch), checkLabels=labels, viva=VIVA[ch])
     return out
@@ -221,7 +262,26 @@ def markup(ch: int, sp: dict) -> str:
             f'<pre id="buildOutput" style="white-space:pre-wrap;overflow-wrap:anywhere;{mono}"></pre>'
             '<label for="labEvidence" class="field-label">Build record' + ('' if ch == 0 else ' · included in your submission') + '</label>'
             '<textarea id="labEvidence" readonly style="min-height:160px" placeholder="Created when you run. Changing the code clears it until you run again."></textarea>'
-            + coverage_markup(ch) + '</section>')
+            + coverage_markup(ch) + (their_markup(ch, sp) if ch in THEIR_CH else '') + '</section>')
+
+
+def their_markup(ch: int, sp: dict) -> str:
+    """Run 3 · their change: the student's tests stay as they are while a part they did not write changes."""
+    yes_g, no_g = 'Yes: my tests stayed green after their change', 'No: at least one of my tests turned red'
+    yes_c, no_c = 'Yes: the result is still correct after their change', 'No: the result is no longer correct after their change'
+    sel = lambda i, a, b: (f'<select id="{i}"><option value="">Choose…</option><option value="{esc(a)}">{esc(a)}</option>'
+                           f'<option value="{esc(b)}">{esc(b)}</option></select>')
+    return ('<div class="their-step" id="theirStep"><p class="ey">RUN 3 · THEIR CHANGE · A PART YOU DID NOT WRITE CHANGES</p>'
+            f'<p>{esc(sp["theirChange"])}</p>'
+            f'<pre style="white-space:pre-wrap;overflow-wrap:anywhere">- {esc(sp["theirBefore"])}\n+ {esc(sp["theirAfter"])}</pre>'
+            '<p>After your tests pass (Run 2), run their change. Do not edit your code or your tests first.</p>'
+            '<div class="buttons"><button type="button" id="theirRun" data-lab-mode="their">Run their change</button></div>'
+            '<p id="theirStatus" role="status" aria-live="polite"></p>'
+            '<label for="theirGreen" class="field-label">Did your tests stay green?</label>' + sel('theirGreen', yes_g, no_g)
+            + '<label for="theirCorrect" class="field-label">Is the result still correct?</label>' + sel('theirCorrect', yes_c, no_c)
+            + '<label for="theirNote" class="field-label">One sentence · included in your submission: what in the run shows it?</label>'
+            '<textarea id="theirNote" rows="2" maxlength="600" placeholder="My tests … after their change, and the result is … because the run shows …"></textarea>'
+            '<input type="hidden" id="theirFacts" value="their-v0:run-3-not-recorded"></div>')
 
 
 def coverage_markup(ch: int) -> str:
@@ -254,12 +314,21 @@ def patch(path: Path, ch: int, sp: dict, eng: str) -> bool:
     if OLD_BUDGET_78 in s: one(OLD_BUDGET_78, NEW_BUDGET)
     if OLD_CHECK in s: one(OLD_CHECK, NEW_CHECK)
     # CLO 11 coverage step: the sentence is a Part A field, labelled in the export, and a second run is required
-    if COV_A[1] not in s:
+    if '"labEvidence", "coverageNote"' not in s:
         one(*COV_A)
-    if COV_LABEL[1] not in s:
+    if '"coverageNote": "COVERAGE SENTENCE' not in s:
         one(*COV_LABEL, count=3)
     if COV_CHECK not in s:
         one(NEW_CHECK, NEW_CHECK + COV_CHECK)
+    if ch in THEIR_CH:
+        if THEIR_A[1] not in s:
+            one(*THEIR_A)
+        if THEIR_LABEL[1] not in s:
+            one(*THEIR_LABEL, count=3)
+        if THEIR_MARK in s:
+            s = re.sub(re.escape(THEIR_MARK) + r'.*?\}\)\(\);\n', lambda _: THEIR_SCRIPT, s, count=1, flags=re.S)
+        else:
+            one(f'\nStudyBuild.mount({ch});\n', f'\nStudyBuild.mount({ch});\n' + THEIR_SCRIPT)
     if 'StudyLab.mount(' in s: one(f'\nStudyLab.mount({ch});\n', f'\nStudyBuild.mount({ch});\n')
     if LAB_INLINE.search(s): s = LAB_INLINE.sub(lambda _: '<script>' + eng + '</script>', s, count=1)
     else: s, n = BUILD_INLINE.subn(lambda _: '<script>' + eng + '</script>', s, count=1); assert n == 1, path.name

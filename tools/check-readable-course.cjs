@@ -102,6 +102,11 @@ async function run(){
     await page.locator('#labCases').fill('def test_a():\n    assert 1 == 1\n');
     await page.locator('#buildRun').click();await page.waitForFunction(()=>/^Run 2 on this device/m.test(document.getElementById('labEvidence').value));
     await page.locator('#coverageNote').fill('QA: after run 2 the refusal branch is still not tested; a malformed input would test it.');
+    if(await page.locator('#theirStep').count()){ // run 3 · their change (Chapters 15, 16, 17, 20)
+     await page.locator('#theirRun').click();await page.waitForFunction(()=>document.getElementById('labEvidence').value.includes('THEIR CHANGE · run 3'));
+     await page.locator('#theirGreen').selectOption({index:1});await page.locator('#theirCorrect').selectOption({index:2});
+     await page.locator('#theirNote').fill('QA: my tests stayed green after their change, but the shared result is no longer correct.');
+    }
    }
    await page.locator('#sourceUse').fill('Slide '+a.reading_pages[0]+': the source concept constrains the model assumptions and defines a bounded control that must be independently checked.');
    await page.locator('#section').fill('QA');await page.locator('#save').click();await page.reload();assert.match(await page.locator('#fit').inputValue(),/QA:/);

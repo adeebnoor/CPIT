@@ -100,35 +100,53 @@ for ch in CH:
     r = run(ch, (SRC / f'ch{ch}_starter.py').read_text())
     c = r.get('coverage')
     check(f'Ch{ch} the build record measures line and branch coverage of the starter', bool(c) and c['lines'][1] > 0 and c['lines'][0] <= c['lines'][1], str(c))
-ADAPTER = ('def reserve_minutes(component, room_id, minutes):\n'
-           '    if not isinstance(minutes, int) or isinstance(minutes, bool):\n'
-           '        raise ValueError("whole minutes")\n'
-           '    if minutes < 1 or minutes > 120:\n'
-           '        raise ValueError("1..120")\n'
-           '    r = component.reserve(room_id, minutes * 60)\n'
-           '    if r["end"] - r["start"] != minutes * 60:\n'
-           '        raise ContractError("postcondition")\n'
-           '    return r\n')
-T3 = ('def test_thirty():\n    c = FakeComponent(); reserve_minutes(c, "Lab-1", 30); assert c.calls == [("Lab-1", 1800)]\n'
-      'def test_zero():\n    c = FakeComponent()\n    try:\n        reserve_minutes(c, "Lab-1", 0); assert False\n    except ValueError:\n        pass\n'
-      'def test_top():\n    c = FakeComponent(); reserve_minutes(c, "Lab-1", INPUT)\n')
-c1 = run(16, ADAPTER + T3.replace('INPUT', '120'))['coverage']
-untested = [(row[0], row[3], row[5]) for row in c1['rows'] if not (row[3] and row[5])]
-check('coverage names the branches three tests never take (type check true, postcondition true)', c1['branches'] == [4, 6] and untested == [(2, False, True), (7, False, True)] and c1['missed'] == [3, 8], str(c1))
-c2 = run(16, ADAPTER + T3.replace('INPUT', '"30"'))['coverage']
-check('changing one input and running again changes the coverage: the type-check branch is now taken', c2['branches'] == [5, 6] and [r[0] for r in c2['rows'] if not (r[3] and r[5])] == [7], str(c2))
-r = run(16, ADAPTER + T3.replace('INPUT', '120'))
-check('coverage counts only your own tests: the course checks do not add lines', r['coverage']['lines'] == c1['lines'] and all(ok for _, ok, _ in r['checks'][:4]), str(r['checks'][:4]))
-
-TREE = ('current = OR(Event("Camera misses a person", "fact"), Event("Night use", "fact"), Event("Stop not used", "assumption"))\n'
-        'revised = AND(OR(Event("Camera misses a person", "fact"), Event("Night use", "fact")), Event("Second sensor fails", "proposed"), Event("Stop not used", "assumption"))\n'
+LOAN = ('def can_borrow(student, item):\n'
+        '    if not isinstance(student, dict) or not isinstance(item, dict):\n'
+        '        return False\n'
+        '    if student.get("overdue"):\n'
+        '        return False\n'
+        '    return bool(item.get("available")) and student.get("loans", 0) < LIMIT\n')
+T3 = ('def test_ok():\n    assert can_borrow({"loans": 0, "overdue": False}, {"available": True})\n'
+      'def test_overdue():\n    assert not can_borrow({"loans": 0, "overdue": True}, {"available": True})\n'
+      'def test_third():\n    can_borrow(INPUT, {"available": True})\n')
+c1 = run(0, LOAN + T3.replace('INPUT', '{"loans": 1, "overdue": False}'))['coverage']
+check('coverage names the branch three tests never take (malformed input)', c1['branches'] == [3, 4] and [r[0] for r in c1['rows'] if not (r[3] and r[5])] == [2] and c1['missed'] == [3], str(c1))
+c2 = run(0, LOAN + T3.replace('INPUT', '"not a record"'))['coverage']
+check('changing one input and running again changes the coverage: the malformed-input branch is now taken', c2['branches'] == [4, 4], str(c2))
+r = run(0, LOAN + T3.replace('INPUT', '{"loans": 1, "overdue": False}'))
+check('coverage counts only your own tests: the course checks do not add lines', r['coverage']['lines'] == c1['lines'], str(r['coverage']))
+TREE = ('current = OR(Event("E1", "fact"), Event("E2", "fact"), Event("E3", "assumption"))\n'
+        'revised = AND(OR(Event("E1", "fact"), Event("E2", "fact")), Event("P1", "proposed"), Event("E3", "assumption"))\n'
         'def test_cuts():\n    assert cut_sets(revised)\n'
         'def test_none():\n    assert not occurs(revised, set())\n'
-        'def test_all():\n    assert occurs(revised, {"Camera misses a person", "Second sensor fails", "Stop not used"})\n')
+        'def test_all():\n    assert occurs(revised, {"E1", "P1", "E3"})\n')
 g = run(12, TREE)['coverage']
 check('Ch12 coverage measures gate outcomes in the fault tree (the current tree is never evaluated)', g and g.get('unit') == 'gates' and g['lines'] == [2, 3] and g['branches'] == [4, 6] and any(r[0].startswith('current') and not r[3] and not r[5] for r in g['rows']), str(g))
 
-# 7. the in-class demos embedded in the lectures are current and behave as taught
+# 7. run 3 · their change (Chapters 15, 16, 17, 20): the tests stay green; the shared result is checked separately.
+# Public check: the starters. Reference solutions stay private; set ISCARB_PRIVATE_SOLUTIONS to a folder with chNN.py to check them too.
+import os
+their = lambda ch, code: json.loads(ns['__their']((SRC / f'ch{ch}_helpers.py').read_text(), code, (SRC / f'ch{ch}_their.py').read_text()))
+for ch in (15, 16, 17, 20):
+    t = their(ch, (SRC / f'ch{ch}_starter.py').read_text())
+    check(f'Ch{ch} their change runs on the starter: the shared result is wrong, and the record shows the evidence',
+          t['error'] is None and bool(t['tests']) and t['correct'] is False and len(t['evidence']) >= 2, str(t))
+for ch in (12, 13, 14):
+    check(f'Ch{ch} has no run 3 (their change is for Chapters 15, 16, 17 and 20 only)', not (SRC / f'ch{ch}_their.py').exists() and 'their' not in spec[str(ch)])
+PRIV = Path(os.environ.get('ISCARB_PRIVATE_SOLUTIONS', '/nonexistent'))
+EXPECT = {15: True, 16: False, 17: False, 20: False}   # 15: a correct fit check shows the missing promise; the others cannot see the change
+if PRIV.is_dir():
+    for ch, want in EXPECT.items():
+        code = (PRIV / f'ch{ch}.py').read_text()
+        t = their(ch, code)
+        # A test that pins the exact output may turn red after their change (Chapter 15): that is a good test, not a failure.
+        check(f'Ch{ch} their change on the private solution: result {"still correct" if want else "no longer correct"}'
+              + ('' if ch == 15 else '; tests stay green'),
+              t['error'] is None and t['correct'] is want and (ch == 15 or all(x[1] for x in t['tests'])), str(t))
+else:
+    print('SKIP run 3 on the private solutions (set ISCARB_PRIVATE_SOLUTIONS)')
+
+# 8. the in-class demos embedded in the lectures are current and behave as taught
 import importlib.util
 spec_cb = importlib.util.spec_from_file_location('apply_class_builds', ROOT / 'tools/apply_class_builds.py')
 cb = importlib.util.module_from_spec(spec_cb); spec_cb.loader.exec_module(cb)
