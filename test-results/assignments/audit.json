@@ -1,6 +1,6 @@
 {
- "checked": "2026-10-14",
- "pass": 109,
+ "checked": "2026-10-15",
+ "pass": 130,
  "fail": 0,
  "assignments": [
   {
@@ -27,7 +27,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   },
   {
    "assignment": 4,
@@ -35,7 +38,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   },
   {
    "assignment": 5,
@@ -43,7 +49,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   },
   {
    "assignment": 6,
@@ -51,7 +60,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   },
   {
    "assignment": 7,
@@ -59,7 +71,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   },
   {
    "assignment": 8,
@@ -67,7 +82,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   },
   {
    "assignment": 9,
@@ -75,7 +93,10 @@
    "criteria": 5,
    "points": 5,
    "examples": 5,
-   "bound": "in export"
+   "bound": "in export",
+   "hour": true,
+   "testsRun": true,
+   "coverageStep": true
   }
  ]
 }

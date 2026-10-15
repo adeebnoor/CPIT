@@ -1,4 +1,55 @@
-import json, traceback
+import ast, json, sys, traceback
+
+def __coverage_map(student):
+    """Lines and branches of the code under test: every function in your_code.py whose name does not start with test_."""
+    tree = ast.parse(student)
+    lines, branches = set(), {}
+    src = student.split("\n")
+    for f in ast.walk(tree):
+        if not isinstance(f, (ast.FunctionDef, ast.AsyncFunctionDef)) or f.name.startswith("test_"):
+            continue
+        for n in ast.walk(f):
+            if n is f or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            if isinstance(n, ast.stmt) and not (isinstance(n, ast.Expr) and isinstance(getattr(n, "value", None), ast.Constant) and isinstance(n.value.value, str)):
+                lines.add(n.lineno)
+            if isinstance(n, (ast.If, ast.While, ast.For)) and n.body and n.body[0].lineno != n.lineno:
+                text = src[n.lineno - 1].strip()
+                if isinstance(n, ast.If):
+                    other = n.orelse[0].lineno if n.orelse else None
+                    branches[n.lineno] = [text, n.body[0].lineno, other, "true", "false"]
+                else:
+                    branches[n.lineno] = [text, n.body[0].lineno, None, "loop body runs", "loop is skipped or ends"]
+    return lines, branches
+
+def __tracer(hit, arcs):
+    def call(frame, event, arg):
+        code = frame.f_code
+        if code.co_filename != "your_code.py" or code.co_name.startswith("test_") or code.co_name == "<module>":
+            return None
+        last = [None]
+        def local(frame, event, arg):
+            if event == "line":
+                hit.add(frame.f_lineno); arcs.add((last[0], frame.f_lineno)); last[0] = frame.f_lineno
+            elif event == "return":
+                arcs.add((last[0], -1))
+            return local
+        return local
+    return call
+
+def __coverage(student, hit, arcs):
+    try:
+        lines, branches = __coverage_map(student)
+    except BaseException:
+        return None
+    rows = []
+    for line in sorted(branches):
+        text, first, other, yes, no = branches[line]
+        took_yes = (line, first) in arcs
+        took_no = (line, other) in arcs if other else any(a == line and b != first for a, b in arcs)
+        rows.append([line, text[:70], yes, took_yes, no, took_no])
+    return {"lines": [len(lines & hit), len(lines)], "missed": sorted(lines - hit),
+            "branches": [sum(r[3] + r[5] for r in rows), 2 * len(rows)], "rows": rows}
 
 def __last_line(e):
     return type(e).__name__ + (": " + str(e) if str(e) else "")
@@ -46,7 +97,9 @@ def __run(helpers, student, checks, mutants=""):
         out["error"] = "Your code did not run" + (f" (line {line})" if line else "") + ": " + __last_line(e)
         return json.dumps(out)
     ns["__source__"] = student
+    hit, arcs = set(), set()
     for name in sorted(k for k, v in list(ns.items()) if k.startswith("test_") and callable(v)):
+        sys.settrace(__tracer(hit, arcs))   # coverage counts only what your own tests run
         try:
             ns[name]()
             out["tests"].append([name, True, ""])
@@ -54,6 +107,15 @@ def __run(helpers, student, checks, mutants=""):
             out["tests"].append([name, False, "assertion failed" + (": " + str(e) if str(e) else "")])
         except BaseException as e:
             out["tests"].append([name, False, __last_line(e)])
+        finally:
+            sys.settrace(None)
+    cov = __coverage(student, hit, arcs)
+    if (not cov or not cov["lines"][1]) and callable(ns.get("_tree_coverage")):
+        try:
+            cov = ns["_tree_coverage"](ns)   # a build without functions (the fault tree) measures its gates instead
+        except BaseException:
+            pass
+    out["coverage"] = cov
     cns = dict(base)
     cns["__name__"] = "checks"
     exec(checks, cns)

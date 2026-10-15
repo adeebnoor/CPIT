@@ -52,3 +52,33 @@ def cut_sets(tree):
 def single_points(tree):
     """Events that cause the top event on their own."""
     return [s[0] for s in cut_sets(tree) if len(s) == 1]
+
+_GATE_SEEN = {}
+
+def occurs(tree, happened):
+    """True when the top event happens, given the names of the basic events that happen."""
+    happened = set(happened)
+    def value(t):
+        if isinstance(t, Event):
+            return t.name in happened
+        r = any(value(c) for c in t.children) if t.kind == "OR" else all(value(c) for c in t.children)
+        _GATE_SEEN.setdefault(id(t), set()).add(r)
+        return r
+    return value(tree)
+
+def _tree_coverage(ns):
+    """Coverage for a fault tree: did your tests see each gate both open (true) and blocked (false)?"""
+    rows = []
+    def walk(name, g):
+        if isinstance(g, Event):
+            return
+        seen = _GATE_SEEN.get(id(g), set())
+        inputs = ", ".join(c.name[:18] if isinstance(c, Event) else c.kind + "(…)" for c in g.children)
+        rows.append([name + " · " + g.kind + " gate", (g.kind + "(" + inputs + ")")[:70], "true (the path to the hazard is open)", True in seen, "false (the path is blocked)", False in seen])
+        for c in g.children:
+            walk(name, c)
+    for name in ("current", "revised"):
+        if isinstance(ns.get(name), Gate):
+            walk(name, ns[name])
+    return {"unit": "gates", "lines": [sum(1 for r in rows if r[3] or r[5]), len(rows)], "missed": [],
+            "branches": [sum(r[3] + r[5] for r in rows), 2 * len(rows)], "rows": rows}

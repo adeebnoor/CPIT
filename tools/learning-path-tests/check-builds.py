@@ -95,7 +95,40 @@ check('SystemExit from student module code is contained and reported', bool(r['e
 r = run(13, 'def can_read(user, project):\n    raise SystemExit(2)\n' + OWN)
 check('SystemExit raised through a course check is contained', any('SystemExit: 2' in (c[2] or '') for c in r['checks']), str(r['checks']))
 
-# 6. the in-class demos embedded in the lectures are current and behave as taught
+# 6. coverage (course outcome 11): your own tests are measured, the course checks are not
+for ch in CH:
+    r = run(ch, (SRC / f'ch{ch}_starter.py').read_text())
+    c = r.get('coverage')
+    check(f'Ch{ch} the build record measures line and branch coverage of the starter', bool(c) and c['lines'][1] > 0 and c['lines'][0] <= c['lines'][1], str(c))
+ADAPTER = ('def reserve_minutes(component, room_id, minutes):\n'
+           '    if not isinstance(minutes, int) or isinstance(minutes, bool):\n'
+           '        raise ValueError("whole minutes")\n'
+           '    if minutes < 1 or minutes > 120:\n'
+           '        raise ValueError("1..120")\n'
+           '    r = component.reserve(room_id, minutes * 60)\n'
+           '    if r["end"] - r["start"] != minutes * 60:\n'
+           '        raise ContractError("postcondition")\n'
+           '    return r\n')
+T3 = ('def test_thirty():\n    c = FakeComponent(); reserve_minutes(c, "Lab-1", 30); assert c.calls == [("Lab-1", 1800)]\n'
+      'def test_zero():\n    c = FakeComponent()\n    try:\n        reserve_minutes(c, "Lab-1", 0); assert False\n    except ValueError:\n        pass\n'
+      'def test_top():\n    c = FakeComponent(); reserve_minutes(c, "Lab-1", INPUT)\n')
+c1 = run(16, ADAPTER + T3.replace('INPUT', '120'))['coverage']
+untested = [(row[0], row[3], row[5]) for row in c1['rows'] if not (row[3] and row[5])]
+check('coverage names the branches three tests never take (type check true, postcondition true)', c1['branches'] == [4, 6] and untested == [(2, False, True), (7, False, True)] and c1['missed'] == [3, 8], str(c1))
+c2 = run(16, ADAPTER + T3.replace('INPUT', '"30"'))['coverage']
+check('changing one input and running again changes the coverage: the type-check branch is now taken', c2['branches'] == [5, 6] and [r[0] for r in c2['rows'] if not (r[3] and r[5])] == [7], str(c2))
+r = run(16, ADAPTER + T3.replace('INPUT', '120'))
+check('coverage counts only your own tests: the course checks do not add lines', r['coverage']['lines'] == c1['lines'] and all(ok for _, ok, _ in r['checks'][:4]), str(r['checks'][:4]))
+
+TREE = ('current = OR(Event("Camera misses a person", "fact"), Event("Night use", "fact"), Event("Stop not used", "assumption"))\n'
+        'revised = AND(OR(Event("Camera misses a person", "fact"), Event("Night use", "fact")), Event("Second sensor fails", "proposed"), Event("Stop not used", "assumption"))\n'
+        'def test_cuts():\n    assert cut_sets(revised)\n'
+        'def test_none():\n    assert not occurs(revised, set())\n'
+        'def test_all():\n    assert occurs(revised, {"Camera misses a person", "Second sensor fails", "Stop not used"})\n')
+g = run(12, TREE)['coverage']
+check('Ch12 coverage measures gate outcomes in the fault tree (the current tree is never evaluated)', g and g.get('unit') == 'gates' and g['lines'] == [2, 3] and g['branches'] == [4, 6] and any(r[0].startswith('current') and not r[3] and not r[5] for r in g['rows']), str(g))
+
+# 7. the in-class demos embedded in the lectures are current and behave as taught
 import importlib.util
 spec_cb = importlib.util.spec_from_file_location('apply_class_builds', ROOT / 'tools/apply_class_builds.py')
 cb = importlib.util.module_from_spec(spec_cb); spec_cb.loader.exec_module(cb)

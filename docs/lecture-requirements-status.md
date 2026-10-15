@@ -64,17 +64,17 @@ Levels: **must** fails the release; **pref** warns; **manual** is reviewed by th
 
 Static check of every assessed page; the browser audit (`tools/check-assignment-pages.cjs`, results in `test-results/assignments/audit.json`) repeats it on the rendered pages at 1366 and 390 px.
 
-| Assignment | Chapter | Criteria | Points | All levels visible (1 · 0.75 · 0.5 · 0) | Rubric before commit | Strong/weak examples | Other answers | Boundary sentence in export |
-|---|---|---|---|---|---|---|---|---|
-| A1 (frozen) | 10 | 4 | 4 | yes | yes | — | — | lecture only |
-| A2 (frozen) | 11 | 5 | 5 | yes | yes | — | — | lecture only |
-| A3 | 12 | 5 | 5 | yes | yes | 5 | yes | yes |
-| A4 | 13 | 5 | 5 | yes | yes | 5 | yes | yes |
-| A5 | 14 | 5 | 5 | yes | yes | 5 | yes | yes |
-| A6 | 15 | 5 | 5 | yes | yes | 5 | yes | yes |
-| A7 | 16 | 5 | 5 | yes | yes | 5 | yes | yes |
-| A8 | 17 | 5 | 5 | yes | yes | 5 | yes | yes |
-| A9 | 20 | 5 | 5 | yes | yes | 5 | yes | yes |
+| Assignment | Chapter | Criteria | Points | All levels visible (1 · 0.75 · 0.5 · 0) | Rubric before commit | Strong/weak examples | Other answers | Boundary sentence in export | Practical-hour line | TESTS RUN row | Coverage step |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| A1 (frozen) | 10 | 4 | 4 | yes | yes | — | — | lecture only | — | — | — |
+| A2 (frozen) | 11 | 5 | 5 | yes | yes | — | — | lecture only | — | — | — |
+| A3 | 12 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
+| A4 | 13 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
+| A5 | 14 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
+| A6 | 15 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
+| A7 | 16 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
+| A8 | 17 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
+| A9 | 20 | 5 | 5 | yes | yes | 5 | yes | yes | yes | yes | yes |
 
 Assignments 1–2 were published and submitted before the review; they are kept unchanged.
 

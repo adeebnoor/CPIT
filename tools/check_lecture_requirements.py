@@ -552,25 +552,27 @@ def check_assignments(R: Report, cfg: dict):
         s = p.read_text(encoding='utf-8')
         rt = s[s.find('id="rubric-heading"'):]
         rt = rt[:rt.find('</table>')]
-        names = re.findall(r'<th scope="row">([^<]+)</th>', rt)
+        names = [x for x in re.findall(r'<th scope="row">([^<]+)</th>', rt) if not x.startswith('TESTS RUN')]
         tot = re.search(r'How your work is assessed · ([\d.]+) points', s)
         ex = s[s.find('id="rubricExamples"'):] if 'id="rubricExamples"' in s else ''
         ci = s.find('id="commitBtn"') if 'id="commitBtn"' in s else s.find('Review &amp; commit')
         R.assignments.append({'no': len(R.assignments) + 1, 'chapter': ch, 'criteria': len(names), 'points': tot.group(1) if tot else '?',
                               'levels': all(all(f'<b>{l}</b>' in rt[rt.find(n):][:rt[rt.find(n):].find('</tr>')] for l in ('1:', '0.75:', '0.5:', '0:')) for n in names) and '<details class="levels">' not in rt,
                               'before': 0 <= s.find('id="rubric-heading"') < ci, 'examples': ex.count('data-criterion='), 'other': 'Other answers are accepted when' in ex,
-                              'bound': BOUND_MARK in s, 'frozen': ch < cfg.get('assignmentRubricFromChapter', 12)})
+                              'bound': BOUND_MARK in s, 'frozen': ch < cfg.get('assignmentRubricFromChapter', 12),
+                              'tests': 'data-row="tests-run"' in rt, 'coverage': 'id="coverageNote"' in s and 'must show Run 2 or later' in s,
+                              'hour': '<!-- practical-hour:start -->' in s})
         if ch < cfg.get('assignmentRubricFromChapter', 12):
             continue
         bad1, bad2, bad4, bad5 = [], [], [], []
-        crit = re.findall(r'<th scope="row">([^<]+)</th>', s[s.find('id="rubric-heading"'):])
+        crit = [x for x in re.findall(r'<th scope="row">([^<]+)</th>', s[s.find('id="rubric-heading"'):]) if not x.startswith('TESTS RUN')]
         if 'id="rubric-heading"' not in s or len(crit) < 3:
             bad1.append('rubric table missing')
         if 'Partial credit' not in s:
             bad1.append('rubric levels (partial credit) missing')
         table = s[s.find('id="rubric-heading"'):]
         table = table[:table.find('</table>')]
-        for c in re.findall(r'<th scope="row">([^<]+)</th>', table):
+        for c in [x for x in re.findall(r'<th scope="row">([^<]+)</th>', table) if not x.startswith('TESTS RUN')]:
             row = table[table.find(f'<th scope="row">{c}</th>'):]
             row = row[:row.find('</tr>')]
             got = [l for l in ('1:', '0.75:', '0.5:', '0:') if f'<b>{l}</b>' in row]
@@ -600,11 +602,34 @@ def check_assignments(R: Report, cfg: dict):
             ci = s.find('Review &amp; commit')
         if not (0 <= ri < ci):
             bad5.append('rubric must appear before the commit control')
+        hour = []
+        if '<!-- practical-hour:start -->' not in s or 'not submitted without it' not in s or 'تشغيل الاختبارات صف مستقل في السلّم' not in s or 'outcome 11' not in s:
+            hour.append('the practical-hour line (English and Arabic, with the course outcomes) is missing at the top')
+        if 'data-row="tests-run"' not in table or 'longer writing does not make up for a missing run' not in table:
+            hour.append('the rubric has no separate TESTS RUN row')
+        if '"labEvidence", "coverageNote"]' not in s or 'id="coverageNote"' not in s or 'must show Run 2 or later' not in s or 'TESTS RUN: required' not in s:
+            hour.append('the coverage step (second run, coverage sentence in Part A and the export) is missing')
+        bad1 += hour
         bad_b4 = [] if (BOUND_MARK in s and "lines.push('## Chapter boundary sentence" in s and 'id="bound"' in s) else ['the lecture boundary sentence is not carried into the assignment export']
         for code, bad in (('RUB-1', bad1), ('RUB-2', bad2), ('RUB-4', bad4), ('RUB-5', bad5), ('BOUND-4', bad_b4)):
             st, det = R.rows[ch][code]
             if bad:
                 R.rows[ch][code] = ('FAIL', det + [f'assignment page: {b}' for b in bad])
+
+
+def check_site() -> list[str]:
+    """Lab credit 0 is stated under the grade tables; no public page says the lab was cancelled or Code Coverage is missing."""
+    bad = []
+    for rel in ('student-guide.html', 'assignment-example.html'):
+        t = (ROOT / rel).read_text(encoding='utf-8')
+        if '<!-- lab-credit:start -->' not in t or 'Lab credit is 0.' not in t or 'رصيد المعمل صفر' not in t:
+            bad.append(f'{rel}: the lab-credit sentence (English and Arabic) is missing under the grade table')
+    pages = [p for p in ROOT.glob('*.html')] + [p for p in (ROOT / 'lectures/iscarb').glob('*.html')]
+    for p in pages:
+        t = p.read_text(encoding='utf-8')
+        if re.search(r'\blabs?\b[^.<]{0,40}cancel|cancel\w*[^.<]{0,40}\blabs?\b|not on this site yet|Code Coverage[^.<]{0,80}(gap|incomplete|not here)', t, re.I):
+            bad.append(f'{p.relative_to(ROOT)}: says the lab was cancelled or Code Coverage is missing')
+    return bad
 
 
 def write_status(R: Report, grade_note: str) -> None:
@@ -618,13 +643,14 @@ def write_status(R: Report, grade_note: str) -> None:
         out.append(f'| {c} | {TITLES[c]} | {LEVEL[c]} | ' + ' | '.join(cells) + ' |')
     out += ['', '## Assessed assignment pages', '',
             'Static check of every assessed page; the browser audit (`tools/check-assignment-pages.cjs`, results in `test-results/assignments/audit.json`) repeats it on the rendered pages at 1366 and 390 px.', '',
-            '| Assignment | Chapter | Criteria | Points | All levels visible (1 · 0.75 · 0.5 · 0) | Rubric before commit | Strong/weak examples | Other answers | Boundary sentence in export |',
-            '|---|---|---|---|---|---|---|---|---|']
+            '| Assignment | Chapter | Criteria | Points | All levels visible (1 · 0.75 · 0.5 · 0) | Rubric before commit | Strong/weak examples | Other answers | Boundary sentence in export | Practical-hour line | TESTS RUN row | Coverage step |',
+            '|---|---|---|---|---|---|---|---|---|---|---|---|']
     yn = lambda b: 'yes' if b else 'no'
     for a in R.assignments:
         fz = ' (frozen)' if a['frozen'] else ''
         out.append(f"| A{a['no']}{fz} | {a['chapter']} | {a['criteria']} | {a['points']} | {yn(a['levels'])} | {yn(a['before'])} | "
-                   f"{a['examples'] or ('—' if a['frozen'] else 'no')} | {yn(a['other']) if not a['frozen'] else '—'} | {yn(a['bound']) if not a['frozen'] else 'lecture only'} |")
+                   f"{a['examples'] or ('—' if a['frozen'] else 'no')} | {yn(a['other']) if not a['frozen'] else '—'} | {yn(a['bound']) if not a['frozen'] else 'lecture only'} | "
+                   f"{yn(a['hour']) if not a['frozen'] else '—'} | {yn(a['tests']) if not a['frozen'] else '—'} | {yn(a['coverage']) if not a['frozen'] else '—'} |")
     out += ['', 'Assignments 1–2 were published and submitted before the review; they are kept unchanged.', '', '## Acceptance list per lecture', '']
     for ch in sorted(R.rows):
         fails = [f'{c}: {"; ".join(d[:3])}' for c, (st, d) in R.rows[ch].items() if st == 'FAIL']
@@ -664,6 +690,7 @@ def run(quiet: bool = False) -> list[str]:
                 errors.append(f'Chapter {ch} {code}: ' + ('; '.join(det[:4]) if det else 'failed'))
             if st == 'WARN' and not quiet:
                 print(f'WARN Chapter {ch} {code}: ' + '; '.join(det[:3]))
+    errors += ['Site: ' + b for b in check_site()]
     write_status(R, f'{len(errors)} mandatory failure(s).')
     if not quiet:
         for e in errors:
