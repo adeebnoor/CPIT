@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-14  
-**Commit ID:** c40d5b02-f3a7-43e9-89cf-8d955ac3d5ae  
-**Part A committed:** 2026-10-14T21:59:48.478Z  
-**STRESS revealed:** 2026-10-14T21:59:48.486Z
+**Date:** 2026-10-15  
+**Commit ID:** 09150b07-ed35-4f58-be47-cfb7f3f4715d  
+**Part A committed:** 2026-10-15T05:42:11.081Z  
+**STRESS revealed:** 2026-10-15T05:42:11.097Z
 
 ## Scenario
 A fictional campus transport desk needs to read today's pickup list even when the central scheduling server stops working.
@@ -48,12 +48,13 @@ QA: the build enforces the rule; tests cover a normal, an edge and a refused cas
 
 ## PYTHON BUILD (CODE AND TESTS)
 def test_a():
-    assert True
+    assert 1 == 1
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-14T21:59:48.291Z
-Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
+BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-15T05:42:10.913Z
+Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
+Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Return conflicts with the pickup id as well as the change id. Change the code and one test.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
 Your tests:
@@ -62,7 +63,11 @@ Your tests:
   ✓ test_c
 Course checks:
   ✓ course check
+Coverage of your code by your own tests: not measured by this runner.
 
+
+## COVERAGE SENTENCE (COURSE OUTCOME 11)
+QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
 
 ## STRESS
 QA evidence for chapter 14: this opens automatically after commitment.
@@ -83,7 +88,7 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; RECOVER: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. Instructor assessment required.
+FIT: 1; RECOVER: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
 
 
 ## Preparation and workload

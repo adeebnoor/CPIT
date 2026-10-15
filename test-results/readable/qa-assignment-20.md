@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-14  
-**Commit ID:** 96258cb4-a290-48d5-9b47-2f797047de4e  
-**Part A committed:** 2026-10-14T22:00:00.927Z  
-**STRESS revealed:** 2026-10-14T22:00:00.936Z
+**Date:** 2026-10-15  
+**Commit ID:** 0667947a-509e-49cb-b534-7bf4056d56e3  
+**Part A committed:** 2026-10-15T05:42:25.399Z  
+**STRESS revealed:** 2026-10-15T05:42:25.410Z
 
 ## Scenario
 A fictional university wants one screen showing incidents using information from security, transport and facilities.
@@ -48,12 +48,13 @@ QA: the build enforces the rule; tests cover a normal, an edge and a refused cas
 
 ## PYTHON BUILD (CODE AND TESTS)
 def test_a():
-    assert True
+    assert 1 == 1
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-14T22:00:00.725Z
-Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
+BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-15T05:42:25.229Z
+Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
+Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
 Your tests:
@@ -62,7 +63,11 @@ Your tests:
   ✓ test_c
 Course checks:
   ✓ course check
+Coverage of your code by your own tests: not measured by this runner.
 
+
+## COVERAGE SENTENCE (COURSE OUTCOME 11)
+QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
 
 ## STRESS
 QA evidence for chapter 20: this opens automatically after commitment.
@@ -83,7 +88,7 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; INTEGRATE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. Instructor assessment required.
+FIT: 1; INTEGRATE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
 
 
 ## Preparation and workload

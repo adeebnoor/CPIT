@@ -268,47 +268,47 @@
   "packages": [
     {
       "chapter": 10,
-      "sha256": "d6537194c3ff9ad461e27991ddee3e380ec2fff9c5dee505f87d810d4d4d1d91",
+      "sha256": "24de843a0fff7f12871fde777bde2b3ffd18000db772b5982e87e170c7d83f42",
       "offline_opened": true
     },
     {
       "chapter": 11,
-      "sha256": "6fa895beb935c148d57c06c7a84a670677df6f74c61d4d91ea2e772c523a52be",
+      "sha256": "e9e2f1ab68671f30fbf79fda4e314e82fefde2ade8e8425f59ca60175a69da3f",
       "offline_opened": true
     },
     {
       "chapter": 12,
-      "sha256": "63fc93b5d4ab97e1dce9a06f0a7f12420ec7b59d89ea60141ef82bac6b2d5801",
+      "sha256": "6b17df02479f6db5c7322bb90478758410fa60bb70384d7db06606b876fd8ccf",
       "offline_opened": true
     },
     {
       "chapter": 13,
-      "sha256": "6b040dd7616d98df05d0b7466f4516718799119e2160992caccd4303396950e7",
+      "sha256": "fb5e35233571d6220b70e90859c8aba324621b75633e80f6a0b4da2f975ab177",
       "offline_opened": true
     },
     {
       "chapter": 14,
-      "sha256": "4e73b0f804dc398651b6d19ce6edded8d1512c748a8d88bc18bf68916c2f76cb",
+      "sha256": "46d6010720f22e8cdd558f3c515b7a1787a075c7ffc4f160dcb80eed40fd50ba",
       "offline_opened": true
     },
     {
       "chapter": 15,
-      "sha256": "6aff6553e84abb95e4fc9e201574dab8ce2849e896f417c31cfc5d512a32ad35",
+      "sha256": "e7ec75eef8ae2bef489b0f0c03381bc10e7ad186ad3d9e24d9c60a1613153b0e",
       "offline_opened": true
     },
     {
       "chapter": 16,
-      "sha256": "658cf396ef4d1af00a5f01eebd3b18ce1620d474960befbbada2a99e51d8836e",
+      "sha256": "536bded6aa1a9ac8857421d64b2ad678568f01395c85a4e128aeadbbe4e52c8f",
       "offline_opened": true
     },
     {
       "chapter": 17,
-      "sha256": "40612e2532b3d7915e9b0b15d57240bbca5f58b0cf017cf82d2bfd999ac3c4a2",
+      "sha256": "fdd8801484d45779f7c0d30b75b9993977a85acb63517414ea4578c0ea8804eb",
       "offline_opened": true
     },
     {
       "chapter": 20,
-      "sha256": "4fb2e9ce406e20dc559da9739fc8c12dc5f41ce4252904728f7ae2d6efe6692e",
+      "sha256": "32989801e5f6b8bfb12da3a267c8355fb382f1afd5bf93f310474c870f106552",
       "offline_opened": true
     }
   ],

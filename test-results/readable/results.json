@@ -18,38 +18,65 @@
       "delayed_reveal": true,
       "locked_reload": true,
       "editable_export": true
+    },
+    {
+      "chapter": 12,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
+    },
+    {
+      "chapter": 13,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
+    },
+    {
+      "chapter": 14,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
+    },
+    {
+      "chapter": 15,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
+    },
+    {
+      "chapter": 16,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
+    },
+    {
+      "chapter": 17,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
+    },
+    {
+      "chapter": 20,
+      "entry": true,
+      "save_reload": true,
+      "delayed_reveal": true,
+      "locked_reload": true,
+      "editable_export": true
     }
   ],
-  "errors": [
-    {
-      "assignment": 12,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    },
-    {
-      "assignment": 13,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    },
-    {
-      "assignment": 14,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    },
-    {
-      "assignment": 15,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    },
-    {
-      "assignment": 16,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    },
-    {
-      "assignment": 17,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    },
-    {
-      "assignment": 20,
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#refitwhy') to be visible\u001b[22m\n"
-    }
-  ],
+  "errors": [],
   "overflow": [],
   "checks": [
     {
