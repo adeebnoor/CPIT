@@ -137,6 +137,9 @@ def student_texts(data: dict, story: list | None = None) -> list[tuple[str, str]
             add(f'{sid}.list.title', L.get('title'))
             for it in L.get('items', []):
                 add(f'{sid}.list.item', it)
+    th = data.get('their') or {}
+    for k in ('question', 'who'):
+        add(f'their.{k}', th.get(k))
     for st in data.get('stations', []):
         no = st.get('no')
         for k in ('think', 'pair', 'write', 'hint', 'answer', 'note'):

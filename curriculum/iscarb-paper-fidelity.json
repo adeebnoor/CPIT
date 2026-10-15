@@ -163,7 +163,7 @@
   },
   "15": {
    "path": "lectures/iscarb/Ch15-Software-Reuse.html",
-   "lecture_data_sha256": "3af9eebfca8dbc32d3f56d197acfe37d4afb2a5806155f38148a039c2b49d182",
+   "lecture_data_sha256": "5281c27633bdf78b558c14bb06f27ec09b32d8545da1ff65b1a661a7ae415765",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -189,7 +189,7 @@
   },
   "16": {
    "path": "lectures/iscarb/Ch16-Component-Based-SE.html",
-   "lecture_data_sha256": "7478e67f8ab77d05a527165f0cb981c9aba7de3d39fabe4a9e6eb5aae93ffe55",
+   "lecture_data_sha256": "1ef0bd89096f37235c3049a3551b3d95aee7b831909f74c7c4a20cf523e4116d",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -215,7 +215,7 @@
   },
   "17": {
    "path": "lectures/iscarb/Ch17-Distributed-SE.html",
-   "lecture_data_sha256": "0b0ae0a9d480bfc99213fb8edc623f67888af78ae73ba1c503d9918c31f80cd9",
+   "lecture_data_sha256": "ccb66791a3859d220550f779ae48cc749869ab4243d29ada6533b45084e342f8",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -241,7 +241,7 @@
   },
   "20": {
    "path": "lectures/iscarb/Ch20-Systems-of-Systems.html",
-   "lecture_data_sha256": "8a1d9e04f546a916fc3a8ee5dd11234b502b010d8069806609fedec66580017a",
+   "lecture_data_sha256": "8a108fa70b191936b406fca30715d6363c2958b1cfd0bba1d3d52004dc4a210a",
    "core_keys": [
     "TITLE",
     "MAP",
@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "21e232ae9830a310a010ee228290856e951e78dc366f7d8d89eaf4a57fa71bf3",
+   "assignment_sha256_lf": "e281fe262493800b5c3ae840fadb8926a5074d300aa62628e049583c9afbe617",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "bbf5f63a35c530d83783623add9d0d412e560ed0c1cf6bec0a603c3cc7d90590",
+   "assignment_sha256_lf": "dea013c7893f5945106aa72409d776ae139b010b016e6c8cb80a8651a1bc3238",
    "stress_sha256_lf": "94696ea2bc67547ac2520a923ff23fd281bdaae01514ae89637b64e6fe8e23f1"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "106a322e80321d0b68540b768f20a7cf198d3359cea11ccd647480b8e5f8685b",
+   "assignment_sha256_lf": "537d9db2d17e88db0057f41c4cfdeb90359f254517d7e26cbe4612c757955af8",
    "stress_sha256_lf": "6e4f43415cd427fbad9eadd34d0cc23b27e2f6755e8c26e5c4bcf29f54cd4802"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "cbf76e09322e32e69dfe81ef36c71ca0599f5ec2dbed2ca304a204ddbc2a52fd",
+   "assignment_sha256_lf": "62bc4115aa86a7b5f4fbc5e259fcd69f1bfd1281875f8932f265b4902b2622b6",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "70482c7797fa2e7f89064b9f8956f2805476c77513f08a310611e8b04acd2034",
+   "assignment_sha256_lf": "a27a78a0d942aa8f2abff555bd27aa2ca0b82e556fecb979cce1e5054b35e8c7",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "e4478db27e3be943659646bef05c2102eca5efb3342531e240afb7a741083d16",
+   "assignment_sha256_lf": "7196fba41e1b68b48a1665295d9178069fd1979e167ad7eecfd91d84740f19b3",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "d2edc7e37fb4a5649ba907dd54484aa6d1ceef259497dea9d1826bb69eeff850",
+   "assignment_sha256_lf": "2146f585c782c7b7c5f055ad8d5347dc4f3c0858143f45a01d4c65191213568f",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -850,6 +850,25 @@
     "assignment 16",
     "assignment 17",
     "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261015-their-change",
+   "date": "2026-10-15",
+   "base_release": "20260926-genai-v12",
+   "summary": "Run 3 their change in Assignments 6-9 and the lecture slide before the assignment (Chapters 15, 16, 17, 20)",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20",
+    "lecture 15",
+    "lecture 16",
+    "lecture 17",
+    "lecture 20"
    ]
   }
  ]

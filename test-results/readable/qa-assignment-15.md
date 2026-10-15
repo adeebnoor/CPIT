@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-15  
-**Commit ID:** 769331eb-ae90-489f-bd8b-f8448f7e1534  
-**Part A committed:** 2026-10-15T05:42:14.615Z  
-**STRESS revealed:** 2026-10-15T05:42:14.627Z
+**Commit ID:** 92a372dd-e482-4bc5-9fb0-5f38e725fc5d  
+**Part A committed:** 2026-10-15T06:33:29.734Z  
+**STRESS revealed:** 2026-10-15T06:33:29.747Z
 
 ## Scenario
 A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-15T05:42:14.463Z
+BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-15T06:33:29.453Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.
@@ -66,8 +66,32 @@ Course checks:
 Coverage of your code by your own tests: not measured by this runner.
 
 
+THEIR CHANGE · run 3 · your code and tests unchanged (fingerprint eac82db7ba76d8c4)
+What changed (you did not write it): The supplier ships version 2 of its product facts. The names are the same, but the promise of an export API for option A is no longer stated.
+  - ("A", "export-api"): "met",
+  + (removed in version 2: the supplier no longer states this promise)
+Your tests after their change: 3 of 3 pass
+  ✓ test_a
+  ✓ test_b
+  ✓ test_c
+What the shared case shows:
+
+
+
 ## COVERAGE SENTENCE (COURSE OUTCOME 11)
 QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
+
+## THEIR CHANGE · YOUR TESTS
+Yes: my tests stayed green after their change
+
+## THEIR CHANGE · THE RESULT
+No: the result is no longer correct after their change
+
+## THEIR CHANGE · YOUR SENTENCE
+QA: my tests stayed green after their change, but the shared result is no longer correct.
+
+## THEIR CHANGE · RUN 3 RECORD (verified after commitment)
+their-v1:eyJoIjoiZWFjODJkYjdiYTc2ZDhjNCIsImdyZWVuIjp0cnVlLCJjb3JyZWN0IjpmYWxzZX0=
 
 ## STRESS
 QA evidence for chapter 15: this opens automatically after commitment.
@@ -88,9 +112,15 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; COMPARE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
+FIT: 1; COMPARE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). THEIR CHANGE: required (run 3; your answer must match the run; no points). Instructor assessment required.
 
 
 ## Preparation and workload
 Required reading: Reuse approaches and planning: slides 12–15; Frameworks and inversion of control: slides 16–21
 Reported total active minutes (reading, check and assignment): Not reported
+
+
+## THEIR CHANGE · run 3 verdict
+The run showed: your tests stayed green; the result was no longer correct.
+Your answer: tests green; result not correct.
+THEIR CHANGE row: met. This row adds no points.

@@ -1163,5 +1163,13 @@
  "bound": {
   "model": "Reusing a product is the wrong choice when supplier support ends before your system's planned lifetime.",
   "condition": "the supplier's support end date is earlier than your planned lifetime"
+ },
+ "their": {
+  "at": "APPLY",
+  "run1": "Run 1 · your fit check tests: 3 of 3 pass ✓",
+  "before": "(\"A\", \"export-api\"): \"met\",",
+  "after": "(removed in version 2: the supplier no longer states this promise)",
+  "who": "the supplier changed this line",
+  "question": "Do your tests still pass, and is the answer still correct? Write your prediction."
  }
 }

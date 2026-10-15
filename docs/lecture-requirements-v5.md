@@ -114,3 +114,20 @@ Authored data: `curriculum/lecture-requirements/` (one JSON per lecture, applied
 | Lab credit | Under the grade tables (student guide, worked example) and in the instructor guide: "Lab credit is 0. The practical hour is the coded build, the tests, and the recorded run inside Assignments 3–9, completed in the weekly 90-minute practical session. It is marked. It is not optional." Arabic version beside it. |
 | Wording | No public page says the lab was cancelled or that Code Coverage is missing or taught later. The checker fails any such sentence, a missing practical-hour line, a missing TESTS RUN row or coverage step, and a missing credit sentence. |
 | Tools | `tools/apply_practical_hour.py` (line, row, credit sentence, page wording). `tools/apply_assignment_build.py` (coverage step, run counter, coverage in the record) now matches the practical section in any attribute order. Order: apply_assignment_build → apply_assignment_plain_language → apply_lecture_requirements → apply_practical_hour. |
+
+## Run 3 · their change (Chapters 15, 16, 17 and 20 only, 15 October 2026)
+
+Run 2 changes an input the student wrote; it measures their coverage of their own code. Run 3 changes a part the student did not write, after their tests pass and without editing them. Chapters 12, 13 and 14 (safety, security, resilience) and the frozen Assignments 1–2 are unchanged.
+
+| Chapter | What the build swaps (the student does not write it) | What the run shows |
+|---|---|---|
+| 15 Reuse | Supplier facts version 2: same names, the export-API promise for option A is gone | The fit tests stay green; a fit check that reads the facts shows the missing commitment (`evidence_needed('A')` lists it). A copy of the old facts stays green and is wrong. |
+| 16 Components | Component version 2: same call, duration now in milliseconds | The adapter's tests stay green; the booking is 1.8 seconds instead of 30 minutes (the postcondition cannot see it). |
+| 17 Distributed | The remote app retries a lost reply with a new request id | The retry tests stay green; the store holds two reservations for one user action. |
+| 20 Systems of systems | Owner B redefines "updated" (minutes since the last update) without changing the version | Each owner's own test passes and the student's tests stay green; the shared display shows B live and the headline says "All feeds live". |
+
+The case uses the feed's update time, the field the build has. It plays the role of the "high" level in the lecture case: the same name, a new meaning, and no version change.
+
+- **Assignment page.** A "Run their change" button runs the student's unchanged code and tests against the swapped part (`chNN_their.py`, `__their` in the harness) and appends the result to the build record. The student answers two questions (did your tests stay green? is the result still correct?) and writes one sentence; all are Part A fields and are exported. The verdict is stored with the run and shown in the export after commitment: when the answer does not match the run, the **THEIR CHANGE** row is *not met*. The row adds no points.
+- **Lecture.** One block on the APPLY slide, the slide before the assignment, with no extra explanation: run 1 is green, one line the student did not write changes, and the question "Do your tests still pass, and is the answer still correct?" The student writes a prediction (saved on the device; no answer is revealed); the assignment runs this change as run 3.
+- **Checks.** `check-builds.py` runs their change on the starters. It also runs it on the private reference solutions when `ISCARB_PRIVATE_SOLUTIONS` points to them; the solutions are never committed. The requirements checker fails a missing run 3 in these four assignments and rejects one anywhere else.

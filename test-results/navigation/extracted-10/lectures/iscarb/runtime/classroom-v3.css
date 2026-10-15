@@ -330,3 +330,8 @@ html[data-stage="v4"] .end-page .bound-block>.buttons button{padding:4px 10px;mi
 /* an open inline answer: the slide scrolls; the table / WHAT IT MEANS grid keeps its height instead of being overlapped */
 .chapter-main.answer-open{overflow-y:auto;scrollbar-width:thin}
 .chapter-main.answer-open .body-grid,html[data-stage="v4"] body.single-canvas #app .chapter-main.answer-open .body-grid{flex-shrink:0}
+/* Before the assignment · their change (Chapters 15, 16, 17, 20) */
+.their-block{margin:10px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;background:var(--panel)}
+.their-block .ey{margin:0 0 6px}
+.their-run{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.05);font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.their-q{margin:0 0 6px}

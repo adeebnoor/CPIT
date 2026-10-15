@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-15  
-**Commit ID:** ae4e6d2c-7860-43d2-a2bc-90260f49ebb6  
-**Part A committed:** 2026-10-15T05:42:21.848Z  
-**STRESS revealed:** 2026-10-15T05:42:21.860Z
+**Commit ID:** 5d3be12b-0a2f-44d9-aef9-0ffcc37519ae  
+**Part A committed:** 2026-10-15T06:33:35.433Z  
+**STRESS revealed:** 2026-10-15T06:33:35.446Z
 
 ## Scenario
 A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.
@@ -51,7 +51,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-15T05:42:21.664Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-15T06:33:35.182Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?
@@ -65,8 +65,32 @@ Course checks:
 Coverage of your code by your own tests: not measured by this runner.
 
 
+THEIR CHANGE · run 3 · your code and tests unchanged (fingerprint eac82db7ba76d8c4)
+What changed (you did not write it): The remote app ships a new release. After a lost reply it sends the same booking again, but with a new request_id.
+  - retry after a lost reply: send the same request_id
+  + retry after a lost reply: send a new request_id
+Your tests after their change: 3 of 3 pass
+  ✓ test_a
+  ✓ test_b
+  ✓ test_c
+What the shared case shows:
+
+
+
 ## COVERAGE SENTENCE (COURSE OUTCOME 11)
 QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
+
+## THEIR CHANGE · YOUR TESTS
+Yes: my tests stayed green after their change
+
+## THEIR CHANGE · THE RESULT
+No: the result is no longer correct after their change
+
+## THEIR CHANGE · YOUR SENTENCE
+QA: my tests stayed green after their change, but the shared result is no longer correct.
+
+## THEIR CHANGE · RUN 3 RECORD (verified after commitment)
+their-v1:eyJoIjoiZWFjODJkYjdiYTc2ZDhjNCIsImdyZWVuIjp0cnVlLCJjb3JyZWN0IjpmYWxzZX0=
 
 ## STRESS
 QA evidence for chapter 17: this opens automatically after commitment.
@@ -87,9 +111,15 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; FAILURE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
+FIT: 1; FAILURE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). THEIR CHANGE: required (run 3; your answer must match the run; no points). Instructor assessment required.
 
 
 ## Preparation and workload
 Required reading: Distributed architectural patterns: slides 29–34; SaaS and service delivery: slides 53–58
 Reported total active minutes (reading, check and assignment): Not reported
+
+
+## THEIR CHANGE · run 3 verdict
+The run showed: your tests stayed green; the result was no longer correct.
+Your answer: tests green; result not correct.
+THEIR CHANGE row: met. This row adds no points.

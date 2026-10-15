@@ -18,7 +18,7 @@ import html, json, re, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from apply_assignment_build import CLO, CLO11, CRIT
+from apply_assignment_build import CLO, CLO11, CRIT, THEIR_CH
 
 ROOT = Path(__file__).resolve().parents[1]
 PUB = json.loads((ROOT / 'curriculum/publication.json').read_text(encoding='utf-8'))
@@ -45,6 +45,8 @@ CREDIT_AR = ('رصيد المعمل صفر. الساعة التطبيقية هي
 H_START, H_END = '<!-- practical-hour:start -->', '<!-- practical-hour:end -->'
 C_START, C_END = '<!-- lab-credit:start -->', '<!-- lab-credit:end -->'
 ROW_MARK = 'data-row="tests-run"'
+THEIR_ROW_MARK = 'data-row="their-change"'
+MD_THEIR = 'THEIR CHANGE: required (run 3; your answer must match the run; no points). '
 MD_OLD = 'REFIT: 1. Instructor assessment required.'
 MD_NEW = 'REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.'
 
@@ -79,6 +81,13 @@ def tests_row(ch: int) -> str:
             f'A run with failing checks is accepted when your text explains it. The build itself is marked in {CRIT[ch]}.</td></tr>')
 
 
+def their_row() -> str:
+    return (f'<tr {THEIR_ROW_MARK}><th scope="row">THEIR CHANGE · required</th><td><b>Required for submission:</b> run 3, their change, '
+            'with your code and tests unchanged, and your answer to two questions: did your tests stay green, and is the result still correct? '
+            '<b>Not met</b> when your answer does not match what the run shows, for example “the result is still correct” when it is not. '
+            'This row adds no points and takes none; the instructor reviews a row that is not met.</td></tr>')
+
+
 def credit() -> str:
     return (f'<div class="lab-credit" role="note"><p><b>Practical hour.</b> {esc(CREDIT_EN)}</p>'
             f'<p lang="ar" dir="rtl"><b>الساعة التطبيقية.</b> {esc(CREDIT_AR)}</p></div>')
@@ -95,10 +104,15 @@ def patch_assignment(path: Path, ch: int) -> bool:
             raise SystemExit(f'{path.name}: rubric row with the build not found')
         at = i + build_row.end()
         s = s[:at] + tests_row(ch) + s[at:]
-    if MD_NEW not in s:
+    if ch in THEIR_CH and THEIR_ROW_MARK not in s:
+        i = s.index('id="rubric-heading"'); j = s.index('</tr>', s.index(ROW_MARK, i)) + len('</tr>')
+        s = s[:j] + their_row() + s[j:]
+    if 'TESTS RUN: required' not in s:
         if s.count(MD_OLD) != 1:
             raise SystemExit(f'{path.name}: export rubric line not found once')
         s = s.replace(MD_OLD, MD_NEW)
+    if ch in THEIR_CH and MD_THEIR not in s:
+        s = s.replace(MD_NEW, MD_NEW.replace('Instructor assessment required.', MD_THEIR + 'Instructor assessment required.'))
     if s != s0:
         path.write_text(s, encoding='utf-8'); return True
     return False
