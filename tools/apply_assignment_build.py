@@ -269,7 +269,7 @@ def their_markup(ch: int, sp: dict) -> str:
     """Run 3 · their change: the student's tests stay as they are while a part they did not write changes."""
     yes_g, no_g = 'Yes: my tests stayed green after their change', 'No: at least one of my tests turned red'
     yes_c, no_c = 'Yes: the result is still correct after their change', 'No: the result is no longer correct after their change'
-    sel = lambda i, a, b: (f'<select id="{i}"><option value="">Choose…</option><option value="{esc(a)}">{esc(a)}</option>'
+    sel = lambda i, a, b: (f'<select id="{i}" style="display:block;width:100%;max-width:100%;white-space:normal"><option value="">Choose…</option><option value="{esc(a)}">{esc(a)}</option>'
                            f'<option value="{esc(b)}">{esc(b)}</option></select>')
     return ('<div class="their-step" id="theirStep"><p class="ey">RUN 3 · THEIR CHANGE · A PART YOU DID NOT WRITE CHANGES</p>'
             f'<p>{esc(sp["theirChange"])}</p>'

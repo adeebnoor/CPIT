@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-15  
-**Commit ID:** 0667947a-509e-49cb-b534-7bf4056d56e3  
-**Part A committed:** 2026-10-15T05:42:25.399Z  
-**STRESS revealed:** 2026-10-15T05:42:25.410Z
+**Commit ID:** 5e05ca6d-45d7-445d-8334-8bf5264a3d1f  
+**Part A committed:** 2026-10-15T06:33:39.168Z  
+**STRESS revealed:** 2026-10-15T06:33:39.180Z
 
 ## Scenario
 A fictional university wants one screen showing incidents using information from security, transport and facilities.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-15T05:42:25.229Z
+BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-15T06:33:38.916Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.
@@ -66,8 +66,32 @@ Course checks:
 Coverage of your code by your own tests: not measured by this runner.
 
 
+THEIR CHANGE · run 3 · your code and tests unchanged (fingerprint eac82db7ba76d8c4)
+What changed (you did not write it): Owner B changes what "updated" means in feed B, without changing the version number (still v1). It now means minutes since the last update, not the minute of the last update.
+  - "updated": minute of the last update        # feed B, version v1
+  + "updated": minutes since the last update    # feed B, version still v1
+Your tests after their change: 3 of 3 pass
+  ✓ test_a
+  ✓ test_b
+  ✓ test_c
+What the shared case shows:
+
+
+
 ## COVERAGE SENTENCE (COURSE OUTCOME 11)
 QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
+
+## THEIR CHANGE · YOUR TESTS
+Yes: my tests stayed green after their change
+
+## THEIR CHANGE · THE RESULT
+No: the result is no longer correct after their change
+
+## THEIR CHANGE · YOUR SENTENCE
+QA: my tests stayed green after their change, but the shared result is no longer correct.
+
+## THEIR CHANGE · RUN 3 RECORD (verified after commitment)
+their-v1:eyJoIjoiZWFjODJkYjdiYTc2ZDhjNCIsImdyZWVuIjp0cnVlLCJjb3JyZWN0IjpmYWxzZX0=
 
 ## STRESS
 QA evidence for chapter 20: this opens automatically after commitment.
@@ -88,9 +112,15 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; INTEGRATE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
+FIT: 1; INTEGRATE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). THEIR CHANGE: required (run 3; your answer must match the run; no points). Instructor assessment required.
 
 
 ## Preparation and workload
 Required reading: SoS classification and independence: slides 15–20; Data feeds and architecture patterns: slides 48–53
 Reported total active minutes (reading, check and assignment): Not reported
+
+
+## THEIR CHANGE · run 3 verdict
+The run showed: your tests stayed green; the result was no longer correct.
+Your answer: tests green; result not correct.
+THEIR CHANGE row: met. This row adds no points.

@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "0352f5365f59cd2476a20ad96a7cba078641ff31aa359bce514f20ea41a9721e",
+   "assignment_sha256_lf": "62bc4115aa86a7b5f4fbc5e259fcd69f1bfd1281875f8932f265b4902b2622b6",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "b20237111523a2c7487963dee856acee544bf5d65b591175fccd9c8afcc530d4",
+   "assignment_sha256_lf": "a27a78a0d942aa8f2abff555bd27aa2ca0b82e556fecb979cce1e5054b35e8c7",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "6295ad0d9f788d3a28cd777c2c0ba64e9c8531e1437ec4c213f35afd3e776e7c",
+   "assignment_sha256_lf": "7196fba41e1b68b48a1665295d9178069fd1979e167ad7eecfd91d84740f19b3",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "6f7642dc210aa967e53dac52f20fb79857a5723458870f3d18c21c2720a65e90",
+   "assignment_sha256_lf": "2146f585c782c7b7c5f055ad8d5347dc4f3c0858143f45a01d4c65191213568f",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -858,17 +858,17 @@
    "base_release": "20260926-genai-v12",
    "summary": "Run 3 their change in Assignments 6-9 and the lecture slide before the assignment (Chapters 15, 16, 17, 20)",
    "repinned": [
-    "lecture 15",
-    "lecture 16",
-    "lecture 17",
-    "lecture 20",
     "assignment 12",
     "assignment 13",
     "assignment 14",
     "assignment 15",
     "assignment 16",
     "assignment 17",
-    "assignment 20"
+    "assignment 20",
+    "lecture 15",
+    "lecture 16",
+    "lecture 17",
+    "lecture 20"
    ]
   }
  ]
