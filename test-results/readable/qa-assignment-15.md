@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-14  
-**Commit ID:** 365e93d8-15cc-469a-9089-79600fc1d331  
-**Part A committed:** 2026-10-14T21:59:52.026Z  
-**STRESS revealed:** 2026-10-14T21:59:52.036Z
+**Date:** 2026-10-15  
+**Commit ID:** 769331eb-ae90-489f-bd8b-f8448f7e1534  
+**Part A committed:** 2026-10-15T05:42:14.615Z  
+**STRESS revealed:** 2026-10-15T05:42:14.627Z
 
 ## Scenario
 A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.
@@ -48,12 +48,13 @@ QA: the build enforces the rule; tests cover a normal, an edge and a refused cas
 
 ## PYTHON BUILD (CODE AND TESTS)
 def test_a():
-    assert True
+    assert 1 == 1
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-14T21:59:51.857Z
-Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
+BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-15T05:42:14.463Z
+Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
+Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
 Your tests:
@@ -62,7 +63,11 @@ Your tests:
   ✓ test_c
 Course checks:
   ✓ course check
+Coverage of your code by your own tests: not measured by this runner.
 
+
+## COVERAGE SENTENCE (COURSE OUTCOME 11)
+QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
 
 ## STRESS
 QA evidence for chapter 15: this opens automatically after commitment.
@@ -83,7 +88,7 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; COMPARE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. Instructor assessment required.
+FIT: 1; COMPARE: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
 
 
 ## Preparation and workload

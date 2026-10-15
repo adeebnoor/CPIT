@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-14  
-**Commit ID:** cf9c61f9-1c4e-4f76-9886-322c8ecddcc1  
-**Part A committed:** 2026-10-14T21:59:44.909Z  
-**STRESS revealed:** 2026-10-14T21:59:44.921Z
+**Date:** 2026-10-15  
+**Commit ID:** 4f0b8880-409e-49b0-8175-71107ea866f5  
+**Part A committed:** 2026-10-15T05:42:07.515Z  
+**STRESS revealed:** 2026-10-15T05:42:07.528Z
 
 ## Scenario
 A fictional university website stores student project files. It has two user roles: student and staff.
@@ -48,12 +48,13 @@ QA: the build enforces the rule; tests cover a normal, an edge and a refused cas
 
 ## PYTHON BUILD (CODE AND TESTS)
 def test_a():
-    assert True
+    assert 1 == 1
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-14T21:59:44.708Z
-Code fingerprint: d64dd4bae169e8af (the code above, exactly as run)
+BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-15T05:42:07.346Z
+Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
+Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove your malformed-input handling and run again. Which known bug is no longer caught, and why?
 Your tests: 3 of 3 pass · Course checks: 1 of 1 pass
 Your tests:
@@ -62,7 +63,11 @@ Your tests:
   ✓ test_c
 Course checks:
   ✓ course check
+Coverage of your code by your own tests: not measured by this runner.
 
+
+## COVERAGE SENTENCE (COURSE OUTCOME 11)
+QA: after run 2 the refusal branch is still not tested; a malformed input would test it.
 
 ## STRESS
 QA evidence for chapter 13: this opens automatically after commitment.
@@ -83,7 +88,7 @@ Name: QA test
 Attested: Yes — reviewed and responsibility accepted
 
 ## Rubric — 5 points
-FIT: 1; TEST: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. Instructor assessment required.
+FIT: 1; TEST: 1; BOUND: 1; ACT + EVIDENCE: 1; REFIT: 1. TESTS RUN: required (recorded runs and the coverage sentence; longer writing does not replace them). Instructor assessment required.
 
 
 ## Preparation and workload

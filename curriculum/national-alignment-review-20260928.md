@@ -20,6 +20,8 @@ All nine chapter spines were compared with their declared source sections and th
 
 The syllabus item **Code Coverage** remains openly recorded as missing teaching material in the course-outcome map. This release does not claim that the nine chapters complete every syllabus item.
 
+> **Update, 15 October 2026.** Code Coverage is now practised in the coverage step of every Python build in Assignments 3–9 (course outcome 11): the build record measures line and branch coverage of the student’s code, and the student changes one input, reruns and names the branch still untested.
+
 The Jaheziah mapping is educational and proposed; formal specialization codes and program approval are not established. NELC design alignment does not establish certification, institutional compliance, causal effectiveness or student attainment.
 
 ## Verification

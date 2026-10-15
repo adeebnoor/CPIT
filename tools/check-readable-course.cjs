@@ -98,6 +98,10 @@ async function run(){
     await page.evaluate(()=>StudyBuild.setRunner(()=>({error:null,tests:[['test_a',true,''],['test_b',true,''],['test_c',true,'']],checks:[['course check',true,'']]})));
     await page.locator('#labCases').fill('def test_a():\n    assert True\n');
     await page.locator('#buildRun').click();await page.waitForFunction(()=>/^BUILD RECORD/.test(document.getElementById('labEvidence').value));
+    // Coverage step (course outcome 11): change one input, run again, write the untested branch.
+    await page.locator('#labCases').fill('def test_a():\n    assert 1 == 1\n');
+    await page.locator('#buildRun').click();await page.waitForFunction(()=>/^Run 2 on this device/m.test(document.getElementById('labEvidence').value));
+    await page.locator('#coverageNote').fill('QA: after run 2 the refusal branch is still not tested; a malformed input would test it.');
    }
    await page.locator('#sourceUse').fill('Slide '+a.reading_pages[0]+': the source concept constrains the model assumptions and defines a bounded control that must be independently checked.');
    await page.locator('#section').fill('QA');await page.locator('#save').click();await page.reload();assert.match(await page.locator('#fit').inputValue(),/QA:/);

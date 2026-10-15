@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "e8c128e1b50fe9605d3f69524b52b15b6d5f77f313c1ace5ac7914d5c07d5b0e",
+   "assignment_sha256_lf": "21e232ae9830a310a010ee228290856e951e78dc366f7d8d89eaf4a57fa71bf3",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "104d202eff463dea0611a7d5aebbf2925a5bc799354ebfc367ca5d479734c46a",
+   "assignment_sha256_lf": "bbf5f63a35c530d83783623add9d0d412e560ed0c1cf6bec0a603c3cc7d90590",
    "stress_sha256_lf": "94696ea2bc67547ac2520a923ff23fd281bdaae01514ae89637b64e6fe8e23f1"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "500105bab0f9bbfaf31241b0fb18a5b66e2d355cb3e30b55b0d584649c0b5d0e",
+   "assignment_sha256_lf": "106a322e80321d0b68540b768f20a7cf198d3359cea11ccd647480b8e5f8685b",
    "stress_sha256_lf": "6e4f43415cd427fbad9eadd34d0cc23b27e2f6755e8c26e5c4bcf29f54cd4802"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "6853aa4e2fc35435f436631cd33afbb758b99ab566de15088f82df6ffa9479e3",
+   "assignment_sha256_lf": "cbf76e09322e32e69dfe81ef36c71ca0599f5ec2dbed2ca304a204ddbc2a52fd",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "d31a9207a2773cc20a736015264ab572f9e5d847c9e339c28c6ac25271a3ac4d",
+   "assignment_sha256_lf": "70482c7797fa2e7f89064b9f8956f2805476c77513f08a310611e8b04acd2034",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "79bb417aebc649edf92df4ed21ea5c641d1cbc2304ee0117c6dce901c9e336bb",
+   "assignment_sha256_lf": "e4478db27e3be943659646bef05c2102eca5efb3342531e240afb7a741083d16",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "8c512e266a6a46be1fff752196d3a93bcc0049c8d7be794848b6ea3a77225aa9",
+   "assignment_sha256_lf": "d2edc7e37fb4a5649ba907dd54484aa6d1ceef259497dea9d1826bb69eeff850",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -827,6 +827,21 @@
    "date": "2026-10-14",
    "base_release": "20260926-genai-v12",
    "summary": "Fourth review follow-up: hub gate, export labels, visible rubric levels, reveal layout",
+   "repinned": [
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261015-practical-hour",
+   "date": "2026-10-15",
+   "base_release": "20260926-genai-v12",
+   "summary": "Practical hour in Assignments 3-9: coverage step (CLO 11), TESTS RUN row, lab-credit sentence",
    "repinned": [
     "assignment 12",
     "assignment 13",
