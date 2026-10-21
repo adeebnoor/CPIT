@@ -552,7 +552,7 @@ def check_assignments(R: Report, cfg: dict):
         s = p.read_text(encoding='utf-8')
         rt = s[s.find('id="rubric-heading"'):]
         rt = rt[:rt.find('</table>')]
-        names = [x for x in re.findall(r'<th scope="row">([^<]+)</th>', rt) if not x.startswith(('TESTS RUN', 'THEIR CHANGE'))]
+        names = [x for x in re.findall(r'<th scope="row">([^<]+)</th>', rt) if not x.startswith(('TESTS RUN', 'THEIR CHANGE', 'IN-CLASS CHECK'))]
         tot = re.search(r'How your work is assessed · ([\d.]+) points', s)
         ex = s[s.find('id="rubricExamples"'):] if 'id="rubricExamples"' in s else ''
         ci = s.find('id="commitBtn"') if 'id="commitBtn"' in s else s.find('Review &amp; commit')
@@ -565,14 +565,14 @@ def check_assignments(R: Report, cfg: dict):
         if ch < cfg.get('assignmentRubricFromChapter', 12):
             continue
         bad1, bad2, bad4, bad5 = [], [], [], []
-        crit = [x for x in re.findall(r'<th scope="row">([^<]+)</th>', s[s.find('id="rubric-heading"'):]) if not x.startswith(('TESTS RUN', 'THEIR CHANGE'))]
+        crit = [x for x in re.findall(r'<th scope="row">([^<]+)</th>', s[s.find('id="rubric-heading"'):]) if not x.startswith(('TESTS RUN', 'THEIR CHANGE', 'IN-CLASS CHECK'))]
         if 'id="rubric-heading"' not in s or len(crit) < 3:
             bad1.append('rubric table missing')
         if 'Partial credit' not in s:
             bad1.append('rubric levels (partial credit) missing')
         table = s[s.find('id="rubric-heading"'):]
         table = table[:table.find('</table>')]
-        for c in [x for x in re.findall(r'<th scope="row">([^<]+)</th>', table) if not x.startswith(('TESTS RUN', 'THEIR CHANGE'))]:
+        for c in [x for x in re.findall(r'<th scope="row">([^<]+)</th>', table) if not x.startswith(('TESTS RUN', 'THEIR CHANGE', 'IN-CLASS CHECK'))]:
             row = table[table.find(f'<th scope="row">{c}</th>'):]
             row = row[:row.find('</tr>')]
             got = [l for l in ('1:', '0.75:', '0.5:', '0:') if f'<b>{l}</b>' in row]
@@ -614,6 +614,13 @@ def check_assignments(R: Report, cfg: dict):
             hour.append('run 3 (their change), its questions, the THEIR CHANGE row or the export verdict is missing')
         if ch not in (15, 16, 17, 20) and 'id="theirStep"' in s:
             hour.append('run 3 belongs only to Chapters 15, 16, 17 and 20')
+        # AI rules per step, an AI draft to critique and the in-class check (tools/apply_ai_integrity.py)
+        integrity = ('id="ai-rules"' in s and 'data-row="in-class-check"' in table and 'class="review-item"' in s
+                     and 'An AI assistant' in s and 'التحقق في المحاضرة' in s)
+        if ch in (15, 16, 17, 20) and not integrity:
+            hour.append('the AI rules card, the AI draft or the IN-CLASS CHECK row is missing')
+        if ch not in (15, 16, 17, 20) and 'id="ai-rules"' in s:
+            hour.append('the AI rules and in-class check belong only to Chapters 15, 16, 17 and 20')
         bad1 += hour
         bad_b4 = [] if (BOUND_MARK in s and "lines.push('## Chapter boundary sentence" in s and 'id="bound"' in s) else ['the lecture boundary sentence is not carried into the assignment export']
         for code, bad in (('RUB-1', bad1), ('RUB-2', bad2), ('RUB-4', bad4), ('RUB-5', bad5), ('BOUND-4', bad_b4)):

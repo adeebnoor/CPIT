@@ -119,15 +119,15 @@
         "Neither option has a reliable estimate of the full cost over its use, including support and later changes.",
         "The goal is a trial next term, not replacing the faculty's whole system. Recommend an option, a limited evaluation, or a hold."
       ],
-      "review_title": "A colleague's draft recommendation — review it; do not copy it",
+      "review_title": "An AI assistant's draft recommendation — review it; do not copy it",
       "review": "Choose Option A for the whole faculty next term. It already has all the booking features, so changing its settings will be enough. Two years of support is fine for a three-year trial: we can simply renew it. Finishing Option B would take too long; the team's knowledge of its code makes no difference. Option A clearly costs less overall because it is ready-made.",
-      "fit": "Name the type of software reuse in each option. List the features needed and the limits the choice must meet. Point out where the colleague's draft misstates the intended size of the trial, needs over its lifetime, or requirements.",
+      "fit": "Name the type of software reuse in each option. List the features needed and the limits the choice must meet. Point out where the AI draft misstates the intended size of the trial, needs over its lifetime, or requirements.",
       "measure": "Make the comparison missing from the draft. Use four relevant factors for choosing software to reuse. For each entry, mark it supported by a supplied fact, unknown, or dependent on a condition. Identify claims in the draft that the facts do not support. Do not invent scores, prices or performance results.",
       "bound": "Name an assumption about support or use over time that the draft treats as certain without evidence. State one specific change that would make you change your own recommendation.",
       "act": "Write the recommendation you would sign: choose an option or propose an evaluation, and state its limits. Name who is responsible and what evidence is needed to answer one important unknown.",
       "technical": "A framework calls the extra code you add to it; your program calls a library when it needs one of its functions. Explain who controls the order of work in each case. Give one effect this difference has when connecting an existing software component.",
       "build_title": "Build the check against known facts",
-      "build_task": "Write fit, shortlist and evidence_needed. Use only the supplied facts. A requirement with no evidence must stay unknown, not be marked met. Use the output to check the claims in the colleague's draft.",
+      "build_task": "Write fit, shortlist and evidence_needed. Use only the supplied facts. A requirement with no evidence must stay unknown, not be marked met. Use the output to check the claims in the AI draft.",
       "reading": "Read about assumptions a reused software component relies on but does not state in its description. Which unknown result in your comparison represents such an assumption?",
       "terms": [
         [
@@ -175,7 +175,7 @@
         "A sample request with duration = 30 returns an ID. Nobody has tested the saved end time or what happens with invalid input.",
         "Your decision: use the component, adapt the connection, replace the component, or hold the limited trial. Explain what must be checked before relying on it."
       ],
-      "fit": "Explain the difference between matching the function name and input types (syntax) and agreeing on what the values mean (semantics). Name the service the component provides and one rule the calling app must follow.",
+      "fit": "Explain the difference between matching the function name and input types (syntax) and agreeing on what the values mean (semantics). Name the service the component provides and one rule the calling app must follow. Name one claim in the AI draft that the supplied facts do not support, and the fact that shows it.",
       "measure": "Write a precondition (what must be true before the call) and a postcondition (what must be true after it succeeds). Use clear notation; OCL-style notation is also allowed. State the unit conversion the adapter needs. Give one test at a limit or with invalid input, and the result you expect to observe. Use your actual build record to explain a difference between the original and corrected behavior, one limit of the model, and any prediction you corrected.",
       "bound": "State the allowed input range and the documented behavior you rely on. Name one unanswered question about how errors are reported or handled.",
       "act": "Choose use, adapt, replace or hold. Name who is responsible for connecting the software. State what evidence is needed to check the agreed rules after the parts are connected.",
@@ -219,7 +219,9 @@
       "warmup": [
         "A function accepts a number called duration. Does its name and input type tell you whether this means minutes or seconds?",
         "No. The unit is part of what the input means. The calling app and the component need agreed rules for units, limits and what happens on an error."
-      ]
+      ],
+      "review_title": "An AI assistant's draft answer — review it; do not copy it",
+      "review": "Use the component as it is. The sample request with duration = 30 returned a reservation ID, so the connection works correctly. Both sides call the value duration, so the adapter only needs to pass it through. Any duration up to 7200 is accepted, so a three-hour booking (180 minutes) is safe. No more tests are needed before the trial."
     },
     "17": {
       "scenario": [
@@ -229,7 +231,7 @@
         "Normal requests have succeeded. Nobody has tested what happens if the database saves a booking but the reply is then lost.",
         "Recommend how these parts should work together in a trial, and the rule for sending a request again (retry)."
       ],
-      "fit": "State what the browser, application service and database each do, and where they run (deployment tiers). Identify where a request crosses between computers. Explain the difference between receiving no reply and the server doing no work.",
+      "fit": "State what the browser, application service and database each do, and where they run (deployment tiers). Identify where a request crosses between computers. Explain the difference between receiving no reply and the server doing no work. Name one claim in the AI draft that the supplied facts do not support, and the fact that shows it.",
       "measure": "List the events in order when a booking is saved but its reply is lost. Propose a rule for retrying or checking the saved records, and a test that would reveal a duplicate booking. State what you are assuming. Use your actual build record to explain a difference between the original and corrected behavior, one limit of the model, and any prediction you corrected.",
       "bound": "Name the kinds of failure your recommendation covers and the rule the stored bookings must still satisfy (consistency requirement). Say what the supplied tests do not cover.",
       "act": "Recommend an action for the trial and state its limits. Name who is responsible. Explain how your design works and what results you need before allowing the browser to retry automatically.",
@@ -273,7 +275,9 @@
       "warmup": [
         "You send a payment request to another computer, but the waiting time ends with no reply. Can you assume no payment happened?",
         "No. The server may have completed the payment before its reply was lost. Before sending the request again, define how to identify the same request, prevent a second effect, or check the saved result."
-      ]
+      ],
+      "review_title": "An AI assistant's draft answer — review it; do not copy it",
+      "review": "Keep the current design. Normal requests succeed, so the booking flow is reliable. Sending the request again with a new request ID is safe, because the database creates exactly one reservation for each request ID. If a reply is lost, the browser's retry fixes the problem. A longer timeout would remove the risk completely."
     },
     "20": {
       "scenario": [
@@ -283,15 +287,15 @@
         "The owners agree to a limited daytime trial. They have not agreed how old information may be before it is unsuitable, or what the screen should show when a system stops sending data.",
         "Each system passed its own API tests (tests of its program-to-program connection). Nobody has tested a failure involving the systems working together."
       ],
-      "review_title": "The transport team's proposed design — review it before the trial",
+      "review_title": "An AI assistant's draft design for the transport team — review it before the trial",
       "review": "The screen asks all three systems for data every minute. It labels the latest value received from each as live. If a system stops sending data, it keeps displaying that system's last value so the screen is never empty. Each owner signs a one-page promise of 99.9% availability. To accept the design, check that every API returns HTTP 200 (a successful response code) and uses the agreed JSON data structure.",
-      "fit": "Name the type of system of systems (SoS). Explain how each system can work alone and make its own management decisions. Name one useful shared service. Identify control over the other owners that the proposed design wrongly assumes.",
-      "measure": "Review the proposed design. Write an agreement for two participating systems: who owns each, what data they exchange, assumptions about software versions and data age, and useful behavior if one stops sending data. Plan a test of the shared service in stages. For each change you propose, say which weakness in the team's design it addresses.",
+      "fit": "Name the type of system of systems (SoS). Explain how each system can work alone and make its own management decisions. Name one useful shared service. Identify control over the other owners that the AI draft wrongly assumes.",
+      "measure": "Review the AI draft design. Write an agreement for two participating systems: who owns each, what data they exchange, assumptions about software versions and data age, and useful behavior if one stops sending data. Plan a test of the shared service in stages. For each change you propose, say which weakness in the AI draft it addresses.",
       "bound": "Separate what the trial coordinator can decide alone from what needs agreement with another owner. Name an event that would require stopping or limiting what the shared service promises.",
       "act": "Approve the design, approve it with conditions, or reject it for the trial. Name the coordinating role and the owners who must take part. State what evidence is needed before moving to the next stage.",
       "technical": "Compare a data-feed design (systems send updates to a shared service) with a trading design (systems request or offer services through agreed exchanges). Which fits this incident screen? What extra kind of interaction would make the other design appropriate?",
       "build_title": "Build a display that shows the data's real state",
-      "build_task": "Write display_state and headline. For every incoming data feed, show whether it is recent enough, too old, or unavailable. Do not label the whole display live when one feed is old or unavailable. Use the proposed 5-minute age limit. Use the actual result when reviewing the team's design.",
+      "build_task": "Write display_state and headline. For every incoming data feed, show whether it is recent enough, too old, or unavailable. Do not label the whole display live when one feed is old or unavailable. Use the proposed 5-minute age limit. Use the actual result when reviewing the AI draft.",
       "reading": "Read about operational independence (each system can work alone) and managerial independence (each owner makes its own decisions). Which line of your code is needed because the dashboard does not control the owners of the data feeds?",
       "terms": [
         [
