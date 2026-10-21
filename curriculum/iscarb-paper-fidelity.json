@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "ecdda89ab47d4d461c30084ae00409e54b13a31a92db569d276bc08766ef9511",
+   "assignment_sha256_lf": "f0d8ae16b5067ee0a7198ec387b5e77b58b66177bcc4c04fa55982f43055ecb0",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "dde694faa619311949753458dd817e872928b4fcd127c9d99f5b9d92791a0b83",
+   "assignment_sha256_lf": "da6ab84b21c922148e12ae97bc8651221619cdfb46b21b54b6894baf5e4d89df",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "1d2dbb2cd21ddb4508d4db23913326171f12479f5e8457ae71276639f8ea94cd",
+   "assignment_sha256_lf": "c4c7353d4dfdf4f670d0e6243624ee63ca7883aaa6b9c742bc074c00d4dce169",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "03ef08ce43709afb3e92ac9c18c60c02f4fc0de5e5619f98b7a5512676abbbbd",
+   "assignment_sha256_lf": "25efb355930a19e03d7110c8a65f5997640232631e818e05d09d902a40f75cbd",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -876,6 +876,18 @@
    "date": "2026-10-21",
    "base_release": "20260926-genai-v12",
    "summary": "AI rules per step, an AI assistant's draft with planted errors to critique, and an in-class check in Assignments 6-9 (Chapters 15, 16, 17, 20); midterm announcement removed from the learning path",
+   "repinned": [
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261021-student-help",
+   "date": "2026-10-21",
+   "base_release": "20260926-genai-v12",
+   "summary": "Student help for Assignments 6-9: what is new, with a worked example (assignment-example.html#new-6-9)",
    "repinned": [
     "assignment 15",
     "assignment 16",
