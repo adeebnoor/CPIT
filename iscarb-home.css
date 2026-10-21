@@ -194,14 +194,3 @@ button.text-link{background:none;border:0;cursor:pointer;color:var(--muted);font
   .course-home .course-intro .actions .btn{flex:1 1 100%}
   .course-home .course-intro .actions .text-link{flex:0 1 auto;min-height:44px}
 }
-
-/* Midterm announcement: a red notice at the top of the learning path. */
-.exam-alert{--ea-bg:#fdecea;--ea-line:#c0261b;--ea-ink:#7a1a12;--ea-title:#a3170c;
-  margin:18px 0 6px;padding:14px 18px 16px;border:2px solid var(--ea-line);border-left-width:8px;border-radius:10px;
-  background:var(--ea-bg);color:var(--ea-ink)}
-:root[data-theme=dark] .exam-alert{--ea-bg:#3a1411;--ea-line:#f0796e;--ea-ink:#fcd9d5;--ea-title:#ffb4ab}
-.exam-alert p{margin:6px 0 0;font-size:15px;line-height:1.55;color:var(--ea-ink)}
-.exam-alert .ea-title{margin-top:0;font-weight:800;font-size:17px;color:var(--ea-title)}
-.exam-alert p[lang=ar]{font-size:15.5px}
-.exam-alert p[lang=ar].ea-title{margin-top:12px;padding-top:10px;border-top:1px solid var(--ea-line)}
-@media (max-width:600px){.exam-alert{padding:12px 14px 14px;border-left-width:6px}.exam-alert .ea-title{font-size:16px}}

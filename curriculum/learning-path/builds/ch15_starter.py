@@ -1,4 +1,4 @@
-# Assignment 6 build: an evidence-only fit check for the colleague's draft.
+# Assignment 6 build: an evidence-only fit check for the AI draft.
 # FACTS[(option, requirement)] is "met" or "gap", read only from the scenario. REQUIREMENTS lists what the pilot needs.
 # A requirement the facts do not settle is "unknown". Unknown never counts as met.
 
