@@ -1,4 +1,10 @@
-import ast, json, sys, traceback
+import ast, json, os, sys, traceback
+
+# os._exit() would stop Python itself and look like a broken runner. In the student's code it raises SystemExit.
+def __exit_now(code=0):
+    raise SystemExit(code)
+
+os._exit = __exit_now
 
 def __coverage_map(student):
     """Lines and branches of the code under test: every function in your_code.py whose name does not start with test_."""
