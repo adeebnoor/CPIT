@@ -224,17 +224,9 @@ def _card(head_en, head_ar, good, bad, good_mark='✓', bad_mark='✗'):
 def guide_section() -> str:
     rules = ''.join(f'<tr><th scope="row">{ESC(a)}<br/><span lang="ar" dir="rtl">{ESC(c)}</span></th>'
                     f'<td>{ESC(b)}<br/><span lang="ar" dir="rtl">{ESC(d)}</span></td></tr>' for a, b, c, d in RULES)
-    uses = '<div class="wx-grid">' + ''.join([
-        _card('Studying the lecture', 'مذاكرة المحاضرة',
-              '“Explain idempotence with a coffee-order example, then ask me to explain it back.”',
-              'Not allowed: “Here is Assignment 8. What should I recommend?”'),
-        _card('Python build', 'البناء في بايثون',
-              '“My build says <code>KeyError: \'loans\'</code>. What does this error mean?” Then you fix it yourself.',
-              'Not allowed: “Write reserve_minutes and three tests for it.”'),
-        _card('After you commit', 'بعد التثبيت',
-              '“Here is my REFIT. Ask me two questions that test whether my boundary still holds.”',
-              'Not allowed: “Rewrite my REFIT so it gets full marks.”'),
-    ]) + '</div>'
+    h3 = lambda en, ar: f'<h3>{en} <span lang="ar" dir="rtl" style="display:block;font-weight:600;font-size:.9em">{ar}</span></h3>'
+    show = lambda en, ar, body: (f'<details class="faq"><summary><b>{en}</b> <span lang="ar" dir="rtl">{ar}</span></summary>'
+                                 f'{body}</details>')
     draft = ('“Open the kiosk now. It passed every test, so the loan rule works. The overdue flag comes from the '
              'library system, so it is always correct. A student can never take a third item, because the rule says '
              'at most two.”')
@@ -243,58 +235,42 @@ def guide_section() -> str:
                 '<li><b>“The overdue flag is always correct.”</b> Not supported. The flag is copied once a night at '
                 '02:00, so it can be almost a day old.</li>'
                 '<li><b>“A student can never take a third item.”</b> Not supported. Writing the rule is not the same as '
-                'enforcing it, and nothing has tested the third item.</li></ol>')
-    checkq = '<div class="wx-grid">' + ''.join([
-        _card('Question 1 · a small change to your code', 'السؤال 1 · تغيير صغير في كودك',
-              'Change <code>loans &lt; LIMIT</code> to <code>loans &lt;= LIMIT</code>. Which test fails, and why?<br/>'
-              '<b>Strong:</b> test_third_item_is_refused fails: a student who already holds 2 items is now lent a '
-              'third. The other three tests still pass, because none of them holds 2 items.',
-              '<b>Weak:</b> “All the tests fail because the code is wrong.”'),
-        _card('Question 2 · one new fact', 'السؤال 2 · معلومة جديدة',
-              'The library now copies the overdue flag every hour. Does your decision change?<br/>'
-              '<b>Strong:</b> RETAIN. My boundary (flag at most 24 hours old) now holds more strongly, but T2 and T3 '
-              'have still not run on the real kiosk, so I keep the restricted opening until they pass.',
-              '<b>Weak:</b> “Yes, now it is safe, so open the kiosk.”'),
-    ]) + '</div>'
-    declare = '<div class="wx-grid">' + ''.join([
-        _card('AI-use declaration · Assignments 6–9', 'تصريح استخدام الذكاء الاصطناعي',
-              '“ChatGPT, two steps. Build: it explained a KeyError; I found and fixed the missing key myself. After '
-              'commit: it asked whether my boundary covers counter loans; I added that to my REFIT. I did not take its '
-              'suggestion to remove the overdue test, because the case needs it.” <b>Or:</b> “No AI used.”',
-              '“I used AI to help me.” It names no step, no change and nothing rejected.'),
-    ]) + '</div>'
-    return (GUIDE_START + '<section class="section" id="new-6-9"><h2>Assignments 6–9: what is new, with an example '
-            '<span class="vs-ar-t" lang="ar" dir="rtl">الجديد في الواجبات 6–9، مع مثال</span></h2>'
-            '<p>Assignments 6, 7, 8 and 9 (Chapters 15, 16, 17 and 20) keep the same steps and the same 5 points. Three '
-            'things are new. The examples use the <a href="#example">practice case</a> above, not your assignments.</p>'
-            '<p lang="ar" dir="rtl">الواجبات 6 و7 و8 و9 لها نفس الخطوات ونفس الدرجات الخمس، والجديد ثلاثة أشياء. الأمثلة هنا على '
-            'الحالة التدريبية في الأعلى، وليست على واجباتك.</p>'
-            '<h3>1 · What AI may do in each step <span lang="ar" dir="rtl" style="display:block;font-weight:600;font-size:.9em">دور الذكاء الاصطناعي في كل خطوة</span></h3>'
+                'enforcing it, and nothing has tested the third item.</li></ol>'
+                '<p>✗ Weak: “The AI draft is too confident and wrong.” It names no claim and no fact.</p>')
+    return (GUIDE_START + '<section class="section" id="new-6-9"><h2>7 · Assignments 6–9: three new things '
+            '<span class="vs-ar-t" lang="ar" dir="rtl">الواجبات 6–9: ثلاثة أشياء جديدة</span></h2>'
+            '<p>Same steps, same 5 points. The examples use the <a href="#example">practice case</a>, not your '
+            'assignments. <span lang="ar" dir="rtl">نفس الخطوات ونفس الدرجة. الأمثلة على الحالة التدريبية وليست على واجباتك.</span></p>'
+            + h3('A · What AI may do in each step', 'أ · دور الذكاء الاصطناعي في كل خطوة') +
             '<div class="tablewrap"><table><thead><tr><th scope="col">Step · الخطوة</th><th scope="col">What AI may do · '
             'دور الذكاء الاصطناعي</th></tr></thead><tbody>' + rules + '</tbody></table></div>'
-            '<p>✓ allowed and ✗ not allowed, for the same step:</p>' + uses +
-            '<h3>2 · Critique the AI draft <span lang="ar" dir="rtl" style="display:block;font-weight:600;font-size:.9em">انقد مسودة الذكاء الاصطناعي</span></h3>'
-            '<p>Each assignment shows an AI assistant\'s draft with mistakes in it. Use three steps:</p>'
-            '<ol><li><b>Find each claim.</b> One sentence, one claim.</li><li><b>Look for the fact.</b> Is there a '
-            'supplied fact that supports it, contradicts it, or says nothing?</li><li><b>Write the verdict.</b> '
-            'Supported, not supported, or unknown, and name the fact.</li></ol>'
-            '<p lang="ar" dir="rtl">ثلاث خطوات: حدّد كل ادعاء، وابحث عن الحقيقة المعطاة التي تدعمه أو تنقضه، ثم اكتب حكمك واذكر '
-            'الحقيقة.</p>'
+            '<p>✓ “My build says <code>KeyError: \'loans\'</code>. What does this error mean?” Then you fix it. '
+            '✗ “Write reserve_minutes and three tests for it.”</p>'
+            + h3('B · Critique the AI draft', 'ب · انقد مسودة الذكاء الاصطناعي') +
+            '<p>For each claim in the draft: find the supplied fact that supports it, contradicts it, or says nothing, '
+            'and write your verdict. This counts inside FIT; then write your own answer.</p>'
+            '<p lang="ar" dir="rtl">لكل ادعاء في المسودة: ابحث عن الحقيقة المعطاة التي تدعمه أو تنقضه، واكتب حكمك. هذا جزء من FIT، '
+            'ثم اكتب إجابتك أنت.</p>'
             '<div class="ex"><p class="tag">Practice AI draft · not assessed</p><p>' + draft + '</p></div>'
-            '<div class="wx-grid"><div class="wx"><p class="wx-h"><b>A strong critique</b> <span lang="ar" dir="rtl">نقد قوي</span></p>'
-            '<div class="wx-good"><span aria-hidden="true">✓</span>' + critique + '</div>'
-            '<p class="wx-bad"><span aria-hidden="true">✗</span> Weak: “The AI draft is too confident and wrong.” It names no '
-            'claim and no fact.</p></div></div>'
-            '<p>In the assignment, the critique is part of FIT. Then write your own answer: do not copy the draft.</p>'
-            '<h3>3 · The in-class check <span lang="ar" dir="rtl" style="display:block;font-weight:600;font-size:.9em">التحقق في المحاضرة</span></h3>'
+            + show('Show a strong critique', 'اعرض نقداً قوياً', critique)
+            + h3('C · The in-class check', 'ج · التحقق في المحاضرة') +
             f'<p>{CHECK_EN}</p><p lang="ar" dir="rtl">{CHECK_AR}</p>'
-            '<p>Two sample questions on the practice build (section 4):</p>' + checkq +
-            '<p><b>How to prepare (10 minutes):</b> read your own submission once more; run your tests again and know '
-            'which test catches which bug; say your BOUND in one sentence; know what you would do if one condition in '
-            'your BOUND failed.</p>'
-            '<p lang="ar" dir="rtl"><b>كيف تستعد (10 دقائق):</b> اقرأ ما سلّمته مرة أخرى، وشغّل اختباراتك واعرف أي اختبار يكشف أي '
-            'خطأ، وقل حدود قرارك في جملة واحدة، واعرف ماذا ستفعل إذا سقط أحد شروطها.</p>'
-            '<h3>4 · Declare AI use <span lang="ar" dir="rtl" style="display:block;font-weight:600;font-size:.9em">صرّح باستخدام الذكاء الاصطناعي</span></h3>' + declare +
+            '<p>Two sample questions on the <a href="#build">practice build</a>. Answer first, then open:</p>'
+            + show('1 · Change <code>loans &lt; LIMIT</code> to <code>loans &lt;= LIMIT</code>. Which test fails, and why?',
+                   'السؤال 1 · تغيير صغير في الكود',
+                   '<p>✓ test_third_item_is_refused fails: a student who already holds 2 items is now lent a third. '
+                   'The other three tests still pass, because none of them holds 2 items.</p>'
+                   '<p>✗ “All the tests fail because the code is wrong.”</p>')
+            + show('2 · The library now copies the overdue flag every hour. Does your decision change?',
+                   'السؤال 2 · معلومة جديدة',
+                   '<p>✓ RETAIN. My boundary (flag at most 24 hours old) now holds more strongly, but T2 and T3 have '
+                   'still not run on the real kiosk, so I keep the restricted opening until they pass.</p>'
+                   '<p>✗ “Yes, now it is safe, so open the kiosk.”</p>') +
+            '<p><b>Prepare:</b> read your submission once more, run your tests and know which test catches which bug, '
+            'and say your BOUND in one sentence. <b>Declare:</b> name the tool, the steps, what you changed and what '
+            'you rejected, or write “No AI used.”</p>'
+            '<p lang="ar" dir="rtl"><b>استعد:</b> اقرأ ما سلّمته، وشغّل اختباراتك واعرف أي اختبار يكشف أي خطأ، وقل حدود قرارك في '
+            'جملة. <b>صرّح:</b> اذكر الأداة والخطوات وما غيّرته وما رفضته، أو اكتب “No AI used.”</p>'
             '</section>' + GUIDE_END)
 
 FAQ_AI_OLD = ('<p>Yes, if you declare it and check its output. If you cannot explain or change your own code in the '
@@ -303,10 +279,54 @@ FAQ_AI_NEW = ('<p>Yes, if you declare it and check its output. If you cannot exp
               'micro-viva, the build loses its credit. In Assignments 6–9, Part A is written without AI: see '
               '<a href="#new-6-9">what AI may do in each step</a>.</p>')
 INTRO_NAV_OLD = '<a href="#faq">7 · Questions students ask</a></p>'
-INTRO_NAV_NEW = ('<a href="#faq">7 · Questions students ask</a> · <a href="#new-6-9"><b>New in Assignments 6–9</b></a></p>'
-                 '<p class="vs-lead"><b>Doing Assignment 6, 7, 8 or 9?</b> Read <a href="#new-6-9">what is new</a> first: AI '
-                 'rules for each step, an AI draft to critique, and a 10-minute check in class. '
-                 '<span lang="ar" dir="rtl">إذا كنت تحل الواجب 6 أو 7 أو 8 أو 9، فاقرأ الجديد أولاً.</span></p>')
+INTRO_NAV_V1 = ('<a href="#faq">7 · Questions students ask</a> · <a href="#new-6-9"><b>New in Assignments 6–9</b></a></p>'
+                '<p class="vs-lead"><b>Doing Assignment 6, 7, 8 or 9?</b> Read <a href="#new-6-9">what is new</a> first: AI '
+                'rules for each step, an AI draft to critique, and a 10-minute check in class. '
+                '<span lang="ar" dir="rtl">إذا كنت تحل الواجب 6 أو 7 أو 8 أو 9، فاقرأ الجديد أولاً.</span></p>')
+INTRO_NAV_V2 = ('<a href="#faq">8 · Questions students ask</a></p>'
+                '<div class="ex" id="start-here"><p class="tag">Start here · ابدأ من هنا</p><ul>'
+                '<li><b>Every assignment:</b> read <a href="#example">3</a>, <a href="#stress">5</a> and '
+                '<a href="#submit">6</a> (about 10 minutes).</li>'
+                '<li><b>Assignments 3–9:</b> also <a href="#build">4 · the Python build</a>.</li>'
+                '<li><b>Assignments 6–9:</b> also <a href="#new-6-9">7 · three new things</a>.</li>'
+                '<li><b>Stuck on a step?</b> <a href="#steps">2</a> shows it on a picture of the real page.</li></ul>'
+                '<p lang="ar" dir="rtl">كل الواجبات: اقرأ 3 و5 و6. الواجبات 3–9: والقسم 4 (بايثون). الواجبات 6–9: والقسم 7 '
+                '(الجديد). وإذا تعثرت في خطوة فالقسم 2 يشرحها بالصور.</p></div>')
+INTRO_NAV_NEW = '<a href="#faq">8 · Questions students ask</a></p>'
+H1 = '<h1>How to do an assignment, with a complete example</h1>'
+START = ('<div class="ex" id="start-here"><p class="tag">Start here · ابدأ من هنا</p><ul>'
+         '<li><b>Every assignment:</b> read <a href="#example">3</a>, <a href="#stress">5</a> and '
+         '<a href="#submit">6</a> (about 10 minutes).</li>'
+         '<li><b>Assignments 3–9:</b> also <a href="#build">4 · the Python build</a>.</li>'
+         '<li><b>Assignments 6–9:</b> also <a href="#new-6-9">7 · three new things</a>.</li>'
+         '<li><b>Stuck on a step?</b> <a href="#steps">2</a> shows it on a picture of the real page.</li></ul>'
+         '<p lang="ar" dir="rtl">كل الواجبات: اقرأ 3 و5 و6. الواجبات 3–9: والقسم 4 (بايثون). الواجبات 6–9: والقسم 7 '
+         '(الجديد). وإذا تعثرت في خطوة فالقسم 2 يشرحها بالصور.</p></div>')
+LEAD_OLD = ('<p>This page answers the questions students ask most: how the course is graded, what to do in each step of '
+            'an assignment, and what a good answer looks like. The worked example uses a <b>practice case that is not '
+            'one of your assignments</b>, so you can copy its method but not its content. The practice build below runs '
+            'exactly like the real one and is not assessed.</p>')
+LEAD_NEW = ('<p>The worked example uses a <b>practice case that is not one of your assignments</b>: copy its method, '
+            'not its content. The practice build runs like the real one and is not assessed.</p>')
+NAV_ITEM_OLD = '<a href="#submit">6 · Declare and submit</a> · '
+NAV_ITEM_NEW = '<a href="#submit">6 · Declare and submit</a> · <a href="#new-6-9">7 · New in Assignments 6–9</a> · '
+FAQ_H_OLD = '<section class="section" id="faq"><h2>7 · Questions students ask'
+FAQ_H_NEW = '<section class="section" id="faq"><h2>8 · Questions students ask'
+PICS_OPEN = ('<details class="faq" id="pictures"><summary><b>Show the pictures of each step</b> '
+             '<span lang="ar" dir="rtl">اعرض صور الخطوات</span></summary>')
+PICS_START, PICS_END = '<!-- visual-guide:pictures:start -->', '<!-- visual-guide:pictures:end -->'
+SOL_OLD = '<h3>A complete solution with four tests</h3>\n<pre id="exampleSolution">'
+SOL_NEW = ('<details class="faq" id="solution"><summary><b>Show a complete solution with four tests</b> '
+           '<span lang="ar" dir="rtl">اعرض حلاً كاملاً مع أربعة اختبارات</span></summary>\n<pre id="exampleSolution">')
+SOL_END_OLD = '</pre>\n<h3>How to read the build record</h3>'
+SOL_END_NEW = '</pre></details>\n<h3>How to read the build record</h3>'
+# A link to a picture or the solution opens the closed section that holds it.
+OPEN_JS = ('<script>/* open-on-link */(function(){function go(){var id=decodeURIComponent(location.hash.slice(1)),'
+           'el=id&&document.getElementById(id);if(!el)return;for(var d=el.closest("details");d;d=d.parentElement&&'
+           'd.parentElement.closest("details"))d.open=true;el.scrollIntoView();}addEventListener("hashchange",go);'
+           'document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href*=\'#\']");'
+           'if(a&&a.hash===location.hash&&a.pathname===location.pathname)setTimeout(go,0);});'
+           'if(document.readyState!=="loading")go();else addEventListener("DOMContentLoaded",go);})();</script>')
 GUIDE_LINK = ('<p><a href="../../assignment-example.html#new-6-9"><b>How to do it, with an example</b></a> · '
               '<span lang="ar" dir="rtl"><a href="../../assignment-example.html#new-6-9">كيف تحلها، مع مثال</a></span></p>')
 SG_OLD = '<p>Same method, plus a small Python build. Plan about 80–90 minutes.</p>'
@@ -328,7 +348,23 @@ def patch_guides() -> None:
         assert t.count(faq) == 1
         t = t.replace(faq, guide_section() + '\n' + faq)
     t = once(t, FAQ_AI_OLD, FAQ_AI_NEW, 0, 'example FAQ on AI')
-    t = once(t, INTRO_NAV_OLD, INTRO_NAV_NEW, 0, 'example intro link')
+    for older in (INTRO_NAV_V1, INTRO_NAV_V2):
+        if older in t:
+            t = t.replace(older, INTRO_NAV_NEW)
+    t = once(t, H1, H1 + START, 0, 'start-here box under the title')
+    t = once(t, LEAD_OLD, LEAD_NEW, 0, 'shorter intro')
+    t = once(t, INTRO_NAV_OLD, INTRO_NAV_NEW, 0, 'example intro: start here')
+    t = once(t, NAV_ITEM_OLD, NAV_ITEM_NEW, 0, 'example nav item 7')
+    t = once(t, FAQ_H_OLD, FAQ_H_NEW, 0, 'FAQ is section 8')
+    # The pictures and the full solution are folded; the step strip and links still open them.
+    if PICS_OPEN not in t:
+        assert t.count(PICS_START) == 1 and t.count(PICS_END) == 1
+        t = t.replace(PICS_START, PICS_OPEN + PICS_START).replace(PICS_END, PICS_END + '</details>')
+    t = once(t, SOL_OLD, SOL_NEW, 0, 'fold the full solution')
+    t = once(t, SOL_END_OLD, SOL_END_NEW, 0, 'fold the full solution (end)')
+    if '/* open-on-link */' not in t:
+        assert t.count('</body>') == 1
+        t = t.replace('</body>', OPEN_JS + '</body>')
     p.write_text(t, encoding='utf-8')
     p = ROOT / 'student-guide.html'
     t = p.read_text(encoding='utf-8')
