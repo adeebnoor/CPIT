@@ -38,90 +38,107 @@ MET, PART, OPEN = 'met', 'partly', 'open'
 LABEL = {MET: 'Met', PART: 'Partly met', OPEN: 'Open'}
 LABEL_AR = {MET: 'مستوفى', PART: 'مستوفى جزئياً', OPEN: 'مفتوح'}
 
-# ---- 1. The requirements used --------------------------------------------------------------
+# ---- 1. Reference requirements ------------------------------------------------------------
+CODE_NOW = 'CPIT-455 Software Engineering (II)'
+CODE_NEW = 'IT 456 Dependable Systems'
 SOURCES = [
-    ('ETEC / NCAAA', 'T-104 Course Specification template, version 2022',
-     'Sections A–G: general information, teaching mode and contact hours; CLOs in three domains '
-     '(knowledge and understanding; skills; values, autonomy and responsibility) aligned with program '
-     'outcomes, each with teaching strategies and assessment methods; course content with contact hours; '
-     'assessment activities with week and weight; learning resources and facilities; assessment of course '
-     'quality; approval data.',
+    ('Education and Training Evaluation Commission (ETEC), NCAAA', 'T-104 Course Specification template, version 2022',
+     'Sections A to G: general information, teaching mode and contact hours; course learning outcomes in the three '
+     'domains of the National Qualifications Framework (knowledge and understanding; skills; values, autonomy and '
+     'responsibility), aligned with program outcomes and each linked to teaching strategies and assessment methods; '
+     'course content with contact hours; assessment activities with timing and weight; learning resources and '
+     'facilities; assessment of course quality; specification approval data.',
      f'<a href="{STD}{SCRATCH_ATTACHMENTS["t104en"]}">English template</a> · '
      f'<a href="{STD}{SCRATCH_ATTACHMENTS["t104ar"]}">Arabic template</a>'),
-    ('IT Department, FCIT', 'CPIT-455 course specifications (course file), Fall 2024, last articulated 12 October 2023',
-     'The 11 CLOs and their student outcomes (2 and 6), the topic weeks, the grade distribution, the textbook, '
-     'credit (3: theory 3, practical 1) and the weekly 90-minute lab/tutorial.',
+    ('Department of Information Technology, FCIT', 'CPIT-455 course specifications (course file), Fall 2024, last articulated 12 October 2023',
+     'Eleven course learning outcomes and their student outcomes (SO 2 and SO 6); topic allocation by week; grade '
+     'distribution; textbook; credit of three hours (theory 3, practical 1); a weekly 90-minute laboratory or tutorial session.',
      f'<a href="{STD}{SCRATCH_ATTACHMENTS["spec"]}">Specification on file (PDF)</a>'),
-    ('Head of the IT Department', 'First Semester Guidelines 1448 H, 27 August 2026',
-     'One grading policy, syllabus and weekly schedule per the Articulation Matrix, the same grade distribution '
-     'in all sections, the syllabus available to students in the first week, students kept informed of their '
-     'grades, posted office hours, at least three coordination meetings, and the previous end-of-semester report.',
-     'Summarised here (internal email)'),
-    ('Bachelor\'s Curriculum Development Committee', 'Course specification review and certification alignment, 22 October 2026',
-     'Update course specifications, including the latest textbook editions and references, and record for each '
-     'certification its issuer, the course topics it covers and does not cover, a coverage percentage and a '
-     'recommendation. In the revised IT plan CPIT-455 corresponds to the elective IT 456 Dependable Systems.',
-     'Summarised here (internal email)'),
-    ('TVTC and HRDF', 'Supported Professional Certifications Guide for the ICT sector, 2025, second edition',
-     'The supported certifications by field, each with its issuer and the maximum HRDF compensation.',
+    ('Course coordinator, Department of Information Technology', 'CPIT-455 Articulation Matrix, template version 5.0, Spring 2025',
+     'Weekly teaching schedule (weeks 1 to 15); learning-outcome domain and student outcome for each CLO; teaching '
+     'activities and assessment weeks for each CLO; grade distribution: homework 10% (week 7), examination 30% (week 8), '
+     'graded laboratory work 10% and group project 20% (week 15), final examination 30% (week 16).',
+     'Internal course document; summarised in this report'),
+    ('Head of the Department of Information Technology', 'First Semester Guidelines, 1448 H, issued 27 August 2026',
+     'A unified grading policy, syllabus and weekly schedule in accordance with the Articulation Matrix; the same grade '
+     'distribution in all sections; the syllabus made available to students in the first week; students kept informed '
+     'of their assessment grades; office hours scheduled and posted; at least three coordination meetings; completion '
+     'of the previous end-of-semester report.',
+     'Internal circular; summarised in this report'),
+    ("Bachelor's Curriculum Development Committee", 'Course specification review and professional certification alignment, 22 October 2026',
+     'Review and update of course specifications, including the latest editions of textbooks and references; for each '
+     'proposed certification, the issuing organization, the course topics covered and not covered, an estimated '
+     'coverage percentage and a recommendation on equivalency. In the revised IT program plan, CPIT-455 corresponds '
+     f'to the elective course {CODE_NEW}.',
+     'Internal correspondence; summarised in this report'),
+    ('Technical and Vocational Training Corporation (TVTC) and Human Resources Development Fund (HRDF)',
+     'Supported Professional Certifications Guide for the ICT Sector, 2025, second edition',
+     'The supported professional certifications by field, with the issuing organization and the maximum HRDF compensation.',
      f'<a href="{STD}{SCRATCH_ATTACHMENTS["cert"]}">Guide (PDF, 6.5 MB)</a>'),
 ]
 
-# ---- 2. Gap analysis: (requirement, source, finding before, action on the site, status) ------
+# ---- 2. Gap analysis: (requirement, source, finding, action taken on the website, status) -----
 GAPS = [
-    ('Course specification in the ETEC T-104 structure, visible to students', 'ETEC T-104; department: syllabus in week 1',
-     'The site had a CLO map only. The specification itself was not on the site.',
-     'Sections A–G below for CPIT-455 as taught in Fall 2026, with the specification on file attached.', MET),
-    ('CLOs classified into the three NQF domains', 'ETEC T-104 section B',
-     'The specification on file lists 11 CLOs without domains. No CLO is in the values, autonomy and responsibility domain.',
-     'Each CLO is placed in its domain (B). A values CLO is proposed for the revised specification; the site already '
-     'produces its evidence (named owner, AI-use declaration, REFIT, in-class check).', PART),
-    ('Each CLO linked to teaching strategies and assessment methods', 'ETEC T-104 section B',
-     'The site showed where each CLO is taught, not how it is assessed.',
-     'Strategies and methods per CLO (B) and a CLO-by-assessment matrix (section 4).', MET),
-    ('CLOs aligned with program outcomes', 'ETEC T-104 section B; specification on file',
-     'Student outcomes 2 and 6 were not shown on the site.',
-     'Shown for every CLO as recorded in the specification on file. The revised plan\'s outcome codes are not available here.', PART),
-    ('Number and wording of CLOs', 'ETEC guidance on measurable CLOs',
-     'CLO 7 and CLO 8 overlap (both describe reuse by composing standardized components); CLO 10 has a typing error ("systes").',
-     'Recommendation 2 below: merge CLO 7 and 8 and correct CLO 10 in the next specification.', OPEN),
-    ('Course content with contact hours', 'ETEC T-104 section C; specification on file',
-     'The site did not show topic weeks or contact hours.',
-     'Topics, weeks and contact hours (C), with the site chapter and assignment for each topic.', MET),
-    ('Code Coverage topic (2 weeks in the specification)', 'Specification on file',
-     'Taught inside the builds of Assignments 3–9 since 15 October 2026, not as two lecture weeks.',
-     'Recorded in C as a delivery change, to be reported in the end-of-semester course report.', PART),
-    ('Assessment activities, timing and weights the same as the Articulation Matrix and in all sections', 'ETEC T-104 section D; department guidelines',
-     'The site publishes assignments 30, midterm 30, final 30, participation 10. The specification on file lists homework 10, '
-     'exam 1 30, group project 20, graded lab work 10, final exam 30.',
-     'Both are shown side by side in D. Weights are not changed mid-semester; the coordinator confirms the weights in this '
-     'semester\'s Articulation Matrix and the coordination record.', OPEN),
+    ('Course code in the revised IT program plan', 'Curriculum Development Committee',
+     f'The website identified the course only as CPIT-455.',
+     f'This report identifies the course as CPIT-455 (current code) and {CODE_NEW} (code in the revised plan, elective).', MET),
+    ('Course specification in the ETEC T-104 structure, available to students', 'ETEC T-104; department guidelines (syllabus in the first week)',
+     'The website contained a course-outcome map only; the specification itself was not published.',
+     'Section 3 presents the specification in sections A to G, and the specification on file is attached.', MET),
+    ('Course learning outcomes classified in the three NQF domains', 'ETEC T-104, section B',
+     'The Articulation Matrix classifies CLOs 1–6 and 11 as cognitive skills and CLOs 7–10 as knowledge, using the earlier '
+     'five-domain NCAAA framework. No CLO is in the domain of values, autonomy and responsibility.',
+     'Each CLO is placed in the current three-domain structure (section 3B). A values outcome is proposed for the next '
+     'specification; the website already collects its evidence.', PART),
+    ('Each CLO linked to teaching strategies and assessment methods', 'ETEC T-104, section B; Articulation Matrix',
+     'The website indicated where each CLO is taught but not how it is assessed.',
+     'Teaching strategies and assessment methods are stated for each CLO (section 3B), with a CLO-to-assessment map (section 4).', MET),
+    ('Course learning outcomes aligned with program outcomes', 'ETEC T-104, section B; Articulation Matrix',
+     'Student outcomes were not shown on the website.',
+     'SO 2 and SO 6 are shown for each CLO, with their wording from the Articulation Matrix. The outcome codes of the '
+     'revised program have not yet been received.', PART),
+    ('Number and wording of course learning outcomes', 'ETEC guidance on measurable outcomes',
+     'CLO 7 and CLO 8 overlap (both describe reuse by composition of standardized components); CLO 10 contains a typing error ("systes").',
+     'Recommended for the next specification: merge CLO 7 and CLO 8, and correct CLO 10 (recommendation 2).', OPEN),
+    ('Course content and weekly schedule with contact hours', 'ETEC T-104, section C; Articulation Matrix',
+     'Topic weeks and contact hours were not shown on the website.',
+     'Section 3C lists each topic with its weeks in the Articulation Matrix, its contact hours, and the chapter and assignment on the website.', MET),
+    ('Code Coverage (weeks 14 and 15 in the Articulation Matrix)', 'Specification on file; Articulation Matrix',
+     'Since 15 October 2026, Code Coverage has been taught within the Python builds of Assignments 3–9 rather than in two lecture weeks.',
+     'Recorded in section 3C as a change in delivery, to be reported in the end-of-semester course report.', PART),
+    ('Assessment activities, timing and weights consistent with the Articulation Matrix in all sections', 'ETEC T-104, section D; department guidelines',
+     'The website publishes assignments 30%, midterm examination 30%, final examination 30% and participation 10%. The '
+     'specification on file and the Articulation Matrix (Spring 2025) specify homework 10%, examination 30%, graded '
+     'laboratory work 10%, group project 20% and final examination 30%.',
+     'Both schemes are presented in section 3D. Weights are not changed during the semester; the weights for Fall 2026 '
+     'are to be confirmed in the current Articulation Matrix and the coordination record.', OPEN),
     ('Latest textbook edition and references', 'Curriculum Development Committee',
-     'The site used Sommerville, 10th edition.',
-     'Checked: the 10th edition is the latest (Pearson eText 2021, © 2016); no 11th edition found. The seven primary '
-     'sources used in the assignments are listed as supportive references (E).', MET),
-    ('Catalog description matches the course', 'ETEC T-104 section A',
-     'The description on file names topics the course no longer teaches (team management, cost estimation, quality '
-     'management, process and re-engineering) and omits dependability, safety, security and resilience.',
-     'A replacement description is proposed (recommendation 1). It needs department approval.', OPEN),
-    ('Learning resources, facilities and equipment', 'ETEC T-104 section E',
-     'Not stated on the site.', 'Listed in E, including the in-browser Python runner that needs no installation.', MET),
-    ('Plan to assess course quality', 'ETEC T-104 section F',
-     'Not stated on the site.', 'Areas, assessors and direct or indirect methods in F.', MET),
-    ('Professional certification alignment', 'Curriculum Development Committee; TVTC/HRDF guide',
-     'Not on the site.',
-     'Section 5: six certifications from the guide with issuer, covered and uncovered topics, coverage estimate and '
-     'recommendation. None supports course equivalency.', MET),
-    ('Correspondence with IT 456 Dependable Systems in the revised plan', 'Curriculum Development Committee',
-     'Not on the site.',
-     'Section 6 records the correspondence. A clause-by-clause crosswalk waits for the IT 456 specification file.', PART),
-    ('Office hours posted', 'Department guidelines', 'Not on the site.', 'To be added with the instructor\'s hours.', OPEN),
-    ('Students kept informed of their grades', 'Department guidelines',
-     'Grades are released in Blackboard; the site explains how assignment points become marks.', 'No change needed.', MET),
-    ('At least three coordination meetings; Articulation Matrix updated', 'Department guidelines',
-     'A coordinator and committee record, not a website item.', 'Listed in the course-file checklist (section 7).', OPEN),
-    ('AI-supported learning design', 'NELC framework, September 2026 (already on the site)',
-     'Aligned on the Saudi alignment page since 28 September 2026.', 'No change.', MET),
+     'The website used Sommerville, 10th edition.',
+     'Verified on 23 October 2026: the 10th edition is the latest (Pearson eText 2021, © 2016); no 11th edition was found. '
+     'The seven primary sources used in the assignments are listed as supportive references (section 3E).', MET),
+    ('Catalog description consistent with the course content', 'ETEC T-104, section A',
+     'The description on file refers to topics no longer taught (team management, cost estimation, quality management, '
+     'process and re-engineering) and omits dependability, safety, security and resilience.',
+     'A revised description is proposed (recommendation 1), subject to department approval.', OPEN),
+    ('Learning resources, facilities and equipment', 'ETEC T-104, section E',
+     'Not stated on the website.', 'Stated in section 3E, including the in-browser Python environment, which requires no installation.', MET),
+    ('Plan for the assessment of course quality', 'ETEC T-104, section F',
+     'Not stated on the website.', 'Assessment areas, assessors and direct or indirect methods are stated in section 3F.', MET),
+    ('Alignment with professional certifications', 'Curriculum Development Committee; TVTC/HRDF guide',
+     'Not addressed on the website.',
+     'Section 5 assesses six certifications from the guide (issuer, topics covered and not covered, estimated coverage and '
+     'recommendation). None supports equivalency.', MET),
+    (f'Content of {CODE_NEW} in the revised plan', 'Curriculum Development Committee',
+     'No comparison was available on the website.',
+     f'Section 6 records the correspondence. A clause-by-clause comparison will follow receipt of the {CODE_NEW} specification.', PART),
+    ('Office hours scheduled and posted', 'Department guidelines', 'Not shown on the website.',
+     'To be added once the office hours for Fall 2026 are confirmed.', OPEN),
+    ('Students informed of their assessment grades', 'Department guidelines',
+     'Grades are released in Blackboard; the website explains how assignment points are converted to marks.', 'No change required.', MET),
+    ('At least three coordination meetings; Articulation Matrix updated after each', 'Department guidelines',
+     'A coordination record maintained by the course coordinator; not a website item.', 'Listed in the course-file checklist (section 7).', OPEN),
+    ('AI-supported learning design', 'NELC framework, September 2026',
+     'Addressed on the Saudi alignment page since 28 September 2026.', 'No change required.', MET),
 ]
 
 # ---- 3. Course specification, T-104 structure ------------------------------------------------
@@ -163,29 +180,29 @@ CLOS = [  # (domain code, ETEC code, CLO no. on file, CLO text on file, SO, stra
 ]
 DOMAINS = {'1': '1.0 · Knowledge and understanding · المعرفة والفهم', '2': '2.0 · Skills · المهارات',
            '3': '3.0 · Values, autonomy and responsibility · القيم والاستقلالية والمسؤولية'}
-VALUES_PROPOSED = ('3.1', 'Proposed: take responsibility for an engineering decision by naming the accountable owner, '
-                   'disclosing any AI assistance and revising the decision when new evidence arrives.',
+VALUES_PROPOSED = ('3.1', 'Proposed: take responsibility for engineering decisions by identifying the accountable owner, '
+                   'disclosing any use of AI assistance and revising the decision when new evidence becomes available.',
                    'Named owner in ACT; AI-use declaration; commit before STRESS, then REFIT',
                    'ACT and REFIT rubric rows; AI-use declaration; in-class check (Assignments 6–9). Not a separate CLO on file.')
 
-CONTENT = [  # (topic, weeks on file, chapter on the site, assignment)
-    ('Dependable systems', 2, 'Chapter 10', 'Assignment 1'),
-    ('Reliability engineering', 2, 'Chapter 11', 'Assignment 2'),
-    ('Safety engineering', 1, 'Chapter 12', 'Assignment 3'),
-    ('Security engineering', 2, 'Chapter 13', 'Assignment 4'),
-    ('Resilience engineering', 2, 'Chapter 14', 'Assignment 5'),
-    ('Software reuse', 1, 'Chapter 15', 'Assignment 6'),
-    ('Component-based software engineering', 1, 'Chapter 16', 'Assignment 7'),
-    ('Distributed software engineering', 1, 'Chapter 17', 'Assignment 8'),
-    ('Systems of systems', 1, 'Chapter 20', 'Assignment 9'),
-    ('Code coverage', 2, 'Inside every build, Assignments 3–9', 'Coverage step in Assignments 3–9'),
+CONTENT = [  # (topic, weeks in the Articulation Matrix, number of weeks, chapter on the website, assessment)
+    ('Dependable systems', '1–2', 2, 'Chapter 10', 'Assignment 1'),
+    ('Reliability engineering', '3–4', 2, 'Chapter 11', 'Assignment 2'),
+    ('Safety engineering', '5', 1, 'Chapter 12', 'Assignment 3'),
+    ('Security engineering', '6–7', 2, 'Chapter 13', 'Assignment 4'),
+    ('Resilience engineering', '8–9', 2, 'Chapter 14', 'Assignment 5'),
+    ('Software reuse', '10', 1, 'Chapter 15', 'Assignment 6'),
+    ('Distributed software engineering', '11', 1, 'Chapter 17', 'Assignment 8'),
+    ('Component-based software engineering', '12', 1, 'Chapter 16', 'Assignment 7'),
+    ('Systems of systems', '13', 1, 'Chapter 20', 'Assignment 9'),
+    ('Code coverage (testing strategies and levels, coverage tools)', '14–15', 2, 'Within every Python build, Assignments 3–9', 'Coverage step, Assignments 3–9'),
 ]
-ASSESS_FILE = [('Homework assignments', '7', 10), ('Exam 1', '8', 30), ('Group project', '15', 20),
-               ('Graded lab work', '15', 10), ('Final exam', '16', 30)]
-ASSESS_NOW = [('Assignments 1–9 (written work and, from Assignment 3, the Python build)', 'After each chapter, weeks 2–14', 30),
-              ('Midterm exam (written test)', 'Week 8 (20 October 2026)', 30),
-              ('Final exam (written test)', 'Final examination period', 30),
-              ('Participation (preparation, stations and explain-it questions)', 'Weeks 1–15', 10)]
+ASSESS_FILE = [('Homework assignments', '7', 10), ('Examination', '8', 30), ('Graded laboratory work', '15', 10),
+               ('Group project', '15', 20), ('Final examination', '16', 30)]
+ASSESS_NOW = [('Assignments 1–9 (written analysis and, from Assignment 3, a Python build)', 'After each chapter, weeks 2–14', 30),
+              ('Midterm examination (written test)', 'Week 8 (20 October 2026)', 30),
+              ('Final examination (written test)', 'Final examination period', 30),
+              ('Participation (preparation, in-class activities and questions)', 'Weeks 1–15', 10)]
 
 MATRIX_COLS = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'Midterm', 'Final']
 MATRIX = {1: {'A1', 'Midterm', 'Final'}, 2: {'A1', 'A2', 'A4', 'Midterm', 'Final'}, 3: {'A2', 'Midterm', 'Final'},
@@ -223,11 +240,11 @@ CERTS = [
 
 ATTACH = [
     (SCRATCH_ATTACHMENTS['t104en'], 'ETEC/NCAAA T-104 Course Specification template, V2022 (English, Word)',
-     'Copy of the official template as distributed by the KSU Deanship of Quality.'),
+     'Official template, as distributed by the Deanship of Quality, King Saud University.'),
     (SCRATCH_ATTACHMENTS['t104ar'], 'ETEC/NCAAA T-104 توصيف المقرر، إصدار 2022 (عربي، Word)',
      'Arabic version of the same template.'),
     (SCRATCH_ATTACHMENTS['spec'], 'CPIT-455 course specifications on file, Fall 2024 (PDF)',
-     'Department course file, last articulated 12 October 2023. The authority for CLOs until a revised specification is approved.'),
+     'Department course file, last articulated 12 October 2023. It remains the reference for the course learning outcomes until a revised specification is approved.'),
     (SCRATCH_ATTACHMENTS['cert'], 'TVTC and HRDF Supported Professional Certifications Guide, 2025 (PDF, 6.5 MB)',
      'دليل الشهادات المهنية الاحترافية المدعومة في قطاع الاتصالات وتقنية المعلومات، النسخة الثانية 2025.'),
 ]
@@ -279,8 +296,8 @@ def build_page():
     code, text, strat, meth = VALUES_PROPOSED
     clo_rows.append((code, f'<span class="prop">{E(text)}</span>', '—', E(strat), E(meth)))
 
-    content_rows = [(str(i + 1), E(t), str(w), str(w * 3), E(c), E(a)) for i, (t, w, c, a) in enumerate(CONTENT)]
-    content_rows.append(('', '<b>Total</b>', '<b>15</b>', f'<b>{sum(w for _, w, _, _ in CONTENT) * 3}</b>', '', ''))
+    content_rows = [(str(i + 1), E(t), wk, str(n * 3), E(c), E(a)) for i, (t, wk, n, c, a) in enumerate(CONTENT)]
+    content_rows.append(('', '<b>Total</b>', '<b>15 weeks</b>', f'<b>{sum(n for _, _, n, _, _ in CONTENT) * 3}</b>', '', ''))
     file_rows = [(str(i + 1), E(a), w, f'{p}%') for i, (a, w, p) in enumerate(ASSESS_FILE)]
     file_rows.append(('', '<b>Total</b>', '', '<b>100%</b>'))
     now_rows = [(str(i + 1), E(a), E(w), f'{p}%') for i, (a, w, p) in enumerate(ASSESS_NOW)]
@@ -291,76 +308,92 @@ def build_page():
         text = next(t for _, _, k, t, _, _, _ in CLOS if k == n)
         short = text if len(text) < 70 else text[:67].rsplit(' ', 1)[0] + '…'
         mrows.append([f'CLO {n} · {E(short)}'] + ['●' if c in MATRIX[n] else '' for c in MATRIX_COLS])
-    cert_rows = [(f'<b>{E(c)}</b>', E(i), f'{m} SAR', E(cov), E(unc), pct, 'Insufficient alignment for equivalency; useful as a follow-on credential')
+    cert_rows = [(f'<b>{E(c)}</b>', E(i), f'SAR {m}', E(cov), E(unc), pct, 'Insufficient for equivalency; suitable as a subsequent professional credential')
                  for c, i, m, cov, unc, pct in CERTS]
     att_rows = [(f'<a href="{STD}{f}">{E(t)}</a>', E(d)) for f, t, d in ATTACH]
 
-    t_a = table(['Item', 'CPIT-455'], [
-        ('Course title and code', 'Software Engineering (II) · CPIT-455'),
-        ('Program · department · college', 'BSc Information Technology · Department of Information Technology · Faculty of Computing and Information Technology, King Abdulaziz University'),
-        ('Credit hours', '3 (theory 3, lab 0, practical 1)'),
-        ('Course type', 'Department · elective'),
-        ('Level', 'As in the program plan (not stated in the specification on file)'),
-        ('Pre-requisite · co-requisite', 'CPIT-251 · none'),
-        ('Catalog description on file', 'Advanced software engineering principles and techniques used in the specification, design and testing of software systems. See recommendation 1: the description no longer matches the topics.'),
-        ('Main objective (proposed wording)', 'Make and defend engineering decisions about dependable, safe, secure and resilient software systems, using evidence, tests and stated limits.'),
-        ('Teaching mode', 'Traditional classroom on campus, 100% of contact hours. The course website supports study and practice; it does not replace class.'),
+    t_doc = table(['Item', 'Detail'], [
+        ('Course (current code)', 'Software Engineering (II) · CPIT-455'),
+        ('Course in the revised IT program plan', f'<b>{CODE_NEW}</b> (elective)'),
+        ('Program', 'Bachelor of Science in Information Technology'),
+        ('Department and faculty', 'Department of Information Technology, Faculty of Computing and Information Technology, King Abdulaziz University'),
+        ('Prepared by', 'Prof. Adeeb Noor, course instructor'),
+        ('Version and date', f'Version 1.1 · {DATE}'),
+        ('Status', 'Working document for departmental review. Not approved by the department council.'),
+    ])
+    t_a = table(['Item', 'Detail'], [
+        ('Course title and code', f'Software Engineering (II) · CPIT-455. In the revised IT program plan: {CODE_NEW}'),
+        ('Program, department and faculty', 'Bachelor of Science in Information Technology · Department of Information Technology · Faculty of Computing and Information Technology, King Abdulaziz University'),
+        ('Credit hours', '3 (theory 3, laboratory 0, practical 1)'),
+        ('Course type', 'Department course · elective'),
+        ('Level', 'As specified in the program study plan (not stated in the specification on file)'),
+        ('Pre-requisite and co-requisite', 'CPIT-251 · none'),
+        ('Catalog description on file', 'Advanced software engineering principles and techniques used in the specification, design and testing of software systems. This description no longer reflects the course content; a revision is proposed in recommendation 1.'),
+        ('Main objective (proposed wording)', 'To enable students to make and justify engineering decisions on dependable, safe, secure and resilient software systems, on the basis of evidence, testing and stated limitations.'),
+        ('Teaching mode', 'Traditional classroom instruction on campus: 100% of contact hours. The course website supports study and practice and does not replace classroom instruction.'),
         ('Contact hours per semester', 'Lectures 45 (3 hours × 15 weeks) · practical 22.5 (90 minutes × 15 weeks) · total 67.5'),
     ])
     t_e = table(['Item', 'Resources'], [
-        ('Essential reference', 'I. Sommerville, <i>Software Engineering</i>, 10th edition, Pearson (ISBN 9780133943030). Checked {DATE}: the latest edition; no 11th edition was found.'.format(DATE=DATE)),
-        ('Supportive references', 'Vesely et al., <i>Fault Tree Handbook</i> (NUREG-0492), 1981 · Saltzer and Schroeder, “The Protection of Information in Computer Systems,” <i>Proc. IEEE</i>, 1975 · Helland and Campbell, “Building on Quicksand,” CIDR, 2009 · Garlan, Allen and Ockerbloom, “Architectural Mismatch,” <i>IEEE Software</i>, 1995 · Meyer, “Applying Design by Contract,” <i>IEEE Computer</i>, 1992 · Helland, “Idempotence Is Not a Medical Condition,” <i>ACM Queue</i>, 2012 · Maier, “Architecting Principles for Systems-of-Systems,” <i>Systems Engineering</i>, 1998'),
-        ('Electronic materials', 'This course website: nine lectures, a source ledger per chapter, nine assessed assignments and offline packages (<a href="course-resources.html">Course &amp; sources</a>); Blackboard for announcements, submissions and grades'),
-        ('Other learning materials', 'The original slide packs and textbook chapter PDFs, linked per chapter'),
+        ('Essential reference', f'I. Sommerville, <i>Software Engineering</i>, 10th edition, Pearson (ISBN 9780133943030). Verified on {DATE} as the latest edition; no 11th edition was found.'),
+        ('Supportive references', 'W. E. Vesely et al., <i>Fault Tree Handbook</i> (NUREG-0492), 1981 · J. H. Saltzer and M. D. Schroeder, “The Protection of Information in Computer Systems,” <i>Proceedings of the IEEE</i>, 1975 · P. Helland and D. Campbell, “Building on Quicksand,” CIDR, 2009 · D. Garlan, R. Allen and J. Ockerbloom, “Architectural Mismatch: Why Reuse Is So Hard,” <i>IEEE Software</i>, 1995 · B. Meyer, “Applying ‘Design by Contract’,” <i>IEEE Computer</i>, 1992 · P. Helland, “Idempotence Is Not a Medical Condition,” <i>ACM Queue</i>, 2012 · M. W. Maier, “Architecting Principles for Systems-of-Systems,” <i>Systems Engineering</i>, 1998'),
+        ('Electronic materials', 'The course website: nine lectures, a source ledger for each chapter, nine assessed assignments and offline packages (<a href="course-resources.html">Course &amp; sources</a>); Blackboard for announcements, submissions and grades'),
+        ('Other learning materials', 'The original slide packs and the textbook chapters, linked for each chapter'),
         ('Facilities', 'Lecture room; the weekly 90-minute practical session'),
-        ('Technology', 'Projector; a current web browser. Python runs inside the browser, with nothing to install, and a copy of Python is kept on this site in case the download fails.'),
+        ('Technology equipment', 'Projector; a current web browser. Python runs within the browser without installation; a copy of the Python environment is hosted on the course website in case the external download is unavailable.'),
     ])
-    t_f = table(['Assessment area', 'Assessor', 'Method'], [
+    t_f = table(['Assessment area', 'Assessor', 'Assessment method'], [
         ('Effectiveness of teaching', 'Students; course coordinator', 'University course-evaluation survey (indirect); coordination meetings and peer review (direct)'),
-        ('Effectiveness of student assessment', 'Faculty', 'Four-level rubrics with calibration anchors; second marking of a sample; in-class check comparing the written work with the student\'s explanation (direct)'),
-        ('Quality of learning resources', 'Students; faculty', 'Survey (indirect); each chapter\'s source ledger checked against the textbook and slide pack (direct)'),
-        ('Extent to which CLOs are achieved', 'Faculty; program leaders', 'Rubric rows and exam items tagged to CLOs (section 4), reported in the end-of-semester course report (direct)'),
-        ('AI-supported learning', 'Faculty', 'AI-use declarations and the NELC alignment review (indirect)'),
+        ('Effectiveness of student assessment', 'Faculty', 'Four-level rubrics with calibration examples; second marking of a sample; in-class verification of the written work against the student\'s explanation (direct)'),
+        ('Quality of learning resources', 'Students; faculty', 'Survey (indirect); review of each chapter\'s source ledger against the textbook and slide pack (direct)'),
+        ('Extent to which CLOs are achieved', 'Faculty; program leadership', 'Rubric criteria and examination items mapped to CLOs (section 4), reported in the end-of-semester course report (direct)'),
+        ('AI-supported learning', 'Faculty', 'Review of AI-use declarations and of the NELC alignment (indirect)'),
     ])
     t_g = table(['Item', 'Status'], [
         ('Specification on file', 'CPIT-455 course file, Fall 2024; last articulated 12 October 2023; coordinator Dr. Mounira Taileb'),
-        ('This page', f'Instructor\'s alignment, {DATE}. Not approved by the department council. Proposed changes are for the next specification review.'),
+        ('Articulation Matrix on file', 'CPIT-455 Articulation Matrix, template version 5.0, Spring 2025'),
+        ('This report', f'Prepared by the course instructor, {DATE}. Not approved by the department council. Proposed changes are submitted for the next specification review.'),
     ])
-    main = f'''<main class="wrap" id="main"><div class="document-heading"><p class="ey">COURSE SPECIFICATION · ETEC/NCAAA · COLLEGE · {DATE.upper()}</p>
-<h1>What the course must meet.<br><em>Where the site stands.</em></h1>
-<p class="intro">A gap analysis of the CPIT-455 site against the college and department requirements and the ETEC course specification template, the changes made on the site, and what is still open.</p></div>
-<section class="panel" lang="ar" dir="rtl" id="summary-ar"><h2>الملخص</h2>
-<p>قارنّا موقع المقرر بمتطلبات القسم والكلية (توصيف المقرر المعتمد في ملف المقرر، وتوجيهات رئيس القسم للفصل الأول 1448هـ، وطلب لجنة تطوير الخطط) وبنموذج توصيف المقرر من هيئة تقويم التعليم والتدريب (T-104، إصدار 2022)، وبدليل الشهادات المهنية المدعومة من المؤسسة العامة للتدريب التقني والمهني وصندوق هدف (2025).</p>
-<ul><li><b>مستوفى ({counts[MET]}):</b> التوصيف بهيكل الهيئة (أ–ز) منشور في هذه الصفحة، وطرق التدريس والتقييم لكل مخرج، ومحتوى المقرر بالساعات، والمراجع (الطبعة العاشرة هي الأحدث)، والمرافق، وخطة تقييم جودة المقرر، ومواءمة الشهادات المهنية.</li>
-<li><b>مستوفى جزئياً ({counts[PART]}):</b> تصنيف المخرجات في مجالات الإطار الوطني (لا يوجد مخرج في مجال القيم؛ اقترحنا واحداً)، وربط المخرجات بمخرجات البرنامج، وتغطية الكود، ومقابلة المقرر IT 456 في الخطة الجديدة.</li>
-<li><b>مفتوح ({counts[OPEN]}):</b> توزيع الدرجات المنشور يختلف عن التوصيف الموجود في الملف ويحتاج تأكيداً في مصفوفة المواءمة (Articulation Matrix)، ووصف المقرر في الملف قديم، ودمج المخرجين 7 و8، والساعات المكتبية، وسجل اجتماعات التنسيق.</li></ul>
-<p>لم نغيّر أوزان الدرجات في منتصف الفصل. الوثائق المرفقة في القسم 8.</p></section>
-<nav aria-label="On this page"><ul class="spec-toc"><li><a href="#sources">1 · Requirements used</a></li><li><a href="#gaps">2 · Gap analysis</a></li><li><a href="#spec">3 · Course specification (A–G)</a></li><li><a href="#matrix">4 · CLO-by-assessment matrix</a></li><li><a href="#certifications">5 · Professional certifications</a></li><li><a href="#it456">6 · Revised plan: IT 456</a></li><li><a href="#recommendations">7 · Recommendations and course file</a></li><li><a href="#attachments">8 · Attachments</a></li></ul></nav>
+    so_note = ('<p><b>Student outcomes</b> (wording from the Articulation Matrix): <b>SO 2</b> · Design, implement, and evaluate a '
+               'computing-based solution to meet a given set of computing requirements in the context of the program’s discipline. '
+               '<b>SO 6 (IT)</b> · Use systemic approaches to select, develop, apply, integrate, and administer secure computing '
+               'technologies to accomplish user goals.</p>')
+    main = f'''<main class="wrap" id="main"><div class="document-heading"><p class="ey">COURSE SPECIFICATION AND ALIGNMENT REPORT · {DATE.upper()}</p>
+<h1>Course Specification and Gap Analysis<br><em>CPIT-455 · {CODE_NEW} in the revised plan</em></h1>
+<p class="intro">This report reviews the course website against the requirements of the Department of Information Technology, the Faculty of Computing and Information Technology and the Education and Training Evaluation Commission (ETEC). It presents the course specification in the ETEC T-104 structure, records the changes made to the website and identifies the items that require a departmental decision.</p></div>
+<section class="panel" id="document-control"><h2>Document control <span class="vs-ar-t" lang="ar" dir="rtl">بيانات الوثيقة</span></h2>
+{t_doc}</section>
+<section class="panel" lang="ar" dir="rtl" id="summary-ar"><h2>الملخص التنفيذي</h2>
+<p>يراجع هذا التقرير موقع مقرر هندسة البرمجيات (2)، ورمزه الحالي CPIT-455، ويقابله في الخطة الدراسية المحدثة لبرنامج تقنية المعلومات المقرر الاختياري <b>IT 456 Dependable Systems</b>. وتشمل المراجعة المتطلبات التالية: توصيف المقرر المعتمد في ملف المقرر، ومصفوفة المواءمة (Articulation Matrix)، وتوجيهات رئيس القسم للفصل الدراسي الأول 1448هـ، وطلب لجنة تطوير الخطط الدراسية، ونموذج توصيف المقرر الصادر عن هيئة تقويم التعليم والتدريب (T-104، إصدار 2022)، ودليل الشهادات المهنية الاحترافية المدعومة الصادر عن المؤسسة العامة للتدريب التقني والمهني وصندوق تنمية الموارد البشرية (2025).</p>
+<ul><li><b>المتطلبات المستوفاة ({counts[MET]}):</b> تحديد رمز المقرر في الخطة المحدثة، ونشر التوصيف وفق أقسام نموذج الهيئة (أ–ز)، وربط كل مخرج تعلم بطرق التدريس والتقييم، وعرض محتوى المقرر وجدوله الأسبوعي وساعاته، والتحقق من حداثة المرجع الأساسي، وبيان المرافق وخطة تقييم جودة المقرر، ودراسة مواءمة الشهادات المهنية.</li>
+<li><b>المتطلبات المستوفاة جزئياً ({counts[PART]}):</b> تصنيف مخرجات التعلم وفق مجالات الإطار الوطني للمؤهلات، وربطها بمخرجات البرنامج، وتدريس تغطية الشيفرة ضمن البناء البرمجي، ومقارنة محتوى المقرر IT 456، وكلها مرهونة بوثائق أو اعتمادات من خارج الموقع.</li>
+<li><b>المتطلبات المفتوحة ({counts[OPEN]}):</b> توحيد توزيع الدرجات وفق مصفوفة المواءمة للفصل الحالي، وتحديث وصف المقرر، ودمج المخرجين السابع والثامن، ونشر الساعات المكتبية، واستكمال سجل اجتماعات التنسيق.</li></ul>
+<p>لم تُعدَّل أوزان الدرجات خلال الفصل الدراسي. والوثائق المرجعية مرفقة في القسم الثامن.</p></section>
+<nav aria-label="Contents of this report"><ul class="spec-toc"><li><a href="#sources">1 · Reference requirements</a></li><li><a href="#gaps">2 · Gap analysis</a></li><li><a href="#spec">3 · Course specification (A–G)</a></li><li><a href="#matrix">4 · Mapping of CLOs to assessments</a></li><li><a href="#certifications">5 · Professional certifications</a></li><li><a href="#it456">6 · {CODE_NEW}</a></li><li><a href="#recommendations">7 · Recommendations</a></li><li><a href="#attachments">8 · Reference documents</a></li></ul></nav>
 
-<section class="section" id="sources"><h2>1 · Requirements used <span class="vs-ar-t" lang="ar" dir="rtl">المتطلبات المعتمدة في التحليل</span></h2>
-{table(['Issued by', 'Document', 'What it requires', 'Copy'], src_rows)}</section>
+<section class="section" id="sources"><h2>1 · Reference requirements <span class="vs-ar-t" lang="ar" dir="rtl">المتطلبات المرجعية</span></h2>
+{table(['Issuing body', 'Document', 'Requirements', 'Copy'], src_rows)}</section>
 
 <section class="section" id="gaps"><h2>2 · Gap analysis <span class="vs-ar-t" lang="ar" dir="rtl">تحليل الفجوات</span></h2>
-<p>Status after the changes made on {DATE}. <b>Met</b>: the site now shows or does it. <b>Partly met</b>: shown, but part depends on a document or approval outside the site. <b>Open</b>: needs a department decision or the instructor's input.</p>
+<p>Status as of {DATE}. <b>Met</b>: the requirement is satisfied on the website. <b>Partly met</b>: the requirement is satisfied in part, and the remainder depends on a document or an approval outside the website. <b>Open</b>: the requirement needs a departmental decision or further information from the instructor.</p>
 <div class="spec-counts">{pill(MET)} <b>{counts[MET]}</b> {pill(PART)} <b>{counts[PART]}</b> {pill(OPEN)} <b>{counts[OPEN]}</b></div>
-{table(['Requirement', 'Source', 'Finding before', 'Action on the site', 'Status'], gap_rows, 'stack gaps')}</section>
+{table(['Requirement', 'Source', 'Finding', 'Action taken', 'Status'], gap_rows, 'stack gaps')}</section>
 
-<section class="section" id="spec"><h2>3 · Course specification, ETEC T-104 structure <span class="vs-ar-t" lang="ar" dir="rtl">توصيف المقرر بهيكل نموذج الهيئة</span></h2>
-<p>CPIT-455 as taught in Fall 2026, written in the sections of the ETEC template. CLO wording is copied from the specification on file; anything new is marked <i>proposed</i>.</p>
-<h3 class="spec-sub" id="spec-a">A · General information</h3>
+<section class="section" id="spec"><h2>3 · Course specification, ETEC T-104 structure <span class="vs-ar-t" lang="ar" dir="rtl">توصيف المقرر وفق نموذج الهيئة</span></h2>
+<p>The course as delivered in Fall 2026, presented in the sections of the ETEC template. The wording of the course learning outcomes is taken from the specification on file; additions are marked <i>proposed</i>.</p>
+<h3 class="spec-sub" id="spec-a">A · General information about the course</h3>
 {t_a}
 <h3 class="spec-sub" id="spec-b">B · Course learning outcomes, teaching strategies and assessment methods</h3>
-<p>Program alignment uses the student-outcome numbers recorded in the specification on file (SO 2 and SO 6).</p>
 {table(['Code', 'Course learning outcome', 'Student outcome', 'Teaching strategies', 'Assessment methods'], clo_rows)}
+{so_note}
 <h3 class="spec-sub" id="spec-c">C · Course content</h3>
-{table(['No', 'Topic', 'Weeks on file', 'Contact hours', 'On the site', 'Assessed in'], content_rows)}
-<p>Delivery change: the two weeks of Code Coverage are taught as the coverage step of every Python build (Assignments 3–9) in the weekly practical session. To be reported in the end-of-semester course report.</p>
+{table(['No', 'Topic', 'Weeks (Articulation Matrix)', 'Contact hours', 'On the website', 'Assessed in'], content_rows)}
+<p>Change in delivery: Code Coverage, scheduled for weeks 14 and 15, is taught as the coverage step of every Python build (Assignments 3–9) in the weekly practical session. Chapters 16 and 17 are taught in chapter order. Both changes are to be reported in the end-of-semester course report.</p>
 <h3 class="spec-sub" id="spec-d">D · Student assessment activities</h3>
-<p><b>Specification on file (Fall 2024):</b></p>
+<p><b>Specification on file and Articulation Matrix (Spring 2025):</b></p>
 {table(['No', 'Assessment activity', 'Week', 'Weight'], file_rows)}
-<p><b>This semester, as published to students on the site:</b></p>
+<p><b>Fall 2026, as published to students on the website:</b></p>
 {table(['No', 'Assessment activity', 'Timing', 'Weight'], now_rows)}
-<p>The two schemes differ. The written-test weights match (exam 1 and midterm 30, final 30). Homework, the group project and graded lab work (40 together) correspond to the nine assignments with their Python builds and to participation (40 together). The weights for all sections are set in the course Articulation Matrix. The coordinator confirms them there, and they are not changed mid-semester.</p>
+<p>The two schemes differ. The weights of the written examinations are the same (examination and midterm 30%; final examination 30%). The remaining 40% is allocated on file to homework, graded laboratory work and a group project, and on the website to nine assignments with Python builds and to participation. The department sets the weights for all sections in the Articulation Matrix; the weights for Fall 2026 are to be confirmed there and are not changed during the semester.</p>
 <h3 class="spec-sub" id="spec-e">E · Learning resources and facilities</h3>
 {t_e}
 <h3 class="spec-sub" id="spec-f">F · Assessment of course quality</h3>
@@ -368,38 +401,40 @@ def build_page():
 <h3 class="spec-sub" id="spec-g">G · Specification approval data</h3>
 {t_g}</section>
 
-<section class="section" id="matrix"><h2>4 · CLO-by-assessment matrix <span class="vs-ar-t" lang="ar" dir="rtl">مصفوفة المخرجات والتقييم</span></h2>
-<p>● marks where each CLO is assessed directly. Assignment 1 covers Chapter 10, Assignment 2 Chapter 11, and so on to Assignment 9, Chapter 20.</p>
+<section class="section" id="matrix"><h2>4 · Mapping of course learning outcomes to assessments <span class="vs-ar-t" lang="ar" dir="rtl">ربط مخرجات التعلم بأدوات التقييم</span></h2>
+<p>● indicates that the outcome is assessed directly in that assessment. Assignment 1 corresponds to Chapter 10, Assignment 2 to Chapter 11, and so on to Assignment 9, which corresponds to Chapter 20.</p>
 {table(['Course learning outcome'] + MATRIX_COLS, mrows, 'matrix')}</section>
 
-<section class="section" id="certifications"><h2>5 · Professional certifications <span class="vs-ar-t" lang="ar" dir="rtl">مواءمة الشهادات المهنية</span></h2>
-<p>The certifications in the TVTC/HRDF guide that touch CPIT-455 topics, using the committee's fields. Coverage is the instructor's estimate of the share of CPIT-455 content the certification covers. Maximum compensation is as stated in the guide.</p>
-{table(['Certification', 'Issuer', 'Max HRDF compensation', 'Course topics covered', 'Course topics not covered', 'Coverage', 'Recommendation'], cert_rows)}
-<p><b>Conclusion:</b> no certification in the guide covers dependability, reliability specification, safety engineering, reuse and component-based engineering, or systems of systems. None supports full or partial equivalency for CPIT-455 or IT 456. Students may take them after the course: CTFL builds on CLO 11, Security+ on CLO 5, AWS Solutions Architect on CLO 6 and 9.</p></section>
+<section class="section" id="certifications"><h2>5 · Alignment with professional certifications <span class="vs-ar-t" lang="ar" dir="rtl">مواءمة الشهادات المهنية</span></h2>
+<p>The certifications in the TVTC/HRDF guide that relate to topics of this course, reported in the fields requested by the Curriculum Development Committee. Coverage is the instructor's estimate of the proportion of course content addressed by the certification. Maximum compensation is as stated in the guide.</p>
+{table(['Certification', 'Issuing organization', 'Maximum HRDF compensation', 'Course topics covered', 'Course topics not covered', 'Estimated coverage', 'Recommendation'], cert_rows)}
+<p><b>Conclusion.</b> No certification in the guide addresses dependability, reliability specification, safety engineering, software reuse and component-based engineering, or systems of systems. None supports full or partial equivalency with CPIT-455 or {CODE_NEW}. The certifications may serve as subsequent professional credentials: ISTQB CTFL builds on CLO 11, CompTIA Security+ on CLO 5, and AWS Solutions Architect – Associate on CLOs 6 and 9.</p></section>
 
-<section class="section" id="it456"><h2>6 · Revised plan: IT 456 Dependable Systems <span class="vs-ar-t" lang="ar" dir="rtl">الخطة المحدثة: IT 456</span></h2>
-<p>In the revised IT program plan, CPIT-455 corresponds to the elective <b>IT 456 Dependable Systems</b>. Its specification covers dependability, reliability, safety, security and resilience engineering and uses Sommerville as a reference. These match Chapters 10–14 and CLOs 1–6 here.</p>
-<p>Open: the IT 456 specification file is in the committee's shared folder and was not available for this review. A clause-by-clause crosswalk will be added when it is compared. Check in particular whether Chapters 15, 16, 17 and 20 (CLOs 7–10) and Code Coverage stay in IT 456.</p></section>
+<section class="section" id="it456"><h2>6 · {CODE_NEW} in the revised IT program plan <span class="vs-ar-t" lang="ar" dir="rtl">المقرر في الخطة المحدثة</span></h2>
+<p>In the revised IT program plan, CPIT-455 corresponds to the elective course <b>{CODE_NEW}</b>. Its specification covers dependability, reliability, safety, security and resilience engineering and lists Sommerville as a reference. These topics correspond to Chapters 10–14 and CLOs 1–6 of the current course.</p>
+<p>Pending: the {CODE_NEW} specification is held in the committee's shared folder and was not available for this review. A clause-by-clause comparison will be added on receipt, in particular to establish whether Chapters 15, 16, 17 and 20 (CLOs 7–10) and Code Coverage remain within {CODE_NEW}.</p></section>
 
-<section class="section" id="recommendations"><h2>7 · Recommendations and course file <span class="vs-ar-t" lang="ar" dir="rtl">التوصيات وملف المقرر</span></h2>
+<section class="section" id="recommendations"><h2>7 · Recommendations and course-file checklist <span class="vs-ar-t" lang="ar" dir="rtl">التوصيات وقائمة ملف المقرر</span></h2>
 <ol>
-<li><b>Catalog description (proposed):</b> Engineering of dependable software systems: dependability properties; reliability specification and metrics; safety and hazard analysis; security engineering; resilience; software reuse and component-based software engineering; distributed software engineering; systems of systems; test design, mutation testing and code coverage as evidence for engineering decisions.</li>
-<li><b>CLOs:</b> merge CLO 7 and CLO 8 into one reuse outcome; correct “systes” in CLO 10; add the values outcome 3.1 in section B.</li>
-<li><b>Grade distribution:</b> record the weights for all sections in the Articulation Matrix. Then make the specification and the site show the same table.</li>
-<li><b>Code Coverage:</b> record it as practised in the builds of Assignments 3–9, not as two separate lecture weeks.</li>
-<li><b>References:</b> keep Sommerville 10th edition as essential. Add the seven primary sources in section E as supportive references.</li>
+<li><b>Catalog description (proposed).</b> Engineering of dependable software systems: dependability properties; reliability specification and metrics; safety and hazard analysis; security engineering; resilience engineering; software reuse and component-based software engineering; distributed software engineering; systems of systems; test design, mutation testing and code coverage as evidence for engineering decisions.</li>
+<li><b>Course learning outcomes.</b> Merge CLO 7 and CLO 8 into a single outcome on software reuse; correct the typing error in CLO 10; add the proposed outcome 3.1 in the domain of values, autonomy and responsibility; classify all outcomes in the three domains of the current National Qualifications Framework.</li>
+<li><b>Grade distribution.</b> Record the weights for all sections in the Articulation Matrix for Fall 2026, and present the same table in the specification and on the website.</li>
+<li><b>Code Coverage.</b> Record Code Coverage as practised within the builds of Assignments 3–9 rather than as two separate lecture weeks.</li>
+<li><b>Articulation Matrix.</b> Correct the week-13 entry (systems of systems), which contains text from Chapter 25 on configuration management.</li>
+<li><b>References.</b> Retain Sommerville, 10th edition, as the essential reference and add the seven primary sources in section 3E as supportive references.</li>
+<li><b>Course code.</b> Record {CODE_NEW} as the corresponding course in the revised plan in the next version of the specification.</li>
 </ol>
-<p><b>Course-file checklist from the department guidelines:</b> syllabus available to students in week 1 (this page and the attached specification) · same grading in all sections (recommendation 3) · at least three coordination meetings, with minutes (coordinator) · Articulation Matrix updated after each meeting (coordinator) · office hours posted (open) · previous end-of-semester report completed (instructor).</p></section>
+<p><b>Course-file checklist (department guidelines, 1448 H).</b> Syllabus available to students in the first week: met (this report and the attached specification) · same grade distribution in all sections: recommendation 3 · at least three coordination meetings with minutes: course coordinator · Articulation Matrix updated after each meeting: course coordinator · office hours posted: open · previous end-of-semester report completed: course instructor.</p></section>
 
-<section class="section" id="attachments"><h2>8 · Attachments <span class="vs-ar-t" lang="ar" dir="rtl">المرفقات</span></h2>
+<section class="section" id="attachments"><h2>8 · Reference documents <span class="vs-ar-t" lang="ar" dir="rtl">الوثائق المرجعية</span></h2>
 {table(['Document', 'Note'], att_rows)}
-<p>The internal emails (department guidelines and the committee request) are summarised in section 1 and are not attached. The certification alignment sheet and other colleagues' course specifications are internal and are not published.</p></section>
+<p>Internal documents (the department guidelines, the Articulation Matrix and the committee correspondence) are summarised in section 1 and are not published. The certification alignment sheet and the specifications of other courses are likewise not published.</p></section>
 </main>'''
 
     head = (f'<!DOCTYPE html>\n<html data-iscarb-standalone="1" data-theme="dark" lang="en"><head><meta charset="utf-8">'
             '<meta content="width=device-width,initial-scale=1" name="viewport"><meta content="#006b62" name="theme-color">'
-            '<meta content="CPIT-455 course specification in the ETEC T-104 structure, gap analysis against college and ETEC requirements, and professional certification alignment." name="description">'
-            '<title>Course specification and alignment · iSCARB CPIT-455</title>'
+            '<meta content="Course specification of CPIT-455 (IT 456 Dependable Systems in the revised IT plan) in the ETEC T-104 structure, with a gap analysis against departmental, faculty and ETEC requirements and an alignment with professional certifications." name="description">'
+            '<title>Course specification and gap analysis · CPIT-455 (IT 456) · iSCARB</title>'
             f'<link href="iscarb-hub.css?v={VERSION}" rel="stylesheet"><link rel="stylesheet" href="course-design.css?v={VERSION}">'
             + dependencies() + STYLE + '</head>')
     body = ('<body class="course-page" id="top"><a class="skip" href="#main">Skip to content</a>'
@@ -410,24 +445,37 @@ def build_page():
 # ---- Links from the existing pages, and the build registration -------------------------------
 LINK_MARK = '<!-- course-specification:link -->'
 LINK = (LINK_MARK + '<section class="panel" id="course-specification"><p class="ey">COURSE SPECIFICATION · ETEC/NCAAA</p>'
-        '<h2>Course specification and alignment</h2><p>The CPIT-455 specification in the ETEC T-104 structure, a gap analysis '
-        'against the college, department and ETEC requirements, and the professional-certification alignment, with the source '
-        'documents attached. <a href="course-specification.html"><b>Open the course specification</b></a>.</p>'
-        '<p lang="ar" dir="rtl">توصيف المقرر بهيكل نموذج هيئة تقويم التعليم والتدريب، وتحليل الفجوات مع متطلبات الكلية والقسم والهيئة، '
-        'ومواءمة الشهادات المهنية، مع الوثائق المرجعية. <a href="course-specification.html">افتح توصيف المقرر</a>.</p></section>')
+        '<h2>Course specification and gap analysis</h2><p>CPIT-455 Software Engineering (II), which corresponds to '
+        '<b>IT 456 Dependable Systems</b> in the revised IT program plan. The report presents the course specification in the '
+        'ETEC T-104 structure, a gap analysis against the requirements of the department, the faculty and ETEC, and an '
+        'assessment of alignment with professional certifications, together with the reference documents. '
+        '<a href="course-specification.html"><b>Open the report</b></a>.</p>'
+        '<p lang="ar" dir="rtl">مقرر هندسة البرمجيات (2) CPIT-455، ويقابله في الخطة المحدثة لبرنامج تقنية المعلومات المقرر '
+        'IT 456 Dependable Systems. يتضمن التقرير توصيف المقرر وفق نموذج هيئة تقويم التعليم والتدريب، وتحليل الفجوات مع '
+        'متطلبات القسم والكلية والهيئة، ومواءمة الشهادات المهنية، مع الوثائق المرجعية. <a href="course-specification.html">الاطلاع على التقرير</a>.</p></section>')
 # The Saudi alignment page is English only (tools/check-readable-course.cjs): no Arabic line there.
 LINK_EN = LINK[:LINK.index('<p lang="ar"')] + '</section>'
 GRADE_MARK = '<!-- course-specification:grades -->'
-GRADE_LINK = (GRADE_MARK + '<p>How these weights relate to the course specification and the department\'s Articulation Matrix: '
-              '<a href="{p}course-specification.html#spec-d">course specification, section D</a>. '
-              '<span lang="ar" dir="rtl">علاقة هذه الأوزان بتوصيف المقرر: <a href="{p}course-specification.html#spec-d">القسم د في توصيف المقرر</a>.</span></p>')
+GRADE_LINK = (GRADE_MARK + '<p>The relationship between these weights, the course specification and the department\'s Articulation Matrix is set out in '
+              '<a href="{p}course-specification.html#spec-d">section 3D of the course specification report</a>. '
+              '<span lang="ar" dir="rtl">العلاقة بين هذه الأوزان وتوصيف المقرر ومصفوفة المواءمة موضحة في <a href="{p}course-specification.html#spec-d">القسم 3د من تقرير توصيف المقرر</a>.</span></p>')
+
+
+def put_block(t, block):
+    """Insert-or-refresh helper: replace an earlier version of the marked block in place."""
+    mark = block[:block.index('-->') + 3]
+    i = t.index(mark)
+    close = '</section>' if block.endswith('</section>') else '</p>'
+    j = t.index(close, i) + len(close)
+    return t[:i] + block + t[j:]
 
 
 def insert_between(rel, left, right, block):
-    """Insert block between two adjacent strings that occur together exactly once (skipped if already there)."""
+    """Insert block between two adjacent strings that occur together exactly once; refresh it if already there."""
     p = ROOT / rel
     t = p.read_text(encoding='utf-8')
     if block[:block.index('-->') + 3] in t:
+        p.write_text(put_block(t, block), encoding='utf-8')
         return
     assert t.count(left + right) == 1, f'{rel}: anchor found {t.count(left + right)} times'
     p.write_text(t.replace(left + right, left + block + right), encoding='utf-8')
@@ -437,8 +485,9 @@ def link_pages():
     insert_between('course-resources.html', '</section>', '<section class="section" id="outcomes">', LINK)
     insert_between('instructor-guide.html', '</div>', '<section class="panel" id="use-iscarb">', LINK)
     t = (ROOT / 'nelc-alignment.html').read_text(encoding='utf-8')
-    t = t.replace(LINK, LINK_EN)
-    if LINK_MARK not in t:
+    if LINK_MARK in t:
+        t = put_block(t, LINK_EN)
+    else:
         a = t.index('<section class="national-hero">')
         b = t.index('</section>', a) + len('</section>')
         t = t[:b] + LINK_EN + t[b:]
