@@ -914,14 +914,21 @@
    "revision": "20261023-course-specification",
    "date": "2026-10-23",
    "base_release": "20260926-genai-v12",
-   "summary": "Course specification page (ETEC T-104 structure), gap analysis against college and ETEC requirements, certification alignment; links from site pages",
+   "summary": "Course specification page (ETEC T-104 structure); links from site pages",
    "repinned": []
   },
   {
    "revision": "20261023-course-specification-formal",
    "date": "2026-10-23",
    "base_release": "20260926-genai-v12",
-   "summary": "Course specification report in formal wording; course code IT 456 Dependable Systems in the revised plan; Articulation Matrix (Spring 2025) added as a source",
+   "summary": "Course specification page in formal wording; course code IT 456 Dependable Systems in the revised plan",
+   "repinned": []
+  },
+  {
+   "revision": "20261024-course-specification-public",
+   "date": "2026-10-23",
+   "base_release": "20260926-genai-v12",
+   "summary": "Public course specification: course as delivered in the ETEC T-104 structure with the iSCARB framework; coordinator role; internal analysis withdrawn",
    "repinned": []
   }
  ]
