@@ -930,6 +930,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Public course specification: course as delivered in the ETEC T-104 structure with the iSCARB framework; coordinator role; internal analysis withdrawn",
    "repinned": []
+  },
+  {
+   "revision": "20261024-course-resources-wording",
+   "date": "2026-10-23",
+   "base_release": "20260926-genai-v12",
+   "summary": "Course & sources: wording aligned with the course specification page",
+   "repinned": []
   }
  ]
 }

@@ -327,9 +327,39 @@ def attachments(args):
         (ROOT / STD / name).unlink(missing_ok=True)
 
 
+# Wording on Course & sources that predates the course specification page.
+WORDING = [
+    ('course-resources.html', 'Nine published chapters, one source ledger per chapter, and a visible course-level gap.',
+     'Nine published chapters, one source ledger per chapter, and the course-outcome map.'),
+    ('course-resources.html', 'The course syllabus on file is labelled Fall 2024 and lists 11 course learning outcomes. Its topic allocation guides '
+     'the learning-path organization. This website does not declare a replacement syllabus: follow the current LMS for grades, deadlines, '
+     'rooms and the official timetable.',
+     'The approved course specification lists 11 course learning outcomes, and its topic allocation guides the learning path. The course '
+     'as delivered is presented in the <a href="course-specification.html">course specification</a>. Grades, deadlines, rooms and the '
+     'official timetable are announced in Blackboard.'),
+]
+
+
+def reword():
+    for rel, old, new in WORDING:
+        p = ROOT / rel
+        t = p.read_text(encoding='utf-8')
+        if old in t:
+            assert t.count(old) == 1, rel
+            p.write_text(t.replace(old, new), encoding='utf-8')
+        assert new in p.read_text(encoding='utf-8'), f'{rel}: wording not applied'
+    # keep the legacy generator consistent, so a rerun does not bring the old wording back
+    g = ROOT / 'tools/build_learning_hub.py'
+    t = g.read_text(encoding='utf-8')
+    for _, old, new in WORDING:
+        t = t.replace(old, new)
+    g.write_text(t, encoding='utf-8')
+
+
 if __name__ == '__main__':
     attachments(sys.argv[1:])
     build_page()
     link_pages()
+    reword()
     register()
     print('Course specification page, links and registration applied')
