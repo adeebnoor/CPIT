@@ -909,6 +909,13 @@
     "assignment 17",
     "assignment 20"
    ]
+  },
+  {
+   "revision": "20261023-course-specification",
+   "date": "2026-10-23",
+   "base_release": "20260926-genai-v12",
+   "summary": "Course specification page (ETEC T-104 structure), gap analysis against college and ETEC requirements, certification alignment; links from site pages",
+   "repinned": []
   }
  ]
 }

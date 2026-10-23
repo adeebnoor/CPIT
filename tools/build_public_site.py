@@ -8,7 +8,7 @@ from check_lecture_requirements import run as check_lecture_requirements
 ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
 VERSION=publication()['release']
-PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-students.html','fbr-submission.html','download.html','download-stats.html','student-guide.html','course-resources.html','instructor-guide.html','micro-viva.html','assignment-example.html','midterm-practice.html','evidence.html','nelc-alignment.html','methodology.html','style.css','iscarb-theme.css','iscarb-theme.js','iscarb-hub.css','iscarb-hub.js','iscarb-home.css','assets/fcit-kau-logo.png','student-ux.css','student-ux.js','chapter-search.js','course-design.css','national-site.css']
+PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-students.html','fbr-submission.html','download.html','download-stats.html','student-guide.html','course-resources.html','instructor-guide.html','micro-viva.html','assignment-example.html','course-specification.html','midterm-practice.html','evidence.html','nelc-alignment.html','methodology.html','style.css','iscarb-theme.css','iscarb-theme.js','iscarb-hub.css','iscarb-hub.js','iscarb-home.css','assets/fcit-kau-logo.png','student-ux.css','student-ux.js','chapter-search.js','course-design.css','national-site.css']
 def main():
     spec=publication(); errors=audit(ROOT)
     if errors: raise SystemExit('\n'.join(errors))
@@ -22,6 +22,7 @@ def main():
         shutil.copy2(ROOT/name,DEST/name)
     shutil.copy2(ROOT/'iSCARB-Teaching-Template.md',DEST/'iSCARB-Teaching-Template.md')
     shutil.copytree(ROOT/'assets/guide',DEST/'assets/guide')  # pictures for the visual assignment guide
+    shutil.copytree(ROOT/'assets/standards',DEST/'assets/standards')  # documents attached to course-specification.html
     shutil.copytree(ROOT/'vendor/pyodide',DEST/'vendor/pyodide')  # second source for the Python build runner
     for name in ['slides','lectures/cimt','lectures/himma']:
         if (ROOT/name).exists(): shutil.copytree(ROOT/name,DEST/name,ignore=shutil.ignore_patterns('.rsync-tmp'))
