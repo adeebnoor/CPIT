@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html data-iscarb-standalone="1" data-theme="dark" lang="en" dir="ltr"><head><meta charset="utf-8"><meta content="width=device-width,initial-scale=1" name="viewport"><meta content="#006b62" name="theme-color"><meta content="Instructor page for flipped-lecture bookings." name="description"><meta name="robots" content="noindex,nofollow"><title>Flipped lectures · instructor · iSCARB CPIT-455</title><link href="iscarb-hub.css?v=20260928-campus-v3" rel="stylesheet"><link rel="stylesheet" href="course-design.css?v=20260928-campus-v3"><link rel="stylesheet" href="course-shell.css?v=20260928-campus-v3"><script src="course-shell.js?v=20260928-campus-v3" defer></script><script>try{document.documentElement.dataset.theme=localStorage.getItem('iscarb-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}</script><style>
+.fl-intro{max-width:72ch}
+.fl .en{display:block;color:var(--muted);font-size:.92em}
+.fl[dir=rtl] .en{text-align:right}
+.fl h1 .en,.fl h2 .en{font-size:.6em;font-weight:600}
+.fl table td .en,.fl table th .en{font-size:.85em}
+.fl-cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.fl-card{min-width:0;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--panel);display:grid;gap:10px;align-content:start}
+.fl-card h3{margin:0;text-wrap:balance}
+.fl-card dl{display:grid;grid-template-columns:minmax(0,11em) 1fr;gap:6px 12px;margin:0;font-size:.95em}
+@media (max-width:480px){.fl-card dl{grid-template-columns:1fr}.fl-card dd{margin-bottom:6px}}
+.fl-card dt{color:var(--muted)}.fl-card dd{margin:0;font-variant-numeric:tabular-nums}
+.fl-left{font-weight:800;color:var(--accent);margin:0}.fl-card h3 .en{font-size:.75em;font-weight:600}
+.fl-seat{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-top:1px dashed var(--line);padding-top:10px}
+.fl-seat b{display:block}.fl-seat small{color:var(--muted);display:block}
+.fl-seat button{font:inherit;border-radius:10px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer;white-space:nowrap}
+.fl-seat button[disabled]{background:transparent;color:var(--muted);border-color:var(--line);cursor:not-allowed}
+.fl-closed{color:var(--muted)}
+.fl-free{display:inline-block;font-size:.75em;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:0 8px;margin-inline-end:4px}
+.fl-panel{border:2px solid var(--accent);border-radius:14px;padding:16px;background:var(--panel);display:grid;gap:12px}
+.fl-panel[hidden]{display:none}
+.fl-form{display:grid;gap:10px;max-width:520px}
+.fl-form label{display:grid;gap:4px}
+.fl-form input[type=text],.fl-form input[type=email]{font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.fl-form .check{display:flex;gap:8px;align-items:flex-start}
+.fl-form button,.fl-btn{font:inherit;border-radius:10px;padding:10px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer;justify-self:start}
+.fl-btn.ghost{background:transparent;color:var(--accent)}
+.fl-msg{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.fl-msg:empty{display:none}
+.fl-msg.err{border-color:#b4462f}
+.fl-code{font:800 2rem/1.2 ui-monospace,monospace;letter-spacing:.25em;text-align:center;padding:12px;border:2px dashed var(--accent);border-radius:12px;direction:ltr}
+.fl-warn{font-weight:700}
+@media (max-width:480px){.fl-seat{grid-template-columns:1fr}.fl-seat button{width:100%}}
+</style></head><body class="course-page" id="top"><a class="skip" href="#main">Skip to content</a><header class="site-header" data-surface="document"><div class="site-masthead">
+<a class="site-brand" href="iscarb.html"><img src="assets/fcit-kau-logo.png" width="48" height="48" alt="FCIT, King Abdulaziz University"><span><strong>iSCARB</strong><small>CPIT-455 · King Abdulaziz University</small></span></a>
+<div class="site-utilities"><a class="profile-link" href="https://adeebnoor.github.io/">About &amp; contact <span aria-hidden="true">↗</span></a><button class="theme" id="themeBtn" type="button">Dark mode</button></div>
+<button class="nav-toggle" id="navToggle" type="button" aria-controls="courseNav" aria-expanded="false">Menu <span aria-hidden="true">☰</span></button></div>
+<nav class="site-nav" id="courseNav" aria-label="Course navigation"><a href="iscarb.html">Learning path</a><a href="student-guide.html">How to study</a><a href="course-resources.html">Course & sources</a><a href="nelc-alignment.html">Saudi alignment</a><a href="methodology.html">For educators</a><a href="https://qeeem.com/" id="topQeeem" target="_blank" rel="noopener">Evaluation <span aria-hidden="true">↗</span></a></nav></header>
+<main class="wrap fl" id="main" lang="en" dir="ltr"><div class="document-heading"><p class="ey">CPIT-455 · Flipped lectures · Instructor</p><h1>Bookings and rubric scores</h1>
+<p class="intro">Signed-in instructor only (arnoor@kau.edu.sa). Access is checked on the server.</p></div>
+<section class="fl-panel" id="adLogin"><form class="fl-form" id="adLoginForm"><label>Email<input type="email" value="arnoor@kau.edu.sa" readonly></label>
+<label>Password<input type="password" id="adPass" required autocomplete="current-password"></label><button type="submit">Sign in</button><div class="fl-msg" id="adLoginMsg" aria-live="polite"></div></form></section>
+<div id="adApp" hidden>
+<div class="fl-msg" id="adMsg" aria-live="polite"></div><p id="adCount"></p>
+<section class="section"><h2>Bookings</h2><div id="adList"></div>
+<p><button type="button" class="fl-btn" id="adCsv">Export CSV for Blackboard</button></p></section>
+<section class="section"><h2>Add a student to a seat</h2><p>Also works after registration has closed.</p>
+<form class="fl-form" id="adAddForm"><label>Student<select id="adStudent"></select></label><label>Seat<select id="adSeat"></select></label><button type="submit">Add</button></form></section>
+<section class="section"><h2>Add or correct a student in the roster</h2>
+<form class="fl-form" id="adRosterForm"><label>Student ID (7 digits)<input type="text" id="adRId" required pattern="[0-9]{7}" inputmode="numeric"></label><label>Full name<input type="text" id="adRName" required></label><label>University email<input type="email" id="adRMail" required></label><button type="submit">Save</button></form></section>
+<section class="section"><h2>Account</h2><form class="fl-form" id="adPwForm"><label>New password (at least 10 characters)<input type="password" id="adNewPw" minlength="10" required autocomplete="new-password"></label><button type="submit">Change password</button></form>
+<p><button type="button" class="fl-btn ghost" id="adOut">Sign out</button></p></section>
+<section class="section"><h2>After final grades</h2><p>Deletes all bookings and the roster. Type DELETE, then press the button.</p>
+<p><input type="text" id="adPurgeText" dir="ltr"> <button type="button" class="fl-btn ghost" id="adPurge">Delete all booking data</button></p></section>
+</div></main><footer class="site-footer"><div class="site-footer-inner"><div><a class="footer-brand" href="iscarb.html">iSCARB</a><p>Software Engineering II · CPIT-455<br>Faculty of Computing &amp; Information Technology<br>King Abdulaziz University · Jeddah, Saudi Arabia</p></div><div><h2>Explore the course</h2><a href="student-guide.html">Student guide</a><a href="course-resources.html">Course &amp; sources</a><a href="nelc-alignment.html">Saudi alignment</a></div><div><h2>Teaching &amp; collaboration</h2><a href="methodology.html">iSCARB methodology</a><a href="instructor-guide.html">Instructor guide</a><a href="index.html#evolution">Teaching history</a></div><div><h2>Professor Adeeb Noor</h2><p>Course instructor &amp; iSCARB developer</p><a class="profile-link" href="https://adeebnoor.github.io/">Profile, research &amp; contact ↗</a><a href="mailto:arnoor@kau.edu.sa">arnoor@kau.edu.sa</a></div></div><div class="site-footer-bottom"><span>Learning resources · Human judgment · Evidence</span><a href="#top">Back to top ↑</a></div></footer><script>
+(function(){
+var CFG={"url": "", "key": ""}, LEC=[{"id": 2, "number": 2, "chapter": "Ch16", "title_en": "Component-based Software Engineering", "title_ar": "هندسة البرمجيات القائمة على المكونات", "assignment_en": "Assignment 7", "assignment_ar": "الواجب 7", "starts_at": "2026-11-05T15:00:00+03:00", "seats": [{"id": 21, "part_no": 1, "title_en": "Components, interfaces and component models", "title_ar": "المكونات والواجهات ونماذج المكونات", "slides": "Lecture slides 4–8 · source slides 3–22"}, {"id": 22, "part_no": 2, "title_en": "Development for reuse and with reuse; validation", "title_ar": "التطوير لإعادة الاستخدام والتطوير بإعادة الاستخدام والتحقق", "slides": "Lecture slides 10–12 · source slides 23–39"}, {"id": 23, "part_no": 3, "title_en": "Composition, adapters and interface semantics", "title_ar": "التركيب والمحوّلات ودلالات الواجهات", "slides": "Lecture slides 13 and 15–17 · source slides 40–59"}]}, {"id": 3, "number": 3, "chapter": "Ch17", "title_en": "Distributed Software Engineering", "title_ar": "هندسة البرمجيات الموزعة", "assignment_en": "Assignment 8", "assignment_ar": "الواجب 8", "starts_at": "2026-11-12T15:00:00+03:00", "seats": [{"id": 31, "part_no": 1, "title_en": "Design issues, scaling and timeouts", "title_ar": "قضايا التصميم والتوسّع ومهلة الانتظار", "slides": "Lecture slides 4–7 · source slides 3–14"}, {"id": 32, "part_no": 2, "title_en": "Interaction models, middleware and client–server", "title_ar": "نماذج التفاعل والبرمجيات الوسيطة ونموذج العميل والخادم", "slides": "Lecture slides 8, 10 and 11 · source slides 15–28"}, {"id": 33, "part_no": 3, "title_en": "Architectural patterns, SaaS and multi-tenancy", "title_ar": "الأنماط المعمارية والبرمجيات كخدمة وتعدد المستأجرين", "slides": "Lecture slides 12 and 14–17 · source slides 29–66"}]}, {"id": 4, "number": 4, "chapter": "Ch20", "title_en": "Systems of Systems", "title_ar": "أنظمة الأنظمة", "assignment_en": "Assignment 9", "assignment_ar": "الواجب 9", "starts_at": "2026-11-19T15:00:00+03:00", "seats": [{"id": 41, "part_no": 1, "title_en": "Characteristics, complexity and classification", "title_ar": "الخصائص والتعقيد والتصنيف", "slides": "Lecture slides 4–7 · source slides 3–26"}, {"id": 42, "part_no": 2, "title_en": "Engineering, interfaces, deployment and testing", "title_ar": "الهندسة والواجهات والنشر والاختبار", "slides": "Lecture slides 9–12 · source slides 27–43"}, {"id": 43, "part_no": 3, "title_en": "Architecture principles and the three patterns", "title_ar": "مبادئ المعمارية والأنماط الثلاثة", "slides": "Lecture slides 14–17 · source slides 44–63"}]}, {"id": 5, "number": 5, "chapter": "Testing", "title_en": "Test cases and code coverage", "title_ar": "حالات الاختبار وتغطية الشيفرة", "assignment_en": "Coverage step, Assignments 3–9", "assignment_ar": "خطوة التغطية في الواجبات 3–9", "starts_at": "2026-11-26T15:00:00+03:00", "seats": [{"id": 51, "part_no": 1, "title_en": "Testing strategies and levels", "title_ar": "استراتيجيات الاختبار ومستوياته", "slides": "Study guide section 1 · Sommerville 8.1–8.4"}, {"id": 52, "part_no": 2, "title_en": "Writing a test case as evidence", "title_ar": "كتابة حالة الاختبار دليلًا", "slides": "Study guide section 2"}, {"id": 53, "part_no": 3, "title_en": "Coverage measures, tools and the worked example", "title_ar": "مقاييس التغطية وأدواتها والمثال المحلول", "slides": "Study guide sections 3–5"}]}], ADMIN='arnoor@kau.edu.sa', KEY='flip-admin-token';
+var $=function(s){return document.querySelector(s);}, H=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var token=null;try{token=sessionStorage.getItem(KEY);}catch(e){}
+var seatName={};LEC.forEach(function(l){l.seats.forEach(function(s){seatName[s.id]='L'+l.number+' · '+l.chapter+' · P'+s.part_no+' · '+s.title_en;});});
+var fmt=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+function note(t,err){var m=$('#adMsg');m.textContent=t;m.className='fl-msg'+(err?' err':'');}
+function call(name,body){return fetch(CFG.url+'/rest/v1/rpc/'+name,{method:'POST',headers:{'apikey':CFG.key,'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body||{})})
+  .then(function(r){return r.json().then(function(j){if(!r.ok){if(r.status===401||/JWT|forbidden/i.test(JSON.stringify(j)))signOut();throw Error(j.message||('http '+r.status));}return j;});});}
+function signOut(){token=null;try{sessionStorage.removeItem(KEY);}catch(e){}$('#adApp').hidden=true;$('#adLogin').hidden=false;}
+$('#adLoginForm').addEventListener('submit',function(e){e.preventDefault();
+  fetch(CFG.url+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':CFG.key,'Content-Type':'application/json'},body:JSON.stringify({email:ADMIN,password:$('#adPass').value})})
+  .then(function(r){return r.json().then(function(j){if(!r.ok||!j.access_token)throw Error('Sign-in failed');return j;});})
+  .then(function(j){token=j.access_token;try{sessionStorage.setItem(KEY,token);}catch(e){}$('#adPass').value='';start();})
+  .catch(function(err){$('#adLoginMsg').textContent=err.message;$('#adLoginMsg').className='fl-msg err';});});
+var rows=[], roster=[];
+function opts(sel,cur){return Object.keys(seatName).map(function(id){return '<option value="'+id+'"'+(+id===cur?' selected':'')+'>'+H(seatName[id])+'</option>';}).join('');}
+function sc(name,val,choices){return '<select data-f="'+name+'">'+['',].concat(choices).map(function(c){return '<option value="'+c+'"'+(String(val==null?'':+val)===String(c)?' selected':'')+'>'+(c===''?'–':c)+'</option>';}).join('')+'</select>';}
+function render(){
+  var byL={};rows.forEach(function(r){(byL[r.lecture]=byL[r.lecture]||[]).push(r);});
+  $('#adList').innerHTML=LEC.map(function(l){var list=byL[l.number]||[];
+    return '<h3>Lecture '+l.number+' · '+H(l.chapter)+' '+H(l.title_en)+' · '+list.length+'/3</h3>'+(list.length?'<div class="table-scroll"><table><thead><tr><th>Part</th><th>Name</th><th>ID</th><th>Email</th><th>Booked</th><th>Accuracy</th><th>Understanding</th><th>Quiz</th><th>Commitment</th><th>Total</th><th>Actions</th></tr></thead><tbody>'
+      +list.map(function(r){return '<tr data-b="'+r.booking_id+'"><td>'+r.part+'</td><td>'+H(r.full_name)+'</td><td dir="ltr">'+H(r.student_id)+'</td><td dir="ltr">'+H(r.email)+'</td><td dir="ltr">'+H(fmt.format(new Date(r.created_at)))+'</td>'
+        +'<td>'+sc('a',r.accuracy,[1,0.5,0])+'</td><td>'+sc('u',r.understanding,[1,0.5,0])+'</td><td>'+sc('q',r.quiz,[0.5,0.25,0])+'</td><td>'+sc('c',r.commitment,[0.5,0.25,0])+'</td><td class="tot"><b>'+(+r.total)+'</b> / 3</td>'
+        +'<td><button type="button" data-act="save">Save</button> <select data-move>'+opts(0,r.seat_id)+'</select><button type="button" data-act="move">Move</button> <button type="button" data-act="cancel">Cancel</button></td></tr>';}).join('')+'</tbody></table></div>':'<p>No bookings.</p>');}).join('');
+  $('#adStudent').innerHTML=roster.map(function(s){return '<option value="'+H(s.student_id)+'">'+H(s.full_name)+' · '+H(s.student_id)+(s.booked?' (booked)':'')+'</option>';}).join('');
+  $('#adSeat').innerHTML=opts(0,0);
+  $('#adCount').textContent=roster.length+' students in the roster · '+rows.length+' bookings';
+}
+function refresh(){return Promise.all([call('admin_bookings'),call('admin_roster')]).then(function(a){rows=a[0];roster=a[1];render();}).catch(function(e){note(e.message,true);});}
+function start(){$('#adLogin').hidden=true;$('#adApp').hidden=false;refresh();}
+$('#adList').addEventListener('change',function(e){var tr=e.target.closest('tr[data-b]');if(!tr||!e.target.dataset.f)return;var t=0;tr.querySelectorAll('select[data-f]').forEach(function(s){t+=+(s.value||0);});tr.querySelector('.tot').innerHTML='<b>'+t+'</b> / 3';});
+$('#adList').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;var tr=b.closest('tr');var id=+tr.dataset.b;var act=b.dataset.act;
+  var v=function(f){var x=tr.querySelector('select[data-f="'+f+'"]').value;return x===''?null:+x;};
+  var p=act==='save'?call('admin_score',{p_booking_id:id,p_accuracy:v('a'),p_understanding:v('u'),p_quiz:v('q'),p_commitment:v('c')})
+       :act==='move'?call('admin_move',{p_booking_id:id,p_seat_id:+tr.querySelector('select[data-move]').value})
+       :(confirmCancel(tr)?call('admin_cancel',{p_booking_id:id}):Promise.resolve({ok:false,error:'not confirmed'}));
+  p.then(function(r){note(r.ok?'Saved.':('Not done: '+(r.error||'')),!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
+function confirmCancel(tr){if(tr.dataset.sure==='1')return true;tr.dataset.sure='1';note('Press Cancel again to confirm.',true);return false;}
+$('#adAddForm').addEventListener('submit',function(e){e.preventDefault();call('admin_add',{p_student_id:$('#adStudent').value,p_seat_id:+$('#adSeat').value})
+  .then(function(r){note(r.ok?('Added. Cancellation code for the student: '+r.code):('Not added: '+r.error),!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
+$('#adRosterForm').addEventListener('submit',function(e){e.preventDefault();call('admin_roster_add',{p_student_id:$('#adRId').value,p_full_name:$('#adRName').value,p_email:$('#adRMail').value})
+  .then(function(r){note(r.ok?'Student saved in the roster.':'Not saved.',!r.ok);e.target.reset();return refresh();}).catch(function(e){note(e.message,true);});});
+$('#adCsv').addEventListener('click',function(){var head=['student_id','full_name','lecture','part','accuracy','understanding','quiz','commitment','total'];
+  var q=function(x){x=x==null?'':String(x);return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x;};
+  var csv='﻿'+head.join(',')+'\n'+rows.map(function(r){return [r.student_id,r.full_name,r.lecture,r.part,r.accuracy,r.understanding,r.quiz,r.commitment,+r.total].map(q).join(',');}).join('\n')+'\n';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='CPIT455-flipped-grades.csv';document.body.appendChild(a);a.click();a.remove();});
+$('#adPwForm').addEventListener('submit',function(e){e.preventDefault();fetch(CFG.url+'/auth/v1/user',{method:'PUT',headers:{'apikey':CFG.key,'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({password:$('#adNewPw').value})})
+  .then(function(r){note(r.ok?'Password changed.':'Password not changed (at least 10 characters).',!r.ok);e.target.reset();});});
+$('#adPurge').addEventListener('click',function(){var c=$('#adPurgeText').value;call('admin_purge',{p_confirm:c}).then(function(r){note(r.ok?'All bookings and the roster were deleted.':'Type DELETE to confirm.',!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
+$('#adOut').addEventListener('click',signOut);
+if(!CFG.url){$('#adLoginMsg').textContent='The booking service is not configured yet.';}
+else if(token){start();}
+})();
+</script></body></html>
