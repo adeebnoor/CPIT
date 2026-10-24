@@ -122,7 +122,12 @@ var fmtAr=new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{timeZone:'Asia/R
 var fmtEn=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
 function when(iso,h){var d=new Date(new Date(iso).getTime()-h*3600000);return '<span lang="ar">'+H(fmtAr.format(d))+'</span><span class="en" lang="en" dir="ltr">'+H(fmtEn.format(d))+'</span>';}
 function msg(code){var m=MSG[code]||MSG.network;return '<span lang="ar">'+H(m[0])+'</span><span class="en" lang="en" dir="ltr">'+H(m[1])+'</span>';}
-function api(body){return fetch(CFG.api,{method:'POST',body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw Error('http '+r.status);return r.json();});}
+function once(body){return fetch(CFG.api,{method:'POST',body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw Error('http '+r.status);return r.json();});}
+/* Google sometimes returns a page instead of the reply. The same request is sent again (bookings carry the code, so a repeat confirms the same booking). */
+function api(body,valid,tries){tries=tries||4;return once(body).then(function(r){if(valid(r))return r;throw Error('unexpected reply');}).catch(function(e){if(tries<=1)throw e;return new Promise(function(ok){setTimeout(ok,700);}).then(function(){return api(body,valid,tries-1);});});}
+function newCode(){var a='ABCDEFGHJKMNPQRSTUVWXYZ23456789',b=new Uint8Array(6),s='';crypto.getRandomValues(b);for(var i=0;i<6;i++)s+=a.charAt(b[i]%a.length);return s;}
+var isStatus=function(r){return Array.isArray(r)&&r.every(function(x){return typeof x.seat_id==='number';});};
+var isAnswer=function(r){return r&&typeof r.ok==='boolean'&&(r.ok?true:typeof r.error==='string');};
 var status={}, chosen=null;
 function render(){
   var html=LEC.map(function(l){
@@ -141,7 +146,7 @@ function render(){
 }
 function load(){
   if(!CFG.api){LEC.forEach(function(l){l.seats.forEach(function(s){status[s.id]={booked:false,closed:true};});});render();$('#flStatus').innerHTML=msg('not_open');return;}
-  api({action:'status'}).then(function(rows){status={};rows.forEach(function(r){status[r.seat_id]={booked:r.booked,closed:r.closed};});render();$('#flStatus').innerHTML='';})
+  api({action:'status'},isStatus).then(function(rows){status={};rows.forEach(function(r){status[r.seat_id]={booked:r.booked,closed:r.closed};});render();$('#flStatus').innerHTML='';})
   .catch(function(){render();$('#flStatus').innerHTML=msg('network');});
 }
 document.addEventListener('click',function(e){
@@ -155,7 +160,8 @@ $('#flBookForm').addEventListener('submit',function(e){
   if(!/^[0-9]{7}$/.test(sid)){out.className='fl-msg err';out.innerHTML='<span lang="ar">الرقم الجامعي 7 أرقام.</span><span class="en" lang="en" dir="ltr">The student ID has 7 digits.</span>';return;}
   if(!$('#flAgree').checked){out.className='fl-msg err';out.innerHTML='<span lang="ar">أكّد أنك قرأت الروبريك.</span><span class="en" lang="en" dir="ltr">Confirm that you have read the rubric.</span>';return;}
   var btn=e.submitter||$('#flBookForm button');btn.disabled=true;out.className='fl-msg';out.textContent='…';
-  api({action:'book',student_id:sid,email:mail,full_name:name,seat_id:chosen}).then(function(r){
+  var code=newCode();
+  api({action:'book',student_id:sid,email:mail,full_name:name,seat_id:chosen,code:code},function(r){return isAnswer(r)&&(!r.ok||r.code===code);}).then(function(r){
     if(!r.ok){out.className='fl-msg err';out.innerHTML=msg(r.error);load();return;}
     $('#flBook').hidden=true;$('#flBookForm').reset();
     $('#flDoneText').innerHTML='المحاضرة '+r.lecture+' · '+H(r.chapter)+' · الجزء '+r.part+': '+H(r.title_ar)+'<span class="en" lang="en" dir="ltr">Lecture '+r.lecture+' · Part '+r.part+': '+H(r.title_en)+' · '+H(r.slides)+'</span>'
@@ -167,7 +173,7 @@ $('#flCancelBook').addEventListener('click',function(){$('#flBook').hidden=true;
 $('#flCancelForm').addEventListener('submit',function(e){
   e.preventDefault();var out=$('#flCancelMsg');var sid=$('#flCSid').value.trim(),code=$('#flCCode').value.trim();
   var btn=$('#flCancelForm button');btn.disabled=true;out.className='fl-msg';out.textContent='…';
-  api({action:'cancel',student_id:sid,code:code}).then(function(r){
+  api({action:'cancel',student_id:sid,code:code},isAnswer).then(function(r){
     if(!r.ok){out.className='fl-msg err';out.innerHTML=msg(r.error);return;}
     out.className='fl-msg';out.innerHTML='<span lang="ar">أُلغي حجزك، والمقعد متاح الآن لغيرك.</span><span class="en" lang="en" dir="ltr">Your booking is cancelled and the seat is available again.</span>';$('#flCancelForm').reset();load();
   }).catch(function(){out.className='fl-msg err';out.innerHTML=msg('network');}).then(function(){btn.disabled=false;});

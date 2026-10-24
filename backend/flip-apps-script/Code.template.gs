@@ -51,7 +51,7 @@ function doGet(e) {
   var p = (e && e.parameter) || {};
   if (p.view === 'admin') return adminPage_();
   if (p.action === 'status') return json_(status_());
-  return json_({ ok: true });
+  return json_({ ok: false, error: 'bad_request' });
 }
 
 function doPost(e) {
@@ -82,11 +82,20 @@ function book_(b) {
   var starts = Date.parse(lec.starts_at);
   if (Date.now() >= starts - CLOSE_HOURS * 3600000) return { ok: false, error: 'closed' };
   var bookings = table_('bookings');
-  if (bookings.some(function (x) { return x.student_id === sid; })) return { ok: false, error: 'already' };
+  // The page creates the code and sends it again if a reply is lost; the same request then confirms the same booking.
+  var code = /^[A-HJ-NP-Z2-9]{6}$/.test(String(b.code || '').toUpperCase()) ? String(b.code).toUpperCase() : newCode_();
+  var mine = bookings.filter(function (x) { return x.student_id === sid; })[0];
+  if (mine && mine.seat_id === seatId && hash_(mine.cancel_salt, code) === mine.cancel_code_hash)
+    return confirmation_(code, lec, seat, starts);
+  if (mine) return { ok: false, error: 'already' };
   if (bookings.some(function (x) { return x.seat_id === seatId; })) return { ok: false, error: 'taken' };
-  var code = newCode_(), salt = Utilities.getUuid();
+  var salt = Utilities.getUuid();
   appendRow_('bookings', { seat_id: seatId, student_id: sid, entered_name: String(b.full_name || '').trim().slice(0, 120),
     cancel_salt: salt, cancel_code_hash: hash_(salt, code), cancel_attempts: '0', created_at: new Date().toISOString() });
+  return confirmation_(code, lec, seat, starts);
+}
+
+function confirmation_(code, lec, seat, starts) {
   return { ok: true, code: code, lecture: +lec.number, chapter: lec.chapter, part: +seat.part_no, title_en: seat.title_en,
            title_ar: seat.title_ar, slides: seat.slides, starts_at: lec.starts_at,
            draft_due: new Date(starts - DRAFT_HOURS * 3600000).toISOString() };
@@ -96,7 +105,8 @@ function cancel_(b) {
   var sid = String(b.student_id || '').trim(), code = String(b.code || '').trim().toUpperCase();
   var sh = sheet_('bookings'), rows = table_('bookings'), i = -1;
   rows.forEach(function (x, k) { if (x.student_id === sid) i = k; });
-  if (i < 0) return { ok: false, error: 'bad_code' };
+  var done = 'cancelled:' + sid + ':' + hash_('', code);
+  if (i < 0) return CacheService.getScriptCache().get(done) ? { ok: true } : { ok: false, error: 'bad_code' };
   var row = rows[i], seat = table_('seats').filter(function (s) { return s.id === row.seat_id; })[0];
   var lec = byId_(table_('lectures'))[seat.lecture_id];
   if (Date.now() >= Date.parse(lec.starts_at) - CLOSE_HOURS * 3600000) return { ok: false, error: 'closed' };
@@ -106,6 +116,7 @@ function cancel_(b) {
     return { ok: false, error: 'bad_code' };
   }
   sh.deleteRow(i + 2);
+  CacheService.getScriptCache().put(done, '1', 600);  // a repeated request after a lost reply also gets "cancelled"
   return { ok: true };
 }
 
