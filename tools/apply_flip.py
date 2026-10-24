@@ -4,14 +4,12 @@
   (72 h before), draft deadline (48 h before), "X of 3 left" and three seats (part, slides, available / booked /
   closed). Booking form (student ID, full name, university email, rubric checkbox), confirmation with a six-character
   code, and "cancel my booking" (student ID + code). Names and IDs of booked students are never shown.
-- flip-admin.html: sign-in for arnoor@kau.edu.sa; bookings per lecture; move, cancel or add a student (also after
-  registration has closed); the four rubric scores with an automatic total out of 3; CSV export for Blackboard;
-  roster entry; deletion of all bookings and the roster after final grades.
-- supabase/flip/seed.sql: lectures and seats from curriculum/flip-config.json.
+- backend/flip-apps-script/Code.gs: the Google Apps Script backend (bound to a private Google Sheet), generated from
+  Code.template.gs with the lectures and seats of curriculum/flip-config.json. It enforces the booking rules on the
+  server and serves the instructor's admin page (Admin.html) to the signed-in instructor only.
 - iscarb.html: an update card in "This semester" linking to the booking page.
 
-Booking rules are enforced on the server (supabase/flip/schema.sql). The page uses only the project's publishable
-key; no service key and no student data are in the repository.
+No student data and no credentials are in the repository; the roster lives only in the private Sheet.
 """
 from pathlib import Path
 from html import escape as E
@@ -52,6 +50,7 @@ MESSAGES = {
     'no_seat': ('هذا المقعد غير موجود.', 'This seat does not exist.'),
     'network': ('تعذّر الاتصال بخدمة التسجيل، حاول مرة أخرى بعد قليل.', 'The booking service could not be reached. Try again shortly.'),
     'not_open': ('التسجيل لم يُفتح بعد.', 'Registration is not open yet.'),
+    'busy': ('الخدمة مشغولة الآن، حاول مرة أخرى بعد ثوانٍ.', 'The service is busy. Try again in a few seconds.'),
 }
 
 
@@ -123,7 +122,7 @@ var fmtAr=new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{timeZone:'Asia/R
 var fmtEn=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
 function when(iso,h){var d=new Date(new Date(iso).getTime()-h*3600000);return '<span lang="ar">'+H(fmtAr.format(d))+'</span><span class="en" lang="en" dir="ltr">'+H(fmtEn.format(d))+'</span>';}
 function msg(code){var m=MSG[code]||MSG.network;return '<span lang="ar">'+H(m[0])+'</span><span class="en" lang="en" dir="ltr">'+H(m[1])+'</span>';}
-function rpc(name,body){return fetch(CFG.url+'/rest/v1/rpc/'+name,{method:'POST',headers:{'apikey':CFG.key,'Content-Type':'application/json'},body:JSON.stringify(body||{})}).then(function(r){if(!r.ok)throw Error('http '+r.status);return r.json();});}
+function api(body){return fetch(CFG.api,{method:'POST',body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw Error('http '+r.status);return r.json();});}
 var status={}, chosen=null;
 function render(){
   var html=LEC.map(function(l){
@@ -141,8 +140,8 @@ function render(){
   $('#flCards').innerHTML=html;
 }
 function load(){
-  if(!CFG.url||!CFG.key){LEC.forEach(function(l){l.seats.forEach(function(s){status[s.id]={booked:false,closed:true};});});render();$('#flStatus').innerHTML=msg('not_open');return;}
-  rpc('seat_status').then(function(rows){status={};rows.forEach(function(r){status[r.seat_id]={booked:r.booked,closed:r.closed};});render();$('#flStatus').innerHTML='';})
+  if(!CFG.api){LEC.forEach(function(l){l.seats.forEach(function(s){status[s.id]={booked:false,closed:true};});});render();$('#flStatus').innerHTML=msg('not_open');return;}
+  api({action:'status'}).then(function(rows){status={};rows.forEach(function(r){status[r.seat_id]={booked:r.booked,closed:r.closed};});render();$('#flStatus').innerHTML='';})
   .catch(function(){render();$('#flStatus').innerHTML=msg('network');});
 }
 document.addEventListener('click',function(e){
@@ -156,7 +155,7 @@ $('#flBookForm').addEventListener('submit',function(e){
   if(!/^[0-9]{7}$/.test(sid)){out.className='fl-msg err';out.innerHTML='<span lang="ar">الرقم الجامعي 7 أرقام.</span><span class="en" lang="en" dir="ltr">The student ID has 7 digits.</span>';return;}
   if(!$('#flAgree').checked){out.className='fl-msg err';out.innerHTML='<span lang="ar">أكّد أنك قرأت الروبريك.</span><span class="en" lang="en" dir="ltr">Confirm that you have read the rubric.</span>';return;}
   var btn=e.submitter||$('#flBookForm button');btn.disabled=true;out.className='fl-msg';out.textContent='…';
-  rpc('book_seat',{p_student_id:sid,p_email:mail,p_full_name:name,p_seat_id:chosen}).then(function(r){
+  api({action:'book',student_id:sid,email:mail,full_name:name,seat_id:chosen}).then(function(r){
     if(!r.ok){out.className='fl-msg err';out.innerHTML=msg(r.error);load();return;}
     $('#flBook').hidden=true;$('#flBookForm').reset();
     $('#flDoneText').innerHTML='المحاضرة '+r.lecture+' · '+H(r.chapter)+' · الجزء '+r.part+': '+H(r.title_ar)+'<span class="en" lang="en" dir="ltr">Lecture '+r.lecture+' · Part '+r.part+': '+H(r.title_en)+' · '+H(r.slides)+'</span>'
@@ -168,7 +167,7 @@ $('#flCancelBook').addEventListener('click',function(){$('#flBook').hidden=true;
 $('#flCancelForm').addEventListener('submit',function(e){
   e.preventDefault();var out=$('#flCancelMsg');var sid=$('#flCSid').value.trim(),code=$('#flCCode').value.trim();
   var btn=$('#flCancelForm button');btn.disabled=true;out.className='fl-msg';out.textContent='…';
-  rpc('cancel_booking',{p_student_id:sid,p_code:code}).then(function(r){
+  api({action:'cancel',student_id:sid,code:code}).then(function(r){
     if(!r.ok){out.className='fl-msg err';out.innerHTML=msg(r.error);return;}
     out.className='fl-msg';out.innerHTML='<span lang="ar">أُلغي حجزك، والمقعد متاح الآن لغيرك.</span><span class="en" lang="en" dir="ltr">Your booking is cancelled and the seat is available again.</span>';$('#flCancelForm').reset();load();
   }).catch(function(){out.className='fl-msg err';out.innerHTML=msg('network');}).then(function(){btn.disabled=false;});
@@ -221,7 +220,7 @@ def build_student():
 <div class="fl-msg" id="flCancelMsg" aria-live="polite"></div></form>
 <p><a href="iscarb.html">العودة إلى مسار التعلم · Back to the learning path</a></p></section>
 </main>'''
-    js = (STUDENT_JS.replace('__CFG__', json.dumps({'url': CFG['supabase_url'], 'key': CFG['publishable_key']}))
+    js = (STUDENT_JS.replace('__CFG__', json.dumps({'api': CFG['api_url']}))
           .replace('__MSG__', json.dumps(MESSAGES, ensure_ascii=False))
           .replace('__LEC__', json.dumps(public_lectures(), ensure_ascii=False)))
     html = (page_head('المحاضرات المقلوبة · iSCARB CPIT-455', 'Book a seat to explain part of a flipped lecture in CPIT-455.')
@@ -230,105 +229,10 @@ def build_student():
     (ROOT / 'flip.html').write_text(html, encoding='utf-8')
 
 
-ADMIN_JS = r'''<script>
-(function(){
-var CFG=__CFG__, LEC=__LEC__, ADMIN='arnoor@kau.edu.sa', KEY='flip-admin-token';
-var $=function(s){return document.querySelector(s);}, H=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-var token=null;try{token=sessionStorage.getItem(KEY);}catch(e){}
-var seatName={};LEC.forEach(function(l){l.seats.forEach(function(s){seatName[s.id]='L'+l.number+' · '+l.chapter+' · P'+s.part_no+' · '+s.title_en;});});
-var fmt=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-function note(t,err){var m=$('#adMsg');m.textContent=t;m.className='fl-msg'+(err?' err':'');}
-function call(name,body){return fetch(CFG.url+'/rest/v1/rpc/'+name,{method:'POST',headers:{'apikey':CFG.key,'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body||{})})
-  .then(function(r){return r.json().then(function(j){if(!r.ok){if(r.status===401||/JWT|forbidden/i.test(JSON.stringify(j)))signOut();throw Error(j.message||('http '+r.status));}return j;});});}
-function signOut(){token=null;try{sessionStorage.removeItem(KEY);}catch(e){}$('#adApp').hidden=true;$('#adLogin').hidden=false;}
-$('#adLoginForm').addEventListener('submit',function(e){e.preventDefault();
-  fetch(CFG.url+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':CFG.key,'Content-Type':'application/json'},body:JSON.stringify({email:ADMIN,password:$('#adPass').value})})
-  .then(function(r){return r.json().then(function(j){if(!r.ok||!j.access_token)throw Error('Sign-in failed');return j;});})
-  .then(function(j){token=j.access_token;try{sessionStorage.setItem(KEY,token);}catch(e){}$('#adPass').value='';start();})
-  .catch(function(err){$('#adLoginMsg').textContent=err.message;$('#adLoginMsg').className='fl-msg err';});});
-var rows=[], roster=[];
-function opts(sel,cur){return Object.keys(seatName).map(function(id){return '<option value="'+id+'"'+(+id===cur?' selected':'')+'>'+H(seatName[id])+'</option>';}).join('');}
-function sc(name,val,choices){return '<select data-f="'+name+'">'+['',].concat(choices).map(function(c){return '<option value="'+c+'"'+(String(val==null?'':+val)===String(c)?' selected':'')+'>'+(c===''?'–':c)+'</option>';}).join('')+'</select>';}
-function render(){
-  var byL={};rows.forEach(function(r){(byL[r.lecture]=byL[r.lecture]||[]).push(r);});
-  $('#adList').innerHTML=LEC.map(function(l){var list=byL[l.number]||[];
-    return '<h3>Lecture '+l.number+' · '+H(l.chapter)+' '+H(l.title_en)+' · '+list.length+'/3</h3>'+(list.length?'<div class="table-scroll"><table><thead><tr><th>Part</th><th>Name</th><th>ID</th><th>Email</th><th>Booked</th><th>Accuracy</th><th>Understanding</th><th>Quiz</th><th>Commitment</th><th>Total</th><th>Actions</th></tr></thead><tbody>'
-      +list.map(function(r){return '<tr data-b="'+r.booking_id+'"><td>'+r.part+'</td><td>'+H(r.full_name)+'</td><td dir="ltr">'+H(r.student_id)+'</td><td dir="ltr">'+H(r.email)+'</td><td dir="ltr">'+H(fmt.format(new Date(r.created_at)))+'</td>'
-        +'<td>'+sc('a',r.accuracy,[1,0.5,0])+'</td><td>'+sc('u',r.understanding,[1,0.5,0])+'</td><td>'+sc('q',r.quiz,[0.5,0.25,0])+'</td><td>'+sc('c',r.commitment,[0.5,0.25,0])+'</td><td class="tot"><b>'+(+r.total)+'</b> / 3</td>'
-        +'<td><button type="button" data-act="save">Save</button> <select data-move>'+opts(0,r.seat_id)+'</select><button type="button" data-act="move">Move</button> <button type="button" data-act="cancel">Cancel</button></td></tr>';}).join('')+'</tbody></table></div>':'<p>No bookings.</p>');}).join('');
-  $('#adStudent').innerHTML=roster.map(function(s){return '<option value="'+H(s.student_id)+'">'+H(s.full_name)+' · '+H(s.student_id)+(s.booked?' (booked)':'')+'</option>';}).join('');
-  $('#adSeat').innerHTML=opts(0,0);
-  $('#adCount').textContent=roster.length+' students in the roster · '+rows.length+' bookings';
-}
-function refresh(){return Promise.all([call('admin_bookings'),call('admin_roster')]).then(function(a){rows=a[0];roster=a[1];render();}).catch(function(e){note(e.message,true);});}
-function start(){$('#adLogin').hidden=true;$('#adApp').hidden=false;refresh();}
-$('#adList').addEventListener('change',function(e){var tr=e.target.closest('tr[data-b]');if(!tr||!e.target.dataset.f)return;var t=0;tr.querySelectorAll('select[data-f]').forEach(function(s){t+=+(s.value||0);});tr.querySelector('.tot').innerHTML='<b>'+t+'</b> / 3';});
-$('#adList').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;var tr=b.closest('tr');var id=+tr.dataset.b;var act=b.dataset.act;
-  var v=function(f){var x=tr.querySelector('select[data-f="'+f+'"]').value;return x===''?null:+x;};
-  var p=act==='save'?call('admin_score',{p_booking_id:id,p_accuracy:v('a'),p_understanding:v('u'),p_quiz:v('q'),p_commitment:v('c')})
-       :act==='move'?call('admin_move',{p_booking_id:id,p_seat_id:+tr.querySelector('select[data-move]').value})
-       :(confirmCancel(tr)?call('admin_cancel',{p_booking_id:id}):Promise.resolve({ok:false,error:'not confirmed'}));
-  p.then(function(r){note(r.ok?'Saved.':('Not done: '+(r.error||'')),!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
-function confirmCancel(tr){if(tr.dataset.sure==='1')return true;tr.dataset.sure='1';note('Press Cancel again to confirm.',true);return false;}
-$('#adAddForm').addEventListener('submit',function(e){e.preventDefault();call('admin_add',{p_student_id:$('#adStudent').value,p_seat_id:+$('#adSeat').value})
-  .then(function(r){note(r.ok?('Added. Cancellation code for the student: '+r.code):('Not added: '+r.error),!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
-$('#adRosterForm').addEventListener('submit',function(e){e.preventDefault();call('admin_roster_add',{p_student_id:$('#adRId').value,p_full_name:$('#adRName').value,p_email:$('#adRMail').value})
-  .then(function(r){note(r.ok?'Student saved in the roster.':'Not saved.',!r.ok);e.target.reset();return refresh();}).catch(function(e){note(e.message,true);});});
-$('#adCsv').addEventListener('click',function(){var head=['student_id','full_name','lecture','part','accuracy','understanding','quiz','commitment','total'];
-  var q=function(x){x=x==null?'':String(x);return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x;};
-  var csv='﻿'+head.join(',')+'\n'+rows.map(function(r){return [r.student_id,r.full_name,r.lecture,r.part,r.accuracy,r.understanding,r.quiz,r.commitment,+r.total].map(q).join(',');}).join('\n')+'\n';
-  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='CPIT455-flipped-grades.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#adPwForm').addEventListener('submit',function(e){e.preventDefault();fetch(CFG.url+'/auth/v1/user',{method:'PUT',headers:{'apikey':CFG.key,'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({password:$('#adNewPw').value})})
-  .then(function(r){note(r.ok?'Password changed.':'Password not changed (at least 10 characters).',!r.ok);e.target.reset();});});
-$('#adPurge').addEventListener('click',function(){var c=$('#adPurgeText').value;call('admin_purge',{p_confirm:c}).then(function(r){note(r.ok?'All bookings and the roster were deleted.':'Type DELETE to confirm.',!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
-$('#adOut').addEventListener('click',signOut);
-if(!CFG.url){$('#adLoginMsg').textContent='The booking service is not configured yet.';}
-else if(token){start();}
-})();
-</script>'''
-
-
-def build_admin():
-    main = '''<main class="wrap fl" id="main" lang="en" dir="ltr"><div class="document-heading"><p class="ey">CPIT-455 · Flipped lectures · Instructor</p><h1>Bookings and rubric scores</h1>
-<p class="intro">Signed-in instructor only (arnoor@kau.edu.sa). Access is checked on the server.</p></div>
-<section class="fl-panel" id="adLogin"><form class="fl-form" id="adLoginForm"><label>Email<input type="email" value="arnoor@kau.edu.sa" readonly></label>
-<label>Password<input type="password" id="adPass" required autocomplete="current-password"></label><button type="submit">Sign in</button><div class="fl-msg" id="adLoginMsg" aria-live="polite"></div></form></section>
-<div id="adApp" hidden>
-<div class="fl-msg" id="adMsg" aria-live="polite"></div><p id="adCount"></p>
-<section class="section"><h2>Bookings</h2><div id="adList"></div>
-<p><button type="button" class="fl-btn" id="adCsv">Export CSV for Blackboard</button></p></section>
-<section class="section"><h2>Add a student to a seat</h2><p>Also works after registration has closed.</p>
-<form class="fl-form" id="adAddForm"><label>Student<select id="adStudent"></select></label><label>Seat<select id="adSeat"></select></label><button type="submit">Add</button></form></section>
-<section class="section"><h2>Add or correct a student in the roster</h2>
-<form class="fl-form" id="adRosterForm"><label>Student ID (7 digits)<input type="text" id="adRId" required pattern="[0-9]{7}" inputmode="numeric"></label><label>Full name<input type="text" id="adRName" required></label><label>University email<input type="email" id="adRMail" required></label><button type="submit">Save</button></form></section>
-<section class="section"><h2>Account</h2><form class="fl-form" id="adPwForm"><label>New password (at least 10 characters)<input type="password" id="adNewPw" minlength="10" required autocomplete="new-password"></label><button type="submit">Change password</button></form>
-<p><button type="button" class="fl-btn ghost" id="adOut">Sign out</button></p></section>
-<section class="section"><h2>After final grades</h2><p>Deletes all bookings and the roster. Type DELETE, then press the button.</p>
-<p><input type="text" id="adPurgeText" dir="ltr"> <button type="button" class="fl-btn ghost" id="adPurge">Delete all booking data</button></p></section>
-</div></main>'''
-    js = (ADMIN_JS.replace('__CFG__', json.dumps({'url': CFG['supabase_url'], 'key': CFG['publishable_key']}))
-          .replace('__LEC__', json.dumps(public_lectures(), ensure_ascii=False)))
-    html = (page_head('Flipped lectures · instructor · iSCARB CPIT-455', 'Instructor page for flipped-lecture bookings.', '<meta name="robots" content="noindex,nofollow">')
-            .replace('lang="ar" dir="rtl"', 'lang="en" dir="ltr"', 1)
-            + '<body class="course-page" id="top"><a class="skip" href="#main">Skip to content</a>' + header('', '') + '\n'
-            + main + footer('') + js + '</body></html>\n')
-    (ROOT / 'flip-admin.html').write_text(html, encoding='utf-8')
-
-
-def seed_sql():
-    q = lambda s: "'" + str(s).replace("'", "''") + "'"
-    out = ['-- Generated by tools/apply_flip.py from curriculum/flip-config.json. Lectures and seats only; no student data.']
-    for l in CFG['lectures']:
-        out.append('insert into public.lectures (id, number, chapter, title_en, title_ar, assignment_en, assignment_ar, starts_at) values '
-                   f"({l['id']}, {l['number']}, {q(l['chapter'])}, {q(l['title_en'])}, {q(l['title_ar'])}, {q(l['assignment_en'])}, {q(l['assignment_ar'])}, {q(l['starts_at'])}) "
-                   'on conflict (id) do update set number = excluded.number, chapter = excluded.chapter, title_en = excluded.title_en, title_ar = excluded.title_ar, '
-                   'assignment_en = excluded.assignment_en, assignment_ar = excluded.assignment_ar, starts_at = excluded.starts_at;')
-        for s in l['seats']:
-            out.append('insert into public.seats (id, lecture_id, part_no, title_en, title_ar, slides) values '
-                       f"({s['id']}, {l['id']}, {s['part_no']}, {q(s['title_en'])}, {q(s['title_ar'])}, {q(s['slides'])}) "
-                       'on conflict (id) do update set lecture_id = excluded.lecture_id, part_no = excluded.part_no, title_en = excluded.title_en, '
-                       'title_ar = excluded.title_ar, slides = excluded.slides;')
-    (ROOT / 'supabase/flip/seed.sql').write_text('\n'.join(out) + '\n', encoding='utf-8')
+def build_backend():
+    t = (ROOT / 'backend/flip-apps-script/Code.template.gs').read_text(encoding='utf-8')
+    assert t.count('__LECTURES__') == 1
+    (ROOT / 'backend/flip-apps-script/Code.gs').write_text(t.replace('__LECTURES__', json.dumps(public_lectures(), ensure_ascii=False, indent=1)), encoding='utf-8')
 
 
 HUB_MARK = '<!-- flip:card -->'
@@ -354,8 +258,8 @@ def patch_hub():
 
 def register():
     edits = [
-        ('tools/build_public_site.py', "'national-awareness.html',", "'national-awareness.html','flip.html','flip-admin.html',"),
-        ('tools/audit_classroom.py', '"national-awareness.html", ', '"national-awareness.html", "flip.html", "flip-admin.html", '),
+        ('tools/build_public_site.py', "'national-awareness.html',", "'national-awareness.html','flip.html',"),
+        ('tools/audit_classroom.py', '"national-awareness.html", ', '"national-awareness.html", "flip.html", '),
         ('tools/check-site-design.cjs', "'national-awareness.html',", "'national-awareness.html','flip.html',"),
     ]
     for rel, old, new in edits:
@@ -368,8 +272,7 @@ def register():
 
 if __name__ == '__main__':
     build_student()
-    build_admin()
-    seed_sql()
+    build_backend()
     patch_hub()
     register()
-    print('Flipped lectures applied: flip.html, flip-admin.html, supabase/flip/seed.sql, learning-path card')
+    print('Flipped lectures applied: flip.html, backend/flip-apps-script/Code.gs, learning-path card')

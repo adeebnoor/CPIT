@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en"><head><base target="_top"><meta charset="utf-8">
+<style>
+:root{--bg:#f6f8f7;--panel:#fff;--ink:#13221d;--muted:#5b6b65;--line:#d5dfdb;--accent:#006b62}
+@media (prefers-color-scheme:dark){:root{--bg:#10191a;--panel:#16232a;--ink:#e6eeeb;--muted:#9fb1ab;--line:#2c3d42;--accent:#7fd8c8}}
+body{margin:0;padding:16px;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,"Noto Sans Arabic",sans-serif}
+main{max-width:1200px;margin:0 auto;display:grid;gap:16px}
+h1{margin:0}h2{margin:0 0 8px}section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+button,select,input{font:inherit;border-radius:8px;border:1px solid var(--line);padding:6px 10px;background:var(--bg);color:var(--ink)}
+button{border-color:var(--accent);cursor:pointer}button.primary{background:var(--accent);color:var(--bg)}
+#msg{padding:8px 12px;border-radius:8px;border:1px solid var(--line)}#msg:empty{display:none}
+form{display:flex;flex-wrap:wrap;gap:8px;align-items:end}label{display:grid;gap:2px}
+</style></head><body><main>
+<h1>Flipped lectures · bookings and rubric scores</h1>
+<p id="count"></p><div id="msg" aria-live="polite"></div>
+<section><h2>Bookings</h2><div id="list"></div><p><button class="primary" id="csv" type="button">Export CSV for Blackboard</button></p></section>
+<section><h2>Add a student to a seat</h2><p>Also works after registration has closed.</p>
+<form id="add"><label>Student<select id="addStudent"></select></label><label>Seat<select id="addSeat"></select></label><button class="primary" type="submit">Add</button></form></section>
+<section><h2>Add or correct a student in the roster</h2>
+<form id="roster"><label>Student ID<input id="rId" required pattern="[0-9]{7}" inputmode="numeric"></label><label>Full name<input id="rName" required></label><label>University email<input id="rMail" type="email" required></label><button class="primary" type="submit">Save</button></form></section>
+<section><h2>After final grades</h2><p>Deletes all bookings and the roster. Type DELETE, then press the button.</p><input id="purgeText"> <button id="purge" type="button">Delete all booking data</button></section>
+</main>
+<script>
+var data=null,seatName={};
+function H(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function note(t,err){var m=document.getElementById('msg');m.textContent=t;m.style.borderColor=err?'#b4462f':'';}
+function run(fn){var args=[].slice.call(arguments,1);return new Promise(function(ok,no){google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn].apply(null,args);});}
+function opts(cur){return Object.keys(seatName).map(function(id){return '<option value="'+id+'"'+(id===String(cur)?' selected':'')+'>'+H(seatName[id])+'</option>';}).join('');}
+function sc(f,val,choices){return '<select data-f="'+f+'"><option value="">–</option>'+choices.map(function(c){return '<option value="'+c+'"'+(val!==''&&+val===c?' selected':'')+'>'+c+'</option>';}).join('')+'</select>';}
+function render(){
+  seatName={};data.lectures.forEach(function(l){l.seats.forEach(function(s){seatName[s.id]='L'+l.number+' · '+l.chapter+' · P'+s.part_no+' · '+s.title_en;});});
+  var by={};data.bookings.forEach(function(b){(by[b.lecture]=by[b.lecture]||[]).push(b);});
+  document.getElementById('list').innerHTML=data.lectures.map(function(l){var list=by[l.number]||[];
+    return '<h3>Lecture '+l.number+' · '+H(l.chapter)+' '+H(l.title_en)+' · '+list.length+'/3</h3>'+(list.length?'<div class="scroll"><table><thead><tr><th>Part</th><th>Name</th><th>ID</th><th>Email</th><th>Booked</th><th>Accuracy</th><th>Understanding</th><th>Quiz</th><th>Commitment</th><th>Total</th><th>Actions</th></tr></thead><tbody>'
+    +list.map(function(b){return '<tr data-s="'+H(b.student_id)+'"><td>'+b.part+'</td><td>'+H(b.full_name)+'</td><td>'+H(b.student_id)+'</td><td>'+H(b.email)+'</td><td>'+H(String(b.created_at).slice(0,16).replace('T',' '))+'</td>'
+      +'<td>'+sc('a',b.accuracy,[1,0.5,0])+'</td><td>'+sc('u',b.understanding,[1,0.5,0])+'</td><td>'+sc('q',b.quiz,[0.5,0.25,0])+'</td><td>'+sc('c',b.commitment,[0.5,0.25,0])+'</td><td class="tot"><b>'+b.total+'</b> / 3</td>'
+      +'<td><button data-act="save" type="button">Save</button> <select data-move>'+opts(b.seat_id)+'</select> <button data-act="move" type="button">Move</button> <button data-act="cancel" type="button">Cancel</button></td></tr>';}).join('')+'</tbody></table></div>':'<p>No bookings.</p>');}).join('');
+  document.getElementById('addStudent').innerHTML=data.roster.map(function(r){return '<option value="'+H(r.student_id)+'">'+H(r.full_name)+' · '+H(r.student_id)+(r.booked?' (booked)':'')+'</option>';}).join('');
+  document.getElementById('addSeat').innerHTML=opts('');
+  document.getElementById('count').textContent=data.roster.length+' students in the roster · '+data.bookings.length+' bookings';
+}
+function refresh(){return run('adminData').then(function(d){data=d;render();}).catch(function(e){note(e.message,true);});}
+document.getElementById('list').addEventListener('change',function(e){var tr=e.target.closest('tr[data-s]');if(!tr||!e.target.dataset.f)return;var t=0;tr.querySelectorAll('select[data-f]').forEach(function(s){t+=+(s.value||0);});tr.querySelector('.tot').innerHTML='<b>'+t+'</b> / 3';});
+document.getElementById('list').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;var tr=b.closest('tr'),sid=tr.dataset.s,act=b.dataset.act;
+  var v=function(f){var x=tr.querySelector('select[data-f="'+f+'"]').value;return x===''?null:+x;};
+  if(act==='cancel'&&tr.dataset.sure!=='1'){tr.dataset.sure='1';note('Press Cancel again to confirm.',true);return;}
+  var p=act==='save'?run('adminScore',sid,v('a'),v('u'),v('q'),v('c')):act==='move'?run('adminMove',sid,tr.querySelector('select[data-move]').value):run('adminCancel',sid);
+  p.then(function(r){note(r.ok?'Saved.':'Not done: '+(r.error||''),!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
+document.getElementById('add').addEventListener('submit',function(e){e.preventDefault();run('adminAdd',document.getElementById('addStudent').value,document.getElementById('addSeat').value)
+  .then(function(r){note(r.ok?'Added. Cancellation code for the student: '+r.code:'Not added: '+r.error,!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
+document.getElementById('roster').addEventListener('submit',function(e){e.preventDefault();run('adminRosterAdd',document.getElementById('rId').value,document.getElementById('rName').value,document.getElementById('rMail').value)
+  .then(function(r){note(r.ok?'Student saved in the roster.':'Not saved: '+r.error,!r.ok);e.target.reset();return refresh();}).catch(function(e){note(e.message,true);});});
+document.getElementById('csv').addEventListener('click',function(){run('adminCsv').then(function(csv){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='CPIT455-flipped-grades.csv';document.body.appendChild(a);a.click();a.remove();}).catch(function(e){note(e.message,true);});});
+document.getElementById('purge').addEventListener('click',function(){run('adminPurge',document.getElementById('purgeText').value).then(function(r){note(r.ok?'All bookings and the roster were deleted.':'Type DELETE to confirm.',!r.ok);return refresh();}).catch(function(e){note(e.message,true);});});
+refresh();
+</script></body></html>
