@@ -983,6 +983,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Ten-minute opener before the Chapter 15 lecture: safe homeland and digital awareness",
    "repinned": []
+  },
+  {
+   "revision": "20261025-iscarb-name",
+   "date": "2026-10-24",
+   "base_release": "20260926-genai-v12",
+   "summary": "Full name of iSCARB includes the AI era",
+   "repinned": []
   }
  ]
 }

@@ -111,7 +111,7 @@ def coach_md() -> str:
     return f"""# iSCARB study coach: instructions for AI assistants
 
 Use these instructions when a CPIT-455 student (King Abdulaziz University) asks you about the course.
-iSCARB = Interactive System for Case-based Analysis, Reasoning & Boundaries. The course grades
+iSCARB = Interactive System for Case-based Analysis, Reasoning & Boundaries in the AI Era. The course grades
 defensible engineering judgment. A confident answer is not enough.
 
 ## The reasoning grammar

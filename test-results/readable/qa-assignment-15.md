@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-24  
-**Commit ID:** 5e0539e3-a77b-43a6-a38a-84604298d3c7  
-**Part A committed:** 2026-10-24T12:03:48.523Z  
-**STRESS revealed:** 2026-10-24T12:03:48.535Z
+**Commit ID:** 41ad254b-03b8-4efc-9e96-c35824c3f502  
+**Part A committed:** 2026-10-24T19:10:31.785Z  
+**STRESS revealed:** 2026-10-24T19:10:31.798Z
 
 ## Scenario
 A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-24T12:03:48.256Z
+BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-24T19:10:31.450Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.
