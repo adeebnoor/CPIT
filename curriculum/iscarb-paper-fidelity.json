@@ -937,6 +937,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Course & sources: wording aligned with the course specification page",
    "repinned": []
+  },
+  {
+   "revision": "20261024-study-aids",
+   "date": "2026-10-24",
+   "base_release": "20260926-genai-v12",
+   "summary": "Study guide for testing strategies and code coverage; course at a glance and 24 October update on the learning path",
+   "repinned": []
   }
  ]
 }

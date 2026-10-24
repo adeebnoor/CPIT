@@ -5,7 +5,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
 const base=process.env.COURSE_BASE_URL||'http://127.0.0.1:8765/';
 const out='test-results/readable';fs.mkdirSync(out,{recursive:true});
 const pub=JSON.parse(fs.readFileSync('curriculum/publication.json','utf8'));
-const pages=['iscarb.html','student-guide.html','course-resources.html','instructor-guide.html','nelc-alignment.html','course-specification.html','methodology.html','fbr-submission.html','download.html','download-stats.html','index.html','iscarb-students.html','404.html','cimt.html','imam.html',...pub.lectures.map(c=>c.study_path)];
+const pages=['iscarb.html','student-guide.html','course-resources.html','instructor-guide.html','nelc-alignment.html','course-specification.html','code-coverage.html','methodology.html','fbr-submission.html','download.html','download-stats.html','index.html','iscarb-students.html','404.html','cimt.html','imam.html',...pub.lectures.map(c=>c.study_path)];
 async function contrast(locator){return locator.evaluate(el=>{
  const rgb=s=>s.match(/[\d.]+/g).map(Number),fg=rgb(getComputedStyle(el).color);let bg=[255,255,255];
  const chain=[];for(let n=el;n;n=n.parentElement)chain.unshift(n);
