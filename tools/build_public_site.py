@@ -9,6 +9,12 @@ ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
 VERSION=publication()['release']
 PUBLIC=['index.html','404.html','cimt.html','imam.html','iscarb.html','iscarb-students.html','fbr-submission.html','download.html','download-stats.html','student-guide.html','course-resources.html','instructor-guide.html','micro-viva.html','assignment-example.html','course-specification.html','code-coverage.html','midterm-practice.html','evidence.html','nelc-alignment.html','methodology.html','style.css','iscarb-theme.css','iscarb-theme.js','iscarb-hub.css','iscarb-hub.js','iscarb-home.css','assets/fcit-kau-logo.png','student-ux.css','student-ux.js','chapter-search.js','course-design.css','national-site.css']
+ARCHIVE_BANNER=('<div class="archive-banner" role="note" lang="en" style="position:sticky;top:0;z-index:2147483647;padding:8px 16px;'
+  'background:#3b2f12;color:#fff8e6;font:13px/1.45 system-ui,sans-serif;text-align:center;border-bottom:2px solid #e0b252">'
+  '<b>Archived lecture (Fall 2025), preserved as taught.</b> Its dates, tasks, grading, contact details and figures are not current course '
+  'information and are not verified sources. Current course: <a href="../iscarb.html" style="color:#ffd27a">learning path</a> · '
+  '<a href="../course-specification.html" style="color:#ffd27a">course specification</a>.'
+  '<span lang="ar" dir="rtl" style="display:block">محاضرة مؤرشفة من فصل خريف 2025 كما دُرّست. مواعيدها ومهامها ودرجاتها وأرقامها لا تمثل المقرر الحالي.</span></div>')
 def main():
     spec=publication(); errors=audit(ROOT)
     if errors: raise SystemExit('\n'.join(errors))
@@ -26,6 +32,12 @@ def main():
     shutil.copytree(ROOT/'vendor/pyodide',DEST/'vendor/pyodide')  # second source for the Python build runner
     for name in ['slides','lectures/cimt','lectures/himma']:
         if (ROOT/name).exists(): shutil.copytree(ROOT/name,DEST/name,ignore=shutil.ignore_patterns('.rsync-tmp'))
+    # Archived Fall 2025 decks: the served copy carries a notice that it is not current course information; sources stay as taught.
+    for p in (DEST/'slides').glob('*.html'):
+        s=p.read_text(encoding='utf-8')
+        if 'class="archive-banner"' not in s:
+            assert s.count('<body>')==1, p.name
+            p.write_text(s.replace('<body>','<body>'+ARCHIVE_BANNER,1),encoding='utf-8')
     for name in spec['iscarb_public_files']:
         (DEST/name).parent.mkdir(parents=True,exist_ok=True); shutil.copy2(ROOT/name,DEST/name)
     image='iscarb-studio/app/static/hero_user_original.png'; (DEST/image).parent.mkdir(parents=True,exist_ok=True); shutil.copy2(ROOT/image,DEST/image)

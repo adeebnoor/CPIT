@@ -61,7 +61,7 @@ CLOS = [  # (domain, code, CLO no., text, SO, teaching strategies, assessment me
     ('1', '1.4', 10, 'Explain the idea of a system of systems and discuss the challenges of building complex systems of software systems', '6',
      'Case-based lecture; staged-acceptance station; primary source (Maier 1998)', 'Assignment 9 (governance, BOUND, build); final examination'),
     ('2', '2.1', 1, 'Design dependability in systems by using redundancy and diversity', '2',
-     'Case-based lecture; redundancy and common-cause station', 'Assignment 1 (FIT, BOUND, ACT and EVIDENCE); midterm examination'),
+     'Case-based lecture; redundancy and common-cause station', 'Assignment 1 (FIT, BOUND, ACT and EVIDENCE); Assignment 2 (redundancy and diversity); midterm examination'),
     ('2', '2.2', 2, 'Write functional and non-functional dependability and security requirements', '2',
      'Case-based lecture; requirement-writing station', 'Assignments 1, 2 and 4; midterm examination'),
     ('2', '2.3', 3, 'Apply metrics for reliability specification to specify measurable reliability requirements', '2',
@@ -90,11 +90,11 @@ CONTENT = [  # (topic, weeks, number of weeks, chapter, assessment)
     ('Code coverage: testing strategies and levels, coverage tools', '14–15', 2, 'Practised in every Python build, Assignments 3–9', 'Coverage step, Assignments 3–9'),
 ]
 ASSESS = [('Assignments 1–9 (written analysis and, from Assignment 3, a Python build)', 'After each chapter, weeks 2–14', 30),
-          ('Midterm examination (written test)', 'Week 8', 30),
-          ('Final examination (written test)', 'Final examination period', 30),
+          ('Midterm examination (written test), Chapters 10–14', 'After Chapter 14 (20 October 2026)', 30),
+          ('Final examination (written test), the whole course', 'Final examination period', 30),
           ('Participation (preparation, in-class activities and questions)', 'Weeks 1–15', 10)]
 MATRIX_COLS = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'Midterm', 'Final']
-MATRIX = {1: {'A1', 'Midterm', 'Final'}, 2: {'A1', 'A2', 'A4', 'Midterm', 'Final'}, 3: {'A2', 'Midterm', 'Final'},
+MATRIX = {1: {'A1', 'A2', 'Midterm', 'Final'}, 2: {'A1', 'A2', 'A4', 'Midterm', 'Final'}, 3: {'A2', 'Midterm', 'Final'},
           4: {'A3', 'Midterm', 'Final'}, 5: {'A4', 'Midterm', 'Final'}, 6: {'A5', 'Midterm', 'Final'},
           7: {'A6', 'Final'}, 8: {'A7', 'Final'}, 9: {'A8', 'Final'}, 10: {'A9', 'Final'},
           11: {'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'Final'}}
