@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-15  
-**Commit ID:** dab0259a-3439-4931-a6e7-cf312d897ff9  
-**Part A committed:** 2026-10-15T06:33:25.884Z  
-**STRESS revealed:** 2026-10-15T06:33:25.897Z
+**Date:** 2026-10-24  
+**Commit ID:** 6c02f5ee-748f-45e2-b8a0-db4500d41704  
+**Part A committed:** 2026-10-24T11:38:13.569Z  
+**STRESS revealed:** 2026-10-24T11:38:13.584Z
 
 ## Scenario
 A fictional campus transport desk needs to read today's pickup list even when the central scheduling server stops working.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-15T06:33:25.718Z
+BUILD RECORD · Assignment 5 (Chapter 14) · 2026-10-24T11:38:13.368Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Return conflicts with the pickup id as well as the change id. Change the code and one test.

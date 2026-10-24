@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-15  
-**Commit ID:** 92a372dd-e482-4bc5-9fb0-5f38e725fc5d  
-**Part A committed:** 2026-10-15T06:33:29.734Z  
-**STRESS revealed:** 2026-10-15T06:33:29.747Z
+**Date:** 2026-10-24  
+**Commit ID:** b3a77730-8bba-4e78-ba02-c5d86da0a191  
+**Part A committed:** 2026-10-24T11:38:17.259Z  
+**STRESS revealed:** 2026-10-24T11:38:17.272Z
 
 ## Scenario
 A fictional faculty needs a room-booking service for a three-year trial (pilot), starting next term.
@@ -17,7 +17,7 @@ Option B is an existing university application. The university owns its source c
 Neither option has a reliable estimate of the full cost over its use, including support and later changes.
 
 The goal is a trial next term, not replacing the faculty's whole system. Recommend an option, a limited evaluation, or a hold.
-A colleague's draft recommendation — review it; do not copy it: “Choose Option A for the whole faculty next term. It already has all the booking features, so changing its settings will be enough. Two years of support is fine for a three-year trial: we can simply renew it. Finishing Option B would take too long; the team's knowledge of its code makes no difference. Option A clearly costs less overall because it is ready-made.”
+An AI assistant's draft recommendation — review it; do not copy it: “Choose Option A for the whole faculty next term. It already has all the booking features, so changing its settings will be enough. Two years of support is fine for a three-year trial: we can simply renew it. Finishing Option B would take too long; the team's knowledge of its code makes no difference. Option A clearly costs less overall because it is ready-made.”
 
 ## Chapter boundary sentence (written in the lecture)
 Not written in the lecture on this device.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-15T06:33:29.453Z
+BUILD RECORD · Assignment 6 (Chapter 15) · 2026-10-24T11:38:17.001Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The vendor sends a measured peak-load report for Option A that passes. Change one fact and show the new shortlist.

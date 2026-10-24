@@ -288,7 +288,7 @@
    "stress_path": "lectures/iscarb/reveal/r12-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch12-mastery-v2",
-   "assignment_sha256_lf": "e76fc7695a598abf1ec9a49ae76a69f738644c5c7f9ffe420ed0327e3bb0069d",
+   "assignment_sha256_lf": "1e80f0087893823d29cb11af68794b80250e3661b68383dee0c0046f4fc7be0c",
    "stress_sha256_lf": "4997deb4b9e4172b5be86e8905450b083b4c614960c2d99dec9a095bdf81c5b6"
   },
   "13": {
@@ -296,7 +296,7 @@
    "stress_path": "lectures/iscarb/reveal/r13-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch13-mastery-v2",
-   "assignment_sha256_lf": "80ea8528e3132b78099331ed30e9033707aefea2533341e7733ab467f7cf2df6",
+   "assignment_sha256_lf": "178cf0a3036f4cd58e60152cf4c272e04f60a750a3496a3cdf99bfef6644acae",
    "stress_sha256_lf": "94696ea2bc67547ac2520a923ff23fd281bdaae01514ae89637b64e6fe8e23f1"
   },
   "14": {
@@ -304,7 +304,7 @@
    "stress_path": "lectures/iscarb/reveal/r14-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch14-mastery-v2",
-   "assignment_sha256_lf": "706f266dc626fc9947b1edce248df72ba23e0533ebfe65ab090df5c91682fbab",
+   "assignment_sha256_lf": "add80c9df24ae75f8ab62240bb7fc2fef86e90a9812d705d09e330ba6dee4412",
    "stress_sha256_lf": "6e4f43415cd427fbad9eadd34d0cc23b27e2f6755e8c26e5c4bcf29f54cd4802"
   },
   "15": {
@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "ab8ff29013f489a49fafd3b329dd024ff5b4abed93dc3fbdbfbade364f1bcf8e",
+   "assignment_sha256_lf": "23e3c0f7ff1647e8b8113a576544c1919b0958ed77ffd7ac67c479af2b0a7637",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "a8667b260e0f6494871b2801943ac2290555ca0e1d3f6f1926190a9374cef2a9",
+   "assignment_sha256_lf": "f494b0e2320863b264d3e72eda3aa8bd4b7a252f135b3403f9e9a17195b6ee3e",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "47c39c2e5446b113cdc652df8e1cd6e5b95d236237657e6e86181c69eef12098",
+   "assignment_sha256_lf": "263cb27c3794dd7be27d1f1f1243aab8bd2478bdf0055558d12ebb50218e1969",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "4a74c46b205e26b82740c03fa85f6a67abf65da33469428a5da44698b65382e2",
+   "assignment_sha256_lf": "0b5797b5bd105b33e3b302bbfc1152f704092c2728104a5811664b7c527d089a",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -953,6 +953,21 @@
    "repinned": [
     "assignment 10",
     "assignment 11",
+    "assignment 12",
+    "assignment 13",
+    "assignment 14",
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
+  },
+  {
+   "revision": "20261024-awareness-runner",
+   "date": "2026-10-24",
+   "base_release": "20260926-genai-v12",
+   "summary": "Safe homeland and digital awareness activity; third Python standard-library source for blocked devices",
+   "repinned": [
     "assignment 12",
     "assignment 13",
     "assignment 14",
