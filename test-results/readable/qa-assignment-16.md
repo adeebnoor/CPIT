@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-15  
-**Commit ID:** 423beb51-2de0-4f8b-a7a9-b3e682c784d8  
-**Part A committed:** 2026-10-15T06:33:33.486Z  
-**STRESS revealed:** 2026-10-15T06:33:33.498Z
+**Date:** 2026-10-24  
+**Commit ID:** 8b7468ec-fafe-4ae7-890d-ebb931cb41d3  
+**Part A committed:** 2026-10-24T11:38:21.037Z  
+**STRESS revealed:** 2026-10-24T11:38:21.047Z
 
 ## Scenario
 A fictional lab-booking app uses an existing software component with the function reserve(roomId, duration).
@@ -17,6 +17,7 @@ A small connecting function (adapter) currently passes both values to the compon
 A sample request with duration = 30 returns an ID. Nobody has tested the saved end time or what happens with invalid input.
 
 Your decision: use the component, adapt the connection, replace the component, or hold the limited trial. Explain what must be checked before relying on it.
+An AI assistant's draft answer — review it; do not copy it: “Use the component as it is. The sample request with duration = 30 returned a reservation ID, so the connection works correctly. Both sides call the value duration, so the adapter only needs to pass it through. Any duration up to 7200 is accepted, so a three-hour booking (180 minutes) is safe. No more tests are needed before the trial.”
 
 ## Chapter boundary sentence (written in the lecture)
 Not written in the lecture on this device.
@@ -51,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 7 (Chapter 16) · 2026-10-15T06:33:33.201Z
+BUILD RECORD · Assignment 7 (Chapter 16) · 2026-10-24T11:38:20.767Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The maximum becomes 90 minutes. Change one thing and show the test that proves it.

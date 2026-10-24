@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-15  
-**Commit ID:** 5d3be12b-0a2f-44d9-aef9-0ffcc37519ae  
-**Part A committed:** 2026-10-15T06:33:35.433Z  
-**STRESS revealed:** 2026-10-15T06:33:35.446Z
+**Date:** 2026-10-24  
+**Commit ID:** 063f2eed-3063-4515-b11f-84598ead2d71  
+**Part A committed:** 2026-10-24T11:38:24.854Z  
+**STRESS revealed:** 2026-10-24T11:38:24.863Z
 
 ## Scenario
 A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.
@@ -17,6 +17,7 @@ The database creates one reservation for each new request ID.
 Normal requests have succeeded. Nobody has tested what happens if the database saves a booking but the reply is then lost.
 
 Recommend how these parts should work together in a trial, and the rule for sending a request again (retry).
+An AI assistant's draft answer — review it; do not copy it: “Keep the current design. Normal requests succeed, so the booking flow is reliable. Sending the request again with a new request ID is safe, because the database creates exactly one reservation for each request ID. If a reply is lost, the browser's retry fixes the problem. A longer timeout would remove the risk completely.”
 
 ## Chapter boundary sentence (written in the lecture)
 Not written in the lecture on this device.
@@ -51,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-15T06:33:35.182Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-24T11:38:24.550Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?

@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-15  
-**Commit ID:** 5e05ca6d-45d7-445d-8334-8bf5264a3d1f  
-**Part A committed:** 2026-10-15T06:33:39.168Z  
-**STRESS revealed:** 2026-10-15T06:33:39.180Z
+**Date:** 2026-10-24  
+**Commit ID:** 79ebd81e-274e-4d11-8a4d-11a3a4590ad1  
+**Part A committed:** 2026-10-24T11:38:28.686Z  
+**STRESS revealed:** 2026-10-24T11:38:28.702Z
 
 ## Scenario
 A fictional university wants one screen showing incidents using information from security, transport and facilities.
@@ -17,7 +17,7 @@ Security sends incident IDs. Transport sends vehicle locations and the time each
 The owners agree to a limited daytime trial. They have not agreed how old information may be before it is unsuitable, or what the screen should show when a system stops sending data.
 
 Each system passed its own API tests (tests of its program-to-program connection). Nobody has tested a failure involving the systems working together.
-The transport team's proposed design — review it before the trial: “The screen asks all three systems for data every minute. It labels the latest value received from each as live. If a system stops sending data, it keeps displaying that system's last value so the screen is never empty. Each owner signs a one-page promise of 99.9% availability. To accept the design, check that every API returns HTTP 200 (a successful response code) and uses the agreed JSON data structure.”
+An AI assistant's draft design for the transport team — review it before the trial: “The screen asks all three systems for data every minute. It labels the latest value received from each as live. If a system stops sending data, it keeps displaying that system's last value so the screen is never empty. Each owner signs a one-page promise of 99.9% availability. To accept the design, check that every API returns HTTP 200 (a successful response code) and uses the agreed JSON data structure.”
 
 ## Chapter boundary sentence (written in the lecture)
 Not written in the lecture on this device.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-15T06:33:38.916Z
+BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-24T11:38:28.402Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.
