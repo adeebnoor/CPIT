@@ -1,8 +1,10 @@
 """Study aids on the learning path (idempotent).
 
-- code-coverage.html: a study guide for the course-plan topic "testing strategies and levels, code coverage,
-  code coverage tools" (CLO 11). The nine lectures do not have a chapter for it; it is practised in the coverage
-  step of every Python build (Assignments 3–9) and is within the scope of the final examination.
+- code-coverage.html: a study guide for the course-specification topic "code coverage" and CLO 11 ("design and
+  implementation of test cases in the different testing strategies"). The nine lectures do not have a chapter for it;
+  it is practised in the tests and coverage step of every Python build (Assignments 3–9) and is within the scope of the
+  final examination. Tests are taught as evidence for dependability decisions; systematic test-design techniques
+  (partitioning, boundary values, decision tables, path coverage, random or automated generation) are out of scope.
 - iscarb.html: a "course at a glance" panel (chapter, course learning outcomes, assignment, examinations) and the
   current student update, keeping the 14 October notes in a folded section.
 - Registers the guide in the public build, the offline packages and the site checks.
@@ -25,22 +27,20 @@ LEVELS = [
     ('Release testing', 'A separate team checks the system against its requirements before release; requirements-based, scenario and performance testing.', 'Chapter 11: statistical testing with an operational profile.'),
     ('User testing', 'Alpha, beta and acceptance testing by users or the customer.', 'Chapter 20: staged acceptance.'),
 ]
-STRATEGIES = [
-    ('Partition (equivalence-class) testing', 'Group inputs that the program should treat the same way; test one value from each group.',
-     'Loans 0–1 (allowed) and 2 or more (refused).'),
-    ('Boundary values', 'Test at and next to the edges of each partition, where errors cluster.', 'Loans 1, 2 and 3; negative loans.'),
-    ('Guideline-based testing', 'Use experience: empty or missing values, wrong types, very large inputs, repeated calls.', 'A record without "loans"; loans given as text.'),
-    ('Requirements-based testing', 'Derive at least one test from each requirement.', 'Each course check in a build is a requirement test.'),
-    ('Negative and security testing', 'Check that what must be refused is refused, and fails safely.', 'Chapter 13: misuse cases become tests.'),
+EVIDENCE = [
+    ('From the requirement', 'Turn each requirement or course check into at least one test that asserts the expected result.',
+     'Each course check in a build is a requirement test.'),
+    ('What is allowed and what is refused', 'Test the normal case and the case that must be refused, including missing or invalid data; check that the refusal fails safely.',
+     'A record without "loans"; loans given as text.'),
+    ('Misuse cases', 'Turn a misuse case into a test that the attack or misuse is refused.', 'Chapter 13: misuse cases become tests.'),
+    ('The changed condition', 'When new evidence changes a condition (STRESS), add a test for the new condition before you change the code (REFIT).',
+     'The REFIT step in Assignments 3–9.'),
     ('Test-driven development', 'Write a failing test, write the code that passes it, then refactor.', 'Run your tests after each change in a build.'),
 ]
 CRITERIA = [
     ('Statement (line) coverage', 'Share of executable statements run at least once by the tests.', 'The build record reports it for your own code.'),
     ('Branch (decision) coverage', 'Share of decision outcomes (each if true and false; each loop entered and skipped) taken by the tests.',
      'The build record lists every branch your tests did not take.'),
-    ('Path coverage', 'Share of distinct routes through the code. The number of paths grows quickly with loops, so it is rarely complete.', 'Discussed, not measured.'),
-    ('Condition and MC/DC coverage', 'Each condition in a decision takes both values; MC/DC also shows that each condition independently changes the outcome. Required for the most critical avionics software (DO-178C, level A).',
-     'Chapter 12: safety-critical verification.'),
 ]
 TOOLS = [
     ('Python', 'coverage.py', 'coverage run --branch -m pytest, then coverage report -m (lists the lines not run)'),
@@ -53,16 +53,16 @@ QUIZ = [
      'No. An if without an else can have every statement run by a test where the condition is true, while the false outcome is never taken. Branch coverage includes statement coverage, not the other way round.'),
     ('Your tests reach 100% line coverage and all pass. Is the code correct?',
      'Not necessarily. Coverage shows that code ran, not that a test checked its result. A test without an assert can run every line. That is why the builds also use mutation testing: each known faulty version must make at least one of your tests fail.'),
-    ('A rule allows a student to hold at most 2 items. Which inputs would you test, and why?',
-     'One value from each partition (for example 0 and 5) and the boundary values 1, 2 and 3, plus invalid input such as −1 or text. Errors cluster at boundaries, such as < written as <=.'),
+    ('A requirement says: "a student with an overdue item cannot borrow." Write one test for it.',
+     'Build a student record with overdue set to True and an available item, call can_borrow, and assert that the result is False. Name the test after the requirement, for example test_overdue_student_is_refused.'),
     ('At which testing level do you check that two components owned by different teams work together?',
      'Component or system testing (integration). In a system of systems (Chapter 20) this is cross-owner interaction testing.'),
     ('The coverage report lists the branch "if type(loans) is not int or loans < 0 → true" as not taken. What do you do?',
      'Add a test whose input makes the condition true, for example loans = −1 or loans = "2", and assert that the result is False. Then run the build again and confirm the branch is now taken.'),
 ]
-EXAM = ['Name the testing levels and what each one checks.',
-        'Derive partitions and boundary values for a stated rule.',
-        'Define statement, branch and path coverage, and explain why branch coverage is stronger than statement coverage.',
+EXAM = ['Name the testing strategies and levels in Sommerville Chapter 8 and what each one checks.',
+        'Write a test case, with its assert, for a stated requirement or a refused case.',
+        'Define statement and branch coverage, and explain why branch coverage is stronger than statement coverage.',
         'Explain what coverage cannot show, and how mutation testing complements it.',
         'Read a short function and its tests, and name the line or branch that is not covered and a test that would cover it.']
 
@@ -86,20 +86,22 @@ CODE = '''def can_borrow(student, item):
 def build_guide():
     quiz = ''.join(f'<details class="faq"><summary><b>{i}. {E(q)}</b></summary><p>{E(a)}</p></details>'
                    for i, (q, a) in enumerate(QUIZ, 1))
-    main = f'''<main class="wrap" id="main"><div class="document-heading"><p class="ey">STUDY GUIDE · CLO 11 · WEEKS 14–15 OF THE COURSE PLAN</p>
-<h1>Testing strategies and code coverage</h1>
-<p class="intro">How to choose test cases, at which level to test, and what code coverage does and does not tell you. You practise this in the coverage step of every Python build (Assignments 3–9), and it is part of the final examination.</p></div>
-<section class="panel" lang="ar" dir="rtl"><h2>باختصار</h2><p>هذا الدليل يغطي موضوع «استراتيجيات الاختبار ومستوياته، وتغطية الشيفرة وأدواتها» في خطة المقرر (مخرج التعلم 11). تتدرّب عليه في خطوة التغطية في كل بناء برمجي (الواجبات 3–9)، وهو ضمن الاختبار النهائي. اقرأ الأقسام الأربعة، ثم جرّب المثال المحلول، ثم أجب عن أسئلة المراجعة.</p></section>
+    main = f'''<main class="wrap" id="main"><div class="document-heading"><p class="ey">STUDY GUIDE · CLO 11 · CODE COVERAGE · WEEKS 14–15</p>
+<h1>Test cases and code coverage</h1>
+<p class="intro">How to write a test case as evidence for a decision, where it sits among the testing strategies, and what code coverage does and does not tell you. You practise this in the tests and the coverage step of every Python build (Assignments 3–9), and it is part of the final examination.</p></div>
+<section class="panel" lang="ar" dir="rtl"><h2>باختصار</h2><p>هذا الدليل يغطي موضوع «تغطية الشيفرة» في توصيف المقرر، ومخرج التعلم 11: تصميم حالات الاختبار وتنفيذها في استراتيجيات الاختبار المختلفة. تتدرّب عليه في خطوة التغطية في كل بناء برمجي (الواجبات 3–9)، وهو ضمن الاختبار النهائي. اقرأ الأقسام الأربعة، ثم جرّب المثال المحلول، ثم أجب عن أسئلة المراجعة.</p></section>
 <p><b>Reading:</b> I. Sommerville, <i>Software Engineering</i>, 10th edition, Chapter 8 (Software testing): 8.1 development testing, 8.2 test-driven development, 8.3 release testing, 8.4 user testing.</p>
 
-<section class="section" id="levels"><h2>1 · Testing levels <span class="vs-ar-t" lang="ar" dir="rtl">مستويات الاختبار</span></h2>
+<section class="section" id="levels"><h2>1 · Testing strategies and levels <span class="vs-ar-t" lang="ar" dir="rtl">استراتيجيات الاختبار ومستوياته</span></h2>
 {table(['Level', 'What it checks', 'Where you meet it in this course'], [(f'<b>{E(a)}</b>', E(b), E(c)) for a, b, c in LEVELS])}</section>
 
-<section class="section" id="strategies"><h2>2 · Choosing test cases <span class="vs-ar-t" lang="ar" dir="rtl">اختيار حالات الاختبار</span></h2>
-<p>Black-box strategies choose tests from the specification; white-box (structural) strategies choose tests from the code, and coverage measures them.</p>
-{table(['Strategy', 'Idea', 'Example from the practice build'], [(f'<b>{E(a)}</b>', E(b), E(c)) for a, b, c in STRATEGIES])}</section>
+<section class="section" id="strategies"><h2>2 · Writing a test case as evidence <span class="vs-ar-t" lang="ar" dir="rtl">حالة الاختبار دليلاً</span></h2>
+<p>In this course a test is evidence for a dependability decision: it shows that a requirement holds, that a misuse is refused, or that a changed condition is handled.</p>
+{table(['Source of the test', 'What you write', 'Example from the builds'], [(f'<b>{E(a)}</b>', E(b), E(c)) for a, b, c in EVIDENCE])}
+<p class="small"><b>Scope.</b> Systematic test-design techniques, such as equivalence partitioning, boundary-value analysis, decision tables, path coverage and random or automated test generation, are the subject of a dedicated software-testing course. They are not taught or assessed in CPIT-455.</p>
+<p class="small" lang="ar" dir="rtl"><b>حدود الموضوع:</b> تقنيات تصميم الاختبار المنهجية، مثل تقسيم التكافؤ وتحليل القيم الحدّية وجداول القرار وتغطية المسارات والتوليد العشوائي أو الآلي للاختبارات، موضوع مقرر مستقل في اختبار البرمجيات، ولا تُدرَّس ولا تُقيَّم في هذا المقرر.</p></section>
 
-<section class="section" id="criteria"><h2>3 · Coverage criteria <span class="vs-ar-t" lang="ar" dir="rtl">معايير التغطية</span></h2>
+<section class="section" id="criteria"><h2>3 · Coverage measures <span class="vs-ar-t" lang="ar" dir="rtl">مقاييس التغطية</span></h2>
 {table(['Criterion', 'Definition', 'In this course'], [(f'<b>{E(a)}</b>', E(b), E(c)) for a, b, c in CRITERIA])}
 <p><b>What coverage does not show.</b> Coverage tells you which code your tests ran, not whether they checked the result. Code that was never written, such as a missing check, cannot be uncovered. Treat coverage as a map of what is still untested, not as a score. Mutation testing, used in every build, asks the stronger question: would a test fail if the code were wrong?</p>
 <p lang="ar" dir="rtl"><b>ما لا تُظهره التغطية:</b> التغطية تبيّن أي جزء من الشيفرة نفّذته اختباراتك، ولا تبيّن هل تحققت الاختبارات من النتيجة. والفحص الناقص الذي لم يُكتب أصلاً لا يظهر في التغطية. لذلك تستخدم البناءات اختبار الطفرات أيضاً.</p></section>
@@ -124,8 +126,8 @@ def build_guide():
 </main>'''
     head = ('<!DOCTYPE html>\n<html data-iscarb-standalone="1" data-theme="dark" lang="en"><head><meta charset="utf-8">'
             '<meta content="width=device-width,initial-scale=1" name="viewport"><meta content="#006b62" name="theme-color">'
-            '<meta content="Study guide for testing strategies, testing levels and code coverage (CPIT-455, CLO 11)." name="description">'
-            '<title>Testing strategies and code coverage · iSCARB CPIT-455</title>'
+            '<meta content="Study guide for test cases and code coverage (CPIT-455, CLO 11)." name="description">'
+            '<title>Test cases and code coverage · iSCARB CPIT-455</title>'
             f'<link href="iscarb-hub.css?v={VERSION}" rel="stylesheet"><link rel="stylesheet" href="course-design.css?v={VERSION}">'
             + dependencies()
             + '<style>details.faq{border-bottom:1px solid var(--line);padding:8px 0}details.faq summary{cursor:pointer}'
@@ -153,7 +155,7 @@ CHAPTERS = [  # chapter, title, CLOs, assignment, examinations
 
 def glance():
     rows = ''.join(f'<tr><td>{c}</td><td>{E(t)}</td><td>{l}</td><td>{a}</td><td>{x}</td></tr>' for c, t, l, a, x in CHAPTERS)
-    rows += ('<tr><td>—</td><td><a href="code-coverage.html">Testing strategies and code coverage</a></td><td>11</td>'
+    rows += ('<tr><td>—</td><td><a href="code-coverage.html">Test cases and code coverage</a></td><td>11</td>'
              '<td>Coverage step, Assignments 3–9</td><td>Final</td></tr>')
     return (GLANCE_MARK + '<section class="glance" id="at-a-glance" aria-labelledby="glance-title" style="padding-top:24px">'
             '<p class="ey">Course at a glance</p><h2 id="glance-title">What each chapter is assessed by</h2>'
@@ -162,20 +164,20 @@ def glance():
             f'<tbody>{rows}</tbody></table></div>'
             '<p>Grade: assignments 30, midterm examination 30, final examination 30, participation 10 '
             '(<a href="assignment-example.html#grading">how the course is graded</a>). The final examination covers the whole course, '
-            'including testing strategies and code coverage. The outcomes are listed in the <a href="course-specification.html#spec-b">course '
+            'including test cases and code coverage (CLO 11). The outcomes are listed in the <a href="course-specification.html#spec-b">course '
             'specification</a>. In the revised IT program plan, this course is <b>IT 456 Dependable Systems</b>.</p>'
             '<p lang="ar" dir="rtl">الدرجة: الواجبات 30، والاختبار النصفي 30، والاختبار النهائي 30، والمشاركة 10. الاختبار النهائي يشمل المقرر كله، '
-            'ومنه استراتيجيات الاختبار وتغطية الشيفرة (<a href="code-coverage.html">دليل المراجعة</a>). ويقابل هذا المقرر في الخطة المحدثة المقرر IT 456.</p>'
+            'ومنه حالات الاختبار وتغطية الشيفرة (<a href="code-coverage.html">دليل المراجعة</a>). ويقابل هذا المقرر في الخطة المحدثة المقرر IT 456.</p>'
             '</section>')
 
 
 UPDATE_MARK = '<!-- study-aids:update-24oct -->'
 UPDATE = (UPDATE_MARK + '<p class="ey">24 October · update</p>'
-          '<p><b>New for students.</b> A study guide for <a href="code-coverage.html">testing strategies and code coverage</a> '
+          '<p><b>New for students.</b> A study guide for <a href="code-coverage.html">test cases and code coverage</a> '
           '(part of the final examination). <a href="assignment-example.html#new-6-9">Assignments 6–9: three new things</a>, with an example. '
           'The <a href="course-specification.html">course specification</a>: outcomes, content and assessment. If Python does not '
           'load in a build, it now loads from the course site automatically.</p>'
-          '<p lang="ar" dir="rtl"><b>جديد للطلاب:</b> <a href="code-coverage.html">دليل مراجعة استراتيجيات الاختبار وتغطية الشيفرة</a> '
+          '<p lang="ar" dir="rtl"><b>جديد للطلاب:</b> <a href="code-coverage.html">دليل مراجعة حالات الاختبار وتغطية الشيفرة</a> '
           '(ضمن الاختبار النهائي)، و<a href="assignment-example.html#new-6-9">الجديد في الواجبات 6–9 مع مثال</a>، و<a href="course-specification.html">توصيف المقرر</a>. '
           'وإذا لم يُحمَّل بايثون في البناء البرمجي فإنه يُحمَّل الآن من موقع المقرر تلقائياً.</p>'
           '<details><summary style="font-size:14px;font-weight:700;cursor:pointer">14 October · second update</summary>')
