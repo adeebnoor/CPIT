@@ -141,6 +141,7 @@ def build_page():
 <section class="section" id="plan"><h2>للمحاضر: خطة العشر دقائق</h2>
 <div class="table-scroll"><table class="na-plan"><thead><tr><th scope="col">الوقت</th><th scope="col">المحتوى</th></tr></thead><tbody>{plan}</tbody></table></div>
 <p>تُقدَّم المحاور بلغة تربوية هادئة تعزز الطمأنينة والمسؤولية، مع الاستناد إلى المعلومات الرسمية وتجنّب التحليلات والتوقعات غير الموثوقة. إذا كان في المحاضرة اختبار، تُقدَّم الدقائق العشر قبل بدئه ولا تُحتسب من زمنه.</p>
+<p><b>في القاعة:</b> افتح محاضرة الفصل الخامس عشر في وضع المحاضر، فتظهر الشاشة الافتتاحية قبل الشريحة الأولى ومعها مؤقت العشر دقائق، أو افتحها مباشرة من <a href="lectures/iscarb/Ch15-Software-Reuse.html?presenter=1#AWARENESS">هذا الرابط</a>.</p>
 <p><a href="iscarb.html">العودة إلى مسار التعلم</a></p></section>
 </main>'''
     head = ('<!DOCTYPE html>\n<html data-iscarb-standalone="1" data-theme="dark" lang="ar" dir="rtl"><head><meta charset="utf-8">'
