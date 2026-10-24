@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-24  
-**Commit ID:** 79ebd81e-274e-4d11-8a4d-11a3a4590ad1  
-**Part A committed:** 2026-10-24T11:38:28.686Z  
-**STRESS revealed:** 2026-10-24T11:38:28.702Z
+**Commit ID:** b4e6a3b1-6712-40bd-a836-930a45b74cc2  
+**Part A committed:** 2026-10-24T12:03:59.997Z  
+**STRESS revealed:** 2026-10-24T12:04:00.006Z
 
 ## Scenario
 A fictional university wants one screen showing incidents using information from security, transport and facilities.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-24T11:38:28.402Z
+BUILD RECORD · Assignment 9 (Chapter 20) · 2026-10-24T12:03:59.689Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Add a fourth feed, parking, that is unavailable. What does the headline say? Show it with a test.
