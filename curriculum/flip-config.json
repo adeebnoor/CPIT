@@ -1,6 +1,6 @@
 {
  "_note": "Flipped lectures (seat booking). Edit dates and slide ranges here, then run tools/apply_flip.py and paste backend/flip-apps-script/Code.gs into the Apps Script project and run setup. Times are Riyadh time (UTC+3). No student data in this file.",
- "api_url": "",
+ "api_url": "https://script.google.com/macros/s/AKfycbw0JJsuiAV4yPiBZYnB-FDM-3Q_knu42bcSRKv52HXDBZKoyH1kTYFkumO6sGQzDPPPGA/exec",
  "model_lecture": {
   "date": "2026-10-29T15:00:00+03:00",
   "chapter": "Ch15 Software Reuse"
