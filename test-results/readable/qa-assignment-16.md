@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-25  
-**Commit ID:** 35cec32b-ffa3-4aca-9cf8-5e690bef0613  
-**Part A committed:** 2026-10-25T06:28:28.279Z  
-**STRESS revealed:** 2026-10-25T06:28:28.291Z
+**Commit ID:** edba9bb9-8026-4456-bd26-2619475a23d2  
+**Part A committed:** 2026-10-25T06:44:12.200Z  
+**STRESS revealed:** 2026-10-25T06:44:12.213Z
 
 ## Scenario
 A fictional lab-booking app uses an existing software component with the function reserve(roomId, duration).
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 7 (Chapter 16) · 2026-10-25T06:28:28.044Z
+BUILD RECORD · Assignment 7 (Chapter 16) · 2026-10-25T06:44:11.983Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): The maximum becomes 90 minutes. Change one thing and show the test that proves it.

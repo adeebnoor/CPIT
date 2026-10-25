@@ -136,10 +136,11 @@ function render(){
     var known=l.seats.every(function(s){return status[s.id];});
     var seats=l.seats.map(function(s){var st=status[s.id];var label,dis=true;
       if(!st){label='…';}else if(st.closed){label='مغلق · Closed';}else if(st.booked){label='محجوز · Booked';}else{label='احجز · Book';dis=false;}
-      return '<div class="fl-seat"><div><b>'+(st&&!st.booked&&!st.closed?'<span class="fl-free">متاح · Available</span> ':'')+'الجزء '+s.part_no+' · '+H(s.title_ar)+'</b><small lang="en" dir="ltr">Part '+s.part_no+' · '+H(s.title_en)+'</small><small lang="en" dir="ltr">'+H(s.slides)+'</small></div>'
+      return '<div class="fl-seat"><div><b>المقعد '+s.part_no+'</b><span class="en" lang="en" dir="ltr">Seat '+s.part_no+'</span>'+(st&&!st.booked&&!st.closed?'<span class="fl-free">متاح · Available</span>':'')+'</div>'
         +'<button type="button" data-seat="'+s.id+'"'+(dis?' disabled':'')+'>'+label+'</button></div>';}).join('');
     return '<article class="fl-card'+(closed?' fl-closed':'')+'" id="lecture-'+l.number+'"><p class="ey">المحاضرة '+l.number+' · Lecture '+l.number+(closed?' · مغلق · Closed':'')+'</p>'
-      +'<h3>'+H(l.title_ar)+'<span class="en" lang="en" dir="ltr">'+H(l.chapter)+' · '+H(l.title_en)+'</span></h3><p style="margin:0">'+H(l.assignment_ar)+'<span class="en" lang="en" dir="ltr">'+H(l.assignment_en)+'</span></p>'
+      +'<h3>'+H(l.title_ar)+'<span class="en" lang="en" dir="ltr">'+H(l.chapter)+' · '+H(l.title_en)+'</span></h3>'
+      +'<p class="fl-req" style="margin:0"><b>المطلوب:</b> تشرح جزءًا من هذا الفصل يحدده لك الدكتور بعد الحجز، في 12 إلى 15 دقيقة، وترسل المسودة قبل المحاضرة بـ48 ساعة.<span class="en" lang="en" dir="ltr"><b>Required:</b> explain one part of this chapter, assigned by the instructor after you book, in 12 to 15 minutes, and send the draft 48 hours before the lecture.</span></p>'
       +'<dl><dt>الموعد · Date</dt><dd>'+when(l.starts_at,0)+'</dd><dt>إغلاق التسجيل · Registration closes</dt><dd>'+when(l.starts_at,72)+'</dd><dt>آخر موعد للمسودة · Draft due</dt><dd>'+when(l.starts_at,48)+'</dd></dl>'
       +'<p class="fl-left">'+(known?('باقي '+free+' من 3<span class="en" lang="en" dir="ltr">'+free+' of 3 left</span>'):'…')+'</p>'+seats+'</article>';}).join('');
   $('#flCards').innerHTML=html;
@@ -152,7 +153,7 @@ function load(){
 document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('button[data-seat]');if(!b||b.disabled)return;
   var id=+b.getAttribute('data-seat');var l=LEC.find(function(x){return x.seats.some(function(s){return s.id===id;});});var s=l.seats.find(function(x){return x.id===id;});
-  chosen=id;$('#flChosen').innerHTML='المحاضرة '+l.number+' · '+H(l.chapter)+' · الجزء '+s.part_no+': '+H(s.title_ar)+'<span class="en" lang="en" dir="ltr">Lecture '+l.number+' · Part '+s.part_no+': '+H(s.title_en)+' · '+H(s.slides)+'</span>';
+  chosen=id;$('#flChosen').innerHTML='المحاضرة '+l.number+' · '+H(l.title_ar)+' · المقعد '+s.part_no+'<span class="en" lang="en" dir="ltr">Lecture '+l.number+' · '+H(l.title_en)+' · Seat '+s.part_no+'</span>';
   $('#flBookMsg').textContent='';$('#flBookMsg').className='fl-msg';$('#flBook').hidden=false;$('#flDone').hidden=true;$('#flBook').scrollIntoView({behavior:'smooth',block:'start'});$('#flSid').focus({preventScroll:true});
 });
 $('#flBookForm').addEventListener('submit',function(e){
@@ -164,7 +165,9 @@ $('#flBookForm').addEventListener('submit',function(e){
   api({action:'book',student_id:sid,email:mail,full_name:name,seat_id:chosen,code:code},function(r){return isAnswer(r)&&(!r.ok||r.code===code);}).then(function(r){
     if(!r.ok){out.className='fl-msg err';out.innerHTML=msg(r.error);load();return;}
     $('#flBook').hidden=true;$('#flBookForm').reset();
-    $('#flDoneText').innerHTML='المحاضرة '+r.lecture+' · '+H(r.chapter)+' · الجزء '+r.part+': '+H(r.title_ar)+'<span class="en" lang="en" dir="ltr">Lecture '+r.lecture+' · Part '+r.part+': '+H(r.title_en)+' · '+H(r.slides)+'</span>'
+    var L=LEC.find(function(x){return x.number===r.lecture;})||{title_ar:'',title_en:''};
+    $('#flDoneText').innerHTML='المحاضرة '+r.lecture+' · '+H(L.title_ar)+' · المقعد '+r.part+'<span class="en" lang="en" dir="ltr">Lecture '+r.lecture+' · '+H(L.title_en)+' · Seat '+r.part+'</span>'
+      +'<p style="margin:8px 0 0">يحدد لك الدكتور الجزء الذي تشرحه. <span class="en" lang="en" dir="ltr">The instructor will tell you which part to explain.</span></p>'
       +'<p style="margin:8px 0 0"><b>آخر موعد للمسودة · Draft due:</b> '+when(r.draft_due,0)+'</p><p style="margin:4px 0 0">أرسل المسودة إلى arnoor@kau.edu.sa <span class="en" lang="en" dir="ltr">Send the draft to arnoor@kau.edu.sa</span></p>';
     $('#flCode').textContent=r.code;$('#flDone').hidden=false;$('#flDone').scrollIntoView({behavior:'smooth',block:'start'});load();
   }).catch(function(){out.className='fl-msg err';out.innerHTML=msg('network');}).then(function(){btn.disabled=false;});
@@ -184,12 +187,11 @@ load();setInterval(load,60000);
 
 
 def build_student():
-    model = CFG['model_lecture']
     main = f'''<main class="wrap fl" id="main" lang="ar" dir="rtl"><div class="document-heading"><p class="ey">CPIT-455 · المحاضرات المقلوبة · Flipped lectures</p>
 <h1>اشرح جزءًا من المحاضرة، واحصل على 3 درجات</h1>
 <p class="en" lang="en" dir="ltr">Explain part of a lecture and earn 3 marks</p>
-<div class="fl-intro"><p>في المحاضرات من الثانية إلى الخامسة يشرح ثلاثة منكم جزءًا من الفصل لزملائهم في 12 إلى 15 دقيقة، وأنا معكم أصحّح وأكمّل. لكل محاضرة 3 مقاعد، ولكل طالب مقعد واحد، والحجز بالأسبقية. المقعد عليه 3 درجات تُحسب من درجة المشاركة (10)، فهي ليست درجة إضافية فوق الـ100. المشاركة اختيارية، ومن لا يسجل لا تُخصم منه أي درجة. المحاضرة الأولى ({E(model['chapter'])}، الخميس 29 أكتوبر) يقدمها الدكتور نموذجًا.</p>
-<p class="en" lang="en" dir="ltr">In lectures 2 to 5, three of you each explain one part of the chapter to the class in 12 to 15 minutes, and I correct and complete. Each lecture has 3 seats, one seat per student, first come first served. A seat is worth 3 marks counted within the participation grade (10), not extra marks above 100. Taking part is optional and nobody loses marks for not booking. Lecture 1 ({E(model['chapter'])}, Thursday 29 October) is given by the instructor as a model.</p></div></div>
+<div class="fl-intro"><p>في المحاضرات الخمس القادمة، ابتداءً من الخميس 29 أكتوبر، يشرح ثلاثة منكم في كل محاضرة جزءًا من الفصل لزملائهم في 12 إلى 15 دقيقة، وأنا معكم أصحّح وأكمّل. لكل محاضرة 3 مقاعد، ولكل طالب مقعد واحد، والحجز بالأسبقية، ويحدد لك الدكتور الجزء الذي تشرحه بعد الحجز. المقعد عليه 3 درجات تُحسب من درجة المشاركة (10)، فهي ليست درجة إضافية فوق الـ100. المشاركة اختيارية، ومن لا يسجل لا تُخصم منه أي درجة.</p>
+<p class="en" lang="en" dir="ltr">In the next five lectures, from Thursday 29 October, three of you in each lecture explain one part of the chapter to the class in 12 to 15 minutes, and I correct and complete. Each lecture has 3 seats, one seat per student, first come first served; the instructor assigns your part after you book. A seat is worth 3 marks counted within the participation grade (10), not extra marks above 100. Taking part is optional and nobody loses marks for not booking.</p></div></div>
 
 <section class="section" id="rubric"><h2>الروبريك (3 درجات) <span class="en" lang="en" dir="ltr">Rubric (3 marks)</span></h2>
 {rubric_table()}
