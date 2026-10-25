@@ -41,6 +41,11 @@
       "pass": true
     },
     {
+      "file": "flip.html",
+      "width": 1440,
+      "pass": true
+    },
+    {
       "file": "methodology.html",
       "width": 1440,
       "pass": true
@@ -171,6 +176,11 @@
       "pass": true
     },
     {
+      "file": "flip.html",
+      "width": 1024,
+      "pass": true
+    },
+    {
       "file": "methodology.html",
       "width": 1024,
       "pass": true
@@ -301,6 +311,11 @@
       "pass": true
     },
     {
+      "file": "flip.html",
+      "width": 390,
+      "pass": true
+    },
+    {
       "file": "methodology.html",
       "width": 390,
       "pass": true
@@ -427,6 +442,11 @@
     },
     {
       "file": "national-awareness.html",
+      "width": 320,
+      "pass": true
+    },
+    {
+      "file": "flip.html",
       "width": 320,
       "pass": true
     },

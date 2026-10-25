@@ -4,10 +4,10 @@
 **Student:**   
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
-**Date:** 2026-10-24  
-**Commit ID:** 99a4a71e-aeed-4656-b816-bac9a6e6052b  
-**Part A committed:** 2026-10-24T19:10:39.947Z  
-**STRESS revealed:** 2026-10-24T19:10:39.961Z
+**Date:** 2026-10-25  
+**Commit ID:** 89413173-07f7-4927-ac85-110a9a624a8b  
+**Part A committed:** 2026-10-25T06:28:31.928Z  
+**STRESS revealed:** 2026-10-25T06:28:31.943Z
 
 ## Scenario
 A fictional event-booking system has three parts: a browser, an application service that handles requests, and a database that stores bookings.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-24T19:10:39.597Z
+BUILD RECORD · Assignment 8 (Chapter 17) · 2026-10-25T06:28:31.694Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove the persistence of request ids and run again. Which test fails first, and which real failure is it?

@@ -990,6 +990,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Full name of iSCARB includes the AI era",
    "repinned": []
+  },
+  {
+   "revision": "20261025-flipped-lectures",
+   "date": "2026-10-25",
+   "base_release": "20260926-genai-v12",
+   "summary": "Flipped lectures: seat booking page and learning-path card",
+   "repinned": []
   }
  ]
 }
