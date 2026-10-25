@@ -22,6 +22,39 @@ var COLS = {
 };
 var LECTURES = [
  {
+  "id": 1,
+  "number": 1,
+  "chapter": "Ch15",
+  "title_en": "Software Reuse",
+  "title_ar": "إعادة استخدام البرمجيات",
+  "assignment_en": "Assignment 6",
+  "assignment_ar": "الواجب 6",
+  "starts_at": "2026-10-29T15:00:00+03:00",
+  "seats": [
+   {
+    "id": 11,
+    "part_no": 1,
+    "title_en": "Seat 1",
+    "title_ar": "المقعد 1",
+    "slides": ""
+   },
+   {
+    "id": 12,
+    "part_no": 2,
+    "title_en": "Seat 2",
+    "title_ar": "المقعد 2",
+    "slides": ""
+   },
+   {
+    "id": 13,
+    "part_no": 3,
+    "title_en": "Seat 3",
+    "title_ar": "المقعد 3",
+    "slides": ""
+   }
+  ]
+ },
+ {
   "id": 2,
   "number": 2,
   "chapter": "Ch16",
@@ -34,23 +67,23 @@ var LECTURES = [
    {
     "id": 21,
     "part_no": 1,
-    "title_en": "Components, interfaces and component models",
-    "title_ar": "المكونات والواجهات ونماذج المكونات",
-    "slides": "Lecture slides 4–8 · source slides 3–22"
+    "title_en": "Seat 1",
+    "title_ar": "المقعد 1",
+    "slides": ""
    },
    {
     "id": 22,
     "part_no": 2,
-    "title_en": "Development for reuse and with reuse; validation",
-    "title_ar": "التطوير لإعادة الاستخدام والتطوير بإعادة الاستخدام والتحقق",
-    "slides": "Lecture slides 10–12 · source slides 23–39"
+    "title_en": "Seat 2",
+    "title_ar": "المقعد 2",
+    "slides": ""
    },
    {
     "id": 23,
     "part_no": 3,
-    "title_en": "Composition, adapters and interface semantics",
-    "title_ar": "التركيب والمحوّلات ودلالات الواجهات",
-    "slides": "Lecture slides 13 and 15–17 · source slides 40–59"
+    "title_en": "Seat 3",
+    "title_ar": "المقعد 3",
+    "slides": ""
    }
   ]
  },
@@ -67,23 +100,23 @@ var LECTURES = [
    {
     "id": 31,
     "part_no": 1,
-    "title_en": "Design issues, scaling and timeouts",
-    "title_ar": "قضايا التصميم والتوسّع ومهلة الانتظار",
-    "slides": "Lecture slides 4–7 · source slides 3–14"
+    "title_en": "Seat 1",
+    "title_ar": "المقعد 1",
+    "slides": ""
    },
    {
     "id": 32,
     "part_no": 2,
-    "title_en": "Interaction models, middleware and client–server",
-    "title_ar": "نماذج التفاعل والبرمجيات الوسيطة ونموذج العميل والخادم",
-    "slides": "Lecture slides 8, 10 and 11 · source slides 15–28"
+    "title_en": "Seat 2",
+    "title_ar": "المقعد 2",
+    "slides": ""
    },
    {
     "id": 33,
     "part_no": 3,
-    "title_en": "Architectural patterns, SaaS and multi-tenancy",
-    "title_ar": "الأنماط المعمارية والبرمجيات كخدمة وتعدد المستأجرين",
-    "slides": "Lecture slides 12 and 14–17 · source slides 29–66"
+    "title_en": "Seat 3",
+    "title_ar": "المقعد 3",
+    "slides": ""
    }
   ]
  },
@@ -100,23 +133,23 @@ var LECTURES = [
    {
     "id": 41,
     "part_no": 1,
-    "title_en": "Characteristics, complexity and classification",
-    "title_ar": "الخصائص والتعقيد والتصنيف",
-    "slides": "Lecture slides 4–7 · source slides 3–26"
+    "title_en": "Seat 1",
+    "title_ar": "المقعد 1",
+    "slides": ""
    },
    {
     "id": 42,
     "part_no": 2,
-    "title_en": "Engineering, interfaces, deployment and testing",
-    "title_ar": "الهندسة والواجهات والنشر والاختبار",
-    "slides": "Lecture slides 9–12 · source slides 27–43"
+    "title_en": "Seat 2",
+    "title_ar": "المقعد 2",
+    "slides": ""
    },
    {
     "id": 43,
     "part_no": 3,
-    "title_en": "Architecture principles and the three patterns",
-    "title_ar": "مبادئ المعمارية والأنماط الثلاثة",
-    "slides": "Lecture slides 14–17 · source slides 44–63"
+    "title_en": "Seat 3",
+    "title_ar": "المقعد 3",
+    "slides": ""
    }
   ]
  },
@@ -133,23 +166,23 @@ var LECTURES = [
    {
     "id": 51,
     "part_no": 1,
-    "title_en": "Testing strategies and levels",
-    "title_ar": "استراتيجيات الاختبار ومستوياته",
-    "slides": "Study guide section 1 · Sommerville 8.1–8.4"
+    "title_en": "Seat 1",
+    "title_ar": "المقعد 1",
+    "slides": ""
    },
    {
     "id": 52,
     "part_no": 2,
-    "title_en": "Writing a test case as evidence",
-    "title_ar": "كتابة حالة الاختبار دليلًا",
-    "slides": "Study guide section 2"
+    "title_en": "Seat 2",
+    "title_ar": "المقعد 2",
+    "slides": ""
    },
    {
     "id": 53,
     "part_no": 3,
-    "title_en": "Coverage measures, tools and the worked example",
-    "title_ar": "مقاييس التغطية وأدواتها والمثال المحلول",
-    "slides": "Study guide sections 3–5"
+    "title_en": "Seat 3",
+    "title_ar": "المقعد 3",
+    "slides": ""
    }
   ]
  }

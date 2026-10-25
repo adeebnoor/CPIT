@@ -997,6 +997,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Flipped lectures: seat booking page and learning-path card",
    "repinned": []
+  },
+  {
+   "revision": "20261025-flip-five",
+   "date": "2026-10-25",
+   "base_release": "20260926-genai-v12",
+   "summary": "Flipped lectures: five lectures from 29 October; cards show name, topic and what is required",
+   "repinned": []
   }
  ]
 }
