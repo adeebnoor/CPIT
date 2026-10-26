@@ -312,7 +312,7 @@
    "stress_path": "lectures/iscarb/reveal/r15-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch15-mastery-v2",
-   "assignment_sha256_lf": "23e3c0f7ff1647e8b8113a576544c1919b0958ed77ffd7ac67c479af2b0a7637",
+   "assignment_sha256_lf": "0dee7c769e302d95dc6ad2728f92c841f58d7e802fa86e92b3a9ad931af6eb31",
    "stress_sha256_lf": "164afc01e80cc4daaad15e4edc6269af5e6a674209a4974676bbd7ee20d43cea"
   },
   "16": {
@@ -320,7 +320,7 @@
    "stress_path": "lectures/iscarb/reveal/r16-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch16-mastery-v2",
-   "assignment_sha256_lf": "f494b0e2320863b264d3e72eda3aa8bd4b7a252f135b3403f9e9a17195b6ee3e",
+   "assignment_sha256_lf": "48b5f6d6cf0256159152684041857ef31aeb5a9648e72f46dcaa23181c055991",
    "stress_sha256_lf": "8e1354e99b8f1f55dc829d76e9bc2a77422b5b91ca4d818079a0e1cd5054fd21"
   },
   "17": {
@@ -328,7 +328,7 @@
    "stress_path": "lectures/iscarb/reveal/r17-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch17-mastery-v2",
-   "assignment_sha256_lf": "263cb27c3794dd7be27d1f1f1243aab8bd2478bdf0055558d12ebb50218e1969",
+   "assignment_sha256_lf": "9cba738d0ba2702d90d0dcf4f7e7bd337ee3fe5fcf037d4a49d474e029ebcfd4",
    "stress_sha256_lf": "d4c16ae918e2aab408fe2aadbeec150d785b7cac46a2defd257539179b6cbbd2"
   },
   "20": {
@@ -336,7 +336,7 @@
    "stress_path": "lectures/iscarb/reveal/r20-mastery-v2.json",
    "edition": "mastery-v2",
    "version": "2026-09-ch20-mastery-v2",
-   "assignment_sha256_lf": "0b5797b5bd105b33e3b302bbfc1152f704092c2728104a5811664b7c527d089a",
+   "assignment_sha256_lf": "9e1762a947948e2536f2a0651a3e24d4e2da0e3cecbf2f8d39aee7b0358891be",
    "stress_sha256_lf": "fd5f404421f8ac37b2dbf288c256b49606e699bd33cd73370e5b24bf0c754bfb"
   }
  },
@@ -1004,6 +1004,18 @@
    "base_release": "20260926-genai-v12",
    "summary": "Flipped lectures: five lectures from 29 October; cards show name, topic and what is required",
    "repinned": []
+  },
+  {
+   "revision": "20261026-fcit-ai-policy",
+   "date": "2026-10-26",
+   "base_release": "20260926-genai-v12",
+   "summary": "FCIT Generative AI Policy, Option C: AI level of every assessment, syllabus statement and acknowledgment wording",
+   "repinned": [
+    "assignment 15",
+    "assignment 16",
+    "assignment 17",
+    "assignment 20"
+   ]
   }
  ]
 }
