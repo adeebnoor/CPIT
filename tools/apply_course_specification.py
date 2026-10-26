@@ -19,7 +19,7 @@ from course_shell import header, footer, dependencies, VERSION  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / 'course-specification.html'
 STD = 'assets/standards/'
-DATE = '24 October 2026'
+DATE = '26 October 2026'
 CODE_NEW = 'IT 456 Dependable Systems'
 TEMPLATES = {  # source path given on the command line (first run only) → published name
     't104en': 'ETEC-NCAAA-T-104-Course-Specification-V2022-EN.docx',
@@ -43,7 +43,7 @@ ISCARB = [  # (element, what students do, T-104 section it serves, outcomes and 
     ('Commit, then STRESS, then REFIT', 'Commit the initial reasoning before a changed condition is revealed, then retain, revise or replace the decision with justification.',
      'D · assessment design; F · effectiveness of student assessment', 'Values, autonomy and responsibility'),
     ('AI-use rules and declaration; human sign-off', 'Follow the AI rules for each step and declare any assistance; the final decision and wording remain the student\'s.',
-     'F; NELC alignment', 'Values, autonomy and responsibility'),
+     'D.1 · use of Generative AI (FCIT policy, Option C); F; NELC alignment', 'Values, autonomy and responsibility'),
     ('Micro-viva and in-class check', 'Explain and change one\'s own work in a short oral or written check.',
      'D; F · effectiveness of student assessment', 'Skills; values, autonomy and responsibility'),
     ('Four-level rubrics with calibration examples', 'Every criterion is assessed at 1, 0.75, 0.5 or 0, with strong and weak examples shown in advance.',
@@ -92,7 +92,47 @@ CONTENT = [  # (topic, weeks, number of weeks, chapter, assessment)
 ASSESS = [('Assignments 1–9 (written analysis and, from Assignment 3, a Python build)', 'After each chapter, weeks 2–14', 30),
           ('Midterm examination (written test), Chapters 10–14', 'After Chapter 14 (20 October 2026)', 30),
           ('Final examination (written test), the whole course', 'Final examination period', 30),
-          ('Participation (preparation, in-class activities and questions)', 'Weeks 1–15', 10)]
+          ('Participation (preparation, in-class activities and questions; an optional flipped-lecture presentation counts for up to 3 of the 10 marks)', 'Weeks 1–15', 10)]
+
+# ---- D.1 · Use of Generative AI: FCIT Generative AI Policy Guide for Course Syllabus, Option C (Mixed Approach) ----
+# The statement is the guide's Option C syllabus statement. Each row gives the permitted level, what it allows, and the
+# acknowledgment asked for (the guide's appendix options). Assignment pages state the same levels (tools/apply_ai_integrity.py).
+AI_GUIDE = 'FCIT Generative AI Policy Guide for Course Syllabus'
+AI_STATEMENT = ('This course adopts a balanced approach to the use of Generative AI. Depending on the intended learning outcomes, '
+                'assessments may be designated as AI-Free, AI-Assisted, or AI-Integrated. The instructor will specify the permitted '
+                'level of AI use for each assessment. Students remain responsible for demonstrating their own understanding and '
+                'complying with the AI requirements specified for each assessment. Unauthorized use of AI beyond the permitted level '
+                'may be treated as academic misconduct.')
+AI_STATEMENT_AR = ('يتبنّى هذا المقرر نهجًا متوازنًا في استخدام الذكاء الاصطناعي التوليدي. فبحسب نواتج التعلم المقصودة، يُصنَّف كل تقييم '
+                   'على أنه بدون ذكاء اصطناعي، أو بمساعدة الذكاء الاصطناعي، أو مدمج فيه الذكاء الاصطناعي، ويحدد الأستاذ المستوى المسموح '
+                   'لكل تقييم. ويبقى الطالب مسؤولًا عن إثبات فهمه بنفسه والالتزام بمتطلبات الذكاء الاصطناعي المحددة لكل تقييم، '
+                   'واستخدام الذكاء الاصطناعي بما يتجاوز المستوى المسموح قد يُعامل مخالفةً أكاديمية.')
+AI_LEVELS = [  # (assessment, AI level, what is permitted, acknowledgment)
+    ('Assignments 1–5 (Chapters 10–14)', 'AI-Assisted (as instructed on the assignment page)',
+     'AI may assist. The student checks every calculation and engineering claim against the lecture, the scenario and the supplied '
+     'evidence, and never presents an AI-generated rate or test result as measured evidence. From Assignment 3, a build the student '
+     'cannot explain or change in the micro-viva loses its credit.',
+     'AI-use declaration on the assignment page, or “No AI used.”'),
+    ('Assignments 6–9 · Part A (FIT, COMPARE, BOUND, ACT and EVIDENCE, reading, second idea), including the critique of the AI draft in the scenario',
+     'AI-Free', 'Written without AI. The AI draft in the scenario is supplied material to critique, not a tool to use.',
+     'Declaration (guide appendix, Option 1, for Part A)'),
+    ('Assignments 6–9 · Python build', 'AI-Assisted',
+     'AI may explain an error message. It does not write the functions or the tests; the student reviews, tests and modifies the code '
+     'and can explain every part of it.', 'Declaration (guide appendix, Option 4: programming assistance)'),
+    ('Assignments 6–9 · after commitment (STRESS and REFIT)', 'AI-Assisted',
+     'AI may question the student’s reasoning. The final decision and its wording are the student’s.', 'Declaration naming the step'),
+    ('Micro-viva and in-class check (Assignments 6–9)', 'AI-Free',
+     'Oral, or on paper with no devices, about the student’s own submission.', 'None'),
+    ('Midterm examination', 'AI-Free', 'Written test on paper.', 'None'),
+    ('Final examination', 'AI-Free', 'Written test.', 'None'),
+    ('Participation · in-class practice stations', 'AI-Assisted · for learning (as shown on the slide)',
+     'The student starts without AI, then may use it to check an answer, and discloses any assistance on the practice card.',
+     'Disclosure on the practice card'),
+    ('Participation · flipped-lecture presentation (optional, up to 3 marks)', 'AI-Assisted',
+     'AI may help to brainstorm and to improve the language of the draft. The summary, the source-slide numbers, the new example and the '
+     'quiz question are the student’s own and are checked against the slides; the presentation and the answers to questions are given live, without AI.',
+     'One line at the end of the draft (guide appendix, Options 2 and 3), or “No AI used.”'),
+]
 MATRIX_COLS = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'Midterm', 'Final']
 MATRIX = {1: {'A1', 'A2', 'Midterm', 'Final'}, 2: {'A1', 'A2', 'A4', 'Midterm', 'Final'}, 3: {'A2', 'Midterm', 'Final'},
           4: {'A3', 'Midterm', 'Final'}, 5: {'A4', 'Midterm', 'Final'}, 6: {'A5', 'Midterm', 'Final'},
@@ -113,6 +153,8 @@ STYLE = '''<style>
 .spec-toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;padding:0;list-style:none}
 .matrix td,.matrix th{text-align:center}.matrix td:first-child,.matrix th:first-child{text-align:left}
 .spec-sub{margin-top:1.4rem}
+.ai-statement{margin:10px 0;padding:10px 14px;border-inline-start:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.ai-statement p{margin:.3rem 0}
 .dom{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:700}
 @media (max-width:700px){.table-scroll table.stack{min-width:0}.stack thead{display:none}.stack,.stack tbody,.stack tr,.stack td{display:block;width:100%;box-sizing:border-box}
 .stack tr{padding:10px 0;border-bottom:1px solid var(--line)}.stack td{border:0;padding:4px 12px;min-width:0!important}
@@ -145,7 +187,7 @@ def build_page():
         ('Program', 'Bachelor of Science in Information Technology'),
         ('Department and faculty', 'Department of Information Technology, Faculty of Computing and Information Technology, King Abdulaziz University'),
         ('Course coordinator and instructor', 'Prof. Adeeb Noor'),
-        ('Version and date', f'Version 2.0 · {DATE}'),
+        ('Version and date', f'Version 2.1 · {DATE}'),
         ('Scope', 'The course as delivered in Fall 2026. The approved course specification is held in the department course file.'),
     ])
     t_a = table(['Item', 'Detail'], [
@@ -166,12 +208,14 @@ def build_page():
         ('Facilities', 'Lecture room; the weekly 90-minute practical session'),
         ('Technology equipment', 'Projector; a current web browser. Python runs within the browser without installation.'),
     ])
+    t_ai = table(['Assessment', 'AI level', 'What is permitted', 'Acknowledgment'],
+                 [(E(a), f'<b>{E(b)}</b>', E(c), E(d)) for a, b, c, d in AI_LEVELS])
     t_f = table(['Assessment area', 'Assessor', 'Assessment method'], [
         ('Effectiveness of teaching', 'Students; course coordinator', 'University course-evaluation survey (indirect); coordination meetings and peer review (direct)'),
         ('Effectiveness of student assessment', 'Faculty', 'Four-level rubrics with calibration examples; commit before STRESS; micro-viva and in-class check of the written work against the student\'s explanation (direct)'),
         ('Quality of learning resources', 'Students; faculty', 'Survey (indirect); review of each chapter\'s source ledger against the textbook and slide pack (direct)'),
         ('Extent to which CLOs are achieved', 'Faculty; program leadership', 'Rubric criteria and examination items mapped to CLOs (section 3), reported in the end-of-semester course report (direct)'),
-        ('AI-supported learning', 'Faculty', 'AI-use declarations and the NELC alignment (indirect)'),
+        ('AI-supported learning', 'Faculty', 'AI-use declarations checked against the AI level of each assessment (D.1, FCIT Generative AI Policy, Option C); the NELC alignment (indirect)'),
     ])
     so_note = ('<p><b>Student outcomes.</b> <b>SO 2</b> · Design, implement, and evaluate a computing-based solution to meet a given '
                'set of computing requirements in the context of the program’s discipline. <b>SO 6 (IT)</b> · Use systemic approaches '
@@ -205,6 +249,11 @@ def build_page():
 <h3 class="spec-sub" id="spec-d">D · Student assessment activities, Fall 2026</h3>
 {table(['No', 'Assessment activity', 'Timing', 'Weight'], assess_rows)}
 <p>How assignment points are converted to marks is explained in <a href="assignment-example.html#grading">How the course is graded</a>.</p>
+<h3 class="spec-sub" id="ai-policy">D.1 · Use of Generative AI <span class="vs-ar-t" lang="ar" dir="rtl">استخدام الذكاء الاصطناعي التوليدي</span></h3>
+<p>The course follows the <b>{AI_GUIDE}</b> of the Faculty of Computing and Information Technology and adopts its <b>Option C, Mixed Approach</b>, which the guide recommends when assessments have different learning outcomes or different levels of permitted AI use. Syllabus statement:</p>
+<blockquote class="ai-statement"><p>{AI_STATEMENT}</p><p lang="ar" dir="rtl">{AI_STATEMENT_AR}</p></blockquote>
+<p>The permitted level of each assessment in Fall 2026 is given below. No assessment in this course is AI-Integrated. Each assignment page states the same level for each step, and the acknowledgment wording follows the appendix of the guide.</p>
+{t_ai}
 <h3 class="spec-sub" id="spec-e">E · Learning resources and facilities</h3>
 {t_e}
 <h3 class="spec-sub" id="spec-f">F · Assessment of course quality</h3>
@@ -225,6 +274,7 @@ def build_page():
         (f'<a href="{STD}{TEMPLATES["t104ar"]}">ETEC/NCAAA T-104 توصيف المقرر، إصدار 2022 (عربي، Word)</a>', 'Arabic version of the same template.'),
         ('<a href="methodology.html">iSCARB methodology</a>', 'The teaching and assessment framework of the course.'),
         ('<a href="nelc-alignment.html">Saudi alignment</a>', 'Jaheziah and NELC alignment of every chapter.'),
+        (f'{AI_GUIDE} · Faculty of Computing and Information Technology', '<a href="#ai-policy">Option C, Mixed Approach</a>, adopted in D.1: the AI level of every assessment, and the acknowledgment wording of the guide’s appendix on the assignment pages.'),
     ])}</section>
 </main>'''
 

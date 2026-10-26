@@ -3,7 +3,8 @@
 Chapters 15, 16, 17 and 20 only. Three changes, decided by the instructor after the midterm
 (assignment marks were near full while the paper midterm averaged 73%):
 
-1. AI rules per step. Part A is written without AI; the build may use AI only to explain an
+1. AI rules per step, with the AI level of the FCIT Generative AI Policy Guide (Option C, Mixed Approach):
+   Part A is AI-Free; the build may use AI only to explain an
    error message; after commitment AI may question the student's reasoning. Shown in English
    and Arabic in a card under "Before you start", and named again in the AI-use declaration.
 2. An AI assistant's draft with planted errors. Assignments 6 and 9 already reviewed a flawed
@@ -67,38 +68,54 @@ PROMPTS = {
 FIELD_ID = {'fit': 'fit', 'measure': 'measure'}
 
 # ---- 1. AI rules and 3. in-class check ------------------------------------------------------
+AIF = ('AI-Free', 'بدون ذكاء اصطناعي')
+AIA = ('AI-Assisted', 'بمساعدة الذكاء الاصطناعي')
+AIA_LEARN = ('AI-Assisted · for learning', 'بمساعدة الذكاء الاصطناعي · للتعلّم')
+REQ = ('Required', 'مطلوب')
+POLICY_EN = ('<b>FCIT Generative AI Policy, Option C (Mixed Approach).</b> Each step below has its own permitted AI level. '
+             'You remain responsible for showing your own understanding, and using AI beyond the permitted level may be '
+             'treated as academic misconduct. The level of every assessment is listed in the '
+             '<a href="../../course-specification.html#ai-policy">course specification</a>.')
+POLICY_AR = ('<b>سياسة الذكاء الاصطناعي التوليدي في كلية الحاسبات وتقنية المعلومات، الخيار C (النهج المختلط).</b> لكل خطوة '
+             'أدناه مستوى مسموح لاستخدام الذكاء الاصطناعي. وتبقى مسؤولًا عن إثبات فهمك بنفسك، واستخدام الذكاء الاصطناعي بما '
+             'يتجاوز المستوى المسموح قد يُعامل مخالفةً أكاديمية. ومستوى كل تقييم في المقرر مذكور في '
+             '<a href="../../course-specification.html#ai-policy">توصيف المقرر</a>.')
+# (step, rule, step in Arabic, rule in Arabic, AI level, AI level in Arabic). Levels follow the FCIT Generative AI
+# Policy Guide, Option C (Mixed Approach); the level of every assessment is listed in the course specification (D).
 RULES = [
     ('Studying the lecture before you start', 'AI may explain an idea and ask you to restate it in your own words. It may not answer this case.',
-     'قبل البدء: مذاكرة المحاضرة', 'يمكن للذكاء الاصطناعي أن يشرح فكرة ويطلب منك إعادة صياغتها بكلامك، ولا يجيب عن حالة هذا الواجب.'),
+     'قبل البدء: مذاكرة المحاضرة', 'يمكن للذكاء الاصطناعي أن يشرح فكرة ويطلب منك إعادة صياغتها بكلامك، ولا يجيب عن حالة هذا الواجب.', *AIA_LEARN),
     ('Part A answers (FIT, COMPARE, BOUND, ACT + EVIDENCE, reading, second idea)', 'No AI. Write them yourself.',
-     'إجابات الجزء A', 'بدون ذكاء اصطناعي. اكتبها بنفسك.'),
+     'إجابات الجزء A', 'بدون ذكاء اصطناعي. اكتبها بنفسك.', *AIF),
     ('The AI draft in the scenario', 'It is the material you critique. Find the claims the supplied facts do not support.',
-     'مسودة الذكاء الاصطناعي في الحالة', 'هي المادة التي تنقدها: حدّد الادعاءات التي لا تدعمها الحقائق المعطاة.'),
+     'مسودة الذكاء الاصطناعي في الحالة', 'هي المادة التي تنقدها: حدّد الادعاءات التي لا تدعمها الحقائق المعطاة.', *AIF),
     ('Python build', 'AI may explain an error message. It may not write your functions or your tests.',
-     'البناء في بايثون', 'يمكن للذكاء الاصطناعي أن يشرح رسالة الخطأ، ولا يكتب دوالك ولا اختباراتك.'),
+     'البناء في بايثون', 'يمكن للذكاء الاصطناعي أن يشرح رسالة الخطأ، ولا يكتب دوالك ولا اختباراتك.', *AIA),
     ('After you commit (STRESS and REFIT)', 'AI may question your reasoning. The final decision and the words are yours.',
-     'بعد تثبيت الجزء A', 'يمكن للذكاء الاصطناعي أن يسألك عن تفكيرك، والقرار الأخير وصياغته لك.'),
+     'بعد تثبيت الجزء A', 'يمكن للذكاء الاصطناعي أن يسألك عن تفكيرك، والقرار الأخير وصياغته لك.', *AIA),
     ('AI-use declaration', 'Name the tool and the steps where you used it, what you changed because of it, and what you chose not to take, and why.',
-     'تصريح استخدام الذكاء الاصطناعي', 'اذكر الأداة والخطوات التي استخدمتها فيها، وما غيّرته بسببها، وما رفضت أخذه ولماذا.'),
+     'تصريح استخدام الذكاء الاصطناعي', 'اذكر الأداة والخطوات التي استخدمتها فيها، وما غيّرته بسببها، وما رفضت أخذه ولماذا.', *REQ),
 ]
-CHECK_EN = ('<b>In-class check.</b> In the lecture after the deadline you answer two short questions on paper, '
+CHECK_EN = ('<b>In-class check · AI-Free.</b> In the lecture after the deadline you answer two short questions on paper, '
             'with no devices, about your own submission: a small change to your code (which test fails, and why) '
             'and one new fact (does your decision change?). It takes about 10 minutes. Both answers correct: your '
             'assignment mark stands. One correct: your mark is halved. Neither: a two-minute conversation with the '
             'instructor decides the mark. If you miss that lecture with an accepted excuse, the check is done in '
             'office hours. This applies the ownership rule on every assignment: your written work and your own '
             'explanation must agree.')
-CHECK_AR = ('<b>التحقق في المحاضرة.</b> في المحاضرة التي تلي موعد التسليم تجيب على ورق، وبدون أي جهاز، عن سؤالين قصيرين '
+CHECK_AR = ('<b>التحقق في المحاضرة · بدون ذكاء اصطناعي.</b> في المحاضرة التي تلي موعد التسليم تجيب على ورق، وبدون أي جهاز، عن سؤالين قصيرين '
             'حول واجبك أنت: تغيير صغير في الكود (أي اختبار سيفشل ولماذا)، ومعلومة جديدة (هل يتغير قرارك؟). يستغرق نحو '
             '10 دقائق. إذا كانت الإجابتان صحيحتين تبقى درجة الواجب كما هي، وإذا كانت إجابة واحدة صحيحة تصبح نصف الدرجة، '
             'وإذا لم تصح أي منهما تُحدَّد الدرجة بعد نقاش قصير مع الأستاذ مدته دقيقتان. ومن غاب عن تلك المحاضرة بعذر مقبول '
             'يُجري التحقق في الساعات المكتبية. هذا تطبيق لقاعدة الملكية الموجودة في كل واجب: يجب أن يتفق ما كتبته مع شرحك له.')
 
 def rules_card() -> str:
-    items = ''.join(f'<li><p><b>{ESC(a)}.</b> {ESC(b)}</p><p lang="ar" dir="rtl"><b>{ESC(c)}:</b> {ESC(d)}</p></li>'
-                    for a, b, c, d in RULES)
+    items = ''.join(f'<li><p><b>{ESC(a)}.</b> <span class="ai-level">{ESC(le)}:</span> {ESC(b)}</p>'
+                    f'<p lang="ar" dir="rtl"><b>{ESC(c)}:</b> <span class="ai-level">{ESC(la)}:</span> {ESC(d)}</p></li>'
+                    for a, b, c, d, le, la in RULES)
     return ('<!-- ai-rules:start --><section class="card" id="ai-rules"><h2>AI rules and the in-class check</h2>'
             '<p lang="ar" dir="rtl"><b>قواعد الذكاء الاصطناعي والتحقق في المحاضرة</b></p>'
+            f'<p>{POLICY_EN}</p><p lang="ar" dir="rtl">{POLICY_AR}</p>'
             '<ul class="ai-rules-list">' + items + '</ul>'
             f'<p>{CHECK_EN}</p><p lang="ar" dir="rtl">{CHECK_AR}</p>' + GUIDE_LINK + '</section><!-- ai-rules:end -->')
 
@@ -117,9 +134,15 @@ ROW = ('<tr data-row="in-class-check"><th scope="row">IN-CLASS CHECK · required
        'in-class check</a>.</td></tr>')
 DECL_OLD = ('If AI was used, name the tool, what it helped with, and how you independently checked any calculation or '
             'engineering claim against the lecture, scenario and supplied evidence.')
-DECL_NEW = ('If AI was used, name the tool and the steps where you used it (see the AI rules at the top of this page), '
-            'what you changed because of it, and what you chose not to take, and why. Check any calculation or '
-            'engineering claim against the lecture, scenario and supplied evidence.')
+DECL_V1 = ('If AI was used, name the tool and the steps where you used it (see the AI rules at the top of this page), '
+           'what you changed because of it, and what you chose not to take, and why. Check any calculation or '
+           'engineering claim against the lecture, scenario and supplied evidence.')
+# The acknowledgment wording is adapted from the appendix of the FCIT Generative AI Policy Guide (Options 1 and 4).
+DECL_NEW = (DECL_V1 + ' You may use the FCIT acknowledgment wording. Part A: “I confirm that Part A is entirely my own '
+            'work and that no Generative AI tools were used in it.” Python build: “I used [AI tool] to explain an error '
+            'message. I reviewed, tested and modified the code, and I understand and can explain every part of it.”')
+HEAD_OLD = '<h2>AI may assist. You own the claim.</h2>'
+HEAD_NEW = '<h2>Declare your AI use. You own the claim.</h2>'
 
 
 def once(text: str, old: str, new: str, ch: int, what: str) -> str:
@@ -201,7 +224,10 @@ def patch(ch: int) -> None:
         assert text.count(ROW_ANCHOR) == 1, ch
         at = text.index('</tr>', text.index(ROW_ANCHOR)) + len('</tr>')
         text = text[:at] + ROW + text[at:]
+    if DECL_NEW not in text and DECL_V1 in text:
+        text = text.replace(DECL_V1, DECL_NEW)
     text = once(text, DECL_OLD, DECL_NEW, ch, 'AI-use declaration hint')
+    text = once(text, HEAD_OLD, HEAD_NEW, ch, 'declaration heading (Part A is AI-Free)')
     path.write_text(text)
     print('AI rules, AI draft and in-class check applied to Chapter', ch)
 
@@ -223,7 +249,8 @@ def _card(head_en, head_ar, good, bad, good_mark='✓', bad_mark='✗'):
 
 def guide_section() -> str:
     rules = ''.join(f'<tr><th scope="row">{ESC(a)}<br/><span lang="ar" dir="rtl">{ESC(c)}</span></th>'
-                    f'<td>{ESC(b)}<br/><span lang="ar" dir="rtl">{ESC(d)}</span></td></tr>' for a, b, c, d in RULES)
+                    f'<td><b>{ESC(le)}:</b> {ESC(b)}<br/><span lang="ar" dir="rtl"><b>{ESC(la)}:</b> {ESC(d)}</span></td></tr>'
+                    for a, b, c, d, le, la in RULES)
     h3 = lambda en, ar: f'<h3>{en} <span lang="ar" dir="rtl" style="display:block;font-weight:600;font-size:.9em">{ar}</span></h3>'
     show = lambda en, ar, body: (f'<details class="faq"><summary><b>{en}</b> <span lang="ar" dir="rtl">{ar}</span></summary>'
                                  f'{body}</details>')
@@ -275,9 +302,12 @@ def guide_section() -> str:
 
 FAQ_AI_OLD = ('<p>Yes, if you declare it and check its output. If you cannot explain or change your own code in the '
               'micro-viva, the build loses its credit.</p>')
-FAQ_AI_NEW = ('<p>Yes, if you declare it and check its output. If you cannot explain or change your own code in the '
-              'micro-viva, the build loses its credit. In Assignments 6–9, Part A is written without AI: see '
-              '<a href="#new-6-9">what AI may do in each step</a>.</p>')
+FAQ_AI_V1 = ('<p>Yes, if you declare it and check its output. If you cannot explain or change your own code in the '
+             'micro-viva, the build loses its credit. In Assignments 6–9, Part A is written without AI: see '
+             '<a href="#new-6-9">what AI may do in each step</a>.</p>')
+FAQ_AI_NEW = FAQ_AI_V1[:-4] + (' The course follows the FCIT Generative AI Policy, Option C (Mixed Approach): the AI level '
+                               'of every assessment is listed in the <a href="course-specification.html#ai-policy">course '
+                               'specification</a>. The examinations and the in-class check are AI-Free.</p>')
 INTRO_NAV_OLD = '<a href="#faq">7 · Questions students ask</a></p>'
 INTRO_NAV_V1 = ('<a href="#faq">7 · Questions students ask</a> · <a href="#new-6-9"><b>New in Assignments 6–9</b></a></p>'
                 '<p class="vs-lead"><b>Doing Assignment 6, 7, 8 or 9?</b> Read <a href="#new-6-9">what is new</a> first: AI '
@@ -347,6 +377,8 @@ def patch_guides() -> None:
         faq = '<section class="section" id="faq">'
         assert t.count(faq) == 1
         t = t.replace(faq, guide_section() + '\n' + faq)
+    if FAQ_AI_NEW not in t and FAQ_AI_V1 in t:
+        t = t.replace(FAQ_AI_V1, FAQ_AI_NEW)
     t = once(t, FAQ_AI_OLD, FAQ_AI_NEW, 0, 'example FAQ on AI')
     for older in (INTRO_NAV_V1, INTRO_NAV_V2):
         if older in t:
