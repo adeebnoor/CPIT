@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-iscarb-standalone="1"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ch8 · complete source review</title><link rel="stylesheet" href="../../../course-shell.css?v=20260928-campus-v3"><script src="../../../course-shell.js?v=20260928-campus-v3" defer></script><script>try{document.documentElement.dataset.theme=localStorage.getItem('iscarb-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}</script></head><body class="source-page" id="top"><a class="skip" href="#main">Skip to source content</a><header class="site-header" data-surface="source"><div class="site-masthead">
+<a class="site-brand" href="../../../iscarb.html"><img src="../../../assets/fcit-kau-logo.png" width="48" height="48" alt="FCIT, King Abdulaziz University"><span><strong>iSCARB</strong><small>CPIT-455 · King Abdulaziz University</small></span></a>
+<div class="site-utilities"><a class="profile-link" href="https://adeebnoor.github.io/">About &amp; contact <span aria-hidden="true">↗</span></a><button class="theme" id="themeBtn" type="button">Dark mode</button></div>
+<button class="nav-toggle" id="navToggle" type="button" aria-controls="courseNav" aria-expanded="false">Menu <span aria-hidden="true">☰</span></button></div>
+<nav class="site-nav" id="courseNav" aria-label="Course navigation"><a href="../../../iscarb.html">Learning path</a><a href="../../../student-guide.html">How to study</a><a href="../../../course-resources.html" aria-current="page">Course &amp; sources</a><a href="../../../nelc-alignment.html">Saudi alignment</a><a href="../../../methodology.html">For educators</a><a href="https://qeeem.com/" id="topQeeem" target="_blank" rel="noopener">Evaluation <span aria-hidden="true">↗</span></a></nav></header><main id="main"><nav><a href="../Ch8-Software-Testing.html">← Classroom lecture</a><a href="../../../iscarb.html">Course hub</a><a href="Ch8-Original.pptx">Original source pack</a><a href="../../../code-coverage.html">Code coverage (course page)</a></nav><h1>Chapter 8 · Software Testing and Code Coverage<br>Source review</h1><p class="callout">The original source text and figures remain available. The slide pack is the textbook author’s published slide set for Chapter 8 (Sommerville, <i>Software Engineering</i>, 10th edition). The code-coverage part of the lecture extends source slide 47 with the course page on statement and branch coverage. Classroom activities are labelled separately.</p><h2>Required selections</h2><ul><li>Partition testing and testing guidelines: original slides 26–31</li><li>Test-driven development and regression testing: original slides 43–48</li></ul><p>Apply one named source concept to the chapter artifact and explain its effect. Finish any uncompleted core topic here; material does not become optional merely because it is reviewed after class.</p><nav><a href="#source-slide-1">Original slides · 64</a><a href="#gallery">Preserved source illustrations</a></nav><details id="source-slide-1" class="source"><summary>Slide 1 · Chapter 8 – Software Testing</summary><pre>Chapter 8 – Software Testing</pre></details><details id="source-slide-2" class="source"><summary>Slide 2 · Topics covered</summary><pre>Topics covered
+Development testing
+Test-driven development
+Release testing
+User testing</pre></details><details id="source-slide-3" class="source"><summary>Slide 3 · Program testing</summary><pre>Program testing
+Testing is intended to show that a program does what it is intended to do and to discover program defects before it is put into use.
+When you test software, you execute a program using artificial data.
+You check the results of the test run for errors, anomalies or information about the program’s non-functional attributes.
+Can reveal the presence of errors NOT their absence.
+Testing is part of a more general verification and validation process, which also includes static validation techniques.</pre></details><details id="source-slide-4" class="source"><summary>Slide 4 · Program testing goals</summary><pre>Program testing goals
+To demonstrate to the developer and the customer that the software meets its requirements.
+For custom software, this means that there should be at least one test for every requirement in the requirements document. For generic software products, it means that there should be tests for all of the system features, plus combinations of these features, that will be incorporated in the product release.
+To discover situations in which the behavior of the software is incorrect, undesirable or does not conform to its specification.
+Defect testing is concerned with rooting out undesirable system behavior such as system crashes, unwanted interactions with other systems, incorrect computations and data corruption.</pre></details><details id="source-slide-5" class="source"><summary>Slide 5 · Validation and defect testing</summary><pre>Validation and defect testing
+The first goal leads to validation testing
+You expect the system to perform correctly using a given set of test cases that reflect the system’s expected use.
+The second goal leads to defect testing
+The test cases are designed to expose defects. The test cases in defect testing can be deliberately obscure and need not reflect how the system is normally used.</pre></details><details id="source-slide-6" class="source"><summary>Slide 6 · Testing process goals</summary><pre>Testing process goals
+Validation testing
+To demonstrate to the developer and the system customer that the software meets its requirements
+A successful test shows that the system operates as intended.
+Defect testing
+To discover faults or defects in the software where its behaviour is incorrect or not in conformance with its specification
+A successful test is a test that makes the system perform incorrectly and so exposes a defect in the system.</pre></details><details id="source-slide-7" class="source"><summary>Slide 7 · An input-output model of program testing</summary><pre>An input-output model of program testing</pre><p><img src="../assets/v3/ch8-fig-7.jpg" alt="Source slide 7: An input-output model of program testing" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-8" class="source"><summary>Slide 8 · Verification vs validation</summary><pre>Verification vs validation
+Verification: 	&quot;Are we building the product right”.
+The software should conform to its specification.
+Validation:	 &quot;Are we building the right product”.
+The software should do what the user really requires.</pre></details><details id="source-slide-9" class="source"><summary>Slide 9 · V &amp; V confidence</summary><pre>V &amp; V confidence
+Aim of V &amp; V is to establish confidence that the system is ‘fit for purpose’.
+Depends on system’s purpose, user expectations and marketing environment
+Software purpose
+The level of confidence depends on how critical the software is to an organisation.
+User expectations
+Users may have low expectations of certain kinds of software.
+Marketing environment
+Getting a product to market early may be more important than finding defects in the program.</pre></details><details id="source-slide-10" class="source"><summary>Slide 10 · Inspections and testing</summary><pre>Inspections and testing
+Software inspections Concerned with analysis of the static system representation to discover problems  (static verification)
+May be supplement by tool-based document and code analysis.
+Discussed in Chapter 15.
+Software testing Concerned with exercising and observing product behaviour (dynamic verification)
+The system is executed with test data and its operational behaviour is observed.</pre></details><details id="source-slide-11" class="source"><summary>Slide 11 · Inspections and testing</summary><pre>Inspections and testing</pre><p><img src="../assets/v3/ch8-fig-11.jpg" alt="Source slide 11: Inspections and testing" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-12" class="source"><summary>Slide 12 · Software inspections</summary><pre>Software inspections
+These involve people examining the source representation with the aim of discovering anomalies and defects.
+Inspections not require execution of a system so may be used before implementation.
+They may be applied to any representation of the system (requirements, design,configuration data, test data, etc.).
+They have been shown to be an effective technique for discovering program errors.</pre></details><details id="source-slide-13" class="source"><summary>Slide 13 · Advantages of inspections</summary><pre>Advantages of inspections
+During testing, errors can mask (hide) other errors. Because inspection is a static process, you don’t have to be concerned with interactions between errors.
+Incomplete versions of a system can be inspected without additional costs. If a program is incomplete, then you need to develop specialized test harnesses to test the parts that are available.
+As well as searching for program defects, an inspection can also consider broader quality attributes of a program, such as compliance with standards, portability and maintainability.</pre></details><details id="source-slide-14" class="source"><summary>Slide 14 · Inspections and testing</summary><pre>Inspections and testing
+Inspections and testing are complementary and not opposing verification techniques.
+Both should be used during the V &amp; V process.
+Inspections can check conformance with a specification but not conformance with the customer’s real requirements.
+Inspections cannot check non-functional characteristics such as performance, usability, etc.</pre></details><details id="source-slide-15" class="source"><summary>Slide 15 · A model of the software testing process</summary><pre>A model of the software testing process</pre><p><img src="../assets/v3/ch8-fig-15.jpg" alt="Source slide 15: A model of the software testing process" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-16" class="source"><summary>Slide 16 · Stages of testing</summary><pre>Stages of testing
+Development testing, where the system is tested during development to discover bugs and defects.
+Release testing, where a separate testing team test a complete version of the system before it is released to users.
+User testing, where users or potential users of a system test the system in their own environment.</pre></details><details id="source-slide-17" class="source"><summary>Slide 17 · Development testing</summary><pre>Development testing</pre></details><details id="source-slide-18" class="source"><summary>Slide 18 · Development testing</summary><pre>Development testing
+Development testing includes all testing activities that are carried out by the team developing the system.
+Unit testing, where individual program units or object classes are tested. Unit testing should focus on testing the functionality of objects or methods.
+Component testing, where several individual units are integrated to create composite components. Component testing should focus on testing component interfaces.
+System testing, where some or all of the components in a system are integrated and the system is tested as a whole. System testing should focus on testing component interactions.</pre></details><details id="source-slide-19" class="source"><summary>Slide 19 · Unit testing</summary><pre>Unit testing
+Unit testing is the process of testing individual components in isolation.
+It is a defect testing process.
+Units may be:
+Individual functions or methods within an object
+Object classes with several attributes and methods
+Composite components with defined interfaces used to access their functionality.</pre></details><details id="source-slide-20" class="source"><summary>Slide 20 · Object class testing</summary><pre>Object class testing
+Complete test coverage of a class involves
+Testing all operations associated with an object
+Setting and interrogating all object attributes
+Exercising the object in all possible states.
+Inheritance makes it more difficult to design object class tests as the information to be tested is not localised.</pre></details><details id="source-slide-21" class="source"><summary>Slide 21 · The weather station object interface</summary><pre>The weather station object interface</pre><p><img src="../assets/v3/ch8-fig-21.jpg" alt="Source slide 21: The weather station object interface" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-22" class="source"><summary>Slide 22 · Weather station testing</summary><pre>Weather station testing
+Need to define test cases for reportWeather, calibrate, test, startup and shutdown.
+Using a state model, identify sequences of state transitions to be tested and the event sequences to cause these transitions
+For example:
+Shutdown -&gt; Running-&gt; Shutdown
+Configuring-&gt; Running-&gt; Testing -&gt; Transmitting -&gt; Running
+Running-&gt; Collecting-&gt; Running-&gt; Summarizing -&gt; Transmitting -&gt; Running</pre></details><details id="source-slide-23" class="source"><summary>Slide 23 · Automated testing</summary><pre>Automated testing
+Whenever possible, unit testing should be automated so that tests are run and checked without manual intervention.
+In automated unit testing, you make use of a test automation framework (such as JUnit) to write and run your program tests.
+Unit testing frameworks provide generic test classes that you extend to create specific test cases. They can then run all of the tests that you have implemented and report, often through some GUI, on the success of otherwise of the tests.</pre></details><details id="source-slide-24" class="source"><summary>Slide 24 · Automated test components</summary><pre>Automated test components
+A setup part, where you initialize the system with the test case, namely the inputs and expected outputs.
+A call part, where you call the object or method to be tested.
+An assertion part where you compare the result of the call with the expected result. If the assertion evaluates to true, the test has been successful  if false, then it has failed.</pre></details><details id="source-slide-25" class="source"><summary>Slide 25 · Choosing unit test cases</summary><pre>Choosing unit test cases
+The test cases should show that, when used as expected, the component that you are testing does what it is supposed to do.
+If there are defects in the component, these should be revealed by test cases.
+This leads to 2 types of unit test case:
+The first of these should reflect normal operation of a program and should show that the component works as expected.
+The other kind of test case should be based on testing experience of where common problems arise. It should use abnormal inputs to check that these are properly processed and do not crash the component.</pre></details><details id="source-slide-26" class="source"><summary>Slide 26 · Testing strategies</summary><pre>Testing strategies
+Partition testing, where you identify groups of inputs that have common characteristics and should be processed in the same way.
+You should choose tests from within each of these groups.
+Guideline-based testing, where you use testing guidelines to choose test cases.
+These guidelines reflect previous experience of the kinds of errors that programmers often make when developing components.</pre></details><details id="source-slide-27" class="source"><summary>Slide 27 · Partition testing</summary><pre>Partition testing
+Input data and output results often fall into different classes where all members of a class are related.
+Each of these classes is an equivalence partition or domain where the program behaves in an equivalent way for each class member.
+Test cases should be chosen from each partition.</pre></details><details id="source-slide-28" class="source"><summary>Slide 28 · Equivalence partitioning</summary><pre>Equivalence partitioning</pre><p><img src="../assets/v3/ch8-fig-28.jpg" alt="Source slide 28: Equivalence partitioning" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-29" class="source"><summary>Slide 29 · Equivalence partitions</summary><pre>Equivalence partitions</pre><p><img src="../assets/v3/ch8-fig-29.jpg" alt="Source slide 29: Equivalence partitions" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-30" class="source"><summary>Slide 30 · Testing guidelines (sequences)</summary><pre>Testing guidelines (sequences)
+Test software with sequences which have only a single value.
+Use sequences of different sizes in different tests.
+Derive tests so that the first, middle and last elements of the sequence are accessed.
+Test with sequences of zero length.</pre></details><details id="source-slide-31" class="source"><summary>Slide 31 · General testing guidelines</summary><pre>General testing guidelines
+Choose inputs that force the system to generate all error messages
+Design inputs that cause input buffers to overflow
+Repeat the same input or series of inputs numerous times
+Force invalid outputs to be generated
+Force computation results to be too large or too small.</pre></details><details id="source-slide-32" class="source"><summary>Slide 32 · Component testing</summary><pre>Component testing
+Software components are often composite components that are made up of several interacting objects.
+For example, in the weather station system, the reconfiguration component includes objects that deal with each aspect of the reconfiguration.
+You access the functionality of these objects through the defined component interface.
+Testing composite components should therefore focus on showing that the component interface behaves according to its specification.
+You can assume that unit tests on the individual objects within the component have been completed.</pre></details><details id="source-slide-33" class="source"><summary>Slide 33 · Interface testing</summary><pre>Interface testing
+Objectives are to detect faults due to interface errors or invalid assumptions about interfaces.
+Interface types
+Parameter interfaces Data passed from one method or procedure to another.
+Shared memory interfaces Block of memory is shared between procedures or functions.
+Procedural interfaces Sub-system encapsulates a set of procedures to be called by other sub-systems.
+Message passing interfaces Sub-systems request services from other sub-systems</pre></details><details id="source-slide-34" class="source"><summary>Slide 34 · Interface testing</summary><pre>Interface testing</pre><p><img src="../assets/v3/ch8-fig-34.jpg" alt="Source slide 34: Interface testing" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-35" class="source"><summary>Slide 35 · Interface errors</summary><pre>Interface errors
+Interface misuse
+A calling component calls another component and makes an error in its use of its interface e.g. parameters in the wrong order.
+Interface misunderstanding
+A calling component embeds assumptions about the behaviour of the called component which are incorrect.
+Timing errors
+The called and the calling component operate at different speeds and out-of-date information is accessed.</pre></details><details id="source-slide-36" class="source"><summary>Slide 36 · Interface testing guidelines</summary><pre>Interface testing guidelines
+Design tests so that parameters to a called procedure are at the extreme ends of their ranges.
+Always test pointer parameters with null pointers.
+Design tests which cause the component to fail.
+Use stress testing in message passing systems.
+In shared memory systems, vary the order in which components are activated.</pre></details><details id="source-slide-37" class="source"><summary>Slide 37 · System testing</summary><pre>System testing
+System testing during development involves integrating components to create a version of the system and then testing the integrated system.
+The focus in system testing is testing the interactions between components.
+System testing checks that components are compatible, interact correctly and transfer the right data at the right time across their interfaces.
+System testing tests the emergent behaviour of a system.</pre></details><details id="source-slide-38" class="source"><summary>Slide 38 · System and component testing</summary><pre>System and component testing
+During system testing, reusable components that have been separately developed and off-the-shelf systems may be integrated with newly developed components. The complete system is then tested.
+Components developed by different team members or sub-teams may be integrated at this stage. System testing is a collective rather than an individual process.
+In some companies, system testing may involve a separate testing team with no involvement from designers and programmers.</pre></details><details id="source-slide-39" class="source"><summary>Slide 39 · Use-case testing</summary><pre>Use-case testing
+The use-cases developed to identify system interactions can be used as a basis for system testing.
+Each use case usually involves several system components so testing the use case forces these interactions to occur.
+The sequence diagrams associated with the use case documents the components and interactions that are being tested.</pre></details><details id="source-slide-40" class="source"><summary>Slide 40 · Collect weather data sequence chart</summary><pre>Collect weather data sequence chart</pre><p><img src="../assets/v3/ch8-fig-40.jpg" alt="Source slide 40: Collect weather data sequence chart" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-41" class="source"><summary>Slide 41 · Test cases derived from sequence diagram</summary><pre>Test cases derived from sequence diagram
+An input of a request for a report should have an associated acknowledgement. A report should ultimately be returned from the request.
+You should create summarized data that can be used to check that the report is correctly organized.
+An input request for a report to WeatherStation results in a summarized report being generated.
+Can be tested by creating raw data corresponding to the summary that you have prepared for the test of SatComms and checking that the WeatherStation object correctly produces this summary. This raw data is also used to test the WeatherData object.</pre></details><details id="source-slide-42" class="source"><summary>Slide 42 · Testing policies</summary><pre>Testing policies
+Exhaustive system testing is impossible so testing policies which define the required system test coverage may be developed.
+Examples of testing policies:
+All system functions that are accessed through menus should be tested.
+Combinations of functions (e.g. text formatting) that are accessed through the same menu must be tested.
+Where user input is provided, all functions must be tested with both correct and incorrect input.</pre></details><details id="source-slide-43" class="source"><summary>Slide 43 · Test-driven development</summary><pre>Test-driven development</pre></details><details id="source-slide-44" class="source"><summary>Slide 44 · Test-driven development</summary><pre>Test-driven development
+Test-driven development (TDD) is an approach to program development in which you inter-leave testing and code development.
+Tests are written before code and ‘passing’ the tests is the critical driver of development.
+You develop code incrementally, along with a test for that increment. You don’t move on to the next increment until the code that you have developed passes its test.
+TDD was introduced as part of agile methods such as Extreme Programming. However, it can also be used in plan-driven development processes.</pre></details><details id="source-slide-45" class="source"><summary>Slide 45 · Test-driven development</summary><pre>Test-driven development</pre><p><img src="../assets/v3/ch8-fig-45.jpg" alt="Source slide 45: Test-driven development" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-46" class="source"><summary>Slide 46 · TDD process activities</summary><pre>TDD process activities
+Start by identifying the increment of functionality that is required. This should normally be small and implementable in a few lines of code.
+Write a test for this functionality and implement this as an automated test.
+Run the test, along with all other tests that have been implemented. Initially, you have not implemented the functionality so the new test will fail.
+Implement the functionality and re-run the test.
+Once all tests run successfully, you move on to implementing the next chunk of functionality.</pre></details><details id="source-slide-47" class="source"><summary>Slide 47 · Benefits of test-driven development</summary><pre>Benefits of test-driven development
+Code coverage
+Every code segment that you write has at least one associated test so all code written has at least one test.
+Regression testing
+A regression test suite is developed incrementally as a program is developed.
+Simplified debugging
+When a test fails, it should be obvious where the problem lies. The newly written code needs to be checked and modified.
+System documentation
+The tests themselves are a form of documentation that describe what the code should be doing.</pre></details><details id="source-slide-48" class="source"><summary>Slide 48 · Regression testing</summary><pre>Regression testing
+Regression testing is testing the system to check that changes have not ‘broken’ previously working code.
+In a manual testing process, regression testing is expensive but, with automated testing, it is simple and straightforward. All tests are rerun every time a change is made to the program.
+Tests must run ‘successfully’ before the change is committed.</pre></details><details id="source-slide-49" class="source"><summary>Slide 49 · Release testing</summary><pre>Release testing</pre></details><details id="source-slide-50" class="source"><summary>Slide 50 · Release testing</summary><pre>Release testing
+Release testing is the process of testing a particular release of a system that is intended for use outside of the development team.
+The primary goal of the release testing process is to convince the supplier of the system that it is good enough for use.
+Release testing, therefore, has to show that the system delivers its specified functionality, performance and dependability, and that it does not fail during normal use.
+Release testing is usually a black-box testing process where tests are only derived from the system specification.</pre></details><details id="source-slide-51" class="source"><summary>Slide 51 · Release testing and system testing</summary><pre>Release testing and system testing
+Release testing is a form of system testing.
+Important differences:
+A separate team that has not been involved in the system development, should be responsible for release testing.
+System testing by the development team should focus on discovering bugs in the system (defect testing). The objective of release testing is to check that the system meets its requirements and is good enough for external use (validation testing).</pre></details><details id="source-slide-52" class="source"><summary>Slide 52 · Requirements based testing</summary><pre>Requirements based testing
+Requirements-based testing involves examining each requirement and developing a test or tests for it.
+Mentcare system requirements:
+If a patient is known to be allergic to any particular medication, then prescription of that medication shall result in a warning message being issued to the system user.
+If a prescriber chooses to ignore an allergy warning, they shall provide a reason why this has been ignored.</pre></details><details id="source-slide-53" class="source"><summary>Slide 53 · Requirements tests</summary><pre>Requirements tests
+Set up a patient record with no known allergies. Prescribe medication for allergies that are known to exist. Check that a warning message is not issued by the system.
+Set up a patient record with a known allergy. Prescribe the medication to that the patient is allergic to, and check that the warning is issued by the system.
+Set up a patient record in which allergies to two or more drugs are recorded. Prescribe both of these drugs separately and check that the correct warning for each drug is issued.
+Prescribe two drugs that the patient is allergic to. Check that two warnings are correctly issued.
+Prescribe a drug that issues a warning and overrule that warning. Check that the system requires the user to provide information explaining why the warning was overruled.</pre></details><details id="source-slide-54" class="source"><summary>Slide 54 · A usage scenario for the Mentcare system</summary><pre>A usage scenario for the Mentcare system
+George is a nurse who specializes in mental healthcare. One of his responsibilities is to visit patients at home to check that their treatment is effective and that they are not suffering from medication side effects.
+On a day for home visits, George logs into the Mentcare system and uses it to print his schedule of home visits for that day, along with summary information about the patients to be visited. He requests that the records for these patients be downloaded to his laptop. He is prompted for his key phrase to encrypt the records on the laptop.
+One of the patients that he visits is Jim, who is being treated with medication for depression. Jim feels that the medication is helping him but believes that it has the side effect of keeping him awake at night. George looks up Jim’s record and is prompted for his key phrase to decrypt the record. He checks the drug prescribed and queries its side effects. Sleeplessness is a known side effect so he notes the problem in Jim’s record and suggests that he visits the clinic to have his medication changed. Jim agrees so George enters a prompt to call him when he gets back to the clinic to make an appointment with a physician. George ends the consultation and the system re-encrypts Jim’s record.
+After, finishing his consultations, George returns to the clinic and uploads the records of patients visited to the database. The system generates a call list for George of those patients who He has to contact for follow-up information and make clinic appointments.</pre></details><details id="source-slide-55" class="source"><summary>Slide 55 · Features tested by scenario</summary><pre>Features tested by scenario
+Authentication by logging on to the system.
+Downloading and uploading of specified patient records to a laptop.
+Home visit scheduling.
+Encryption and decryption of patient records on a mobile device.
+Record retrieval and modification.
+Links with the drugs database that maintains side-effect information.
+The system for call prompting.</pre></details><details id="source-slide-56" class="source"><summary>Slide 56 · Performance testing</summary><pre>Performance testing
+Part of release testing may involve testing the emergent properties of a system, such as performance and reliability.
+Tests should reflect the profile of use of the system.
+Performance tests usually involve planning a series of tests where the load is steadily increased until the system performance becomes unacceptable.
+Stress testing is a form of performance testing where the system is deliberately overloaded to test its failure behaviour.</pre></details><details id="source-slide-57" class="source"><summary>Slide 57 · User testing</summary><pre>User testing</pre></details><details id="source-slide-58" class="source"><summary>Slide 58 · User testing</summary><pre>User testing
+User or customer testing is a stage in the testing process in which users or customers provide input and advice on system testing.
+User testing is essential, even when comprehensive system and release testing have been carried out.
+The reason for this is that influences from the user’s working environment have a major effect on the reliability, performance, usability and robustness of a system. These cannot be replicated in a testing environment.</pre></details><details id="source-slide-59" class="source"><summary>Slide 59 · Types of user testing</summary><pre>Types of user testing
+Alpha testing
+Users of the software work with the development team to test the software at the developer’s site.
+Beta testing
+A release of the software is made available to users to allow them to experiment and to raise problems that they discover with the system developers.
+Acceptance testing
+Customers test a system to decide whether or not it is ready to be accepted from the system developers and deployed in the customer environment. Primarily for custom systems.</pre></details><details id="source-slide-60" class="source"><summary>Slide 60 · The acceptance testing process</summary><pre>The acceptance testing process</pre><p><img src="../assets/v3/ch8-fig-60.jpg" alt="Source slide 60: The acceptance testing process" loading="lazy" style="max-width:100%;height:auto"></p></details><details id="source-slide-61" class="source"><summary>Slide 61 · Stages in the acceptance testing process</summary><pre>Stages in the acceptance testing process
+Define acceptance criteria
+Plan acceptance testing
+Derive acceptance tests
+Run acceptance tests
+Negotiate test results
+Reject/accept system</pre></details><details id="source-slide-62" class="source"><summary>Slide 62 · Agile methods and acceptance testing</summary><pre>Agile methods and acceptance testing
+In agile methods, the user/customer is part of the development team and is responsible for making decisions on the acceptability of the system.
+Tests are defined by the user/customer and are integrated with other tests in that they are run automatically when changes are made.
+There is no separate acceptance testing process.
+Main problem here is whether or not the embedded user is ‘typical’ and can represent the interests of all system stakeholders.</pre></details><details id="source-slide-63" class="source"><summary>Slide 63 · Key points</summary><pre>Key points
+Testing can only show the presence of errors in a program. It cannot demonstrate that there are no remaining faults.
+Development testing is the responsibility of the software development team. A separate team should be responsible for testing a system before it is released to customers.
+Development testing includes unit testing, in which you test individual objects and methods  component testing in which you test related groups of objects  and system testing, in which you test partial or complete systems.</pre></details><details id="source-slide-64" class="source"><summary>Slide 64 · Key points</summary><pre>Key points
+When testing software, you should try to ‘break’ the software by using experience and guidelines to choose types of test case that have been effective in discovering defects in other systems.
+Wherever possible, you should write automated tests. The tests are embedded in a program that can be run every time a change is made to a system.
+Test-first development is an approach to development where tests are written before the code to be tested.
+Scenario testing involves inventing a typical usage scenario and using this to derive test cases.
+Acceptance testing is a user testing process where the aim is to decide if the software is good enough to be deployed and used in its operational environment.</pre></details><h2 id="gallery">Preserved source illustrations</h2><figure><img src="../assets/v3/ch8-fig-7.jpg" alt="Source slide 7" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 7 · An input-output model of program testing</figcaption></figure><figure><img src="../assets/v3/ch8-fig-11.jpg" alt="Source slide 11" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 11 · Inspections and testing</figcaption></figure><figure><img src="../assets/v3/ch8-fig-15.jpg" alt="Source slide 15" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 15 · A model of the software testing process</figcaption></figure><figure><img src="../assets/v3/ch8-fig-21.jpg" alt="Source slide 21" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 21 · The weather station object interface</figcaption></figure><figure><img src="../assets/v3/ch8-fig-28.jpg" alt="Source slide 28" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 28 · Equivalence partitioning</figcaption></figure><figure><img src="../assets/v3/ch8-fig-29.jpg" alt="Source slide 29" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 29 · Equivalence partitions</figcaption></figure><figure><img src="../assets/v3/ch8-fig-34.jpg" alt="Source slide 34" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 34 · Interface testing</figcaption></figure><figure><img src="../assets/v3/ch8-fig-40.jpg" alt="Source slide 40" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 40 · Collect weather data sequence chart</figcaption></figure><figure><img src="../assets/v3/ch8-fig-45.jpg" alt="Source slide 45" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 45 · Test-driven development</figcaption></figure><figure><img src="../assets/v3/ch8-fig-60.jpg" alt="Source slide 60" loading="lazy" style="max-width:100%;height:auto"><figcaption>Source slide 60 · The acceptance testing process</figcaption></figure></main><footer class="site-footer"><div class="site-footer-inner"><div><a class="footer-brand" href="../../../iscarb.html">iSCARB</a><p>Software Engineering II · CPIT-455<br>Faculty of Computing &amp; Information Technology<br>King Abdulaziz University · Jeddah, Saudi Arabia</p></div><div><h2>Explore the course</h2><a href="../../../student-guide.html">Student guide</a><a href="../../../course-resources.html">Course &amp; sources</a><a href="../../../nelc-alignment.html">Saudi alignment</a></div><div><h2>Teaching &amp; collaboration</h2><a href="../../../methodology.html">iSCARB methodology</a><a href="../../../instructor-guide.html">Instructor guide</a><a href="../../../index.html#evolution">Teaching history</a></div><div><h2>Professor Adeeb Noor</h2><p>Course instructor &amp; iSCARB developer</p><a class="profile-link" href="https://adeebnoor.github.io/">Profile, research &amp; contact ↗</a><a href="mailto:arnoor@kau.edu.sa">arnoor@kau.edu.sa</a></div></div><div class="site-footer-bottom"><span>Learning resources · Human judgment · Evidence</span><a href="#top">Back to top ↑</a></div></footer></body></html>

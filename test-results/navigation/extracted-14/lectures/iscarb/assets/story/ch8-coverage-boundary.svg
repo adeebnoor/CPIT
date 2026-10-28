@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">Every test passes and every line ran; one student is still rejected</title><desc id="d">Three tests of the late-penalty rule pass at 0, 5 and 30 hours late, and the coverage report shows 100 percent of lines and branches. On the hours-late line, the rule changes at exactly 24 hours, where no test was placed. A student 24 hours late is rejected although the policy gives minus one mark.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f9"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f3b57"/></marker>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b42318"/></marker>
+<style>.h{font-size:17px;font-weight:700;fill:#13212e}.t{font-size:15px;fill:#13212e}.s{font-size:13px;fill:#3b4b5a}.m{font-family:Consolas,Menlo,monospace;font-size:14px;fill:#13212e}.ok{fill:#0f766e;font-weight:700}.bad{fill:#b42318;font-weight:700}.box{fill:#fff;stroke:#5b6b7b;stroke-width:1.6}.ln{stroke:#1f3b57;stroke-width:2;fill:none}.lnr{stroke:#b42318;stroke-width:2.4;fill:none}</style></defs>
+<rect width="820" height="520" rx="18" fill="url(#bg)"/>
+
+<rect x="40" y="40" width="360" height="190" rx="12" class="box"/>
+<text x="60" y="72" class="h">Test run</text>
+<text x="60" y="108" class="m">test_on_time          penalty(0)</text><text x="370" y="108" class="ok" text-anchor="end">✓</text>
+<text x="60" y="140" class="m">test_five_hours_late  penalty(5)</text><text x="370" y="140" class="ok" text-anchor="end">✓</text>
+<text x="60" y="172" class="m">test_thirty_hours     penalty(30)</text><text x="370" y="172" class="ok" text-anchor="end">✓</text>
+<text x="60" y="210" class="ok">3 passed</text>
+
+<rect x="420" y="40" width="360" height="190" rx="12" class="box"/>
+<text x="440" y="72" class="h">Coverage report</text>
+<text x="440" y="110" class="t">Statements</text><rect x="560" y="96" width="180" height="18" rx="4" fill="#0f766e"/><text x="750" y="110" class="t" text-anchor="end"> </text><text x="650" y="110" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">100 %</text>
+<text x="440" y="146" class="t">Branches</text><rect x="560" y="132" width="180" height="18" rx="4" fill="#0f766e"/><text x="650" y="146" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">100 %</text>
+<text x="440" y="184" class="s">Every line ran. Every decision went</text><text x="440" y="202" class="s">both ways. Nothing compared a result</text><text x="440" y="220" class="s">with the policy at 24 hours.</text>
+
+<text x="40" y="290" class="h">Hours late, and the policy</text>
+<line x1="60" y1="360" x2="770" y2="360" class="ln" marker-end="url(#ar)"/>
+<rect x="60" y="330" width="80" height="30" fill="#e6f4f1" stroke="#0f766e"/><text x="100" y="351" class="s" text-anchor="middle">on time · 0</text>
+<rect x="140" y="330" width="380" height="30" fill="#fff7e6" stroke="#b7791f"/><text x="330" y="351" class="s" text-anchor="middle">up to and including 24 h · −1</text>
+<rect x="520" y="330" width="240" height="30" fill="#fdecea" stroke="#b42318"/><text x="640" y="351" class="s" text-anchor="middle">more than 24 h · rejected</text>
+<g class="t"><line x1="100" y1="372" x2="100" y2="392" class="ln"/><text x="100" y="410" text-anchor="middle" class="ok">0 ✓</text>
+<line x1="175" y1="372" x2="175" y2="392" class="ln"/><text x="175" y="410" text-anchor="middle" class="ok">5 ✓</text>
+<line x1="640" y1="372" x2="640" y2="392" class="ln"/><text x="640" y="410" text-anchor="middle" class="ok">30 ✓</text></g>
+<line x1="520" y1="300" x2="520" y2="326" class="lnr" marker-end="url(#arr)"/>
+<text x="520" y="294" class="bad" text-anchor="middle">24: no test</text>
+<rect x="300" y="430" width="480" height="62" rx="10" fill="#fdecea" stroke="#b42318" stroke-width="1.6"/>
+<text x="318" y="456" class="bad">Code: if hours_late &lt; 24 · Policy: up to and including 24</text>
+<text x="318" y="480" class="t">A student exactly 24 hours late is rejected.</text>
+<text x="40" y="470" class="s">Fictional teaching case</text>
+</svg>

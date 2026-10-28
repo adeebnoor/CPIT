@@ -855,3 +855,149 @@ window.ISCARB_STORY = {
   for (const k in B) if (S.chapters[k]) S.chapters[k].build = B[k];
 })(window.ISCARB_STORY);
 /* class-builds:end */
+/* ch8-story:start */
+(function(S){if(!S)return;S.extraChapters=[8];S.chapters[8]={
+ "episode": "Episode 8 · Twenty-four hours",
+ "setting": "The course portal’s late-submission rule is being released before the final week. Layan wrote the tests; the coverage tool reports 100 %.",
+ "client": {
+  "name": "Sara",
+  "role": "Course coordinator · owns the late-submission policy"
+ },
+ "clock": "The portal update goes live on Sunday",
+ "coldOpen": "Three tests, three green ticks, and a coverage report that says 100 %. Layan is ready to release. Khalid asks one thing: “What happens to a student who is exactly 24 hours late?”",
+ "stakes": "Release with an untested boundary and students who followed the policy are rejected. Hold the release with no evidence and the whole class waits on a rule nobody can check.",
+ "gut": {
+  "q": "All tests pass and coverage is 100 %. Can Layan release?",
+  "options": [
+   "Yes: green tests and 100 % coverage",
+   "Yes: the AI-generated tests also pass",
+   "Not until the boundary at 24 hours has a test"
+  ]
+ },
+ "acts": [
+  "Khalid asks what three passing tests prove about a student exactly 24 hours late.",
+  "Layan writes the test in three parts: setup, call, assertion. Where does the expected result come from?",
+  "Sara’s policy has three partitions. Which values does Layan test, and which one decides the rule?",
+  "The coverage report says 100 %. Layan asks why the bug can still be there.",
+  "Sara must accept the release. Which tests does she need to see, and who wrote their expected results?"
+ ],
+ "twist": "The registrar calls: three students who submitted exactly 24 hours late were rejected. Every test passed and coverage was 100 %. The code said < 24; the policy said up to and including 24.",
+ "epilogue": "Sara asks Layan one question before Sunday. Her answer must be a test and an expected result, not a coverage number. The question: “How do I know the next rule change is tested at its edge?”",
+ "epilogueTag": "YOUR TURN: THE SAME REASONING IN THE COVERAGE STEP OF YOUR BUILDS",
+ "assessLine": "the coverage step in every Python build (Assignments 3–9): run your tests, read the coverage, change one input and name the branch or boundary still untested, in your own words; and the final examination. AI may help you practise, not decide.",
+ "noSteps": true,
+ "caseFigure": {
+  "src": "assets/story/ch8-coverage-boundary.svg",
+  "alt": "Three passing tests and a 100 % coverage report, while a student 24 hours late is rejected",
+  "caption": "Teaching illustration · select to enlarge"
+ },
+ "aiSystem": "An AI assistant writes tests from the code. The question for the engineer: where must each expected result come from?",
+ "practice": "Layan asks an AI to list partitions and unusual inputs. She writes every expected result from Sara’s policy herself.",
+ "real": {
+  "title": "Apple’s “goto fail” bug",
+  "when": "2014",
+  "facts": [
+   "In Apple’s TLS code, a single duplicated line, goto fail;, made the function jump past the final signature check.",
+   "Connections with an invalid server signature were accepted on iOS and OS X (CVE-2014-1266).",
+   "The code compiled and normal connections worked, so everyday use and ordinary tests passed.",
+   "Apple fixed it in iOS 7.0.6 in February 2014."
+  ],
+  "map": [
+   [
+    "Passing tests are evidence only for the inputs tried",
+    "Valid signatures worked; no test sent an invalid one."
+   ],
+   [
+    "Defect tests try to break it",
+    "One test with a bad signature would have failed."
+   ],
+   [
+    "Coverage shows what never ran",
+    "The final signature check was unreachable: coverage would show it never executed."
+   ],
+   [
+    "Regression tests keep the fix",
+    "A test for the bad-signature case guards every later change."
+   ]
+  ],
+  "lesson": "Ordinary use exercises the paths that already work. Find the defect with a test designed to fail, and read coverage for code that never runs.",
+  "differs": "In the training story every line ran and the boundary was missing. In goto fail a whole check never ran, which statement coverage alone would have shown.",
+  "sources": [
+   [
+    "NVD · CVE-2014-1266",
+    "https://nvd.nist.gov/vuln/detail/CVE-2014-1266"
+   ],
+   [
+    "Adam Langley · Apple’s SSL/TLS bug",
+    "https://www.imperialviolet.org/2014/02/22/applebug.html"
+   ]
+  ]
+ },
+ "build": {
+  "question": "The rule says up to and including 24 hours late costs one mark. Predict each test: pass or fail?",
+  "map": [
+   [
+    10,
+    "Test each partition and its boundary.",
+    "penalty(24) is the deciding value"
+   ],
+   [
+    16,
+    "Coverage shows what ran, not what is right.",
+    "100 % before the boundary test"
+   ],
+   [
+    15,
+    "Keep the boundary test in the regression suite.",
+    "rerun on every change"
+   ]
+  ],
+  "bridge": "Your builds in Assignments 3–9 end with the same step: read the coverage, change one input, and name the branch or boundary still untested.",
+  "assignment": "3–9",
+  "helpers": "",
+  "buggy": "def penalty(hours_late):\n    \"\"\"Policy: on time 0; up to and including\n    24 hours late -1; later: rejected (None).\"\"\"\n    if hours_late <= 0:\n        return 0\n    if hours_late < 24:\n        return -1\n    return None\n",
+  "fixed": "def penalty(hours_late):\n    \"\"\"Policy: on time 0; up to and including\n    24 hours late -1; later: rejected (None).\"\"\"\n    if hours_late <= 0:\n        return 0\n    if hours_late <= 24:\n        return -1\n    return None\n",
+  "tests": "def test_on_time():\n    assert penalty(0) == 0\n\ndef test_five_hours_late():\n    assert penalty(5) == -1\n\ndef test_exactly_24_hours_late():\n    assert penalty(24) == -1\n",
+  "result": {
+   "buggy": {
+    "tests": [
+     [
+      "test_on_time",
+      true,
+      ""
+     ],
+     [
+      "test_five_hours_late",
+      true,
+      ""
+     ],
+     [
+      "test_exactly_24_hours_late",
+      false,
+      "assertion failed: penalty(24) returned None"
+     ]
+    ]
+   },
+   "fixed": {
+    "tests": [
+     [
+      "test_on_time",
+      true,
+      ""
+     ],
+     [
+      "test_five_hours_late",
+      true,
+      ""
+     ],
+     [
+      "test_exactly_24_hours_late",
+      true,
+      ""
+     ]
+    ]
+   }
+  }
+ }
+};})(window.ISCARB_STORY);
+/* ch8-story:end */

@@ -12,7 +12,7 @@ async function run(){
   await context.route('**/*.supabase.co/**',r=>r.abort());
   page.on('pageerror',e=>results.errors.push({kind:'javascript',error:e.message}));
   await page.goto(base+'iscarb.html');
-  assert.equal(await page.locator('.lesson').count(),9);
+  assert.equal(await page.locator('.lesson').count(),10);  // nine assessed chapters + Chapter 8 (testing)
   await page.locator('#chapterSearch').fill('reliability');assert.equal(await page.locator('.lesson:visible').count(),1);
   await page.locator('#chapterSearch').fill('no-match-qa');assert.equal(await page.locator('.lesson:visible').count(),0);assert.match(await page.locator('#chapterSearchStatus').innerText(),/No matching/);
   await page.locator('#chapterSearch').fill('');

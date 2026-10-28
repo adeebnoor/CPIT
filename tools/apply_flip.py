@@ -104,9 +104,9 @@ def rubric_table():
     return f'<div class="table-scroll"><table><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>'
 
 
-def public_lectures():
-    return [{k: l[k] for k in ('id', 'number', 'chapter', 'title_en', 'title_ar', 'assignment_en', 'assignment_ar', 'starts_at')}
-            | {'seats': l['seats']} for l in CFG['lectures']]
+def public_lectures(with_url=False):
+    keys = ('id', 'number', 'chapter', 'title_en', 'title_ar', 'assignment_en', 'assignment_ar', 'starts_at') + (('url',) if with_url else ())
+    return [{k: l[k] for k in keys if k in l} | {'seats': l['seats']} for l in CFG['lectures']]
 
 
 def page_head(title, desc, extra=''):
@@ -258,7 +258,8 @@ document.getElementById('flCards').innerHTML=LEC.map(function(l){
   return '<article class="fl-card" id="lecture-'+l.number+'"><p class="ey">المحاضرة '+l.number+' · Lecture '+l.number+'</p>'
     +'<h3>'+H(l.title_ar)+'<span class="en" lang="en" dir="ltr">'+H(l.chapter)+' · '+H(l.title_en)+'</span></h3>'
     +'<p class="fl-req" style="margin:0"><b>المطلوب:</b> يشرح كل طالب محدَّد جزءًا من هذا الفصل يحدده الدكتور، في 12 إلى 15 دقيقة، ويرسل المسودة قبل المحاضرة بـ48 ساعة.<span class="en" lang="en" dir="ltr"><b>Required:</b> each assigned student explains one part of this chapter, set by the instructor, in 12 to 15 minutes, and sends the draft 48 hours before the lecture.</span></p>'
-    +'<dl><dt>الموعد · Date</dt><dd>'+when(l.starts_at,0)+'</dd><dt>آخر موعد للمسودة · Draft due</dt><dd>'+when(l.starts_at,48)+'</dd></dl>'+seats+'</article>';}).join('');
+    +'<dl><dt>الموعد · Date</dt><dd>'+when(l.starts_at,0)+'</dd><dt>آخر موعد للمسودة · Draft due</dt><dd>'+when(l.starts_at,48)+'</dd></dl>'
+    +(l.url?'<p style="margin:0"><a href="'+H(l.url)+'#TITLE">المحاضرة والشرائح · <span lang="en" dir="ltr">Lecture and slides</span></a></p>':'')+seats+'</article>';}).join('');
 })();
 </script>"""
 
@@ -288,7 +289,7 @@ def build_assigned():
 </main>'''
     html = (page_head('المحاضرات المقلوبة · iSCARB CPIT-455', 'The schedule of the flipped lectures in CPIT-455: five lectures, three assigned students each.')
             + '<body class="course-page" id="top"><a class="skip" href="#main">Skip to content</a>' + header('', '') + '\n'
-            + main + footer('') + ASSIGNED_JS.replace('__LEC__', json.dumps(public_lectures(), ensure_ascii=False)) + '</body></html>\n')
+            + main + footer('') + ASSIGNED_JS.replace('__LEC__', json.dumps(public_lectures(with_url=True), ensure_ascii=False)) + '</body></html>\n')
     (ROOT / 'flip.html').write_text(html, encoding='utf-8')
 
 
