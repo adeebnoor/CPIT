@@ -1,5 +1,8 @@
 """Flipped lectures: seat booking page, admin page and seed data (idempotent).
 
+With "mode": "assigned" in curriculum/flip-config.json the instructor assigns the seats (admin page) and flip.html
+shows only the schedule, the rubric and the draft rules: no booking or cancelling (build_assigned).
+
 - flip.html: the idea, the full rubric (Arabic and English), one card per lecture (2-5) with date, registration close
   (72 h before), draft deadline (48 h before), "X of 3 left" and three seats (part, slides, available / booked /
   closed). Booking form (student ID, full name, university email, rubric checkbox), confirmation with a six-character
@@ -114,6 +117,15 @@ def page_head(title, desc, extra=''):
             + dependencies() + STYLE + '</head>')
 
 
+def rubric_section():
+    return f'''<section class="section" id="rubric"><h2>الروبريك (3 درجات) <span class="en" lang="en" dir="ltr">Rubric (3 marks)</span></h2>
+{rubric_table()}
+<p><b>المسودة:</b> صفحة واحدة تلخّص جزءك، لكل معلومة رقم شريحة المصدر، ومعها مثال جديد من عندك، وسؤال اختيار من متعدد للكويز. تُرسل إلى arnoor@kau.edu.sa قبل المحاضرة بـ48 ساعة، وأراجعها وأرد عليك بالتصحيحات.</p>
+<p class="en" lang="en" dir="ltr"><b>Draft:</b> one page summarizing your part, with the source slide number for every point, a new example of your own and one multiple-choice question for the quiz. Send it to arnoor@kau.edu.sa 48 hours before the lecture; I review it and reply with corrections.</p>
+<p id="ai-use"><b>استخدام الذكاء الاصطناعي · بمساعدة الذكاء الاصطناعي:</b> حسب سياسة الذكاء الاصطناعي التوليدي في كلية الحاسبات وتقنية المعلومات (الخيار C، النهج المختلط)، يمكنك استخدام الذكاء الاصطناعي في توليد الأفكار وتحسين لغة المسودة فقط. أما الملخص وأرقام الشرائح والمثال الجديد وسؤال الكويز فهي من عملك، وتتحقق منها من الشرائح، والعرض والإجابة عن الأسئلة تكون مباشرة بدون ذكاء اصطناعي. اكتب في آخر المسودة سطرًا واحدًا: اسم الأداة وفيمَ استخدمتها، أو «No AI used.». <a href="course-specification.html#ai-policy">مستوى الذكاء الاصطناعي في كل تقييم</a>.</p>
+<p class="en" lang="en" dir="ltr"><b>Use of AI · AI-Assisted:</b> under the FCIT Generative AI Policy (Option C, Mixed Approach), you may use AI to brainstorm and to improve the language of your draft. The summary, the slide numbers, the new example and the quiz question are your own work, checked against the slides, and you present and answer questions live, without AI. End the draft with one line: the tool and what you used it for, or “No AI used.” <a href="course-specification.html#ai-policy">The AI level of every assessment</a>.</p></section>'''
+
+
 STUDENT_JS = r'''<script>
 (function(){
 var CFG=__CFG__, MSG=__MSG__, LEC=__LEC__;
@@ -193,12 +205,7 @@ def build_student():
 <div class="fl-intro"><p>في المحاضرات الخمس القادمة، ابتداءً من الخميس 29 أكتوبر، يشرح ثلاثة منكم في كل محاضرة جزءًا من الفصل لزملائهم في 12 إلى 15 دقيقة، وأنا معكم أصحّح وأكمّل. لكل محاضرة 3 مقاعد، ولكل طالب مقعد واحد، والحجز بالأسبقية، ويحدد لك الدكتور الجزء الذي تشرحه بعد الحجز. المقعد عليه 3 درجات تُحسب من درجة المشاركة (10)، فهي ليست درجة إضافية فوق الـ100. المشاركة اختيارية، ومن لا يسجل لا تُخصم منه أي درجة.</p>
 <p class="en" lang="en" dir="ltr">In the next five lectures, from Thursday 29 October, three of you in each lecture explain one part of the chapter to the class in 12 to 15 minutes, and I correct and complete. Each lecture has 3 seats, one seat per student, first come first served; the instructor assigns your part after you book. A seat is worth 3 marks counted within the participation grade (10), not extra marks above 100. Taking part is optional and nobody loses marks for not booking.</p></div></div>
 
-<section class="section" id="rubric"><h2>الروبريك (3 درجات) <span class="en" lang="en" dir="ltr">Rubric (3 marks)</span></h2>
-{rubric_table()}
-<p><b>المسودة:</b> صفحة واحدة تلخّص جزءك، لكل معلومة رقم شريحة المصدر، ومعها مثال جديد من عندك، وسؤال اختيار من متعدد للكويز. تُرسل إلى arnoor@kau.edu.sa قبل المحاضرة بـ48 ساعة، وأراجعها وأرد عليك بالتصحيحات.</p>
-<p class="en" lang="en" dir="ltr"><b>Draft:</b> one page summarizing your part, with the source slide number for every point, a new example of your own and one multiple-choice question for the quiz. Send it to arnoor@kau.edu.sa 48 hours before the lecture; I review it and reply with corrections.</p>
-<p id="ai-use"><b>استخدام الذكاء الاصطناعي · بمساعدة الذكاء الاصطناعي:</b> حسب سياسة الذكاء الاصطناعي التوليدي في كلية الحاسبات وتقنية المعلومات (الخيار C، النهج المختلط)، يمكنك استخدام الذكاء الاصطناعي في توليد الأفكار وتحسين لغة المسودة فقط. أما الملخص وأرقام الشرائح والمثال الجديد وسؤال الكويز فهي من عملك، وتتحقق منها من الشرائح، والعرض والإجابة عن الأسئلة تكون مباشرة بدون ذكاء اصطناعي. اكتب في آخر المسودة سطرًا واحدًا: اسم الأداة وفيمَ استخدمتها، أو «No AI used.». <a href="course-specification.html#ai-policy">مستوى الذكاء الاصطناعي في كل تقييم</a>.</p>
-<p class="en" lang="en" dir="ltr"><b>Use of AI · AI-Assisted:</b> under the FCIT Generative AI Policy (Option C, Mixed Approach), you may use AI to brainstorm and to improve the language of your draft. The summary, the slide numbers, the new example and the quiz question are your own work, checked against the slides, and you present and answer questions live, without AI. End the draft with one line: the tool and what you used it for, or “No AI used.” <a href="course-specification.html#ai-policy">The AI level of every assessment</a>.</p></section>
+{rubric_section()}
 
 <section class="section" id="seats"><h2>المحاضرات والمقاعد <span class="en" lang="en" dir="ltr">Lectures and seats</span></h2>
 <p>كل الأوقات بتوقيت الرياض. يغلق التسجيل والإلغاء قبل المحاضرة بـ72 ساعة، وبعد الإغلاق لا يتغير المقعد إلا عن طريق الدكتور.</p>
@@ -238,6 +245,53 @@ def build_student():
             + main + footer('') + js + '</body></html>\n')
     (ROOT / 'flip.html').write_text(html, encoding='utf-8')
 
+# ---- mode "assigned": the instructor assigns the seats; the page shows the schedule only -------------------------
+ASSIGNED_JS = r"""<script>
+(function(){
+var LEC=__LEC__;
+var H=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var fmtAr=new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn',{timeZone:'Asia/Riyadh',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'});
+var fmtEn=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+function when(iso,h){var d=new Date(new Date(iso).getTime()-h*3600000);return '<span lang="ar">'+H(fmtAr.format(d))+'</span><span class="en" lang="en" dir="ltr">'+H(fmtEn.format(d))+'</span>';}
+document.getElementById('flCards').innerHTML=LEC.map(function(l){
+  var seats=l.seats.map(function(s){return '<div class="fl-seat"><div><b>المقعد '+s.part_no+'</b><span class="en" lang="en" dir="ltr">Seat '+s.part_no+'</span></div><span class="fl-free">حدّده الدكتور · Assigned</span></div>';}).join('');
+  return '<article class="fl-card" id="lecture-'+l.number+'"><p class="ey">المحاضرة '+l.number+' · Lecture '+l.number+'</p>'
+    +'<h3>'+H(l.title_ar)+'<span class="en" lang="en" dir="ltr">'+H(l.chapter)+' · '+H(l.title_en)+'</span></h3>'
+    +'<p class="fl-req" style="margin:0"><b>المطلوب:</b> يشرح كل طالب محدَّد جزءًا من هذا الفصل يحدده الدكتور، في 12 إلى 15 دقيقة، ويرسل المسودة قبل المحاضرة بـ48 ساعة.<span class="en" lang="en" dir="ltr"><b>Required:</b> each assigned student explains one part of this chapter, set by the instructor, in 12 to 15 minutes, and sends the draft 48 hours before the lecture.</span></p>'
+    +'<dl><dt>الموعد · Date</dt><dd>'+when(l.starts_at,0)+'</dd><dt>آخر موعد للمسودة · Draft due</dt><dd>'+when(l.starts_at,48)+'</dd></dl>'+seats+'</article>';}).join('');
+})();
+</script>"""
+
+
+def first_date():
+    import datetime
+    d = datetime.datetime.fromisoformat(min(l['starts_at'] for l in CFG['lectures']))
+    ar_months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+    return f'{d.day} {ar_months[d.month - 1]}', d.strftime('%-d %B')
+
+
+def build_assigned():
+    ar, en = first_date()
+    main = f'''<main class="wrap fl" id="main" lang="ar" dir="rtl"><div class="document-heading"><p class="ey">CPIT-455 · المحاضرات المقلوبة · Flipped lectures</p>
+<h1>اشرح جزءًا من المحاضرة، واحصل على 3 درجات</h1>
+<p class="en" lang="en" dir="ltr">Explain part of a lecture and earn 3 marks</p>
+<div class="fl-intro"><p>في المحاضرات الخمس القادمة، ابتداءً من الخميس {ar}، يشرح ثلاثة طلاب في كل محاضرة جزءًا من الفصل لزملائهم في 12 إلى 15 دقيقة، وأنا معكم أصحّح وأكمّل. وزّع الدكتور المقاعد على الطلاب، ويصل كل طالب محدَّد إيميل فيه محاضرته والجزء الذي يشرحه وموعد مسودته. المقعد عليه 3 درجات تُحسب من درجة المشاركة (10)، فهي ليست درجة إضافية فوق الـ100. ومن عنده عذر يتواصل مع الدكتور قبل موعد المسودة.</p>
+<p class="en" lang="en" dir="ltr">In the next five lectures, from Thursday {en}, three students in each lecture explain one part of the chapter to the class in 12 to 15 minutes, and I correct and complete. The instructor has assigned the seats; each assigned student receives an email with the lecture, the part to explain and the draft deadline. A seat is worth 3 marks counted within the participation grade (10), not extra marks above 100. A student with an excuse contacts the instructor before the draft deadline.</p></div></div>
+
+{rubric_section()}
+
+<section class="section" id="seats"><h2>المحاضرات <span class="en" lang="en" dir="ltr">Lectures</span></h2>
+<p>كل الأوقات بتوقيت الرياض. المقاعد يحددها الدكتور، ولا يُحجز من هذه الصفحة.</p>
+<p class="en" lang="en" dir="ltr">All times are Riyadh time. Seats are assigned by the instructor; there is no booking on this page.</p>
+<div class="fl-cards" id="flCards" aria-live="polite"></div>
+<p><a href="iscarb.html">العودة إلى مسار التعلم · Back to the learning path</a></p></section>
+</main>'''
+    html = (page_head('المحاضرات المقلوبة · iSCARB CPIT-455', 'The schedule of the flipped lectures in CPIT-455: five lectures, three assigned students each.')
+            + '<body class="course-page" id="top"><a class="skip" href="#main">Skip to content</a>' + header('', '') + '\n'
+            + main + footer('') + ASSIGNED_JS.replace('__LEC__', json.dumps(public_lectures(), ensure_ascii=False)) + '</body></html>\n')
+    (ROOT / 'flip.html').write_text(html, encoding='utf-8')
+
+
 
 def build_backend():
     t = (ROOT / 'backend/flip-apps-script/Code.template.gs').read_text(encoding='utf-8')
@@ -250,6 +304,12 @@ HUB = (HUB_MARK + '<div class="flip-card" style="margin-top:12px;border-top:1px 
        '<p class="ey">Update · تحديث</p><p style="margin:0"><b>Flipped lectures:</b> explain part of a lecture for 3 participation marks. '
        '<a href="flip.html">Book a seat</a>.</p><p lang="ar" dir="rtl" style="margin:4px 0 0"><b>المحاضرات المقلوبة:</b> اشرح جزءًا من المحاضرة '
        'واحصل على 3 درجات من المشاركة. <a href="flip.html">احجز مقعدك</a>.</p></div>')
+if CFG.get('mode') == 'assigned':
+    HUB = (HUB_MARK + '<div class="flip-card" style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">'
+           '<p class="ey">Update · تحديث</p><p style="margin:0"><b>Flipped lectures:</b> five lectures from 5 November; the '
+           'instructor has assigned the seats. <a href="flip.html">The schedule and the rubric</a>.</p><p lang="ar" dir="rtl" '
+           'style="margin:4px 0 0"><b>المحاضرات المقلوبة:</b> خمس محاضرات من 5 نوفمبر، ووزّع الدكتور المقاعد. '
+           '<a href="flip.html">الجدول والروبريك</a>.</p></div>')
 
 
 def patch_hub():
@@ -281,7 +341,7 @@ def register():
 
 
 if __name__ == '__main__':
-    build_student()
+    build_assigned() if CFG.get('mode') == 'assigned' else build_student()
     build_backend()
     patch_hub()
     register()

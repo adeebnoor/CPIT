@@ -1016,6 +1016,13 @@
     "assignment 17",
     "assignment 20"
    ]
+  },
+  {
+   "revision": "20261028-flip-assigned",
+   "date": "2026-10-28",
+   "base_release": "20260926-genai-v12",
+   "summary": "Flipped lectures moved one week (from 5 November); seats assigned by the instructor; schedule-only page",
+   "repinned": []
   }
  ]
 }
