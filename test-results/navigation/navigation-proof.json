@@ -1,6 +1,6 @@
 {
   "version": "20260921-navigation-v1",
-  "base": "http://127.0.0.1:34587/",
+  "base": "http://127.0.0.1:40131/",
   "cases": [
     {
       "chapter": 10,
