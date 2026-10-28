@@ -95,7 +95,7 @@ var LECTURES = [
   "title_ar": "هندسة البرمجيات الموزعة",
   "assignment_en": "Assignment 8",
   "assignment_ar": "الواجب 8",
-  "starts_at": "2026-11-19T15:00:00+03:00",
+  "starts_at": "2026-12-03T15:00:00+03:00",
   "seats": [
    {
     "id": 31,
@@ -128,7 +128,7 @@ var LECTURES = [
   "title_ar": "أنظمة الأنظمة",
   "assignment_en": "Assignment 9",
   "assignment_ar": "الواجب 9",
-  "starts_at": "2026-11-26T15:00:00+03:00",
+  "starts_at": "2026-12-10T15:00:00+03:00",
   "seats": [
    {
     "id": 41,
@@ -161,7 +161,7 @@ var LECTURES = [
   "title_ar": "حالات الاختبار وتغطية الشيفرة",
   "assignment_en": "Coverage step, Assignments 3–9",
   "assignment_ar": "خطوة التغطية في الواجبات 3–9",
-  "starts_at": "2026-12-03T15:00:00+03:00",
+  "starts_at": "2026-12-17T15:00:00+03:00",
   "seats": [
    {
     "id": 51,

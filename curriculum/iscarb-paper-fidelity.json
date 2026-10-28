@@ -1023,6 +1023,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Flipped lectures moved one week (from 5 November); seats assigned by the instructor; schedule-only page",
    "repinned": []
+  },
+  {
+   "revision": "20261028-flip-december",
+   "date": "2026-10-28",
+   "base_release": "20260926-genai-v12",
+   "summary": "Flipped lectures 3-5 moved to 3, 10 and 17 December (19 and 26 November are holidays)",
+   "repinned": []
   }
  ]
 }

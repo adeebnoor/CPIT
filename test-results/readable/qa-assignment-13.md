@@ -5,9 +5,9 @@
 **Student ID:** QA-DESIGN-ONLY  
 **Section:** QA  
 **Date:** 2026-10-28  
-**Commit ID:** f49ab04d-50e0-40e5-a4c7-970f6babb1fa  
-**Part A committed:** 2026-10-28T13:36:15.437Z  
-**STRESS revealed:** 2026-10-28T13:36:15.449Z
+**Commit ID:** c1694451-868b-4f5e-b691-f5c85b02118b  
+**Part A committed:** 2026-10-28T15:14:56.416Z  
+**STRESS revealed:** 2026-10-28T15:14:56.429Z
 
 ## Scenario
 A fictional university website stores student project files. It has two user roles: student and staff.
@@ -52,7 +52,7 @@ def test_a():
 
 
 ## BUILD RECORD
-BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-28T13:36:15.252Z
+BUILD RECORD · Assignment 4 (Chapter 13) · 2026-10-28T15:14:56.214Z
 Code fingerprint: eac82db7ba76d8c4 (the code above, exactly as run)
 Run 2 on this device · previous code fingerprint: d64dd4bae169e8af
 Micro-viva change request (from Student ID QA-DESIGN-ONLY): Remove your malformed-input handling and run again. Which known bug is no longer caught, and why?
