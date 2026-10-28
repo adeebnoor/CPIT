@@ -1030,6 +1030,13 @@
    "base_release": "20260926-genai-v12",
    "summary": "Flipped lectures 3-5 moved to 3, 10 and 17 December (19 and 26 November are holidays)",
    "repinned": []
+  },
+  {
+   "revision": "20261028-ch8-testing",
+   "date": "2026-10-28",
+   "base_release": "20260926-genai-v12",
+   "summary": "Chapter 8 lecture (Software Testing and Code Coverage) on the classroom-v3 runtime; runtime accepts a lecture-specific assessment link, story overrides and no previous-lecture link",
+   "repinned": []
   }
  ]
 }
