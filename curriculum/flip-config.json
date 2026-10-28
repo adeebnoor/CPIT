@@ -1,5 +1,5 @@
 {
- "_note": "Flipped lectures (seat booking): five lectures from Thursday 29 October 2026, 3:00 pm Riyadh time, three seats each. The instructor assigns each student's part after booking. Edit here, run tools/apply_flip.py, paste backend/flip-apps-script/Code.gs into the Apps Script project, run setup and deploy a new version. No student data in this file.",
+ "_note": "Flipped lectures: five lectures from Thursday 5 November 2026, 3:00 pm Riyadh time (moved one week: no lectures in the examination week), three seats each. mode 'assigned': the instructor assigns the seats (admin page) and tells each student by email; the page shows the schedule and does not take bookings. Edit here, run tools/apply_flip.py, paste backend/flip-apps-script/Code.gs into the Apps Script project, run setup and deploy a new version. No student data in this file.",
  "api_url": "https://script.google.com/macros/s/AKfycbw0JJsuiAV4yPiBZYnB-FDM-3Q_knu42bcSRKv52HXDBZKoyH1kTYFkumO6sGQzDPPPGA/exec",
  "lectures": [
   {
@@ -10,7 +10,7 @@
    "title_ar": "إعادة استخدام البرمجيات",
    "assignment_en": "Assignment 6",
    "assignment_ar": "الواجب 6",
-   "starts_at": "2026-10-29T15:00:00+03:00",
+   "starts_at": "2026-11-05T15:00:00+03:00",
    "seats": [
     {
      "id": 11,
@@ -43,7 +43,7 @@
    "title_ar": "هندسة البرمجيات القائمة على المكونات",
    "assignment_en": "Assignment 7",
    "assignment_ar": "الواجب 7",
-   "starts_at": "2026-11-05T15:00:00+03:00",
+   "starts_at": "2026-11-12T15:00:00+03:00",
    "seats": [
     {
      "id": 21,
@@ -76,7 +76,7 @@
    "title_ar": "هندسة البرمجيات الموزعة",
    "assignment_en": "Assignment 8",
    "assignment_ar": "الواجب 8",
-   "starts_at": "2026-11-12T15:00:00+03:00",
+   "starts_at": "2026-11-19T15:00:00+03:00",
    "seats": [
     {
      "id": 31,
@@ -109,7 +109,7 @@
    "title_ar": "أنظمة الأنظمة",
    "assignment_en": "Assignment 9",
    "assignment_ar": "الواجب 9",
-   "starts_at": "2026-11-19T15:00:00+03:00",
+   "starts_at": "2026-11-26T15:00:00+03:00",
    "seats": [
     {
      "id": 41,
@@ -142,7 +142,7 @@
    "title_ar": "حالات الاختبار وتغطية الشيفرة",
    "assignment_en": "Coverage step, Assignments 3–9",
    "assignment_ar": "خطوة التغطية في الواجبات 3–9",
-   "starts_at": "2026-11-26T15:00:00+03:00",
+   "starts_at": "2026-12-03T15:00:00+03:00",
    "seats": [
     {
      "id": 51,
@@ -167,5 +167,6 @@
     }
    ]
   }
- ]
+ ],
+ "mode": "assigned"
 }
